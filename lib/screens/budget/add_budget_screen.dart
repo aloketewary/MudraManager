@@ -156,7 +156,10 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.existing == null ? 'Add Budget' : 'Edit Budget'),
+        title: Text(
+          widget.existing == null ? 'Add Budget' : 'Edit Budget',
+          style: textTheme.titleLarge?.copyWith(color: color.onPrimary),
+        ),
       ),
       body: catsAsync.when(
         data: (cats) {
@@ -261,7 +264,9 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
                                   selectedCategories.remove(cat.id);
                                 } else {
                                   _selectedCats.add(cat);
-                                  _allocCtrls[cat.id] = TextEditingController(text: _allocCtrls[cat.id]?.text);
+                                  _allocCtrls[cat.id] = TextEditingController(
+                                    text: _allocCtrls[cat.id]?.text,
+                                  );
                                   selectedCategories.add(cat.id);
                                 }
                               });

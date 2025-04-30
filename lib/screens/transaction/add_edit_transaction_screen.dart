@@ -446,7 +446,7 @@ class _AddEditTransactionScreenState
                   txn.tags.clear();
                   txn.tags.addAll(selectedTags);
                   await ref.read(transactionProvider).addTransaction(txn);
-                  ref.invalidate(transactionProvider);
+                  invalidateAll(ref);
                   Navigator.pop(context);
                 }
               },

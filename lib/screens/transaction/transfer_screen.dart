@@ -20,6 +20,7 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
   final _formKey = GlobalKey<FormState>();
   Account? _fromAccount;
   Account? _toAccount;
+
   final _amountC = TextEditingController();
   final _noteC = TextEditingController();
   DateTime _date = DateTime.now();
@@ -58,6 +59,7 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
     final accountsAsync = ref.watch(accountsProvider);
     var color = Theme.of(context).colorScheme;
     var textTheme = Theme.of(context).textTheme;
+    final service = ref.watch(accountServiceProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -77,20 +79,116 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
                     key: _formKey,
                     child: ListView(
                       children: [
-                        // From account
-                        buildTransferSelector(
-                          accounts: accounts,
-                          from: _fromAccount,
-                          to: _toAccount,
-                          onFromChanged:
-                              (v) => setState(
-                                () =>
-                                    _fromAccount = _fromAccount == v ? null : v,
+                        AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 300),
+                          switchInCurve: Curves.easeIn,
+                          switchOutCurve: Curves.easeOut,
+                          child:
+                              _toAccount?.id == null
+                                  ? Column(
+                                    key: const ValueKey("accountSelector"),
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.all(8),
+                                        child: Text(
+                                          "Select Accounts",
+                                          style: textTheme.titleLarge?.copyWith(
+                                            color: color.primary,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 12),
+                                      buildTransferSelector(
+                                        accounts: accounts,
+                                        from: _fromAccount,
+                                        to: _toAccount,
+                                        onFromChanged:
+                                            (v) => setState(() {
+                                              _fromAccount =
+                                                  _fromAccount == v ? null : v;
+                                            }),
+                                        onToChanged:
+                                            (v) => setState(() {
+                                              _toAccount =
+                                                  _toAccount == v ? null : v;
+                                            }),
+                                      ),
+                                      const SizedBox(height: 12),
+                                    ],
+                                  )
+                                  : const SizedBox.shrink(
+                                    key: ValueKey("empty"),
+                                  ),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.all(8),
+                                  child: Text(
+                                    "From".toUpperCase(),
+                                    style: textTheme.titleLarge?.copyWith(
+                                      color: color.primary,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 150,
+                                  child:
+                                      _fromAccount != null
+                                          ? AccountCardMini(
+                                            account: _fromAccount!,
+                                            selected: true,
+                                            balance: service.getAccountBalance(
+                                              _fromAccount!.id,
+                                            ),
+                                          )
+                                          : AccountCardMini.skeleton(),
+                                ),
+                              ],
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 32),
+                              child: Icon(
+                                Icons.arrow_forward_ios_outlined,
+                                size: 32,
+                                color: color.secondary,
                               ),
-                          onToChanged:
-                              (v) => setState(
-                                () => _toAccount = _toAccount == v ? null : v,
-                              ),
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.all(8),
+                                  child: Text(
+                                    "To".toUpperCase(),
+                                    style: textTheme.titleLarge?.copyWith(
+                                      color: color.primary,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 150,
+                                  child:
+                                      _toAccount != null
+                                          ? AccountCardMini(
+                                            account: _toAccount!,
+                                            selected: true,
+                                            balance: service.getAccountBalance(
+                                              _toAccount!.id,
+                                            ),
+                                          )
+                                          : AccountCardMini.skeleton(),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 12),
                         CommonTextInputField(
@@ -169,58 +267,52 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
     final service = ref.watch(accountServiceProvider);
 
     return SizedBox(
-      height: 320,
+      height: 150,
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // SOURCE ACCOUNTS
-          Expanded(
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: fromAccountList.length,
-              padding: const EdgeInsets.only(left: 0),
-              itemBuilder: (context, i) {
-                final acct = fromAccountList[i];
-                var accountBalance = service.getAccountBalance(acct.id);
-                final selected = acct.id == from?.id;
-                return GestureDetector(
-                  onTap: () => onFromChanged(acct),
-                  child: AccountCardMini(
-                    account: acct,
-                    selected: selected,
-                    balance: accountBalance,
-                  ),
-                );
-              },
+          if (_fromAccount == null)
+            Expanded(
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: fromAccountList.length,
+                padding: const EdgeInsets.only(left: 0),
+                itemBuilder: (context, i) {
+                  final acct = fromAccountList[i];
+                  var accountBalance = service.getAccountBalance(acct.id);
+                  final selected = acct.id == from?.id;
+                  return GestureDetector(
+                    onTap: () => onFromChanged(acct),
+                    child: AccountCardMini(
+                      account: acct,
+                      selected: selected,
+                      balance: accountBalance,
+                    ),
+                  );
+                },
+              ),
             ),
-          ),
-
-          // CENTER ARROW
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Icon(Icons.arrow_downward, size: 32, color: color.secondary),
-          ),
-
-          // DESTINATION ACCOUNTS
-          Expanded(
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: toAccountList.length,
-              padding: const EdgeInsets.only(right: 16),
-              itemBuilder: (context, i) {
-                final acct = toAccountList[i];
-                var accountBalance = service.getAccountBalance(acct.id);
-                final selected = acct.id == to?.id;
-                return GestureDetector(
-                  onTap: () => onToChanged(acct),
-                  child: AccountCardMini(
-                    account: acct,
-                    selected: selected,
-                    balance: accountBalance,
-                  ),
-                );
-              },
+          if (_fromAccount != null && _toAccount == null)
+            Expanded(
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: toAccountList.length,
+                padding: const EdgeInsets.only(right: 16),
+                itemBuilder: (context, i) {
+                  final acct = toAccountList[i];
+                  var accountBalance = service.getAccountBalance(acct.id);
+                  final selected = acct.id == to?.id;
+                  return GestureDetector(
+                    onTap: () => onToChanged(acct),
+                    child: AccountCardMini(
+                      account: acct,
+                      selected: selected,
+                      balance: accountBalance,
+                    ),
+                  );
+                },
+              ),
             ),
-          ),
         ],
       ),
     );

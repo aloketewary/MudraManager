@@ -12,6 +12,7 @@ import 'package:mudra_manager/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/util/string_util.dart';
 import 'package:mudra_manager/util/transaction_msg_util.dart'
     show TransactionInfo, TransactionType, TransactionUtil;
+import 'package:permission_handler/permission_handler.dart';
 import 'package:telephony/telephony.dart';
 
 class SmsImportSettingsScreen extends ConsumerStatefulWidget {
@@ -27,6 +28,17 @@ class _SmsImportSettingsScreenState
   bool _smsImportEnabled = false; // Toggle for SMS Import
   final Telephony telephony = Telephony.instance;
   TransactionUtil transactionUtil = TransactionUtil();
+  bool _permissionGranted = false;
+
+  @override
+  void initState() {
+    super.initState();
+    Permission.sms.status.then((value) => {
+      setState(() {
+        _permissionGranted = value == PermissionStatus.granted;
+      })
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -114,9 +126,14 @@ class _SmsImportSettingsScreenState
               }).toList(),
         );
       },
-    ).then((selectedStartDate) {
+    ).then((selectedStartDate) async {
       if (selectedStartDate != null && selectedStartDate is DateTime) {
-        _rescanSmsFrom(selectedStartDate);
+        var permission = await Permission.sms.status;
+        if (permission.isGranted) {
+          _rescanSmsFrom(selectedStartDate);
+        } else {
+          await Permission.sms.request();
+        }
       }
     });
   }
