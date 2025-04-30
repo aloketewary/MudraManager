@@ -58,6 +58,7 @@ dependencies:
   telephony: ^0.2.0
   flutter_sms_inbox: ^1.0.4
   crypto: ^3.0.6
+  package_info_plus: ^8.3.0
 #  workmanager: ^0.5.0
 
 
