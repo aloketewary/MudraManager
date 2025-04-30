@@ -1,0 +1,204 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:isar/isar.dart';
+import 'package:mudra_manager/db/isar_service.dart' show IsarService;
+import 'package:mudra_manager/db/models/budget.dart'
+    show Budget, BudgetQueryFilter, BudgetQueryWhere, GetBudgetCollection;
+import 'package:mudra_manager/db/models/budget_category_allocation.dart'
+    show
+        BudgetCategoryAllocationQueryLinks,
+        GetBudgetCategoryAllocationCollection;
+import 'package:mudra_manager/db/models/category.dart';
+import 'package:mudra_manager/db/models/transaction.dart';
+import 'package:mudra_manager/providers/isar_provider.dart';
+
+final budgetServiceProvider = Provider<BudgetService>((ref) {
+  final isarService = ref.watch(isarServiceProvider);
+  return BudgetService(isarService);
+});
+
+final budgetStreamProvider = StreamProvider<List<Budget>>((ref) {
+  final service = ref.watch(budgetServiceProvider);
+  return service.watchAllBudgets();
+});
+
+final budgetWithProgressProvider = StreamProvider<List<(Budget, double)>>((
+  ref,
+) async* {
+  final budgetService = ref.watch(budgetServiceProvider);
+  final isar = await ref.watch(isarServiceProvider).getInstance();
+
+  await for (final budgets in isar.budgets
+      .where()
+      .isArchivedEqualTo(false)
+      .watch(fireImmediately: true).take(2)) {
+    final List<(Budget, double)> result = [];
+    for (final budget in budgets) {
+      final spent = await budgetService.calculateSpentAmount(budget);
+      result.add((budget, spent));
+    }
+    yield result;
+  }
+});
+
+final budgetsWithProgressProvider =
+    StreamProvider.autoDispose<List<BudgetWithProgress>>((ref) {
+      return ref.watch(budgetServiceProvider).watchBudgetsWithProgress();
+    });
+
+class BudgetService {
+  final IsarService isarService;
+
+  BudgetService(this.isarService);
+
+  Stream<List<Budget>> watchAllBudgets() async* {
+    final isar = await isarService.getInstance();
+    yield* isar.budgets
+        .where()
+        .isArchivedEqualTo(false)
+        .watch(fireImmediately: true);
+  }
+
+  Future<double> calculateSpentAmount(Budget budget) async {
+    final isar = await isarService.getInstance();
+
+    final categoryIds = budget.categories.map((c) => c.id).toList();
+
+    final transactions =
+        await isar.transactions
+            .filter()
+            .isExpenseEqualTo(true)
+            .dateBetween(budget.startDate, budget.endDate)
+            .findAll();
+
+    final spent = transactions
+        .where(
+          (t) =>
+              t.category.value != null &&
+              categoryIds.contains(t.category.value!.id),
+        )
+        .fold<double>(0.0, (sum, t) => sum + t.amount);
+
+    return spent;
+  }
+
+  Stream<List<BudgetWithProgress>> watchBudgetsWithProgress() async* {
+    final isar = await isarService.getInstance();
+    await for (final budgets in isar.budgets
+        .where()
+        .isArchivedEqualTo(false)
+        .watch(fireImmediately: true)) {
+      final List<BudgetWithProgress> list = [];
+      for (final budget in budgets) {
+        // 1) load linked categories & allocations
+        await budget.categories.load();
+        await budget.allocations.load();
+
+        // 2) total spent across all linked categories
+        double totalSpent = 0;
+        final catSpendings = <CategorySpending>[];
+        for (final alloc in budget.allocations) {
+          await alloc.category.load();
+          final cat = alloc.category.value!;
+          final spent =
+              await isar.transactions
+                  .filter()
+                  .isExpenseEqualTo(true)
+                  .dateBetween(budget.startDate, budget.endDate)
+                  .category((q) => q.idEqualTo(cat.id))
+                  .amountProperty()
+                  .sum();
+          totalSpent += spent;
+          catSpendings.add(
+            CategorySpending(
+              category: cat,
+              allocated: alloc.amount,
+              spent: spent,
+            ),
+          );
+        }
+
+        list.add(
+          BudgetWithProgress(
+            budget: budget,
+            spent: totalSpent,
+            categorySpendings: catSpendings,
+          ),
+        );
+      }
+      yield list;
+    }
+  }
+
+  Future<void> save(Budget bud) async {
+    final isar = await isarService.getInstance();
+    await isar.writeTxnSync(() async {
+      // 1) Put budget and save its category & allocation links in one go:
+      isar.budgets.putSync(bud, saveLinks: true);
+
+      // 2) Put each allocation (and save its own links):
+      for (final alloc in bud.allocations) {
+        isar.budgetCategoryAllocations.putSync(alloc, saveLinks: true);
+      }
+    });
+  }
+
+  /// Delete a budget and all its allocations
+  Future<void> deleteBudget(int budgetId) async {
+    final isar = await isarService.getInstance();
+    await isar.writeTxn(() async {
+      // Remove allocations
+      final allocs =
+          await isar.budgetCategoryAllocations
+              .filter()
+              .budget((q) => q.idEqualTo(budgetId))
+              .findAll();
+      for (final a in allocs) {
+        await isar.budgetCategoryAllocations.delete(a.id);
+      }
+      // Remove budget itself
+      await isar.budgets.delete(budgetId);
+    });
+  }
+
+  /// Fetch a single budget by ID
+  Future<Budget?> getBudget(int budgetId) async {
+    final isar = await isarService.getInstance();
+    return await isar.budgets.get(budgetId);
+  }
+
+  // Archiving
+  Future<void> archiveBudget(int id) async {
+    final isar = await isarService.getInstance();
+    await isar.writeTxn(() async {
+      final b = await isar.budgets.get(id);
+      if (b != null) {
+        b.isArchived = true;
+        await isar.budgets.put(b);
+      }
+    });
+  }
+}
+
+class CategorySpending {
+  final Category category;
+  final double allocated;
+  final double spent;
+
+  CategorySpending({
+    required this.category,
+    required this.allocated,
+    required this.spent,
+  });
+}
+
+class BudgetWithProgress {
+  final Budget budget;
+  final double spent;
+  final List<CategorySpending> categorySpendings;
+
+  BudgetWithProgress({
+    required this.budget,
+    required this.spent,
+    required this.categorySpendings,
+  });
+}
