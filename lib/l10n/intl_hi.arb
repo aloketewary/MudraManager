@@ -1,0 +1,11 @@
+{
+  "@@locale": "hi",
+  "onboard_manageYourMoneyDescription": "अपने पैसे को स्मार्ट तरीके से और सहजता से प्रबंधित करें।",
+  "@onboard_manageYourMoneyDescription": {
+    "description": "Manage your money smartly & effortlessly."
+  },
+  "onboard_welcomeToApp": " {appName} में आपका स्वागत है",
+  "@onboard_welcomeToApp": {
+    "description": "Welcome to Application"
+  }
+}

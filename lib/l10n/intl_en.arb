@@ -1,0 +1,11 @@
+{
+  "@@locale": "en",
+  "onboard_manageYourMoneyDescription": "Manage your money smartly & effortlessly.",
+  "@onboard_manageYourMoneyDescription": {
+    "description": "Manage your money smartly & effortlessly."
+  },
+  "onboard_welcomeToApp": "Welcome to {appName}",
+  "@onboard_welcomeToApp": {
+    "description": "Welcome to Application"
+  }
+}

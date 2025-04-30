@@ -1,0 +1,11 @@
+{
+  "@@locale": "bn",
+  "onboard_manageYourMoneyDescription": "আপনার অর্থ স্মার্ট এবং অনায়াসে পরিচালনা করুন।",
+  "@onboard_manageYourMoneyDescription": {
+    "description": "Manage your money smartly & effortlessly."
+  },
+  "onboard_welcomeToApp": "{appName} e স্বাগতম ",
+  "@onboard_welcomeToApp": {
+    "description": "Welcome to Application"
+  }
+}
