@@ -189,7 +189,7 @@ class _StatsState extends ConsumerState<StatisticsScreen> {
     if (pieData.isEmpty) {
       return NoDataFound(
         message: "Category not present.",
-        imagePath: 'assets/icons/512/category.png',
+        iconData: Icons.category_outlined,
       );
     }
     final sections =

@@ -19,8 +19,10 @@ import 'package:mudra_manager/screens/profile/manage_categories_screen.dart'
 import 'package:mudra_manager/screens/profile/profile_tile.dart';
 import 'package:mudra_manager/screens/profile/setting_screen.dart';
 import 'package:mudra_manager/screens/profile/sms_import_setting_screen.dart';
+import 'package:mudra_manager/service/notification_service.dart' show NotificationService;
 import 'package:mudra_manager/theme/mudra_manager_avatar_icons.dart'
     show MudraManagerAvatarIcons;
+import 'package:mudra_manager/theme/theme_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -32,6 +34,9 @@ class ProfileScreen extends ConsumerWidget {
     final profileAsync = ref.watch(userProfileProvider);
     var textTheme = Theme.of(context).textTheme;
     var color = Theme.of(context).colorScheme;
+    final currentTheme = ref.watch(themeModeProvider);
+    final themeNotifier = ref.read(themeModeProvider.notifier);
+
     return Column(
       children: [
         const SizedBox(height: 20),
@@ -125,6 +130,36 @@ class ProfileScreen extends ConsumerWidget {
                 },
               ),
               ProfileTile(
+                title: "Theme Mode",
+                subtitle: _getSubtitle(currentTheme),
+                icon: Icons.color_lens_outlined,
+                onTap: () {
+                  showModalBottomSheet(
+                    context: context,
+                    builder: (_) => Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: ThemeMode.values.map((mode) {
+                        return ListTile(
+                          title: Text(_getSubtitle(mode)),
+                          leading: Icon(
+                            mode == ThemeMode.light
+                                ? Icons.light_mode
+                                : mode == ThemeMode.dark
+                                ? Icons.dark_mode
+                                : Icons.phone_android,
+                          ),
+                          selected: currentTheme == mode,
+                          onTap: () {
+                            themeNotifier.setTheme(mode);
+                            Navigator.pop(context);
+                          },
+                        );
+                      }).toList(),
+                    ),
+                  );
+                },
+              ),
+              ProfileTile(
                 title: "Security",
                 subtitle: "Protect your app with PIN or Fingerprint",
                 icon: Icons.lock,
@@ -132,6 +167,38 @@ class ProfileScreen extends ConsumerWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => SecuritySettingsScreen()),
+                  );
+                },
+              ),
+              Consumer(
+                builder: (context, ref, _) {
+                  final reminderTime = ref.watch(reminderTimeProvider);
+
+                  return ProfileTile(
+                    title: "Daily Reminder",
+                    subtitle: reminderTime != null
+                        ? "Set a daily notification at ${reminderTime.format(context)}"
+                        : "Set a daily notification time",
+                    icon: Icons.notifications_active_outlined,
+                    onTap: () async {
+                      final selectedTime = await showTimePicker(
+                        context: context,
+                        initialTime: reminderTime ?? TimeOfDay.now(),
+                      );
+
+                      if (selectedTime != null) {
+                        await NotificationService.scheduleDailyReminder(selectedTime);
+                        ref.read(reminderTimeProvider.notifier).state = selectedTime;
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Reminder set for ${selectedTime.format(context)}',
+                            ),
+                          ),
+                        );
+                      }
+                    },
                   );
                 },
               ),
@@ -199,5 +266,16 @@ class ProfileScreen extends ConsumerWidget {
         ),
       ],
     );
+  }
+
+  String _getSubtitle(ThemeMode mode) {
+    switch (mode) {
+      case ThemeMode.light:
+        return "Light";
+      case ThemeMode.dark:
+        return "Dark";
+      default:
+        return "System Default";
+    }
   }
 }

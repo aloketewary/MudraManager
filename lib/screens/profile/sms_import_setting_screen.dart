@@ -11,9 +11,8 @@ import 'package:mudra_manager/providers/pending_transaction_prodiver.dart';
 import 'package:mudra_manager/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/util/string_util.dart';
 import 'package:mudra_manager/util/transaction_msg_util.dart'
-    show TransactionInfo, TransactionType, TransactionUtil;
+    show TransactionInfo, TransactionType, TransactionUtil, checkForTransactionalMessage, generateSmsHash;
 import 'package:permission_handler/permission_handler.dart';
-import 'package:telephony/telephony.dart';
 
 class SmsImportSettingsScreen extends ConsumerStatefulWidget {
   const SmsImportSettingsScreen({super.key});
@@ -26,18 +25,19 @@ class SmsImportSettingsScreen extends ConsumerStatefulWidget {
 class _SmsImportSettingsScreenState
     extends ConsumerState<SmsImportSettingsScreen> {
   bool _smsImportEnabled = false; // Toggle for SMS Import
-  final Telephony telephony = Telephony.instance;
   TransactionUtil transactionUtil = TransactionUtil();
   bool _permissionGranted = false;
 
   @override
   void initState() {
     super.initState();
-    Permission.sms.status.then((value) => {
-      setState(() {
-        _permissionGranted = value == PermissionStatus.granted;
-      })
-    });
+    Permission.sms.status.then(
+      (value) => {
+        setState(() {
+          _permissionGranted = value == PermissionStatus.granted;
+        }),
+      },
+    );
   }
 
   @override
@@ -240,15 +240,6 @@ class _SmsImportSettingsScreenState
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(message)));
-  }
-
-  bool checkForTransactionalMessage(String? body) {
-    final smsBody = body ?? '';
-    return (smsBody.contains('debit') ||
-            smsBody.contains('spent') ||
-            smsBody.contains('credit')) &&
-        !smsBody.contains('request') &&
-        !smsBody.contains('pending');
   }
 
   void processSmsForSaving(TransactionInfo sms) async {

@@ -5,8 +5,13 @@ import 'package:mudra_manager/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/util/localization_extension.dart';
 
 final localeProvider = StateProvider<Locale>((ref) {
-  var language = SharedPrefsUtil.instance.getLanguage();
-  return Locale(language);
+  try {
+    var language = SharedPrefsUtil.instance.getLanguage();
+    return Locale(language);
+  } catch(exception) {
+    return const Locale('en');
+  }
+
 });
 
 final languageService = StateProvider<LanguageService>((ref) {

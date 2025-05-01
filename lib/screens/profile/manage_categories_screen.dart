@@ -30,7 +30,8 @@ class ManageCategoriesScreen extends ConsumerWidget {
         data: (categories) {
           if (categories.isEmpty) {
             return NoDataFound(
-              imagePath: 'assets/icons/512/category.png',
+              // imagePath: 'assets/icons/512/category.png',
+              iconData: Icons.category_outlined,
               message: "No categories found.",
             );
           }

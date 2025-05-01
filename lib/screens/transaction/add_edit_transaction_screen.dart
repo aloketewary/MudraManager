@@ -432,6 +432,18 @@ class _AddEditTransactionScreenState
               backGroundColor: color.secondary,
               textColor: color.onSecondary,
               onPressed: () async {
+                if (_selectedAccount == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Select one Account')),
+                  );
+                  return;
+                }
+                if (_selectedCategory == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Select one Category')),
+                  );
+                  return;
+                }
                 if (_formKey.currentState?.validate() ?? false) {
                   // Save to DB here
                   final txn = Transaction.create(
@@ -440,7 +452,9 @@ class _AddEditTransactionScreenState
                     isExpense: _isExpense,
                     description: _descController.text,
                   );
-                  txn.id = widget.transaction?.id ?? -1;
+                  if (widget.transaction?.id != null) {
+                    txn.id = widget.transaction!.id;
+                  }
                   txn.account.value = _selectedAccount!;
                   txn.category.value = _selectedCategory!;
                   txn.tags.clear();

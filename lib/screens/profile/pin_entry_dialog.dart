@@ -65,7 +65,7 @@ class _PinEntryDialogState extends State<PinEntryDialog> {
                 height: 16,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: filled ? color.secondary : Colors.grey.shade300,
+                  color: filled ? color.primary : Colors.grey.shade300,
                 ),
               );
             }),

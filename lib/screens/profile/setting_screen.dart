@@ -96,6 +96,22 @@ class _SecuritySettingsScreenState
             onChanged: _togglePin,
             activeColor: color.secondary,
           ),
+          const SizedBox(height: 24),
+          const Divider(indent: 16, endIndent: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            child: Text(
+              'Regarding PIN Unlock:',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: const Text(
+              'The PIN you entered is secured and the digits are randomized every time you enter it.',
+              style: TextStyle(color: Colors.grey),
+            ),
+          ),
         ],
       ),
     );

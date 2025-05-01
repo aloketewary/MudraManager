@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/db/isar_service.dart' show IsarService;
 import 'package:mudra_manager/providers/account_providers.dart';
@@ -17,3 +18,5 @@ void invalidateAll(WidgetRef ref) {
   ref.invalidate(transactionProvider);
   ref.invalidate(transactionCountsProvider);
 }
+
+final reminderTimeProvider = StateProvider<TimeOfDay?>((ref) => null);

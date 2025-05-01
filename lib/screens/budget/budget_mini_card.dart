@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:mudra_manager/providers/budget_service_provider.dart';
+import 'package:mudra_manager/screens/budget/add_budget_screen.dart'
+    show AddBudgetScreen;
 import 'package:mudra_manager/screens/budget/budget_dashboard.dart';
+import 'package:mudra_manager/screens/reusable/common_button.dart';
 import 'package:mudra_manager/screens/reusable/no_data_found.dart';
 
 class BudgetMiniCard extends ConsumerStatefulWidget {
@@ -54,7 +57,18 @@ class _BudgetMiniCardState extends ConsumerState<BudgetMiniCard> {
             if (budgets.isEmpty) {
               return NoDataFound(
                 message: "No Budgets Defined, Add one!",
-                imagePath: 'assets/icons/512/chart.png',
+                iconData: Icons.pie_chart_outline,
+                action: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const AddBudgetScreen(),
+                      ),
+                    );
+                  },
+                  child: Text('Add Budget'),
+                ),
               );
             }
             return Column(

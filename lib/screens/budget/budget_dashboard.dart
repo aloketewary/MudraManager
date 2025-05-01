@@ -33,7 +33,7 @@ class _BudgetDashboardState extends ConsumerState<BudgetDashboard> {
           if (list.isEmpty) {
             return NoDataFound(
               message: "No Budgets Defined, Add one!",
-              imagePath: 'assets/icons/512/chart.png',
+              iconData: Icons.pie_chart_outline,
             );
           }
           return ListView(

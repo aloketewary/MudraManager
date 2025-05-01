@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:isar/isar.dart';
-import 'package:mudra_manager/db/isar_service.dart';
 import 'package:mudra_manager/l10n/app_localizations.dart';
 import 'package:mudra_manager/providers/l10n_provider.dart';
 import 'package:mudra_manager/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/screens/home_screen.dart';
 import 'package:mudra_manager/screens/onboarding/onboarding_screen.dart';
+import 'package:mudra_manager/service/notification_service.dart';
 import 'package:mudra_manager/theme/app_theme.dart';
 import 'package:mudra_manager/theme/theme_provider.dart';
 import 'package:mudra_manager/util/auth_gate.dart';
@@ -27,6 +25,8 @@ void main() async {
   // );
   var sharedPrefs = await SharedPreferences.getInstance();
   SharedPrefsUtil.init(sharedPrefs);
+  await NotificationService.initialize();
+
   final completed = SharedPrefsUtil.instance.isOnboardingComplete();
   runApp(ProviderScope(child: MudraManagerApp(showOnboarding: !completed)));
 }
@@ -40,6 +40,7 @@ class MudraManagerApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeProvider);
     var appTheme = AppTheme.instance;
+
     return MaterialApp(
       title: 'Mudra Manager',
       theme: appTheme.buildLightTheme(),
@@ -73,7 +74,7 @@ Future<void> setupSmsListener() async {
     telephony.listenIncomingSms(
       onNewMessage: (SmsMessage message) {
         if (message.body != null) {
-          parseAndSaveTransaction(message.body!);
+          SmsProcessorService.instance.parseAndSaveTransaction(message.body!);
         }
       },
       onBackgroundMessage: backgroundMessageHandler,
@@ -85,6 +86,6 @@ Future<void> setupSmsListener() async {
 @pragma('vm:entry-point')
 void backgroundMessageHandler(SmsMessage message) {
   if (message.body != null) {
-    parseAndSaveTransaction(message.body!);
+    SmsProcessorService.instance.parseAndSaveTransaction(message.body!);
   }
 }

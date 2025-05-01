@@ -17,7 +17,7 @@ buildscript {
     dependencies {
         // Add your buildscript dependencies here, e.g.,
         // classpath("com.android.tools.build:gradle:...")
-        // classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:...")
+        // classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:...")'
     }
 }
 

@@ -123,7 +123,8 @@ class _TransactionListScreenState extends ConsumerState<TransactionListScreen> {
               if (transactions.isEmpty) {
                 return NoDataFound(
                   message: 'No transactions found.',
-                  imagePath: 'assets/icons/512/transaction.png',
+                  // imagePath: 'assets/icons/512/transaction.png',
+                  iconData: Icons.receipt_long_outlined,
                 );
               }
               final sectioned = buildSectionedList(transactions);

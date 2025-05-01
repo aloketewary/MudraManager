@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:crypto/crypto.dart';
 import 'package:intl/intl.dart';
 import 'package:mudra_manager/util/string_util.dart';
 
@@ -431,4 +434,18 @@ class TransactionInfo {
   String toString() {
     return 'TransactionInfo [account: $account, balance: $balance, money: $money, typeOfTransaction: $typeOfTransaction, transactionTime: $transactionTime]';
   }
+}
+
+bool checkForTransactionalMessage(String? body) {
+  final smsBody = body ?? '';
+  return (smsBody.contains('debit') ||
+      smsBody.contains('spent') ||
+      smsBody.contains('credit')) &&
+      !smsBody.contains('request') &&
+      !smsBody.contains('pending');
+}
+
+String generateSmsHash(String address, int? date, String body) {
+  final input = '$address|$date|$body';
+  return sha256.convert(utf8.encode(input)).toString();
 }

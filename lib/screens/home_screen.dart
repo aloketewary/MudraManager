@@ -2,11 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/db/models/user_profile.dart' show UserProfile;
 import 'package:mudra_manager/providers/greeting_provider.dart';
+import 'package:mudra_manager/providers/isar_provider.dart'
+    show reminderTimeProvider;
 import 'package:mudra_manager/providers/user_profile_provider.dart';
 import 'package:mudra_manager/screens/profile/profile_screen.dart';
 import 'package:mudra_manager/screens/statistics/statistics_screen.dart';
 import 'package:mudra_manager/screens/transaction/add_edit_transaction_screen.dart';
 import 'package:mudra_manager/screens/transaction/transaction_list_screen.dart';
+import 'package:mudra_manager/service/notification_service.dart'
+    show NotificationService;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'dashboard/dashboard_home.dart';
@@ -31,6 +35,7 @@ class HomePageState extends ConsumerState<HomePage> {
       StatisticsScreen(),
       ProfileScreen(),
     ];
+    initNotification();
   }
 
   void _onTabSelected(int index) {
@@ -179,5 +184,10 @@ class HomePageState extends ConsumerState<HomePage> {
           ),
         );
     }
+  }
+
+  void initNotification() async {
+    final savedTime = await NotificationService.getSavedReminderTime();
+    ref.read(reminderTimeProvider.notifier).state = savedTime;
   }
 }

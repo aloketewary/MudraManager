@@ -158,7 +158,7 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
                                   // or whatever aligns best for you
                                   children: [
                                     Text(
-                                      "₹$income",
+                                      "₹$income}",
                                       style: textTheme.titleLarge?.copyWith(
                                         color: color.onPrimary.withAlpha(10),
                                         fontSize: 80,
@@ -167,7 +167,7 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
                                       overflow: TextOverflow.fade,
                                     ),
                                     Text(
-                                      "₹${income.toStringAsFixed(2)}",
+                                      "₹${income.toStringAsFixed(0)}",
                                       style: textTheme.titleLarge?.copyWith(
                                         color: color.onPrimary,
                                         fontSize: 40,
@@ -250,7 +250,7 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
                                       overflow: TextOverflow.fade,
                                     ),
                                     Text(
-                                      "₹${expense.toStringAsFixed(2)}",
+                                      "₹${expense.toStringAsFixed(0)}",
                                       style: textTheme.titleLarge?.copyWith(
                                         color: color.primary,
                                         fontSize: 40,

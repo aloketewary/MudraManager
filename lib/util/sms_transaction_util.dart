@@ -1,37 +1,89 @@
-void parseAndSaveTransaction(String sms) {
-  final isExpense = sms.contains("spent") || sms.contains("debited");
-  final isIncome = sms.contains("credited") || sms.contains("received");
+import 'dart:convert';
 
-  double amount = extractAmountFromSms(sms);
-  String description = extractMerchantFromSms(sms);
+import 'package:flutter/material.dart';
+import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
+import 'package:isar/isar.dart';
+import 'package:mudra_manager/db/isar_service.dart';
+import 'package:mudra_manager/db/models/pending_transaction.dart'
+    show
+        GetPendingTransactionCollection,
+        PendingTransaction,
+        PendingTransactionSchema;
+import 'package:mudra_manager/providers/shared_preference_provider.dart'
+    show SharedPrefsUtil;
+import 'package:mudra_manager/util/string_util.dart';
+import 'package:mudra_manager/util/transaction_msg_util.dart';
 
-  if (amount == 0) return; // invalid sms
+class SmsProcessorService {
+  static final SmsProcessorService instance = SmsProcessorService._();
 
-  if (isExpense) {
-    // Save Expense transaction
-    print("Expense Detected: ₹$amount at $description");
-  } else if (isIncome) {
-    // Save Income transaction
-    print("Income Detected: ₹$amount from $description");
-  }
-}
+  SmsProcessorService._();
 
-double extractAmountFromSms(String sms) {
-  final regex = RegExp(r'₹\s?(\d+(\.\d+)?)');
-  final match = regex.firstMatch(sms);
-  if (match != null) {
-    return double.parse(match.group(1)!);
-  }
-  return 0.0;
-}
+  Future<void> processSmsForSaving(TransactionInfo sms) async {
+    final pending =
+        PendingTransaction()
+          ..date = sms.transactionTime ?? DateTime.now()
+          ..account = sms.account?.sendTo
+          ..amount = sms.money?.toDouble()
+          ..isIncome = sms.typeOfTransaction == TransactionType.credited
+          ..body = sms.body
+          ..sender = sms.sender
+          ..transactionRef = sms.account?.refNo
+          ..category = sms.typeOfTransaction?.name
+          ..smsHash = sms.smsHash
+          ..toAccount = sms.account?.type == 'UPI' ? sms.account?.sendTo : '';
 
-String extractMerchantFromSms(String sms) {
-  // Very basic for now, we can improve later
-  if (sms.contains("at")) {
-    var parts = sms.split("at");
-    if (parts.length > 1) {
-      return parts[1].split(" ")[0];
+    try {
+      final isar =
+          await getIsarInstance(); // Your function to return open Isar instance
+      await isar.writeTxn(() async {
+        await isar.pendingTransactions.put(pending);
+      });
+    } catch (e) {
+      // Log for background — no context
+      print('Failed to save SMS transaction: $e');
     }
   }
-  return "Unknown Merchant";
+
+  void parseAndSaveTransaction(String sms) {
+    var transactionalMessage = checkForTransactionalMessage(sms);
+    if (transactionalMessage) {
+      var smsMessage = parseSms(sms);
+      checkForDuplicateEntryAndProcess(smsMessage);
+    }
+  }
+
+  parseSms(String sms) {
+    var smsMessage = SmsMessage.fromJson(json.decode(sms));
+    return smsMessage;
+  }
+
+  void checkForDuplicateEntryAndProcess(SmsMessage sms) {
+    TransactionUtil transactionUtil = TransactionUtil();
+    var smsHash = generateSmsHash(
+      sms.address ?? '',
+      sms.date?.millisecondsSinceEpoch,
+      sms.body ?? '',
+    );
+    var alreadyProcessed = SharedPrefsUtil.instance.isAlreadyProcessed(smsHash);
+    if (!alreadyProcessed) {
+      SharedPrefsUtil.instance.storeProcessedHash(smsHash);
+      var transactionInfo = transactionUtil.getTransactionInfo(
+        sms.body,
+        sms.address,
+        sms.sender,
+        smsHash,
+      );
+      processSmsForSaving(transactionInfo);
+    } else {
+      debugPrint("Skipping already processed SMS from ${sms.address}");
+    }
+  }
+
+  Future<Isar> getIsarInstance() async {
+    if (Isar.instanceNames.isEmpty) {
+      return await IsarService.initIsar();
+    }
+    return Isar.getInstance()!;
+  }
 }
