@@ -1,8 +1,10 @@
 import 'package:isar/isar.dart';
+import 'package:json_annotation/json_annotation.dart';
 
 part 'category.g.dart';
 
 @collection
+@JsonSerializable()
 class Category {
   Id id = Isar.autoIncrement;
 
@@ -27,6 +29,9 @@ class Category {
     required this.name,
     this.categoryType = CategoryType.expense, // Default to expense
   });
+
+  factory Category.fromJson(Map<String, dynamic> json) => _$CategoryFromJson(json);
+  Map<String, dynamic> toJson() => _$CategoryToJson(this);
 }
 
 enum CategoryType { income, expense }

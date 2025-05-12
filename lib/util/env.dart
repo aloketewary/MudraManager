@@ -1,8 +1,8 @@
 import 'package:envied/envied.dart';
 
-part 'env_file.g.dart';
+part 'env.g.dart';
 
-@envied
+@Envied(requireEnvFile: true)
 abstract class Env {
   @EnviedField(varName: 'ENCRYPT_KEY', obfuscate: true)
   static String encryptKey = _Env.encryptKey;

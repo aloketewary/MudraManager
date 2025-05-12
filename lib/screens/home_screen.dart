@@ -4,7 +4,9 @@ import 'package:mudra_manager/db/models/user_profile.dart' show UserProfile;
 import 'package:mudra_manager/providers/greeting_provider.dart';
 import 'package:mudra_manager/providers/isar_provider.dart'
     show reminderTimeProvider;
+import 'package:mudra_manager/providers/notification_record_service.dart';
 import 'package:mudra_manager/providers/user_profile_provider.dart';
+import 'package:mudra_manager/screens/notifications/notification_page_screen.dart';
 import 'package:mudra_manager/screens/profile/profile_screen.dart';
 import 'package:mudra_manager/screens/statistics/statistics_screen.dart';
 import 'package:mudra_manager/screens/transaction/add_edit_transaction_screen.dart';
@@ -25,6 +27,7 @@ class HomePage extends ConsumerStatefulWidget {
 class HomePageState extends ConsumerState<HomePage> {
   int _selectedIndex = 0;
   List<Widget> _pages = [];
+  final statisticsKey = GlobalKey<StatisticsScreenState>();
 
   @override
   void initState() {
@@ -32,7 +35,7 @@ class HomePageState extends ConsumerState<HomePage> {
     _pages = [
       DashboardHome(),
       TransactionListScreen(),
-      StatisticsScreen(),
+      StatisticsScreen(key: statisticsKey),
       ProfileScreen(),
     ];
     initNotification();
@@ -111,6 +114,7 @@ class HomePageState extends ConsumerState<HomePage> {
     final greetingAsync = ref.watch(greetingProvider);
     final textTheme = Theme.of(context).textTheme;
     final color = Theme.of(context).colorScheme;
+    final notificationService = ref.watch(notificationRecordServiceProvider);
 
     switch (selectedIndex) {
       case 0:
@@ -153,11 +157,51 @@ class HomePageState extends ConsumerState<HomePage> {
             ],
           ),
           actions: [
-            IconButton(
-              enableFeedback: true,
-              icon: Icon(Icons.notifications),
-              onPressed: () {
-                // Handle notification press
+            FutureBuilder(
+              future: notificationService.countUnreadNotification(),
+              builder: (_, snapshot) {
+                var notificationCount = snapshot.data;
+                return Padding(
+                  padding: const EdgeInsets.only(right: 16),
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const NotificationPage(),
+                        ),);
+                    },
+                    child: Stack(
+                      children: [
+                        const Icon(Icons.notifications_none, size: 28),
+                        if ((notificationCount ?? 0) > 0)
+                          Positioned(
+                            right: 0,
+                            top: 0,
+                            child: Container(
+                              padding: const EdgeInsets.all(2),
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              constraints: const BoxConstraints(
+                                minWidth: 16,
+                                minHeight: 16,
+                              ),
+                              child: Text(
+                                '$notificationCount',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                );
               },
             ),
           ],
@@ -175,6 +219,15 @@ class HomePageState extends ConsumerState<HomePage> {
             "Statistics",
             style: textTheme.titleLarge?.copyWith(color: color.onPrimary),
           ),
+          actions: [
+            IconButton(
+              enableFeedback: true,
+              icon: Icon(Icons.save_alt_outlined),
+              onPressed: () {
+                statisticsKey.currentState?.showExportOptions(context);
+              },
+            ),
+          ],
         );
       default:
         return AppBar(

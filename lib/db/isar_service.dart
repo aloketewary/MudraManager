@@ -3,6 +3,7 @@ import 'package:mudra_manager/db/models/budget.dart';
 import 'package:mudra_manager/db/models/budget_category_allocation.dart';
 import 'package:mudra_manager/db/models/category.dart';
 import 'package:mudra_manager/db/models/goal.dart';
+import 'package:mudra_manager/db/models/notification_record.dart';
 import 'package:mudra_manager/db/models/pending_transaction.dart';
 import 'package:mudra_manager/db/models/recurring_transaction.dart';
 import 'package:mudra_manager/db/models/tag.dart';
@@ -28,7 +29,8 @@ class IsarService {
       TransactionSchema,
       UserProfileSchema,
       BudgetCategoryAllocationSchema,
-      PendingTransactionSchema
+      PendingTransactionSchema,
+      NotificationRecordSchema
     ], directory: dir.path);
   }
 

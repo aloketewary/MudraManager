@@ -626,3 +626,16 @@ extension TagQueryProperty on QueryBuilder<Tag, Tag, QQueryProperty> {
     });
   }
 }
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+Tag _$TagFromJson(Map<String, dynamic> json) => Tag()
+  ..id = (json['id'] as num).toInt()
+  ..name = json['name'] as String;
+
+Map<String, dynamic> _$TagToJson(Tag instance) => <String, dynamic>{
+      'id': instance.id,
+      'name': instance.name,
+    };

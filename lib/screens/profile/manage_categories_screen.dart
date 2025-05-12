@@ -36,7 +36,7 @@ class ManageCategoriesScreen extends ConsumerWidget {
             );
           }
           return ListView.separated(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.only(top: 16, left: 16, right: 16, bottom: 60),
             itemCount: categories.length,
             separatorBuilder: (_, __) => const Divider(thickness: 0.1),
             itemBuilder: (context, index) {
@@ -59,7 +59,7 @@ class ManageCategoriesScreen extends ConsumerWidget {
                       color.primary,
                       // color.primaryFixed,
                       color.primaryFixed,
-                      Color(category.colorValue ?? 0xFFE0E0E0)
+                      Color(category.colorValue ?? 0xFFE0E0E0),
                     ],
                   ),
                   // Light background color
@@ -134,7 +134,7 @@ class ManageCategoriesScreen extends ConsumerWidget {
                       },
                     ),
                     IconButton.filled(
-                      icon: Icon(Icons.delete, color: color.onPrimary,),
+                      icon: Icon(Icons.delete, color: color.onPrimary),
                       onPressed: () => _deleteCategory(context, ref, category),
                     ),
                   ],
@@ -165,23 +165,37 @@ class ManageCategoriesScreen extends ConsumerWidget {
     WidgetRef ref,
     Category category,
   ) async {
+    var color = Theme.of(context).colorScheme;
+    var textTheme = Theme.of(context).textTheme;
+
     final shouldDelete = await showDialog<bool>(
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('Delete Category'),
-            content: const Text(
+            title: Text('Delete Category', style: textTheme.titleLarge),
+            content: Text(
               'Are you sure you want to delete this category?\nAll associated transactions will also be removed.',
+              style: textTheme.bodyLarge,
             ),
             actions: [
-              TextButton(
+              OutlinedButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Cancel'),
+                child: Text(
+                  'Cancel'.toUpperCase(),
+                  style: textTheme.labelLarge?.copyWith(color: color.primary),
+                ),
               ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                onPressed: () => Navigator.of(context).pop(true),
-                child: const Text('Delete'),
+              OutlinedButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: OutlinedButton.styleFrom(
+                  backgroundColor: color.primary,
+                ),
+                child: Text(
+                  'Delete'.toUpperCase(),
+                  style: textTheme.labelLarge?.copyWith(
+                    color: color.onPrimary,
+                  ),
+                ),
               ),
             ],
           ),

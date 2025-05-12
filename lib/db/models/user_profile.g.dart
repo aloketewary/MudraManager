@@ -1154,3 +1154,27 @@ extension UserProfileQueryProperty
     });
   }
 }
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+UserProfile _$UserProfileFromJson(Map<String, dynamic> json) => UserProfile()
+  ..id = (json['id'] as num).toInt()
+  ..name = json['name'] as String
+  ..email = json['email'] as String?
+  ..phone = json['phone'] as String?
+  ..avatarIndex = (json['avatarIndex'] as num?)?.toInt()
+  ..createdAt = DateTime.parse(json['createdAt'] as String)
+  ..updateAt = DateTime.parse(json['updateAt'] as String);
+
+Map<String, dynamic> _$UserProfileToJson(UserProfile instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'name': instance.name,
+      'email': instance.email,
+      'phone': instance.phone,
+      'avatarIndex': instance.avatarIndex,
+      'createdAt': instance.createdAt.toIso8601String(),
+      'updateAt': instance.updateAt.toIso8601String(),
+    };

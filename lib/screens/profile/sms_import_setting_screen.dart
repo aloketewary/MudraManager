@@ -24,7 +24,7 @@ class SmsImportSettingsScreen extends ConsumerStatefulWidget {
 
 class _SmsImportSettingsScreenState
     extends ConsumerState<SmsImportSettingsScreen> {
-  bool _smsImportEnabled = false; // Toggle for SMS Import
+  bool _smsImportEnabled = SharedPrefsUtil.instance.getSmsImportEnabled(); // Toggle for SMS Import
   TransactionUtil transactionUtil = TransactionUtil();
   bool _permissionGranted = false;
 
@@ -64,7 +64,7 @@ class _SmsImportSettingsScreenState
               setState(() {
                 _smsImportEnabled = value;
               });
-              // Here, you can also save this preference to local storage
+              SharedPrefsUtil.instance.setSmsImportEnabled(value);
             },
           ),
           const SizedBox(height: 24),
@@ -79,6 +79,7 @@ class _SmsImportSettingsScreenState
           const SizedBox(height: 24),
           ListTile(
             title: const Text('Clear SMS transaction processing history'),
+            subtitle: Text('If scan sms not working clear this and re-scan sms again.'),
             leading: const Icon(Icons.clear_all),
             onTap: () => SharedPrefsUtil.instance.clearProcessedHashes(),
           ),

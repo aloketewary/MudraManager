@@ -5,7 +5,7 @@ import 'package:mudra_manager/providers/auth_service.dart';
 import 'package:mudra_manager/screens/profile/pin_entry_dialog.dart';
 
 class SecuritySettingsScreen extends ConsumerStatefulWidget {
-  const SecuritySettingsScreen({Key? key}) : super(key: key);
+  const SecuritySettingsScreen({super.key});
 
   @override
   ConsumerState<SecuritySettingsScreen> createState() =>

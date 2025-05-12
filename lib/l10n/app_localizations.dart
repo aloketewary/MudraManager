@@ -108,6 +108,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Welcome to {appName}'**
   String onboard_welcomeToApp(Object appName);
+
+  /// This is title of screen page
+  ///
+  /// In en, this message translates to:
+  /// **'App Settings'**
+  String get app_settings_appbar_title;
+
+  /// This is title of Choose Language page
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Language'**
+  String get language_settings_appbar_title;
+
+  /// This is title of Language tile
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get app_settings_language_title;
+
+  /// This is subtitle of Language tile
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your language'**
+  String get app_settings_language_subtitle;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

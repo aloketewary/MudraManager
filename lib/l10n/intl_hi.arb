@@ -7,5 +7,21 @@
   "onboard_welcomeToApp": " {appName} में आपका स्वागत है",
   "@onboard_welcomeToApp": {
     "description": "Welcome to Application"
+  },
+  "app_settings_appbar_title": "ऐप सेटिंग्स",
+  "@app_settings_appbar_title": {
+    "description": "This is title of screen page"
+  },
+  "language_settings_appbar_title": "भाषा चुनें",
+  "@language_settings_appbar_title": {
+    "description": "This is title of Choose Language page"
+  },
+  "app_settings_language_title": "भाषा",
+  "@app_settings_language_title": {
+    "description": "This is title of Language tile"
+  },
+  "app_settings_language_subtitle": "अपनी भाषा चुनें",
+  "@app_settings_language_subtitle": {
+    "description": "This is subtitle of Language tile"
   }
 }

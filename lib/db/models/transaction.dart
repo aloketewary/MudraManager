@@ -1,4 +1,5 @@
 import 'package:isar/isar.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'package:mudra_manager/db/models/recurring_transaction.dart';
 import 'package:mudra_manager/db/models/category.dart'; // Import for linking
 import 'package:mudra_manager/db/models/account.dart';  // Import for linking
@@ -7,6 +8,7 @@ import 'package:mudra_manager/db/models/tag.dart';
 part 'transaction.g.dart';
 
 @collection
+@JsonSerializable()
 class Transaction {
   Id id = Isar.autoIncrement;
 
@@ -58,4 +60,7 @@ class Transaction {
     this.description,
     this.isTransfer = false
   });
+
+  factory Transaction.fromJson(Map<String, dynamic> json) => _$TransactionFromJson(json);
+  Map<String, dynamic> toJson() => _$TransactionToJson(this);
 }

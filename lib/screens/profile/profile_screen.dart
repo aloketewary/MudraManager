@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show SystemUiOverlayStyle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mudra_manager/db/isar_service.dart' show IsarService;
 import 'package:mudra_manager/providers/isar_provider.dart';
 import 'package:mudra_manager/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/providers/user_profile_provider.dart';
 import 'package:mudra_manager/screens/onboarding/onboarding_screen.dart'
     show OnboardingScreen;
-import 'package:mudra_manager/screens/profile/about_app.dart' show AboutScreen;
-import 'package:mudra_manager/screens/profile/choose_language_screen.dart'
-    show ChooseLanguageScreen;
+import 'package:mudra_manager/screens/profile/app_settings_page.dart' show AppSettingsPage;
 import 'package:mudra_manager/screens/profile/edit_user_profile_screen.dart'
     show EditUserProfileScreen;
 import 'package:mudra_manager/screens/profile/manage_account_screen.dart'
@@ -19,11 +15,8 @@ import 'package:mudra_manager/screens/profile/manage_categories_screen.dart'
 import 'package:mudra_manager/screens/profile/profile_tile.dart';
 import 'package:mudra_manager/screens/profile/setting_screen.dart';
 import 'package:mudra_manager/screens/profile/sms_import_setting_screen.dart';
-import 'package:mudra_manager/service/notification_service.dart' show NotificationService;
 import 'package:mudra_manager/theme/mudra_manager_avatar_icons.dart'
     show MudraManagerAvatarIcons;
-import 'package:mudra_manager/theme/theme_provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -32,10 +25,6 @@ class ProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     var iconDataList = MudraManagerAvatarIcons.iconDataList;
     final profileAsync = ref.watch(userProfileProvider);
-    var textTheme = Theme.of(context).textTheme;
-    var color = Theme.of(context).colorScheme;
-    final currentTheme = ref.watch(themeModeProvider);
-    final themeNotifier = ref.read(themeModeProvider.notifier);
 
     return Column(
       children: [
@@ -117,48 +106,19 @@ class ProfileScreen extends ConsumerWidget {
                 },
               ),
               ProfileTile(
-                title: "Language",
-                subtitle: "Choose your language",
-                icon: Icons.language_outlined,
+                title: "App Settings",
+                subtitle: "Update app related settings",
+                icon: Icons.settings,
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => const ChooseLanguageScreen(),
+                      builder: (_) => const AppSettingsPage(),
                     ),
                   );
                 },
               ),
-              ProfileTile(
-                title: "Theme Mode",
-                subtitle: _getSubtitle(currentTheme),
-                icon: Icons.color_lens_outlined,
-                onTap: () {
-                  showModalBottomSheet(
-                    context: context,
-                    builder: (_) => Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: ThemeMode.values.map((mode) {
-                        return ListTile(
-                          title: Text(_getSubtitle(mode)),
-                          leading: Icon(
-                            mode == ThemeMode.light
-                                ? Icons.light_mode
-                                : mode == ThemeMode.dark
-                                ? Icons.dark_mode
-                                : Icons.phone_android,
-                          ),
-                          selected: currentTheme == mode,
-                          onTap: () {
-                            themeNotifier.setTheme(mode);
-                            Navigator.pop(context);
-                          },
-                        );
-                      }).toList(),
-                    ),
-                  );
-                },
-              ),
+
               ProfileTile(
                 title: "Security",
                 subtitle: "Protect your app with PIN or Fingerprint",
@@ -167,38 +127,6 @@ class ProfileScreen extends ConsumerWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => SecuritySettingsScreen()),
-                  );
-                },
-              ),
-              Consumer(
-                builder: (context, ref, _) {
-                  final reminderTime = ref.watch(reminderTimeProvider);
-
-                  return ProfileTile(
-                    title: "Daily Reminder",
-                    subtitle: reminderTime != null
-                        ? "Set a daily notification at ${reminderTime.format(context)}"
-                        : "Set a daily notification time",
-                    icon: Icons.notifications_active_outlined,
-                    onTap: () async {
-                      final selectedTime = await showTimePicker(
-                        context: context,
-                        initialTime: reminderTime ?? TimeOfDay.now(),
-                      );
-
-                      if (selectedTime != null) {
-                        await NotificationService.scheduleDailyReminder(selectedTime);
-                        ref.read(reminderTimeProvider.notifier).state = selectedTime;
-
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              'Reminder set for ${selectedTime.format(context)}',
-                            ),
-                          ),
-                        );
-                      }
-                    },
                   );
                 },
               ),
@@ -217,25 +145,10 @@ class ProfileScreen extends ConsumerWidget {
                   );
                 },
               ),
-              ProfileTile(
-                title: "About Mudra Manager",
-                subtitle: "Version, team and legal information",
-                icon: Icons.info_outline, // You can change icon if you want
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder:
-                          (_) => AboutScreen(), // You’ll create this screen
-                    ),
-                  );
-                },
-              ),
             ],
           ),
         ),
 
-        // Center Logout Button
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 16),
           child: TextButton.icon(
@@ -254,7 +167,7 @@ class ProfileScreen extends ConsumerWidget {
               // 3. Navigate to onboarding (and clear backstack)
               Navigator.of(context).pushAndRemoveUntil(
                 MaterialPageRoute(builder: (context) => OnboardingScreen()),
-                (route) => false,
+                    (route) => false,
               );
             },
             icon: const Icon(Icons.logout, color: Colors.redAccent),
@@ -268,14 +181,4 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  String _getSubtitle(ThemeMode mode) {
-    switch (mode) {
-      case ThemeMode.light:
-        return "Light";
-      case ThemeMode.dark:
-        return "Dark";
-      default:
-        return "System Default";
-    }
-  }
 }

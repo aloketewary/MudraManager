@@ -1,10 +1,12 @@
 import 'package:isar/isar.dart';
+import 'package:json_annotation/json_annotation.dart';
 // We will link Transactions back TO Accounts, but Account doesn't need a direct link *list*
 // of transactions typically, as queries handle that.
 
 part 'account.g.dart';
 
 @collection
+@JsonSerializable()
 class Account {
   Id id = Isar.autoIncrement; // Auto-incrementing primary key
 
@@ -40,6 +42,8 @@ class Account {
 // Note: We don't store the 'currentBalance' here.
 // Current balance is typically CALCULATED dynamically by summing:
 // initialBalance + all related income transactions - all related expense transactions.
+  factory Account.fromJson(Map<String, dynamic> json) => _$AccountFromJson(json);
+  Map<String, dynamic> toJson() => _$AccountToJson(this);
 }
 
 // You might define an enum for AccountType outside the class:

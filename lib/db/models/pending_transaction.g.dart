@@ -2523,3 +2523,40 @@ extension PendingTransactionQueryProperty
     });
   }
 }
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+PendingTransaction _$PendingTransactionFromJson(Map<String, dynamic> json) =>
+    PendingTransaction()
+      ..id = (json['id'] as num).toInt()
+      ..sender = json['sender'] as String
+      ..body = json['body'] as String
+      ..date = DateTime.parse(json['date'] as String)
+      ..amount = (json['amount'] as num?)?.toDouble()
+      ..isIncome = json['isIncome'] as bool?
+      ..account = json['account'] as String?
+      ..type = json['type'] as String?
+      ..fromBank = json['fromBank'] as String?
+      ..toAccount = json['toAccount'] as String?
+      ..transactionRef = json['transactionRef'] as String?
+      ..category = json['category'] as String?
+      ..smsHash = json['smsHash'] as String;
+
+Map<String, dynamic> _$PendingTransactionToJson(PendingTransaction instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'sender': instance.sender,
+      'body': instance.body,
+      'date': instance.date.toIso8601String(),
+      'amount': instance.amount,
+      'isIncome': instance.isIncome,
+      'account': instance.account,
+      'type': instance.type,
+      'fromBank': instance.fromBank,
+      'toAccount': instance.toAccount,
+      'transactionRef': instance.transactionRef,
+      'category': instance.category,
+      'smsHash': instance.smsHash,
+    };

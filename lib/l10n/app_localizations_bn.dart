@@ -15,4 +15,16 @@ class AppLocalizationsBn extends AppLocalizations {
   String onboard_welcomeToApp(Object appName) {
     return '$appName e স্বাগতম ';
   }
+
+  @override
+  String get app_settings_appbar_title => 'অ্যাপ সেটিংস';
+
+  @override
+  String get language_settings_appbar_title => 'ভাষা নির্বাচন করুন';
+
+  @override
+  String get app_settings_language_title => 'ভাষা';
+
+  @override
+  String get app_settings_language_subtitle => 'আপনার ভাষা নির্বাচন করুন';
 }

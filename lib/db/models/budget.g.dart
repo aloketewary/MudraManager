@@ -1314,3 +1314,34 @@ extension BudgetQueryProperty on QueryBuilder<Budget, Budget, QQueryProperty> {
     });
   }
 }
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+Budget _$BudgetFromJson(Map<String, dynamic> json) => Budget()
+  ..id = (json['id'] as num).toInt()
+  ..isArchived = json['isArchived'] as bool
+  ..name = json['name'] as String
+  ..amount = (json['amount'] as num).toDouble()
+  ..startDate = DateTime.parse(json['startDate'] as String)
+  ..endDate = DateTime.parse(json['endDate'] as String)
+  ..recurrence = $enumDecode(_$BudgetRecurrenceEnumMap, json['recurrence']);
+
+Map<String, dynamic> _$BudgetToJson(Budget instance) => <String, dynamic>{
+      'id': instance.id,
+      'isArchived': instance.isArchived,
+      'name': instance.name,
+      'amount': instance.amount,
+      'startDate': instance.startDate.toIso8601String(),
+      'endDate': instance.endDate.toIso8601String(),
+      'recurrence': _$BudgetRecurrenceEnumMap[instance.recurrence]!,
+    };
+
+const _$BudgetRecurrenceEnumMap = {
+  BudgetRecurrence.none: 'none',
+  BudgetRecurrence.daily: 'daily',
+  BudgetRecurrence.weekly: 'weekly',
+  BudgetRecurrence.monthly: 'monthly',
+  BudgetRecurrence.yearly: 'yearly',
+};

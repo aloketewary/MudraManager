@@ -50,7 +50,7 @@ class PendingTransactionService {
 
   Future<List<PendingTransaction?>> getAllPendingTransaction() async {
     var isar = await isarService.getInstance();
-    return isar.pendingTransactions.where().findAll();
+    return isar.pendingTransactions.where().sortByDate().findAll();
   }
 
   Future<void> remove(PendingTransaction pendingTx) async {

@@ -1454,3 +1454,43 @@ extension RecurringTransactionQueryProperty on QueryBuilder<
     });
   }
 }
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+RecurringTransaction _$RecurringTransactionFromJson(
+        Map<String, dynamic> json) =>
+    RecurringTransaction()
+      ..id = (json['id'] as num).toInt()
+      ..amount = (json['amount'] as num).toDouble()
+      ..isExpense = json['isExpense'] as bool
+      ..description = json['description'] as String?
+      ..frequency = $enumDecode(_$FrequencyEnumMap, json['frequency'])
+      ..startDate = DateTime.parse(json['startDate'] as String)
+      ..endDate = json['endDate'] == null
+          ? null
+          : DateTime.parse(json['endDate'] as String)
+      ..nextDueDate = DateTime.parse(json['nextDueDate'] as String)
+      ..isActive = json['isActive'] as bool;
+
+Map<String, dynamic> _$RecurringTransactionToJson(
+        RecurringTransaction instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'amount': instance.amount,
+      'isExpense': instance.isExpense,
+      'description': instance.description,
+      'frequency': _$FrequencyEnumMap[instance.frequency]!,
+      'startDate': instance.startDate.toIso8601String(),
+      'endDate': instance.endDate?.toIso8601String(),
+      'nextDueDate': instance.nextDueDate.toIso8601String(),
+      'isActive': instance.isActive,
+    };
+
+const _$FrequencyEnumMap = {
+  Frequency.daily: 'daily',
+  Frequency.weekly: 'weekly',
+  Frequency.monthly: 'monthly',
+  Frequency.yearly: 'yearly',
+};

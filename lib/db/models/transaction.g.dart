@@ -1294,3 +1294,25 @@ extension TransactionQueryProperty
     });
   }
 }
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+Transaction _$TransactionFromJson(Map<String, dynamic> json) => Transaction()
+  ..id = (json['id'] as num).toInt()
+  ..date = DateTime.parse(json['date'] as String)
+  ..amount = (json['amount'] as num).toDouble()
+  ..isExpense = json['isExpense'] as bool
+  ..description = json['description'] as String?
+  ..isTransfer = json['isTransfer'] as bool;
+
+Map<String, dynamic> _$TransactionToJson(Transaction instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'date': instance.date.toIso8601String(),
+      'amount': instance.amount,
+      'isExpense': instance.isExpense,
+      'description': instance.description,
+      'isTransfer': instance.isTransfer,
+    };

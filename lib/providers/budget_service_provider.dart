@@ -177,6 +177,17 @@ class BudgetService {
       }
     });
   }
+
+  Future<List<Budget>> getFilterBudget(DateTime now) async{
+    final isar = await isarService.getInstance();
+    final budgets = await isar.budgets
+        .filter()
+        .startDateLessThan(now)
+        .and()
+        .endDateGreaterThan(now)
+        .findAll();
+    return budgets;
+  }
 }
 
 class CategorySpending {

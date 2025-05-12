@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:mudra_manager/db/models/account.dart' show AccountType;
+import 'package:mudra_manager/screens/reusable/animated_balance.dart' show AnimatedBalance;
 import 'package:mudra_manager/util/account_type_extension.dart';
+import 'package:mudra_manager/util/string_util.dart';
 
 enum AnimationStyles { defaultStyle, custom, none }
 
@@ -131,8 +133,8 @@ class _AnimatedAccountCard extends State<AnimatedAccountCard> {
                     ),
                   ],
                 ),
-                Text(
-                  "₹${widget.totalBalance}",
+                AnimatedBalance(
+                  value: widget.totalBalance.toDouble(),
                   style: textTheme.titleLarge?.copyWith(
                     color: color.onPrimary,
                     fontSize: 40,

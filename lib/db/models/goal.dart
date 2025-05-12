@@ -1,9 +1,11 @@
 import 'package:isar/isar.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'account.dart'; // Import for optional linking
 
 part 'goal.g.dart';
 
 @collection
+@JsonSerializable()
 class Goal {
   Id id = Isar.autoIncrement; // Auto-incrementing primary key
 
@@ -54,5 +56,8 @@ class Goal {
   // You might add helper getters for progress:
   double get progressPercent => (targetAmount > 0) ? (currentAmount / targetAmount).clamp(0.0, 1.0) : 0.0;
   double get remainingAmount => (targetAmount - currentAmount).isNegative ? 0.0 : (targetAmount - currentAmount);
+
+  factory Goal.fromJson(Map<String, dynamic> json) => _$GoalFromJson(json);
+  Map<String, dynamic> toJson() => _$GoalToJson(this);
 
 }

@@ -424,3 +424,20 @@ extension BudgetCategoryAllocationQueryProperty on QueryBuilder<
     });
   }
 }
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+BudgetCategoryAllocation _$BudgetCategoryAllocationFromJson(
+        Map<String, dynamic> json) =>
+    BudgetCategoryAllocation()
+      ..id = (json['id'] as num).toInt()
+      ..amount = (json['amount'] as num).toDouble();
+
+Map<String, dynamic> _$BudgetCategoryAllocationToJson(
+        BudgetCategoryAllocation instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'amount': instance.amount,
+    };

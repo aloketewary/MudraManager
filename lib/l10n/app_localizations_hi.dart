@@ -15,4 +15,16 @@ class AppLocalizationsHi extends AppLocalizations {
   String onboard_welcomeToApp(Object appName) {
     return ' $appName में आपका स्वागत है';
   }
+
+  @override
+  String get app_settings_appbar_title => 'ऐप सेटिंग्स';
+
+  @override
+  String get language_settings_appbar_title => 'भाषा चुनें';
+
+  @override
+  String get app_settings_language_title => 'भाषा';
+
+  @override
+  String get app_settings_language_subtitle => 'अपनी भाषा चुनें';
 }

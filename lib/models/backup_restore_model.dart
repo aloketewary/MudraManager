@@ -9,14 +9,14 @@ class BackupData {
   });
 
   Map<String, dynamic> toJson() => {
-        'includeDatabase': includeDatabase,
-        'includeSettings': includeSettings,
-      };
+    'includeDatabase': includeDatabase,
+    'includeSettings': includeSettings,
+  };
 
   static BackupData fromJson(Map<String, dynamic> json) => BackupData(
-        includeDatabase: json['includeDatabase'] ?? false,
-        includeSettings: json['includeSettings'] ?? false,
-      );
+    includeDatabase: json['includeDatabase'] ?? false,
+    includeSettings: json['includeSettings'] ?? false,
+  );
 }
 
 enum BackupOption { database, settings }

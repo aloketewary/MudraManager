@@ -1,4 +1,5 @@
 import 'package:isar/isar.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'package:mudra_manager/db/models/budget_category_allocation.dart'
     show BudgetCategoryAllocation;
 import 'category.dart'; // Import for linking
@@ -6,6 +7,7 @@ import 'category.dart'; // Import for linking
 part 'budget.g.dart';
 
 @collection
+@JsonSerializable()
 class Budget {
   Id id = Isar.autoIncrement;
 
@@ -48,6 +50,8 @@ class Budget {
   // Note: The current spending against the budget is not stored here.
   // It needs to be CALCULATED dynamically by querying Transactions
   // that fall within the budget's date range AND belong to the linked categories.
+  factory Budget.fromJson(Map<String, dynamic> json) => _$BudgetFromJson(json);
+  Map<String, dynamic> toJson() => _$BudgetToJson(this);
 }
 
 // Example Enum (defined outside the class)

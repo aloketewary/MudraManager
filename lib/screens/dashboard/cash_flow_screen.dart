@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:mudra_manager/db/filter_type.dart' show FilterType;
 import 'package:mudra_manager/providers/filter_provider.dart';
+import 'package:mudra_manager/screens/reusable/animated_balance.dart';
 import 'package:mudra_manager/screens/transaction/transaction_list_screen.dart';
 
 class CashFlowScreen extends ConsumerStatefulWidget {
@@ -92,7 +93,9 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => TransactionListScreen(showAppBar: true,),
+                            builder:
+                                (context) =>
+                                    TransactionListScreen(showAppBar: true),
                           ),
                         );
                       },
@@ -166,13 +169,14 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
                                       ),
                                       overflow: TextOverflow.fade,
                                     ),
-                                    Text(
-                                      "₹${income.toStringAsFixed(0)}",
+                                    AnimatedBalance(
+                                      value: income,
                                       style: textTheme.titleLarge?.copyWith(
                                         color: color.onPrimary,
                                         fontSize: 40,
                                         fontWeight: FontWeight.bold,
                                       ),
+                                      fixedStringLength: 0,
                                       overflow: TextOverflow.fade,
                                     ),
                                   ],
@@ -249,13 +253,14 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
                                       ),
                                       overflow: TextOverflow.fade,
                                     ),
-                                    Text(
-                                      "₹${expense.toStringAsFixed(0)}",
+                                    AnimatedBalance(
+                                      value: expense,
                                       style: textTheme.titleLarge?.copyWith(
                                         color: color.primary,
                                         fontSize: 40,
                                         fontWeight: FontWeight.bold,
                                       ),
+                                      fixedStringLength: 0,
                                       overflow: TextOverflow.fade,
                                     ),
                                   ],

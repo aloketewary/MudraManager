@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/db/models/account.dart';
 import 'package:mudra_manager/providers/account_providers.dart';
 import 'package:mudra_manager/screens/dashboard/dashboard_account_card.dart'
-    show AccountCard, AccountCardWidget, AnimatedAccountCard;
+    show AccountCard;
 import 'package:mudra_manager/screens/dashboard/dashboard_animated_card.dart'
     show AnimatedAccountCard;
 
@@ -127,8 +127,8 @@ class _AnimatedSwipeableAccountCardsState
                   child: AnimatedAccountCard(
                     totalBalance: cards[_getIndex(-1, cards)].totalBalance,
                     accountNumber: cards[_getIndex(-1, cards)].accountNumber,
-                    backgroundColor: cards[_getIndex(-1, cards)].accentColor,
-                    accentColor: color.primary,
+                    backgroundColor: color.primary,
+                    accentColor: cards[_getIndex(-1, cards)].accentColor,
                     accountName: cards[_getIndex(-1, cards)].accountName,
                     accountType: cards[_getIndex(-1, cards)].accountType,
                     onArchive: () {},
@@ -149,8 +149,8 @@ class _AnimatedSwipeableAccountCardsState
                   child: AnimatedAccountCard(
                     totalBalance: cards[_getIndex(1, cards)].totalBalance,
                     accountNumber: cards[_getIndex(1, cards)].accountNumber,
-                    backgroundColor: cards[_getIndex(1, cards)].accentColor,
-                    accentColor: color.primary,
+                    backgroundColor: color.primary,
+                    accentColor: cards[_getIndex(1, cards)].accentColor,
                     accountName: cards[_getIndex(1, cards)].accountName,
                     accountType: cards[_getIndex(1, cards)].accountType,
                     onArchive: () {},

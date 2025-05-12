@@ -147,8 +147,8 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
             ),
             CommonButton(
               text: widget.existing == null ? 'save' : 'update',
-              backGroundColor: color.secondary,
-              textColor: color.onSecondary,
+              backGroundColor: color.primary,
+              textColor: color.onPrimary,
               onPressed: () async {
                 await _save();
                 Navigator.of(context).pop(true);

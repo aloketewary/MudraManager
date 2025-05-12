@@ -1352,3 +1352,28 @@ extension GoalQueryProperty on QueryBuilder<Goal, Goal, QQueryProperty> {
     });
   }
 }
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+Goal _$GoalFromJson(Map<String, dynamic> json) => Goal()
+  ..id = (json['id'] as num).toInt()
+  ..name = json['name'] as String
+  ..targetAmount = (json['targetAmount'] as num).toDouble()
+  ..currentAmount = (json['currentAmount'] as num).toDouble()
+  ..targetDate = json['targetDate'] == null
+      ? null
+      : DateTime.parse(json['targetDate'] as String)
+  ..creationDate = DateTime.parse(json['creationDate'] as String)
+  ..isActive = json['isActive'] as bool;
+
+Map<String, dynamic> _$GoalToJson(Goal instance) => <String, dynamic>{
+      'id': instance.id,
+      'name': instance.name,
+      'targetAmount': instance.targetAmount,
+      'currentAmount': instance.currentAmount,
+      'targetDate': instance.targetDate?.toIso8601String(),
+      'creationDate': instance.creationDate.toIso8601String(),
+      'isActive': instance.isActive,
+    };

@@ -7,5 +7,21 @@
   "onboard_welcomeToApp": "{appName} e স্বাগতম ",
   "@onboard_welcomeToApp": {
     "description": "Welcome to Application"
+  },
+  "app_settings_appbar_title": "অ্যাপ সেটিংস",
+  "@app_settings_appbar_title": {
+    "description": "This is title of screen page"
+  },
+  "language_settings_appbar_title": "ভাষা নির্বাচন করুন",
+  "@language_settings_appbar_title": {
+    "description": "This is title of Choose Language page"
+  },
+  "app_settings_language_title": "ভাষা",
+  "@app_settings_language_title": {
+    "description": "This is title of Language tile"
+  },
+  "app_settings_language_subtitle": "আপনার ভাষা নির্বাচন করুন",
+  "@app_settings_language_subtitle": {
+    "description": "This is subtitle of Language tile"
   }
 }

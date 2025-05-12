@@ -1,8 +1,10 @@
 import 'package:isar/isar.dart';
+import 'package:json_annotation/json_annotation.dart';
 
 part 'tag.g.dart';
 
 @collection
+@JsonSerializable()
 class Tag {
   Id id = Isar.autoIncrement;
 
@@ -14,4 +16,7 @@ class Tag {
 
   // Optional: Convenience constructor
   Tag.create({required this.name});
+
+  factory Tag.fromJson(Map<String, dynamic> json) => _$TagFromJson(json);
+  Map<String, dynamic> toJson() => _$TagToJson(this);
 }

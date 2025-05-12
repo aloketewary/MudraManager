@@ -1300,3 +1300,35 @@ extension AccountQueryProperty
     });
   }
 }
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+Account _$AccountFromJson(Map<String, dynamic> json) => Account()
+  ..id = (json['id'] as num).toInt()
+  ..name = json['name'] as String
+  ..accountType = $enumDecode(_$AccountTypeEnumMap, json['accountType'])
+  ..initialBalance = (json['initialBalance'] as num).toDouble()
+  ..colorValue = (json['colorValue'] as num?)?.toInt()
+  ..accountNumber = json['accountNumber'] as String?
+  ..isActive = json['isActive'] as bool;
+
+Map<String, dynamic> _$AccountToJson(Account instance) => <String, dynamic>{
+      'id': instance.id,
+      'name': instance.name,
+      'accountType': _$AccountTypeEnumMap[instance.accountType]!,
+      'initialBalance': instance.initialBalance,
+      'colorValue': instance.colorValue,
+      'accountNumber': instance.accountNumber,
+      'isActive': instance.isActive,
+    };
+
+const _$AccountTypeEnumMap = {
+  AccountType.bank: 'bank',
+  AccountType.cash: 'cash',
+  AccountType.creditCard: 'creditCard',
+  AccountType.eWallet: 'eWallet',
+  AccountType.investment: 'investment',
+  AccountType.other: 'other',
+};

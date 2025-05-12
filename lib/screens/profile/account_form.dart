@@ -172,8 +172,8 @@ class _AccountFormState extends ConsumerState<AccountForm> {
             CommonButton(
               text: widget.account == null ? "Save" : "update",
               onPressed: _saveAccount,
-              backGroundColor: color.secondary,
-              textColor: color.onSecondary,
+              backGroundColor: color.primary,
+              textColor: color.onPrimary,
             ),
           ],
         ),

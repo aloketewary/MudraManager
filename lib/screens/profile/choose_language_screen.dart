@@ -4,7 +4,6 @@ import 'package:mudra_manager/l10n/app_localizations.dart'
     show AppLocalizations;
 import 'package:mudra_manager/providers/l10n_provider.dart';
 import 'package:mudra_manager/util/localization_extension.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class ChooseLanguageScreen extends ConsumerStatefulWidget {
   const ChooseLanguageScreen({super.key});
@@ -24,7 +23,7 @@ class _ChooseLanguageScreenState extends ConsumerState<ChooseLanguageScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Choose Language',
+          AppLocalizations.of(context)!.language_settings_appbar_title,
           style: textTheme.titleLarge?.copyWith(color: color.onPrimary),
         ),
       ),

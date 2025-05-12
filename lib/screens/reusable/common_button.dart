@@ -24,14 +24,20 @@ class CommonButton extends StatelessWidget {
     var color = Theme.of(context).colorScheme;
     return ElevatedButton(
       onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: backGroundColor ?? color.primary,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           if (iconData != null) Icon(iconData, color: Colors.white, size: 24),
           if (iconData != null) SizedBox(width: 12),
-          Text(text.toUpperCase()),
+          Text(text.toUpperCase(), style: textStyle,),
         ],
-      ),
+      )
     );
   }
 }

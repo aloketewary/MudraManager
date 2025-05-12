@@ -7,5 +7,21 @@
   "onboard_welcomeToApp": "Welcome to {appName}",
   "@onboard_welcomeToApp": {
     "description": "Welcome to Application"
+  },
+  "app_settings_appbar_title": "App Settings",
+  "@app_settings_appbar_title": {
+    "description": "This is title of screen page"
+  },
+  "language_settings_appbar_title": "Choose Language",
+  "@language_settings_appbar_title": {
+    "description": "This is title of Choose Language page"
+  },
+  "app_settings_language_title": "Language",
+  "@app_settings_language_title": {
+    "description": "This is title of Language tile"
+  },
+  "app_settings_language_subtitle": "Choose your language",
+  "@app_settings_language_subtitle": {
+    "description": "This is subtitle of Language tile"
   }
 }

@@ -1,4 +1,5 @@
 import 'package:isar/isar.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'category.dart'; // Import for linking
 import 'account.dart';  // Import for linking
 import 'frequency.dart';   // Import Frequency enum
@@ -6,6 +7,7 @@ import 'frequency.dart';   // Import Frequency enum
 part 'recurring_transaction.g.dart';
 
 @collection
+@JsonSerializable()
 class RecurringTransaction {
   Id id = Isar.autoIncrement;
 
@@ -59,6 +61,8 @@ class RecurringTransaction {
 // 2. Generate a new `Transaction` record based on the template data.
 // 3. Update the `nextDueDate` of this RecurringTransaction template.
 // 4. Potentially deactivate it if `endDate` is reached.
+  factory RecurringTransaction.fromJson(Map<String, dynamic> json) => _$RecurringTransactionFromJson(json);
+  Map<String, dynamic> toJson() => _$RecurringTransactionToJson(this);
 }
 
 

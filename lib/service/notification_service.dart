@@ -41,9 +41,12 @@ class NotificationService {
 
   static Future<void> requestNotificationPermission() async {
     FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-    FlutterLocalNotificationsPlugin();
-    flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>()?.requestNotificationsPermission();
+        FlutterLocalNotificationsPlugin();
+    flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >()
+        ?.requestNotificationsPermission();
   }
 
   static Future<void> scheduleDailyReminder(TimeOfDay time) async {
@@ -62,7 +65,7 @@ class NotificationService {
 
     await _plugin.zonedSchedule(
       0,
-      'Mudra Manager Reminder',
+      'Daily Expense Reminder',
       'Don\'t forget to track your expenses today!',
       scheduledDate,
       const NotificationDetails(
@@ -114,5 +117,23 @@ class NotificationService {
     }
 
     return scheduledDate;
+  }
+
+  static Future<void> showLocalNotification({
+    required int id,
+    required String title,
+    required String body,
+  }) async {
+    const androidDetails = AndroidNotificationDetails(
+      'mudra_channel_id',
+      'Mudra Manager Notifications',
+      channelDescription: 'Notifications for budget & account alerts',
+      importance: Importance.max,
+      priority: Priority.high,
+    );
+
+    const notificationDetails = NotificationDetails(android: androidDetails);
+
+    await _plugin.show(id, title, body, notificationDetails);
   }
 }

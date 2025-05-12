@@ -28,6 +28,7 @@ void main() async {
   await NotificationService.initialize();
 
   final completed = SharedPrefsUtil.instance.isOnboardingComplete();
+  setupSmsListener();
   runApp(ProviderScope(child: MudraManagerApp(showOnboarding: !completed)));
 }
 
@@ -77,6 +78,7 @@ Future<void> setupSmsListener() async {
           SmsProcessorService.instance.parseAndSaveTransaction(message.body!);
         }
       },
+      listenInBackground: true,
       onBackgroundMessage: backgroundMessageHandler,
     );
   }

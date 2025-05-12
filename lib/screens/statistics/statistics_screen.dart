@@ -7,20 +7,24 @@ import 'package:intl/intl.dart';
 import 'package:mudra_manager/db/models/transaction.dart' show Transaction;
 import 'package:mudra_manager/models/pie_chart_card.dart' show PieCategory;
 import 'package:mudra_manager/providers/status_data_provider.dart'
-    show statsProvider;
+    show StatsData, statsProvider;
+import 'package:mudra_manager/screens/reusable/animated_balance.dart';
 import 'package:mudra_manager/screens/reusable/no_data_found.dart';
 import 'package:mudra_manager/screens/statistics/period_selector_screen.dart';
+import 'package:mudra_manager/util/export_excel_pdf.dart'
+    show exportStatsToExcel, exportStatsToPdf;
 import 'package:mudra_manager/util/icon_helper.dart' show IconHelper;
 
 class StatisticsScreen extends ConsumerStatefulWidget {
   const StatisticsScreen({super.key});
 
   @override
-  ConsumerState<StatisticsScreen> createState() => _StatsState();
+  ConsumerState<StatisticsScreen> createState() => StatisticsScreenState();
 }
 
-class _StatsState extends ConsumerState<StatisticsScreen> {
+class StatisticsScreenState extends ConsumerState<StatisticsScreen> {
   String _period = 'Month';
+  StatsData? data;
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +37,7 @@ class _StatsState extends ConsumerState<StatisticsScreen> {
 
     return stats.when(
       data: (d) {
+        setLatestData(d);
         List<PieCategory> pieData =
             d.categoryData.entries.map((entry) {
               var categoryData = d.categoryDataMap[entry.key];
@@ -55,7 +60,19 @@ class _StatsState extends ConsumerState<StatisticsScreen> {
               buildLineChart(d.incomeSpots, d.expenseSpots),
               const SizedBox(height: 16),
               buildMetricsRow(d.income, d.expense),
-              const SizedBox(height: 16),
+              Center(
+                child: Padding(
+                  padding: EdgeInsets.all(8),
+                  child: Text(
+                    'We trim down decimal places, please round off if required.',
+                    style: textTheme.labelSmall?.copyWith(
+                      color: color.onSurface,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
               Divider(indent: 8, endIndent: 8),
               Text(
                 'By Category',
@@ -140,11 +157,12 @@ class _StatsState extends ConsumerState<StatisticsScreen> {
                   ],
                 ),
                 SizedBox(height: 8),
-                Text(
-                  '₹${value.toStringAsFixed(2)}',
+                AnimatedBalance(
+                  value: value,
                   style: textTheme.titleLarge?.copyWith(color: color.primary),
                   textAlign: TextAlign.center,
                   overflow: TextOverflow.ellipsis,
+                  fixedStringLength: 0,
                 ),
               ],
             ),
@@ -305,7 +323,7 @@ class _StatsState extends ConsumerState<StatisticsScreen> {
                           Text(
                             "${t.isExpense ? "-" : "+"} ₹${t.amount}",
                             style: textTheme.titleLarge?.copyWith(
-                              color: color.primary
+                              color: color.primary,
                             ),
                           ),
                           Text(
@@ -325,5 +343,39 @@ class _StatsState extends ConsumerState<StatisticsScreen> {
         );
       },
     );
+  }
+
+  void showExportOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder:
+          (_) => Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.picture_as_pdf),
+                title: const Text('Export to PDF'),
+                onTap: () {
+                  Navigator.pop(context);
+                  exportStatsToPdf(data!);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.table_chart),
+                title: const Text('Export to Excel'),
+                onTap: () {
+                  Navigator.pop(context);
+                  exportStatsToExcel(data!);
+                },
+              ),
+            ],
+          ),
+    );
+  }
+
+  void setLatestData(StatsData d) {
+    setState(() {
+      data = d;
+    });
   }
 }

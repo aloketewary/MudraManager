@@ -7,6 +7,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   isar_flutter_libs
   local_auth_windows
   permission_handler_windows
+  printing
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST
