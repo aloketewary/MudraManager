@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:mudra_manager/l10n/app_localizations.dart' show AppLocalizations;
 
 class SwipeableWeeklyCalendar extends StatefulWidget {
   final bool allowFutureDateSelection;
@@ -130,6 +131,7 @@ class _SwipeableWeeklyCalendarState extends State<SwipeableWeeklyCalendar> {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final isFutureDate = DateTime(day.year, day.month, day.day).isAfter(today);
+    final ctxt = AppLocalizations.of(context)!;
 
     final isSameDay =
         day.year == _currentDate.year &&
@@ -166,7 +168,7 @@ class _SwipeableWeeklyCalendarState extends State<SwipeableWeeklyCalendar> {
               child: Padding(
                 padding: const EdgeInsets.all(8),
                 child: Text(
-                  DateFormat('d').format(day),
+                  DateFormat('d', ctxt.localeName).format(day),
                   style: textTheme.titleLarge?.copyWith(
                     color:
                         isSameDay
@@ -188,6 +190,8 @@ class _SwipeableWeeklyCalendarState extends State<SwipeableWeeklyCalendar> {
   Widget build(BuildContext context) {
     var textTheme = Theme.of(context).textTheme;
     var color = Theme.of(context).colorScheme;
+    final ctxt = AppLocalizations.of(context)!;
+
     return GestureDetector(
       onVerticalDragEnd: (details) {
         const double sensitivity = 20.0; // Adjust this value
@@ -217,7 +221,7 @@ class _SwipeableWeeklyCalendarState extends State<SwipeableWeeklyCalendar> {
                 GestureDetector(
                   onTap: () => _selectMonthYear(context),
                   child: Text(
-                    DateFormat('MMMM yyyy').format(_currentDate),
+                    DateFormat('MMMM yyyy', ctxt.localeName).format(_currentDate),
                     style: textTheme.titleLarge?.copyWith(
                       color: color.primary,
                     ),
@@ -236,37 +240,37 @@ class _SwipeableWeeklyCalendarState extends State<SwipeableWeeklyCalendar> {
               children: [
                 Expanded(
                   child: Center(
-                    child: Text('M', style: TextStyle(color: color.onSurface)),
+                    child: Text(ctxt.calendar_week_monday_initial_text, style: TextStyle(color: color.onSurface)),
                   ),
                 ),
                 Expanded(
                   child: Center(
-                    child: Text('T', style: TextStyle(color: color.onSurface)),
+                    child: Text(ctxt.calendar_week_tuesday_initial_text, style: TextStyle(color: color.onSurface)),
                   ),
                 ),
                 Expanded(
                   child: Center(
-                    child: Text('W', style: TextStyle(color: color.onSurface)),
+                    child: Text(ctxt.calendar_week_wednesday_initial_text, style: TextStyle(color: color.onSurface)),
                   ),
                 ),
                 Expanded(
                   child: Center(
-                    child: Text('T', style: TextStyle(color: color.onSurface)),
+                    child: Text(ctxt.calendar_week_thursday_initial_text, style: TextStyle(color: color.onSurface)),
                   ),
                 ),
                 Expanded(
                   child: Center(
-                    child: Text('F', style: TextStyle(color: color.onSurface)),
+                    child: Text(ctxt.calendar_week_friday_initial_text, style: TextStyle(color: color.onSurface)),
                   ),
                 ),
                 Expanded(
                   child: Center(
-                    child: Text('S', style: TextStyle(color: color.onSurface)),
+                    child: Text(ctxt.calendar_week_saturday_initial_text, style: TextStyle(color: color.onSurface)),
                   ),
                 ),
                 Expanded(
                   child: Center(
-                    child: Text('S', style: TextStyle(color: color.onSurface)),
+                    child: Text(ctxt.calendar_week_sunday_initial_text, style: TextStyle(color: color.onSurface)),
                   ),
                 ),
               ],

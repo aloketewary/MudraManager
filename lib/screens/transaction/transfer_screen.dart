@@ -10,7 +10,24 @@ import 'package:mudra_manager/screens/transaction/account_card_mini.dart'
     show AccountCardMini;
 
 class TransferScreen extends ConsumerStatefulWidget {
-  const TransferScreen({super.key});
+  final Account? fromAccount;
+  final Account? toAccount;
+  final int? fromId;
+  final int? toId;
+  final String? amount;
+  final String? note;
+  final DateTime? date;
+
+  const TransferScreen({
+    super.key,
+    this.amount,
+    this.note,
+    this.date,
+    this.fromAccount,
+    this.toAccount,
+    this.fromId,
+    this.toId,
+  });
 
   @override
   ConsumerState<TransferScreen> createState() => _TransferScreenState();
@@ -24,6 +41,20 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
   final _amountC = TextEditingController();
   final _noteC = TextEditingController();
   DateTime _date = DateTime.now();
+  bool isUpdate = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _fromAccount = widget.fromAccount;
+    _toAccount = widget.toAccount;
+    _amountC.text = widget.amount ?? '';
+    _noteC.text = widget.note ?? '';
+    _date = widget.date ?? DateTime.now();
+    setState(() {
+      isUpdate = widget.fromAccount != null && widget.toAccount != null;
+    });
+  }
 
   @override
   void dispose() {
@@ -47,6 +78,8 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
       amount: amt,
       date: _date,
       note: note.isEmpty ? null : note,
+      fromId: widget.fromId,
+      toId: widget.toId,
     );
 
     ref.invalidate(transactionProvider);
@@ -67,6 +100,17 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
           'Transfer Funds',
           style: textTheme.titleLarge?.copyWith(color: color.onPrimary),
         ),
+        actions: [
+          IconButton.outlined(
+            onPressed: () {
+              setState(() {
+                _fromAccount = null;
+                _toAccount = null;
+              });
+            },
+            icon: Icon(Icons.undo_outlined, color: color.onPrimary,),
+          )
+        ],
       ),
       body: accountsAsync.when(
         data: (accounts) {
@@ -236,7 +280,7 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
                 ),
 
                 CommonButton(
-                  text: 'Transfer',
+                  text: isUpdate ? 'Update Transfer' : 'Transfer',
                   backGroundColor: color.secondary,
                   textColor: color.onSecondary,
                   onPressed: _submit,

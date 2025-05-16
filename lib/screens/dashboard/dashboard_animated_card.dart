@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mudra_manager/db/models/account.dart' show AccountType;
-import 'package:mudra_manager/screens/reusable/animated_balance.dart' show AnimatedBalance;
+import 'package:mudra_manager/screens/reusable/animated_balance.dart'
+    show AnimatedBalance;
 import 'package:mudra_manager/util/account_type_extension.dart';
 import 'package:mudra_manager/util/string_util.dart';
 
@@ -26,6 +27,7 @@ class AnimatedAccountCard extends StatefulWidget {
   final VoidCallback? onEdit;
   final VoidCallback? onRemove;
   final bool showMenu;
+  final bool isBehind;
 
   const AnimatedAccountCard({
     super.key,
@@ -39,6 +41,7 @@ class AnimatedAccountCard extends StatefulWidget {
     required this.onEdit,
     required this.onRemove,
     required this.showMenu,
+    this.isBehind = false,
   });
 
   @override
@@ -64,15 +67,14 @@ class _AnimatedAccountCard extends State<AnimatedAccountCard> {
         padding: const EdgeInsets.all(24.0),
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [
-              color.primary,
-              color.primaryFixed,
-              widget.accentColor,
-            ],
+            colors: [color.primary, color.primaryFixed, widget.accentColor],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(16.0),
+          border: Border(
+            top: BorderSide(color: color.onPrimary, width: 1.0)
+          )
         ),
         child: Stack(
           alignment: Alignment.center,
@@ -140,18 +142,22 @@ class _AnimatedAccountCard extends State<AnimatedAccountCard> {
                     fontSize: 40,
                     fontWeight: FontWeight.w700,
                   ),
+                  overflow: TextOverflow.ellipsis,
                 ),
-                SizedBox(height: 40),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Text(
-                      widget.accountNumber,
-                      style: textTheme.titleSmall?.copyWith(
-                        color: color.onPrimary,
+                SizedBox(height: 30),
+                Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Text(
+                        widget.accountNumber,
+                        style: textTheme.titleSmall?.copyWith(
+                          color: color.onPrimary,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),

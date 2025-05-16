@@ -4,8 +4,12 @@ import 'package:mudra_manager/db/models/account.dart' show Account;
 import 'package:mudra_manager/db/models/category.dart';
 import 'package:mudra_manager/db/models/tag.dart';
 import 'package:mudra_manager/db/models/transaction.dart' show Transaction;
+import 'package:mudra_manager/l10n/app_localizations.dart' show AppLocalizations;
 import 'package:mudra_manager/util/account_type_extension.dart';
+import 'package:mudra_manager/util/case_extension.dart';
 import 'package:mudra_manager/util/icon_helper.dart';
+import 'package:mudra_manager/util/localization_extension.dart';
+import 'package:mudra_manager/util/string_util.dart';
 
 class TransactionCard extends StatefulWidget {
   final Category? category;
@@ -48,6 +52,7 @@ class _TransactionCardState extends State<TransactionCard> {
     final textTheme = Theme.of(context).textTheme;
     widget.related?.category.load();
     widget.related?.account.load();
+    final ctxt = AppLocalizations.of(context)!;
 
     return Card.outlined(
       shadowColor: color.surface,
@@ -135,6 +140,8 @@ class _TransactionCardState extends State<TransactionCard> {
   buildNormalCard(bool isExpanded) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final ctxt = AppLocalizations.of(context)!;
+
     return Row(
       children: <Widget>[
         Container(
@@ -165,7 +172,7 @@ class _TransactionCardState extends State<TransactionCard> {
                 ),
               ),
               Text(
-                widget.account?.accountType.name.toUpperCase() ?? '',
+                '${widget.account?.name} - ${widget.account?.accountType.name.toTitleCase()}',
                 style: textTheme.labelMedium?.copyWith(
                   color: isExpanded ? color.onPrimary : color.primary,
                 ),
@@ -178,13 +185,13 @@ class _TransactionCardState extends State<TransactionCard> {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: <Widget>[
             Text(
-              "${widget.isExpense ? "-" : "+"} ₹${widget.amount}",
+              ctxt.formatLocalizedNumberWithSign(2, ctxt.localeName, widget.amount.toDouble()),
               style: textTheme.titleLarge?.copyWith(
                 color: isExpanded ? color.onPrimary : color.primary,
               ),
             ),
             Text(
-              DateFormat('EEE, dd MMM yyyy').format(widget.date),
+              DateFormat('EEE, dd MMM yyyy', ctxt.localeName).format(widget.date),
               style: textTheme.labelSmall?.copyWith(
                 color: isExpanded ? color.onPrimary : color.primary,
               ),
@@ -199,6 +206,8 @@ class _TransactionCardState extends State<TransactionCard> {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     var related = widget.related;
+    final ctxt = AppLocalizations.of(context)!;
+
     return Column(
       children: [
         Row(
@@ -244,14 +253,14 @@ class _TransactionCardState extends State<TransactionCard> {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: <Widget>[
                 Text(
-                  "${related?.isExpense ?? false ? "-" : "+"} ₹${related?.amount.toStringAsFixed(2)}",
+                  ctxt.formatLocalizedNumberWithSign(2, ctxt.localeName, related?.amount ?? 0.0),
                   style: textTheme.titleLarge?.copyWith(
                     color: _isExpanded ? color.onPrimary : color.primary,
                   ),
                 ),
                 Text(
                   DateFormat(
-                    'EEE, dd MMM yyyy',
+                    'EEE, dd MMM yyyy', ctxt.localeName
                   ).format(related?.date ?? DateTime.now()),
                   style: textTheme.labelSmall?.copyWith(
                     color: _isExpanded ? color.onPrimary : color.primary,
@@ -264,7 +273,11 @@ class _TransactionCardState extends State<TransactionCard> {
         Padding(
           padding: EdgeInsets.symmetric(vertical: 0),
           child: IconButton.filledTonal(
-            onPressed: (){},
+            onPressed: (){
+              setState(() {
+                _isExpanded = !_isExpanded;
+              });
+            },
             icon: Icon(Icons.arrow_downward),
           ),
         ),
@@ -310,13 +323,13 @@ class _TransactionCardState extends State<TransactionCard> {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: <Widget>[
                 Text(
-                  "${widget.isExpense ? "-" : "+"} ₹${widget.amount}",
+                  ctxt.formatLocalizedNumberWithSign(2, ctxt.localeName, widget.amount.toDouble()),
                   style: textTheme.titleLarge?.copyWith(
                     color: _isExpanded ? color.onPrimary : color.primary,
                   ),
                 ),
                 Text(
-                  DateFormat('EEE, dd MMM yyyy').format(widget.date),
+                  DateFormat('EEE, dd MMM yyyy', ctxt.localeName).format(widget.date),
                   style: textTheme.labelSmall?.copyWith(
                     color: _isExpanded ? color.onPrimary : color.primary,
                   ),

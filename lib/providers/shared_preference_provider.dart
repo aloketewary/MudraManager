@@ -26,7 +26,7 @@ class SharedPrefsUtil {
 
   // Save onboarding completion
   void setLanguage(String locale) {
-    _prefs.setBool('user_language', true);
+    _prefs.setString('user_language', locale);
   }
 
   // Check if onboarding is complete

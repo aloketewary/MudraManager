@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/db/models/account.dart';
+import 'package:mudra_manager/l10n/app_localizations.dart';
 import 'package:mudra_manager/providers/account_providers.dart';
 import 'package:mudra_manager/screens/dashboard/dashboard_account_card.dart'
     show AccountCard;
@@ -35,11 +36,12 @@ class _AnimatedSwipeableAccountCardsState
           ref.watch(accountServiceProvider).getAccountBalanceMap();
       balanceMap.then(
         (val) => {
-          if (mounted) {
-            setState(() {
-              _balanceMap = val;
-            }),
-          }
+          if (mounted)
+            {
+              setState(() {
+                _balanceMap = val;
+              }),
+            },
         },
       );
       _initialized = true;
@@ -63,13 +65,13 @@ class _AnimatedSwipeableAccountCardsState
         currentIndex = nextIndex;
         _dragOffset = Offset.zero;
       });
-    } else if (_dragOffset.dy < -threshold || velocity < -700) {
-      // Swipe up → previous
-      final prevIndex = (currentIndex - 1 + cards.length) % cards.length;
-      setState(() {
-        currentIndex = prevIndex;
-        _dragOffset = Offset.zero;
-      });
+    // } else if (_dragOffset.dy < -threshold || velocity < -700) {
+    //   // Swipe up → previous
+    //   final prevIndex = (currentIndex - 1 + cards.length) % cards.length;
+    //   setState(() {
+    //     currentIndex = prevIndex;
+    //     _dragOffset = Offset.zero;
+    //   });
     } else {
       // Not enough, snap back
       setState(() {
@@ -87,6 +89,7 @@ class _AnimatedSwipeableAccountCardsState
     var color = Theme.of(context).colorScheme;
     final accountsAsync = ref.watch(accountsProvider);
     var size = MediaQuery.of(context).size;
+    var ctxt = AppLocalizations.of(context)!;
 
     return accountsAsync.when(
       data: (accounts) {
@@ -108,10 +111,12 @@ class _AnimatedSwipeableAccountCardsState
                 accountType: account.accountType,
               );
             }).toList();
+        final textScale = MediaQuery.textScalerOf(context).textScaleFactor;
+        final scale = textScale.clamp(1.0, 1.4);
 
         // Use accounts list instead of _cards
         return SizedBox(
-          height: 250,
+          height: 280,
           width: size.width - 16,
           child: Stack(
             alignment: Alignment.center,
@@ -120,21 +125,24 @@ class _AnimatedSwipeableAccountCardsState
               // Previous card (behind)
               AnimatedPositioned(
                 duration: const Duration(milliseconds: 300),
-                top: 10,
+                top: 2,
+                left: 18,
+                right: 18,
                 child: AnimatedScale(
                   scale: 1,
                   duration: const Duration(milliseconds: 300),
                   child: AnimatedAccountCard(
-                    totalBalance: cards[_getIndex(-1, cards)].totalBalance,
-                    accountNumber: cards[_getIndex(-1, cards)].accountNumber,
+                    totalBalance: cards[_getIndex(2, cards)].totalBalance,
+                    accountNumber: cards[_getIndex(2, cards)].accountNumber,
                     backgroundColor: color.primary,
-                    accentColor: cards[_getIndex(-1, cards)].accentColor,
-                    accountName: cards[_getIndex(-1, cards)].accountName,
-                    accountType: cards[_getIndex(-1, cards)].accountType,
+                    accentColor: cards[_getIndex(2, cards)].accentColor,
+                    accountName: cards[_getIndex(2, cards)].accountName,
+                    accountType: cards[_getIndex(2, cards)].accountType,
                     onArchive: () {},
                     onEdit: () {},
                     onRemove: () {},
                     showMenu: false,
+                    isBehind: true,
                   ),
                 ),
               ),
@@ -142,7 +150,9 @@ class _AnimatedSwipeableAccountCardsState
               // Next card (bottom)
               AnimatedPositioned(
                 duration: const Duration(milliseconds: 300),
-                bottom: 10,
+                top: 8,
+                left: 12,
+                right: 12,
                 child: AnimatedScale(
                   scale: 1,
                   duration: const Duration(milliseconds: 300),
@@ -190,25 +200,26 @@ class _AnimatedSwipeableAccountCardsState
           ),
         );
       },
-      loading: () => AnimatedSwitcher(
-        duration: const Duration(milliseconds: 300),
-        child: Transform.translate(
-          key: ValueKey<int>(currentIndex),
-          offset: _dragOffset,
-          child: AnimatedAccountCard(
-            totalBalance: '---',
-            accountNumber: '---',
-            backgroundColor: Colors.grey,
-            accentColor: color.primary,
-            accountName: 'Loading',
-            accountType: AccountType.cash,
-            onArchive: () {},
-            onEdit: () {},
-            onRemove: () {},
-            showMenu: false,
+      loading:
+          () => AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child: Transform.translate(
+              key: ValueKey<int>(currentIndex),
+              offset: _dragOffset,
+              child: AnimatedAccountCard(
+                totalBalance: '---',
+                accountNumber: '---',
+                backgroundColor: Colors.grey,
+                accentColor: color.primary,
+                accountName: 'Loading',
+                accountType: AccountType.cash,
+                onArchive: () {},
+                onEdit: () {},
+                onRemove: () {},
+                showMenu: false,
+              ),
+            ),
           ),
-        ),
-      ),
       error: (e, st) => Center(child: Text("Error: $e")),
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/db/models/user_profile.dart' show UserProfile;
+import 'package:mudra_manager/l10n/app_localizations.dart' show AppLocalizations;
 import 'package:mudra_manager/providers/greeting_provider.dart';
 import 'package:mudra_manager/providers/isar_provider.dart'
     show reminderTimeProvider;
@@ -13,7 +14,7 @@ import 'package:mudra_manager/screens/transaction/add_edit_transaction_screen.da
 import 'package:mudra_manager/screens/transaction/transaction_list_screen.dart';
 import 'package:mudra_manager/service/notification_service.dart'
     show NotificationService;
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mudra_manager/util/localization_extension.dart';
 
 import 'dashboard/dashboard_home.dart';
 
@@ -28,13 +29,14 @@ class HomePageState extends ConsumerState<HomePage> {
   int _selectedIndex = 0;
   List<Widget> _pages = [];
   final statisticsKey = GlobalKey<StatisticsScreenState>();
+  final transactionListKey = GlobalKey<TransactionListScreenState>();
 
   @override
   void initState() {
     super.initState();
     _pages = [
       DashboardHome(),
-      TransactionListScreen(),
+      TransactionListScreen(key: transactionListKey,),
       StatisticsScreen(key: statisticsKey),
       ProfileScreen(),
     ];
@@ -51,6 +53,7 @@ class HomePageState extends ConsumerState<HomePage> {
   Widget build(BuildContext context) {
     final profileAsync = ref.watch(userProfileProvider);
     var color = Theme.of(context).colorScheme;
+    var ctxt = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: buildTopBar(profileAsync, _selectedIndex),
@@ -69,7 +72,7 @@ class HomePageState extends ConsumerState<HomePage> {
                   key: const ValueKey('extended'),
                   onPressed: _onFabPressed,
                   icon: const Icon(Icons.add),
-                  label: const Text("Add Transaction"),
+                  label: Text(ctxt.add_edit_transaction_screen_title),
                 ),
               )
               : null,
@@ -79,17 +82,17 @@ class HomePageState extends ConsumerState<HomePage> {
         type: BottomNavigationBarType.fixed,
         // unselectedItemColor: color.primary,
         backgroundColor: color.surface,
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+        items: <BottomNavigationBarItem>[
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: ctxt.home_screen_title),
           BottomNavigationBarItem(
             icon: Icon(Icons.receipt_long),
-            label: 'Activity',
+            label: ctxt.transaction_screen_title,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.auto_graph),
-            label: 'Statistics',
+            label: ctxt.statistics_screen_title,
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: ctxt.profile_screen_title),
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: color.primary,
@@ -115,6 +118,7 @@ class HomePageState extends ConsumerState<HomePage> {
     final textTheme = Theme.of(context).textTheme;
     final color = Theme.of(context).colorScheme;
     final notificationService = ref.watch(notificationRecordServiceProvider);
+    final ctxt = AppLocalizations.of(context)!;
 
     switch (selectedIndex) {
       case 0:
@@ -126,14 +130,14 @@ class HomePageState extends ConsumerState<HomePage> {
               greetingAsync.when(
                 data:
                     (greeting) => Text(
-                      '$greeting,',
+                      '${ctxt.translate(greeting)},',
                       style: textTheme.titleMedium?.copyWith(
                         color: color.onPrimary,
                       ),
                     ),
                 loading:
                     () => Text(
-                      'Hello, ',
+                      '${ctxt.greeting_hello_text}, ',
                       style: textTheme.titleMedium?.copyWith(
                         color: color.onPrimary,
                       ),
@@ -209,14 +213,19 @@ class HomePageState extends ConsumerState<HomePage> {
       case 1:
         return AppBar(
           title: Text(
-            "Activity",
+            ctxt.transaction_screen_title,
             style: textTheme.titleLarge?.copyWith(color: color.onPrimary),
           ),
+          actions: [
+            IconButton(onPressed: () {
+              transactionListKey.currentState?.showFilterBottomSheet(context);
+            }, icon: Icon(Icons.filter_list))
+          ],
         );
       case 2:
         return AppBar(
           title: Text(
-            "Statistics",
+            ctxt.statistics_screen_title,
             style: textTheme.titleLarge?.copyWith(color: color.onPrimary),
           ),
           actions: [
@@ -232,7 +241,7 @@ class HomePageState extends ConsumerState<HomePage> {
       default:
         return AppBar(
           title: Text(
-            "Profile",
+            ctxt.profile_screen_title,
             style: textTheme.titleLarge?.copyWith(color: color.onPrimary),
           ),
         );

@@ -149,8 +149,8 @@ class _EditUserProfileScreenState extends ConsumerState<EditUserProfileScreen> {
                   const Spacer(),
                   CommonButton(
                     text: 'save',
-                    backGroundColor: color.secondary,
-                    textColor: color.onSecondary,
+                    backGroundColor: color.primary,
+                    textColor: color.onPrimary,
                     onPressed: () async {
                       if (_formKey.currentState?.validate() ?? false) {
                         final updatedProfile =

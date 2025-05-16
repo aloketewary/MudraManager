@@ -132,6 +132,246 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Choose your language'**
   String get app_settings_language_subtitle;
+
+  /// This is title of Theme Mode tile
+  ///
+  /// In en, this message translates to:
+  /// **'Theme Mode'**
+  String get app_settings_theme_mode_title;
+
+  /// This is text of Theme Mode light
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get app_settings_theme_mode_light;
+
+  /// This is text of Theme Mode dark
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get app_settings_theme_mode_dark;
+
+  /// This is text of Theme Mode system default
+  ///
+  /// In en, this message translates to:
+  /// **'System Default'**
+  String get app_settings_theme_mode_system_default;
+
+  /// This is text of Daily reminder title
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Expense Reminder'**
+  String get app_settings_daily_reminder_title;
+
+  /// This is title of Home screen
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get home_screen_title;
+
+  /// This is title of Activity screen
+  ///
+  /// In en, this message translates to:
+  /// **'Activity'**
+  String get transaction_screen_title;
+
+  /// This is title of Statistics screen
+  ///
+  /// In en, this message translates to:
+  /// **'Statistics'**
+  String get statistics_screen_title;
+
+  /// This is title of Profile screen
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get profile_screen_title;
+
+  /// This is title of Add Transaction screen
+  ///
+  /// In en, this message translates to:
+  /// **'Add Transaction'**
+  String get add_edit_transaction_screen_title;
+
+  /// This is title of Transaction List screen
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction List'**
+  String get transaction_list_screen_title;
+
+  /// This is text of Good Morning
+  ///
+  /// In en, this message translates to:
+  /// **'Good Morning'**
+  String get greeting_good_morning_text;
+
+  /// This is text of Good Afternoon
+  ///
+  /// In en, this message translates to:
+  /// **'Good Afternoon'**
+  String get greeting_good_afternoon_text;
+
+  /// This is text of Good Evening
+  ///
+  /// In en, this message translates to:
+  /// **'Good Evening'**
+  String get greeting_good_evening_text;
+
+  /// This is text of Good Night
+  ///
+  /// In en, this message translates to:
+  /// **'Good Night'**
+  String get greeting_good_night_text;
+
+  /// This is text of Hello
+  ///
+  /// In en, this message translates to:
+  /// **'Hello'**
+  String get greeting_hello_text;
+
+  /// This is text of Income
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get transaction_type_income;
+
+  /// This is text of Expense
+  ///
+  /// In en, this message translates to:
+  /// **'Expense'**
+  String get transaction_type_expense;
+
+  /// This is text of add transaction button
+  ///
+  /// In en, this message translates to:
+  /// **'Add transaction'**
+  String get dashboard_add_transaction_text;
+
+  /// This is text of add Transfer button
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer'**
+  String get dashboard_add_transfer_text;
+
+  /// This is text of Cash Flow
+  ///
+  /// In en, this message translates to:
+  /// **'Cash Flow'**
+  String get dashboard_cash_flow_text;
+
+  /// This is text of Day
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get cash_flow_filter_type_day;
+
+  /// This is text of Week
+  ///
+  /// In en, this message translates to:
+  /// **'Week'**
+  String get cash_flow_filter_type_week;
+
+  /// This is text of Month
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get cash_flow_filter_type_month;
+
+  /// This is text of Year
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get cash_flow_filter_type_year;
+
+  /// This is text of Budget
+  ///
+  /// In en, this message translates to:
+  /// **'Budget'**
+  String get dashboard_mini_budget_text;
+
+  /// This is text of budget not found
+  ///
+  /// In en, this message translates to:
+  /// **'No Budgets Defined, Add One!'**
+  String get dashboard_mini_budget_not_found_text;
+
+  /// This is text of add budget
+  ///
+  /// In en, this message translates to:
+  /// **'Add Budget'**
+  String get dashboard_mini_budget_add_text;
+
+  /// This is title of Transactions List from cash flow screen
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions'**
+  String get transaction_list_cash_flow_screen_title;
+
+  /// This is text of All
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get transaction_list_filter_all;
+
+  /// This is text of Income
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get transaction_list_filter_income;
+
+  /// This is text of Expense
+  ///
+  /// In en, this message translates to:
+  /// **'Expense'**
+  String get transaction_list_filter_expense;
+
+  /// This is text of pending transaction message
+  ///
+  /// In en, this message translates to:
+  /// **'⚡ New transactions found! Review now'**
+  String get transaction_list_pending_transaction_message_text;
+
+  /// This is text of Monday initial
+  ///
+  /// In en, this message translates to:
+  /// **'M'**
+  String get calendar_week_monday_initial_text;
+
+  /// This is text of Tuesday initial
+  ///
+  /// In en, this message translates to:
+  /// **'T'**
+  String get calendar_week_tuesday_initial_text;
+
+  /// This is text of Wednesday initial
+  ///
+  /// In en, this message translates to:
+  /// **'W'**
+  String get calendar_week_wednesday_initial_text;
+
+  /// This is text of Thursday initial
+  ///
+  /// In en, this message translates to:
+  /// **'T'**
+  String get calendar_week_thursday_initial_text;
+
+  /// This is text of Friday initial
+  ///
+  /// In en, this message translates to:
+  /// **'F'**
+  String get calendar_week_friday_initial_text;
+
+  /// This is text of Saturday initial
+  ///
+  /// In en, this message translates to:
+  /// **'S'**
+  String get calendar_week_saturday_initial_text;
+
+  /// This is text of Sunday initial
+  ///
+  /// In en, this message translates to:
+  /// **'S'**
+  String get calendar_week_sunday_initial_text;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

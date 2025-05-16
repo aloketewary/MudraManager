@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:mudra_manager/l10n/app_localizations.dart';
 import 'package:mudra_manager/providers/budget_service_provider.dart';
 import 'package:mudra_manager/screens/budget/add_budget_screen.dart'
     show AddBudgetScreen;
@@ -24,6 +25,7 @@ class _BudgetMiniCardState extends ConsumerState<BudgetMiniCard> {
     var color = Theme.of(context).colorScheme;
     var textTheme = Theme.of(context).textTheme;
     final formatter = DateFormat('dd MMM yy');
+    final ctxt = AppLocalizations.of(context)!;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -34,7 +36,7 @@ class _BudgetMiniCardState extends ConsumerState<BudgetMiniCard> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Budgets',
+                ctxt.dashboard_mini_budget_text,
                 style: textTheme.titleLarge?.copyWith(color: color.primary),
               ),
               IconButton.filled(
@@ -56,7 +58,7 @@ class _BudgetMiniCardState extends ConsumerState<BudgetMiniCard> {
           data: (budgets) {
             if (budgets.isEmpty) {
               return NoDataFound(
-                message: "No Budgets Defined, Add one!",
+                message: ctxt.dashboard_mini_budget_not_found_text,
                 iconData: Icons.pie_chart_outline,
                 action: ElevatedButton(
                   onPressed: () {
@@ -67,7 +69,7 @@ class _BudgetMiniCardState extends ConsumerState<BudgetMiniCard> {
                       ),
                     );
                   },
-                  child: Text('Add Budget'),
+                  child: Text(ctxt.dashboard_mini_budget_add_text),
                 ),
               );
             }

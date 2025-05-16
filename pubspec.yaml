@@ -148,3 +148,5 @@ flutter:
     - assets/icons/96/
     - assets/icons/128/
     - assets/icons/512/
+    - assets/logo/money-currency.png
+    - assets/fonts/NotoSans-Regular.ttf

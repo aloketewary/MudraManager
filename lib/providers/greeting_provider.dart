@@ -6,15 +6,15 @@ final greetingProvider = FutureProvider.autoDispose<String>((ref) async {
 
 String _updateGreeting() {
   final hour = DateTime.now().hour;
-  String greeting = 'Hello';
+  String greeting = 'hello';
   if (hour < 12) {
-    greeting = 'Good morning';
+    greeting = 'good_morning';
   } else if (hour < 17) {
-    greeting = 'Good afternoon';
+    greeting = 'good_afternoon';
   } else if (hour < 20) {
-    greeting = 'Good evening';
+    greeting = 'good_evening';
   } else {
-    greeting = 'Good night';
+    greeting = 'good_night';
   }
   return greeting;
 }

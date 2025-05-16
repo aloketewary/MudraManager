@@ -1,160 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:mudra_manager/theme/app_color_theme_enum.dart';
 
 class AppTheme {
   AppTheme._(this.extensions);
 
   static final AppTheme instance = AppTheme._([]);
 
-  // static ThemeData get lightTheme {
-  //   return ThemeData(
-  //     useMaterial3: true,
-  //     brightness: Brightness.light,
-  //     fontFamily: 'Tuffy',
-  //     colorScheme: ColorScheme.light(
-  //       primary: Colors.blueGrey.shade800,
-  //       secondary: Colors.teal.shade400,
-  //       surface: Colors.white60,
-  //       onPrimary: Colors.white,
-  //       onSecondary: Colors.white,
-  //       onSurface: Colors.black87,
-  //     ),
-  //     scaffoldBackgroundColor: Colors.white60,
-  //     appBarTheme: AppBarTheme(
-  //       backgroundColor: Colors.blueGrey.shade800,
-  //       foregroundColor: Colors.white,
-  //       elevation: 0,
-  //     ),
-  //     floatingActionButtonTheme: FloatingActionButtonThemeData(
-  //       backgroundColor: Colors.teal.shade400,
-  //       foregroundColor: Colors.white,
-  //     ),
-  //     bottomNavigationBarTheme: BottomNavigationBarThemeData(
-  //       selectedItemColor: Colors.teal.shade400,
-  //       unselectedItemColor: Colors.blueGrey.shade400,
-  //       backgroundColor: Colors.white,
-  //       showUnselectedLabels: true,
-  //     ),
-  //     textTheme: const TextTheme(
-  //       headlineMedium: TextStyle(fontWeight: FontWeight.bold),
-  //       bodyLarge: TextStyle(color: Colors.black87),
-  //       bodyMedium: TextStyle(color: Colors.black54),
-  //     ),
-  //     inputDecorationTheme: InputDecorationTheme(
-  //       filled: true,
-  //       fillColor: const Color(0xFFF1F3F4),
-  //       border: OutlineInputBorder(
-  //         borderRadius: BorderRadius.circular(12),
-  //         borderSide: BorderSide.none,
-  //       ),
-  //     ),
-  //   );
-  // }
-  //
-  // static ThemeData get darkTheme {
-  //   return ThemeData(
-  //     useMaterial3: true,
-  //     brightness: Brightness.dark,
-  //     fontFamily: 'Onest',
-  //     colorScheme: ColorScheme.dark(
-  //       primary: Colors.blueGrey.shade200,
-  //       secondary: Colors.tealAccent.shade400,
-  //       surface: Colors.blueGrey.shade900,
-  //       onPrimary: Colors.black,
-  //       onSecondary: Colors.black,
-  //       onSurface: Colors.white70,
-  //       onPrimaryContainer: Colors.white,
-  //       onSecondaryContainer: Colors.white70,
-  //     ),
-  //     scaffoldBackgroundColor: Colors.blueGrey.shade900,
-  //     appBarTheme: AppBarTheme(
-  //       backgroundColor: Colors.blueGrey.shade900,
-  //       foregroundColor: Colors.white,
-  //       elevation: 0,
-  //     ),
-  //     floatingActionButtonTheme: FloatingActionButtonThemeData(
-  //       backgroundColor: Colors.tealAccent.shade400,
-  //       foregroundColor: Colors.black,
-  //     ),
-  //     bottomNavigationBarTheme: BottomNavigationBarThemeData(
-  //       selectedItemColor: Colors.tealAccent.shade400,
-  //       unselectedItemColor: Colors.blueGrey.shade300,
-  //       backgroundColor: const Color(0xFF1E1E1E),
-  //       showUnselectedLabels: true,
-  //     ),
-  //     textTheme: const TextTheme(
-  //       headlineMedium: TextStyle(fontWeight: FontWeight.bold),
-  //       bodyLarge: TextStyle(color: Colors.white70),
-  //       bodyMedium: TextStyle(color: Colors.white38),
-  //     ),
-  //     inputDecorationTheme: InputDecorationTheme(
-  //       filled: true,
-  //       fillColor: const Color(0xFF2C2C2C),
-  //       border: OutlineInputBorder(
-  //         borderRadius: BorderRadius.circular(12),
-  //         borderSide: BorderSide.none,
-  //       ),
-  //     ),
-  //   );
-  // }
-
   final Iterable<ThemeExtension<dynamic>>? extensions;
-
-  // Define your primary color scheme for Light Theme
-  ColorScheme lightColorScheme = ColorScheme(
-    brightness: Brightness.light,
-    primary: Color(0xFF633AD3),
-    onPrimary: Color(0xFFFFFFFF),
-    primaryContainer: Color(0xFFBFB1E6),
-    onPrimaryContainer: Color(0xFF180E33),
-    secondary: Color(0xFF727076),
-    onSecondary: Color(0xFFFFFFFF),
-    secondaryContainer: Color(0xFFE3E2E6),
-    onSecondaryContainer: Color(0xFF313033),
-    tertiary: Color(0xFF9D516A),
-    onTertiary: Color(0xFFFFFFFF),
-    tertiaryContainer: Color(0xFFE6C3CE),
-    onTertiaryContainer: Color(0xFF331B23),
-    error: Color(0xFFBE1910),
-    onError: Color(0xFFFFFFFF),
-    errorContainer: Color(0xFFE6A6A3),
-    onErrorContainer: Color(0xFF330704),
-    background: Color(0xFFfcfcfc),
-    onBackground: Color(0xFF323133),
-    surface: Color(0xFFfcfcfc),
-    onSurface: Color(0xFF323133),
-    surfaceVariant: Color(0xFFdedbe6),
-    onSurfaceVariant: Color(0xFF5b5766),
-    outline: Color(0xFF898399),
-  );
-
-  ColorScheme darkColorScheme = ColorScheme(
-    brightness: Brightness.dark,
-    primary: Color(0xFFAF9BE6),
-    onPrimary: Color(0xFF24154C),
-    primaryContainer: Color(0xFF301C66),
-    onPrimaryContainer: Color(0xFFBFB1E6),
-    secondary: Color(0xFFE2E0E6),
-    onSecondary: Color(0xFF4A494C),
-    secondaryContainer: Color(0xFF636166),
-    onSecondaryContainer: Color(0xFFE3E2E6),
-    tertiary: Color(0xFFE6B4C5),
-    onTertiary: Color(0xFF4C2834),
-    tertiaryContainer: Color(0xFF663545),
-    onTertiaryContainer: Color(0xFFE6C3CE),
-    error: Color(0xFFE68C87),
-    onError: Color(0xFF4C0A06),
-    errorContainer: Color(0xFF660D08),
-    onErrorContainer: Color(0xFFE6A6A3),
-    background: Color(0xFF323133),
-    onBackground: Color(0xFFe4e3e6),
-    surface: Color(0xFF323133),
-    onSurface: Color(0xFFe4e3e6),
-    surfaceVariant: Color(0xFF5b5766),
-    onSurfaceVariant: Color(0xFFdbd7e6),
-    outline: Color(0xFFa7a2b3),
-  );
 
   // Build the TextTheme with Onest for both light and dark themes
   TextTheme _buildTextTheme(TextTheme base) {
@@ -238,36 +91,44 @@ class AppTheme {
   }
 
   // Build the Light Theme
-  ThemeData buildLightTheme() {
+  ThemeData buildLightTheme(AppColorTheme appTheme) {
     final ThemeData base = ThemeData.light(useMaterial3: true);
     return base.copyWith(
-      colorScheme: lightColorScheme,
+      extensions: extensions,
+      colorScheme: appTheme.lightColorScheme(),
       textTheme: _buildTextTheme(base.textTheme),
       primaryTextTheme: _buildTextTheme(base.primaryTextTheme),
-      appBarTheme: _appBarTheme(base, lightColorScheme, Brightness.light),
-      buttonTheme: _buttonTheme(base, lightColorScheme),
-      elevatedButtonTheme: _elevatedButtonTheme(base, lightColorScheme),
-      outlinedButtonTheme: _outlinedButtonTheme(base, lightColorScheme),
-      inputDecorationTheme: _inputDecorationTheme(base, lightColorScheme),
-      cardTheme: _cardTheme(base, lightColorScheme),
-      dialogTheme: _dialogTheme(base, lightColorScheme),
+      appBarTheme: _appBarTheme(base, appTheme.lightColorScheme(), Brightness.light),
+      buttonTheme: _buttonTheme(base, appTheme.lightColorScheme()),
+      elevatedButtonTheme: _elevatedButtonTheme(base, appTheme.lightColorScheme()),
+      outlinedButtonTheme: _outlinedButtonTheme(base, appTheme.lightColorScheme()),
+      inputDecorationTheme: _inputDecorationTheme(base, appTheme.lightColorScheme()),
+      cardTheme: _cardTheme(base, appTheme.lightColorScheme()),
+      dialogTheme: _dialogTheme(base, appTheme.lightColorScheme()),
+      chipTheme: _chipTheme(base, appTheme.lightColorScheme()),
+      tabBarTheme: _tabBarTheme(base, appTheme.lightColorScheme()),
+      tooltipTheme: _tooltipTheme(base, appTheme.lightColorScheme()),
     );
   }
 
   // Build the Dark Theme
-  ThemeData buildDarkTheme() {
+  ThemeData buildDarkTheme(AppColorTheme appTheme) {
     final ThemeData base = ThemeData.dark(useMaterial3: true);
     return base.copyWith(
-      colorScheme: darkColorScheme,
+      extensions: extensions,
+      colorScheme: appTheme.darkColorScheme(),
       textTheme: _buildTextTheme(base.textTheme),
       primaryTextTheme: _buildTextTheme(base.primaryTextTheme),
-      appBarTheme: _appBarTheme(base, darkColorScheme, Brightness.light),
-      buttonTheme: _buttonTheme(base, darkColorScheme),
-      elevatedButtonTheme: _elevatedButtonTheme(base, darkColorScheme),
-      outlinedButtonTheme: _outlinedButtonTheme(base, darkColorScheme),
-      inputDecorationTheme: _inputDecorationTheme(base, darkColorScheme),
-      cardTheme: _cardTheme(base, darkColorScheme),
-      dialogTheme: _dialogTheme(base, darkColorScheme),
+      appBarTheme: _appBarTheme(base, appTheme.darkColorScheme(), Brightness.light),
+      buttonTheme: _buttonTheme(base, appTheme.darkColorScheme()),
+      elevatedButtonTheme: _elevatedButtonTheme(base, appTheme.darkColorScheme()),
+      outlinedButtonTheme: _outlinedButtonTheme(base, appTheme.darkColorScheme()),
+      inputDecorationTheme: _inputDecorationTheme(base, appTheme.darkColorScheme()),
+      cardTheme: _cardTheme(base, appTheme.darkColorScheme()),
+      dialogTheme: _dialogTheme(base, appTheme.darkColorScheme()),
+      chipTheme: _chipTheme(base, appTheme.darkColorScheme()),
+      tabBarTheme: _tabBarTheme(base, appTheme.darkColorScheme()),
+      tooltipTheme: _tooltipTheme(base, appTheme.darkColorScheme()),
     );
   }
 
@@ -403,4 +264,37 @@ class AppTheme {
       ),
     );
   }
+
+  ChipThemeData _chipTheme(ThemeData baseTheme, ColorScheme colorScheme) {
+    return baseTheme.chipTheme.copyWith(
+      backgroundColor: colorScheme.secondaryContainer,
+      labelStyle: baseTheme.textTheme.labelLarge?.copyWith(
+        color: colorScheme.onSecondaryContainer,
+      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    );
+  }
+
+  TabBarThemeData _tabBarTheme(ThemeData baseTheme, ColorScheme colorScheme) {
+    return baseTheme.tabBarTheme.copyWith(
+      labelColor: colorScheme.primary,
+      unselectedLabelColor: colorScheme.onSurfaceVariant,
+      indicator: UnderlineTabIndicator(
+        borderSide: BorderSide(color: colorScheme.primary, width: 2.0),
+      ),
+    );
+  }
+
+  TooltipThemeData _tooltipTheme(ThemeData baseTheme, ColorScheme colorScheme) {
+    return baseTheme.tooltipTheme.copyWith(
+      decoration: BoxDecoration(
+        color: colorScheme.onSurface,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      textStyle: baseTheme.textTheme.bodySmall?.copyWith(
+        color: colorScheme.surface,
+      ),
+    );
+  }
 }
+

@@ -70,14 +70,18 @@ class AccountDisplayCard extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
             Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 Icon(
                   accountType.icon,
                   color: isSelected ? color.onPrimary : color.primary,
+                  size: 24,
                 ),
                 const SizedBox(width: 8.0),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     Text(
                       accountType.label.toUpperCase(),

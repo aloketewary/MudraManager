@@ -2,8 +2,14 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+import 'package:mudra_manager/l10n/app_localizations.dart'
+    show AppLocalizations;
 import 'package:mudra_manager/providers/pending_transaction_prodiver.dart';
 import 'package:mudra_manager/providers/transaction_provider.dart';
+import 'package:mudra_manager/screens/reusable/common_button.dart';
+import 'package:mudra_manager/screens/reusable/month_tab_selector.dart'
+    show MonthTabSelector;
 import 'package:mudra_manager/screens/reusable/no_data_found.dart'
     show NoDataFound;
 import 'package:mudra_manager/screens/sms/review_pending_transactions_Screen.dart'
@@ -12,6 +18,7 @@ import 'package:mudra_manager/screens/transaction/add_edit_transaction_screen.da
     show AddEditTransactionScreen;
 import 'package:mudra_manager/screens/transaction/transaction_card.dart';
 import 'package:mudra_manager/screens/transaction/transaction_group.dart';
+import 'package:mudra_manager/screens/transaction/transfer_screen.dart';
 import 'package:mudra_manager/util/date_group.dart';
 
 class TransactionListScreen extends ConsumerStatefulWidget {
@@ -21,16 +28,17 @@ class TransactionListScreen extends ConsumerStatefulWidget {
 
   @override
   ConsumerState<TransactionListScreen> createState() =>
-      _TransactionListScreenState();
+      TransactionListScreenState();
 }
 
-class _TransactionListScreenState extends ConsumerState<TransactionListScreen> {
+class TransactionListScreenState extends ConsumerState<TransactionListScreen> {
   String _filter = 'all';
   double rightBoxWidthFactor = 0.3;
   double leftBoxWidthFactor = 0.3;
   double middleBoxWidthFactor = 0.3;
   double tiltAngleDegrees = 20.0;
   double tiltExpenseAngleDegrees = 20.0;
+  DateTime _selectedDate = DateTime.now();
 
   void _onFabPressed() {
     // Navigate to Add Transaction screen or open bottom sheet
@@ -40,18 +48,53 @@ class _TransactionListScreenState extends ConsumerState<TransactionListScreen> {
     );
   }
 
+  List<DateTime> generateCircularMonths({int count = 12}) {
+    final now = DateTime.now();
+    return List.generate(
+      count * 2 + 1,
+      (i) => DateTime(now.year, now.month - count + i),
+    );
+  }
+
+  String formatDateHeader(DateTime date, String locale) {
+    final today = DateTime.now();
+    final yesterday = today.subtract(Duration(days: 1));
+
+    final dateOnly = DateTime(date.year, date.month, date.day);
+    final todayOnly = DateTime(today.year, today.month, today.day);
+    final yesterdayOnly = DateTime(
+      yesterday.year,
+      yesterday.month,
+      yesterday.day,
+    );
+
+    if (dateOnly == todayOnly) return 'Today';
+    if (dateOnly == yesterdayOnly) return 'Yesterday';
+
+    return DateFormat.yMMMMd(locale).format(date); // e.g., May 14, 2025
+  }
+
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final color = Theme.of(context).colorScheme;
+    final ctxt = AppLocalizations.of(context)!;
 
     return widget.showAppBar
         ? Scaffold(
           appBar: AppBar(
             title: Text(
-              'Transactions',
+              ctxt.transaction_list_cash_flow_screen_title,
               style: textTheme.titleLarge?.copyWith(color: color.onPrimary),
             ),
+            actions: [
+              IconButton(
+                onPressed: () {
+                  showFilterBottomSheet(context);
+                },
+                icon: Icon(Icons.filter_list),
+              ),
+            ],
           ),
           body: _buildMainComponent(),
           floatingActionButtonLocation:
@@ -65,7 +108,7 @@ class _TransactionListScreenState extends ConsumerState<TransactionListScreen> {
               // backgroundColor: Theme.of(context).colorScheme.secondary,
               onPressed: _onFabPressed,
               icon: const Icon(Icons.add),
-              label: const Text("Add Transaction"),
+              label: Text(ctxt.dashboard_add_transaction_text),
             ),
           ),
         )
@@ -73,10 +116,14 @@ class _TransactionListScreenState extends ConsumerState<TransactionListScreen> {
   }
 
   Widget _buildMainComponent() {
-    final transactionsAsync = ref.watch(filteredTransactionProvider(_filter));
+    final transactionsAsync = ref.watch(
+      transactionsByMonthAndTypeProvider((month: _selectedDate, type: _filter)),
+    );
     final pendingTxnCountService = ref.watch(pendingTxnCountProvider);
     final textTheme = Theme.of(context).textTheme;
     final color = Theme.of(context).colorScheme;
+    final ctxt = AppLocalizations.of(context)!;
+
     return Column(
       children: [
         pendingTxnCountService.when(
@@ -85,7 +132,7 @@ class _TransactionListScreenState extends ConsumerState<TransactionListScreen> {
               return MaterialBanner(
                 backgroundColor: color.primaryContainer,
                 content: Text(
-                  "⚡ New transactions found! Review now",
+                  ctxt.transaction_list_pending_transaction_message_text,
                   style: textTheme.bodyMedium?.copyWith(
                     color: color.onPrimaryContainer,
                   ),
@@ -116,14 +163,22 @@ class _TransactionListScreenState extends ConsumerState<TransactionListScreen> {
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (e, _) => Center(child: Text('Error: $e')),
         ),
-        _buildFilterChips(),
+        MonthTabSelector(
+          onMonthSelected: (date) {
+            setState(() {
+              _selectedDate = date;
+              debugPrint(
+                'Selected date: ${DateFormat('yyyy-MM-dd').format(_selectedDate)}',
+              );
+            });
+          },
+        ),
         Expanded(
           child: transactionsAsync.when(
             data: (transactions) {
               if (transactions.isEmpty) {
                 return NoDataFound(
                   message: 'No transactions found.',
-                  // imagePath: 'assets/icons/512/transaction.png',
                   iconData: Icons.receipt_long_outlined,
                 );
               }
@@ -139,7 +194,10 @@ class _TransactionListScreenState extends ConsumerState<TransactionListScreen> {
                         horizontal: 16,
                       ),
                       child: Text(
-                        entry.group.label.toUpperCase(),
+                        formatDateHeader(
+                          entry.group,
+                          ctxt.localeName,
+                        ).toUpperCase(),
                         style: textTheme.titleMedium?.copyWith(
                           color: color.primary,
                         ),
@@ -161,36 +219,75 @@ class _TransactionListScreenState extends ConsumerState<TransactionListScreen> {
                       tags: tags,
                       related: transaction.related.value,
                       onEdit: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder:
-                                (_) => AddEditTransactionScreen(
-                                  transaction: transaction,
-                                ),
-                          ),
-                        );
+                        transaction.isTransfer
+                            ? Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder:
+                                    (_) => TransferScreen(
+                                      amount: transaction.amount
+                                          .toStringAsFixed(2),
+                                      note: transaction.description,
+                                      date: transaction.date,
+                                      fromAccount:
+                                          transaction
+                                              .related
+                                              .value
+                                              ?.account
+                                              .value,
+                                      toAccount: transaction.account.value,
+                                      fromId: transaction.related.value?.id,
+                                      toId: transaction.id,
+                                    ),
+                              ),
+                            )
+                            : Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder:
+                                    (_) => AddEditTransactionScreen(
+                                      transaction: transaction,
+                                    ),
+                              ),
+                            );
                       },
                       onRemove: () async {
                         final confirm = await showDialog<bool>(
                           context: context,
                           builder:
                               (context) => AlertDialog(
-                                title: Text("Delete Transaction?"),
-                                content: Text("This action cannot be undone."),
-                                actions: [
-                                  TextButton(
-                                    onPressed:
-                                        () => Navigator.pop(context, false),
-                                    child: Text("Cancel"),
+                                title: Text(
+                                  "Delete Transaction?",
+                                  style: textTheme.titleLarge?.copyWith(
+                                    color: color.primary,
                                   ),
-                                  TextButton(
-                                    onPressed:
-                                        () => Navigator.pop(context, true),
-                                    child: Text(
-                                      "Delete",
-                                      style: TextStyle(color: Colors.red),
-                                    ),
+                                ),
+                                content: Text(
+                                  "This action cannot be undone.",
+                                  style: textTheme.bodyLarge?.copyWith(
+                                    color: color.secondary,
+                                  ),
+                                ),
+                                actions: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      CommonButton(
+                                        onPressed:
+                                            () => Navigator.pop(context, false),
+                                        text: 'Cancel',
+                                        backGroundColor: color.secondary,
+                                        textColor: color.onSecondary,
+                                      ),
+                                      SizedBox(width: 8),
+                                      CommonButton(
+                                        onPressed:
+                                            () => Navigator.pop(context, true),
+                                        text: 'Delete',
+                                        backGroundColor: color.primary,
+                                        textColor: color.onPrimary,
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
@@ -223,172 +320,79 @@ class _TransactionListScreenState extends ConsumerState<TransactionListScreen> {
     );
   }
 
-  Widget _buildFilterChips() {
+  void showFilterBottomSheet(BuildContext context) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final tiltAngleRadians = math.pi * tiltAngleDegrees / 180;
-    final tiltExpenseAngleRadians = math.pi * tiltExpenseAngleDegrees / 180;
+    final ctxt = AppLocalizations.of(context)!;
 
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Expanded(
-            flex: (leftBoxWidthFactor * 100).toInt(),
-            child: SizedBox(
-              // width: MediaQuery.of(context).size.width / 3,
-              child: GestureDetector(
-                onTap: () => {setState(() => _filter = 'all')},
-                child: Container(
-                  width: 120,
-                  padding: const EdgeInsets.all(8.0),
-                  margin: const EdgeInsets.only(right: 8.0),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16.0),
-                    color:
-                        _filter == 'all' ? color.primary : Colors.transparent,
-                    // Light background color
-                    border: Border.all(color: color.primary), // Subtle border
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      CircleAvatar(
-                        radius: 16,
-                        // backgroundColor: Colors.lightBlueAccent,
-                        child: Icon(
-                          Icons.compare_arrows,
-                          // color: Colors.black,
-                          size: 16,
-                        ),
-                      ),
-                      const SizedBox(width: 8.0),
-                      Expanded(
-                        child: Text(
-                          "ALL".toUpperCase(),
-                          textAlign: TextAlign.center,
-                          style: textTheme.bodyMedium?.copyWith(
-                            color:
-                                _filter == 'all'
-                                    ? color.onPrimary
-                                    : color.primary,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            flex: (middleBoxWidthFactor * 100).toInt(),
-            child: SizedBox(
-              // width: MediaQuery.of(context).size.width / 3,
-              child: GestureDetector(
-                onTap: () => {setState(() => _filter = 'income')},
-                child: Container(
-                  width: 120,
-                  padding: const EdgeInsets.all(8.0),
-                  margin: const EdgeInsets.only(right: 8.0),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12.0),
-                    color:
-                        _filter == 'income'
-                            ? color.primary
-                            : Colors.transparent,
-                    border: Border.all(color: color.primary),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      CircleAvatar(
-                        radius: 16,
-                        // backgroundColor: Colors.greenAccent,
-                        child: Transform.rotate(
-                          angle: tiltAngleRadians,
-                          child: Icon(
-                            Icons.arrow_downward,
-                            // color: Colors.black,
-                            size: 16,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8.0),
-                      Expanded(
-                        child: Text(
-                          "INCOME".toUpperCase(),
-                          textAlign: TextAlign.center,
-                          style: textTheme.bodyMedium?.copyWith(
-                            color:
-                                _filter == 'income'
-                                    ? color.onPrimary
-                                    : color.primary,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            flex: (rightBoxWidthFactor * 100).toInt(),
-            child: SizedBox(
-              // width: MediaQuery.of(context).size.width / 3,
-              child: GestureDetector(
-                onTap: () => {setState(() => _filter = 'expense')},
-                child: Container(
-                  width: 120,
-                  padding: const EdgeInsets.all(8.0),
-                  margin: const EdgeInsets.only(right: 8.0),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12.0),
-                    color: _filter == 'expense' ? color.primary : Colors.transparent,
-                    // Light background color
-                    border: Border.all(color: color.primary), // Subtle border
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      CircleAvatar(
-                        radius: 16,
-                        // backgroundColor: Colors.redAccent,
-                        child: Transform.rotate(
-                          angle: tiltExpenseAngleRadians,
-                          child: Icon(
-                            Icons.arrow_upward,
-                            // color: Colors.black,
-                            size: 16,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8.0),
-                      Expanded(
-                        child: Text(
-                          "EXPENSE".toUpperCase(),
-                          textAlign: TextAlign.center,
-                          style: textTheme.bodyMedium?.copyWith(
-                            color:
-                                _filter == 'expense'
-                                    ? color.onPrimary
-                                    : color.primary,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
+      builder: (context) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Text(
+                "Filter Transactions",
+                style: textTheme.titleLarge?.copyWith(color: color.primary),
+              ),
+            ),
+            RadioListTile<String>(
+              value: 'all',
+              groupValue: _filter,
+              title: Text(
+                ctxt.transaction_list_filter_all.toUpperCase(),
+                style: textTheme.labelLarge?.copyWith(
+                  color: _filter == 'all' ? color.primary : color.secondary,
+                ),
+              ),
+              onChanged: (value) {
+                setState(() {
+                  _filter = value!;
+                });
+                Navigator.pop(context);
+              },
+            ),
+            RadioListTile<String>(
+              value: 'income',
+              groupValue: _filter,
+              title: Text(
+                ctxt.transaction_list_filter_income.toUpperCase(),
+                style: textTheme.labelLarge?.copyWith(
+                  color: _filter == 'income' ? color.primary : color.secondary,
+                ),
+              ),
+              onChanged: (value) {
+                setState(() {
+                  _filter = value!;
+                });
+                Navigator.pop(context);
+              },
+            ),
+            RadioListTile<String>(
+              value: 'expense',
+              groupValue: _filter,
+              title: Text(
+                ctxt.transaction_list_filter_expense.toUpperCase(),
+                style: textTheme.labelLarge?.copyWith(
+                  color: _filter == 'expense' ? color.primary : color.secondary,
+                ),
+              ),
+              onChanged: (value) {
+                setState(() {
+                  _filter = value!;
+                });
+                Navigator.pop(context);
+              },
+            ),
+            const SizedBox(height: 16),
+          ],
+        );
+      },
     );
   }
 }

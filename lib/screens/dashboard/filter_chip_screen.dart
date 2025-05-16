@@ -2,7 +2,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/db/filter_type.dart' show FilterType;
+import 'package:mudra_manager/l10n/app_localizations.dart' show AppLocalizations;
 import 'package:mudra_manager/providers/filter_provider.dart';
+import 'package:mudra_manager/util/localization_extension.dart';
 
 class FilterChips extends ConsumerWidget {
   const FilterChips({super.key});
@@ -13,6 +15,7 @@ class FilterChips extends ConsumerWidget {
     var color = Theme.of(context).colorScheme;
     var textTheme = Theme.of(context).textTheme;
     double allBoxWidthFactor = 0.2;
+    final ctxt = AppLocalizations.of(context)!;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -43,7 +46,7 @@ class FilterChips extends ConsumerWidget {
                     children: <Widget>[
                       Expanded(
                         child: Text(
-                          label.toUpperCase(),
+                          ctxt.translate(label.toLowerCase()).toUpperCase(),
                           textAlign: TextAlign.center,
                           style: textTheme.labelLarge?.copyWith(
                             color:

@@ -4,9 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:mudra_manager/db/filter_type.dart' show FilterType;
+import 'package:mudra_manager/l10n/app_localizations.dart'
+    show AppLocalizations;
 import 'package:mudra_manager/providers/filter_provider.dart';
 import 'package:mudra_manager/screens/reusable/animated_balance.dart';
+import 'package:mudra_manager/screens/reusable/responseive_layout_builder.dart';
 import 'package:mudra_manager/screens/transaction/transaction_list_screen.dart';
+import 'package:mudra_manager/util/localization_extension.dart';
 
 class CashFlowScreen extends ConsumerStatefulWidget {
   final double globalPadding;
@@ -27,10 +31,9 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final tiltAngleRadians = math.pi * tiltAngleDegrees / 180;
-    final tiltExpenseAngleRadians = math.pi * tiltExpenseAngleDegrees / 180;
     final filter = ref.watch(filterProvider);
     final now = DateTime.now();
+    final ctxt = AppLocalizations.of(context)!;
 
     DateTime startDate;
     DateTime endDate;
@@ -83,7 +86,7 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Cash Flow',
+                      ctxt.dashboard_cash_flow_text,
                       style: textTheme.titleLarge?.copyWith(
                         color: color.primary,
                       ),
@@ -104,181 +107,48 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
                   ],
                 ),
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    flex: (leftBoxWidthFactor * 100).toInt(),
-                    child: SizedBox(
-                      height: 170,
-                      child: GestureDetector(
-                        onTap: () => {},
-                        child: Container(
-                          width: 120,
-                          padding: const EdgeInsets.all(8.0),
-                          margin: const EdgeInsets.only(right: 8.0),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12.0),
-                            color: color.primary,
-                            // Light background color
-                            border: Border.all(
-                              color: color.primary,
-                            ), // Subtle border
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  CircleAvatar(
-                                    radius: 16,
-                                    child: Transform.rotate(
-                                      angle: tiltAngleRadians,
-                                      child: Icon(
-                                        Icons.arrow_downward,
-                                        size: 16,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8.0),
-                                  Expanded(
-                                    child: Text(
-                                      "INCOME",
-                                      textAlign: TextAlign.center,
-                                      style: textTheme.labelLarge?.copyWith(
-                                        color: color.onPrimary,
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(
-                                height: 100,
-                                child: Stack(
-                                  alignment: Alignment.centerLeft,
-                                  // or whatever aligns best for you
-                                  children: [
-                                    Text(
-                                      "₹$income}",
-                                      style: textTheme.titleLarge?.copyWith(
-                                        color: color.onPrimary.withAlpha(10),
-                                        fontSize: 80,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      overflow: TextOverflow.fade,
-                                    ),
-                                    AnimatedBalance(
-                                      value: income,
-                                      style: textTheme.titleLarge?.copyWith(
-                                        color: color.onPrimary,
-                                        fontSize: 40,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      fixedStringLength: 0,
-                                      overflow: TextOverflow.fade,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Text(
-                                "${DateFormat("dd MMM yy").format(startDate)} - ${DateFormat("dd MMM yy").format(endDate)}",
-                                style: textTheme.labelMedium?.copyWith(
-                                  color: color.onPrimary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+              ResponsiveLayoutBuilder(
+                sizedBoxHeight: 350,
+                columnWidget: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    buildCashFlowCard(
+                      false,
+                      income,
+                      startDate,
+                      endDate,
+                      filter,
                     ),
-                  ),
-                  Expanded(
-                    flex: (rightBoxWidthFactor * 100).toInt(),
-                    child: SizedBox(
-                      height: 170,
-                      child: GestureDetector(
-                        onTap: () => {},
-                        child: Container(
-                          width: 120,
-                          padding: const EdgeInsets.all(8.0),
-                          margin: const EdgeInsets.only(right: 8.0),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12.0),
-                            color: Colors.transparent,
-                            // Light background color
-                            border: Border.all(
-                              color: color.primary,
-                            ), // Subtle border
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  Expanded(
-                                    child: Text(
-                                      "EXPENSE",
-                                      textAlign: TextAlign.center,
-                                      style: textTheme.labelLarge?.copyWith(
-                                        color: color.primary,
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8.0),
-                                  CircleAvatar(
-                                    radius: 16,
-                                    child: Transform.rotate(
-                                      angle: tiltExpenseAngleRadians,
-                                      child: Icon(Icons.arrow_upward, size: 16),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(
-                                height: 100,
-                                child: Stack(
-                                  alignment: Alignment.centerLeft,
-                                  // or whatever aligns best for you
-                                  children: [
-                                    Text(
-                                      "₹$expense",
-                                      style: textTheme.titleLarge?.copyWith(
-                                        color: color.primary.withAlpha(10),
-                                        fontSize: 80,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      overflow: TextOverflow.fade,
-                                    ),
-                                    AnimatedBalance(
-                                      value: expense,
-                                      style: textTheme.titleLarge?.copyWith(
-                                        color: color.primary,
-                                        fontSize: 40,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      fixedStringLength: 0,
-                                      overflow: TextOverflow.fade,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Text(
-                                "${DateFormat("dd MMM yy").format(startDate)} - ${DateFormat("dd MMM yy").format(endDate)}",
-                                style: textTheme.labelMedium?.copyWith(
-                                  color: color.primary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                    SizedBox(height: 12),
+                    buildCashFlowCard(
+                      true,
+                      expense,
+                      startDate,
+                      endDate,
+                      filter,
                     ),
-                  ),
-                ],
+                  ],
+                ),
+                rowWidget: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    buildCashFlowCard(
+                      false,
+                      income,
+                      startDate,
+                      endDate,
+                      filter,
+                    ),
+                    buildCashFlowCard(
+                      true,
+                      expense,
+                      startDate,
+                      endDate,
+                      filter,
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -292,6 +162,142 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
             child: Center(child: CircularProgressIndicator(value: 25)),
           ),
       error: (e, _) => Center(child: Text("Error: $e")),
+    );
+  }
+
+  Widget buildCashFlowCard(
+    bool isExpense,
+    double value,
+    DateTime startDate,
+    DateTime endDate,
+    FilterType filter,
+  ) {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final ctxt = AppLocalizations.of(context)!;
+    final tiltAngleRadians = math.pi * tiltAngleDegrees / 180;
+    final tiltExpenseAngleRadians = math.pi * tiltExpenseAngleDegrees / 180;
+
+    return Expanded(
+      flex: (rightBoxWidthFactor * 100).toInt(),
+      child: SizedBox(
+        height: 170,
+        child: GestureDetector(
+          onTap: () => {},
+          child: Container(
+            // width: 120,
+            padding: const EdgeInsets.all(8.0),
+            margin: const EdgeInsets.only(right: 8.0),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12.0),
+              color: isExpense ? Colors.transparent : color.primary,
+              // Light background color
+              border: Border.all(color: color.primary), // Subtle border
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                !isExpense
+                    ? Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        CircleAvatar(
+                          radius: 16,
+                          child: Transform.rotate(
+                            angle: tiltAngleRadians,
+                            child: Icon(Icons.arrow_downward, size: 16),
+                          ),
+                        ),
+                        const SizedBox(width: 8.0),
+                        Expanded(
+                          child: Text(
+                            ctxt.transaction_type_income.toUpperCase(),
+                            textAlign: TextAlign.center,
+                            style: textTheme.labelLarge?.copyWith(
+                              color: color.onPrimary,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    )
+                    : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Expanded(
+                          child: Text(
+                            ctxt.transaction_type_expense.toUpperCase(),
+                            textAlign: TextAlign.center,
+                            style: textTheme.labelLarge?.copyWith(
+                              color: color.primary,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 8.0),
+                        CircleAvatar(
+                          radius: 16,
+                          child: Transform.rotate(
+                            angle: tiltExpenseAngleRadians,
+                            child: Icon(Icons.arrow_upward, size: 16),
+                          ),
+                        ),
+                      ],
+                    ),
+                SizedBox(
+                  height: 100,
+                  child: Stack(
+                    alignment: Alignment.centerLeft,
+                    // or whatever aligns best for you
+                    children: [
+                      Text(
+                        ctxt.formatLocalizedNumberWithSign(
+                          0,
+                          ctxt.localeName,
+                          value,
+                        ),
+                        style: textTheme.titleLarge?.copyWith(
+                          color:
+                              isExpense
+                                  ? color.primary.withAlpha(10)
+                                  : color.onPrimary.withAlpha(10),
+                          fontSize: 80,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        overflow: TextOverflow.fade,
+                      ),
+                      AnimatedBalance(
+                        value: value,
+                        style: textTheme.titleLarge?.copyWith(
+                          color: isExpense ? color.primary : color.onPrimary,
+                          fontSize: 40,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        fixedStringLength: 0,
+                        overflow: TextOverflow.fade,
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Text(
+                    FilterType.day == filter
+                        ? DateFormat(
+                          "dd MMM yy",
+                          ctxt.localeName,
+                        ).format(startDate)
+                        : "${DateFormat("dd MMM yy", ctxt.localeName).format(startDate)} - ${DateFormat("dd MMM yy", ctxt.localeName).format(endDate)}",
+                    style: textTheme.labelMedium?.copyWith(
+                      color: isExpense ? color.primary : color.onPrimary,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

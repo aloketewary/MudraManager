@@ -23,5 +23,165 @@
   "app_settings_language_subtitle": "Choose your language",
   "@app_settings_language_subtitle": {
     "description": "This is subtitle of Language tile"
+  },
+  "app_settings_theme_mode_title": "Theme Mode",
+  "@app_settings_theme_mode_title": {
+    "description": "This is title of Theme Mode tile"
+  },
+  "app_settings_theme_mode_light": "Light",
+  "@app_settings_theme_mode_light": {
+    "description": "This is text of Theme Mode light"
+  },
+  "app_settings_theme_mode_dark": "Dark",
+  "@app_settings_theme_mode_dark": {
+    "description": "This is text of Theme Mode dark"
+  },
+  "app_settings_theme_mode_system_default": "System Default",
+  "@app_settings_theme_mode_system_default": {
+    "description": "This is text of Theme Mode system default"
+  },
+  "app_settings_daily_reminder_title": "Daily Expense Reminder",
+  "@app_settings_daily_reminder_title": {
+    "description": "This is text of Daily reminder title"
+  },
+  "home_screen_title": "Home",
+  "@home_screen_title": {
+    "description": "This is title of Home screen"
+  },
+  "transaction_screen_title": "Activity",
+  "@transaction_screen_title": {
+    "description": "This is title of Activity screen"
+  },
+  "statistics_screen_title": "Statistics",
+  "@statistics_screen_title": {
+    "description": "This is title of Statistics screen"
+  },
+  "profile_screen_title": "Profile",
+  "@profile_screen_title": {
+    "description": "This is title of Profile screen"
+  },
+  "add_edit_transaction_screen_title": "Add Transaction",
+  "@add_edit_transaction_screen_title": {
+    "description": "This is title of Add Transaction screen"
+  },
+  "transaction_list_screen_title": "Transaction List",
+  "@transaction_list_screen_title": {
+    "description": "This is title of Transaction List screen"
+  },
+  "greeting_good_morning_text": "Good Morning",
+  "@greeting_good_morning_text": {
+    "description": "This is text of Good Morning"
+  },
+  "greeting_good_afternoon_text": "Good Afternoon",
+  "@greeting_good_afternoon_text": {
+    "description": "This is text of Good Afternoon"
+  },
+  "greeting_good_evening_text": "Good Evening",
+  "@greeting_good_evening_text": {
+    "description": "This is text of Good Evening"
+  },
+  "greeting_good_night_text": "Good Night",
+  "@greeting_good_night_text": {
+    "description": "This is text of Good Night"
+  },
+  "greeting_hello_text": "Hello",
+  "@greeting_hello_text": {
+    "description": "This is text of Hello"
+  },
+  "transaction_type_income": "Income",
+  "@transaction_type_income": {
+    "description": "This is text of Income"
+  },
+  "transaction_type_expense": "Expense",
+  "@transaction_type_expense": {
+    "description": "This is text of Expense"
+  },
+  "dashboard_add_transaction_text": "Add transaction",
+  "@dashboard_add_transaction_text": {
+    "description": "This is text of add transaction button"
+  },
+  "dashboard_add_transfer_text": "Transfer",
+  "@dashboard_add_transfer_text": {
+    "description": "This is text of add Transfer button"
+  },
+  "dashboard_cash_flow_text": "Cash Flow",
+  "@dashboard_cash_flow_text": {
+    "description": "This is text of Cash Flow"
+  },
+  "cash_flow_filter_type_day": "Day",
+  "@cash_flow_filter_type_day": {
+    "description": "This is text of Day"
+  },
+  "cash_flow_filter_type_week": "Week",
+  "@cash_flow_filter_type_week": {
+    "description": "This is text of Week"
+  },
+  "cash_flow_filter_type_month": "Month",
+  "@cash_flow_filter_type_month": {
+    "description": "This is text of Month"
+  },
+  "cash_flow_filter_type_year": "Year",
+  "@cash_flow_filter_type_year": {
+    "description": "This is text of Year"
+  },
+  "dashboard_mini_budget_text": "Budget",
+  "@dashboard_mini_budget_text": {
+    "description": "This is text of Budget"
+  },
+  "dashboard_mini_budget_not_found_text": "No Budgets Defined, Add One!",
+  "@dashboard_mini_budget_not_found_text": {
+    "description": "This is text of budget not found"
+  },
+  "dashboard_mini_budget_add_text": "Add Budget",
+  "@dashboard_mini_budget_add_text": {
+    "description": "This is text of add budget"
+  },
+  "transaction_list_cash_flow_screen_title": "Transactions",
+  "@transaction_list_cash_flow_screen_title": {
+    "description": "This is title of Transactions List from cash flow screen"
+  },
+  "transaction_list_filter_all": "All",
+  "@transaction_list_filter_all": {
+    "description": "This is text of All"
+  },
+  "transaction_list_filter_income": "Income",
+  "@transaction_list_filter_income": {
+    "description": "This is text of Income"
+  },
+  "transaction_list_filter_expense": "Expense",
+  "@transaction_list_filter_expense": {
+    "description": "This is text of Expense"
+  },
+  "transaction_list_pending_transaction_message_text" : "⚡ New transactions found! Review now",
+  "@transaction_list_pending_transaction_message_text" : {
+    "description" : "This is text of pending transaction message"
+  },
+  "calendar_week_monday_initial_text" : "M",
+  "@calendar_week_monday_initial_text" : {
+    "description" : "This is text of Monday initial"
+  },
+  "calendar_week_tuesday_initial_text" : "T",
+  "@calendar_week_tuesday_initial_text" : {
+    "description" : "This is text of Tuesday initial"
+  },
+  "calendar_week_wednesday_initial_text" : "W",
+  "@calendar_week_wednesday_initial_text" : {
+    "description" : "This is text of Wednesday initial"
+  },
+  "calendar_week_thursday_initial_text" : "T",
+  "@calendar_week_thursday_initial_text" : {
+    "description" : "This is text of Thursday initial"
+  },
+  "calendar_week_friday_initial_text" : "F",
+  "@calendar_week_friday_initial_text" : {
+    "description" : "This is text of Friday initial"
+  },
+  "calendar_week_saturday_initial_text" : "S",
+  "@calendar_week_saturday_initial_text" : {
+    "description" : "This is text of Saturday initial"
+  },
+  "calendar_week_sunday_initial_text" : "S",
+  "@calendar_week_sunday_initial_text" : {
+    "description" : "This is text of Sunday initial"
   }
 }

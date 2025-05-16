@@ -6,13 +6,18 @@ class SimpleColorPickerDialog extends StatefulWidget {
   const SimpleColorPickerDialog({super.key, this.initialColor});
 
   @override
-  State<SimpleColorPickerDialog> createState() => _SimpleColorPickerDialogState();
+  State<SimpleColorPickerDialog> createState() =>
+      _SimpleColorPickerDialogState();
 }
 
 class _SimpleColorPickerDialogState extends State<SimpleColorPickerDialog> {
   late Color _selected;
 
-  final List<Color> _colors = Colors.primaries;
+  final List<Color> _colors = [
+    ...Colors.primaries,
+    ...Colors.accents.map((c) => c.shade100),
+    ...Colors.primaries.map((c) => c.shade100),
+  ];
 
   @override
   void initState() {
@@ -25,25 +30,40 @@ class _SimpleColorPickerDialogState extends State<SimpleColorPickerDialog> {
     var color = Theme.of(context).colorScheme;
     var textTheme = Theme.of(context).textTheme;
     return AlertDialog(
-      title: Text('Pick a color', style: textTheme.titleLarge?.copyWith(color: color.onPrimaryContainer),),
-      content: Wrap(
-        spacing: 25,
-        runSpacing: 25,
-        children: _colors
-            .map((c) => GestureDetector(
-          onTap: () => setState(() => _selected = c),
-          child: CircleAvatar(
-            backgroundColor: c,
-            radius: 30,
-            child: _selected.toARGB32() == c.toARGB32() ? const Icon(Icons.check, color: Colors.white) : null,
-          ),
-        ))
-            .toList(),
+      title: Text(
+        'Pick a color',
+        style: textTheme.titleLarge?.copyWith(color: color.onPrimaryContainer),
+      ),
+      content: SizedBox(
+        height: 450,
+        width: double.maxFinite,
+        child: GridView.count(
+          crossAxisCount: 5,
+          mainAxisSpacing: 12,
+          crossAxisSpacing: 12,
+          children: _colors.map((c) {
+            return GestureDetector(
+              onTap: () => setState(() => _selected = c),
+              child: CircleAvatar(
+                backgroundColor: c,
+                radius: 24,
+                child: _selected.toARGB32() == c.toARGB32()
+                    ? const Icon(Icons.check, color: Colors.white)
+                    : null,
+              ),
+            );
+          }).toList(),
+        ),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context, _selected),
-          child: Text('OK', style: textTheme.bodyLarge?.copyWith(color: color.onPrimaryContainer),),
+          child: Text(
+            'OK',
+            style: textTheme.bodyLarge?.copyWith(
+              color: color.onPrimaryContainer,
+            ),
+          ),
         ),
       ],
     );

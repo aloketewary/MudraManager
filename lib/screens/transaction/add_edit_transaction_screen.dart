@@ -4,6 +4,7 @@ import 'package:mudra_manager/db/models/account.dart' show Account;
 import 'package:mudra_manager/db/models/category.dart' show Category;
 import 'package:mudra_manager/db/models/tag.dart' show GetTagCollection, Tag;
 import 'package:mudra_manager/db/models/transaction.dart' show Transaction;
+import 'package:mudra_manager/l10n/app_localizations.dart' show AppLocalizations;
 import 'package:mudra_manager/providers/account_providers.dart';
 import 'package:mudra_manager/providers/budget_service_provider.dart';
 import 'package:mudra_manager/providers/category_provider.dart';
@@ -22,6 +23,8 @@ import 'package:mudra_manager/screens/reusable/simple_calculator.dart'
 import 'package:mudra_manager/screens/reusable/swipeable_week_calendar.dart';
 import 'package:mudra_manager/service/notification_service.dart';
 import 'package:mudra_manager/util/icon_helper.dart' show IconHelper;
+import 'package:mudra_manager/util/localization_extension.dart';
+import 'package:mudra_manager/util/string_util.dart';
 
 class AddEditTransactionScreen extends ConsumerStatefulWidget {
   final Transaction? transaction;
@@ -109,6 +112,7 @@ class _AddEditTransactionScreenState
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final ctxt = AppLocalizations.of(context)!;
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -191,7 +195,7 @@ class _AddEditTransactionScreenState
                                       ?.toStringAsFixed(2);
                                   return AccountDisplayCard(
                                     title: account.name,
-                                    amount: "₹$totalBalance",
+                                    amount: ctxt.formatLocalizedNumberWithSign(2, ctxt.localeName, totalBalance?.toDouble() ?? 0.0),
                                     accountType: account.accountType,
                                     startColor: color.onSecondary,
                                     endColor: Color(

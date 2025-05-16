@@ -6,6 +6,7 @@ import 'package:mudra_manager/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/screens/home_screen.dart';
 import 'package:mudra_manager/screens/onboarding/onboarding_screen.dart';
 import 'package:mudra_manager/service/notification_service.dart';
+import 'package:mudra_manager/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/theme/app_theme.dart';
 import 'package:mudra_manager/theme/theme_provider.dart';
 import 'package:mudra_manager/util/auth_gate.dart';
@@ -41,11 +42,12 @@ class MudraManagerApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeProvider);
     var appTheme = AppTheme.instance;
+    final appColorTheme = ref.watch(themeNotifierProvider);
 
     return MaterialApp(
       title: 'Mudra Manager',
-      theme: appTheme.buildLightTheme(),
-      darkTheme: appTheme.buildDarkTheme(),
+      theme: appTheme.buildLightTheme(appColorTheme),
+      darkTheme: appTheme.buildDarkTheme(appColorTheme),
       themeMode: themeMode,
       // You can toggle this
       debugShowCheckedModeBanner: false,

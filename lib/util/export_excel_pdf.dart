@@ -1,8 +1,14 @@
+import 'dart:io';
 import 'dart:typed_data' show Uint8List;
 
 import 'package:excel/excel.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:mudra_manager/l10n/app_localizations.dart' show AppLocalizations;
 import 'package:mudra_manager/providers/status_data_provider.dart' show StatsData;
 import 'package:mudra_manager/util/file_utils.dart' show saveExportedFile;
+import 'package:mudra_manager/util/localization_extension.dart';
+import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 Future<void> exportStatsToExcel(StatsData stats) async {
@@ -44,16 +50,40 @@ Future<void> exportStatsToExcel(StatsData stats) async {
 
 }
 
-Future<void> exportStatsToPdf(StatsData stats) async {
-  final pdf = pw.Document();
+Future<void> exportStatsToPdf(BuildContext context, StatsData stats, Uint8List pieImage, Uint8List lineImage) async {
+  final ctxt = AppLocalizations.of(context)!;
+  final pdf = pw.Document(
+    title: 'Mudra Manager Statistics Report',
+    author: 'Mudra Manager App',
+    subject: 'Statistics Report',
+    pageMode: PdfPageMode.outlines,
+  );
+  final pdfImagePie = pw.MemoryImage(pieImage);
+  final pdfImageLine = pw.MemoryImage(lineImage);
+  final file = await rootBundle.load('assets/fonts/NotoSans-Regular.ttf');
+  final ttf = pw.Font.ttf(file.buffer.asByteData());
+
+  final theme = pw.ThemeData.withFont(
+    base: ttf,
+    bold: ttf,
+  );
 
   pdf.addPage(
     pw.MultiPage(
+      theme: theme,
       build: (context) => [
-        pw.Text('Mudra Statistics Report', style: pw.TextStyle(fontSize: 24)),
+        pw.Text('Mudra Manager Statistics Report', style: pw.TextStyle(fontSize: 24)),
         pw.SizedBox(height: 20),
-        pw.Text('Total Income: ₹${stats.income.toStringAsFixed(2)}'),
-        pw.Text('Total Expense: ₹${stats.expense.toStringAsFixed(2)}'),
+        pw.Text('Summary', style: pw.TextStyle(fontSize: 18)),
+        pw.SizedBox(height: 10),
+        pw.Text('Total Income: ${ctxt.formatLocalizedNumberWithSign(2, ctxt.localeName, stats.income)}'),
+        pw.Text('Total Expense: ${ctxt.formatLocalizedNumberWithSign(2, ctxt.localeName, stats.expense)}'),
+        pw.SizedBox(height: 20),
+        pw.Text('Charts', style: pw.TextStyle(fontSize: 18)),
+        pw.SizedBox(height: 10),
+        pw.Image(pdfImagePie, height: 200),
+        pw.SizedBox(height: 20),
+        pw.Image(pdfImageLine, height: 200),
         pw.SizedBox(height: 20),
         pw.Text('Category Breakdown:', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
         pw.TableHelper.fromTextArray(
@@ -61,7 +91,7 @@ Future<void> exportStatsToPdf(StatsData stats) async {
             ['Category', 'Amount'],
             ...stats.categoryData.entries.map((entry) => [
               stats.categoryDataMap[entry.key]?.name ?? 'Unknown',
-              entry.value.toStringAsFixed(2)
+              ctxt.formatLocalizedNumberWithSign(2, ctxt.localeName, entry.value)
             ])
           ],
         ),
@@ -73,7 +103,7 @@ Future<void> exportStatsToPdf(StatsData stats) async {
             ...stats.recent.map((txn) => [
               txn.date.toLocal().toIso8601String(),
               txn.description ?? '',
-              txn.amount.toStringAsFixed(2),
+              ctxt.formatLocalizedNumberWithSign(2, ctxt.localeName, txn.amount),
               txn.isExpense ? 'Expense' : 'Income'
             ])
           ],

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:mudra_manager/l10n/app_localizations.dart';
+import 'package:mudra_manager/util/localization_extension.dart';
 
 class AnimatedBalance extends StatelessWidget {
   final double value;
@@ -7,7 +10,6 @@ class AnimatedBalance extends StatelessWidget {
   final Duration duration;
   final int fixedStringLength;
   final TextAlign textAlign;
-
   const AnimatedBalance({
     super.key,
     required this.value,
@@ -20,13 +22,15 @@ class AnimatedBalance extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ctxt = AppLocalizations.of(context)!;
+    final locale = Localizations.localeOf(context).toLanguageTag();
+
     return TweenAnimationBuilder<double>(
       tween: Tween<double>(begin: 0, end: value),
       duration: duration,
       builder: (context, animatedValue, _) {
-        var isNegative = animatedValue < 0;
         return Text(
-          "${isNegative ? "-" : ""} ₹${animatedValue.abs().toStringAsFixed(fixedStringLength)}",
+          ctxt.formatLocalizedNumberWithSign(fixedStringLength, locale, animatedValue),
           style: style ?? Theme.of(context).textTheme.headlineMedium,
           overflow: overflow,
           textAlign: textAlign,

@@ -34,10 +34,14 @@ class AboutScreen extends StatelessWidget {
               // App Header
               Column(
                 children: [
-                  Icon(
-                    Icons.account_balance_wallet_rounded,
-                    size: 72,
-                    color: color.primary,
+                  CircleAvatar(
+                    backgroundColor: color.primary,
+                    radius: 48,
+                    child: Image.asset(
+                      'assets/logo/money-currency.png',
+                      // color: color.primary,
+                      width: 72,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   Text(
