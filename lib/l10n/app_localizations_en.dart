@@ -17,6 +17,64 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get onboard_TrackYourTransactions => 'Track your Transactions';
+
+  @override
+  String get onboard_SeeWhereYourMoneyGoes => 'See where your money goes, every day.';
+
+  @override
+  String get onboard_SetBudgetsAndGoals => 'Set Budgets and Goals';
+
+  @override
+  String get onboard_stayOnTrackAndAchieveYourDream => 'Stay on track and achieve your dreams.';
+
+  @override
+  String get onboard_GetStarted => 'Get Started!';
+
+  @override
+  String get onboard_letsSetupYourAccount => 'Let\'s set up your account.';
+
+  @override
+  String get onboard_howShouldWeCallYou => 'How should we call you?';
+
+  @override
+  String get onboard_enterYourNameToPersonalizeYourExperience => 'Enter your name to personalize your experience.';
+
+  @override
+  String get onboard_enterYourName => 'Enter your name';
+
+  @override
+  String get onboard_setupYourFirstAccount => 'Setup Your First Account';
+
+  @override
+  String get onboard_letsCreateYourFirstAccount => 'Let\'s create your first account (let say: Cash).';
+
+  @override
+  String get onboard_accountName => 'Account Name';
+
+  @override
+  String get onboard_initialBalance => 'Initial Balance';
+
+  @override
+  String get onboard_youCanUpdateOtherDetailsLaterAsWell => 'You can update other details later as well.';
+
+  @override
+  String onboard_pleaseFillThe(Object inputName) {
+    return 'Please fill the \"$inputName\"';
+  }
+
+  @override
+  String onboard_pleaseEnterAValidNumberFor(Object hintText) {
+    return 'Please enter a valid number for \"$hintText\"';
+  }
+
+  @override
+  String get onboard_youAreAllSet => 'You\'re all set!';
+
+  @override
+  String get onboard_letsStartManagingYourMoneyWisely => 'Let\'s start managing your money wisely.';
+
+  @override
   String get app_settings_appbar_title => 'App Settings';
 
   @override
@@ -60,6 +118,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transaction_list_screen_title => 'Transaction List';
+
+  @override
+  String get transaction_listViewGroupTodayLabel => 'Today';
+
+  @override
+  String get transaction_listViewGroupYesterdayLabel => 'Yesterday';
 
   @override
   String get greeting_good_morning_text => 'Good Morning';
@@ -128,6 +192,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transaction_list_pending_transaction_message_text => '⚡ New transactions found! Review now';
 
   @override
+  String get transaction_listPendingTransactionMessageActionLabel => 'Review';
+
+  @override
+  String get transaction_noTransactionFoundText => 'No transactions found.';
+
+  @override
+  String get transaction_deleteAlertTitleText => 'Delete Transaction?';
+
+  @override
+  String get transaction_deleteAlertBodyText => 'This action cannot be undone.';
+
+  @override
+  String get transaction_deleteButtonActionText => 'Delete';
+
+  @override
+  String get transaction_cancelButtonActionText => 'Cancel';
+
+  @override
+  String get transaction_filterCategoryText => 'Filter Transactions';
+
+  @override
+  String transaction_noteDescriptionText(Object description) {
+    return 'note: $description';
+  }
+
+  @override
   String get calendar_week_monday_initial_text => 'M';
 
   @override
@@ -147,4 +237,171 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get calendar_week_sunday_initial_text => 'S';
+
+  @override
+  String get dashboard_netWorthTitle => 'Net Worth';
+
+  @override
+  String get budget_dashboardMiniCardBudgetTitleText => 'Budget';
+
+  @override
+  String get budget_dashboardMiniCardSpentTitleText => 'Spent';
+
+  @override
+  String get budget_dashboardPageTitle => 'Budgets Details';
+
+  @override
+  String get budget_dashboardNotFoundText => 'No Budgets Defined, Add One!';
+
+  @override
+  String get budget_dashboardAddBudgetText => 'Add Budget';
+
+  @override
+  String get budget_categoriesTitle => 'Categories';
+
+  @override
+  String budget_dashboardPieChartLabelText(Object spentPercent, Object title, Object totalPercent) {
+    return '$title ($totalPercent of Total, ${spentPercent}of Spent)';
+  }
+
+  @override
+  String get budget_buttonDeleteTitleText => 'Delete Budget?';
+
+  @override
+  String get budget_buttonDeleteBodyText => 'This will remove the Budget and its allocations, this action cannot be undone.';
+
+  @override
+  String get budget_buttonDeleteActionText => 'Delete';
+
+  @override
+  String get budget_buttonCancelActionText => 'Cancel';
+
+  @override
+  String get budget_buttonAddText => 'Add Budget';
+
+  @override
+  String get budget_buttonEditText => 'Edit Budget';
+
+  @override
+  String get budget_budgetNameControllerText => 'Budget Name';
+
+  @override
+  String get budget_budgetAmountControllerText => 'Total Amount';
+
+  @override
+  String get budget_recurrenceControllerText => 'Recurrence';
+
+  @override
+  String get budget_nameRequiredHintText => 'Budget name is required';
+
+  @override
+  String get budget_amountRequiredHintText => 'Valid Amount is required';
+
+  @override
+  String get budget_selectStartDateText => 'Select Start Date';
+
+  @override
+  String budget_selectedStartDateText(Object startDate) {
+    return 'Start: $startDate';
+  }
+
+  @override
+  String get budget_selectEndDateText => 'Select End Date';
+
+  @override
+  String budget_selectedEndDateText(Object endDate) {
+    return 'End: $endDate';
+  }
+
+  @override
+  String get budget_categoryTitle => 'Select Categories & Allocations';
+
+  @override
+  String get budget_allocateAmountText => 'Allocate Amount';
+
+  @override
+  String get budget_categoryMessageInfoText => 'You can manually enter category allocations, or leave them blank to auto-distribute the remaining amount equally.';
+
+  @override
+  String budget_totalAllocatedBudgetText(Object totalAlloc) {
+    return 'Total Allocated: $totalAlloc';
+  }
+
+  @override
+  String get budget_recurrenceText => 'Recurrence';
+
+  @override
+  String get budget_recurrenceNoneText => 'None';
+
+  @override
+  String get budget_recurrenceDailyText => 'Daily';
+
+  @override
+  String get budget_recurrenceWeeklyText => 'Weekly';
+
+  @override
+  String get budget_recurrenceMonthlyText => 'Monthly';
+
+  @override
+  String get budget_recurrenceYearlyText => 'Yearly';
+
+  @override
+  String get budget_saveButtonText => 'save';
+
+  @override
+  String get budget_updateButtonText => 'update';
+
+  @override
+  String get budget_pickBothDatesErrorText => 'Pick both dates';
+
+  @override
+  String get budget_selectAtLeastOneCategoryErrorText => 'Select at least one category';
+
+  @override
+  String get budget_allocatedAmountExceedsTotalBudgetText => 'Allocated amount exceeds total budget';
+
+  @override
+  String get transaction_amountControllerText => 'Amount';
+
+  @override
+  String get transaction_descriptionControllerText => 'Description (optional)';
+
+  @override
+  String get transaction_amountControllerErrorText => 'Enter amount';
+
+  @override
+  String get transaction_selectAccountLabel => 'Select Account';
+
+  @override
+  String get transaction_selectCategoryLabel => 'Select Category';
+
+  @override
+  String get transaction_selectTagLabel => 'Select Tag';
+
+  @override
+  String get transaction_addNewCategoryText => 'Add New \nCategory';
+
+  @override
+  String get transaction_addNewTagText => 'Add New Tag';
+
+  @override
+  String get transaction_tagNameControllerText => 'Tag Name';
+
+  @override
+  String get transaction_saveTagButtonLabel => 'Save Tag';
+
+  @override
+  String get transaction_saveTransactionButtonLabel => 'Save Transaction';
+
+  @override
+  String get transaction_selectOneAccountErrorText => 'Select at least one Account';
+
+  @override
+  String get transaction_selectOneCategoryErrorText => 'Select at least one Category';
+
+  @override
+  String get transaction_incomeButtonLabel => 'INCOME';
+
+  @override
+  String get transaction_expenseButtonLabel => 'EXPENSE';
 }

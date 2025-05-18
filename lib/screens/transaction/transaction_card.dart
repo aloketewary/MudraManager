@@ -58,10 +58,7 @@ class _TransactionCardState extends State<TransactionCard> {
       shadowColor: color.surface,
       color: _isExpanded ? color.primary : null,
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16.0),
-        side: BorderSide(width: 1, color: color.primary),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0), side: BorderSide(width: 1, color: color.primary)),
       child: InkWell(
         borderRadius: BorderRadius.circular(16.0),
         onTap: () {
@@ -74,18 +71,14 @@ class _TransactionCardState extends State<TransactionCard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              widget.isTransfer
-                  ? buildTransferCard(_isExpanded)
-                  : buildNormalCard(_isExpanded),
+              widget.isTransfer ? buildTransferCard(_isExpanded) : buildNormalCard(_isExpanded),
 
               if (_isExpanded && !widget.isTransfer)
                 Padding(
                   padding: const EdgeInsets.only(top: 16.0),
                   child: Text(
-                    "note: ${widget.description}",
-                    style: textTheme.labelMedium?.copyWith(
-                      color: color.onPrimary,
-                    ),
+                    ctxt.transaction_noteDescriptionText(widget.description ?? ''),
+                    style: textTheme.labelLarge?.copyWith(color: color.onPrimary),
                   ),
                 ),
               if (_isExpanded)
@@ -96,38 +89,24 @@ class _TransactionCardState extends State<TransactionCard> {
                       widget.tags.map((tag) {
                         return Padding(
                           padding: EdgeInsets.only(right: 8),
-                          child: Row(
+                          child: Wrap(
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            runSpacing: 2,
                             children: [
                               Icon(Icons.tag, color: color.onPrimary, size: 12),
-                              Text(
-                                tag.name,
-                                style: textTheme.labelSmall?.copyWith(
-                                  color: color.onPrimary,
-                                ),
-                              ),
+                              Text(tag.name, style: textTheme.labelSmall?.copyWith(color: color.onPrimary)),
                             ],
                           ),
                         );
                       }).toList(),
                 ),
-              if (_isExpanded)
-                Padding(
-                  padding: EdgeInsets.only(top: 4),
-                  child: Divider(color: color.onPrimary),
-                ),
+              if (_isExpanded) Padding(padding: EdgeInsets.only(top: 4), child: Divider(color: color.onPrimary)),
               if (_isExpanded)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    IconButton.filledTonal(
-                      onPressed: widget.onEdit,
-                      icon: Icon(Icons.edit),
-                    ),
-                    IconButton.filledTonal(
-                      tooltip: 'Delete Transaction',
-                      onPressed: widget.onRemove,
-                      icon: Icon(Icons.delete),
-                    ),
+                    IconButton.filledTonal(onPressed: widget.onEdit, icon: Icon(Icons.edit)),
+                    IconButton.filledTonal(tooltip: 'Delete Transaction', onPressed: widget.onRemove, icon: Icon(Icons.delete)),
                   ],
                 ),
             ],
@@ -147,10 +126,7 @@ class _TransactionCardState extends State<TransactionCard> {
         Container(
           width: 48.0,
           height: 48.0,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            color: Color(widget.category?.colorValue ?? 0xFF000000),
-          ),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(16), color: Color(widget.category?.colorValue ?? 0xFF000000)),
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Icon(
@@ -165,17 +141,10 @@ class _TransactionCardState extends State<TransactionCard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text(
-                "${widget.category?.name}",
-                style: textTheme.titleMedium?.copyWith(
-                  color: isExpanded ? color.onPrimary : color.primary,
-                ),
-              ),
+              Text("${widget.category?.name}", style: textTheme.titleMedium?.copyWith(color: isExpanded ? color.onPrimary : color.primary)),
               Text(
                 '${widget.account?.name} - ${widget.account?.accountType.name.toTitleCase()}',
-                style: textTheme.labelMedium?.copyWith(
-                  color: isExpanded ? color.onPrimary : color.primary,
-                ),
+                style: textTheme.labelMedium?.copyWith(color: isExpanded ? color.onPrimary : color.primary),
               ),
             ],
           ),
@@ -185,16 +154,12 @@ class _TransactionCardState extends State<TransactionCard> {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: <Widget>[
             Text(
-              ctxt.formatLocalizedNumberWithSign(2, ctxt.localeName, widget.amount.toDouble()),
-              style: textTheme.titleLarge?.copyWith(
-                color: isExpanded ? color.onPrimary : color.primary,
-              ),
+              ctxt.formatCurrencyWithSign(2, widget.amount.toDouble()),
+              style: textTheme.titleLarge?.copyWith(color: isExpanded ? color.onPrimary : color.primary),
             ),
             Text(
               DateFormat('EEE, dd MMM yyyy', ctxt.localeName).format(widget.date),
-              style: textTheme.labelSmall?.copyWith(
-                color: isExpanded ? color.onPrimary : color.primary,
-              ),
+              style: textTheme.labelSmall?.copyWith(color: isExpanded ? color.onPrimary : color.primary),
             ),
           ],
         ),
@@ -215,10 +180,7 @@ class _TransactionCardState extends State<TransactionCard> {
             Container(
               width: 48.0,
               height: 48.0,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                color: Color(related?.account.value?.colorValue ?? 0xFF000000),
-              ),
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(16), color: Color(related?.account.value?.colorValue ?? 0xFF000000)),
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Icon(
@@ -235,16 +197,11 @@ class _TransactionCardState extends State<TransactionCard> {
                 children: <Widget>[
                   Text(
                     related?.account.value?.name ?? '',
-                    style: textTheme.titleMedium?.copyWith(
-                      color: _isExpanded ? color.onPrimary : color.primary,
-                    ),
+                    style: textTheme.titleMedium?.copyWith(color: _isExpanded ? color.onPrimary : color.primary),
                   ),
                   Text(
-                    related?.account.value?.accountType.name.toUpperCase() ??
-                        '',
-                    style: textTheme.labelMedium?.copyWith(
-                      color: _isExpanded ? color.onPrimary : color.primary,
-                    ),
+                    related?.account.value?.accountType.name.toUpperCase() ?? '',
+                    style: textTheme.labelMedium?.copyWith(color: _isExpanded ? color.onPrimary : color.primary),
                   ),
                 ],
               ),
@@ -253,18 +210,12 @@ class _TransactionCardState extends State<TransactionCard> {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: <Widget>[
                 Text(
-                  ctxt.formatLocalizedNumberWithSign(2, ctxt.localeName, related?.amount ?? 0.0),
-                  style: textTheme.titleLarge?.copyWith(
-                    color: _isExpanded ? color.onPrimary : color.primary,
-                  ),
+                  ctxt.formatCurrencyWithSign(2, related?.amount ?? 0.0),
+                  style: textTheme.titleLarge?.copyWith(color: _isExpanded ? color.onPrimary : color.primary),
                 ),
                 Text(
-                  DateFormat(
-                    'EEE, dd MMM yyyy', ctxt.localeName
-                  ).format(related?.date ?? DateTime.now()),
-                  style: textTheme.labelSmall?.copyWith(
-                    color: _isExpanded ? color.onPrimary : color.primary,
-                  ),
+                  DateFormat('EEE, dd MMM yyyy', ctxt.localeName).format(related?.date ?? DateTime.now()),
+                  style: textTheme.labelSmall?.copyWith(color: _isExpanded ? color.onPrimary : color.primary),
                 ),
               ],
             ),
@@ -273,7 +224,7 @@ class _TransactionCardState extends State<TransactionCard> {
         Padding(
           padding: EdgeInsets.symmetric(vertical: 0),
           child: IconButton.filledTonal(
-            onPressed: (){
+            onPressed: () {
               setState(() {
                 _isExpanded = !_isExpanded;
               });
@@ -286,10 +237,7 @@ class _TransactionCardState extends State<TransactionCard> {
             Container(
               width: 48.0,
               height: 48.0,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16.0),
-                color: Color(widget.account?.colorValue ?? 0xFF000000),
-              ),
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(16.0), color: Color(widget.account?.colorValue ?? 0xFF000000)),
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Icon(
@@ -304,17 +252,10 @@ class _TransactionCardState extends State<TransactionCard> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text(
-                    widget.account?.name ?? '',
-                    style: textTheme.titleMedium?.copyWith(
-                      color: _isExpanded ? color.onPrimary : color.primary,
-                    ),
-                  ),
+                  Text(widget.account?.name ?? '', style: textTheme.titleMedium?.copyWith(color: _isExpanded ? color.onPrimary : color.primary)),
                   Text(
                     widget.account?.accountType.name.toUpperCase() ?? '',
-                    style: textTheme.labelMedium?.copyWith(
-                      color: _isExpanded ? color.onPrimary : color.primary,
-                    ),
+                    style: textTheme.labelMedium?.copyWith(color: _isExpanded ? color.onPrimary : color.primary),
                   ),
                 ],
               ),
@@ -323,16 +264,12 @@ class _TransactionCardState extends State<TransactionCard> {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: <Widget>[
                 Text(
-                  ctxt.formatLocalizedNumberWithSign(2, ctxt.localeName, widget.amount.toDouble()),
-                  style: textTheme.titleLarge?.copyWith(
-                    color: _isExpanded ? color.onPrimary : color.primary,
-                  ),
+                  ctxt.formatCurrencyWithSign(2, widget.amount.toDouble()),
+                  style: textTheme.titleLarge?.copyWith(color: _isExpanded ? color.onPrimary : color.primary),
                 ),
                 Text(
                   DateFormat('EEE, dd MMM yyyy', ctxt.localeName).format(widget.date),
-                  style: textTheme.labelSmall?.copyWith(
-                    color: _isExpanded ? color.onPrimary : color.primary,
-                  ),
+                  style: textTheme.labelSmall?.copyWith(color: _isExpanded ? color.onPrimary : color.primary),
                 ),
               ],
             ),

@@ -3,11 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:mudra_manager/l10n/app_localizations.dart';
 import 'package:mudra_manager/providers/budget_service_provider.dart';
-import 'package:mudra_manager/screens/budget/add_budget_screen.dart'
-    show AddBudgetScreen;
+import 'package:mudra_manager/screens/budget/add_budget_screen.dart' show AddBudgetScreen;
 import 'package:mudra_manager/screens/budget/budget_dashboard.dart';
-import 'package:mudra_manager/screens/reusable/common_button.dart';
 import 'package:mudra_manager/screens/reusable/no_data_found.dart';
+import 'package:mudra_manager/util/localization_extension.dart';
 
 class BudgetMiniCard extends ConsumerStatefulWidget {
   final double globalPadding;
@@ -24,8 +23,8 @@ class _BudgetMiniCardState extends ConsumerState<BudgetMiniCard> {
     final budgetProgressProvider = ref.watch(budgetWithProgressProvider);
     var color = Theme.of(context).colorScheme;
     var textTheme = Theme.of(context).textTheme;
-    final formatter = DateFormat('dd MMM yy');
     final ctxt = AppLocalizations.of(context)!;
+    final formatter = DateFormat('dd MMM yy', ctxt.localeName);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -35,21 +34,13 @@ class _BudgetMiniCardState extends ConsumerState<BudgetMiniCard> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                ctxt.dashboard_mini_budget_text,
-                style: textTheme.titleLarge?.copyWith(color: color.primary),
-              ),
-              IconButton.filled(
-                onPressed:
-                    () => {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const BudgetDashboard(),
-                        ),
-                      ),
-                    },
-                icon: Icon(Icons.open_in_new),
+              Text(ctxt.dashboard_mini_budget_text, style: textTheme.titleLarge?.copyWith(color: color.primary)),
+              Hero(
+                tag: 'budgetExpandHero',
+                child: IconButton.filled(
+                  onPressed: () => {Navigator.push(context, MaterialPageRoute(builder: (_) => const BudgetDashboard()))},
+                  icon: Icon(Icons.open_in_new),
+                ),
               ),
             ],
           ),
@@ -62,12 +53,7 @@ class _BudgetMiniCardState extends ConsumerState<BudgetMiniCard> {
                 iconData: Icons.pie_chart_outline,
                 action: ElevatedButton(
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const AddBudgetScreen(),
-                      ),
-                    );
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const AddBudgetScreen()));
                   },
                   child: Text(ctxt.dashboard_mini_budget_add_text),
                 ),
@@ -80,10 +66,7 @@ class _BudgetMiniCardState extends ConsumerState<BudgetMiniCard> {
                     final percent = (spent / budget.amount).clamp(0.0, 1.0);
 
                     return Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       child: SizedBox(
                         height: 210,
                         child: GestureDetector(
@@ -95,12 +78,7 @@ class _BudgetMiniCardState extends ConsumerState<BudgetMiniCard> {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(12.0),
                               // Light background color
-                              border: Border.all(
-                                color:
-                                    percent == 1.0
-                                        ? color.error
-                                        : color.primary,
-                              ), // Subtle border
+                              border: Border.all(color: percent == 1.0 ? color.error : color.primary), // Subtle border
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.center,
@@ -111,12 +89,7 @@ class _BudgetMiniCardState extends ConsumerState<BudgetMiniCard> {
                                   children: <Widget>[
                                     CircleAvatar(
                                       radius: 16,
-                                      child: Icon(
-                                        percent == 1.0
-                                            ? Icons.warning_amber
-                                            : Icons.bubble_chart_outlined,
-                                        size: 16,
-                                      ),
+                                      child: Icon(percent == 1.0 ? Icons.warning_amber : Icons.bubble_chart_outlined, size: 16),
                                     ),
                                     const SizedBox(width: 8.0),
                                     Expanded(
@@ -130,64 +103,46 @@ class _BudgetMiniCardState extends ConsumerState<BudgetMiniCard> {
                                   ],
                                 ),
                                 Padding(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 8.0,
-                                  ),
+                                  padding: EdgeInsets.symmetric(horizontal: 8.0),
                                   child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [
                                       SizedBox(
                                         height: 140,
                                         child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          mainAxisAlignment: MainAxisAlignment.center,
                                           children: [
                                             Text(
-                                              "Budget",
-                                              style: textTheme.labelLarge
-                                                  ?.copyWith(
-                                                    color: color.primaryFixed,
-                                                  ),
+                                              ctxt.budget_dashboardMiniCardBudgetTitleText,
+                                              style: textTheme.labelLarge?.copyWith(color: color.primaryFixed),
                                               overflow: TextOverflow.fade,
                                             ),
                                             Text(
-                                              "₹${budget.amount.toStringAsFixed(2)}",
-                                              style: textTheme.titleLarge
-                                                  ?.copyWith(
-                                                    color: color.primary,
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
+                                              ctxt.formatCurrencyWithSign(2, budget.amount),
+                                              style: textTheme.titleLarge?.copyWith(color: color.primary, fontWeight: FontWeight.w600),
                                               overflow: TextOverflow.fade,
                                             ),
                                             Text(
-                                              "Spent (${((spent / budget.amount) * 100).toInt()}%)",
-                                              style: textTheme.titleSmall
-                                                  ?.copyWith(
-                                                    color: color.secondaryFixed,
-                                                  ),
+                                              "${ctxt.budget_dashboardMiniCardSpentTitleText} (${ctxt.formatCompactNumber().format((spent / budget.amount) * 100)}%)",
+                                              style: textTheme.titleSmall?.copyWith(color: color.secondaryFixed),
                                               overflow: TextOverflow.fade,
                                             ),
                                             Text(
-                                              "₹${spent.toStringAsFixed(2)}",
-                                              style: textTheme.titleLarge
-                                                  ?.copyWith(
-                                                    color: color.secondary,
-                                                    // fontSize: 40,
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
+                                              ctxt.formatCurrencyWithSign(2, spent),
+                                              style: textTheme.titleLarge?.copyWith(
+                                                color: color.secondary,
+                                                // fontSize: 40,
+                                                fontWeight: FontWeight.w600,
+                                              ),
                                               overflow: TextOverflow.fade,
                                             ),
                                           ],
                                         ),
                                       ),
                                       Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         children: <Widget>[
                                           // Circular progress
                                           Stack(
@@ -199,25 +154,11 @@ class _BudgetMiniCardState extends ConsumerState<BudgetMiniCard> {
                                                 child: CircularProgressIndicator(
                                                   value: percent,
                                                   strokeWidth: 12,
-                                                  backgroundColor:
-                                                      color.secondary,
-                                                  valueColor:
-                                                      AlwaysStoppedAnimation<
-                                                        Color
-                                                      >(
-                                                        percent >= 1.0
-                                                            ? color.error
-                                                            : color.primary,
-                                                      ),
+                                                  backgroundColor: color.secondary,
+                                                  valueColor: AlwaysStoppedAnimation<Color>(percent >= 1.0 ? color.error : color.primary),
                                                 ),
                                               ),
-                                              Text(
-                                                '${(percent * 100).toInt()}%',
-                                                style: textTheme.labelLarge
-                                                    ?.copyWith(
-                                                      color: color.primary,
-                                                    ),
-                                              ),
+                                              Text(ctxt.formatPercentNumber(percent), style: textTheme.labelLarge?.copyWith(color: color.primary)),
                                             ],
                                           ),
                                         ],
@@ -228,9 +169,7 @@ class _BudgetMiniCardState extends ConsumerState<BudgetMiniCard> {
                                 Text(
                                   "${formatter.format(budget.startDate)} - ${formatter.format(budget.endDate)}",
                                   textAlign: TextAlign.center,
-                                  style: textTheme.labelMedium?.copyWith(
-                                    color: color.primary,
-                                  ),
+                                  style: textTheme.labelMedium?.copyWith(color: color.primary),
                                 ),
                               ],
                             ),

@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:mudra_manager/providers/budget_service_provider.dart'
-    show BudgetWithProgress, budgetServiceProvider, budgetsWithProgressProvider;
-import 'package:mudra_manager/screens/budget/add_budget_screen.dart'
-    show AddBudgetScreen;
-import 'package:mudra_manager/screens/budget/budget_category_mini_card.dart'
-    show BudgetCategoryMiniCard;
-import 'package:mudra_manager/screens/budget/budget_chart_screen.dart'
-    show NestedCircularChart;
+import 'package:mudra_manager/l10n/app_localizations.dart' show AppLocalizations;
+import 'package:mudra_manager/providers/budget_service_provider.dart' show BudgetWithProgress, budgetServiceProvider, budgetsWithProgressProvider;
+import 'package:mudra_manager/screens/budget/add_budget_screen.dart' show AddBudgetScreen;
+import 'package:mudra_manager/screens/budget/budget_category_mini_card.dart' show BudgetCategoryMiniCard;
+import 'package:mudra_manager/screens/budget/budget_chart_screen.dart' show NestedCircularChart;
+import 'package:mudra_manager/screens/budget/chart_legend.dart';
+import 'package:mudra_manager/util/localization_extension.dart';
 
 class BudgetSummaryCard extends ConsumerStatefulWidget {
   final BudgetWithProgress data;
@@ -16,27 +15,28 @@ class BudgetSummaryCard extends ConsumerStatefulWidget {
   const BudgetSummaryCard(this.data, {super.key});
 
   @override
-  _BudgetSummaryCardState createState() => _BudgetSummaryCardState();
+  BudgetSummaryCardState createState() => BudgetSummaryCardState();
 }
 
-class _BudgetSummaryCardState extends ConsumerState<BudgetSummaryCard> {
+class BudgetSummaryCardState extends ConsumerState<BudgetSummaryCard> {
   bool _expanded = false;
   double allBoxWidthFactor = 0.4;
 
   @override
   Widget build(BuildContext context) {
+    final ctxt = AppLocalizations.of(context)!;
     final b = widget.data.budget;
     final spent = widget.data.spent;
     final total = b.amount;
     final pct = total > 0 ? (spent / total) : 0;
     var color = Theme.of(context).colorScheme;
     var textTheme = Theme.of(context).textTheme;
-    final formatter = DateFormat('dd MMM yy');
+    final formatter = DateFormat('dd MMM yy', ctxt.localeName);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: SizedBox(
-        height: _expanded ? 480 : 280,
+        // height: _expanded ? 480 : 280,
         child: GestureDetector(
           onTap: () => setState(() => _expanded = !_expanded),
           child: Container(
@@ -44,9 +44,7 @@ class _BudgetSummaryCardState extends ConsumerState<BudgetSummaryCard> {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16.0),
               // Light background color
-              border: Border.all(
-                color: pct == 1.0 ? color.error : color.primary,
-              ), // Subtle border
+              border: Border.all(color: pct == 1.0 ? color.error : color.primary), // Subtle border
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -56,36 +54,13 @@ class _BudgetSummaryCardState extends ConsumerState<BudgetSummaryCard> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: <Widget>[
-                    CircleAvatar(
-                      radius: 16,
-                      child: Icon(
-                        pct == 1.0
-                            ? Icons.warning_amber
-                            : Icons.bubble_chart_outlined,
-                        size: 16,
-                      ),
-                    ),
+                    CircleAvatar(radius: 16, child: Icon(pct == 1.0 ? Icons.warning_amber : Icons.bubble_chart_outlined, size: 16)),
                     const SizedBox(width: 8.0),
-                    Expanded(
-                      child: Text(
-                        b.name.toUpperCase(),
-                        // textAlign: TextAlign.center,
-                        style: textTheme.labelLarge?.copyWith(),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
+                    Expanded(child: Text(b.name.toUpperCase(), style: textTheme.labelLarge?.copyWith(), overflow: TextOverflow.ellipsis)),
                     IconButton.filled(
                       icon: Icon(Icons.edit),
                       onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder:
-                                (_) => AddBudgetScreen(
-                                  existing: widget.data.budget,
-                                ),
-                          ),
-                        );
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => AddBudgetScreen(existing: widget.data.budget)));
                       },
                     ),
                     IconButton.filled(
@@ -95,43 +70,29 @@ class _BudgetSummaryCardState extends ConsumerState<BudgetSummaryCard> {
                           context: context,
                           builder:
                               (ctx) => AlertDialog(
-                                title: Text(
-                                  'Delete Budget?',
-                                  style: textTheme.titleLarge,
-                                ),
-                                content: Text(
-                                  'This will remove the budget and its allocations.',
-                                  style: textTheme.bodyLarge,
-                                ),
+                                title: Text(ctxt.budget_buttonDeleteTitleText, style: textTheme.titleLarge),
+                                content: Text(ctxt.budget_buttonDeleteBodyText, style: textTheme.bodyLarge),
                                 actions: [
                                   OutlinedButton(
                                     onPressed: () => Navigator.pop(ctx, false),
                                     child: Text(
-                                      'Cancel'.toUpperCase(),
-                                      style: textTheme.labelLarge?.copyWith(
-                                        color: color.primary,
-                                      ),
+                                      ctxt.budget_buttonCancelActionText.toUpperCase(),
+                                      style: textTheme.labelLarge?.copyWith(color: color.primary),
                                     ),
                                   ),
                                   OutlinedButton(
                                     onPressed: () => Navigator.pop(ctx, true),
-                                    style: OutlinedButton.styleFrom(
-                                      backgroundColor: color.primary,
-                                    ),
+                                    style: OutlinedButton.styleFrom(backgroundColor: color.primary),
                                     child: Text(
-                                      'Delete'.toUpperCase(),
-                                      style: textTheme.labelLarge?.copyWith(
-                                        color: color.onPrimary,
-                                      ),
+                                      ctxt.budget_buttonDeleteActionText.toUpperCase(),
+                                      style: textTheme.labelLarge?.copyWith(color: color.onPrimary),
                                     ),
                                   ),
                                 ],
                               ),
                         );
                         if (confirm == true) {
-                          await ref
-                              .read(budgetServiceProvider)
-                              .deleteBudget(b.id);
+                          await ref.read(budgetServiceProvider).deleteBudget(b.id);
                           ref.invalidate(budgetsWithProgressProvider);
                         }
                       },
@@ -151,14 +112,8 @@ class _BudgetSummaryCardState extends ConsumerState<BudgetSummaryCard> {
                         child: NestedCircularChart(
                           total: total,
                           spent: spent,
-                          spentCategories: {
-                            for (var cs in widget.data.categorySpendings)
-                              cs.category.name: cs.spent,
-                          },
-                          categories: [
-                            for (var cs in widget.data.categorySpendings)
-                              cs.category,
-                          ],
+                          spentCategories: {for (var cs in widget.data.categorySpendings) cs.category.name: cs.spent},
+                          categories: [for (var cs in widget.data.categorySpendings) cs.category],
                         ),
                       ),
                     ),
@@ -170,37 +125,27 @@ class _BudgetSummaryCardState extends ConsumerState<BudgetSummaryCard> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "Budget",
+                              ctxt.budget_dashboardMiniCardBudgetTitleText,
                               // textAlign: TextAlign.center,
-                              style: textTheme.labelLarge?.copyWith(
-                                color: color.primary,
-                              ),
+                              style: textTheme.labelLarge?.copyWith(color: color.primary),
                               overflow: TextOverflow.ellipsis,
                             ),
                             Text(
-                              "₹${b.amount.toStringAsFixed(0)}",
+                              ctxt.formatCurrencyWithSign(0, b.amount),
                               // textAlign: TextAlign.center,
-                              style: textTheme.titleLarge?.copyWith(
-                                color: color.primary,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 35,
-                              ),
+                              style: textTheme.titleLarge?.copyWith(color: color.primary, fontWeight: FontWeight.w700),
                               overflow: TextOverflow.ellipsis,
                             ),
                             Text(
-                              "Spent",
+                              ctxt.budget_dashboardMiniCardSpentTitleText,
                               // textAlign: TextAlign.center,
-                              style: textTheme.labelLarge?.copyWith(
-                                color: color.secondary,
-                              ),
+                              style: textTheme.labelLarge?.copyWith(color: color.secondary),
                               overflow: TextOverflow.ellipsis,
                             ),
                             Text(
-                              "₹${spent.toStringAsFixed(0)} (${(pct * 100).toStringAsFixed(0)}%)",
+                              "${ctxt.formatCurrencyWithSign(0, spent)} (${ctxt.formatPercentNumber(pct)})",
                               // textAlign: TextAlign.center,
-                              style: textTheme.titleLarge?.copyWith(
-                                color: color.secondary,
-                              ),
+                              style: textTheme.titleMedium?.copyWith(color: color.secondary),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ],
@@ -208,6 +153,13 @@ class _BudgetSummaryCardState extends ConsumerState<BudgetSummaryCard> {
                       ),
                     ),
                   ],
+                ),
+                const SizedBox(height: 25),
+                ChartLegend(
+                  spentCategories: {for (var cs in widget.data.categorySpendings) cs.category.name: cs.spent},
+                  categories: [for (var cs in widget.data.categorySpendings) cs.category],
+                  total: total,
+                  spent: spent,
                 ),
                 const SizedBox(height: 25),
                 Row(
@@ -219,17 +171,11 @@ class _BudgetSummaryCardState extends ConsumerState<BudgetSummaryCard> {
                       alignment: Alignment.center,
                       child: Text(
                         "${formatter.format(b.startDate)} - ${formatter.format(b.endDate)}",
-                        style: textTheme.bodyLarge?.copyWith(
-                          color: color.primary,
-                        ),
+                        style: textTheme.bodyLarge?.copyWith(color: color.primary),
                       ),
                     ),
                     Spacer(),
-                    Icon(
-                      _expanded
-                          ? Icons.keyboard_arrow_up_outlined
-                          : Icons.keyboard_arrow_down_outlined,
-                    ),
+                    Icon(_expanded ? Icons.keyboard_arrow_up_outlined : Icons.keyboard_arrow_down_outlined),
                   ],
                 ),
                 if (_expanded) ...[
@@ -237,12 +183,7 @@ class _BudgetSummaryCardState extends ConsumerState<BudgetSummaryCard> {
                   Divider(indent: 10, endIndent: 10),
                   Align(
                     alignment: Alignment.center,
-                    child: Text(
-                      'Categories'.toUpperCase(),
-                      style: textTheme.bodyLarge?.copyWith(
-                        color: color.primary,
-                      ),
-                    ),
+                    child: Text(ctxt.budget_categoriesTitle.toUpperCase(), style: textTheme.bodyLarge?.copyWith(color: color.primary)),
                   ),
                   SizedBox(
                     height: 150, // Adjust height as needed
@@ -252,11 +193,7 @@ class _BudgetSummaryCardState extends ConsumerState<BudgetSummaryCard> {
                       itemCount: widget.data.categorySpendings.length,
                       itemBuilder: (BuildContext context, int index) {
                         var cat = widget.data.categorySpendings[index];
-                        return BudgetCategoryMiniCard(
-                          category: cat.category,
-                          allocated: cat.allocated,
-                          spent: cat.spent,
-                        );
+                        return BudgetCategoryMiniCard(category: cat.category, allocated: cat.allocated, spent: cat.spent);
                       },
                     ),
                   ),

@@ -8,6 +8,78 @@
   "@onboard_welcomeToApp": {
     "description": "Welcome to Application"
   },
+  "onboard_TrackYourTransactions": "अपने लेनदेन को ट्रैक करें",
+  "@onboard_TrackYourTransactions": {
+    "description": "Track your Transactions"
+  },
+  "onboard_SeeWhereYourMoneyGoes": "देखें कि आपका पैसा कहाँ जाता है, हर दिन।",
+  "@onboard_SeeWhereYourMoneyGoes": {
+    "description": "See where your money goes, every day."
+  },
+  "onboard_SetBudgetsAndGoals": "बजट और लक्ष्य निर्धारित करें",
+  "@onboard_SetBudgetsAndGoals": {
+    "description": "Set Budgets and Goals"
+  },
+  "onboard_stayOnTrackAndAchieveYourDream": "पटरी पर रहें और अपने सपनों को प्राप्त करें।",
+  "@onboard_stayOnTrackAndAchieveYourDream": {
+    "description": "Stay on track and achieve your dreams."
+  },
+  "onboard_GetStarted": "शुरू हो जाओ!",
+  "@onboard_GetStarted": {
+    "description": "Get Started!"
+  },
+  "onboard_letsSetupYourAccount": "चलिए, आपका खाता सेट अप करते हैं।",
+  "@onboard_letsSetupYourAccount": {
+    "description": "Let's set up your account."
+  },
+  "onboard_howShouldWeCallYou": "हम आपको कैसे बुलाएं?",
+  "@onboard_howShouldWeCallYou": {
+    "description": "How should we call you?"
+  },
+  "onboard_enterYourNameToPersonalizeYourExperience": "अपने अनुभव को व्यक्तिगत बनाने के लिए अपना नाम दर्ज करें।",
+  "@onboard_enterYourNameToPersonalizeYourExperience": {
+    "description": "Enter your name to personalize your experience."
+  },
+  "onboard_enterYourName": "अपना नाम दर्ज करें",
+  "@onboard_enterYourName": {
+    "description": "Enter your name"
+  },
+  "onboard_setupYourFirstAccount": "अपना पहला खाता सेटअप करें",
+  "@onboard_setupYourFirstAccount": {
+    "description": "Setup Your First Account"
+  },
+  "onboard_letsCreateYourFirstAccount": "आइए अपना पहला खाता बनाते हैं (मान लीजिए: नकद)।",
+  "@onboard_letsCreateYourFirstAccount": {
+    "description": "Let's start managing your money wisely."
+  },
+  "onboard_accountName": "खाते का नाम",
+  "@onboard_accountName": {
+    "description": "Account Name"
+  },
+  "onboard_initialBalance": "शुरुआती शेष",
+  "@onboard_initialBalance": {
+    "description": "Initial Balance"
+  },
+  "onboard_youCanUpdateOtherDetailsLaterAsWell": "आप बाद में भी अन्य विवरण अपडेट कर सकते हैं।",
+  "@onboard_youCanUpdateOtherDetailsLaterAsWell": {
+    "description": "You can update other details later as well."
+  },
+  "onboard_pleaseFillThe": "कृपया \"{inputName}\" भरें",
+  "@onboard_pleaseFillThe": {
+    "description": "Please fill the "
+  },
+  "onboard_pleaseEnterAValidNumberFor": "कृपया \"{hintText}\" के लिए एक मान्य संख्या दर्ज करें",
+  "@onboard_pleaseEnterAValidNumberFor": {
+    "description": "Please enter a valid number for "
+  },
+  "onboard_youAreAllSet": "आप सब तैयार हैं!",
+  "@onboard_youAreAllSet": {
+    "description": "You're all set!"
+  },
+  "onboard_letsStartManagingYourMoneyWisely": "आइए अपने पैसे का बुद्धिमानी से प्रबंधन करना शुरू करें।",
+  "@onboard_letsStartManagingYourMoneyWisely": {
+    "description": "Let's start managing your money wisely."
+  },
   "app_settings_appbar_title": "ऐप सेटिंग्स",
   "@app_settings_appbar_title": {
     "description": "This is title of screen page"
@@ -152,9 +224,49 @@
   "@transaction_list_filter_expense": {
     "description": "This is text of Expense"
   },
+  "transaction_listViewGroupTodayLabel": "आज",
+  "@transaction_listViewGroupTodayLabel": {
+    "description": "This is text of Today"
+  },
+  "transaction_listViewGroupYesterdayLabel": "कल",
+  "@transaction_listViewGroupYesterdayLabel": {
+    "description": "This is text of Yesterday"
+  },
   "transaction_list_pending_transaction_message_text" : "⚡ नए लेनदेन मिले! अभी समीक्षा करें",
   "@transaction_list_pending_transaction_message_text" : {
     "description" : "This is text of pending transaction message"
+  },
+  "transaction_listPendingTransactionMessageActionLabel" : "समीक्षा",
+  "@transaction_listPendingTransactionMessageActionLabel" : {
+    "description" : "This is text of pending transaction message action"
+  },
+  "transaction_noTransactionFoundText" : "कोई लेन-देन नहीं मिला।",
+  "@transaction_noTransactionFoundText" : {
+    "description" : "This is text of no transaction found"
+  },
+  "transaction_deleteAlertTitleText": "लेन-देन हटाएं?",
+  "@transaction_deleteAlertTitleText": {
+    "description": "This is text of Delete Transaction"
+  },
+  "transaction_deleteAlertBodyText": "यह क्रिया पूर्ववत नहीं की जा सकती है।",
+  "@transaction_deleteAlertBodyText": {
+    "description": "This is text of Delete Transaction body"
+  },
+  "transaction_deleteButtonActionText": "हटाएं",
+  "@transaction_deleteButtonActionText": {
+    "description": "This is text of Delete Transaction action"
+  },
+  "transaction_cancelButtonActionText": "रद्द करें",
+  "@transaction_cancelButtonActionText": {
+    "description": "This is text of Cancel Transaction action"
+  },
+  "transaction_filterCategoryText": "लेन-देन फ़िल्टर करें",
+  "@transaction_filterCategoryText": {
+    "description": "This is text of Filter Category"
+  },
+  "transaction_noteDescriptionText": "नोट: {description}",
+  "@transaction_noteDescriptionText": {
+    "description": "This is text of note description"
   },
   "calendar_week_monday_initial_text" : "सो",
   "@calendar_week_monday_initial_text" : {
@@ -183,5 +295,213 @@
   "calendar_week_sunday_initial_text" : "र",
   "@calendar_week_sunday_initial_text" : {
     "description" : "This is text of Sunday initial"
+  },
+  "dashboard_netWorthTitle": "निवल मूल्य",
+  "@dashboard_netWorthTitle": {
+    "description": "This is title of Net Worth"
+  },
+  "budget_dashboardMiniCardBudgetTitleText": "बजट",
+  "@budget_dashboardMiniCardBudgetTitleText": {
+    "description": "This is title of Budget"
+  },
+  "budget_dashboardMiniCardSpentTitleText": "खर्च",
+  "@budget_dashboardMiniCardSpentTitleText": {
+    "description": "This is title of Spent"
+  },
+  "budget_dashboardPageTitle": "बजट विवरण",
+  "@budget_dashboardPageTitle": {
+    "description": "This is title of Budgets Details"
+  },
+  "budget_dashboardNotFoundText": "कोई बजट परिभाषित नहीं है, एक जोड़ें!",
+  "@budget_dashboardNotFoundText": {
+    "description": "This is text of budget not found"
+  },
+  "budget_dashboardAddBudgetText": "बजट जोड़ें",
+  "@budget_dashboardAddBudgetText": {
+    "description": "This is text of add budget"
+  },
+  "budget_categoriesTitle": "श्रेणियाँ",
+  "@budget_categoriesTitle": {
+    "description": "This is text of categories title"
+  },
+  "budget_dashboardPieChartLabelText": "{title} ({totalPercent} कुल का, {spentPercent} खर्च का)",
+  "@budget_dashboardPieChartLabelText": {
+    "description": "This is text of pie chart label"
+  },
+  "budget_buttonDeleteTitleText": "बजट हटाएं?",
+  "@budget_buttonDeleteTitleText": {
+    "description": "This is text of delete title"
+  },
+  "budget_buttonDeleteBodyText": "यह बजट और उसके आवंटन को हटा देगा, यह क्रिया पूर्ववत नहीं की जा सकती है।",
+  "@budget_buttonDeleteBodyText": {
+    "description": "This is text of delete body"
+  },
+  "budget_buttonDeleteActionText": "हटाएं",
+  "@budget_buttonDeleteActionText": {
+    "description": "This is text of delete action"
+  },
+  "budget_buttonCancelActionText": "रद्द करें",
+  "@budget_buttonCancelActionText": {
+    "description": "This is text of cancel action"
+  },
+  "budget_buttonAddText": "बजट जोड़ें",
+  "@budget_buttonAddText": {
+    "description": "This is text of add budget"
+  },
+  "budget_buttonEditText": "बजट संपादित करें",
+  "@budget_buttonEditText": {
+    "description": "This is text of edit budget"
+  },
+  "budget_budgetNameControllerText": "बजट का नाम",
+  "@budget_budgetNameControllerText": {
+    "description": "This is text of Budget Name title"
+  },
+  "budget_budgetAmountControllerText": "कुल राशि",
+  "@budget_budgetAmountControllerText": {
+    "description": "This is text of Total Amount title"
+  },
+  "budget_recurrenceControllerText": "पुनरावृत्ति",
+  "@budget_recurrenceControllerText": {
+    "description": "This is text of Recurrence title"
+  },
+  "budget_nameRequiredHintText": "बजट का नाम आवश्यक है",
+  "@budget_nameRequiredHintText": {
+    "description": "This is text of Budget name is required text"
+  },
+  "budget_amountRequiredHintText": "वैध राशि आवश्यक है",
+  "@budget_amountRequiredHintText": {
+    "description": "This is text of Amount is required text"
+  },
+  "budget_selectStartDateText": "प्रारंभ तिथि चुनें",
+  "@budget_selectStartDateText": {
+    "description": "This is text of Select Start Date"
+  },
+  "budget_selectedStartDateText": "शुरू: {startDate}",
+  "@budget_selectedStartDateText": {
+    "description": "This is text of Selected Start Date"
+  },
+  "budget_selectEndDateText": "समाप्ति तिथि चुनें",
+  "@budget_selectEndDateText": {
+    "description": "This is text of Select End Date"
+  },
+  "budget_selectedEndDateText": "समाप्ति: {endDate}",
+  "@budget_selectedEndDateText": {
+    "description": "This is text of Selected End Date"
+  },
+  "budget_categoryTitle": "श्रेणियाँ और आवंटन चुनें",
+  "@budget_categoryTitle": {
+    "description": "This is text of Select Categories & Allocations title"
+  },
+  "budget_allocateAmountText": "राशि आवंटित करें",
+  "@budget_allocateAmountText": {
+    "description": "This is text of Allocate Amount"
+  },
+  "budget_categoryMessageInfoText" : "आप मैन्युअल रूप से श्रेणी आवंटन दर्ज कर सकते हैं, या शेष राशि को समान रूप से स्वतः वितरित करने के लिए उन्हें खाली छोड़ सकते हैं।",
+  "@budget_categoryMessageInfoText" : {
+    "description" : "This is text of category message info"
+  },
+  "budget_totalAllocatedBudgetText": "कुल आवंटित: {totalAlloc}",
+  "@budget_totalAllocatedBudgetText": {
+    "description": "This is text of Total Allocated"
+  },
+  "budget_recurrenceText": "पुनरावृत्ति",
+  "@budget_recurrenceText": {
+    "description": "This is text of Recurrence text"
+  },
+  "budget_recurrenceNoneText": "कोई नहीं",
+  "@budget_recurrenceNoneText": {
+    "description": "This is text of None text"
+  },
+  "budget_recurrenceDailyText": "दैनिक",
+  "@budget_recurrenceDailyText": {
+    "description": "This is text of Daily text"
+  },
+  "budget_recurrenceWeeklyText": "साप्ताहिक",
+  "@budget_recurrenceWeeklyText": {
+    "description": "This is text of Weekly text"
+  },
+  "budget_recurrenceMonthlyText": "मासिक",
+  "@budget_recurrenceMonthlyText": {
+    "description": "This is text of Monthly text"
+  },
+  "budget_recurrenceYearlyText": "वार्षिक",
+  "@budget_recurrenceYearlyText": {
+    "description": "This is text of Yearly text"
+  },
+  "budget_saveButtonText": "सहेजें",
+  "@budget_saveButtonText": {
+    "description": "This is text of save button"
+  },
+  "budget_updateButtonText": "अपडेट करें",
+  "@budget_updateButtonText": {
+    "description": "This is text of update button"
+  },
+  "budget_pickBothDatesErrorText": "दोनों तिथियाँ चुनें",
+  "@budget_pickBothDatesErrorText": {
+    "description": "This is text of Pick both dates"
+  },
+  "budget_selectAtLeastOneCategoryErrorText": "कम से कम एक श्रेणी चुनें",
+  "@budget_selectAtLeastOneCategoryErrorText": {
+    "description": "This is text of Select at least one category"
+  },
+  "budget_allocatedAmountExceedsTotalBudgetText": "आवंटित राशि कुल बजट से अधिक है",
+  "@budget_allocatedAmountExceedsTotalBudgetText": {
+    "description": "This is text of Allocated amount exceeds total budget"
+  },
+  "transaction_amountControllerText": "राशि",
+  "@transaction_amountControllerText": {
+    "description": "This is text of Amount title"
+  },
+  "transaction_descriptionControllerText": "विवरण (वैकल्पिक)",
+  "@transaction_descriptionControllerText": {
+    "description": "This is text of Description title"
+  },
+  "transaction_amountControllerErrorText": "राशि दर्ज करें",
+  "@transaction_amountControllerErrorText": {
+    "description": "This is text of Enter amount title"
+  },
+  "transaction_selectAccountLabel": "खाता चुनें",
+  "@transaction_selectAccountLabel": {
+    "description": "This is text of Select Account"
+  },
+  "transaction_selectCategoryLabel": "श्रेणी चुनें",
+  "@transaction_selectCategoryLabel": {
+    "description": "This is text of Select Category"
+  },
+  "transaction_selectTagLabel": "टैग चुनें",
+  "@transaction_selectTagLabel": {
+    "description": "This is text of Select Tag"
+  },
+  "transaction_addNewCategoryText": "नई श्रेणी जोड़ें",
+  "@transaction_addNewCategoryText": {
+    "description": "This is text of Add New Category"
+  },
+  "transaction_addNewTagText": "नया टैग जोड़ें",
+  "@transaction_addNewTagText": {
+    "description": "This is text of Add New Tag"
+  },
+  "transaction_tagNameControllerText": "टैग नाम",
+  "@transaction_tagNameControllerText": {
+    "description": "This is text of Tag Name"
+  },
+  "transaction_saveTagButtonLabel": "टैग सहेजें",
+  "@transaction_saveTagButtonLabel": {
+    "description": "This is text of Save Tag"
+  },
+  "transaction_selectOneAccountErrorText": "कम से कम एक खाता चुनें",
+  "@transaction_selectOneAccountErrorText": {
+    "description": "This is text of Select one Account"
+  },
+  "transaction_selectOneCategoryErrorText": "कम से कम एक श्रेणी चुनें",
+  "@transaction_selectOneCategoryErrorText": {
+    "description": "This is text of Select one Category"
+  },
+  "transaction_incomeButtonLabel": "आय",
+  "@transaction_incomeButtonLabel": {
+    "description": "This is text of Income"
+  },
+  "transaction_expenseButtonLabel": "व्यय",
+  "@transaction_expenseButtonLabel": {
+    "description": "This is text of Expense"
   }
 }

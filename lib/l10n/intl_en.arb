@@ -8,6 +8,78 @@
   "@onboard_welcomeToApp": {
     "description": "Welcome to Application"
   },
+  "onboard_TrackYourTransactions": "Track your Transactions",
+  "@onboard_TrackYourTransactions": {
+    "description": "Track your Transactions"
+  },
+  "onboard_SeeWhereYourMoneyGoes": "See where your money goes, every day.",
+  "@onboard_SeeWhereYourMoneyGoes": {
+    "description": "See where your money goes, every day."
+  },
+  "onboard_SetBudgetsAndGoals": "Set Budgets and Goals",
+  "@onboard_SetBudgetsAndGoals": {
+    "description": "Set Budgets and Goals"
+  },
+  "onboard_stayOnTrackAndAchieveYourDream": "Stay on track and achieve your dreams.",
+  "@onboard_stayOnTrackAndAchieveYourDream": {
+    "description": "Stay on track and achieve your dreams."
+  },
+  "onboard_GetStarted": "Get Started!",
+  "@onboard_GetStarted": {
+    "description": "Get Started!"
+  },
+  "onboard_letsSetupYourAccount": "Let's set up your account.",
+  "@onboard_letsSetupYourAccount": {
+    "description": "Let's set up your account."
+  },
+  "onboard_howShouldWeCallYou": "How should we call you?",
+  "@onboard_howShouldWeCallYou": {
+    "description": "How should we call you?"
+  },
+  "onboard_enterYourNameToPersonalizeYourExperience": "Enter your name to personalize your experience.",
+  "@onboard_enterYourNameToPersonalizeYourExperience": {
+    "description": "Enter your name to personalize your experience."
+  },
+  "onboard_enterYourName": "Enter your name",
+  "@onboard_enterYourName": {
+    "description": "Enter your name"
+  },
+  "onboard_setupYourFirstAccount": "Setup Your First Account",
+  "@onboard_setupYourFirstAccount": {
+    "description": "Setup Your First Account"
+  },
+  "onboard_letsCreateYourFirstAccount": "Let's create your first account (let say: Cash).",
+  "@onboard_letsCreateYourFirstAccount": {
+    "description": "Let's start managing your money wisely."
+  },
+  "onboard_accountName": "Account Name",
+  "@onboard_accountName": {
+    "description": "Account Name"
+  },
+  "onboard_initialBalance": "Initial Balance",
+  "@onboard_initialBalance": {
+    "description": "Initial Balance"
+  },
+  "onboard_youCanUpdateOtherDetailsLaterAsWell": "You can update other details later as well.",
+  "@onboard_youCanUpdateOtherDetailsLaterAsWell": {
+    "description": "You can update other details later as well."
+  },
+  "onboard_pleaseFillThe": "Please fill the \"{inputName}\"",
+  "@onboard_pleaseFillThe": {
+    "description": "Please fill the "
+  },
+  "onboard_pleaseEnterAValidNumberFor": "Please enter a valid number for \"{hintText}\"",
+  "@onboard_pleaseEnterAValidNumberFor": {
+    "description": "Please enter a valid number for "
+  },
+  "onboard_youAreAllSet": "You're all set!",
+  "@onboard_youAreAllSet": {
+    "description": "You're all set!"
+  },
+  "onboard_letsStartManagingYourMoneyWisely": "Let's start managing your money wisely.",
+  "@onboard_letsStartManagingYourMoneyWisely": {
+    "description": "Let's start managing your money wisely."
+  },
   "app_settings_appbar_title": "App Settings",
   "@app_settings_appbar_title": {
     "description": "This is title of screen page"
@@ -67,6 +139,14 @@
   "transaction_list_screen_title": "Transaction List",
   "@transaction_list_screen_title": {
     "description": "This is title of Transaction List screen"
+  },
+  "transaction_listViewGroupTodayLabel": "Today",
+  "@transaction_listViewGroupTodayLabel": {
+    "description": "This is text of Today"
+  },
+  "transaction_listViewGroupYesterdayLabel": "Yesterday",
+  "@transaction_listViewGroupYesterdayLabel": {
+    "description": "This is text of Yesterday"
   },
   "greeting_good_morning_text": "Good Morning",
   "@greeting_good_morning_text": {
@@ -156,6 +236,38 @@
   "@transaction_list_pending_transaction_message_text" : {
     "description" : "This is text of pending transaction message"
   },
+  "transaction_listPendingTransactionMessageActionLabel" : "Review",
+  "@transaction_listPendingTransactionMessageActionLabel" : {
+    "description" : "This is text of pending transaction message action"
+  },
+  "transaction_noTransactionFoundText" : "No transactions found.",
+  "@transaction_noTransactionFoundText" : {
+    "description" : "This is text of no transaction found"
+  },
+  "transaction_deleteAlertTitleText": "Delete Transaction?",
+  "@transaction_deleteAlertTitleText": {
+    "description": "This is text of Delete Transaction"
+  },
+  "transaction_deleteAlertBodyText": "This action cannot be undone.",
+  "@transaction_deleteAlertBodyText": {
+    "description": "This is text of Delete Transaction body"
+  },
+  "transaction_deleteButtonActionText": "Delete",
+  "@transaction_deleteButtonActionText": {
+    "description": "This is text of Delete Transaction action"
+  },
+  "transaction_cancelButtonActionText": "Cancel",
+  "@transaction_cancelButtonActionText": {
+    "description": "This is text of Cancel Transaction action"
+  },
+  "transaction_filterCategoryText": "Filter Transactions",
+  "@transaction_filterCategoryText": {
+    "description": "This is text of Filter Category"
+  },
+  "transaction_noteDescriptionText": "note: {description}",
+  "@transaction_noteDescriptionText": {
+    "description": "This is text of note description"
+  },
   "calendar_week_monday_initial_text" : "M",
   "@calendar_week_monday_initial_text" : {
     "description" : "This is text of Monday initial"
@@ -183,5 +295,219 @@
   "calendar_week_sunday_initial_text" : "S",
   "@calendar_week_sunday_initial_text" : {
     "description" : "This is text of Sunday initial"
+  },
+  "dashboard_netWorthTitle": "Net Worth",
+  "@dashboard_netWorthTitle": {
+    "description": "This is title of Net Worth"
+  },
+  "budget_dashboardMiniCardBudgetTitleText": "Budget",
+  "@budget_dashboardMiniCardBudgetTitleText": {
+    "description": "This is title of Budget"
+  },
+  "budget_dashboardMiniCardSpentTitleText": "Spent",
+  "@budget_dashboardMiniCardSpentTitleText": {
+    "description": "This is title of Spent"
+  },
+  "budget_dashboardPageTitle": "Budgets Details",
+  "@budget_dashboardPageTitle": {
+    "description": "This is title of Budgets Details"
+  },
+  "budget_dashboardNotFoundText": "No Budgets Defined, Add One!",
+  "@budget_dashboardNotFoundText": {
+    "description": "This is text of budget not found"
+  },
+  "budget_dashboardAddBudgetText": "Add Budget",
+  "@budget_dashboardAddBudgetText": {
+    "description": "This is text of add budget"
+  },
+  "budget_categoriesTitle": "Categories",
+  "@budget_categoriesTitle": {
+    "description": "This is text of categories title"
+  },
+  "budget_dashboardPieChartLabelText": "{title} ({totalPercent} of Total, {spentPercent}of Spent)",
+  "@budget_dashboardPieChartLabelText": {
+    "description": "This is text of pie chart label"
+  },
+  "budget_buttonDeleteTitleText": "Delete Budget?",
+  "@budget_buttonDeleteTitleText": {
+    "description": "This is text of delete title"
+  },
+  "budget_buttonDeleteBodyText": "This will remove the Budget and its allocations, this action cannot be undone.",
+  "@budget_buttonDeleteBodyText": {
+    "description": "This is text of delete body"
+  },
+  "budget_buttonDeleteActionText": "Delete",
+  "@budget_buttonDeleteActionText": {
+    "description": "This is text of delete action"
+  },
+  "budget_buttonCancelActionText": "Cancel",
+  "@budget_buttonCancelActionText": {
+    "description": "This is text of cancel action"
+  },
+  "budget_buttonAddText": "Add Budget",
+  "@budget_buttonAddText": {
+    "description": "This is text of add budget"
+  },
+  "budget_buttonEditText": "Edit Budget",
+  "@budget_buttonEditText": {
+    "description": "This is text of edit budget"
+  },
+  "budget_budgetNameControllerText": "Budget Name",
+  "@budget_budgetNameControllerText": {
+    "description": "This is text of Budget Name title"
+  },
+  "budget_budgetAmountControllerText": "Total Amount",
+  "@budget_budgetAmountControllerText": {
+    "description": "This is text of Total Amount title"
+  },
+  "budget_recurrenceControllerText": "Recurrence",
+  "@budget_recurrenceControllerText": {
+    "description": "This is text of Recurrence title"
+  },
+  "budget_nameRequiredHintText": "Budget name is required",
+  "@budget_nameRequiredHintText": {
+    "description": "This is text of Budget name is required text"
+  },
+  "budget_amountRequiredHintText": "Valid Amount is required",
+  "@budget_amountRequiredHintText": {
+    "description": "This is text of Amount is required text"
+  },
+  "budget_selectStartDateText": "Select Start Date",
+  "@budget_selectStartDateText": {
+    "description": "This is text of Select Start Date"
+  },
+  "budget_selectedStartDateText": "Start: {startDate}",
+  "@budget_selectedStartDateText": {
+    "description": "This is text of Select End Date"
+  },
+  "budget_selectEndDateText": "Select End Date",
+  "@budget_selectEndDateText": {
+    "description": "This is text of Select End Date"
+  },
+  "budget_selectedEndDateText": "End: {endDate}",
+  "@budget_selectedEndDateText": {
+    "description": "This is text of Select End Date"
+  },
+  "budget_categoryTitle": "Select Categories & Allocations",
+  "@budget_categoryTitle": {
+    "description": "This is text of Select Categories & Allocations title"
+  },
+  "budget_allocateAmountText": "Allocate Amount",
+  "@budget_allocateAmountText": {
+    "description": "This is text of Allocate Amount"
+  },
+  "budget_categoryMessageInfoText" : "You can manually enter category allocations, or leave them blank to auto-distribute the remaining amount equally.",
+  "@budget_categoryMessageInfoText" : {
+    "description" : "This is text of category message info"
+  },
+  "budget_totalAllocatedBudgetText": "Total Allocated: {totalAlloc}",
+  "@budget_totalAllocatedBudgetText": {
+    "description": "This is text of Total Allocated"
+  },
+  "budget_recurrenceText": "Recurrence",
+  "@budget_recurrenceText": {
+    "description": "This is text of Recurrence text"
+  },
+  "budget_recurrenceNoneText": "None",
+  "@budget_recurrenceNoneText": {
+    "description": "This is text of None text"
+  },
+  "budget_recurrenceDailyText": "Daily",
+  "@budget_recurrenceDailyText": {
+    "description": "This is text of Daily text"
+  },
+  "budget_recurrenceWeeklyText": "Weekly",
+  "@budget_recurrenceWeeklyText": {
+    "description": "This is text of Weekly text"
+  },
+  "budget_recurrenceMonthlyText": "Monthly",
+  "@budget_recurrenceMonthlyText": {
+    "description": "This is text of Monthly text"
+  },
+  "budget_recurrenceYearlyText": "Yearly",
+  "@budget_recurrenceYearlyText": {
+    "description": "This is text of Yearly text"
+  },
+  "budget_saveButtonText": "save",
+  "@budget_saveButtonText": {
+    "description": "This is text of save button"
+  },
+  "budget_updateButtonText": "update",
+  "@budget_updateButtonText": {
+    "description": "This is text of update button"
+  },
+  "budget_pickBothDatesErrorText": "Pick both dates",
+  "@budget_pickBothDatesErrorText": {
+    "description": "This is text of Pick both dates"
+  },
+  "budget_selectAtLeastOneCategoryErrorText": "Select at least one category",
+  "@budget_selectAtLeastOneCategoryErrorText": {
+    "description": "This is text of Select at least one category"
+  },
+  "budget_allocatedAmountExceedsTotalBudgetText": "Allocated amount exceeds total budget",
+  "@budget_allocatedAmountExceedsTotalBudgetText": {
+    "description": "This is text of Allocated amount exceeds total budget"
+  },
+  "transaction_amountControllerText": "Amount",
+  "@transaction_amountControllerText": {
+    "description": "This is text of Amount title"
+  },
+  "transaction_descriptionControllerText": "Description (optional)",
+  "@transaction_descriptionControllerText": {
+    "description": "This is text of Description title"
+  },
+  "transaction_amountControllerErrorText": "Enter amount",
+  "@transaction_amountControllerErrorText": {
+    "description": "This is text of Enter amount title"
+  },
+  "transaction_selectAccountLabel": "Select Account",
+  "@transaction_selectAccountLabel": {
+    "description": "This is text of Select Account"
+  },
+  "transaction_selectCategoryLabel": "Select Category",
+  "@transaction_selectCategoryLabel": {
+    "description": "This is text of Select Category"
+  },
+  "transaction_selectTagLabel": "Select Tag",
+  "@transaction_selectTagLabel": {
+    "description": "This is text of Select Tag"
+  },
+  "transaction_addNewCategoryText": "Add New \nCategory",
+  "@transaction_addNewCategoryText": {
+    "description": "This is text of Add New Category"
+  },
+  "transaction_addNewTagText": "Add New Tag",
+  "@transaction_addNewTagText": {
+    "description": "This is text of Add New Tag"
+  },
+  "transaction_tagNameControllerText": "Tag Name",
+  "@transaction_tagNameControllerText": {
+    "description": "This is text of Tag Name"
+  },
+  "transaction_saveTagButtonLabel": "Save Tag",
+  "@transaction_saveTagButtonLabel": {
+    "description": "This is text of Save Tag"
+  },
+  "transaction_saveTransactionButtonLabel": "Save Transaction",
+  "@transaction_saveTransactionButtonLabel": {
+    "description": "This is text of Save Transaction"
+  },
+  "transaction_selectOneAccountErrorText": "Select at least one Account",
+  "@transaction_selectOneAccountErrorText": {
+    "description": "This is text of Select one Account"
+  },
+  "transaction_selectOneCategoryErrorText": "Select at least one Category",
+  "@transaction_selectOneCategoryErrorText": {
+    "description": "This is text of Select one Category"
+  },
+  "transaction_incomeButtonLabel": "INCOME",
+  "@transaction_incomeButtonLabel": {
+    "description": "This is text of Income"
+  },
+  "transaction_expenseButtonLabel": "EXPENSE",
+  "@transaction_expenseButtonLabel": {
+    "description": "This is text of Expense"
   }
+
+
 }

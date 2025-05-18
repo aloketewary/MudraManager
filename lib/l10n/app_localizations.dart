@@ -109,6 +109,114 @@ abstract class AppLocalizations {
   /// **'Welcome to {appName}'**
   String onboard_welcomeToApp(Object appName);
 
+  /// Track your Transactions
+  ///
+  /// In en, this message translates to:
+  /// **'Track your Transactions'**
+  String get onboard_TrackYourTransactions;
+
+  /// See where your money goes, every day.
+  ///
+  /// In en, this message translates to:
+  /// **'See where your money goes, every day.'**
+  String get onboard_SeeWhereYourMoneyGoes;
+
+  /// Set Budgets and Goals
+  ///
+  /// In en, this message translates to:
+  /// **'Set Budgets and Goals'**
+  String get onboard_SetBudgetsAndGoals;
+
+  /// Stay on track and achieve your dreams.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay on track and achieve your dreams.'**
+  String get onboard_stayOnTrackAndAchieveYourDream;
+
+  /// Get Started!
+  ///
+  /// In en, this message translates to:
+  /// **'Get Started!'**
+  String get onboard_GetStarted;
+
+  /// Let's set up your account.
+  ///
+  /// In en, this message translates to:
+  /// **'Let\'s set up your account.'**
+  String get onboard_letsSetupYourAccount;
+
+  /// How should we call you?
+  ///
+  /// In en, this message translates to:
+  /// **'How should we call you?'**
+  String get onboard_howShouldWeCallYou;
+
+  /// Enter your name to personalize your experience.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your name to personalize your experience.'**
+  String get onboard_enterYourNameToPersonalizeYourExperience;
+
+  /// Enter your name
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your name'**
+  String get onboard_enterYourName;
+
+  /// Setup Your First Account
+  ///
+  /// In en, this message translates to:
+  /// **'Setup Your First Account'**
+  String get onboard_setupYourFirstAccount;
+
+  /// Let's start managing your money wisely.
+  ///
+  /// In en, this message translates to:
+  /// **'Let\'s create your first account (let say: Cash).'**
+  String get onboard_letsCreateYourFirstAccount;
+
+  /// Account Name
+  ///
+  /// In en, this message translates to:
+  /// **'Account Name'**
+  String get onboard_accountName;
+
+  /// Initial Balance
+  ///
+  /// In en, this message translates to:
+  /// **'Initial Balance'**
+  String get onboard_initialBalance;
+
+  /// You can update other details later as well.
+  ///
+  /// In en, this message translates to:
+  /// **'You can update other details later as well.'**
+  String get onboard_youCanUpdateOtherDetailsLaterAsWell;
+
+  /// Please fill the
+  ///
+  /// In en, this message translates to:
+  /// **'Please fill the \"{inputName}\"'**
+  String onboard_pleaseFillThe(Object inputName);
+
+  /// Please enter a valid number for
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid number for \"{hintText}\"'**
+  String onboard_pleaseEnterAValidNumberFor(Object hintText);
+
+  /// You're all set!
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re all set!'**
+  String get onboard_youAreAllSet;
+
+  /// Let's start managing your money wisely.
+  ///
+  /// In en, this message translates to:
+  /// **'Let\'s start managing your money wisely.'**
+  String get onboard_letsStartManagingYourMoneyWisely;
+
   /// This is title of screen page
   ///
   /// In en, this message translates to:
@@ -198,6 +306,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Transaction List'**
   String get transaction_list_screen_title;
+
+  /// This is text of Today
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get transaction_listViewGroupTodayLabel;
+
+  /// This is text of Yesterday
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get transaction_listViewGroupYesterdayLabel;
 
   /// This is text of Good Morning
   ///
@@ -331,6 +451,54 @@ abstract class AppLocalizations {
   /// **'⚡ New transactions found! Review now'**
   String get transaction_list_pending_transaction_message_text;
 
+  /// This is text of pending transaction message action
+  ///
+  /// In en, this message translates to:
+  /// **'Review'**
+  String get transaction_listPendingTransactionMessageActionLabel;
+
+  /// This is text of no transaction found
+  ///
+  /// In en, this message translates to:
+  /// **'No transactions found.'**
+  String get transaction_noTransactionFoundText;
+
+  /// This is text of Delete Transaction
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Transaction?'**
+  String get transaction_deleteAlertTitleText;
+
+  /// This is text of Delete Transaction body
+  ///
+  /// In en, this message translates to:
+  /// **'This action cannot be undone.'**
+  String get transaction_deleteAlertBodyText;
+
+  /// This is text of Delete Transaction action
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get transaction_deleteButtonActionText;
+
+  /// This is text of Cancel Transaction action
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get transaction_cancelButtonActionText;
+
+  /// This is text of Filter Category
+  ///
+  /// In en, this message translates to:
+  /// **'Filter Transactions'**
+  String get transaction_filterCategoryText;
+
+  /// This is text of note description
+  ///
+  /// In en, this message translates to:
+  /// **'note: {description}'**
+  String transaction_noteDescriptionText(Object description);
+
   /// This is text of Monday initial
   ///
   /// In en, this message translates to:
@@ -372,6 +540,324 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'S'**
   String get calendar_week_sunday_initial_text;
+
+  /// This is title of Net Worth
+  ///
+  /// In en, this message translates to:
+  /// **'Net Worth'**
+  String get dashboard_netWorthTitle;
+
+  /// This is title of Budget
+  ///
+  /// In en, this message translates to:
+  /// **'Budget'**
+  String get budget_dashboardMiniCardBudgetTitleText;
+
+  /// This is title of Spent
+  ///
+  /// In en, this message translates to:
+  /// **'Spent'**
+  String get budget_dashboardMiniCardSpentTitleText;
+
+  /// This is title of Budgets Details
+  ///
+  /// In en, this message translates to:
+  /// **'Budgets Details'**
+  String get budget_dashboardPageTitle;
+
+  /// This is text of budget not found
+  ///
+  /// In en, this message translates to:
+  /// **'No Budgets Defined, Add One!'**
+  String get budget_dashboardNotFoundText;
+
+  /// This is text of add budget
+  ///
+  /// In en, this message translates to:
+  /// **'Add Budget'**
+  String get budget_dashboardAddBudgetText;
+
+  /// This is text of categories title
+  ///
+  /// In en, this message translates to:
+  /// **'Categories'**
+  String get budget_categoriesTitle;
+
+  /// This is text of pie chart label
+  ///
+  /// In en, this message translates to:
+  /// **'{title} ({totalPercent} of Total, {spentPercent}of Spent)'**
+  String budget_dashboardPieChartLabelText(Object spentPercent, Object title, Object totalPercent);
+
+  /// This is text of delete title
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Budget?'**
+  String get budget_buttonDeleteTitleText;
+
+  /// This is text of delete body
+  ///
+  /// In en, this message translates to:
+  /// **'This will remove the Budget and its allocations, this action cannot be undone.'**
+  String get budget_buttonDeleteBodyText;
+
+  /// This is text of delete action
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get budget_buttonDeleteActionText;
+
+  /// This is text of cancel action
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get budget_buttonCancelActionText;
+
+  /// This is text of add budget
+  ///
+  /// In en, this message translates to:
+  /// **'Add Budget'**
+  String get budget_buttonAddText;
+
+  /// This is text of edit budget
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Budget'**
+  String get budget_buttonEditText;
+
+  /// This is text of Budget Name title
+  ///
+  /// In en, this message translates to:
+  /// **'Budget Name'**
+  String get budget_budgetNameControllerText;
+
+  /// This is text of Total Amount title
+  ///
+  /// In en, this message translates to:
+  /// **'Total Amount'**
+  String get budget_budgetAmountControllerText;
+
+  /// This is text of Recurrence title
+  ///
+  /// In en, this message translates to:
+  /// **'Recurrence'**
+  String get budget_recurrenceControllerText;
+
+  /// This is text of Budget name is required text
+  ///
+  /// In en, this message translates to:
+  /// **'Budget name is required'**
+  String get budget_nameRequiredHintText;
+
+  /// This is text of Amount is required text
+  ///
+  /// In en, this message translates to:
+  /// **'Valid Amount is required'**
+  String get budget_amountRequiredHintText;
+
+  /// This is text of Select Start Date
+  ///
+  /// In en, this message translates to:
+  /// **'Select Start Date'**
+  String get budget_selectStartDateText;
+
+  /// This is text of Select End Date
+  ///
+  /// In en, this message translates to:
+  /// **'Start: {startDate}'**
+  String budget_selectedStartDateText(Object startDate);
+
+  /// This is text of Select End Date
+  ///
+  /// In en, this message translates to:
+  /// **'Select End Date'**
+  String get budget_selectEndDateText;
+
+  /// This is text of Select End Date
+  ///
+  /// In en, this message translates to:
+  /// **'End: {endDate}'**
+  String budget_selectedEndDateText(Object endDate);
+
+  /// This is text of Select Categories & Allocations title
+  ///
+  /// In en, this message translates to:
+  /// **'Select Categories & Allocations'**
+  String get budget_categoryTitle;
+
+  /// This is text of Allocate Amount
+  ///
+  /// In en, this message translates to:
+  /// **'Allocate Amount'**
+  String get budget_allocateAmountText;
+
+  /// This is text of category message info
+  ///
+  /// In en, this message translates to:
+  /// **'You can manually enter category allocations, or leave them blank to auto-distribute the remaining amount equally.'**
+  String get budget_categoryMessageInfoText;
+
+  /// This is text of Total Allocated
+  ///
+  /// In en, this message translates to:
+  /// **'Total Allocated: {totalAlloc}'**
+  String budget_totalAllocatedBudgetText(Object totalAlloc);
+
+  /// This is text of Recurrence text
+  ///
+  /// In en, this message translates to:
+  /// **'Recurrence'**
+  String get budget_recurrenceText;
+
+  /// This is text of None text
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get budget_recurrenceNoneText;
+
+  /// This is text of Daily text
+  ///
+  /// In en, this message translates to:
+  /// **'Daily'**
+  String get budget_recurrenceDailyText;
+
+  /// This is text of Weekly text
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get budget_recurrenceWeeklyText;
+
+  /// This is text of Monthly text
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get budget_recurrenceMonthlyText;
+
+  /// This is text of Yearly text
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly'**
+  String get budget_recurrenceYearlyText;
+
+  /// This is text of save button
+  ///
+  /// In en, this message translates to:
+  /// **'save'**
+  String get budget_saveButtonText;
+
+  /// This is text of update button
+  ///
+  /// In en, this message translates to:
+  /// **'update'**
+  String get budget_updateButtonText;
+
+  /// This is text of Pick both dates
+  ///
+  /// In en, this message translates to:
+  /// **'Pick both dates'**
+  String get budget_pickBothDatesErrorText;
+
+  /// This is text of Select at least one category
+  ///
+  /// In en, this message translates to:
+  /// **'Select at least one category'**
+  String get budget_selectAtLeastOneCategoryErrorText;
+
+  /// This is text of Allocated amount exceeds total budget
+  ///
+  /// In en, this message translates to:
+  /// **'Allocated amount exceeds total budget'**
+  String get budget_allocatedAmountExceedsTotalBudgetText;
+
+  /// This is text of Amount title
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get transaction_amountControllerText;
+
+  /// This is text of Description title
+  ///
+  /// In en, this message translates to:
+  /// **'Description (optional)'**
+  String get transaction_descriptionControllerText;
+
+  /// This is text of Enter amount title
+  ///
+  /// In en, this message translates to:
+  /// **'Enter amount'**
+  String get transaction_amountControllerErrorText;
+
+  /// This is text of Select Account
+  ///
+  /// In en, this message translates to:
+  /// **'Select Account'**
+  String get transaction_selectAccountLabel;
+
+  /// This is text of Select Category
+  ///
+  /// In en, this message translates to:
+  /// **'Select Category'**
+  String get transaction_selectCategoryLabel;
+
+  /// This is text of Select Tag
+  ///
+  /// In en, this message translates to:
+  /// **'Select Tag'**
+  String get transaction_selectTagLabel;
+
+  /// This is text of Add New Category
+  ///
+  /// In en, this message translates to:
+  /// **'Add New \nCategory'**
+  String get transaction_addNewCategoryText;
+
+  /// This is text of Add New Tag
+  ///
+  /// In en, this message translates to:
+  /// **'Add New Tag'**
+  String get transaction_addNewTagText;
+
+  /// This is text of Tag Name
+  ///
+  /// In en, this message translates to:
+  /// **'Tag Name'**
+  String get transaction_tagNameControllerText;
+
+  /// This is text of Save Tag
+  ///
+  /// In en, this message translates to:
+  /// **'Save Tag'**
+  String get transaction_saveTagButtonLabel;
+
+  /// This is text of Save Transaction
+  ///
+  /// In en, this message translates to:
+  /// **'Save Transaction'**
+  String get transaction_saveTransactionButtonLabel;
+
+  /// This is text of Select one Account
+  ///
+  /// In en, this message translates to:
+  /// **'Select at least one Account'**
+  String get transaction_selectOneAccountErrorText;
+
+  /// This is text of Select one Category
+  ///
+  /// In en, this message translates to:
+  /// **'Select at least one Category'**
+  String get transaction_selectOneCategoryErrorText;
+
+  /// This is text of Income
+  ///
+  /// In en, this message translates to:
+  /// **'INCOME'**
+  String get transaction_incomeButtonLabel;
+
+  /// This is text of Expense
+  ///
+  /// In en, this message translates to:
+  /// **'EXPENSE'**
+  String get transaction_expenseButtonLabel;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

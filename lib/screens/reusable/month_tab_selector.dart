@@ -43,6 +43,7 @@ class _MonthTabSelectorState extends State<MonthTabSelector> {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final ctxt = AppLocalizations.of(context)!;
+    final now = DateTime.now();
 
     return SizedBox(
       height: 60,
@@ -79,13 +80,28 @@ class _MonthTabSelectorState extends State<MonthTabSelector> {
                 ),
               ),
               child: Center(
-                child: Text(
-                  DateFormat('MMM yy', ctxt.localeName).format(date),
-                  style: textTheme.titleSmall?.copyWith(
-                    color: isSelected ? color.primary : color.onSurface,
-                    fontWeight:
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      DateFormat('MMMM', ctxt.localeName).format(date),
+                      style: textTheme.titleSmall?.copyWith(
+                        color: isSelected ? color.primary : color.onSurface,
+                        fontWeight:
                         isSelected ? FontWeight.bold : FontWeight.normal,
-                  ),
+                      ),
+                    ),
+                    if(now.year != date.year)
+                    Text(
+                      DateFormat('yyyy', ctxt.localeName).format(date),
+                      style: textTheme.labelSmall?.copyWith(
+                        color: isSelected ? color.primary : color.onSurface,
+                        fontWeight:
+                        isSelected ? FontWeight.bold : FontWeight.normal,
+                      ),
+                    )
+                  ],
                 ),
               ),
             ),

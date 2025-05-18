@@ -17,6 +17,64 @@ class AppLocalizationsBn extends AppLocalizations {
   }
 
   @override
+  String get onboard_TrackYourTransactions => 'আপনার লেনদেন ট্র্যাক করুন';
+
+  @override
+  String get onboard_SeeWhereYourMoneyGoes => 'আপনার টাকা প্রতিদিন কোথায় যায় দেখুন।';
+
+  @override
+  String get onboard_SetBudgetsAndGoals => 'বাজেট এবং লক্ষ্য নির্ধারণ করুন';
+
+  @override
+  String get onboard_stayOnTrackAndAchieveYourDream => 'সঠিক পথে থাকুন এবং আপনার স্বপ্ন অর্জন করুন।';
+
+  @override
+  String get onboard_GetStarted => 'এবার শুরু করা যাক!';
+
+  @override
+  String get onboard_letsSetupYourAccount => 'চলুন আপনার অ্যাকাউন্ট সেট আপ করি।';
+
+  @override
+  String get onboard_howShouldWeCallYou => 'আমরা আপনাকে কী নামে ডাকব?';
+
+  @override
+  String get onboard_enterYourNameToPersonalizeYourExperience => 'আপনার অভিজ্ঞতা ব্যক্তিগতকৃত করতে আপনার নাম লিখুন।';
+
+  @override
+  String get onboard_enterYourName => 'আপনার নাম লিখুন';
+
+  @override
+  String get onboard_setupYourFirstAccount => 'আপনার প্রথম অ্যাকাউন্ট সেটআপ করুন';
+
+  @override
+  String get onboard_letsCreateYourFirstAccount => 'আসুন আপনার প্রথম অ্যাকাউন্ট তৈরি করি (যেমন: ক্যাশ)।';
+
+  @override
+  String get onboard_accountName => 'অ্যাকাউন্টের নাম';
+
+  @override
+  String get onboard_initialBalance => 'প্রাথমিক ব্যালেন্স';
+
+  @override
+  String get onboard_youCanUpdateOtherDetailsLaterAsWell => 'আপনি অন্যান্য বিবরণ পরেও আপডেট করতে পারবেন।';
+
+  @override
+  String onboard_pleaseFillThe(Object inputName) {
+    return 'অনুগ্রহ করে \"$inputName\" পূরণ করুন';
+  }
+
+  @override
+  String onboard_pleaseEnterAValidNumberFor(Object hintText) {
+    return 'অনুগ্রহ করে \"$hintText\" এর জন্য একটি বৈধ সংখ্যা লিখুন';
+  }
+
+  @override
+  String get onboard_youAreAllSet => 'আপনি পুরোপুরি তৈরি!';
+
+  @override
+  String get onboard_letsStartManagingYourMoneyWisely => 'আসুন আপনার অর্থ বিচক্ষণতার সাথে পরিচালনা করা শুরু করি।';
+
+  @override
   String get app_settings_appbar_title => 'অ্যাপ সেটিংস';
 
   @override
@@ -60,6 +118,12 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get transaction_list_screen_title => 'লেনদেনের তালিকা';
+
+  @override
+  String get transaction_listViewGroupTodayLabel => 'আজ';
+
+  @override
+  String get transaction_listViewGroupYesterdayLabel => 'গতকাল';
 
   @override
   String get greeting_good_morning_text => 'শুভ সকাল';
@@ -128,6 +192,32 @@ class AppLocalizationsBn extends AppLocalizations {
   String get transaction_list_pending_transaction_message_text => '⚡ নতুন লেনদেন পাওয়া গেছে! এখনই পর্যালোচনা করুন';
 
   @override
+  String get transaction_listPendingTransactionMessageActionLabel => 'পর্যালোচনা';
+
+  @override
+  String get transaction_noTransactionFoundText => 'কোনো লেনদেন পাওয়া যায়নি।';
+
+  @override
+  String get transaction_deleteAlertTitleText => 'লেনদেন মুছবেন?';
+
+  @override
+  String get transaction_deleteAlertBodyText => 'এই কাজটি আর ফেরানো যাবে না।';
+
+  @override
+  String get transaction_deleteButtonActionText => 'মুছে ফেলুন';
+
+  @override
+  String get transaction_cancelButtonActionText => 'বাতিল করুন';
+
+  @override
+  String get transaction_filterCategoryText => 'লেনদেন ফিল্টার করুন';
+
+  @override
+  String transaction_noteDescriptionText(Object description) {
+    return 'নোট: $description';
+  }
+
+  @override
   String get calendar_week_monday_initial_text => 'সোম';
 
   @override
@@ -147,4 +237,171 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get calendar_week_sunday_initial_text => 'রবি';
+
+  @override
+  String get dashboard_netWorthTitle => 'নিট মূল্য';
+
+  @override
+  String get budget_dashboardMiniCardBudgetTitleText => 'বাজেট';
+
+  @override
+  String get budget_dashboardMiniCardSpentTitleText => 'খরচ হয়েছে';
+
+  @override
+  String get budget_dashboardPageTitle => 'বাজেটের বিবরণ';
+
+  @override
+  String get budget_dashboardNotFoundText => 'কোনো বাজেট সংজ্ঞায়িত নেই, একটি যোগ করুন!';
+
+  @override
+  String get budget_dashboardAddBudgetText => 'বাজেট যোগ করুন';
+
+  @override
+  String get budget_categoriesTitle => 'ক্যাটাগরি';
+
+  @override
+  String budget_dashboardPieChartLabelText(Object spentPercent, Object title, Object totalPercent) {
+    return '$title (মোট $totalPercent, ব্যয়িত $spentPercent)';
+  }
+
+  @override
+  String get budget_buttonDeleteTitleText => 'বাজেট মুছবেন?';
+
+  @override
+  String get budget_buttonDeleteBodyText => 'এটি বাজেট এবং এর বরাদ্দগুলি সরিয়ে ফেলবে, এই পদক্ষেপটি আর ফেরানো যাবে না।';
+
+  @override
+  String get budget_buttonDeleteActionText => 'মুছে ফেলুন';
+
+  @override
+  String get budget_buttonCancelActionText => 'বাতিল করুন';
+
+  @override
+  String get budget_buttonAddText => 'বাজেট যোগ করুন';
+
+  @override
+  String get budget_buttonEditText => 'বাজেট সম্পাদনা করুন';
+
+  @override
+  String get budget_budgetNameControllerText => 'বাজেটের নাম';
+
+  @override
+  String get budget_budgetAmountControllerText => 'মোট পরিমাণ';
+
+  @override
+  String get budget_recurrenceControllerText => 'পুনরাবৃত্তি';
+
+  @override
+  String get budget_nameRequiredHintText => 'বাজেটের নাম আবশ্যক';
+
+  @override
+  String get budget_amountRequiredHintText => 'বৈধ পরিমাণ আবশ্যক';
+
+  @override
+  String get budget_selectStartDateText => 'শুরুর তারিখ নির্বাচন করুন';
+
+  @override
+  String budget_selectedStartDateText(Object startDate) {
+    return 'শুরু: $startDate';
+  }
+
+  @override
+  String get budget_selectEndDateText => 'শেষের তারিখ নির্বাচন করুন';
+
+  @override
+  String budget_selectedEndDateText(Object endDate) {
+    return 'শেষ: $endDate';
+  }
+
+  @override
+  String get budget_categoryTitle => 'ক্যাটাগরি এবং বরাদ্দ নির্বাচন করুন';
+
+  @override
+  String get budget_allocateAmountText => 'বরাদ্দ পরিমাণ';
+
+  @override
+  String get budget_categoryMessageInfoText => 'আপনি ম্যানুয়ালি ক্যাটাগরি বরাদ্দগুলি প্রবেশ করতে পারেন, অথবা অবশিষ্ট পরিমাণ সমানভাবে স্বয়ংক্রিয়ভাবে বিতরণ করার জন্য সেগুলিকে ফাঁকা রাখতে পারেন।';
+
+  @override
+  String budget_totalAllocatedBudgetText(Object totalAlloc) {
+    return 'মোট বরাদ্দ: $totalAlloc';
+  }
+
+  @override
+  String get budget_recurrenceText => 'পুনরাবৃত্তি';
+
+  @override
+  String get budget_recurrenceNoneText => 'নেই';
+
+  @override
+  String get budget_recurrenceDailyText => 'দৈনিক';
+
+  @override
+  String get budget_recurrenceWeeklyText => 'সাপ্তাহিক';
+
+  @override
+  String get budget_recurrenceMonthlyText => 'মাসিক';
+
+  @override
+  String get budget_recurrenceYearlyText => 'বার্ষিক';
+
+  @override
+  String get budget_saveButtonText => 'সংরক্ষণ করুন';
+
+  @override
+  String get budget_updateButtonText => 'আপডেট করুন';
+
+  @override
+  String get budget_pickBothDatesErrorText => 'উভয় তারিখ নির্বাচন করুন';
+
+  @override
+  String get budget_selectAtLeastOneCategoryErrorText => 'অন্তত একটি ক্যাটাগরি নির্বাচন করুন';
+
+  @override
+  String get budget_allocatedAmountExceedsTotalBudgetText => 'বরাদ্দ করা পরিমাণ মোট বাজেট অতিক্রম করেছে';
+
+  @override
+  String get transaction_amountControllerText => 'পরিমাণ';
+
+  @override
+  String get transaction_descriptionControllerText => 'বিবরণ (ঐচ্ছিক)';
+
+  @override
+  String get transaction_amountControllerErrorText => 'পরিমাণ লিখুন';
+
+  @override
+  String get transaction_selectAccountLabel => 'অ্যাকাউন্ট নির্বাচন করুন';
+
+  @override
+  String get transaction_selectCategoryLabel => 'ক্যাটাগরি নির্বাচন করুন';
+
+  @override
+  String get transaction_selectTagLabel => 'ট্যাগ নির্বাচন করুন';
+
+  @override
+  String get transaction_addNewCategoryText => 'নতুন ক্যাটাগরি\nযোগ করুন';
+
+  @override
+  String get transaction_addNewTagText => 'নতুন ট্যাগ যোগ করুন';
+
+  @override
+  String get transaction_tagNameControllerText => 'ট্যাগের নাম';
+
+  @override
+  String get transaction_saveTagButtonLabel => 'ট্যাগ সংরক্ষণ করুন';
+
+  @override
+  String get transaction_saveTransactionButtonLabel => 'Save Transaction';
+
+  @override
+  String get transaction_selectOneAccountErrorText => 'অন্তত একটি অ্যাকাউন্ট নির্বাচন করুন';
+
+  @override
+  String get transaction_selectOneCategoryErrorText => 'অন্তত একটি ক্যাটাগরি নির্বাচন করুন';
+
+  @override
+  String get transaction_incomeButtonLabel => 'আয়';
+
+  @override
+  String get transaction_expenseButtonLabel => 'ব্যয়';
 }

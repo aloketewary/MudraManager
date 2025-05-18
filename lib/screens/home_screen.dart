@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/db/models/user_profile.dart' show UserProfile;
 import 'package:mudra_manager/l10n/app_localizations.dart' show AppLocalizations;
+import 'package:mudra_manager/providers/account_providers.dart' show balanceVisibilityProvider;
 import 'package:mudra_manager/providers/greeting_provider.dart';
 import 'package:mudra_manager/providers/isar_provider.dart'
     show reminderTimeProvider;
@@ -70,6 +71,7 @@ class HomePageState extends ConsumerState<HomePage> {
                 switchOutCurve: Curves.easeIn,
                 child: FloatingActionButton.extended(
                   key: const ValueKey('extended'),
+                  heroTag: 'addTransactionHero',
                   onPressed: _onFabPressed,
                   icon: const Icon(Icons.add),
                   label: Text(ctxt.add_edit_transaction_screen_title),
@@ -103,10 +105,14 @@ class HomePageState extends ConsumerState<HomePage> {
   }
 
   void _onFabPressed() {
-    // Navigate to Add Transaction screen or open bottom sheet
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const AddEditTransactionScreen()),
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        transitionDuration: Duration(milliseconds: 300),
+        pageBuilder: (_, animation, secondaryAnimation) => AddEditTransactionScreen(),
+        transitionsBuilder: (_, animation, __, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+      ),
     );
   }
 
@@ -119,6 +125,7 @@ class HomePageState extends ConsumerState<HomePage> {
     final color = Theme.of(context).colorScheme;
     final notificationService = ref.watch(notificationRecordServiceProvider);
     final ctxt = AppLocalizations.of(context)!;
+    final showBalance = ref.watch(balanceVisibilityProvider);
 
     switch (selectedIndex) {
       case 0:
@@ -161,6 +168,13 @@ class HomePageState extends ConsumerState<HomePage> {
             ],
           ),
           actions: [
+            // IconButton(
+            //   icon: Icon(showBalance ? Icons.visibility : Icons.visibility_off),
+            //   onPressed: () {
+            //     ref.read(balanceVisibilityProvider.notifier).state = !showBalance;
+            //   },
+            //   enableFeedback: true,
+            // ),
             FutureBuilder(
               future: notificationService.countUnreadNotification(),
               builder: (_, snapshot) {

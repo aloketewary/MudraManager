@@ -4,9 +4,7 @@ import 'package:mudra_manager/db/isar_service.dart' show IsarService;
 import 'package:mudra_manager/db/models/budget.dart'
     show Budget, BudgetQueryFilter, BudgetQueryWhere, GetBudgetCollection;
 import 'package:mudra_manager/db/models/budget_category_allocation.dart'
-    show
-        BudgetCategoryAllocationQueryLinks,
-        GetBudgetCategoryAllocationCollection;
+    show BudgetCategoryAllocation, BudgetCategoryAllocationQueryLinks, GetBudgetCategoryAllocationCollection;
 import 'package:mudra_manager/db/models/category.dart';
 import 'package:mudra_manager/db/models/transaction.dart';
 import 'package:mudra_manager/providers/isar_provider.dart';
@@ -188,6 +186,15 @@ class BudgetService {
         .findAll();
     return budgets;
   }
+
+  Future<void> deleteAllocation(List<BudgetCategoryAllocation> allocList) async {
+    final isar = await isarService.getInstance();
+    var allocIds = allocList.map((elem) => elem.id).toList();
+    await isar.writeTxn(() async {
+      await isar.budgetCategoryAllocations.deleteAll(allocIds);
+    });
+  }
+
 }
 
 class CategorySpending {

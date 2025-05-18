@@ -16,6 +16,8 @@ final accountServiceProvider = Provider((ref) {
   return AccountsService(isar);
 });
 
+final balanceVisibilityProvider = StateProvider<bool>((ref) => true);
+
 class AccountsService {
   final IsarService isarService;
 

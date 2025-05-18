@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:math_expressions/math_expressions.dart';
+import 'package:mudra_manager/l10n/app_localizations.dart';
 import 'package:mudra_manager/screens/reusable/common_button.dart';
 
 class SimpleCalculator extends StatefulWidget {
@@ -16,12 +17,13 @@ class _SimpleCalculatorState extends State<SimpleCalculator> {
   String result = '';
 
   void onButtonPressed(String value) {
+    final ctxt = AppLocalizations.of(context)!;
     setState(() {
       if (value == 'Clr') {
         input = '';
         result = '';
       } else if (value == 'C') {
-        if(input.isNotEmpty) {
+        if (input.isNotEmpty) {
           input = input.substring(0, input.length - 1);
           result = '';
         }
@@ -66,6 +68,7 @@ class _SimpleCalculatorState extends State<SimpleCalculator> {
   Widget build(BuildContext context) {
     var textTheme = Theme.of(context).textTheme;
     var color = Theme.of(context).colorScheme;
+    final ctxt = AppLocalizations.of(context)!;
     const buttons = [
       ['7', '8', '9', '÷'],
       ['4', '5', '6', '×'],
@@ -76,17 +79,8 @@ class _SimpleCalculatorState extends State<SimpleCalculator> {
 
     return Column(
       children: [
-        Text(
-          input,
-          style: textTheme.titleLarge?.copyWith(color: color.secondary),
-        ),
-        Text(
-          result,
-          style: textTheme.titleLarge?.copyWith(
-            color: color.primary,
-            fontSize: 24,
-          ),
-        ),
+        Text(input, style: textTheme.titleLarge?.copyWith(color: color.secondary)),
+        Text(result, style: textTheme.titleLarge?.copyWith(color: color.primary, fontSize: 24)),
         ...buttons.map(
           (row) => Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -97,9 +91,7 @@ class _SimpleCalculatorState extends State<SimpleCalculator> {
                     child: CommonButton(
                       onPressed: () => onButtonPressed(btn),
                       text: btn,
-                      textStyle: textTheme.titleLarge?.copyWith(
-                        color: color.onPrimary,
-                      ),
+                      textStyle: textTheme.titleLarge?.copyWith(color: color.onPrimary),
                     ),
                   );
                 }).toList(),

@@ -1,24 +1,25 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:mudra_manager/db/models/category.dart';
+import 'package:mudra_manager/l10n/app_localizations.dart' show AppLocalizations;
 import 'package:mudra_manager/util/icon_helper.dart';
+import 'package:mudra_manager/util/localization_extension.dart';
 
 class BudgetCategoryMiniCard extends StatelessWidget {
   final Category category;
   final double allocated;
   final double spent;
 
-  const BudgetCategoryMiniCard({
-    super.key,
-    required this.category,
-    required this.allocated,
-    required this.spent,
-  });
+  const BudgetCategoryMiniCard({super.key, required this.category, required this.allocated, required this.spent});
 
   @override
   Widget build(BuildContext context) {
-    var colorTheme = Theme.of(context).colorScheme;
+    var color = Theme.of(context).colorScheme;
     var textTheme = Theme.of(context).textTheme;
     var categoryColor = Color(category.colorValue ?? 0xFF000000);
+    final ctxt = AppLocalizations.of(context)!;
+
     return GestureDetector(
       onTap: () => {},
       child: Container(
@@ -27,8 +28,12 @@ class BudgetCategoryMiniCard extends StatelessWidget {
         margin: const EdgeInsets.only(right: 8.0),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12.0),
-          color: categoryColor.withAlpha(58), // Light background color
-          border: Border.all(color: categoryColor), // Subtle border
+          gradient: LinearGradient(
+            begin: Alignment.bottomLeft,
+            end: Alignment.topRight,
+            colors: [color.surfaceDim, color.surface, categoryColor.withAlpha(90)],
+          ),
+          border: Border.all(color: color.primary), // Subtle border
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -38,17 +43,11 @@ class BudgetCategoryMiniCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
-                Icon(
-                  IconHelper.getIconData(category.iconName),
-                  color: Colors.white,
-                  size: 24,
-                ),
+                Icon(IconHelper.getIconData(category.iconName), color: color.primary, size: 24),
                 Text(
-                  "${(spent / allocated * 100).toStringAsFixed(0)}%",
+                  ctxt.formatPercentNumber((spent / allocated)),
                   textAlign: TextAlign.center,
-                  style: textTheme.bodyMedium?.copyWith(
-                    color: colorTheme.onPrimaryContainer,
-                  ),
+                  style: textTheme.bodyMedium?.copyWith(color: color.primary),
                   overflow: TextOverflow.ellipsis,
                 ),
               ],
@@ -56,9 +55,7 @@ class BudgetCategoryMiniCard extends StatelessWidget {
             Text(
               category.name,
               textAlign: TextAlign.center,
-              style: textTheme.titleMedium?.copyWith(
-                color: colorTheme.onPrimaryContainer,
-              ),
+              style: textTheme.titleMedium?.copyWith(color: color.primary),
               overflow: TextOverflow.ellipsis,
             ),
             Column(
@@ -68,19 +65,15 @@ class BudgetCategoryMiniCard extends StatelessWidget {
                   mainAxisSize: MainAxisSize.max,
                   children: [
                     Text(
-                      "₹${spent.toStringAsFixed(0)}",
+                      ctxt.formatCurrencyWithSign(0, spent),
                       textAlign: TextAlign.center,
-                      style: textTheme.bodySmall?.copyWith(
-                        color: colorTheme.onPrimaryContainer,
-                      ),
+                      style: textTheme.bodySmall?.copyWith(color: color.primary),
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      "₹${allocated.toStringAsFixed(0)}",
+                      ctxt.formatCurrencyWithSign(0, allocated),
                       textAlign: TextAlign.center,
-                      style: textTheme.bodySmall?.copyWith(
-                        color: colorTheme.onPrimaryContainer,
-                      ),
+                      style: textTheme.bodySmall?.copyWith(color: color.primary),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ],
@@ -88,8 +81,8 @@ class BudgetCategoryMiniCard extends StatelessWidget {
                 LinearProgressIndicator(
                   value: spent / allocated,
                   semanticsValue: spent.toStringAsFixed(0),
-                  backgroundColor: colorTheme.onSurface,
-                  valueColor: AlwaysStoppedAnimation<Color>(categoryColor),
+                  backgroundColor: color.secondary,
+                  valueColor: AlwaysStoppedAnimation<Color>(color.primary),
                 ),
               ],
             ),

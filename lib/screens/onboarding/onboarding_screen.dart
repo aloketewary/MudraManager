@@ -74,21 +74,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   void _onNext(BuildContext context) {
+    final ctxt = AppLocalizations.of(context)!;
     final isNamePage = _currentPage == onboardingData.length - 3;
     final isAccountPage = _currentPage == onboardingData.length - 2;
 
     final currentPage = onboardingData[_currentPage];
     if (currentPage.needsInput && isNamePage) {
       final text = _nameController.text.trim();
-
+      String hintText =
+          ctxt.translate(currentPage.inputHint ?? '').toLowerCase();
       if (text.isEmpty) {
         // Show error
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Please fill the "${currentPage.inputHint!.toLowerCase()}"',
-            ),
-          ),
+          SnackBar(content: Text(ctxt.onboard_pleaseFillThe(hintText))),
         );
         return; // Stop here
       }
@@ -98,20 +96,24 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       final balanceText = _balanceController.text.trim();
 
       if (text.isEmpty) {
+        String hintText =
+            ctxt.translate(currentPage.inputHint ?? '').toLowerCase();
         // Show error
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Please fill the "${currentPage.inputHint!.toLowerCase()}"',
-            ),
-          ),
+          SnackBar(content: Text(ctxt.onboard_pleaseFillThe(hintText))),
         );
         return; // Stop here
       }
       if (balanceText.isEmpty) {
         // Show error
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Please fill the "initial balance"')),
+          SnackBar(
+            content: Text(
+              ctxt.onboard_pleaseFillThe(
+                ctxt.onboard_initialBalance.toLowerCase(),
+              ),
+            ),
+          ),
         );
         return; // Stop here
       }
@@ -119,12 +121,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       final balance = double.tryParse(balanceText.trim());
 
       if (balance == null) {
+        String hintText =
+            ctxt.translate(currentPage.inputHint ?? '').toLowerCase();
         // Show error if it's not a valid number
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              'Please enter a valid number for "${currentPage.inputHint!.toLowerCase()}"',
-            ),
+            content: Text(ctxt.onboard_pleaseEnterAValidNumberFor(hintText)),
           ),
         );
         return; // Stop here
@@ -174,6 +176,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final isAccountPage = _currentPage == onboardingData.length - 2;
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final ctxt = AppLocalizations.of(context)!;
 
     return Scaffold(
       body: Stack(
@@ -212,9 +215,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             ),
                             const SizedBox(height: 15),
                             Text(
-                              AppLocalizations.of(
-                                context,
-                              )!.translate(data.description),
+                              ctxt.translate(data.description),
                               style: textTheme.titleMedium?.copyWith(
                                 color: color.onPrimary,
                                 fontWeight: FontWeight.normal,
@@ -228,7 +229,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                                     isNamePage
                                         ? _nameController
                                         : _accountController,
-                                labelText: data.inputHint,
+                                labelText: ctxt.translate(data.inputHint ?? ''),
                                 iconData:
                                     isNamePage
                                         ? Icons.person_outline
@@ -239,7 +240,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             if (isAccountPage)
                               CommonTextInputField(
                                 controller: _balanceController,
-                                labelText: 'Enter Initial Balance',
+                                labelText: ctxt.onboard_initialBalance,
                                 iconData: Icons.account_balance_wallet,
                                 inputType: TextInputType.numberWithOptions(
                                   signed: true,
@@ -248,7 +249,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                               ),
                             if (isAccountPage)
                               Text(
-                                "You can update other details later as well.",
+                                ctxt.onboard_youCanUpdateOtherDetailsLaterAsWell,
                                 style: textTheme.bodyMedium?.copyWith(
                                   color: color.onPrimary,
                                 ),

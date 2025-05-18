@@ -8,18 +8,15 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:mudra_manager/db/models/transaction.dart' show Transaction;
-import 'package:mudra_manager/l10n/app_localizations.dart'
-    show AppLocalizations;
+import 'package:mudra_manager/l10n/app_localizations.dart' show AppLocalizations;
 import 'package:mudra_manager/models/pie_chart_card.dart' show PieCategory;
-import 'package:mudra_manager/providers/status_data_provider.dart'
-    show StatsData, statsProvider;
+import 'package:mudra_manager/providers/status_data_provider.dart' show StatsData, statsProvider;
 import 'package:mudra_manager/screens/reusable/animated_balance.dart';
 import 'package:mudra_manager/screens/reusable/no_data_found.dart';
 import 'package:mudra_manager/screens/reusable/responseive_layout_builder.dart';
 import 'package:mudra_manager/screens/statistics/period_selector_screen.dart';
 import 'package:mudra_manager/util/case_extension.dart';
-import 'package:mudra_manager/util/export_excel_pdf.dart'
-    show exportStatsToExcel, exportStatsToPdf;
+import 'package:mudra_manager/util/export_excel_pdf.dart' show exportStatsToExcel, exportStatsToPdf;
 import 'package:mudra_manager/util/icon_helper.dart' show IconHelper;
 import 'package:mudra_manager/util/localization_extension.dart';
 
@@ -30,18 +27,63 @@ class StatisticsScreen extends ConsumerStatefulWidget {
   ConsumerState<StatisticsScreen> createState() => StatisticsScreenState();
 }
 
-class StatisticsScreenState extends ConsumerState<StatisticsScreen> {
+class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerProviderStateMixin {
   String _period = 'Month';
   StatsData? data;
   final GlobalKey pieKey = GlobalKey();
   final GlobalKey lineKey = GlobalKey();
+  late List<AnimationController> _controllers;
+  late List<Animation<Offset>> _animations;
+  bool _isDisposed = false;
+  int? touchedIndex;
+  Set<int> _disabledCategoryIndexes = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _controllers = List.generate(5, (index) {
+      return AnimationController(vsync: this, duration: Duration(milliseconds: 500));
+    });
+
+    _animations =
+        _controllers
+            .map(
+              (controller) =>
+                  Tween<Offset>(begin: Offset(0, 0.2), end: Offset.zero).animate(CurvedAnimation(parent: controller, curve: Curves.easeOut)),
+            )
+            .toList();
+
+    _runStaggeredAnimations();
+  }
+
+  void _runStaggeredAnimations() async {
+    try {
+      if (_controllers.isNotEmpty) {
+        for (int i = 0; i < _controllers.length; i++) {
+          await Future.delayed(Duration(milliseconds: 100));
+          if (_isDisposed) return; // 🔐 Important check
+          _controllers[i].forward();
+        }
+      }
+    } catch (err) {
+      debugPrint(err.toString());
+    }
+  }
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    for (var c in _controllers) {
+      c.dispose();
+    }
+    _controllers = List.empty();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     // You’d fetch data via Riverpod providers based on _period:
-    final stats = ref.watch(
-      statsProvider(_period),
-    ); // income, expense, spots, pieData, recentTxns
+    final stats = ref.watch(statsProvider(_period)); // income, expense, spots, pieData, recentTxns
     var color = Theme.of(context).colorScheme;
     var textTheme = Theme.of(context).textTheme;
 
@@ -51,30 +93,16 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> {
         List<PieCategory> pieData =
             d.categoryData.entries.map((entry) {
               var categoryData = d.categoryDataMap[entry.key];
-              return PieCategory(
-                name: entry.key,
-                value: entry.value,
-                color: Color(categoryData?.colorValue ?? 0xFF000000),
-              );
+              return PieCategory(name: entry.key, value: entry.value, color: Color(categoryData?.colorValue ?? 0xFF000000));
             }).toList();
         return SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              PeriodSelector(
-                selected: _period,
-                onChange: (p) => setState(() => _period = p),
-              ),
+              PeriodSelector(selected: _period, onChange: (p) => setState(() => _period = p)),
               const SizedBox(height: 16),
-              RepaintBoundary(
-                key: lineKey,
-                child: buildLineChartWithLegend(
-                  d.incomeSpots,
-                  d.expenseSpots,
-                  _period,
-                ),
-              ),
+              RepaintBoundary(key: lineKey, child: buildLineChartWithLegend(d.incomeSpots, d.expenseSpots, _period)),
               const SizedBox(height: 16),
               buildMetricsRow(d.income, d.expense),
               Center(
@@ -82,35 +110,21 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                   padding: EdgeInsets.only(top: 8, left: 8, right: 8),
                   child: Text(
                     'We trim down decimal places, please round off if required.',
-                    style: textTheme.labelSmall?.copyWith(
-                      color: color.onSurface,
-                    ),
+                    style: textTheme.labelSmall?.copyWith(color: color.onSurface),
                     textAlign: TextAlign.center,
                   ),
                 ),
               ),
               const SizedBox(height: 8),
               Divider(indent: 8, endIndent: 8, color: color.primary),
-              Text(
-                'By Category',
-                style: textTheme.titleLarge?.copyWith(color: color.primary),
-              ),
+              Text('By Category', style: textTheme.titleLarge?.copyWith(color: color.primary)),
               RepaintBoundary(
                 key: pieKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    buildCategoryPie(pieData),
-                    buildCategoryLegend(pieData),
-                  ],
-                ),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [buildCategoryPie(pieData), buildCategoryLegend(pieData)]),
               ),
               const SizedBox(height: 16),
               Divider(indent: 8, endIndent: 8, color: color.primary),
-              Text(
-                'Recent Transactions',
-                style: textTheme.titleLarge?.copyWith(color: color.primary),
-              ),
+              Text('Recent Transactions', style: textTheme.titleLarge?.copyWith(color: color.primary)),
               buildRecentTransactions(d.recent),
             ],
           ),
@@ -123,18 +137,34 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> {
 
   Widget buildCategoryLegend(List<PieCategory> data) {
     final textTheme = Theme.of(context).textTheme;
+
     return Wrap(
       spacing: 8,
       runSpacing: 4,
       children:
-          data.map((cat) {
-            return Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(width: 12, height: 12, color: cat.color),
-                const SizedBox(width: 4),
-                Text(cat.name, style: textTheme.labelMedium),
-              ],
+          data.asMap().entries.map((entry) {
+            final index = entry.key;
+            final cat = entry.value;
+            final isDisabled = _disabledCategoryIndexes.contains(index);
+
+            return GestureDetector(
+              onTap: () {
+                setState(() {
+                  if (isDisabled) {
+                    _disabledCategoryIndexes.remove(index);
+                  } else {
+                    _disabledCategoryIndexes.add(index);
+                  }
+                });
+              },
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(width: 12, height: 12, color: cat.color),
+                  const SizedBox(width: 4),
+                  Text(cat.name, style: textTheme.labelMedium?.copyWith(decoration: isDisabled ? TextDecoration.lineThrough : null)),
+                ],
+              ),
             );
           }).toList(),
     );
@@ -149,49 +179,24 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> {
         children: [
           _buildMetricCard('Income', income, Colors.green, Icons.arrow_upward),
           SizedBox(height: 8),
-          _buildMetricCard(
-            'Expense',
-            expense,
-            Colors.red,
-            Icons.arrow_downward,
-          ),
+          _buildMetricCard('Expense', expense, Colors.red, Icons.arrow_downward),
           SizedBox(height: 8),
-          _buildMetricCard(
-            'Net',
-            net,
-            net >= 0 ? Colors.lightGreenAccent : Colors.amberAccent,
-            net >= 0 ? Icons.arrow_upward : Icons.arrow_downward,
-          ),
+          _buildMetricCard('Net', net, net >= 0 ? Colors.lightGreenAccent : Colors.amberAccent, net >= 0 ? Icons.arrow_upward : Icons.arrow_downward),
         ],
       ),
       rowWidget: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           _buildMetricCard('Income', income, Colors.green, Icons.arrow_upward),
-          _buildMetricCard(
-            'Expense',
-            expense,
-            Colors.red,
-            Icons.arrow_downward,
-          ),
-          _buildMetricCard(
-            'Net',
-            net,
-            net >= 0 ? Colors.lightGreenAccent : Colors.amberAccent,
-            net >= 0 ? Icons.arrow_upward : Icons.arrow_downward,
-          ),
+          _buildMetricCard('Expense', expense, Colors.red, Icons.arrow_downward),
+          _buildMetricCard('Net', net, net >= 0 ? Colors.lightGreenAccent : Colors.amberAccent, net >= 0 ? Icons.arrow_upward : Icons.arrow_downward),
         ],
       ),
       sizedBoxHeight: 280,
     );
   }
 
-  Widget _buildMetricCard(
-    String title,
-    double value,
-    Color colorScheme,
-    IconData iconData,
-  ) {
+  Widget _buildMetricCard(String title, double value, Color colorScheme, IconData iconData) {
     double allBoxWidthFactor = 0.2;
     var color = Theme.of(context).colorScheme;
     var textTheme = Theme.of(context).textTheme;
@@ -222,9 +227,7 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                       child: Text(
                         title.toUpperCase(),
                         textAlign: TextAlign.center,
-                        style: textTheme.bodyMedium?.copyWith(
-                          color: color.primary,
-                        ),
+                        style: textTheme.bodyMedium?.copyWith(color: color.primary),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -249,22 +252,14 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> {
   Widget _buildLegendItem(Color color, String label) {
     return Row(
       children: [
-        Container(
-          width: 12,
-          height: 12,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-        ),
+        Container(width: 12, height: 12, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
         const SizedBox(width: 6),
         Text(label, style: const TextStyle(fontSize: 12)),
       ],
     );
   }
 
-  Widget buildLineChartWithLegend(
-    List<FlSpot> incomeSpots,
-    List<FlSpot> expenseSpots,
-    String period,
-  ) {
+  Widget buildLineChartWithLegend(List<FlSpot> incomeSpots, List<FlSpot> expenseSpots, String period) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final ctxt = AppLocalizations.of(context)!;
@@ -283,11 +278,8 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                     return touchedSpots.map((spot) {
                       final isIncome = spot.barIndex == 0;
                       return LineTooltipItem(
-                        '${isIncome ? 'Income' : 'Expense'}: ${ctxt.formatLocalizedNumberWithSign(0, ctxt.localeName, spot.y)}',
-                        TextStyle(
-                          color: spot.bar.gradient?.colors.first,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        '${isIncome ? 'Income' : 'Expense'}: ${ctxt.formatCurrencyWithSign(0, spot.y)}',
+                        TextStyle(color: spot.bar.gradient?.colors.first, fontWeight: FontWeight.bold),
                       );
                     }).toList();
                   },
@@ -299,18 +291,14 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                   isCurved: true,
                   barWidth: 2.5,
                   dotData: FlDotData(show: true),
-                  gradient: LinearGradient(
-                    colors: [color.primary, color.primaryFixed],
-                  ),
+                  gradient: LinearGradient(colors: [color.primary, color.primaryFixed]),
                 ),
                 LineChartBarData(
                   spots: expenseSpots,
                   isCurved: true,
                   barWidth: 2.5,
                   dotData: FlDotData(show: true),
-                  gradient: LinearGradient(
-                    colors: [color.tertiary, color.tertiaryFixed],
-                  ),
+                  gradient: LinearGradient(colors: [color.tertiary, color.tertiaryFixed]),
                 ),
               ],
               titlesData: FlTitlesData(
@@ -321,45 +309,32 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                     getTitlesWidget:
                         (value, _) => Text(
                           _getXAxisLabel(value.toInt(), period),
-                          style: textTheme.bodySmall?.copyWith(
-                            color: color.onSurface,
-                            fontWeight: FontWeight.w500,
-                          ),
+                          style: textTheme.bodySmall?.copyWith(color: color.onSurface, fontWeight: FontWeight.w500),
                         ),
                   ),
                 ),
                 leftTitles: AxisTitles(
                   sideTitles: SideTitles(
                     showTitles: true,
-                    getTitlesWidget:
-                        (value, _) => Text(
-                          _formatCompactNumber(value),
-                          style: textTheme.bodySmall,
-                        ),
+                    getTitlesWidget: (value, _) => Text(_formatCompactNumber(value), style: textTheme.bodySmall),
                     reservedSize: 40,
                   ),
                 ),
-                rightTitles: AxisTitles(
-                  sideTitles: SideTitles(showTitles: false),
-                ),
-                topTitles: AxisTitles(
-                  sideTitles: SideTitles(showTitles: false),
-                ),
+                rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
               ),
               gridData: FlGridData(show: true),
               borderData: FlBorderData(show: true),
               minY: 0,
             ),
+            duration: Duration(milliseconds: 600),
+            curve: Curves.easeInOut,
           ),
         ),
         const SizedBox(height: 12),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildLegendItem(color.primary, "Income"),
-            const SizedBox(width: 16),
-            _buildLegendItem(color.tertiary, "Expense"),
-          ],
+          children: [_buildLegendItem(color.primary, "Income"), const SizedBox(width: 16), _buildLegendItem(color.tertiary, "Expense")],
         ),
       ],
     );
@@ -378,29 +353,18 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> {
         return DateFormat('E', ctxt.localeName).format(date); // Mon, Tue...
       case 'Month':
         // Show dates of the month
-        return ctxt.formatLocalizedNumber(ctxt.localeName).format(index + 1);
+        return ctxt.formatCompactNumber().format(index + 1);
       case 'Year':
         // Show months
-        return DateFormat(
-          'MMM',
-          ctxt.localeName,
-        ).format(DateTime(now.year, index + 1));
+        return DateFormat('MMM', ctxt.localeName).format(DateTime(now.year, index + 1));
       default:
-        return DateFormat(
-          'MMM',
-          ctxt.localeName,
-        ).format(DateTime(now.year, index + 1));
+        return DateFormat('MMM', ctxt.localeName).format(DateTime(now.year, index + 1));
     }
   }
 
   String _formatCompactNumber(double value) {
     final ctxt = AppLocalizations.of(context)!;
-    return ctxt.formatLocalizedNumberWithSign(
-      1,
-      ctxt.localeName,
-      value,
-      compact: true,
-    );
+    return ctxt.formatCurrencyWithSign(1, value, compact: true);
   }
 
   Widget buildCategoryPie(List<PieCategory> pieData) {
@@ -408,39 +372,59 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> {
     final textTheme = Theme.of(context).textTheme;
 
     if (pieData.isEmpty) {
-      return NoDataFound(
-        message: "Category not present.",
-        iconData: Icons.category_outlined,
-      );
+      return NoDataFound(message: "Category not present.", iconData: Icons.category_outlined);
     }
 
     final total = pieData.fold<double>(0, (sum, item) => sum + item.value);
-
-    final sections =
-        pieData.map((cat) {
-          final percentage =
-              total > 0 ? (cat.value / total * 100).toStringAsFixed(1) : '0';
-          return PieChartSectionData(
-            value: cat.value,
-            title: '$percentage%',
-            radius: 60,
-            color: cat.color,
-            titleStyle: textTheme.bodySmall?.copyWith(
-              color: color.onSecondary,
-              fontWeight: FontWeight.bold,
-            ),
-          );
-        }).toList();
+    final indexMapping = <int>[];
 
     return SizedBox(
-      height: 220,
-      child: PieChart(
-        PieChartData(
-          sections: sections,
-          centerSpaceRadius: 40,
-          sectionsSpace: 2,
-          borderData: FlBorderData(show: false),
-        ),
+      height: 280,
+      child: TweenAnimationBuilder<double>(
+        key: ValueKey(_disabledCategoryIndexes),
+        tween: Tween(begin: 0, end: 1),
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+        builder: (context, animatedFraction, child) {
+          final sections =
+              pieData.asMap().entries.where((entry) => !_disabledCategoryIndexes.contains(entry.key)).map((entry) {
+                final i = entry.key;
+                final cat = entry.value;
+                final animatedValue = cat.value * animatedFraction;
+                final isTouched = i == touchedIndex;
+                final percentage = total > 0 ? (animatedValue / total * 100).toStringAsFixed(1) : '0';
+                indexMapping.add(entry.key);
+
+                return PieChartSectionData(
+                  value: animatedValue,
+                  gradient: LinearGradient(colors: [cat.color.withAlpha(180), cat.color.withAlpha(200), cat.color]),
+                  radius: isTouched ? 80 : 60 * animatedFraction,
+                  title: '$percentage%',
+                  titleStyle: textTheme.bodySmall?.copyWith(color: color.secondary, fontWeight: FontWeight.bold),
+                );
+              }).toList();
+
+          return PieChart(
+            PieChartData(
+              pieTouchData: PieTouchData(
+                enabled: true,
+                touchCallback: (FlTouchEvent event, PieTouchResponse? response) {
+                  if (!event.isInterestedForInteractions || response == null || response.touchedSection == null) return;
+
+                  final touchedFilteredIndex = response.touchedSection!.touchedSectionIndex;
+                  final originalIndex = touchedFilteredIndex >= 0 ? indexMapping[touchedFilteredIndex] : touchedFilteredIndex;
+                  setState(() {
+                    touchedIndex = originalIndex;
+                  });
+                },
+              ),
+              sections: sections,
+              centerSpaceRadius: 40 * animatedFraction,
+              sectionsSpace: 2,
+              borderData: FlBorderData(show: false),
+            ),
+          );
+        },
       ),
     );
   }
@@ -449,10 +433,7 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> {
     var color = Theme.of(context).colorScheme;
     var textTheme = Theme.of(context).textTheme;
     if (list.isEmpty) {
-      return NoDataFound(
-        message: "Transactions not present.",
-        iconData: Icons.receipt_long_outlined,
-      );
+      return NoDataFound(message: "Transactions not present.", iconData: Icons.receipt_long_outlined);
     }
     return ListView.builder(
       shrinkWrap: true,
@@ -462,89 +443,67 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> {
         final t = list[i];
         t.category.loadSync();
         t.account.loadSync();
-        return Card.outlined(
-          // shadowColor: color.surface,
-          // color: Color(t.category.value?.colorValue ?? 0x00FFFEEE).withAlpha(0),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16.0),
-            side: BorderSide(width: 1, color: color.primary),
-          ),
-          child: InkWell(
-            onTap: () {},
-            child: Padding(
-              padding: const EdgeInsets.all(8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: <Widget>[
-                      Container(
-                        width: 48.0,
-                        height: 48.0,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8.0),
-                          color: Color(
-                            t.category.value?.colorValue ?? 0xFF000000,
-                          ),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Icon(
-                            IconHelper.getIconData(t.category.value?.iconName),
-                            color: color.onPrimary,
-                            size: 24.0,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 16.0),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text(
-                              "${t.category.value?.name}",
-                              style: textTheme.labelLarge?.copyWith(
-                                color: color.primary,
-                              ),
-                            ),
-                            Text(
-                              '${t.account.value?.name} - ${t.account.value?.accountType.name.toTitleCase()}',
-                              style: textTheme.labelMedium?.copyWith(
-                                color: color.primary,
-                              ),
-                            ),
-                            if (t.description != '')
-                              Text(
-                                t.description ?? '',
-                                style: textTheme.labelSmall?.copyWith(
-                                  color: color.primary,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 16.0),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
+        return SlideTransition(
+          position: _animations[i],
+          child: FadeTransition(
+            opacity: _controllers[i],
+            child: Card.outlined(
+              // shadowColor: color.surface,
+              // color: Color(t.category.value?.colorValue ?? 0x00FFFEEE).withAlpha(0),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0), side: BorderSide(width: 1, color: color.primary)),
+              child: InkWell(
+                onTap: () {},
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
                         children: <Widget>[
-                          Text(
-                            "${t.isExpense ? "-" : "+"} ₹${t.amount}",
-                            style: textTheme.titleLarge?.copyWith(
-                              color: color.primary,
+                          Container(
+                            width: 48.0,
+                            height: 48.0,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8.0),
+                              color: Color(t.category.value?.colorValue ?? 0xFF000000),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Icon(IconHelper.getIconData(t.category.value?.iconName), color: color.onPrimary, size: 24.0),
                             ),
                           ),
-                          Text(
-                            DateFormat('EEE, dd MMM yyyy').format(t.date),
-                            style: textTheme.labelSmall?.copyWith(
-                              color: color.primary,
+                          const SizedBox(width: 16.0),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Text("${t.category.value?.name}", style: textTheme.labelLarge?.copyWith(color: color.primary)),
+                                Text(
+                                  '${t.account.value?.name} - ${t.account.value?.accountType.name.toTitleCase()}',
+                                  style: textTheme.labelMedium?.copyWith(color: color.primary),
+                                ),
+                                if (t.description != '')
+                                  Text(
+                                    t.description ?? '',
+                                    style: textTheme.labelSmall?.copyWith(color: color.primary),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                              ],
                             ),
+                          ),
+                          const SizedBox(width: 16.0),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: <Widget>[
+                              Text("${t.isExpense ? "-" : "+"} ₹${t.amount}", style: textTheme.titleLarge?.copyWith(color: color.primary)),
+                              Text(DateFormat('EEE, dd MMM yyyy').format(t.date), style: textTheme.labelSmall?.copyWith(color: color.primary)),
+                            ],
                           ),
                         ],
                       ),
                     ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
@@ -591,8 +550,7 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> {
   }
 
   Future<Uint8List> captureChartAsImage(GlobalKey key) async {
-    final boundary =
-        key.currentContext?.findRenderObject() as RenderRepaintBoundary;
+    final boundary = key.currentContext?.findRenderObject() as RenderRepaintBoundary;
     final image = await boundary.toImage(pixelRatio: 3.0);
     final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
     return byteData!.buffer.asUint8List();
