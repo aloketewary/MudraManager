@@ -404,4 +404,96 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transaction_expenseButtonLabel => 'EXPENSE';
+
+  @override
+  String get statistics_weTrimDownDecimalInfoText => 'We trim down decimal places, please round off if required.';
+
+  @override
+  String get statistics_selectPeriodTodayText => 'Today';
+
+  @override
+  String get statistics_selectPeriodWeekText => 'Week';
+
+  @override
+  String get statistics_selectPeriodMonthText => 'Month';
+
+  @override
+  String get statistics_selectPeriodYearText => 'Year';
+
+  @override
+  String get statistics_chartLineIncomeText => 'Income';
+
+  @override
+  String get statistics_chartLineExpenseText => 'Expense';
+
+  @override
+  String statistics_chartLineTodayHourText(Object hour) {
+    return '${hour}h';
+  }
+
+  @override
+  String get statistics_categoryNotPresentText => 'Category not present.';
+
+  @override
+  String get statistics_transactionNotPresentText => 'Transactions not present.';
+
+  @override
+  String get statistics_byCategoryTitleText => 'By Category';
+
+  @override
+  String get statistics_recentTransactionsTitleText => 'Recent Transactions';
+
+  @override
+  String get statistics_metricIncomeText => 'Income';
+
+  @override
+  String get statistics_metricExpenseText => 'Expense';
+
+  @override
+  String get statistics_metricNetText => 'Net';
+
+  @override
+  String get statistics_showAllButtonText => 'Show All';
+
+  @override
+  String get statistics_exportToPdfButtonText => 'Export to PDF';
+
+  @override
+  String get statistics_exportToExcelButtonText => 'Export to Excel';
+
+  @override
+  String get profile_userProfileTitleText => 'User Profile';
+
+  @override
+  String get profile_userProfileSubtitleText => 'Change profile image, name, and email';
+
+  @override
+  String get profile_nameControllerText => 'Name';
+
+  @override
+  String get profile_nameControllerHintText => 'Enter your name';
+
+  @override
+  String get profile_nameRequiredHintText => 'Name is required';
+
+  @override
+  String get profile_emailControllerText => 'Email';
+
+  @override
+  String get profile_emailControllerHintText => 'Enter your email';
+
+  @override
+  String get profile_phoneControllerText => 'Phone';
+
+  @override
+  String get profile_phoneControllerHintText => 'Enter your phone number';
+
+  @override
+  String get profile_weAreNotStoringInfoText => 'We are not storing any data, all data is in your device!';
+
+  @override
+  String get profile_saveButtonText => 'save';
+
+  @override
+  String get profile_editUserProfileAppTitle => 'Edit User Profile';
 }

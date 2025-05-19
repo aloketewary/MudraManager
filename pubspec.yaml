@@ -88,7 +88,7 @@ dev_dependencies:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/logo/money-currency.png" # your app icon path
+  image_path: "assets/logo/rupee.png" # your app icon path
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -148,5 +148,5 @@ flutter:
     - assets/icons/96/
     - assets/icons/128/
     - assets/icons/512/
-    - assets/logo/money-currency.png
+    - assets/logo/rupee.png
     - assets/fonts/NotoSans-Regular.ttf

@@ -404,4 +404,96 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get transaction_expenseButtonLabel => 'व्यय';
+
+  @override
+  String get statistics_weTrimDownDecimalInfoText => 'हम दशमलव स्थानों को कम करते हैं, यदि आवश्यक हो तो राउंड ऑफ करें।';
+
+  @override
+  String get statistics_selectPeriodTodayText => 'आज';
+
+  @override
+  String get statistics_selectPeriodWeekText => 'सप्ताह';
+
+  @override
+  String get statistics_selectPeriodMonthText => 'महीना';
+
+  @override
+  String get statistics_selectPeriodYearText => 'वर्ष';
+
+  @override
+  String get statistics_chartLineIncomeText => 'आय';
+
+  @override
+  String get statistics_chartLineExpenseText => 'व्यय';
+
+  @override
+  String statistics_chartLineTodayHourText(Object hour) {
+    return '$hourघं';
+  }
+
+  @override
+  String get statistics_categoryNotPresentText => 'श्रेणी मौजूद नहीं है।';
+
+  @override
+  String get statistics_transactionNotPresentText => 'लेन-देन मौजूद नहीं हैं।';
+
+  @override
+  String get statistics_byCategoryTitleText => 'श्रेणी के अनुसार';
+
+  @override
+  String get statistics_recentTransactionsTitleText => 'हाल के लेनदेन';
+
+  @override
+  String get statistics_metricIncomeText => 'आय';
+
+  @override
+  String get statistics_metricExpenseText => 'व्यय';
+
+  @override
+  String get statistics_metricNetText => 'शुद्ध';
+
+  @override
+  String get statistics_showAllButtonText => 'सभी दिखाएँ';
+
+  @override
+  String get statistics_exportToPdfButtonText => 'पीडीएफ में निर्यात करें';
+
+  @override
+  String get statistics_exportToExcelButtonText => 'एक्सेल में निर्यात करें';
+
+  @override
+  String get profile_userProfileTitleText => 'उपयोगकर्ता प्रोफ़ाइल';
+
+  @override
+  String get profile_userProfileSubtitleText => 'प्रोफ़ाइल छवि, नाम और ईमेल बदलें';
+
+  @override
+  String get profile_nameControllerText => 'नाम';
+
+  @override
+  String get profile_nameControllerHintText => 'अपना नाम दर्ज करें';
+
+  @override
+  String get profile_nameRequiredHintText => 'नाम आवश्यक है';
+
+  @override
+  String get profile_emailControllerText => 'ईमेल';
+
+  @override
+  String get profile_emailControllerHintText => 'अपना ईमेल दर्ज करें';
+
+  @override
+  String get profile_phoneControllerText => 'फ़ोन';
+
+  @override
+  String get profile_phoneControllerHintText => 'अपना फ़ोन नंबर दर्ज करें';
+
+  @override
+  String get profile_weAreNotStoringInfoText => 'हम कोई डेटा संग्रहीत नहीं कर रहे हैं, सारा डेटा आपके डिवाइस में है!';
+
+  @override
+  String get profile_saveButtonText => 'सहेजें';
+
+  @override
+  String get profile_editUserProfileAppTitle => 'उपयोगकर्ता प्रोफ़ाइल संपादित करें';
 }

@@ -1,23 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar/isar.dart';
-import 'package:mudra_manager/db/models/account.dart'
-    show Account, AccountType, GetAccountCollection;
-import 'package:mudra_manager/db/models/category.dart'
-    show Category, CategoryType, GetCategoryCollection;
-import 'package:mudra_manager/db/models/user_profile.dart'
-    show GetUserProfileCollection, UserProfile;
+import 'package:mudra_manager/db/models/account.dart' show Account, AccountType, GetAccountCollection;
+import 'package:mudra_manager/db/models/category.dart' show Category, CategoryType, GetCategoryCollection;
+import 'package:mudra_manager/db/models/user_profile.dart' show GetUserProfileCollection, UserProfile;
 import 'package:mudra_manager/l10n/app_localizations.dart';
-import 'package:mudra_manager/models/onboarding_page_model.dart'
-    show onboardingData;
+import 'package:mudra_manager/models/onboarding_page_model.dart' show onboardingData;
 import 'package:mudra_manager/providers/isar_provider.dart';
-import 'package:mudra_manager/providers/l10n_provider.dart'
-    show LanguageService;
+import 'package:mudra_manager/providers/l10n_provider.dart' show LanguageService;
 import 'package:mudra_manager/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/screens/home_screen.dart';
-import 'package:mudra_manager/screens/onboarding/onboarding_background.dart'
-    show OnboardingBackground;
+import 'package:mudra_manager/screens/onboarding/onboarding_background.dart' show OnboardingBackground;
 import 'package:mudra_manager/screens/reusable/common_text_input_field.dart';
+import 'package:mudra_manager/service/backup_restore_service.dart' show BackupService;
 import 'package:mudra_manager/util/localization_extension.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -31,9 +26,7 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final PageController _controller = PageController();
   final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _accountController = TextEditingController(
-    text: 'Cash',
-  );
+  final TextEditingController _accountController = TextEditingController(text: 'Cash');
   final TextEditingController _balanceController = TextEditingController();
   int _currentPage = 0;
   final List<Category> defaultCategories = [
@@ -64,8 +57,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   ];
 
   Future<void> createDefaultCategories(Isar isar) async {
-    final existing =
-        await isar.categorys.where().findAll(); // check if already created
+    final existing = await isar.categorys.where().findAll(); // check if already created
     if (existing.isNotEmpty) return;
 
     await isar.writeTxn(() async {
@@ -81,13 +73,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final currentPage = onboardingData[_currentPage];
     if (currentPage.needsInput && isNamePage) {
       final text = _nameController.text.trim();
-      String hintText =
-          ctxt.translate(currentPage.inputHint ?? '').toLowerCase();
+      String hintText = ctxt.translate(currentPage.inputHint ?? '').toLowerCase();
       if (text.isEmpty) {
         // Show error
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(ctxt.onboard_pleaseFillThe(hintText))),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(ctxt.onboard_pleaseFillThe(hintText))));
         return; // Stop here
       }
     }
@@ -96,47 +85,28 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       final balanceText = _balanceController.text.trim();
 
       if (text.isEmpty) {
-        String hintText =
-            ctxt.translate(currentPage.inputHint ?? '').toLowerCase();
+        String hintText = ctxt.translate(currentPage.inputHint ?? '').toLowerCase();
         // Show error
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(ctxt.onboard_pleaseFillThe(hintText))),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(ctxt.onboard_pleaseFillThe(hintText))));
         return; // Stop here
       }
       if (balanceText.isEmpty) {
         // Show error
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              ctxt.onboard_pleaseFillThe(
-                ctxt.onboard_initialBalance.toLowerCase(),
-              ),
-            ),
-          ),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(ctxt.onboard_pleaseFillThe(ctxt.onboard_initialBalance.toLowerCase()))));
         return; // Stop here
       }
       // Try parsing as a double (allows for decimal numbers)
       final balance = double.tryParse(balanceText.trim());
 
       if (balance == null) {
-        String hintText =
-            ctxt.translate(currentPage.inputHint ?? '').toLowerCase();
+        String hintText = ctxt.translate(currentPage.inputHint ?? '').toLowerCase();
         // Show error if it's not a valid number
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(ctxt.onboard_pleaseEnterAValidNumberFor(hintText)),
-          ),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(ctxt.onboard_pleaseEnterAValidNumberFor(hintText))));
         return; // Stop here
       }
     }
     if (_currentPage < onboardingData.length - 1) {
-      _controller.nextPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
+      _controller.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
     } else {
       _completeOnboarding();
     }
@@ -164,9 +134,18 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     await createDefaultCategories(isar);
     if (context.mounted) {
       SharedPrefsUtil.instance.setOnboardingComplete();
-      Navigator.of(
-        context,
-      ).pushReplacement(MaterialPageRoute(builder: (_) => const HomePage()));
+      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const HomePage()));
+    }
+  }
+
+  _onRestoreButton(BuildContext context) async{
+    final isar = await ref.read(isarServiceProvider).getInstance();
+    final data = await BackupService.restoreEncryptedBackup(context, isar);
+    if (data != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Restore successful")),
+      );
+      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const HomePage()));
     }
   }
 
@@ -203,37 +182,22 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             Icon(data.icon, size: 120, color: color.onPrimary),
                             const SizedBox(height: 30),
                             Text(
-                              AppLocalizations.of(
-                                context,
-                              )!.translate(data.title),
-                              style: textTheme.titleLarge?.copyWith(
-                                color: color.onPrimary,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 30,
-                              ),
+                              AppLocalizations.of(context)!.translate(data.title),
+                              style: textTheme.titleLarge?.copyWith(color: color.onPrimary, fontWeight: FontWeight.w700, fontSize: 30),
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 15),
                             Text(
                               ctxt.translate(data.description),
-                              style: textTheme.titleMedium?.copyWith(
-                                color: color.onPrimary,
-                                fontWeight: FontWeight.normal,
-                              ),
+                              style: textTheme.titleMedium?.copyWith(color: color.onPrimary, fontWeight: FontWeight.normal),
                               textAlign: TextAlign.center,
                             ),
                             if (data.needsInput) SizedBox(height: 15),
                             if (data.needsInput)
                               CommonTextInputField(
-                                controller:
-                                    isNamePage
-                                        ? _nameController
-                                        : _accountController,
+                                controller: isNamePage ? _nameController : _accountController,
                                 labelText: ctxt.translate(data.inputHint ?? ''),
-                                iconData:
-                                    isNamePage
-                                        ? Icons.person_outline
-                                        : Icons.wallet,
+                                iconData: isNamePage ? Icons.person_outline : Icons.wallet,
                               ),
 
                             if (isAccountPage) SizedBox(height: 15),
@@ -242,18 +206,27 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                                 controller: _balanceController,
                                 labelText: ctxt.onboard_initialBalance,
                                 iconData: Icons.account_balance_wallet,
-                                inputType: TextInputType.numberWithOptions(
-                                  signed: true,
-                                  decimal: true,
-                                ),
+                                inputType: TextInputType.numberWithOptions(signed: true, decimal: true),
                               ),
                             if (isAccountPage)
                               Text(
                                 ctxt.onboard_youCanUpdateOtherDetailsLaterAsWell,
-                                style: textTheme.bodyMedium?.copyWith(
-                                  color: color.onPrimary,
-                                ),
+                                style: textTheme.bodyMedium?.copyWith(color: color.onPrimary),
                                 textAlign: TextAlign.center,
+                              ),
+                            if (data.backupDialogue) SizedBox(height: 50),
+                            if (data.backupDialogue)
+                              Text('Do you have Backup?', style: textTheme.bodyMedium?.copyWith(color: color.onPrimary), textAlign: TextAlign.center),
+                            if (data.backupDialogue)
+                              ElevatedButton.icon(
+                                onPressed: () => _onRestoreButton(context),
+                                style: ElevatedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                  backgroundColor: Colors.black,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                ),
+                                icon: const Icon(Icons.restore_outlined, color: Colors.white),
+                                label: const Text("Let's Restore", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                               ),
                           ],
                         ),
@@ -273,10 +246,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           width: _currentPage == index ? 20 : 8,
                           height: 8,
                           decoration: BoxDecoration(
-                            color:
-                                _currentPage == index
-                                    ? color.onPrimary
-                                    : color.onSecondary,
+                            color: _currentPage == index ? color.onPrimary : color.onSecondary,
                             borderRadius: BorderRadius.circular(4),
                           ),
                         ),
@@ -289,10 +259,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           padding: const EdgeInsets.all(18),
                           backgroundColor: Colors.black,
                         ),
-                        child: const Icon(
-                          Icons.arrow_forward,
-                          color: Colors.white,
-                        ),
+                        child: const Icon(Icons.arrow_forward, color: Colors.white),
                       ),
                     ],
                   ),
@@ -303,10 +270,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           Positioned(
             top: 64,
             right: 10,
-            child: IconButton(
-              icon: Icon(Icons.language, color: color.onPrimary),
-              onPressed: () => LanguageService.showLanguagePicker(context, ref),
-            ),
+            child: IconButton(icon: Icon(Icons.language, color: color.onPrimary), onPressed: () => LanguageService.showLanguagePicker(context, ref)),
           ),
         ],
       ),

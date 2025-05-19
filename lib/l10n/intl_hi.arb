@@ -503,5 +503,125 @@
   "transaction_expenseButtonLabel": "व्यय",
   "@transaction_expenseButtonLabel": {
     "description": "This is text of Expense"
+  },
+  "statistics_weTrimDownDecimalInfoText": "हम दशमलव स्थानों को कम करते हैं, यदि आवश्यक हो तो राउंड ऑफ करें।",
+  "@statistics_weTrimDownDecimalInfoText": {
+    "description": "This is text of We trim down decimal places, please round off if required."
+  },
+  "statistics_selectPeriodTodayText": "आज",
+  "@statistics_selectPeriodTodayText": {
+    "description": "This is text of Today"
+  },
+  "statistics_selectPeriodWeekText": "सप्ताह",
+  "@statistics_selectPeriodWeekText": {
+    "description": "This is text of Week"
+  },
+  "statistics_selectPeriodMonthText": "महीना",
+  "@statistics_selectPeriodMonthText": {
+    "description": "This is text of Month"
+  },
+  "statistics_selectPeriodYearText": "वर्ष",
+  "@statistics_selectPeriodYearText": {
+    "description": "This is text of Year"
+  },
+  "statistics_chartLineIncomeText": "आय",
+  "@statistics_chartLineIncomeText": {
+    "description": "This is text of Income"
+  },
+  "statistics_chartLineExpenseText": "व्यय",
+  "@statistics_chartLineExpenseText": {
+    "description": "This is text of Expense"
+  },
+  "statistics_chartLineTodayHourText": "{hour}घं",
+  "@statistics_chartLineTodayHourText": {
+    "description": "This is text of h"
+  },
+  "statistics_categoryNotPresentText": "श्रेणी मौजूद नहीं है।",
+  "@statistics_categoryNotPresentText": {
+    "description": "This is text of Category not present"
+  },
+  "statistics_transactionNotPresentText": "लेन-देन मौजूद नहीं हैं।",
+  "@statistics_transactionNotPresentText": {
+    "description": "This is text of Transactions not present."
+  },
+  "statistics_byCategoryTitleText": "श्रेणी के अनुसार",
+  "@statistics_byCategoryTitleText": {
+    "description": "This is text of By Category"
+  },
+  "statistics_recentTransactionsTitleText": "हाल के लेनदेन",
+  "@statistics_recentTransactionsTitleText": {
+    "description": "This is text of Recent Transactions"
+  },
+  "statistics_metricIncomeText": "आय",
+  "@statistics_metricIncomeText": {
+    "description": "This is text of Income"
+  },
+  "statistics_metricExpenseText": "व्यय",
+  "@statistics_metricExpenseText": {
+    "description": "This is text of Expense"
+  },
+  "statistics_metricNetText": "शुद्ध",
+  "@statistics_metricNetText": {
+    "description": "This is text of Net"
+  },
+  "statistics_showAllButtonText": "सभी दिखाएँ",
+  "@statistics_showAllButtonText": {
+    "description": "This is text of Show All"
+  },
+  "statistics_exportToPdfButtonText": "पीडीएफ में निर्यात करें",
+  "@statistics_exportToPdfButtonText": {
+    "description": "This is text of Export to PDF"
+  },
+  "statistics_exportToExcelButtonText": "एक्सेल में निर्यात करें",
+  "@statistics_exportToExcelButtonText": {
+    "description": "This is text of Export to Excel"
+  },
+  "profile_userProfileTitleText": "उपयोगकर्ता प्रोफ़ाइल",
+  "@profile_userProfileTitleText": {
+    "description": "This is text of User Profile"
+  },
+  "profile_userProfileSubtitleText": "प्रोफ़ाइल छवि, नाम और ईमेल बदलें",
+  "@profile_userProfileSubtitleText": {
+    "description": "This is text of User Profile subtitle"
+  },
+  "profile_nameControllerText": "नाम",
+  "@profile_nameControllerText": {
+    "description": "This is text of Name"
+  },
+  "profile_nameControllerHintText": "अपना नाम दर्ज करें",
+  "@profile_nameControllerHintText": {
+    "description": "This is text of Enter your name"
+  },
+  "profile_nameRequiredHintText": "नाम आवश्यक है",
+  "@profile_nameRequiredHintText": {
+    "description": "This is text of Name is required"
+  },
+  "profile_emailControllerText": "ईमेल",
+  "@profile_emailControllerText": {
+    "description": "This is text of Email"
+  },
+  "profile_emailControllerHintText": "अपना ईमेल दर्ज करें",
+  "@profile_emailControllerHintText": {
+    "description": "This is text of Enter your name"
+  },
+  "profile_phoneControllerText": "फ़ोन",
+  "@profile_phoneControllerText": {
+    "description": "This is text of Phone"
+  },
+  "profile_phoneControllerHintText": "अपना फ़ोन नंबर दर्ज करें",
+  "@profile_phoneControllerHintText": {
+    "description": "This is text of Enter your phone number"
+  },
+  "profile_weAreNotStoringInfoText": "हम कोई डेटा संग्रहीत नहीं कर रहे हैं, सारा डेटा आपके डिवाइस में है!",
+  "@profile_weAreNotStoringInfoText": {
+    "description": "This is text of We are not storing"
+  },
+  "profile_saveButtonText": "सहेजें",
+  "@profile_saveButtonText": {
+    "description": "This is text of save button"
+  },
+  "profile_editUserProfileAppTitle": "उपयोगकर्ता प्रोफ़ाइल संपादित करें",
+  "@profile_editUserProfileAppTitle": {
+    "description": "This is text of Edit User Profile"
   }
 }

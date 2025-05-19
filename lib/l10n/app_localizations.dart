@@ -858,6 +858,186 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'EXPENSE'**
   String get transaction_expenseButtonLabel;
+
+  /// This is text of We trim down decimal places, please round off if required.
+  ///
+  /// In en, this message translates to:
+  /// **'We trim down decimal places, please round off if required.'**
+  String get statistics_weTrimDownDecimalInfoText;
+
+  /// This is text of Today
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get statistics_selectPeriodTodayText;
+
+  /// This is text of Week
+  ///
+  /// In en, this message translates to:
+  /// **'Week'**
+  String get statistics_selectPeriodWeekText;
+
+  /// This is text of Month
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get statistics_selectPeriodMonthText;
+
+  /// This is text of Year
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get statistics_selectPeriodYearText;
+
+  /// This is text of Income
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get statistics_chartLineIncomeText;
+
+  /// This is text of Expense
+  ///
+  /// In en, this message translates to:
+  /// **'Expense'**
+  String get statistics_chartLineExpenseText;
+
+  /// This is text of h
+  ///
+  /// In en, this message translates to:
+  /// **'{hour}h'**
+  String statistics_chartLineTodayHourText(Object hour);
+
+  /// This is text of Category not present
+  ///
+  /// In en, this message translates to:
+  /// **'Category not present.'**
+  String get statistics_categoryNotPresentText;
+
+  /// This is text of Transactions not present.
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions not present.'**
+  String get statistics_transactionNotPresentText;
+
+  /// This is text of By Category
+  ///
+  /// In en, this message translates to:
+  /// **'By Category'**
+  String get statistics_byCategoryTitleText;
+
+  /// This is text of Recent Transactions
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Transactions'**
+  String get statistics_recentTransactionsTitleText;
+
+  /// This is text of Income
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get statistics_metricIncomeText;
+
+  /// This is text of Expense
+  ///
+  /// In en, this message translates to:
+  /// **'Expense'**
+  String get statistics_metricExpenseText;
+
+  /// This is text of Net
+  ///
+  /// In en, this message translates to:
+  /// **'Net'**
+  String get statistics_metricNetText;
+
+  /// This is text of Show All
+  ///
+  /// In en, this message translates to:
+  /// **'Show All'**
+  String get statistics_showAllButtonText;
+
+  /// This is text of Export to PDF
+  ///
+  /// In en, this message translates to:
+  /// **'Export to PDF'**
+  String get statistics_exportToPdfButtonText;
+
+  /// This is text of Export to Excel
+  ///
+  /// In en, this message translates to:
+  /// **'Export to Excel'**
+  String get statistics_exportToExcelButtonText;
+
+  /// This is text of User Profile
+  ///
+  /// In en, this message translates to:
+  /// **'User Profile'**
+  String get profile_userProfileTitleText;
+
+  /// This is text of User Profile subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Change profile image, name, and email'**
+  String get profile_userProfileSubtitleText;
+
+  /// This is text of Name
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get profile_nameControllerText;
+
+  /// This is text of Enter your name
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your name'**
+  String get profile_nameControllerHintText;
+
+  /// This is text of Name is required
+  ///
+  /// In en, this message translates to:
+  /// **'Name is required'**
+  String get profile_nameRequiredHintText;
+
+  /// This is text of Email
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get profile_emailControllerText;
+
+  /// This is text of Enter your name
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email'**
+  String get profile_emailControllerHintText;
+
+  /// This is text of Phone
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get profile_phoneControllerText;
+
+  /// This is text of Enter your phone number
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your phone number'**
+  String get profile_phoneControllerHintText;
+
+  /// This is text of We are not storing
+  ///
+  /// In en, this message translates to:
+  /// **'We are not storing any data, all data is in your device!'**
+  String get profile_weAreNotStoringInfoText;
+
+  /// This is text of save button
+  ///
+  /// In en, this message translates to:
+  /// **'save'**
+  String get profile_saveButtonText;
+
+  /// This is text of Edit User Profile
+  ///
+  /// In en, this message translates to:
+  /// **'Edit User Profile'**
+  String get profile_editUserProfileAppTitle;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

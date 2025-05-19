@@ -3,19 +3,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/db/models/user_profile.dart' show UserProfile;
+import 'package:mudra_manager/l10n/app_localizations.dart' show AppLocalizations;
 import 'package:mudra_manager/providers/user_profile_provider.dart';
 import 'package:mudra_manager/screens/reusable/common_button.dart';
-import 'package:mudra_manager/screens/reusable/common_text_input_field.dart'
-    show CommonTextInputField;
-import 'package:mudra_manager/theme/mudra_manager_avatar_icons.dart'
-    show MudraManagerAvatarIcons;
+import 'package:mudra_manager/screens/reusable/common_text_input_field.dart' show CommonTextInputField;
+import 'package:mudra_manager/theme/mudra_manager_avatar_icons.dart' show MudraManagerAvatarIcons;
 
 class EditUserProfileScreen extends ConsumerStatefulWidget {
   const EditUserProfileScreen({super.key});
 
   @override
-  ConsumerState<EditUserProfileScreen> createState() =>
-      _EditUserProfileScreenState();
+  ConsumerState<EditUserProfileScreen> createState() => _EditUserProfileScreenState();
 }
 
 class _EditUserProfileScreenState extends ConsumerState<EditUserProfileScreen> {
@@ -36,11 +34,7 @@ class _EditUserProfileScreenState extends ConsumerState<EditUserProfileScreen> {
         return GridView.builder(
           padding: const EdgeInsets.all(16),
           itemCount: iconDataList.length, // Assuming 10 avatar options
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 5,
-            mainAxisSpacing: 12,
-            crossAxisSpacing: 12,
-          ),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 5, mainAxisSpacing: 12, crossAxisSpacing: 12),
           itemBuilder: (_, index) {
             return GestureDetector(
               onTap: () {
@@ -79,14 +73,10 @@ class _EditUserProfileScreenState extends ConsumerState<EditUserProfileScreen> {
     final profileAsync = ref.watch(userProfileProvider);
     var textTheme = Theme.of(context).textTheme;
     var color = Theme.of(context).colorScheme;
+    final ctxt = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          "Edit User Profile",
-          style: textTheme.titleLarge?.copyWith(color: color.onPrimary),
-        ),
-      ),
+      appBar: AppBar(title: Text(ctxt.profile_editUserProfileAppTitle, style: textTheme.titleLarge?.copyWith(color: color.onPrimary))),
       body: profileAsync.when(
         data: (profile) {
           if (!_didInit) _loadProfile(profile);
@@ -100,23 +90,13 @@ class _EditUserProfileScreenState extends ConsumerState<EditUserProfileScreen> {
                   Stack(
                     alignment: Alignment.bottomRight,
                     children: [
-                      CircleAvatar(
-                        radius: 48,
-                        child: Icon(
-                          iconDataList[_selectedAvatarIndex],
-                          size: 48,
-                        ),
-                      ),
+                      CircleAvatar(radius: 48, child: Icon(iconDataList[_selectedAvatarIndex], size: 48)),
                       GestureDetector(
                         onTap: _showAvatarPicker,
                         child: CircleAvatar(
                           radius: 16,
                           backgroundColor: color.secondary,
-                          child: Icon(
-                            Icons.edit,
-                            size: 14,
-                            color: color.onSecondary,
-                          ),
+                          child: Icon(Icons.edit, size: 14, color: color.onSecondary),
                         ),
                       ),
                     ],
@@ -124,31 +104,27 @@ class _EditUserProfileScreenState extends ConsumerState<EditUserProfileScreen> {
                   SizedBox(height: 8),
                   CommonTextInputField(
                     controller: _nameController,
-                    labelText: 'Name',
-                    hintText: 'Enter your name',
+                    labelText: ctxt.profile_nameControllerText,
+                    hintText: ctxt.profile_nameControllerHintText,
                     iconData: Icons.person,
+                    validateField: (v) => v == null || v.isEmpty ? ctxt.profile_nameRequiredHintText : null,
                   ),
                   CommonTextInputField(
                     controller: _emailController,
-                    labelText: 'Email',
-                    hintText: 'Enter your email',
+                    labelText: ctxt.profile_emailControllerText,
+                    hintText: ctxt.profile_emailControllerHintText,
                     iconData: Icons.email,
                   ),
                   CommonTextInputField(
                     controller: _phoneController,
-                    labelText: 'Phone',
-                    hintText: 'Enter your phone number',
+                    labelText: ctxt.profile_phoneControllerText,
+                    hintText: ctxt.profile_phoneControllerHintText,
                     iconData: Icons.phone,
                   ),
-                  Center(
-                    child: Text(
-                      "We are not storing any data, all data is in your device!",
-                      style: textTheme.bodySmall,
-                    ),
-                  ),
+                  Center(child: Text(ctxt.profile_weAreNotStoringInfoText, style: textTheme.bodySmall)),
                   const Spacer(),
                   CommonButton(
-                    text: 'save',
+                    text: ctxt.profile_saveButtonText,
                     backGroundColor: color.primary,
                     textColor: color.onPrimary,
                     onPressed: () async {
@@ -161,9 +137,7 @@ class _EditUserProfileScreenState extends ConsumerState<EditUserProfileScreen> {
                               ..avatarIndex = _selectedAvatarIndex
                               ..updateAt = DateTime.now();
 
-                        await ref
-                            .read(userProfileServiceProvider)
-                            .saveProfile(updatedProfile);
+                        await ref.read(userProfileServiceProvider).saveProfile(updatedProfile);
 
                         ref.invalidate(userProfileProvider); // Refresh UI
 

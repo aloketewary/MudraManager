@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mudra_manager/l10n/app_localizations.dart';
+import 'package:mudra_manager/util/localization_extension.dart';
 
 class PeriodSelector extends StatelessWidget {
   final String selected;
@@ -13,6 +15,7 @@ class PeriodSelector extends StatelessWidget {
   Widget build(BuildContext c) {
     var color = Theme.of(c).colorScheme;
     var textTheme = Theme.of(c).textTheme;
+    final ctxt = AppLocalizations.of(c)!;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -31,22 +34,16 @@ class PeriodSelector extends StatelessWidget {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12.0),
                       color: p == selected ? color.primary : Colors.transparent,
-                      // Light background color
-                      border: Border.all(color: color.primary), // Subtle border
+                      border: Border.all(color: color.primary),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
                         Expanded(
                           child: Text(
-                            p.toUpperCase(),
+                            ctxt.translate(p).toUpperCase(),
                             textAlign: TextAlign.center,
-                            style: textTheme.labelLarge?.copyWith(
-                              color:
-                                  p == selected
-                                      ? color.onPrimary
-                                      : color.primary,
-                            ),
+                            style: textTheme.labelLarge?.copyWith(color: p == selected ? color.onPrimary : color.primary),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),

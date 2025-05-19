@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/l10n/app_localizations.dart' show AppLocalizations;
 import 'package:mudra_manager/providers/isar_provider.dart';
 import 'package:mudra_manager/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/providers/user_profile_provider.dart';
@@ -30,6 +31,7 @@ class ProfileScreen extends ConsumerWidget {
     final profileAsync = ref.watch(userProfileProvider);
     var textTheme = Theme.of(context).textTheme;
     var color = Theme.of(context).colorScheme;
+    final ctxt = AppLocalizations.of(context)!;
 
     return Column(
       children: [
@@ -54,7 +56,7 @@ class ProfileScreen extends ConsumerWidget {
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   Text(
-                    profile?.email ?? 'unkown@email.com',
+                    profile?.email ?? '',
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                 ],
@@ -72,8 +74,8 @@ class ProfileScreen extends ConsumerWidget {
           child: ListView(
             children: [
               ProfileTile(
-                title: "User Profile",
-                subtitle: "Change profile image, name, and email",
+                title: ctxt.profile_userProfileTitleText,
+                subtitle: ctxt.profile_userProfileSubtitleText,
                 icon: Icons.person,
                 onTap: () {
                   Navigator.push(

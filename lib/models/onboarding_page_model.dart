@@ -6,6 +6,7 @@ class OnboardingPage {
   final String description;
   final IconData icon;
   final bool needsInput;
+  final bool backupDialogue;
   final String? inputHint;
 
   OnboardingPage({
@@ -13,6 +14,7 @@ class OnboardingPage {
     required this.description,
     required this.icon,
     this.needsInput = false,
+    this.backupDialogue = false,
     this.inputHint,
   });
 }
@@ -38,6 +40,7 @@ final onboardingData = [
     title: "onboard_GetStarted",
     description: "onboard_letsSetupYourAccount",
     icon: Icons.settings_outlined,
+    backupDialogue: true
   ),
   OnboardingPage(
     title: "onboard_howShouldWeCallYou",

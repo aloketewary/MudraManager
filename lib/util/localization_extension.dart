@@ -65,6 +65,14 @@ extension AppLocalizationsHelper on AppLocalizations {
         return budget_recurrenceMonthlyText;
       case 'yearly':
         return budget_recurrenceYearlyText;
+      case 'Today':
+        return statistics_selectPeriodTodayText;
+      case 'Week':
+        return statistics_selectPeriodWeekText;
+      case 'Month':
+        return statistics_selectPeriodMonthText;
+      case 'Year':
+        return statistics_selectPeriodYearText;
       default:
         return key;
     }

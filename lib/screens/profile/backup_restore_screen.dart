@@ -43,7 +43,8 @@ class BackupRestoreScreen extends ConsumerWidget {
               subtitle: "Restore full db and settings data",
               icon: Icons.restore_outlined,
               onTap: () async {
-                final data = await BackupService.restoreEncryptedBackup(context);
+                final isar = await ref.read(isarServiceProvider).getInstance();
+                final data = await BackupService.restoreEncryptedBackup(context, isar);
                 if (data != null) {
                   // await restoreAppFromJson(data); // your data restorer
                   ScaffoldMessenger.of(context).showSnackBar(

@@ -154,7 +154,7 @@ class _TransactionCardState extends State<TransactionCard> {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: <Widget>[
             Text(
-              ctxt.formatCurrencyWithSign(2, widget.amount.toDouble()),
+              '${widget.isExpense ? '-' : '+'} ${ctxt.formatCurrencyWithSign(2, widget.amount.toDouble())}',
               style: textTheme.titleLarge?.copyWith(color: isExpanded ? color.onPrimary : color.primary),
             ),
             Text(
@@ -185,7 +185,6 @@ class _TransactionCardState extends State<TransactionCard> {
                 padding: const EdgeInsets.all(8.0),
                 child: Icon(
                   related?.account.value?.accountType.icon,
-                  // color: color.onPrimary,
                   size: 24.0,
                 ),
               ),

@@ -15,6 +15,7 @@ import 'package:mudra_manager/screens/reusable/animated_balance.dart';
 import 'package:mudra_manager/screens/reusable/no_data_found.dart';
 import 'package:mudra_manager/screens/reusable/responseive_layout_builder.dart';
 import 'package:mudra_manager/screens/statistics/period_selector_screen.dart';
+import 'package:mudra_manager/screens/transaction/transaction_list_screen.dart' show TransactionListScreen;
 import 'package:mudra_manager/util/case_extension.dart';
 import 'package:mudra_manager/util/export_excel_pdf.dart' show exportStatsToExcel, exportStatsToPdf;
 import 'package:mudra_manager/util/icon_helper.dart' show IconHelper;
@@ -36,7 +37,7 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerP
   late List<Animation<Offset>> _animations;
   bool _isDisposed = false;
   int? touchedIndex;
-  Set<int> _disabledCategoryIndexes = {};
+  final Set<int> _disabledCategoryIndexes = {};
 
   @override
   void initState() {
@@ -82,10 +83,10 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerP
 
   @override
   Widget build(BuildContext context) {
-    // You’d fetch data via Riverpod providers based on _period:
     final stats = ref.watch(statsProvider(_period)); // income, expense, spots, pieData, recentTxns
     var color = Theme.of(context).colorScheme;
     var textTheme = Theme.of(context).textTheme;
+    final ctxt = AppLocalizations.of(context)!;
 
     return stats.when(
       data: (d) {
@@ -109,7 +110,7 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerP
                 child: Padding(
                   padding: EdgeInsets.only(top: 8, left: 8, right: 8),
                   child: Text(
-                    'We trim down decimal places, please round off if required.',
+                    ctxt.statistics_weTrimDownDecimalInfoText,
                     style: textTheme.labelSmall?.copyWith(color: color.onSurface),
                     textAlign: TextAlign.center,
                   ),
@@ -117,14 +118,14 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerP
               ),
               const SizedBox(height: 8),
               Divider(indent: 8, endIndent: 8, color: color.primary),
-              Text('By Category', style: textTheme.titleLarge?.copyWith(color: color.primary)),
+              Text(ctxt.statistics_byCategoryTitleText, style: textTheme.titleMedium?.copyWith(color: color.primary)),
               RepaintBoundary(
                 key: pieKey,
                 child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [buildCategoryPie(pieData), buildCategoryLegend(pieData)]),
               ),
               const SizedBox(height: 16),
               Divider(indent: 8, endIndent: 8, color: color.primary),
-              Text('Recent Transactions', style: textTheme.titleLarge?.copyWith(color: color.primary)),
+              Text(ctxt.statistics_recentTransactionsTitleText, style: textTheme.titleMedium?.copyWith(color: color.primary)),
               buildRecentTransactions(d.recent),
             ],
           ),
@@ -172,31 +173,40 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerP
 
   Widget buildMetricsRow(double income, double expense) {
     final net = income - expense;
+    final ctxt = AppLocalizations.of(context)!;
     return ResponsiveLayoutBuilder(
       columnWidget: Column(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          _buildMetricCard('Income', income, Colors.green, Icons.arrow_upward),
+          _buildMetricCard(ctxt.statistics_metricIncomeText, income, Icons.arrow_upward),
           SizedBox(height: 8),
-          _buildMetricCard('Expense', expense, Colors.red, Icons.arrow_downward),
+          _buildMetricCard(ctxt.statistics_metricExpenseText, expense, Icons.arrow_downward),
           SizedBox(height: 8),
-          _buildMetricCard('Net', net, net >= 0 ? Colors.lightGreenAccent : Colors.amberAccent, net >= 0 ? Icons.arrow_upward : Icons.arrow_downward),
+          _buildMetricCard(ctxt.statistics_metricNetText, net, net >= 0 ? Icons.arrow_upward : Icons.arrow_downward),
         ],
       ),
-      rowWidget: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildMetricCard('Income', income, Colors.green, Icons.arrow_upward),
-          _buildMetricCard('Expense', expense, Colors.red, Icons.arrow_downward),
-          _buildMetricCard('Net', net, net >= 0 ? Colors.lightGreenAccent : Colors.amberAccent, net >= 0 ? Icons.arrow_upward : Icons.arrow_downward),
-        ],
+      rowWidget: SizedBox(
+        height: 200,
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildMetricCard(ctxt.statistics_metricIncomeText, income, Icons.arrow_upward),
+                _buildMetricCard(ctxt.statistics_metricExpenseText, expense, Icons.arrow_downward),
+              ],
+            ),
+            SizedBox(height: 8),
+            _buildMetricCard(ctxt.statistics_metricNetText, net, net >= 0 ? Icons.arrow_upward : Icons.arrow_downward, isNetCard: true),
+          ],
+        ),
       ),
       sizedBoxHeight: 280,
     );
   }
 
-  Widget _buildMetricCard(String title, double value, Color colorScheme, IconData iconData) {
+  Widget _buildMetricCard(String title, double value, IconData iconData, {bool isNetCard = false}) {
     double allBoxWidthFactor = 0.2;
     var color = Theme.of(context).colorScheme;
     var textTheme = Theme.of(context).textTheme;
@@ -204,17 +214,14 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerP
     return Expanded(
       flex: (allBoxWidthFactor * 100).toInt(),
       child: SizedBox(
-        // width: 80,
         child: GestureDetector(
           onTap: () {},
           child: Container(
-            // width: 80,
             padding: const EdgeInsets.all(8.0),
             margin: const EdgeInsets.only(right: 4.0),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16.0),
-              // color: color.primary,
-              // Light background color
+              color: isNetCard ? color.primary : Colors.transparent,
               border: Border.all(color: color.primary), // Subtle border
             ),
             child: Column(
@@ -227,7 +234,7 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerP
                       child: Text(
                         title.toUpperCase(),
                         textAlign: TextAlign.center,
-                        style: textTheme.bodyMedium?.copyWith(color: color.primary),
+                        style: textTheme.bodyMedium?.copyWith(color: isNetCard ? color.onPrimary : color.primary),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -236,7 +243,7 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerP
                 SizedBox(height: 8),
                 AnimatedBalance(
                   value: value,
-                  style: textTheme.titleLarge?.copyWith(color: color.primary),
+                  style: textTheme.titleLarge?.copyWith(color: isNetCard ? color.onPrimary : color.primary),
                   textAlign: TextAlign.center,
                   overflow: TextOverflow.ellipsis,
                   fixedStringLength: 0,
@@ -273,12 +280,11 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerP
               lineTouchData: LineTouchData(
                 handleBuiltInTouches: true,
                 touchTooltipData: LineTouchTooltipData(
-                  // tooltipBgColor: color.surfaceVariant,
                   getTooltipItems: (touchedSpots) {
                     return touchedSpots.map((spot) {
                       final isIncome = spot.barIndex == 0;
                       return LineTooltipItem(
-                        '${isIncome ? 'Income' : 'Expense'}: ${ctxt.formatCurrencyWithSign(0, spot.y)}',
+                        '${isIncome ? ctxt.statistics_chartLineIncomeText : ctxt.statistics_chartLineExpenseText}: ${ctxt.formatCurrencyWithSign(0, spot.y)}',
                         TextStyle(color: spot.bar.gradient?.colors.first, fontWeight: FontWeight.bold),
                       );
                     }).toList();
@@ -334,7 +340,11 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerP
         const SizedBox(height: 12),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [_buildLegendItem(color.primary, "Income"), const SizedBox(width: 16), _buildLegendItem(color.tertiary, "Expense")],
+          children: [
+            _buildLegendItem(color.primary, ctxt.statistics_chartLineIncomeText),
+            const SizedBox(width: 16),
+            _buildLegendItem(color.tertiary, ctxt.statistics_chartLineExpenseText),
+          ],
         ),
       ],
     );
@@ -346,7 +356,7 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerP
     switch (filter) {
       case 'Today':
         // Show hourly labels
-        return '${index}h';
+        return ctxt.statistics_chartLineTodayHourText(ctxt.formatCompactNumber().format(index));
       case 'Week':
         // Show weekday labels
         final date = now.subtract(Duration(days: 6 - index));
@@ -370,9 +380,10 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerP
   Widget buildCategoryPie(List<PieCategory> pieData) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final ctxt = AppLocalizations.of(context)!;
 
     if (pieData.isEmpty) {
-      return NoDataFound(message: "Category not present.", iconData: Icons.category_outlined);
+      return NoDataFound(message: ctxt.statistics_categoryNotPresentText, iconData: Icons.category_outlined);
     }
 
     final total = pieData.fold<double>(0, (sum, item) => sum + item.value);
@@ -392,14 +403,14 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerP
                 final cat = entry.value;
                 final animatedValue = cat.value * animatedFraction;
                 final isTouched = i == touchedIndex;
-                final percentage = total > 0 ? (animatedValue / total * 100).toStringAsFixed(1) : '0';
+                final percentage = total > 0 ? (animatedValue / total) : 0.0;
                 indexMapping.add(entry.key);
 
                 return PieChartSectionData(
                   value: animatedValue,
                   gradient: LinearGradient(colors: [cat.color.withAlpha(180), cat.color.withAlpha(200), cat.color]),
                   radius: isTouched ? 80 : 60 * animatedFraction,
-                  title: '$percentage%',
+                  title: ctxt.formatPercentNumber(percentage),
                   titleStyle: textTheme.bodySmall?.copyWith(color: color.secondary, fontWeight: FontWeight.bold),
                 );
               }).toList();
@@ -432,87 +443,109 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerP
   Widget buildRecentTransactions(List<Transaction> list) {
     var color = Theme.of(context).colorScheme;
     var textTheme = Theme.of(context).textTheme;
+    final ctxt = AppLocalizations.of(context)!;
     if (list.isEmpty) {
-      return NoDataFound(message: "Transactions not present.", iconData: Icons.receipt_long_outlined);
+      return NoDataFound(message: ctxt.statistics_transactionNotPresentText, iconData: Icons.receipt_long_outlined);
     }
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      itemCount: min(list.length, 5),
-      itemBuilder: (c, i) {
-        final t = list[i];
-        t.category.loadSync();
-        t.account.loadSync();
-        return SlideTransition(
-          position: _animations[i],
-          child: FadeTransition(
-            opacity: _controllers[i],
-            child: Card.outlined(
-              // shadowColor: color.surface,
-              // color: Color(t.category.value?.colorValue ?? 0x00FFFEEE).withAlpha(0),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0), side: BorderSide(width: 1, color: color.primary)),
-              child: InkWell(
-                onTap: () {},
-                child: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: <Widget>[
-                          Container(
-                            width: 48.0,
-                            height: 48.0,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8.0),
-                              color: Color(t.category.value?.colorValue ?? 0xFF000000),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Icon(IconHelper.getIconData(t.category.value?.iconName), color: color.onPrimary, size: 24.0),
-                            ),
-                          ),
-                          const SizedBox(width: 16.0),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                Text("${t.category.value?.name}", style: textTheme.labelLarge?.copyWith(color: color.primary)),
-                                Text(
-                                  '${t.account.value?.name} - ${t.account.value?.accountType.name.toTitleCase()}',
-                                  style: textTheme.labelMedium?.copyWith(color: color.primary),
-                                ),
-                                if (t.description != '')
-                                  Text(
-                                    t.description ?? '',
-                                    style: textTheme.labelSmall?.copyWith(color: color.primary),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 16.0),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
+    return Column(
+      children: [
+        ListView.builder(
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
+          itemCount: min(list.length, 5),
+          itemBuilder: (c, i) {
+            final t = list[i];
+            t.category.loadSync();
+            t.account.loadSync();
+            return SlideTransition(
+              position: _animations[i],
+              child: FadeTransition(
+                opacity: _controllers[i],
+                child: Card.outlined(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0), side: BorderSide(width: 1, color: color.primary)),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(16.0),
+                    onTap: () {},
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
                             children: <Widget>[
-                              Text("${t.isExpense ? "-" : "+"} ₹${t.amount}", style: textTheme.titleLarge?.copyWith(color: color.primary)),
-                              Text(DateFormat('EEE, dd MMM yyyy').format(t.date), style: textTheme.labelSmall?.copyWith(color: color.primary)),
+                              Container(
+                                width: 48.0,
+                                height: 48.0,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  color: Color(t.category.value?.colorValue ?? 0xFF000000),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Icon(IconHelper.getIconData(t.category.value?.iconName), color: color.onPrimary, size: 24.0),
+                                ),
+                              ),
+                              const SizedBox(width: 16.0),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Text("${t.category.value?.name}", style: textTheme.labelLarge?.copyWith(color: color.primary)),
+                                    Text(
+                                      '${t.account.value?.name} - ${t.account.value?.accountType.name.toTitleCase()}',
+                                      style: textTheme.labelMedium?.copyWith(color: color.primary),
+                                    ),
+                                    if (t.description != '')
+                                      Text(
+                                        t.description ?? '',
+                                        style: textTheme.labelSmall?.copyWith(color: color.primary),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 16.0),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: <Widget>[
+                                  Text(
+                                    '${t.isExpense ? '-' : '+'} ${ctxt.formatCurrencyWithSign(2, t.amount)}',
+                                    style: textTheme.titleLarge?.copyWith(color: color.primary),
+                                  ),
+                                  Text(
+                                    DateFormat('EEE, dd MMM yyyy', ctxt.localeName).format(t.date),
+                                    style: textTheme.labelSmall?.copyWith(color: color.primary),
+                                  ),
+                                ],
+                              ),
                             ],
                           ),
                         ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),
+            );
+          },
+        ),
+        Center(child: TextButton(onPressed: () {
+          Navigator.of(context).push(
+            PageRouteBuilder(
+              transitionDuration: Duration(milliseconds: 300),
+              pageBuilder: (_, animation, secondaryAnimation) => TransactionListScreen(showAppBar: true),
+              transitionsBuilder: (_, animation, __, child) {
+                return FadeTransition(opacity: animation, child: child);
+              },
             ),
-          ),
-        );
-      },
+          );
+        }, child: Text(ctxt.statistics_showAllButtonText.toUpperCase()))),
+      ],
     );
   }
 
   void showExportOptions(BuildContext context) {
+    final ctxt = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       builder:
@@ -521,7 +554,7 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerP
             children: [
               ListTile(
                 leading: const Icon(Icons.picture_as_pdf),
-                title: const Text('Export to PDF'),
+                title: Text(ctxt.statistics_exportToPdfButtonText),
                 onTap: () async {
                   Navigator.pop(context);
                   Uint8List pieImage = await captureChartAsImage(pieKey);
@@ -532,7 +565,7 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerP
               ),
               ListTile(
                 leading: const Icon(Icons.table_chart),
-                title: const Text('Export to Excel'),
+                title: Text(ctxt.statistics_exportToExcelButtonText),
                 onTap: () {
                   Navigator.pop(context);
                   exportStatsToExcel(data!);

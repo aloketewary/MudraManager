@@ -1014,3 +1014,26 @@ extension NotificationRecordQueryProperty
     });
   }
 }
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+NotificationRecord _$NotificationRecordFromJson(Map<String, dynamic> json) =>
+    NotificationRecord()
+      ..id = (json['id'] as num).toInt()
+      ..title = json['title'] as String
+      ..body = json['body'] as String
+      ..timestamp = DateTime.parse(json['timestamp'] as String)
+      ..type = json['type'] as String?
+      ..isRead = json['isRead'] as bool;
+
+Map<String, dynamic> _$NotificationRecordToJson(NotificationRecord instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'title': instance.title,
+      'body': instance.body,
+      'timestamp': instance.timestamp.toIso8601String(),
+      'type': instance.type,
+      'isRead': instance.isRead,
+    };

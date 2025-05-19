@@ -232,17 +232,17 @@
   "@transaction_list_filter_expense": {
     "description": "This is text of Expense"
   },
-  "transaction_list_pending_transaction_message_text" : "⚡ New transactions found! Review now",
-  "@transaction_list_pending_transaction_message_text" : {
-    "description" : "This is text of pending transaction message"
+  "transaction_list_pending_transaction_message_text": "⚡ New transactions found! Review now",
+  "@transaction_list_pending_transaction_message_text": {
+    "description": "This is text of pending transaction message"
   },
-  "transaction_listPendingTransactionMessageActionLabel" : "Review",
-  "@transaction_listPendingTransactionMessageActionLabel" : {
-    "description" : "This is text of pending transaction message action"
+  "transaction_listPendingTransactionMessageActionLabel": "Review",
+  "@transaction_listPendingTransactionMessageActionLabel": {
+    "description": "This is text of pending transaction message action"
   },
-  "transaction_noTransactionFoundText" : "No transactions found.",
-  "@transaction_noTransactionFoundText" : {
-    "description" : "This is text of no transaction found"
+  "transaction_noTransactionFoundText": "No transactions found.",
+  "@transaction_noTransactionFoundText": {
+    "description": "This is text of no transaction found"
   },
   "transaction_deleteAlertTitleText": "Delete Transaction?",
   "@transaction_deleteAlertTitleText": {
@@ -268,33 +268,33 @@
   "@transaction_noteDescriptionText": {
     "description": "This is text of note description"
   },
-  "calendar_week_monday_initial_text" : "M",
-  "@calendar_week_monday_initial_text" : {
-    "description" : "This is text of Monday initial"
+  "calendar_week_monday_initial_text": "M",
+  "@calendar_week_monday_initial_text": {
+    "description": "This is text of Monday initial"
   },
-  "calendar_week_tuesday_initial_text" : "T",
-  "@calendar_week_tuesday_initial_text" : {
-    "description" : "This is text of Tuesday initial"
+  "calendar_week_tuesday_initial_text": "T",
+  "@calendar_week_tuesday_initial_text": {
+    "description": "This is text of Tuesday initial"
   },
-  "calendar_week_wednesday_initial_text" : "W",
-  "@calendar_week_wednesday_initial_text" : {
-    "description" : "This is text of Wednesday initial"
+  "calendar_week_wednesday_initial_text": "W",
+  "@calendar_week_wednesday_initial_text": {
+    "description": "This is text of Wednesday initial"
   },
-  "calendar_week_thursday_initial_text" : "T",
-  "@calendar_week_thursday_initial_text" : {
-    "description" : "This is text of Thursday initial"
+  "calendar_week_thursday_initial_text": "T",
+  "@calendar_week_thursday_initial_text": {
+    "description": "This is text of Thursday initial"
   },
-  "calendar_week_friday_initial_text" : "F",
-  "@calendar_week_friday_initial_text" : {
-    "description" : "This is text of Friday initial"
+  "calendar_week_friday_initial_text": "F",
+  "@calendar_week_friday_initial_text": {
+    "description": "This is text of Friday initial"
   },
-  "calendar_week_saturday_initial_text" : "S",
-  "@calendar_week_saturday_initial_text" : {
-    "description" : "This is text of Saturday initial"
+  "calendar_week_saturday_initial_text": "S",
+  "@calendar_week_saturday_initial_text": {
+    "description": "This is text of Saturday initial"
   },
-  "calendar_week_sunday_initial_text" : "S",
-  "@calendar_week_sunday_initial_text" : {
-    "description" : "This is text of Sunday initial"
+  "calendar_week_sunday_initial_text": "S",
+  "@calendar_week_sunday_initial_text": {
+    "description": "This is text of Sunday initial"
   },
   "dashboard_netWorthTitle": "Net Worth",
   "@dashboard_netWorthTitle": {
@@ -396,9 +396,9 @@
   "@budget_allocateAmountText": {
     "description": "This is text of Allocate Amount"
   },
-  "budget_categoryMessageInfoText" : "You can manually enter category allocations, or leave them blank to auto-distribute the remaining amount equally.",
-  "@budget_categoryMessageInfoText" : {
-    "description" : "This is text of category message info"
+  "budget_categoryMessageInfoText": "You can manually enter category allocations, or leave them blank to auto-distribute the remaining amount equally.",
+  "@budget_categoryMessageInfoText": {
+    "description": "This is text of category message info"
   },
   "budget_totalAllocatedBudgetText": "Total Allocated: {totalAlloc}",
   "@budget_totalAllocatedBudgetText": {
@@ -507,7 +507,125 @@
   "transaction_expenseButtonLabel": "EXPENSE",
   "@transaction_expenseButtonLabel": {
     "description": "This is text of Expense"
+  },
+  "statistics_weTrimDownDecimalInfoText": "We trim down decimal places, please round off if required.",
+  "@statistics_weTrimDownDecimalInfoText": {
+    "description": "This is text of We trim down decimal places, please round off if required."
+  },
+  "statistics_selectPeriodTodayText": "Today",
+  "@statistics_selectPeriodTodayText": {
+    "description": "This is text of Today"
+  },
+  "statistics_selectPeriodWeekText": "Week",
+  "@statistics_selectPeriodWeekText": {
+    "description": "This is text of Week"
+  },
+  "statistics_selectPeriodMonthText": "Month",
+  "@statistics_selectPeriodMonthText": {
+    "description": "This is text of Month"
+  },
+  "statistics_selectPeriodYearText": "Year",
+  "@statistics_selectPeriodYearText": {
+    "description": "This is text of Year"
+  },
+  "statistics_chartLineIncomeText": "Income",
+  "@statistics_chartLineIncomeText": {
+    "description": "This is text of Income"
+  },
+  "statistics_chartLineExpenseText": "Expense",
+  "@statistics_chartLineExpenseText": {
+    "description": "This is text of Expense"
+  },
+  "statistics_chartLineTodayHourText": "{hour}h",
+  "@statistics_chartLineTodayHourText": {
+    "description": "This is text of h"
+  },
+  "statistics_categoryNotPresentText": "Category not present.",
+  "@statistics_categoryNotPresentText": {
+    "description": "This is text of Category not present"
+  },
+  "statistics_transactionNotPresentText": "Transactions not present.",
+  "@statistics_transactionNotPresentText": {
+    "description": "This is text of Transactions not present."
+  },
+  "statistics_byCategoryTitleText": "By Category",
+  "@statistics_byCategoryTitleText": {
+    "description": "This is text of By Category"
+  },
+  "statistics_recentTransactionsTitleText": "Recent Transactions",
+  "@statistics_recentTransactionsTitleText": {
+    "description": "This is text of Recent Transactions"
+  },
+  "statistics_metricIncomeText": "Income",
+  "@statistics_metricIncomeText": {
+    "description": "This is text of Income"
+  },
+  "statistics_metricExpenseText": "Expense",
+  "@statistics_metricExpenseText": {
+    "description": "This is text of Expense"
+  },
+  "statistics_metricNetText": "Net",
+  "@statistics_metricNetText": {
+    "description": "This is text of Net"
+  },
+  "statistics_showAllButtonText": "Show All",
+  "@statistics_showAllButtonText": {
+    "description": "This is text of Show All"
+  },
+  "statistics_exportToPdfButtonText": "Export to PDF",
+  "@statistics_exportToPdfButtonText": {
+    "description": "This is text of Export to PDF"
+  },
+  "statistics_exportToExcelButtonText": "Export to Excel",
+  "@statistics_exportToExcelButtonText": {
+    "description": "This is text of Export to Excel"
+  },
+  "profile_userProfileTitleText": "User Profile",
+  "@profile_userProfileTitleText": {
+    "description": "This is text of User Profile"
+  },
+  "profile_userProfileSubtitleText": "Change profile image, name, and email",
+  "@profile_userProfileSubtitleText": {
+    "description": "This is text of User Profile subtitle"
+  },
+  "profile_nameControllerText": "Name",
+  "@profile_nameControllerText": {
+    "description": "This is text of Name"
+  },
+  "profile_nameControllerHintText": "Enter your name",
+  "@profile_nameControllerHintText": {
+    "description": "This is text of Enter your name"
+  },
+  "profile_nameRequiredHintText": "Name is required",
+  "@profile_nameRequiredHintText": {
+    "description": "This is text of Name is required"
+  },
+  "profile_emailControllerText": "Email",
+  "@profile_emailControllerText": {
+    "description": "This is text of Email"
+  },
+  "profile_emailControllerHintText": "Enter your email",
+  "@profile_emailControllerHintText": {
+    "description": "This is text of Enter your name"
+  },
+  "profile_phoneControllerText": "Phone",
+  "@profile_phoneControllerText": {
+    "description": "This is text of Phone"
+  },
+  "profile_phoneControllerHintText": "Enter your phone number",
+  "@profile_phoneControllerHintText": {
+    "description": "This is text of Enter your phone number"
+  },
+  "profile_weAreNotStoringInfoText": "We are not storing any data, all data is in your device!",
+  "@profile_weAreNotStoringInfoText": {
+    "description": "This is text of We are not storing"
+  },
+  "profile_saveButtonText": "save",
+  "@profile_saveButtonText": {
+    "description": "This is text of save button"
+  },
+  "profile_editUserProfileAppTitle": "Edit User Profile",
+  "@profile_editUserProfileAppTitle": {
+    "description": "This is text of Edit User Profile"
   }
-
-
 }

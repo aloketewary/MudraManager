@@ -404,4 +404,96 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get transaction_expenseButtonLabel => 'ব্যয়';
+
+  @override
+  String get statistics_weTrimDownDecimalInfoText => 'আমরা দশমিক স্থান কমিয়ে দেই, প্রয়োজনে রাউন্ড অফ করুন।';
+
+  @override
+  String get statistics_selectPeriodTodayText => 'আজ';
+
+  @override
+  String get statistics_selectPeriodWeekText => 'সপ্তাহ';
+
+  @override
+  String get statistics_selectPeriodMonthText => 'মাস';
+
+  @override
+  String get statistics_selectPeriodYearText => 'বছর';
+
+  @override
+  String get statistics_chartLineIncomeText => 'আয়';
+
+  @override
+  String get statistics_chartLineExpenseText => 'ব্যয়';
+
+  @override
+  String statistics_chartLineTodayHourText(Object hour) {
+    return '$hourঘঃ';
+  }
+
+  @override
+  String get statistics_categoryNotPresentText => 'ক্যাটাগরি বিদ্যমান নেই।';
+
+  @override
+  String get statistics_transactionNotPresentText => 'লেনদেন বিদ্যমান নেই।';
+
+  @override
+  String get statistics_byCategoryTitleText => 'ক্যাটাগরি অনুযায়ী';
+
+  @override
+  String get statistics_recentTransactionsTitleText => 'সাম্প্রতিক লেনদেন';
+
+  @override
+  String get statistics_metricIncomeText => 'আয়';
+
+  @override
+  String get statistics_metricExpenseText => 'ব্যয়';
+
+  @override
+  String get statistics_metricNetText => 'নিট';
+
+  @override
+  String get statistics_showAllButtonText => 'সব দেখান';
+
+  @override
+  String get statistics_exportToPdfButtonText => 'পিডিএফ-এ এক্সপোর্ট করুন';
+
+  @override
+  String get statistics_exportToExcelButtonText => 'এক্সেল-এ এক্সপোর্ট করুন';
+
+  @override
+  String get profile_userProfileTitleText => 'ব্যবহারকারী প্রোফাইল';
+
+  @override
+  String get profile_userProfileSubtitleText => 'প্রোফাইলের ছবি, নাম এবং ইমেল পরিবর্তন করুন';
+
+  @override
+  String get profile_nameControllerText => 'নাম';
+
+  @override
+  String get profile_nameControllerHintText => 'আপনার নাম লিখুন';
+
+  @override
+  String get profile_nameRequiredHintText => 'নাম আবশ্যক';
+
+  @override
+  String get profile_emailControllerText => 'ইমেল';
+
+  @override
+  String get profile_emailControllerHintText => 'আপনার ইমেল লিখুন';
+
+  @override
+  String get profile_phoneControllerText => 'ফোন';
+
+  @override
+  String get profile_phoneControllerHintText => 'আপনার ফোন নম্বর লিখুন';
+
+  @override
+  String get profile_weAreNotStoringInfoText => 'আমরা কোনো ডেটা সংরক্ষণ করছি না, সব ডেটা আপনার ডিভাইসে আছে!';
+
+  @override
+  String get profile_saveButtonText => 'সংরক্ষণ করুন';
+
+  @override
+  String get profile_editUserProfileAppTitle => 'ব্যবহারকারী প্রোফাইল সম্পাদনা করুন';
 }
