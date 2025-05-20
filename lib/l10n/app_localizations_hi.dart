@@ -9,7 +9,8 @@ class AppLocalizationsHi extends AppLocalizations {
   AppLocalizationsHi([String locale = 'hi']) : super(locale);
 
   @override
-  String get onboard_manageYourMoneyDescription => 'अपने पैसे को स्मार्ट तरीके से और सहजता से प्रबंधित करें।';
+  String get onboard_manageYourMoneyDescription =>
+      'अपने पैसे को स्मार्ट तरीके से और सहजता से प्रबंधित करें।';
 
   @override
   String onboard_welcomeToApp(Object appName) {
@@ -20,13 +21,15 @@ class AppLocalizationsHi extends AppLocalizations {
   String get onboard_TrackYourTransactions => 'अपने लेनदेन को ट्रैक करें';
 
   @override
-  String get onboard_SeeWhereYourMoneyGoes => 'देखें कि आपका पैसा कहाँ जाता है, हर दिन।';
+  String get onboard_SeeWhereYourMoneyGoes =>
+      'देखें कि आपका पैसा कहाँ जाता है, हर दिन।';
 
   @override
   String get onboard_SetBudgetsAndGoals => 'बजट और लक्ष्य निर्धारित करें';
 
   @override
-  String get onboard_stayOnTrackAndAchieveYourDream => 'पटरी पर रहें और अपने सपनों को प्राप्त करें।';
+  String get onboard_stayOnTrackAndAchieveYourDream =>
+      'पटरी पर रहें और अपने सपनों को प्राप्त करें।';
 
   @override
   String get onboard_GetStarted => 'शुरू हो जाओ!';
@@ -38,7 +41,8 @@ class AppLocalizationsHi extends AppLocalizations {
   String get onboard_howShouldWeCallYou => 'हम आपको कैसे बुलाएं?';
 
   @override
-  String get onboard_enterYourNameToPersonalizeYourExperience => 'अपने अनुभव को व्यक्तिगत बनाने के लिए अपना नाम दर्ज करें।';
+  String get onboard_enterYourNameToPersonalizeYourExperience =>
+      'अपने अनुभव को व्यक्तिगत बनाने के लिए अपना नाम दर्ज करें।';
 
   @override
   String get onboard_enterYourName => 'अपना नाम दर्ज करें';
@@ -47,7 +51,8 @@ class AppLocalizationsHi extends AppLocalizations {
   String get onboard_setupYourFirstAccount => 'अपना पहला खाता सेटअप करें';
 
   @override
-  String get onboard_letsCreateYourFirstAccount => 'आइए अपना पहला खाता बनाते हैं (मान लीजिए: नकद)।';
+  String get onboard_letsCreateYourFirstAccount =>
+      'आइए अपना पहला खाता बनाते हैं (मान लीजिए: नकद)।';
 
   @override
   String get onboard_accountName => 'खाते का नाम';
@@ -56,7 +61,8 @@ class AppLocalizationsHi extends AppLocalizations {
   String get onboard_initialBalance => 'शुरुआती शेष';
 
   @override
-  String get onboard_youCanUpdateOtherDetailsLaterAsWell => 'आप बाद में भी अन्य विवरण अपडेट कर सकते हैं।';
+  String get onboard_youCanUpdateOtherDetailsLaterAsWell =>
+      'आप बाद में भी अन्य विवरण अपडेट कर सकते हैं।';
 
   @override
   String onboard_pleaseFillThe(Object inputName) {
@@ -72,7 +78,8 @@ class AppLocalizationsHi extends AppLocalizations {
   String get onboard_youAreAllSet => 'आप सब तैयार हैं!';
 
   @override
-  String get onboard_letsStartManagingYourMoneyWisely => 'आइए अपने पैसे का बुद्धिमानी से प्रबंधन करना शुरू करें।';
+  String get onboard_letsStartManagingYourMoneyWisely =>
+      'आइए अपने पैसे का बुद्धिमानी से प्रबंधन करना शुरू करें।';
 
   @override
   String get app_settings_appbar_title => 'ऐप सेटिंग्स';
@@ -171,7 +178,8 @@ class AppLocalizationsHi extends AppLocalizations {
   String get dashboard_mini_budget_text => 'बजट';
 
   @override
-  String get dashboard_mini_budget_not_found_text => 'कोई बजट परिभाषित नहीं है, एक जोड़ें!';
+  String get dashboard_mini_budget_not_found_text =>
+      'कोई बजट परिभाषित नहीं है, एक जोड़ें!';
 
   @override
   String get dashboard_mini_budget_add_text => 'बजट जोड़ें';
@@ -189,7 +197,8 @@ class AppLocalizationsHi extends AppLocalizations {
   String get transaction_list_filter_expense => 'व्यय';
 
   @override
-  String get transaction_list_pending_transaction_message_text => '⚡ नए लेनदेन मिले! अभी समीक्षा करें';
+  String get transaction_list_pending_transaction_message_text =>
+      '⚡ नए लेनदेन मिले! अभी समीक्षा करें';
 
   @override
   String get transaction_listPendingTransactionMessageActionLabel => 'समीक्षा';
@@ -201,7 +210,8 @@ class AppLocalizationsHi extends AppLocalizations {
   String get transaction_deleteAlertTitleText => 'लेन-देन हटाएं?';
 
   @override
-  String get transaction_deleteAlertBodyText => 'यह क्रिया पूर्ववत नहीं की जा सकती है।';
+  String get transaction_deleteAlertBodyText =>
+      'यह क्रिया पूर्ववत नहीं की जा सकती है।';
 
   @override
   String get transaction_deleteButtonActionText => 'हटाएं';
@@ -251,7 +261,8 @@ class AppLocalizationsHi extends AppLocalizations {
   String get budget_dashboardPageTitle => 'बजट विवरण';
 
   @override
-  String get budget_dashboardNotFoundText => 'कोई बजट परिभाषित नहीं है, एक जोड़ें!';
+  String get budget_dashboardNotFoundText =>
+      'कोई बजट परिभाषित नहीं है, एक जोड़ें!';
 
   @override
   String get budget_dashboardAddBudgetText => 'बजट जोड़ें';
@@ -260,7 +271,11 @@ class AppLocalizationsHi extends AppLocalizations {
   String get budget_categoriesTitle => 'श्रेणियाँ';
 
   @override
-  String budget_dashboardPieChartLabelText(Object spentPercent, Object title, Object totalPercent) {
+  String budget_dashboardPieChartLabelText(
+    Object spentPercent,
+    Object title,
+    Object totalPercent,
+  ) {
     return '$title ($totalPercent कुल का, $spentPercent खर्च का)';
   }
 
@@ -268,7 +283,8 @@ class AppLocalizationsHi extends AppLocalizations {
   String get budget_buttonDeleteTitleText => 'बजट हटाएं?';
 
   @override
-  String get budget_buttonDeleteBodyText => 'यह बजट और उसके आवंटन को हटा देगा, यह क्रिया पूर्ववत नहीं की जा सकती है।';
+  String get budget_buttonDeleteBodyText =>
+      'यह बजट और उसके आवंटन को हटा देगा, यह क्रिया पूर्ववत नहीं की जा सकती है।';
 
   @override
   String get budget_buttonDeleteActionText => 'हटाएं';
@@ -320,7 +336,8 @@ class AppLocalizationsHi extends AppLocalizations {
   String get budget_allocateAmountText => 'राशि आवंटित करें';
 
   @override
-  String get budget_categoryMessageInfoText => 'आप मैन्युअल रूप से श्रेणी आवंटन दर्ज कर सकते हैं, या शेष राशि को समान रूप से स्वतः वितरित करने के लिए उन्हें खाली छोड़ सकते हैं।';
+  String get budget_categoryMessageInfoText =>
+      'आप मैन्युअल रूप से श्रेणी आवंटन दर्ज कर सकते हैं, या शेष राशि को समान रूप से स्वतः वितरित करने के लिए उन्हें खाली छोड़ सकते हैं।';
 
   @override
   String budget_totalAllocatedBudgetText(Object totalAlloc) {
@@ -355,10 +372,12 @@ class AppLocalizationsHi extends AppLocalizations {
   String get budget_pickBothDatesErrorText => 'दोनों तिथियाँ चुनें';
 
   @override
-  String get budget_selectAtLeastOneCategoryErrorText => 'कम से कम एक श्रेणी चुनें';
+  String get budget_selectAtLeastOneCategoryErrorText =>
+      'कम से कम एक श्रेणी चुनें';
 
   @override
-  String get budget_allocatedAmountExceedsTotalBudgetText => 'आवंटित राशि कुल बजट से अधिक है';
+  String get budget_allocatedAmountExceedsTotalBudgetText =>
+      'आवंटित राशि कुल बजट से अधिक है';
 
   @override
   String get transaction_amountControllerText => 'राशि';
@@ -397,7 +416,8 @@ class AppLocalizationsHi extends AppLocalizations {
   String get transaction_selectOneAccountErrorText => 'कम से कम एक खाता चुनें';
 
   @override
-  String get transaction_selectOneCategoryErrorText => 'कम से कम एक श्रेणी चुनें';
+  String get transaction_selectOneCategoryErrorText =>
+      'कम से कम एक श्रेणी चुनें';
 
   @override
   String get transaction_incomeButtonLabel => 'आय';
@@ -406,7 +426,8 @@ class AppLocalizationsHi extends AppLocalizations {
   String get transaction_expenseButtonLabel => 'व्यय';
 
   @override
-  String get statistics_weTrimDownDecimalInfoText => 'हम दशमलव स्थानों को कम करते हैं, यदि आवश्यक हो तो राउंड ऑफ करें।';
+  String get statistics_weTrimDownDecimalInfoText =>
+      'हम दशमलव स्थानों को कम करते हैं, यदि आवश्यक हो तो राउंड ऑफ करें।';
 
   @override
   String get statistics_selectPeriodTodayText => 'आज';
@@ -465,7 +486,8 @@ class AppLocalizationsHi extends AppLocalizations {
   String get profile_userProfileTitleText => 'उपयोगकर्ता प्रोफ़ाइल';
 
   @override
-  String get profile_userProfileSubtitleText => 'प्रोफ़ाइल छवि, नाम और ईमेल बदलें';
+  String get profile_userProfileSubtitleText =>
+      'प्रोफ़ाइल छवि, नाम और ईमेल बदलें';
 
   @override
   String get profile_nameControllerText => 'नाम';
@@ -489,11 +511,17 @@ class AppLocalizationsHi extends AppLocalizations {
   String get profile_phoneControllerHintText => 'अपना फ़ोन नंबर दर्ज करें';
 
   @override
-  String get profile_weAreNotStoringInfoText => 'हम कोई डेटा संग्रहीत नहीं कर रहे हैं, सारा डेटा आपके डिवाइस में है!';
+  String get profile_weAreNotStoringInfoText =>
+      'हम कोई डेटा संग्रहीत नहीं कर रहे हैं, सारा डेटा आपके डिवाइस में है!';
 
   @override
   String get profile_saveButtonText => 'सहेजें';
 
   @override
-  String get profile_editUserProfileAppTitle => 'उपयोगकर्ता प्रोफ़ाइल संपादित करें';
+  String get profile_editUserProfileAppTitle =>
+      'उपयोगकर्ता प्रोफ़ाइल संपादित करें';
+
+  @override
+  String get pendingTranx_reviewPendingTransactionsScreenTitle =>
+      'लंबित लेन-देन';
 }

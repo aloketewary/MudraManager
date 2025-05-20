@@ -284,7 +284,7 @@ class BackupService {
 
   static Future<Directory?> pickBackupFolder() async {
     final hasPermission = await requestStoragePermission();
-    // if (!hasPermission) return null;
+    if (!hasPermission) return null;
 
     String? selectedDir = await FilePicker.platform.getDirectoryPath();
     if (selectedDir != null) {

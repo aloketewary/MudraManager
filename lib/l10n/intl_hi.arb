@@ -623,5 +623,9 @@
   "profile_editUserProfileAppTitle": "उपयोगकर्ता प्रोफ़ाइल संपादित करें",
   "@profile_editUserProfileAppTitle": {
     "description": "This is text of Edit User Profile"
+  },
+  "pendingTranx_reviewPendingTransactionsScreenTitle": "लंबित लेन-देन",
+  "@pendingTranx_reviewPendingTransactionsScreenTitle": {
+    "description": "This is title of Review Pending Transactions"
   }
 }

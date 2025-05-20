@@ -59,4 +59,12 @@ class PendingTransactionService {
       await isar.pendingTransactions.delete(pendingTx.id);
     });
   }
+
+  Future<void> clearAll() async {
+    var isar = await isarService.getInstance();
+    await isar.writeTxn(() async {
+      await isar.pendingTransactions.clear();
+    });
+  }
+
 }

@@ -231,7 +231,8 @@ class ProfileScreen extends ConsumerWidget {
               ProfileTile(
                 title: "Logout",
                 subtitle: "Clear Everything and Logout",
-                icon: Icons.logout, // You can change icon if you want
+                icon: Icons.logout,
+                isLogout: true,
                 onTap: () {
                   showAdaptiveDialog(
                     context: context,

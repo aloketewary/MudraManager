@@ -623,5 +623,9 @@
   "profile_editUserProfileAppTitle": "ব্যবহারকারী প্রোফাইল সম্পাদনা করুন",
   "@profile_editUserProfileAppTitle": {
     "description": "This is text of Edit User Profile"
+  },
+  "pendingTranx_reviewPendingTransactionsScreenTitle": "মুলতুবি লেনদেন",
+  "@pendingTranx_reviewPendingTransactionsScreenTitle": {
+    "description": "This is title of Review Pending Transactions"
   }
 }

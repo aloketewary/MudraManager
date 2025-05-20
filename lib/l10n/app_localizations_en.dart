@@ -9,7 +9,8 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get onboard_manageYourMoneyDescription => 'Manage your money smartly & effortlessly.';
+  String get onboard_manageYourMoneyDescription =>
+      'Manage your money smartly & effortlessly.';
 
   @override
   String onboard_welcomeToApp(Object appName) {
@@ -20,13 +21,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboard_TrackYourTransactions => 'Track your Transactions';
 
   @override
-  String get onboard_SeeWhereYourMoneyGoes => 'See where your money goes, every day.';
+  String get onboard_SeeWhereYourMoneyGoes =>
+      'See where your money goes, every day.';
 
   @override
   String get onboard_SetBudgetsAndGoals => 'Set Budgets and Goals';
 
   @override
-  String get onboard_stayOnTrackAndAchieveYourDream => 'Stay on track and achieve your dreams.';
+  String get onboard_stayOnTrackAndAchieveYourDream =>
+      'Stay on track and achieve your dreams.';
 
   @override
   String get onboard_GetStarted => 'Get Started!';
@@ -38,7 +41,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboard_howShouldWeCallYou => 'How should we call you?';
 
   @override
-  String get onboard_enterYourNameToPersonalizeYourExperience => 'Enter your name to personalize your experience.';
+  String get onboard_enterYourNameToPersonalizeYourExperience =>
+      'Enter your name to personalize your experience.';
 
   @override
   String get onboard_enterYourName => 'Enter your name';
@@ -47,7 +51,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboard_setupYourFirstAccount => 'Setup Your First Account';
 
   @override
-  String get onboard_letsCreateYourFirstAccount => 'Let\'s create your first account (let say: Cash).';
+  String get onboard_letsCreateYourFirstAccount =>
+      'Let\'s create your first account (let say: Cash).';
 
   @override
   String get onboard_accountName => 'Account Name';
@@ -56,7 +61,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboard_initialBalance => 'Initial Balance';
 
   @override
-  String get onboard_youCanUpdateOtherDetailsLaterAsWell => 'You can update other details later as well.';
+  String get onboard_youCanUpdateOtherDetailsLaterAsWell =>
+      'You can update other details later as well.';
 
   @override
   String onboard_pleaseFillThe(Object inputName) {
@@ -72,7 +78,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboard_youAreAllSet => 'You\'re all set!';
 
   @override
-  String get onboard_letsStartManagingYourMoneyWisely => 'Let\'s start managing your money wisely.';
+  String get onboard_letsStartManagingYourMoneyWisely =>
+      'Let\'s start managing your money wisely.';
 
   @override
   String get app_settings_appbar_title => 'App Settings';
@@ -171,7 +178,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboard_mini_budget_text => 'Budget';
 
   @override
-  String get dashboard_mini_budget_not_found_text => 'No Budgets Defined, Add One!';
+  String get dashboard_mini_budget_not_found_text =>
+      'No Budgets Defined, Add One!';
 
   @override
   String get dashboard_mini_budget_add_text => 'Add Budget';
@@ -189,7 +197,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transaction_list_filter_expense => 'Expense';
 
   @override
-  String get transaction_list_pending_transaction_message_text => '⚡ New transactions found! Review now';
+  String get transaction_list_pending_transaction_message_text =>
+      '⚡ New transactions found! Review now';
 
   @override
   String get transaction_listPendingTransactionMessageActionLabel => 'Review';
@@ -260,7 +269,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get budget_categoriesTitle => 'Categories';
 
   @override
-  String budget_dashboardPieChartLabelText(Object spentPercent, Object title, Object totalPercent) {
+  String budget_dashboardPieChartLabelText(
+    Object spentPercent,
+    Object title,
+    Object totalPercent,
+  ) {
     return '$title ($totalPercent of Total, ${spentPercent}of Spent)';
   }
 
@@ -268,7 +281,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get budget_buttonDeleteTitleText => 'Delete Budget?';
 
   @override
-  String get budget_buttonDeleteBodyText => 'This will remove the Budget and its allocations, this action cannot be undone.';
+  String get budget_buttonDeleteBodyText =>
+      'This will remove the Budget and its allocations, this action cannot be undone.';
 
   @override
   String get budget_buttonDeleteActionText => 'Delete';
@@ -320,7 +334,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get budget_allocateAmountText => 'Allocate Amount';
 
   @override
-  String get budget_categoryMessageInfoText => 'You can manually enter category allocations, or leave them blank to auto-distribute the remaining amount equally.';
+  String get budget_categoryMessageInfoText =>
+      'You can manually enter category allocations, or leave them blank to auto-distribute the remaining amount equally.';
 
   @override
   String budget_totalAllocatedBudgetText(Object totalAlloc) {
@@ -355,10 +370,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get budget_pickBothDatesErrorText => 'Pick both dates';
 
   @override
-  String get budget_selectAtLeastOneCategoryErrorText => 'Select at least one category';
+  String get budget_selectAtLeastOneCategoryErrorText =>
+      'Select at least one category';
 
   @override
-  String get budget_allocatedAmountExceedsTotalBudgetText => 'Allocated amount exceeds total budget';
+  String get budget_allocatedAmountExceedsTotalBudgetText =>
+      'Allocated amount exceeds total budget';
 
   @override
   String get transaction_amountControllerText => 'Amount';
@@ -394,10 +411,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transaction_saveTransactionButtonLabel => 'Save Transaction';
 
   @override
-  String get transaction_selectOneAccountErrorText => 'Select at least one Account';
+  String get transaction_selectOneAccountErrorText =>
+      'Select at least one Account';
 
   @override
-  String get transaction_selectOneCategoryErrorText => 'Select at least one Category';
+  String get transaction_selectOneCategoryErrorText =>
+      'Select at least one Category';
 
   @override
   String get transaction_incomeButtonLabel => 'INCOME';
@@ -406,7 +425,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transaction_expenseButtonLabel => 'EXPENSE';
 
   @override
-  String get statistics_weTrimDownDecimalInfoText => 'We trim down decimal places, please round off if required.';
+  String get statistics_weTrimDownDecimalInfoText =>
+      'We trim down decimal places, please round off if required.';
 
   @override
   String get statistics_selectPeriodTodayText => 'Today';
@@ -435,7 +455,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statistics_categoryNotPresentText => 'Category not present.';
 
   @override
-  String get statistics_transactionNotPresentText => 'Transactions not present.';
+  String get statistics_transactionNotPresentText =>
+      'Transactions not present.';
 
   @override
   String get statistics_byCategoryTitleText => 'By Category';
@@ -465,7 +486,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profile_userProfileTitleText => 'User Profile';
 
   @override
-  String get profile_userProfileSubtitleText => 'Change profile image, name, and email';
+  String get profile_userProfileSubtitleText =>
+      'Change profile image, name, and email';
 
   @override
   String get profile_nameControllerText => 'Name';
@@ -489,11 +511,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profile_phoneControllerHintText => 'Enter your phone number';
 
   @override
-  String get profile_weAreNotStoringInfoText => 'We are not storing any data, all data is in your device!';
+  String get profile_weAreNotStoringInfoText =>
+      'We are not storing any data, all data is in your device!';
 
   @override
   String get profile_saveButtonText => 'save';
 
   @override
   String get profile_editUserProfileAppTitle => 'Edit User Profile';
+
+  @override
+  String get pendingTranx_reviewPendingTransactionsScreenTitle =>
+      'Pending Transactions';
 }

@@ -14,6 +14,7 @@ import 'package:mudra_manager/providers/status_data_provider.dart' show StatsDat
 import 'package:mudra_manager/screens/reusable/animated_balance.dart';
 import 'package:mudra_manager/screens/reusable/no_data_found.dart';
 import 'package:mudra_manager/screens/reusable/responseive_layout_builder.dart';
+import 'package:mudra_manager/screens/statistics/expense_trend_widget.dart' show ExpenseTrendWidget;
 import 'package:mudra_manager/screens/statistics/period_selector_screen.dart';
 import 'package:mudra_manager/screens/transaction/transaction_list_screen.dart' show TransactionListScreen;
 import 'package:mudra_manager/util/case_extension.dart';
@@ -117,16 +118,41 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerP
                 ),
               ),
               const SizedBox(height: 8),
-              Divider(indent: 8, endIndent: 8, color: color.primary),
-              Text(ctxt.statistics_byCategoryTitleText, style: textTheme.titleMedium?.copyWith(color: color.primary)),
-              RepaintBoundary(
-                key: pieKey,
-                child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [buildCategoryPie(pieData), buildCategoryLegend(pieData)]),
+              Divider(color: color.primary),
+              ExpansionTile(
+                tilePadding: EdgeInsets.zero,
+                initiallyExpanded: true,
+                iconColor: color.primary,
+                leading: Icon(Icons.pie_chart_outline, color: color.primary),
+                title: Text(ctxt.statistics_byCategoryTitleText, style: textTheme.titleMedium?.copyWith(color: color.primary)),
+                subtitle: Text("Category wise expense chart", style: textTheme.labelSmall?.copyWith(color: color.primary)),
+                children: [
+                  RepaintBoundary(
+                    key: pieKey,
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [buildCategoryPie(pieData), buildCategoryLegend(pieData)]),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+              ),
+              ExpansionTile(
+                tilePadding: EdgeInsets.zero,
+                iconColor: color.primary,
+                maintainState: true,
+                leading: Icon(Icons.trending_up_outlined, color: color.primary),
+                title: Text("Expense Trend by Category", style: textTheme.titleMedium?.copyWith(color: color.primary)),
+                subtitle: Text("Last 12 months category wise expense trends", style: textTheme.labelSmall?.copyWith(color: color.primary)),
+                children: [ExpenseTrendWidget(categoryTrends: d.categoryTrends), SizedBox(height: 8)],
+              ),
+              ExpansionTile(
+                tilePadding: EdgeInsets.zero,
+                iconColor: color.primary,
+                maintainState: true,
+                leading: Icon(Icons.history_outlined, color: color.primary),
+                title: Text(ctxt.statistics_recentTransactionsTitleText, style: textTheme.titleMedium?.copyWith(color: color.primary)),
+                subtitle: Text("Last 5 latest transactions", style: textTheme.labelSmall?.copyWith(color: color.primary)),
+                children: [buildRecentTransactions(d.recent), SizedBox(height: 8)],
               ),
               const SizedBox(height: 16),
-              Divider(indent: 8, endIndent: 8, color: color.primary),
-              Text(ctxt.statistics_recentTransactionsTitleText, style: textTheme.titleMedium?.copyWith(color: color.primary)),
-              buildRecentTransactions(d.recent),
             ],
           ),
         );
@@ -163,7 +189,13 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerP
                 children: [
                   Container(width: 12, height: 12, color: cat.color),
                   const SizedBox(width: 4),
-                  Text(cat.name, style: textTheme.labelMedium?.copyWith(decoration: isDisabled ? TextDecoration.lineThrough : null)),
+                  Text(
+                    cat.name.toUpperCase(),
+                    style: textTheme.labelMedium?.copyWith(
+                      fontWeight: isDisabled ? FontWeight.normal : FontWeight.w600,
+                      decoration: isDisabled ? TextDecoration.lineThrough : null,
+                    ),
+                  ),
                 ],
               ),
             );
@@ -312,11 +344,17 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerP
                   sideTitles: SideTitles(
                     showTitles: true,
                     interval: period == 'Today' ? 6 : 1,
-                    getTitlesWidget:
-                        (value, _) => Text(
-                          _getXAxisLabel(value.toInt(), period),
-                          style: textTheme.bodySmall?.copyWith(color: color.onSurface, fontWeight: FontWeight.w500),
+                    getTitlesWidget: (value, _) {
+                      // Cast value to int for _getXAxisLabel
+                      final int index = value.toInt();
+                      return Padding(
+                        padding: EdgeInsets.only(top: 8),
+                        child: Text(
+                          _getXAxisLabel(index, period),
+                          style: textTheme.bodySmall?.copyWith(color: color.onSurface, fontWeight: FontWeight.w500, fontSize: 8),
                         ),
+                      );
+                    },
                   ),
                 ),
                 leftTitles: AxisTitles(
@@ -529,17 +567,22 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerP
             );
           },
         ),
-        Center(child: TextButton(onPressed: () {
-          Navigator.of(context).push(
-            PageRouteBuilder(
-              transitionDuration: Duration(milliseconds: 300),
-              pageBuilder: (_, animation, secondaryAnimation) => TransactionListScreen(showAppBar: true),
-              transitionsBuilder: (_, animation, __, child) {
-                return FadeTransition(opacity: animation, child: child);
-              },
-            ),
-          );
-        }, child: Text(ctxt.statistics_showAllButtonText.toUpperCase()))),
+        Center(
+          child: TextButton(
+            onPressed: () {
+              Navigator.of(context).push(
+                PageRouteBuilder(
+                  transitionDuration: Duration(milliseconds: 300),
+                  pageBuilder: (_, animation, secondaryAnimation) => TransactionListScreen(showAppBar: true),
+                  transitionsBuilder: (_, animation, __, child) {
+                    return FadeTransition(opacity: animation, child: child);
+                  },
+                ),
+              );
+            },
+            child: Text(ctxt.statistics_showAllButtonText.toUpperCase()),
+          ),
+        ),
       ],
     );
   }

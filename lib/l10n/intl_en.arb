@@ -627,5 +627,9 @@
   "profile_editUserProfileAppTitle": "Edit User Profile",
   "@profile_editUserProfileAppTitle": {
     "description": "This is text of Edit User Profile"
+  },
+  "pendingTranx_reviewPendingTransactionsScreenTitle": "Pending Transactions",
+  "@pendingTranx_reviewPendingTransactionsScreenTitle": {
+    "description": "This is title of Review Pending Transactions"
   }
 }

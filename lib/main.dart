@@ -6,7 +6,6 @@ import 'package:mudra_manager/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/screens/home_screen.dart';
 import 'package:mudra_manager/screens/onboarding/onboarding_screen.dart';
 import 'package:mudra_manager/service/notification_service.dart';
-import 'package:mudra_manager/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/theme/app_theme.dart';
 import 'package:mudra_manager/theme/theme_provider.dart';
 import 'package:mudra_manager/util/auth_gate.dart';
@@ -29,7 +28,7 @@ void main() async {
   await NotificationService.initialize();
 
   final completed = SharedPrefsUtil.instance.isOnboardingComplete();
-  setupSmsListener();
+  // setupSmsListener();
   runApp(ProviderScope(child: MudraManagerApp(showOnboarding: !completed)));
 }
 
@@ -68,28 +67,28 @@ class MudraManagerApp extends ConsumerWidget {
     );
   }
 }
-
-Future<void> setupSmsListener() async {
-  final bool? permissionsGranted =
-      await telephony.requestPhoneAndSmsPermissions;
-
-  if (permissionsGranted ?? false) {
-    telephony.listenIncomingSms(
-      onNewMessage: (SmsMessage message) {
-        if (message.body != null) {
-          SmsProcessorService.instance.parseAndSaveTransaction(message.body!);
-        }
-      },
-      listenInBackground: true,
-      onBackgroundMessage: backgroundMessageHandler,
-    );
-  }
-}
-
-// Background handler
-@pragma('vm:entry-point')
-void backgroundMessageHandler(SmsMessage message) {
-  if (message.body != null) {
-    SmsProcessorService.instance.parseAndSaveTransaction(message.body!);
-  }
-}
+//
+// Future<void> setupSmsListener() async {
+//   final bool? permissionsGranted =
+//       await telephony.requestPhoneAndSmsPermissions;
+//
+//   if (permissionsGranted ?? false) {
+//     telephony.listenIncomingSms(
+//       onNewMessage: (SmsMessage message) {
+//         if (message.body != null) {
+//           SmsProcessorService.instance.parseAndSaveTransaction(message.body!);
+//         }
+//       },
+//       listenInBackground: true,
+//       onBackgroundMessage: backgroundMessageHandler,
+//     );
+//   }
+// }
+//
+// // Background handler
+// @pragma('vm:entry-point')
+// void backgroundMessageHandler(SmsMessage message) {
+//   if (message.body != null) {
+//     SmsProcessorService.instance.parseAndSaveTransaction(message.body!);
+//   }
+// }

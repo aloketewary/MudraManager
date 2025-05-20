@@ -38,7 +38,7 @@ class AboutScreen extends StatelessWidget {
                     backgroundColor: color.primary,
                     radius: 48,
                     child: Image.asset(
-                      'assets/logo/money-currency.png',
+                      'assets/logo/rupee.png',
                       // color: color.primary,
                       width: 72,
                     ),
