@@ -22,14 +22,13 @@ class AppSettingsPage extends ConsumerWidget {
     final currentTheme = ref.watch(themeModeProvider);
     final themeNotifier = ref.read(themeModeProvider.notifier);
     var textTheme = Theme.of(context).textTheme;
-    var color = Theme.of(context).colorScheme;
     var ctxt = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
           ctxt.app_settings_appbar_title,
-          style: textTheme.titleLarge?.copyWith(color: color.onPrimary),
+          style: textTheme.titleLarge,
         ),
       ),
       body: Padding(
@@ -156,7 +155,8 @@ class AppSettingsPage extends ConsumerWidget {
                         context,
                         MaterialPageRoute(
                           builder:
-                              (_) => const AboutScreen(), // You’ll create this screen
+                              (_) =>
+                                  const AboutScreen(), // You’ll create this screen
                         ),
                       );
                     },

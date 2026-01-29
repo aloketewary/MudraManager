@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mudra_manager/db/models/account.dart' show Account;
+import 'package:intl/intl.dart';
+import 'package:mudra_manager/db/models/account.dart' show Account, AccountType;
 import 'package:mudra_manager/db/models/category.dart' show Category;
 import 'package:mudra_manager/db/models/tag.dart' show GetTagCollection, Tag;
 import 'package:mudra_manager/db/models/transaction.dart' show Transaction;
-import 'package:mudra_manager/l10n/app_localizations.dart' show AppLocalizations;
+import 'package:mudra_manager/l10n/app_localizations.dart'
+    show AppLocalizations;
 import 'package:mudra_manager/providers/account_providers.dart';
 import 'package:mudra_manager/providers/budget_service_provider.dart';
 import 'package:mudra_manager/providers/category_provider.dart';
@@ -14,16 +16,11 @@ import 'package:mudra_manager/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/providers/tag_provider.dart';
 import 'package:mudra_manager/providers/transaction_provider.dart';
 import 'package:mudra_manager/screens/profile/add_edit_category_screen.dart';
-import 'package:mudra_manager/screens/reusable/account_display_card.dart';
-import 'package:mudra_manager/screens/reusable/category_card.dart';
-import 'package:mudra_manager/screens/reusable/common_button.dart';
-import 'package:mudra_manager/screens/reusable/common_text_input_field.dart';
-import 'package:mudra_manager/screens/reusable/simple_calculator.dart' show SimpleCalculator;
-import 'package:mudra_manager/screens/reusable/swipeable_week_calendar.dart';
+import 'package:mudra_manager/screens/reusable/simple_calculator.dart'
+    show SimpleCalculator;
 import 'package:mudra_manager/service/notification_service.dart';
 import 'package:mudra_manager/util/icon_helper.dart' show IconHelper;
 import 'package:mudra_manager/util/localization_extension.dart';
-import 'package:mudra_manager/util/string_util.dart';
 
 class AddEditTransactionScreen extends ConsumerStatefulWidget {
   final Transaction? transaction;
@@ -31,10 +28,12 @@ class AddEditTransactionScreen extends ConsumerStatefulWidget {
   const AddEditTransactionScreen({super.key, this.transaction});
 
   @override
-  ConsumerState<AddEditTransactionScreen> createState() => _AddEditTransactionScreenState();
+  ConsumerState<AddEditTransactionScreen> createState() =>
+      _AddEditTransactionScreenState();
 }
 
-class _AddEditTransactionScreenState extends ConsumerState<AddEditTransactionScreen> {
+class _AddEditTransactionScreenState
+    extends ConsumerState<AddEditTransactionScreen> {
   final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
   final _descController = TextEditingController();
@@ -44,17 +43,15 @@ class _AddEditTransactionScreenState extends ConsumerState<AddEditTransactionScr
 
   Account? _selectedAccount;
   Category? _selectedCategory;
-  double leftBoxWidthFactor = 0.5;
-  double rightBoxWidthFactor = 0.5;
   List<Tag> selectedTags = [];
   Map<int, double> _balanceMap = {};
   bool _initialized = false;
-  bool _isCategoryExpanded = false;
 
   @override
   void initState() {
     super.initState();
-    _amountController.text = widget.transaction?.amount.toStringAsFixed(2) ?? '';
+    _amountController.text =
+        widget.transaction?.amount.toStringAsFixed(2) ?? '';
     _descController.text = widget.transaction?.description ?? '';
     _selectedDate = widget.transaction?.date ?? DateTime.now();
     _selectedAccount = widget.transaction?.account.value;
@@ -67,15 +64,14 @@ class _AddEditTransactionScreenState extends ConsumerState<AddEditTransactionScr
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_initialized) {
-      final balanceMap = ref.watch(accountServiceProvider).getAccountBalanceMap();
-      balanceMap.then(
-        (val) => {
+      ref.read(accountServiceProvider).getAccountBalanceMap().then((val) {
+        if (mounted) {
           setState(() {
             _balanceMap = val;
-          }),
-        },
-      );
-      _initialized = true;
+            _initialized = true;
+          });
+        }
+      });
     }
   }
 
@@ -83,7 +79,9 @@ class _AddEditTransactionScreenState extends ConsumerState<AddEditTransactionScr
     showModalBottomSheet(
       context: context,
       isScrollControlled: false,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
       enableDrag: true,
       showDragHandle: true,
       isDismissible: false,
@@ -103,386 +101,956 @@ class _AddEditTransactionScreenState extends ConsumerState<AddEditTransactionScr
 
   @override
   Widget build(BuildContext context) {
-    final color = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final color = theme.colorScheme;
+    final textTheme = theme.textTheme;
     final ctxt = AppLocalizations.of(context)!;
 
+    // Determine header color based on transaction type
+    // Using simple logic for now: Expense = Error (Red), Income = Tertiary/Secondary (Green/Teal)
+    // Adjust colors as per your specific palette intent.
+    final headerColor =
+        _isExpense
+            ? color.error
+            : const Color(
+              0xFF00BFA5,
+            ); // Hardcoded Teal/Green for income distinction if theme doesn't suffice
+    final onHeaderColor = Colors.white;
+
     return Scaffold(
+      backgroundColor: headerColor,
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: Text(ctxt.add_edit_transaction_screen_title, style: textTheme.titleLarge?.copyWith(color: color.onPrimary)),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.close, color: onHeaderColor),
+          onPressed: () => Navigator.pop(context),
+        ),
+        centerTitle: true,
+        title: Container(
+          decoration: BoxDecoration(
+            color: onHeaderColor.withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildTypeToggle(
+                ctxt.transaction_expenseButtonLabel,
+                true,
+                onHeaderColor,
+              ),
+              _buildTypeToggle(
+                ctxt.transaction_incomeButtonLabel,
+                false,
+                onHeaderColor,
+              ),
+            ],
+          ),
+        ),
         actions: [
           IconButton(
             onPressed: () {
               _showCalculator(context, (calculatedValue) {
-                _amountController.text = calculatedValue.toString(); // populate your field
+                _amountController.text = calculatedValue.toString();
               });
             },
-            icon: Icon(Icons.calculate_outlined, color: color.onPrimary, size: 24),
-            // label: const Text("Calculator"),
+            icon: Icon(Icons.calculate_outlined, color: onHeaderColor),
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Hero(
-          tag: 'addTransactionHero',
-          child: Material(
+      body: Column(
+        children: [
+          // --- TOP SECTION (Amount) ---
+          SizedBox(
+            height: MediaQuery.of(context).size.height * 0.25,
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Expanded(
-                  child: Form(
-                    key: _formKey,
-                    child: ListView(
-                      children: [
-                        SwipeableWeeklyCalendar(
-                          allowFutureDateSelection: false,
-                          onDateSelected: (date) {
-                            setState(() => _selectedDate = date);
-                          },
-                          existingDateTime: _selectedDate,
+                Text(
+                  ctxt.transaction_amountControllerText.toUpperCase(),
+                  style: textTheme.labelLarge?.copyWith(
+                    color: onHeaderColor.withValues(alpha: 0.7),
+                    letterSpacing: 1.5,
+                  ),
+                ),
+                IntrinsicWidth(
+                  child: TextFormField(
+                    controller: _amountController,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    textAlign: TextAlign.center,
+                    style: textTheme.displayLarge?.copyWith(
+                      color: onHeaderColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 56,
+                    ),
+                    cursorColor: onHeaderColor,
+                    decoration: InputDecoration(
+                      hintText: '0',
+                      hintStyle: textTheme.displayLarge?.copyWith(
+                        color: onHeaderColor.withValues(alpha: 0.5),
+                        fontSize: 56,
+                      ),
+                      border: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      prefixText: _isExpense ? '- ' : '+ ',
+                      prefixStyle: textTheme.displayLarge?.copyWith(
+                        color: onHeaderColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      filled: true,
+                      fillColor: Colors.transparent,
+                    ),
+                    validator:
+                        (value) =>
+                            value == null || value.isEmpty
+                                ? ctxt.transaction_amountControllerErrorText
+                                : null,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // --- BOTTOM SECTION (Details) ---
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                color: color.surface,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(32),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, -5),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(32),
+                ),
+                child: Form(
+                  key: _formKey,
+                  child: ListView(
+                    padding: const EdgeInsets.only(
+                      top: 32,
+                      left: 24,
+                      right: 24,
+                      bottom: 24,
+                    ),
+                    children: [
+                      // 1. Account Section
+                      Text(
+                        ctxt.transaction_selectAccountLabel,
+                        style: textTheme.titleMedium?.copyWith(
+                          color: color.onSurfaceVariant,
+                          fontWeight: FontWeight.bold,
                         ),
-                        const SizedBox(height: 24),
-                        CommonTextInputField(
-                          controller: _amountController,
-                          labelText: ctxt.transaction_amountControllerText,
-                          inputType: TextInputType.numberWithOptions(decimal: true),
-                          iconData: Icons.money,
-                          validateField: (value) => value == null || value.isEmpty ? ctxt.transaction_amountControllerErrorText : null,
-                        ),
-                        CommonTextInputField(
-                          controller: _descController,
-                          labelText: ctxt.transaction_descriptionControllerText,
-                          iconData: Icons.description,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(ctxt.transaction_selectAccountLabel, style: textTheme.titleMedium?.copyWith(color: color.primary)),
-                        Consumer(
-                          builder: (context, ref, _) {
-                            final accountsAsync = ref.watch(accountsProvider);
-                            return accountsAsync.when(
-                              data: (accounts) {
-                                return SizedBox(
-                                  height: 180, // Adjust height as needed
-                                  child: ListView.builder(
+                      ),
+                      const SizedBox(height: 16),
+                      Consumer(
+                        builder: (context, ref, _) {
+                          final accountsAsync = ref.watch(accountsProvider);
+                          return accountsAsync.when(
+                            data:
+                                (accounts) => SizedBox(
+                                  height: 120,
+                                  child: ListView.separated(
                                     scrollDirection: Axis.horizontal,
-                                    padding: const EdgeInsets.all(16.0),
                                     itemCount: accounts.length,
-                                    itemBuilder: (BuildContext context, int index) {
-                                      var account = accounts[index];
-                                      var totalBalance = _balanceMap[account.id]?.toStringAsFixed(2);
-                                      return AccountDisplayCard(
-                                        title: account.name,
-                                        amount: ctxt.formatCurrencyWithSign(2, totalBalance?.toDouble() ?? 0.0),
-                                        accountType: account.accountType,
-                                        startColor: color.onSecondary,
-                                        endColor: Color(account.colorValue ?? 0xFF000000),
-                                        isSelected: _selectedAccount?.id == account.id,
-                                        accountNumber: account.accountNumber,
-                                        callbackAction: () {
-                                          setState(() => _selectedAccount = account);
-                                        },
+                                    separatorBuilder:
+                                        (_, __) => const SizedBox(width: 12),
+                                    itemBuilder: (context, index) {
+                                      final account = accounts[index];
+                                      final isSelected =
+                                          _selectedAccount?.id == account.id;
+                                      final balance =
+                                          _balanceMap[account.id] ??
+                                          account.initialBalance;
+
+                                      return GestureDetector(
+                                        onTap:
+                                            () => setState(
+                                              () => _selectedAccount = account,
+                                            ),
+                                        child: AnimatedContainer(
+                                          duration: const Duration(
+                                            milliseconds: 200,
+                                          ),
+                                          width: 140,
+                                          margin: const EdgeInsets.symmetric(
+                                            vertical: 4,
+                                          ), // Space for shadow
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(
+                                              24,
+                                            ),
+                                            gradient:
+                                                isSelected
+                                                    ? LinearGradient(
+                                                      begin: Alignment.topLeft,
+                                                      end:
+                                                          Alignment.bottomRight,
+                                                      colors: [
+                                                        Color(
+                                                          account.colorValue ??
+                                                              0xFF000000,
+                                                        ).withValues(
+                                                          alpha: 0.8,
+                                                        ),
+                                                        Color(
+                                                          account.colorValue ??
+                                                              0xFF000000,
+                                                        ),
+                                                      ],
+                                                    )
+                                                    : LinearGradient(
+                                                      begin: Alignment.topLeft,
+                                                      end:
+                                                          Alignment.bottomRight,
+                                                      colors: [
+                                                        color
+                                                            .surfaceContainerHighest
+                                                            .withValues(
+                                                              alpha: 0.6,
+                                                            ),
+                                                        color
+                                                            .surfaceContainerHighest
+                                                            .withValues(
+                                                              alpha: 0.3,
+                                                            ),
+                                                      ],
+                                                    ),
+                                            boxShadow:
+                                                isSelected
+                                                    ? [
+                                                      BoxShadow(
+                                                        color: Color(
+                                                          account.colorValue ??
+                                                              0xFF000000,
+                                                        ).withValues(
+                                                          alpha: 0.3,
+                                                        ),
+                                                        blurRadius: 8,
+                                                        offset: const Offset(
+                                                          0,
+                                                          4,
+                                                        ),
+                                                      ),
+                                                    ]
+                                                    : [],
+                                            border: Border.all(
+                                              color: Colors.white.withValues(
+                                                alpha: 0.2,
+                                              ),
+                                              width: 1.5,
+                                            ),
+                                          ),
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(
+                                              24,
+                                            ),
+                                            child: Stack(
+                                              children: [
+                                                // Watermark Icon
+                                                // if (isSelected)
+                                                Positioned(
+                                                  right: -15,
+                                                  bottom: -15,
+                                                  child: Transform.rotate(
+                                                    angle: -0.2,
+                                                    child: Icon(
+                                                      _getIconForAccountType(
+                                                        account.accountType,
+                                                      ),
+                                                      size: 80,
+                                                      color: Colors.white
+                                                          .withValues(
+                                                            alpha: 0.15,
+                                                          ),
+                                                    ),
+                                                  ),
+                                                ),
+
+                                                // Content
+                                                Padding(
+                                                  padding: const EdgeInsets.all(
+                                                    16,
+                                                  ),
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
+                                                    children: [
+                                                      // Icon Container
+                                                      Container(
+                                                        padding:
+                                                            const EdgeInsets.all(
+                                                              8,
+                                                            ),
+                                                        decoration: BoxDecoration(
+                                                          color:
+                                                              isSelected
+                                                                  ? Colors.white
+                                                                      .withValues(
+                                                                        alpha:
+                                                                            0.2,
+                                                                      )
+                                                                  : color
+                                                                      .surface,
+                                                          shape:
+                                                              BoxShape.circle,
+                                                        ),
+                                                        child: Icon(
+                                                          _getIconForAccountType(
+                                                            account.accountType,
+                                                          ),
+                                                          color:
+                                                              isSelected
+                                                                  ? Colors.white
+                                                                  : color
+                                                                      .onSurfaceVariant,
+                                                          size: 20,
+                                                        ),
+                                                      ),
+
+                                                      // Text Data
+                                                      Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          Text(
+                                                            account.name,
+                                                            style: textTheme
+                                                                .labelMedium
+                                                                ?.copyWith(
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                  color:
+                                                                      isSelected
+                                                                          ? Colors
+                                                                              .white
+                                                                          : color
+                                                                              .onSurfaceVariant,
+                                                                ),
+                                                            maxLines: 1,
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                          ),
+                                                          const SizedBox(
+                                                            height: 2,
+                                                          ),
+                                                          Text(
+                                                            ctxt.formatCurrencyWithSign(
+                                                              2,
+                                                              balance,
+                                                              compact: true,
+                                                            ),
+                                                            style: textTheme.labelLarge?.copyWith(
+                                                              color:
+                                                                  isSelected
+                                                                      ? Colors
+                                                                          .white
+                                                                          .withValues(
+                                                                            alpha:
+                                                                                0.8,
+                                                                          )
+                                                                      : color
+                                                                          .onSurfaceVariant
+                                                                          .withValues(
+                                                                            alpha:
+                                                                                0.7,
+                                                                          ),
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w500,
+                                                            ),
+                                                            maxLines: 1,
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
                                       );
                                     },
                                   ),
-                                );
-                              },
-                              loading: () => SizedBox(width: 50, child: const CircularProgressIndicator()),
-                              error: (err, _) => Text('Error loading accounts'),
-                            );
-                          },
+                                ),
+                            loading: () => const SizedBox(height: 90),
+                            error: (_, __) => const SizedBox(),
+                          );
+                        },
+                      ),
+
+                      const SizedBox(height: 32),
+
+                      // 2. Category Section
+                      Text(
+                        ctxt.transaction_selectCategoryLabel,
+                        style: textTheme.titleMedium?.copyWith(
+                          color: color.onSurfaceVariant,
+                          fontWeight: FontWeight.bold,
                         ),
-                        SizedBox(height: 16),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(ctxt.transaction_selectCategoryLabel, style: textTheme.titleMedium?.copyWith(color: color.primary)),
-                            IconButton.filled(
-                              onPressed: () {
-                                setState(() {
-                                  _isCategoryExpanded = !_isCategoryExpanded;
-                                });
-                              },
-                              icon: Icon(_isCategoryExpanded ? Icons.close_fullscreen : Icons.open_in_full_outlined),
-                            ),
-                          ],
-                        ),
-                        Consumer(
-                          builder: (context, ref, _) {
-                            final categoriesAsync = ref.watch(categoryListProvider);
-                            return categoriesAsync.when(
-                              data: (categories) {
-                                return AnimatedSwitcher(
-                                  duration: const Duration(milliseconds: 300),
-                                  switchInCurve: Curves.easeInOut,
-                                  switchOutCurve: Curves.easeInOut,
-                                  child:
-                                  _isCategoryExpanded
-                                      ? AnimatedSize(
-                                    duration: const Duration(milliseconds: 300),
-                                    curve: Curves.easeInOut,
-                                    child: Wrap(
-                                      key: const ValueKey('wrapView'),
-                                      spacing: 16,
-                                      runSpacing: 16,
-                                      alignment: WrapAlignment.spaceEvenly,
-                                      runAlignment: WrapAlignment.spaceEvenly,
-                                      children: [
-                                        ...categories.map((cat) {
-                                          return SizedBox(
-                                            height: 60,
-                                            child: CategoryCard(
-                                              label: cat.name,
-                                              color: Color(cat.colorValue ?? 0xFF000000),
-                                              icon: IconHelper.iconFromName(cat.iconName ?? Icons.category.toString()),
-                                              isSelected: _selectedCategory?.id == cat.id,
-                                              callbackAction: () {
-                                                setState(() => _selectedCategory = cat);
-                                              },
-                                              isUnderWrap: true,
+                      ),
+                      const SizedBox(height: 16),
+                      Consumer(
+                        builder: (context, ref, _) {
+                          final categoriesAsync = ref.watch(
+                            categoryListProvider,
+                          );
+                          return categoriesAsync.when(
+                            data:
+                                (categories) => SizedBox(
+                                  height: 120,
+                                  child: ListView.separated(
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: categories.length + 1,
+                                    separatorBuilder:
+                                        (_, __) => const SizedBox(width: 12),
+                                    itemBuilder: (context, index) {
+                                      if (index < categories.length) {
+                                        final cat = categories[index];
+                                        final isSelected =
+                                            _selectedCategory?.id == cat.id;
+                                        return GestureDetector(
+                                          onTap:
+                                              () => setState(
+                                                () => _selectedCategory = cat,
+                                              ),
+                                          child: AnimatedContainer(
+                                            duration: const Duration(
+                                              milliseconds: 200,
                                             ),
-                                          );
-                                        }),
-                                        CategoryCard(
-                                          label: ctxt.transaction_addNewCategoryText,
-                                          color: color.secondary,
-                                          icon: Icons.add,
-                                          isSelected: false,
-                                          isNewCard: true,
-                                          callbackAction: () {
-                                            Navigator.push(context, MaterialPageRoute(builder: (_) => AddEditCategoryScreen()));
-                                          },
-                                          isUnderWrap: true,
-                                        ),
-                                      ],
-                                    ),
-                                  )
-                                      : AnimatedSize(
-                                    duration: const Duration(milliseconds: 300),
-                                    curve: Curves.easeInOut,
-                                    child: SizedBox(
-                                      key: const ValueKey('listView'),
-                                      height: 90,
-                                      child: ListView.builder(
-                                        scrollDirection: Axis.horizontal,
-                                        padding: const EdgeInsets.all(16.0),
-                                        itemCount: categories.length + 1,
-                                        itemBuilder: (BuildContext context, int index) {
-                                          if (index < categories.length) {
-                                            var category = categories[index];
-                                            return CategoryCard(
-                                              label: category.name,
-                                              color: Color(category.colorValue ?? 0xFF000000),
-                                              icon: IconHelper.iconFromName(category.iconName ?? Icons.category.toString()),
-                                              isSelected: _selectedCategory?.id == category.id,
-                                              callbackAction: () {
-                                                setState(() => _selectedCategory = category);
-                                              },
-                                            );
-                                          } else {
-                                            return CategoryCard(
-                                              label: ctxt.transaction_addNewCategoryText,
-                                              color: color.secondary,
-                                              icon: Icons.add,
-                                              isSelected: false,
-                                              isNewCard: true,
-                                              callbackAction: () {
-                                                Navigator.push(context, MaterialPageRoute(builder: (_) => AddEditCategoryScreen()));
-                                              },
-                                            );
-                                          }
-                                        },
-                                      ),
+                                            width:
+                                                120, // Slightly narrower since less text
+                                            margin: const EdgeInsets.symmetric(
+                                              vertical: 4,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(24),
+                                              gradient:
+                                                  isSelected
+                                                      ? LinearGradient(
+                                                        begin:
+                                                            Alignment.topLeft,
+                                                        end:
+                                                            Alignment
+                                                                .bottomRight,
+                                                        colors: [
+                                                          Color(
+                                                            cat.colorValue ??
+                                                                0xFF000000,
+                                                          ).withValues(
+                                                            alpha: 0.8,
+                                                          ),
+                                                          Color(
+                                                            cat.colorValue ??
+                                                                0xFF000000,
+                                                          ),
+                                                        ],
+                                                      )
+                                                      : LinearGradient(
+                                                        begin:
+                                                            Alignment.topLeft,
+                                                        end:
+                                                            Alignment
+                                                                .bottomRight,
+                                                        colors: [
+                                                          color
+                                                              .surfaceContainerHighest
+                                                              .withValues(
+                                                                alpha: 0.6,
+                                                              ),
+                                                          color
+                                                              .surfaceContainerHighest
+                                                              .withValues(
+                                                                alpha: 0.3,
+                                                              ),
+                                                        ],
+                                                      ),
+                                              boxShadow:
+                                                  isSelected
+                                                      ? [
+                                                        BoxShadow(
+                                                          color: Color(
+                                                            cat.colorValue ??
+                                                                0xFF000000,
+                                                          ).withValues(
+                                                            alpha: 0.3,
+                                                          ),
+                                                          blurRadius: 8,
+                                                          offset: const Offset(
+                                                            0,
+                                                            4,
+                                                          ),
+                                                        ),
+                                                      ]
+                                                      : [],
+                                              border: Border.all(
+                                                color: Colors.white.withValues(
+                                                  alpha: 0.2,
+                                                ),
+                                                width: 1.5,
+                                              ),
+                                            ),
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(24),
+                                              child: Stack(
+                                                children: [
+                                                  // Watermark Icon
+                                                  if (isSelected)
+                                                    Positioned(
+                                                      right: -15,
+                                                      bottom: -15,
+                                                      child: Transform.rotate(
+                                                        angle: -0.2,
+                                                        child: Icon(
+                                                          IconHelper.iconFromName(
+                                                            cat.iconName ??
+                                                                'category',
+                                                          ),
+                                                          size: 70,
+                                                          color: Colors.white
+                                                              .withValues(
+                                                                alpha: 0.15,
+                                                              ),
+                                                        ),
+                                                      ),
+                                                    ),
+
+                                                  // Content
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                          16,
+                                                        ),
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                      children: [
+                                                        Container(
+                                                          padding:
+                                                              const EdgeInsets.all(
+                                                                8,
+                                                              ),
+                                                          decoration: BoxDecoration(
+                                                            color:
+                                                                isSelected
+                                                                    ? Colors
+                                                                        .white
+                                                                        .withValues(
+                                                                          alpha:
+                                                                              0.2,
+                                                                        )
+                                                                    : color
+                                                                        .surface,
+                                                            shape:
+                                                                BoxShape.circle,
+                                                          ),
+                                                          child: Icon(
+                                                            IconHelper.iconFromName(
+                                                              cat.iconName ??
+                                                                  'category',
+                                                            ),
+                                                            color:
+                                                                isSelected
+                                                                    ? Colors
+                                                                        .white
+                                                                    : color
+                                                                        .onSurfaceVariant,
+                                                            size: 20,
+                                                          ),
+                                                        ),
+                                                        Text(
+                                                          cat.name,
+                                                          style: textTheme
+                                                              .labelMedium
+                                                              ?.copyWith(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                color:
+                                                                    isSelected
+                                                                        ? Colors
+                                                                            .white
+                                                                        : color
+                                                                            .onSurfaceVariant,
+                                                              ),
+                                                          maxLines: 2,
+                                                          overflow:
+                                                              TextOverflow
+                                                                  .ellipsis,
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      } else {
+                                        // Add Category Button
+                                        return GestureDetector(
+                                          onTap:
+                                              () => Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder:
+                                                      (_) =>
+                                                          AddEditCategoryScreen(),
+                                                ),
+                                              ),
+                                          child: Container(
+                                            width: 80, // Slimmer for "Add"
+                                            margin: const EdgeInsets.symmetric(
+                                              vertical: 4,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(24),
+                                              color: color
+                                                  .surfaceContainerHighest
+                                                  .withValues(alpha: 0.3),
+                                              border: Border.all(
+                                                color: color.outline.withValues(
+                                                  alpha: 0.5,
+                                                ),
+                                                width: 1,
+                                                style: BorderStyle.solid,
+                                              ),
+                                            ),
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Icon(
+                                                  Icons.add,
+                                                  color: color.onSurfaceVariant,
+                                                ),
+                                                const SizedBox(height: 4),
+                                                Text(
+                                                  "Add",
+                                                  style: textTheme.labelSmall
+                                                      ?.copyWith(
+                                                        color:
+                                                            color
+                                                                .onSurfaceVariant,
+                                                      ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                    },
+                                  ),
+                                ),
+                            loading: () => const SizedBox(height: 90),
+                            error: (_, __) => const SizedBox(),
+                          );
+                        },
+                      ),
+
+                      const SizedBox(height: 32),
+
+                      // 3. Date & Note (Combined Row)
+                      Row(
+                        children: [
+                          // Date Picker
+                          InkWell(
+                            onTap: () async {
+                              final pick = await showDatePicker(
+                                context: context,
+                                initialDate: _selectedDate,
+                                firstDate: DateTime(2000),
+                                lastDate: DateTime.now(), // Block future dates
+                              );
+                              if (pick != null)
+                                setState(() => _selectedDate = pick);
+                            },
+                            borderRadius: BorderRadius.circular(16),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 16,
+                              ),
+                              decoration: BoxDecoration(
+                                color: color.surfaceContainer,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.calendar_month_rounded,
+                                    color: color.primary,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    DateFormat('MMM d').format(_selectedDate),
+                                    style: textTheme.titleSmall?.copyWith(
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                );
-                              },
-                              loading: () => const CircularProgressIndicator(),
-                              error: (err, _) => Text('Error loading categories'),
-                            );
-                          },
-                        ),
-                        SizedBox(height: 16),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Expanded(
-                              flex: (leftBoxWidthFactor * 100).toInt(),
-                              child: SizedBox(
-                                // width: MediaQuery.of(context).size.width / 3,
-                                child: GestureDetector(
-                                  onTap: () => {setState(() => _isExpense = true)},
-                                  child: Container(
-                                    width: 120,
-                                    padding: const EdgeInsets.all(8.0),
-                                    margin: const EdgeInsets.only(right: 8.0),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(16.0),
-                                      color: _isExpense ? color.primary : Colors.transparent,
-                                      // Light background color
-                                      border: Border.all(color: color.primary, width: 2), // Subtle border
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: <Widget>[
-                                        CircleAvatar(radius: 16, child: Icon(Icons.arrow_downward, size: 16)),
-                                        const SizedBox(width: 8.0),
-                                        Expanded(
-                                          child: Text(
-                                            ctxt.transaction_expenseButtonLabel.toUpperCase(),
-                                            textAlign: TextAlign.center,
-                                            style: textTheme.labelLarge?.copyWith(color: _isExpense ? color.onPrimary : color.primary),
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          // Note Input
+                          Expanded(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                              ),
+                              decoration: BoxDecoration(
+                                color: color.surfaceContainer,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: TextFormField(
+                                controller: _descController,
+                                decoration: InputDecoration(
+                                  hintText:
+                                      ctxt.transaction_descriptionControllerText,
+                                  border: InputBorder.none,
+                                  focusedBorder: InputBorder.none,
+                                  enabledBorder: InputBorder.none,
+                                  icon: Icon(
+                                    Icons.edit_note,
+                                    color: color.onSurfaceVariant,
                                   ),
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              flex: (rightBoxWidthFactor * 100).toInt(),
-                              child: SizedBox(
-                                // width: MediaQuery.of(context).size.width / 3,
-                                child: GestureDetector(
-                                  onTap: () => {setState(() => _isExpense = false)},
-                                  child: Container(
-                                    width: 120,
-                                    padding: const EdgeInsets.all(8.0),
-                                    margin: const EdgeInsets.only(right: 8.0),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(12.0),
-                                      color: !_isExpense ? color.primary : Colors.transparent,
-                                      // Light background color
-                                      border: Border.all(color: color.primary, width: 2), // Subtle border
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: <Widget>[
-                                        CircleAvatar(radius: 16, child: Icon(Icons.arrow_upward, size: 16)),
-                                        const SizedBox(width: 8.0),
-                                        Expanded(
-                                          child: Text(
-                                            ctxt.transaction_incomeButtonLabel.toUpperCase(),
-                                            textAlign: TextAlign.center,
-                                            style: textTheme.labelLarge?.copyWith(color: !_isExpense ? color.onPrimary : color.primary),
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(ctxt.transaction_selectTagLabel, style: textTheme.titleMedium?.copyWith(color: color.primary)),
-                        Consumer(
-                          builder: (context, ref, _) {
-                            final tagsAsync = ref.watch(tagListProvider);
-                            return tagsAsync.when(
-                              data: (tags) {
-                                return Wrap(
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // 4. Tags
+                      Consumer(
+                        builder: (context, ref, _) {
+                          final tagsAsync = ref.watch(tagListProvider);
+                          return tagsAsync.when(
+                            data:
+                                (tags) => Wrap(
                                   spacing: 8,
+                                  runSpacing: 8,
                                   children: [
                                     ...tags.map((tag) {
-                                      final isSelected = selectedTags.map((it) => it.id).contains(tag.id);
+                                      final isSelected = selectedTags.any(
+                                        (t) => t.id == tag.id,
+                                      );
                                       return FilterChip(
-                                        showCheckmark: false,
-                                        backgroundColor: isSelected ? color.primary : Colors.transparent,
-                                        selectedColor: isSelected ? color.primary : Colors.transparent,
-                                        avatar: isSelected ? Icon(Icons.tag, color: color.onPrimary) : Icon(Icons.tag, color: color.primary),
-                                        checkmarkColor: color.primary,
-                                        side: BorderSide(color: color.primary, width: 1),
-                                        label: Text(
-                                          tag.name,
-                                          style: textTheme.labelMedium?.copyWith(color: isSelected ? color.onPrimary : color.primary),
-                                        ),
+                                        label: Text(tag.name),
                                         selected: isSelected,
                                         onSelected: (selected) {
                                           setState(() {
                                             if (selected) {
                                               selectedTags.add(tag);
                                             } else {
-                                              selectedTags.remove(tag);
+                                              selectedTags.removeWhere(
+                                                (t) => t.id == tag.id,
+                                              );
                                             }
                                           });
                                         },
+                                        backgroundColor:
+                                            color.surfaceContainerHighest,
+                                        selectedColor: color.primaryContainer
+                                            .withValues(alpha: 0.5),
+                                        labelStyle: TextStyle(
+                                          color:
+                                              isSelected
+                                                  ? color.onPrimaryContainer
+                                                  : color.onSurfaceVariant,
+                                          fontWeight:
+                                              isSelected
+                                                  ? FontWeight.bold
+                                                  : FontWeight.normal,
+                                        ),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            20,
+                                          ),
+                                          side: BorderSide.none,
+                                        ),
+                                        showCheckmark: false,
                                       );
                                     }),
-                                    FilterChip(
-                                      showCheckmark: false,
-                                      backgroundColor: color.primary,
-                                      avatar: Icon(Icons.add, color: color.onPrimary),
-                                      checkmarkColor: color.primary,
-                                      side: BorderSide(color: color.primary, width: 1),
-                                      label: Text(ctxt.transaction_addNewTagText, style: textTheme.labelMedium?.copyWith(color: color.onPrimary)),
-                                      onSelected: (selected) {
-                                        if (selected) {
-                                          showAddTagBottomSheet(context, ref);
-                                        }
-                                      },
+                                    ActionChip(
+                                      label: Text(
+                                        ctxt.transaction_addNewTagText,
+                                      ),
+                                      avatar: const Icon(Icons.add, size: 16),
+                                      onPressed:
+                                          () => showAddTagBottomSheet(
+                                            context,
+                                            ref,
+                                          ),
+                                      backgroundColor:
+                                          color.surfaceContainerHigh,
+                                      side: BorderSide.none,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
                                     ),
                                   ],
-                                );
-                              },
-                              loading: () => const CircularProgressIndicator(),
-                              error: (err, _) => Text('Error loading tags'),
-                            );
-                          },
+                                ),
+                            loading: () => const SizedBox(),
+                            error: (_, __) => const SizedBox(),
+                          );
+                        },
+                      ),
+
+                      const SizedBox(height: 48), // Spacer for button
+
+                      SizedBox(
+                        width: double.infinity,
+                        height: 56,
+                        child: FilledButton(
+                          onPressed: _saveTransaction,
+                          style: FilledButton.styleFrom(
+                            backgroundColor: headerColor,
+                            foregroundColor: onHeaderColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            elevation: 4,
+                            shadowColor: headerColor.withValues(alpha: 0.4),
+                          ),
+                          child: Text(
+                            ctxt.transaction_saveTransactionButtonLabel
+                                .toUpperCase(),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
                         ),
-                        const SizedBox(height: 24),
-                      ],
-                    ),
+                      ),
+
+                      SizedBox(
+                        height: MediaQuery.of(context).viewInsets.bottom,
+                      ),
+                    ],
                   ),
                 ),
-                CommonButton(
-                  text: ctxt.transaction_saveTransactionButtonLabel,
-                  backGroundColor: color.primary,
-                  textColor: color.onPrimary,
-                  onPressed: () async {
-                    if (_formKey.currentState?.validate() ?? false) {
-                      if (_selectedAccount == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(ctxt.transaction_selectOneAccountErrorText)));
-                        return;
-                      }
-                      if (_selectedCategory == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(ctxt.transaction_selectOneCategoryErrorText)));
-                        return;
-                      }
-                      // Save to DB here
-                      final txn = Transaction.create(
-                        date: _selectedDate,
-                        amount: double.parse(_amountController.text),
-                        isExpense: _isExpense,
-                        description: _descController.text,
-                      );
-                      if (widget.transaction?.id != null) {
-                        txn.id = widget.transaction!.id;
-                      }
-                      txn.account.value = _selectedAccount!;
-                      txn.category.value = _selectedCategory!;
-                      txn.tags.clear();
-                      txn.tags.addAll(selectedTags);
-                      await ref.read(transactionProvider).addTransaction(txn);
-                      invalidateAll(ref);
-                      // Now check for alerts
-                      await _checkLowBalance(txn.account.value);
-                      await _checkBudgetOverspend(txn);
-                      Navigator.pop(context);
-                    }
-                  },
-                ),
-              ],
+              ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  IconData _getIconForAccountType(AccountType type) {
+    switch (type) {
+      case AccountType.bank:
+        return Icons.account_balance;
+      case AccountType.cash:
+        return Icons.money;
+      case AccountType.creditCard:
+        return Icons.credit_card;
+      case AccountType.eWallet:
+        return Icons.account_balance_wallet;
+      case AccountType.investment:
+        return Icons.trending_up;
+      case AccountType.other:
+        return Icons.attach_money;
+    }
+  }
+
+  Widget _buildTypeToggle(String label, bool isExpenseBtn, Color onColor) {
+    final isSelected = _isExpense == isExpenseBtn;
+    return GestureDetector(
+      onTap: () => setState(() => _isExpense = isExpenseBtn),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.white : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          label.toUpperCase(),
+          style: TextStyle(
+            color: isSelected ? Colors.black : onColor.withValues(alpha: 0.6),
+            fontWeight: FontWeight.bold,
+            fontSize: 12,
+            letterSpacing: 1.0,
           ),
         ),
       ),
     );
+  }
+
+  Future<void> _saveTransaction() async {
+    final ctxt = AppLocalizations.of(context)!;
+    if (_formKey.currentState?.validate() ?? false) {
+      if (_selectedAccount == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(ctxt.transaction_selectOneAccountErrorText)),
+        );
+        return;
+      }
+      if (_selectedCategory == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(ctxt.transaction_selectOneCategoryErrorText)),
+        );
+        return;
+      }
+
+      final txn = Transaction.create(
+        date: _selectedDate,
+        amount: double.parse(_amountController.text),
+        isExpense: _isExpense,
+        description: _descController.text,
+      );
+
+      if (widget.transaction?.id != null) {
+        txn.id = widget.transaction!.id;
+      }
+
+      txn.account.value = _selectedAccount!;
+      txn.category.value = _selectedCategory!;
+      txn.tags.clear();
+      txn.tags.addAll(selectedTags);
+
+      await ref.read(transactionProvider).addTransaction(txn);
+      invalidateAll(ref);
+      await _checkLowBalance(txn.account.value);
+      await _checkBudgetOverspend(txn);
+
+      if (mounted) Navigator.pop(context);
+    }
   }
 
   void showAddTagBottomSheet(BuildContext context, WidgetRef ref) {
@@ -493,16 +1061,31 @@ class _AddEditTransactionScreenState extends ConsumerState<AddEditTransactionScr
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (_) {
         return Padding(
-          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom, left: 16, right: 16, top: 24),
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+            left: 16,
+            right: 16,
+            top: 24,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(ctxt.transaction_addNewTagText, style: Theme.of(context).textTheme.titleLarge),
+              Text(
+                ctxt.transaction_addNewTagText,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
               const SizedBox(height: 12),
-              TextField(controller: controller, decoration: InputDecoration(labelText: ctxt.transaction_tagNameControllerText)),
+              TextField(
+                controller: controller,
+                decoration: InputDecoration(
+                  labelText: ctxt.transaction_tagNameControllerText,
+                ),
+              ),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () async {
@@ -538,18 +1121,22 @@ class _AddEditTransactionScreenState extends ConsumerState<AddEditTransactionScr
     var accountsService = ref.watch(accountServiceProvider);
     var notificationService = ref.watch(notificationRecordServiceProvider);
     final currentBalance = await accountsService.getAccountBalance(account.id);
-    var lowBalanceThreshold = SharedPrefsUtil.instance.getLowBalanceThreshold(); // Set your own threshold
+    var lowBalanceThreshold =
+        SharedPrefsUtil.instance
+            .getLowBalanceThreshold(); // Set your own threshold
 
     if (currentBalance < lowBalanceThreshold) {
       await notificationService.logNotification(
         title: 'Low Balance Alert',
-        body: 'Your account "${account.name}" has ₹${currentBalance.toStringAsFixed(2)} remaining.',
+        body:
+            'Your account "${account.name}" has ₹${currentBalance.toStringAsFixed(2)} remaining.',
         type: 'low_balance',
       );
       await NotificationService.showLocalNotification(
         id: 1000 + account.id, // Unique per account
         title: 'Low Balance Alert',
-        body: 'Your balance in ${account.name} is ₹${currentBalance.toStringAsFixed(2)}.',
+        body:
+            'Your balance in ${account.name} is ₹${currentBalance.toStringAsFixed(2)}.',
       );
     }
   }

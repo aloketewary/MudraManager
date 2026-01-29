@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mudra_manager/db/models/account.dart' show AccountType;
 import 'package:mudra_manager/screens/reusable/animated_balance.dart'
     show AnimatedBalance;
+import 'package:mudra_manager/theme/design_tokens.dart';
 import 'package:mudra_manager/util/account_type_extension.dart';
 import 'package:mudra_manager/util/string_util.dart';
 
@@ -63,18 +64,27 @@ class _AnimatedAccountCard extends State<AnimatedAccountCard> {
       height: 250,
       width: 450,
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-        padding: const EdgeInsets.all(24.0),
+        margin: EdgeInsets.symmetric(
+          horizontal: DesignTokens.spacing16, 
+          vertical: DesignTokens.spacing8,
+        ),
+        padding: EdgeInsets.all(DesignTokens.spacing24),
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [color.primary, color.primaryFixed, widget.accentColor],
+            colors: [
+              widget.accentColor,
+              widget.accentColor.withOpacity(0.85),
+              color.primary.withOpacity(0.7),
+            ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          borderRadius: BorderRadius.circular(16.0),
-          border: Border(
-            top: BorderSide(color: color.onPrimary, width: 1.0)
-          )
+          borderRadius: DesignTokens.borderRadiusLarge,
+          boxShadow: AppElevation.coloredElevation(widget.accentColor, intensity: 0.3),
+          border: Border.all(
+            color: color.onPrimary.withOpacity(0.2),
+            width: 1.0,
+          ),
         ),
         child: Stack(
           alignment: Alignment.center,

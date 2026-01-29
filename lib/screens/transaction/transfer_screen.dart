@@ -96,10 +96,7 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Transfer Funds',
-          style: textTheme.titleLarge?.copyWith(color: color.onPrimary),
-        ),
+        title: const Text('Transfer Funds'),
         actions: [
           IconButton.outlined(
             onPressed: () {
@@ -108,8 +105,8 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
                 _toAccount = null;
               });
             },
-            icon: Icon(Icons.undo_outlined, color: color.onPrimary,),
-          )
+            icon: const Icon(Icons.undo_outlined),
+          ),
         ],
       ),
       body: accountsAsync.when(

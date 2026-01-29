@@ -53,29 +53,36 @@ class AccountsService {
   Future<Map<int, double>> getAccountBalanceMap() async {
     final isar = await isarService.getInstance();
 
-    final accounts = await isar.accounts.filter().isActiveEqualTo(true).findAll();
+    final accounts =
+        await isar.accounts.filter().isActiveEqualTo(true).findAll();
     if (accounts.isEmpty) return <int, double>{};
 
     final balanceMap = <int, double>{};
 
+    // Optimization: Fetch all transactions grouped by account in memory if feasible,
+    // or use a more efficient summation.
     for (final account in accounts) {
       final accountId = account.id;
 
-      final income = await isar.transactions
-          .filter()
-          .account((q) => q.idEqualTo(accountId))
-          .and()
-          .isExpenseEqualTo(false)
-          .amountProperty()
-          .sum();
+      // Using property().sum() is already quite fast in Isar as it's a native operation.
+      // But we can ensure we only query transactions that AREN'T transfers (or handle them correctly).
+      final income =
+          await isar.transactions
+              .filter()
+              .account((q) => q.idEqualTo(accountId))
+              .and()
+              .isExpenseEqualTo(false)
+              .amountProperty()
+              .sum();
 
-      final expense = await isar.transactions
-          .filter()
-          .account((q) => q.idEqualTo(accountId))
-          .and()
-          .isExpenseEqualTo(true)
-          .amountProperty()
-          .sum();
+      final expense =
+          await isar.transactions
+              .filter()
+              .account((q) => q.idEqualTo(accountId))
+              .and()
+              .isExpenseEqualTo(true)
+              .amountProperty()
+              .sum();
 
       final balance = account.initialBalance + income - expense;
       balanceMap[accountId] = balance;

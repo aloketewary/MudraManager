@@ -209,7 +209,7 @@ class _AnimatedSwipeableAccountCardsState
               child: AnimatedAccountCard(
                 totalBalance: '---',
                 accountNumber: '---',
-                backgroundColor: Colors.grey,
+                backgroundColor: color.surfaceVariant,
                 accentColor: color.primary,
                 accountName: 'Loading',
                 accountType: AccountType.cash,

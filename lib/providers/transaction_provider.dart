@@ -13,6 +13,9 @@ import 'package:mudra_manager/db/models/transaction.dart'
         TransactionQueryWhere;
 import 'package:mudra_manager/providers/isar_provider.dart';
 
+import 'package:mudra_manager/screens/transaction/transaction_group.dart'
+    show TxListEntry, TxHeader, TxItem;
+
 final transactionProvider = Provider<TransactionService>((ref) {
   final isarService = ref.watch(isarServiceProvider);
   return TransactionService(isarService);
@@ -32,31 +35,60 @@ final filteredTransactionProvider =
     });
 
 final transactionsByMonthProvider =
-FutureProvider.family<List<Transaction>, DateTime>((ref, monthDate) async {
-  final service = ref.watch(transactionProvider);
+    FutureProvider.family<List<Transaction>, DateTime>((ref, monthDate) async {
+      final service = ref.watch(transactionProvider);
 
-  final start = DateTime(monthDate.year, monthDate.month);
-  final end = DateTime(monthDate.year, monthDate.month + 1);
+      final start = DateTime(monthDate.year, monthDate.month);
+      final end = DateTime(monthDate.year, monthDate.month + 1);
 
-  return await service.getByDateRange(start, end);
-});
+      return await service.getByDateRange(start, end);
+    });
 
-final transactionsByMonthAndTypeProvider = FutureProvider.family
-<List<Transaction>, ({DateTime month, String type})>((ref, input) async {
-  final service = ref.watch(transactionProvider);
+final transactionsByMonthAndTypeProvider =
+    FutureProvider.family<List<Transaction>, ({DateTime month, String type})>((
+      ref,
+      arg,
+    ) async {
+      final service = ref.watch(transactionProvider);
+      final start = DateTime(arg.month.year, arg.month.month, 1);
+      final end = DateTime(arg.month.year, arg.month.month + 1, 0, 23, 59, 59);
 
-  final start = DateTime(input.month.year, input.month.month);
-  final end = DateTime(input.month.year, input.month.month + 1);
+      if (arg.type == 'all') {
+        return service.getByDateRange(start, end);
+      } else {
+        return service.getByTypeAndDateRange(
+          isExpense: arg.type == 'expense',
+          start: start,
+          end: end,
+        );
+      }
+    });
 
-  if (input.type == 'income') {
-    return await service.getByTypeAndDateRange(isExpense: false, start: start, end: end);
-  } else if (input.type == 'expense') {
-    return await service.getByTypeAndDateRange(isExpense: true, start: start, end: end);
-  } else {
-    return await service.getByDateRange(start, end);
-  }
-});
+final sectionedTransactionsProvider =
+    FutureProvider.family<List<TxListEntry>, ({DateTime month, String type})>((
+      ref,
+      arg,
+    ) async {
+      final transactions = await ref.watch(
+        transactionsByMonthAndTypeProvider(arg).future,
+      );
 
+      if (transactions.isEmpty) return [];
+
+      final List<TxListEntry> sectioned = [];
+      DateTime? currentDate;
+
+      for (var tx in transactions) {
+        final txDate = DateTime(tx.date.year, tx.date.month, tx.date.day);
+        if (currentDate == null || txDate != currentDate) {
+          currentDate = txDate;
+          sectioned.add(TxHeader(txDate));
+        }
+        sectioned.add(TxItem(tx));
+      }
+
+      return sectioned;
+    });
 
 final transactionCountsProvider = FutureProvider.autoDispose<Map<Id, int>>((
   ref,
@@ -97,29 +129,29 @@ class TransactionService {
 
   Future<List<Transaction>> getAll() async {
     final isar = await isarService.getInstance();
-    final allTransactions = await isar.transactions
-        .where()
-        .sortByDateDesc()
-        .findAll();
+    final allTransactions =
+        await isar.transactions.where().sortByDateDesc().findAll();
 
-    final filteredTransactions = allTransactions.where((tx) {
-      if (tx.isTransfer) {
-        // Only show the 'source' transaction, not the linked one
-        return !tx.isExpense;
-      }
-      return true;
-    }).toList();
+    final filteredTransactions =
+        allTransactions.where((tx) {
+          if (tx.isTransfer) {
+            // Only show the 'source' transaction, not the linked one
+            return !tx.isExpense;
+          }
+          return true;
+        }).toList();
     return filteredTransactions;
   }
 
   Future<List<Transaction>> getAllForDashBoard() async {
     final isar = await isarService.getInstance();
-    final allTransactions = await isar.transactions
-        .where()
-        .isTransferEqualTo(false)
-        .sortByDateDesc()
-        .findAll();
-    
+    final allTransactions =
+        await isar.transactions
+            .where()
+            .isTransferEqualTo(false)
+            .sortByDateDesc()
+            .findAll();
+
     return allTransactions;
   }
 
@@ -175,7 +207,7 @@ class TransactionService {
     required DateTime date,
     String? note,
     int? fromId,
-    int? toId
+    int? toId,
   }) async {
     final isar = await isarService.getInstance();
     final debit =
@@ -187,7 +219,7 @@ class TransactionService {
           )
           ..isTransfer = true
           ..account.value = from;
-    if(fromId != null) debit.id = fromId;
+    if (fromId != null) debit.id = fromId;
     final credit =
         Transaction.create(
             date: date,
@@ -197,7 +229,7 @@ class TransactionService {
           )
           ..isTransfer = true
           ..account.value = to;
-    if(toId != null) credit.id = toId;
+    if (toId != null) credit.id = toId;
     await isar.writeTxnSync(() async {
       // 1) Save both
       debit.related.value = credit;
@@ -213,35 +245,38 @@ class TransactionService {
 
   Future<List<Transaction>> getByDateRange(DateTime start, DateTime end) async {
     final isar = await isarService.getInstance();
-    final allTransactions = await isar.transactions
-        .filter()
-        .dateGreaterThan(start)
-        .and()
-        .dateLessThan(end)
-        .sortByDateDesc()
-        .findAll();
-    final filteredTransactions = allTransactions.where((tx) {
-      if (tx.isTransfer) {
-        // Only show the 'source' transaction, not the linked one
-        return !tx.isExpense;
-      }
-      return true;
-    }).toList();
+    // OPTIMIZATION: Use where() for indexed date range
+    final allTransactions =
+        await isar.transactions
+            .where()
+            .dateBetween(start, end)
+            .sortByDateDesc()
+            .findAll();
+
+    final filteredTransactions =
+        allTransactions.where((tx) {
+          if (tx.isTransfer) {
+            return !tx.isExpense;
+          }
+          return true;
+        }).toList();
     return filteredTransactions;
   }
 
-  Future<List<Transaction>> getByTypeAndDateRange({required bool isExpense, required DateTime start, required DateTime end}) async {
+  Future<List<Transaction>> getByTypeAndDateRange({
+    required bool isExpense,
+    required DateTime start,
+    required DateTime end,
+  }) async {
     final isar = await isarService.getInstance();
+    // OPTIMIZATION: Use composite-like filter starting with indexed date
     return await isar.transactions
         .where()
+        .dateBetween(start, end)
         .filter()
         .isExpenseEqualTo(isExpense)
         .isTransferEqualTo(false)
-        .dateGreaterThan(start)
-        .and()
-        .dateLessThan(end)
         .sortByDateDesc()
         .findAll();
   }
-
 }

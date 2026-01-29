@@ -2,7 +2,8 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:mudra_manager/db/models/category.dart';
-import 'package:mudra_manager/l10n/app_localizations.dart' show AppLocalizations;
+import 'package:mudra_manager/l10n/app_localizations.dart'
+    show AppLocalizations;
 import 'package:mudra_manager/util/icon_helper.dart';
 import 'package:mudra_manager/util/localization_extension.dart';
 
@@ -11,7 +12,12 @@ class BudgetCategoryMiniCard extends StatelessWidget {
   final double allocated;
   final double spent;
 
-  const BudgetCategoryMiniCard({super.key, required this.category, required this.allocated, required this.spent});
+  const BudgetCategoryMiniCard({
+    super.key,
+    required this.category,
+    required this.allocated,
+    required this.spent,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -20,74 +26,68 @@ class BudgetCategoryMiniCard extends StatelessWidget {
     var categoryColor = Color(category.colorValue ?? 0xFF000000);
     final ctxt = AppLocalizations.of(context)!;
 
-    return GestureDetector(
-      onTap: () => {},
-      child: Container(
-        width: 100,
-        padding: const EdgeInsets.all(8.0),
-        margin: const EdgeInsets.only(right: 8.0),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12.0),
-          gradient: LinearGradient(
-            begin: Alignment.bottomLeft,
-            end: Alignment.topRight,
-            colors: [color.surfaceDim, color.surface, categoryColor.withAlpha(90)],
+    // Calculate progress with safety
+    final progress = allocated > 0 ? (spent / allocated).clamp(0.0, 1.0) : 0.0;
+    final isOverBudget = spent > allocated;
+
+    return Container(
+      width: 140,
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: color.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(20.0),
+        border: Border.all(color: color.outline.withValues(alpha: 0.1)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: categoryColor.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  IconHelper.getIconData(category.iconName),
+                  color: categoryColor,
+                  size: 20,
+                ),
+              ),
+              const Spacer(),
+              if (isOverBudget)
+                Icon(Icons.warning_amber_rounded, size: 16, color: color.error),
+            ],
           ),
-          border: Border.all(color: color.primary), // Subtle border
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              mainAxisSize: MainAxisSize.max,
-              children: <Widget>[
-                Icon(IconHelper.getIconData(category.iconName), color: color.primary, size: 24),
-                Text(
-                  ctxt.formatPercentNumber((spent / allocated)),
-                  textAlign: TextAlign.center,
-                  style: textTheme.bodyMedium?.copyWith(color: color.primary),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+          const Spacer(),
+          Text(
+            category.name,
+            style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            "${ctxt.formatCurrencyWithSign(0, spent)} / ${ctxt.formatCurrencyWithSign(0, allocated)}",
+            style: textTheme.bodySmall?.copyWith(
+              color: color.onSurfaceVariant,
+              fontSize: 10,
             ),
-            Text(
-              category.name,
-              textAlign: TextAlign.center,
-              style: textTheme.titleMedium?.copyWith(color: color.primary),
-              overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 6,
+              backgroundColor: color.surfaceContainerHighest,
+              valueColor: AlwaysStoppedAnimation<Color>(
+                isOverBudget ? color.error : categoryColor,
+              ),
             ),
-            Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    Text(
-                      ctxt.formatCurrencyWithSign(0, spent),
-                      textAlign: TextAlign.center,
-                      style: textTheme.bodySmall?.copyWith(color: color.primary),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text(
-                      ctxt.formatCurrencyWithSign(0, allocated),
-                      textAlign: TextAlign.center,
-                      style: textTheme.bodySmall?.copyWith(color: color.primary),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-                LinearProgressIndicator(
-                  value: spent / allocated,
-                  semanticsValue: spent.toStringAsFixed(0),
-                  backgroundColor: color.secondary,
-                  valueColor: AlwaysStoppedAnimation<Color>(color.primary),
-                ),
-              ],
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

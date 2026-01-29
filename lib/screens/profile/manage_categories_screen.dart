@@ -21,24 +21,25 @@ class ManageCategoriesScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          "Manage Categories",
-          style: textTheme.titleLarge?.copyWith(color: color.onPrimary),
-        ),
+        title: Text("Manage Categories", style: textTheme.titleLarge),
       ),
       body: categoriesAsync.when(
         data: (categories) {
           if (categories.isEmpty) {
-            return NoDataFound(
-              // imagePath: 'assets/icons/512/category.png',
+            return const NoDataFound(
               iconData: Icons.category_outlined,
               message: "No categories found.",
             );
           }
           return ListView.separated(
-            padding: const EdgeInsets.only(top: 16, left: 16, right: 16, bottom: 60),
+            padding: const EdgeInsets.only(
+              top: 16,
+              left: 16,
+              right: 16,
+              bottom: 100, // Space for FAB
+            ),
             itemCount: categories.length,
-            separatorBuilder: (_, __) => const Divider(thickness: 0.1),
+            separatorBuilder: (_, __) => const SizedBox(height: 12),
             itemBuilder: (context, index) {
               final category = categories[index];
               final count = transactionCounts.when(
@@ -46,81 +47,58 @@ class ManageCategoriesScreen extends ConsumerWidget {
                 loading: () => 0,
                 error: (_, __) => 0,
               );
+
+              final categoryColor = Color(category.colorValue ?? 0xFFE0E0E0);
+
               return Container(
-                width: 120,
-                padding: const EdgeInsets.all(8.0),
-                margin: const EdgeInsets.only(right: 8.0),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12.0),
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      color.primary,
-                      // color.primaryFixed,
-                      color.primaryFixed,
-                      Color(category.colorValue ?? 0xFFE0E0E0),
-                    ],
+                  color: color.surface,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: color.outlineVariant.withValues(alpha: 0.5),
                   ),
-                  // Light background color
-                  border: Border.all(color: color.primary), // Subtle border
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Expanded(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          CircleAvatar(
-                            radius: 26,
-                            // backgroundColor: Color(
-                            //   category.colorValue ?? 0xFFE0E0E0,
-                            // ),
-                            child: Icon(
-                              IconHelper.getIconData(category.iconName),
-                              // color: Colors.black,
-                              size: 26,
-                            ),
-                          ),
-                          const SizedBox(width: 8.0),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  category.name,
-                                  textAlign: TextAlign.start,
-                                  style: textTheme.titleMedium?.copyWith(
-                                    color: color.onPrimary,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                Text(
-                                  category.categoryType.name.toUpperCase(),
-                                  textAlign: TextAlign.start,
-                                  style: textTheme.labelSmall?.copyWith(
-                                    color: color.onPrimary,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                Text(
-                                  "total $count transaction${count == 1 ? '' : 's'} present",
-                                  textAlign: TextAlign.start,
-                                  style: textTheme.labelSmall?.copyWith(
-                                    color: color.onPrimary,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: color.shadow.withValues(alpha: 0.05),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
                     ),
-                    IconButton.filled(
-                      icon: Icon(Icons.edit, color: color.onPrimary),
-                      onPressed: () {
+                  ],
+                ),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  leading: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: categoryColor.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      IconHelper.getIconData(category.iconName),
+                      color: categoryColor,
+                      size: 24,
+                    ),
+                  ),
+                  title: Text(
+                    category.name,
+                    style: textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: color.onSurface,
+                    ),
+                  ),
+                  subtitle: Text(
+                    '${count} transaction${count == 1 ? '' : 's'} • ${category.categoryType.name.toUpperCase()}',
+                    style: textTheme.bodySmall?.copyWith(
+                      color: color.onSurfaceVariant,
+                    ),
+                  ),
+                  trailing: PopupMenuButton<String>(
+                    icon: Icon(Icons.more_vert, color: color.onSurfaceVariant),
+                    onSelected: (value) {
+                      if (value == 'edit') {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -131,13 +109,45 @@ class ManageCategoriesScreen extends ConsumerWidget {
                                 ),
                           ),
                         );
-                      },
-                    ),
-                    IconButton.filled(
-                      icon: Icon(Icons.delete, color: color.onPrimary),
-                      onPressed: () => _deleteCategory(context, ref, category),
-                    ),
-                  ],
+                      } else if (value == 'delete') {
+                        _deleteCategory(context, ref, category);
+                      }
+                    },
+                    itemBuilder:
+                        (context) => [
+                          PopupMenuItem(
+                            value: 'edit',
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.edit,
+                                  color: color.secondary,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 12),
+                                const Text('Edit'),
+                              ],
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'delete',
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.delete,
+                                  color: color.error,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  'Delete',
+                                  style: TextStyle(color: color.error),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                  ),
                 ),
               );
             },
@@ -146,7 +156,6 @@ class ManageCategoriesScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, stack) => Center(child: Text("Error: $err")),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           Navigator.push(
@@ -155,7 +164,7 @@ class ManageCategoriesScreen extends ConsumerWidget {
           );
         },
         icon: const Icon(Icons.add),
-        label: Text("Add Category"),
+        label: const Text("Add Category"),
       ),
     );
   }
@@ -187,14 +196,10 @@ class ManageCategoriesScreen extends ConsumerWidget {
               ),
               OutlinedButton(
                 onPressed: () => Navigator.pop(context, true),
-                style: OutlinedButton.styleFrom(
-                  backgroundColor: color.primary,
-                ),
+                style: OutlinedButton.styleFrom(backgroundColor: color.primary),
                 child: Text(
                   'Delete'.toUpperCase(),
-                  style: textTheme.labelLarge?.copyWith(
-                    color: color.onPrimary,
-                  ),
+                  style: textTheme.labelLarge?.copyWith(color: color.onPrimary),
                 ),
               ),
             ],

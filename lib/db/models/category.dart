@@ -11,6 +11,7 @@ class Category {
   @Index(type: IndexType.value, unique: true, caseSensitive: false)
   late String name; // e.g., "Groceries", "Salary", "Entertainment"
 
+  @Index()
   @enumerated
   late CategoryType categoryType; // true = Expense, false = Income
 
@@ -30,7 +31,8 @@ class Category {
     this.categoryType = CategoryType.expense, // Default to expense
   });
 
-  factory Category.fromJson(Map<String, dynamic> json) => _$CategoryFromJson(json);
+  factory Category.fromJson(Map<String, dynamic> json) =>
+      _$CategoryFromJson(json);
   Map<String, dynamic> toJson() => _$CategoryToJson(this);
 }
 

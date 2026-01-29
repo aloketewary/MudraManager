@@ -4,7 +4,8 @@ import 'package:mudra_manager/db/models/account.dart' show Account;
 import 'package:mudra_manager/db/models/category.dart';
 import 'package:mudra_manager/db/models/tag.dart';
 import 'package:mudra_manager/db/models/transaction.dart' show Transaction;
-import 'package:mudra_manager/l10n/app_localizations.dart' show AppLocalizations;
+import 'package:mudra_manager/l10n/app_localizations.dart'
+    show AppLocalizations;
 import 'package:mudra_manager/util/account_type_extension.dart';
 import 'package:mudra_manager/util/case_extension.dart';
 import 'package:mudra_manager/util/icon_helper.dart';
@@ -54,86 +55,164 @@ class _TransactionCardState extends State<TransactionCard> {
     widget.related?.account.load();
     final ctxt = AppLocalizations.of(context)!;
 
-    return Card.outlined(
-      shadowColor: color.surface,
-      color: _isExpanded ? color.primary : null,
+    return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0), side: BorderSide(width: 1, color: color.primary)),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16.0),
-        onTap: () {
-          setState(() {
-            _isExpanded = !_isExpanded;
-          });
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              widget.isTransfer ? buildTransferCard(_isExpanded) : buildNormalCard(_isExpanded),
+      decoration: BoxDecoration(
+        color: color.surface,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: color.shadow.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: () {
+            setState(() {
+              _isExpanded = !_isExpanded;
+            });
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                widget.isTransfer
+                    ? buildTransferCard(_isExpanded)
+                    : buildNormalCard(_isExpanded),
 
-              if (_isExpanded && !widget.isTransfer)
-                Padding(
-                  padding: const EdgeInsets.only(top: 16.0),
-                  child: Text(
-                    ctxt.transaction_noteDescriptionText(widget.description ?? ''),
-                    style: textTheme.labelLarge?.copyWith(color: color.onPrimary),
-                  ),
-                ),
-              if (_isExpanded)
-                Wrap(
-                  spacing: 4.0,
-                  runSpacing: 4.0,
-                  children:
-                      widget.tags.map((tag) {
-                        return Padding(
-                          padding: EdgeInsets.only(right: 8),
-                          child: Wrap(
-                            crossAxisAlignment: WrapCrossAlignment.center,
-                            runSpacing: 2,
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                  child:
+                      _isExpanded
+                          ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Icon(Icons.tag, color: color.onPrimary, size: 12),
-                              Text(tag.name, style: textTheme.labelSmall?.copyWith(color: color.onPrimary)),
+                              const SizedBox(height: 16),
+                              const Divider(height: 1),
+                              const SizedBox(height: 16),
+                              if (widget.description?.isNotEmpty == true)
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 12.0),
+                                  child: Text(
+                                    widget.description!,
+                                    style: textTheme.bodyMedium?.copyWith(
+                                      color: color.onSurfaceVariant,
+                                      fontStyle: FontStyle.italic,
+                                    ),
+                                  ),
+                                ),
+                              if (widget.tags.isNotEmpty)
+                                Wrap(
+                                  spacing: 8.0,
+                                  runSpacing: 8.0,
+                                  children:
+                                      widget.tags.map((tag) {
+                                        return Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 4,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: color.secondaryContainer,
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(
+                                                Icons.tag,
+                                                size: 14,
+                                                color:
+                                                    color.onSecondaryContainer,
+                                              ),
+                                              const SizedBox(width: 4),
+                                              Text(
+                                                tag.name,
+                                                style: textTheme.labelSmall
+                                                    ?.copyWith(
+                                                      color:
+                                                          color
+                                                              .onSecondaryContainer,
+                                                    ),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      }).toList(),
+                                ),
+                              const SizedBox(height: 16),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  OutlinedButton.icon(
+                                    onPressed: widget.onEdit,
+                                    icon: const Icon(Icons.edit, size: 18),
+                                    label: const Text("Edit"),
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor: color.primary,
+                                      side: BorderSide(
+                                        color: color.primary.withValues(
+                                          alpha: 0.5,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  OutlinedButton.icon(
+                                    onPressed: widget.onRemove,
+                                    icon: const Icon(Icons.delete, size: 18),
+                                    label: const Text("Delete"),
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor: color.error,
+                                      side: BorderSide(
+                                        color: color.error.withValues(
+                                          alpha: 0.5,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ],
-                          ),
-                        );
-                      }).toList(),
+                          )
+                          : const SizedBox.shrink(),
                 ),
-              if (_isExpanded) Padding(padding: EdgeInsets.only(top: 4), child: Divider(color: color.onPrimary)),
-              if (_isExpanded)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    IconButton.filledTonal(onPressed: widget.onEdit, icon: Icon(Icons.edit)),
-                    IconButton.filledTonal(tooltip: 'Delete Transaction', onPressed: widget.onRemove, icon: Icon(Icons.delete)),
-                  ],
-                ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  buildNormalCard(bool isExpanded) {
+  Widget buildNormalCard(bool isExpanded) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final ctxt = AppLocalizations.of(context)!;
+    final categoryColor = Color(widget.category?.colorValue ?? 0xFF000000);
 
     return Row(
       children: <Widget>[
         Container(
           width: 48.0,
           height: 48.0,
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(16), color: Color(widget.category?.colorValue ?? 0xFF000000)),
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Icon(
-              IconHelper.getIconData(widget.category?.iconName),
-              // color: color.onPrimary,
-              size: 24.0,
-            ),
+          decoration: BoxDecoration(
+            color: categoryColor.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Icon(
+            IconHelper.getIconData(widget.category?.iconName),
+            color: categoryColor,
+            size: 24.0,
           ),
         ),
         const SizedBox(width: 16.0),
@@ -141,25 +220,38 @@ class _TransactionCardState extends State<TransactionCard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text("${widget.category?.name}", style: textTheme.titleMedium?.copyWith(color: isExpanded ? color.onPrimary : color.primary)),
               Text(
-                '${widget.account?.name} - ${widget.account?.accountType.name.toTitleCase()}',
-                style: textTheme.labelMedium?.copyWith(color: isExpanded ? color.onPrimary : color.primary),
+                "${widget.category?.name}",
+                style: textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                '${widget.account?.name} • ${widget.account?.accountType.name.toTitleCase()}',
+                style: textTheme.bodySmall?.copyWith(
+                  color: color.onSurfaceVariant,
+                ),
               ),
             ],
           ),
         ),
-        const SizedBox(width: 16.0),
         Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: <Widget>[
             Text(
               '${widget.isExpense ? '-' : '+'} ${ctxt.formatCurrencyWithSign(2, widget.amount.toDouble())}',
-              style: textTheme.titleLarge?.copyWith(color: isExpanded ? color.onPrimary : color.primary),
+              style: textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: widget.isExpense ? color.error : color.primary,
+              ),
             ),
+            const SizedBox(height: 2),
             Text(
-              DateFormat('EEE, dd MMM yyyy', ctxt.localeName).format(widget.date),
-              style: textTheme.labelSmall?.copyWith(color: isExpanded ? color.onPrimary : color.primary),
+              DateFormat('MMM dd', ctxt.localeName).format(widget.date),
+              style: textTheme.bodySmall?.copyWith(
+                color: color.onSurfaceVariant,
+              ),
             ),
           ],
         ),
@@ -167,112 +259,128 @@ class _TransactionCardState extends State<TransactionCard> {
     );
   }
 
-  buildTransferCard(bool isExpanded) {
+  Widget buildTransferCard(bool isExpanded) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    var related = widget.related;
+    final related = widget.related;
     final ctxt = AppLocalizations.of(context)!;
 
     return Column(
       children: [
         Row(
-          children: <Widget>[
-            Container(
-              width: 48.0,
-              height: 48.0,
-              decoration: BoxDecoration(borderRadius: BorderRadius.circular(16), color: Color(related?.account.value?.colorValue ?? 0xFF000000)),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Icon(
-                  related?.account.value?.accountType.icon,
-                  size: 24.0,
-                ),
-              ),
-            ),
-            const SizedBox(width: 16.0),
+          children: [
+            // FROM Account
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    related?.account.value?.name ?? '',
-                    style: textTheme.titleMedium?.copyWith(color: _isExpanded ? color.onPrimary : color.primary),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: color.surfaceContainerHighest,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      related?.account.value?.accountType.icon,
+                      size: 16,
+                      color: color.primary,
+                    ),
                   ),
-                  Text(
-                    related?.account.value?.accountType.name.toUpperCase() ?? '',
-                    style: textTheme.labelMedium?.copyWith(color: _isExpanded ? color.onPrimary : color.primary),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "From",
+                          style: textTheme.labelSmall?.copyWith(
+                            color: color.onSurfaceVariant,
+                            fontSize: 10,
+                          ),
+                        ),
+                        Text(
+                          related?.account.value?.name ?? '',
+                          style: textTheme.labelMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: <Widget>[
-                Text(
-                  ctxt.formatCurrencyWithSign(2, related?.amount ?? 0.0),
-                  style: textTheme.titleLarge?.copyWith(color: _isExpanded ? color.onPrimary : color.primary),
-                ),
-                Text(
-                  DateFormat('EEE, dd MMM yyyy', ctxt.localeName).format(related?.date ?? DateTime.now()),
-                  style: textTheme.labelSmall?.copyWith(color: _isExpanded ? color.onPrimary : color.primary),
-                ),
-              ],
+
+            // Transfer Icon
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Icon(
+                Icons.arrow_forward_rounded,
+                color: color.tertiary,
+                size: 20,
+              ),
+            ),
+
+            // TO Account
+            Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          "To",
+                          style: textTheme.labelSmall?.copyWith(
+                            color: color.onSurfaceVariant,
+                            fontSize: 10,
+                          ),
+                        ),
+                        Text(
+                          widget.account?.name ?? '',
+                          style: textTheme.labelMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: color.surfaceContainerHighest,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      widget.account?.accountType.icon,
+                      size: 16,
+                      color: color.primary,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
-        Padding(
-          padding: EdgeInsets.symmetric(vertical: 0),
-          child: IconButton.filledTonal(
-            onPressed: () {
-              setState(() {
-                _isExpanded = !_isExpanded;
-              });
-            },
-            icon: Icon(Icons.arrow_downward),
-          ),
-        ),
+        const SizedBox(height: 12),
         Row(
-          children: <Widget>[
-            Container(
-              width: 48.0,
-              height: 48.0,
-              decoration: BoxDecoration(borderRadius: BorderRadius.circular(16.0), color: Color(widget.account?.colorValue ?? 0xFF000000)),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Icon(
-                  widget.account?.accountType.icon,
-                  // color: color.onPrimary,
-                  size: 24.0,
-                ),
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              ctxt.formatCurrencyWithSign(2, widget.amount.toDouble()),
+              style: textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: color.primary,
               ),
-            ),
-            const SizedBox(width: 16.0),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(widget.account?.name ?? '', style: textTheme.titleMedium?.copyWith(color: _isExpanded ? color.onPrimary : color.primary)),
-                  Text(
-                    widget.account?.accountType.name.toUpperCase() ?? '',
-                    style: textTheme.labelMedium?.copyWith(color: _isExpanded ? color.onPrimary : color.primary),
-                  ),
-                ],
-              ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: <Widget>[
-                Text(
-                  ctxt.formatCurrencyWithSign(2, widget.amount.toDouble()),
-                  style: textTheme.titleLarge?.copyWith(color: _isExpanded ? color.onPrimary : color.primary),
-                ),
-                Text(
-                  DateFormat('EEE, dd MMM yyyy', ctxt.localeName).format(widget.date),
-                  style: textTheme.labelSmall?.copyWith(color: _isExpanded ? color.onPrimary : color.primary),
-                ),
-              ],
             ),
           ],
+        ),
+        Text(
+          DateFormat('MMM dd, yyyy', ctxt.localeName).format(widget.date),
+          style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
         ),
       ],
     );

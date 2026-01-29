@@ -2,9 +2,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar/isar.dart';
 import 'package:mudra_manager/db/isar_service.dart' show IsarService;
 import 'package:mudra_manager/db/models/budget.dart'
-    show Budget, BudgetQueryFilter, BudgetQueryWhere, GetBudgetCollection;
+    show
+        Budget,
+        BudgetQueryFilter,
+        BudgetQueryWhere,
+        BudgetRecurrence,
+        BudgetRecurrenceExtension,
+        GetBudgetCollection;
 import 'package:mudra_manager/db/models/budget_category_allocation.dart'
-    show BudgetCategoryAllocation, BudgetCategoryAllocationQueryLinks, GetBudgetCategoryAllocationCollection;
+    show
+        BudgetCategoryAllocation,
+        BudgetCategoryAllocationQueryLinks,
+        GetBudgetCategoryAllocationCollection;
 import 'package:mudra_manager/db/models/category.dart';
 import 'package:mudra_manager/db/models/transaction.dart';
 import 'package:mudra_manager/providers/isar_provider.dart';
@@ -19,24 +28,37 @@ final budgetStreamProvider = StreamProvider<List<Budget>>((ref) {
   return service.watchAllBudgets();
 });
 
-final budgetWithProgressProvider = StreamProvider<List<(Budget, double)>>((
-  ref,
-) async* {
-  final budgetService = ref.watch(budgetServiceProvider);
-  final isar = await ref.watch(isarServiceProvider).getInstance();
+final budgetWithProgressProvider =
+    StreamProvider<List<(Budget, double, DateTime, DateTime)>>((ref) async* {
+      final budgetService = ref.watch(budgetServiceProvider);
+      final isar = await ref.read(isarServiceProvider).getInstance();
 
-  await for (final budgets in isar.budgets
-      .where()
-      .isArchivedEqualTo(false)
-      .watch(fireImmediately: true).take(2)) {
-    final List<(Budget, double)> result = [];
-    for (final budget in budgets) {
-      final spent = await budgetService.calculateSpentAmount(budget);
-      result.add((budget, spent));
-    }
-    yield result;
-  }
-});
+      await for (final budgets in isar.budgets
+          .where()
+          .isArchivedEqualTo(false)
+          .watch(fireImmediately: true)) {
+        final List<(Budget, double, DateTime, DateTime)> result = [];
+        final now = DateTime.now();
+        for (final budget in budgets) {
+          // Filter out expired one-time budgets
+          if (budget.recurrence == BudgetRecurrence.none &&
+              budget.endDate.isBefore(
+                DateTime(now.year, now.month, now.day, 23, 59, 59),
+              )) {
+            continue;
+          }
+
+          final (s, e) = budget.getCurrentPeriodRange(now);
+          final spent = await budgetService.calculateSpentAmount(
+            budget,
+            start: s,
+            end: e,
+          );
+          result.add((budget, spent, s, e));
+        }
+        yield result;
+      }
+    });
 
 final budgetsWithProgressProvider =
     StreamProvider.autoDispose<List<BudgetWithProgress>>((ref) {
@@ -56,8 +78,14 @@ class BudgetService {
         .watch(fireImmediately: true);
   }
 
-  Future<double> calculateSpentAmount(Budget budget) async {
+  Future<double> calculateSpentAmount(
+    Budget budget, {
+    DateTime? start,
+    DateTime? end,
+  }) async {
     final isar = await isarService.getInstance();
+    final s = start ?? budget.startDate;
+    final e = end ?? budget.endDate;
 
     final categoryIds = budget.categories.map((c) => c.id).toList();
 
@@ -65,7 +93,7 @@ class BudgetService {
         await isar.transactions
             .filter()
             .isExpenseEqualTo(true)
-            .dateBetween(budget.startDate, budget.endDate)
+            .dateBetween(s, e)
             .findAll();
 
     final spent = transactions
@@ -86,7 +114,11 @@ class BudgetService {
         .isArchivedEqualTo(false)
         .watch(fireImmediately: true)) {
       final List<BudgetWithProgress> list = [];
+      final now = DateTime.now();
       for (final budget in budgets) {
+        // Calculate current range
+        final (s, e) = budget.getCurrentPeriodRange(now);
+
         // 1) load linked categories & allocations
         await budget.categories.load();
         await budget.allocations.load();
@@ -101,7 +133,7 @@ class BudgetService {
               await isar.transactions
                   .filter()
                   .isExpenseEqualTo(true)
-                  .dateBetween(budget.startDate, budget.endDate)
+                  .dateBetween(s, e)
                   .category((q) => q.idEqualTo(cat.id))
                   .amountProperty()
                   .sum();
@@ -120,6 +152,8 @@ class BudgetService {
             budget: budget,
             spent: totalSpent,
             categorySpendings: catSpendings,
+            startDate: s,
+            endDate: e,
           ),
         );
       }
@@ -176,25 +210,27 @@ class BudgetService {
     });
   }
 
-  Future<List<Budget>> getFilterBudget(DateTime now) async{
+  Future<List<Budget>> getFilterBudget(DateTime now) async {
     final isar = await isarService.getInstance();
-    final budgets = await isar.budgets
-        .filter()
-        .startDateLessThan(now)
-        .and()
-        .endDateGreaterThan(now)
-        .findAll();
+    final budgets =
+        await isar.budgets
+            .filter()
+            .startDateLessThan(now)
+            .and()
+            .endDateGreaterThan(now)
+            .findAll();
     return budgets;
   }
 
-  Future<void> deleteAllocation(List<BudgetCategoryAllocation> allocList) async {
+  Future<void> deleteAllocation(
+    List<BudgetCategoryAllocation> allocList,
+  ) async {
     final isar = await isarService.getInstance();
     var allocIds = allocList.map((elem) => elem.id).toList();
     await isar.writeTxn(() async {
       await isar.budgetCategoryAllocations.deleteAll(allocIds);
     });
   }
-
 }
 
 class CategorySpending {
@@ -213,10 +249,14 @@ class BudgetWithProgress {
   final Budget budget;
   final double spent;
   final List<CategorySpending> categorySpendings;
+  final DateTime startDate;
+  final DateTime endDate;
 
   BudgetWithProgress({
     required this.budget,
     required this.spent,
     required this.categorySpendings,
+    required this.startDate,
+    required this.endDate,
   });
 }

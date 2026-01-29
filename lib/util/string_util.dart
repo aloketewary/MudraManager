@@ -1,22 +1,20 @@
-
 extension StringUtil on String {
-
-  subStringAfterLast(String delimeter) {
+  substringAfterLast(String delimeter) {
     final pos = lastIndexOf(delimeter);
     return pos != -1 ? substring(pos + 1, length) : this;
   }
 
-   String subStringAfter(String delimeter) {
-     final pos = indexOf(delimeter);
-     return pos != -1 ? substring(pos + 1, length) : this;
+  String substringAfter(String delimeter) {
+    final pos = indexOf(delimeter);
+    return pos != -1 ? substring(pos + 1, length) : this;
   }
 
-  subStringBefore(String delimeter) {
+  substringBefore(String delimeter) {
     final pos = indexOf(delimeter);
     return pos != -1 ? substring(0, pos) : this;
   }
 
-  subStringBeforeLast(String delimeter) {
+  substringBeforeLast(String delimeter) {
     final pos = lastIndexOf(delimeter);
     return pos != -1 ? substring(0, pos) : this;
   }
@@ -25,11 +23,15 @@ extension StringUtil on String {
     return int.tryParse(this) ?? defaultValue;
   }
 
-  bool isNan() {
-    return int.tryParse(this)?.isNaN ?? false;
+  bool isNotNumeric() {
+    return double.tryParse(replaceAll(',', '')) == null;
   }
 
   double toDouble({double defaultValue = 0}) {
-    return double.tryParse(this) ?? defaultValue;
+    return double.tryParse(replaceAll(',', '')) ?? defaultValue;
+  }
+
+  String toNumericOnly() {
+    return replaceAll(RegExp(r'[^0-9.]'), '');
   }
 }

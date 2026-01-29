@@ -56,3 +56,63 @@ class Budget {
 
 // Example Enum (defined outside the class)
 enum BudgetRecurrence { none, daily, weekly, monthly, yearly }
+
+extension BudgetRecurrenceExtension on Budget {
+  (DateTime, DateTime) getCurrentPeriodRange(DateTime now) {
+    if (recurrence == BudgetRecurrence.none) {
+      return (startDate, endDate);
+    }
+
+    DateTime currentStart = startDate;
+    DateTime currentEnd = endDate;
+
+    // If 'now' is before the initial range, return the initial range.
+    if (now.isBefore(currentStart)) {
+      return (currentStart, currentEnd);
+    }
+
+    // Fast-forward to the period containing 'now'.
+    while (currentEnd.isBefore(now)) {
+      switch (recurrence) {
+        case BudgetRecurrence.daily:
+          currentStart = currentStart.add(const Duration(days: 1));
+          currentEnd = currentEnd.add(const Duration(days: 1));
+          break;
+        case BudgetRecurrence.weekly:
+          currentStart = currentStart.add(const Duration(days: 7));
+          currentEnd = currentEnd.add(const Duration(days: 7));
+          break;
+        case BudgetRecurrence.monthly:
+          currentStart = _addMonths(currentStart, 1);
+          currentEnd = _addMonths(currentEnd, 1);
+          break;
+        case BudgetRecurrence.yearly:
+          currentStart = DateTime(
+            currentStart.year + 1,
+            currentStart.month,
+            currentStart.day,
+          );
+          currentEnd = DateTime(
+            currentEnd.year + 1,
+            currentEnd.month,
+            currentEnd.day,
+          );
+          break;
+        case BudgetRecurrence.none:
+          return (currentStart, currentEnd);
+      }
+    }
+    return (currentStart, currentEnd);
+  }
+
+  DateTime _addMonths(DateTime dt, int months) {
+    var nextYear = dt.year + (dt.month + months - 1) ~/ 12;
+    var nextMonth = (dt.month + months - 1) % 12 + 1;
+    var next = DateTime(nextYear, nextMonth, dt.day);
+    if (next.month != nextMonth) {
+      // Handle rolling over to next month if day > daysInMonth
+      next = DateTime(nextYear, nextMonth + 1, 0);
+    }
+    return next;
+  }
+}

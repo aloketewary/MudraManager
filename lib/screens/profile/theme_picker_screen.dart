@@ -30,41 +30,55 @@ class _ThemePickerScreenState extends ConsumerState<ThemePickerScreen> {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final color = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          "Choose Theme",
-          style: textTheme.titleLarge?.copyWith(color: color.onPrimary),
+      appBar: AppBar(title: const Text("Choose Theme")),
+      body: GridView.builder(
+        padding: const EdgeInsets.all(20),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 20,
+          mainAxisSpacing: 20,
+          childAspectRatio: 0.70, // Taller aspect ratio for "phone" look
         ),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children:
-            AppColorTheme.values.map((theme) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(theme.name.toUpperCase(), style: textTheme.titleMedium),
-                  ThemePreviewCard(
-                    theme: theme,
-                    isSelected: _tempSelectedTheme == theme,
-                    onTap: () {
-                      setState(() {
-                        _tempSelectedTheme = theme;
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 24),
-                ],
-              );
-            }).toList(),
+        itemCount: AppColorTheme.values.length,
+        itemBuilder: (context, index) {
+          final theme = AppColorTheme.values[index];
+          final isSelected = _tempSelectedTheme == theme;
+
+          return Column(
+            children: [
+              Expanded(
+                child: ThemePreviewCard(
+                  theme: theme,
+                  isSelected: isSelected,
+                  onTap: () {
+                    setState(() {
+                      _tempSelectedTheme = theme;
+                    });
+                  },
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                theme.name.toUpperCase(),
+                style: textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.2,
+                  color:
+                      isSelected
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
+            ],
+          );
+        },
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _applyTheme,
-        icon: const Icon(Icons.save),
-        label: const Text("Apply"),
+        icon: const Icon(Icons.check_circle_outline),
+        label: const Text("Apply Theme"),
       ),
     );
   }

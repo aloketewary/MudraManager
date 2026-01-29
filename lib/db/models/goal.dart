@@ -23,7 +23,7 @@ class Goal {
 
   DateTime? targetDate; // Optional deadline for the goal
 
-  late DateTime creationDate; // When the goal was set up
+  DateTime creationDate = DateTime.now(); // When the goal was set up
 
   @Index() // Index for filtering active/completed goals
   bool isActive = true; // Mark false when completed or abandoned
@@ -34,9 +34,8 @@ class Goal {
   @Index()
   final linkedAccount = IsarLink<Account>();
 
-  // Optional: Icon identifier or color for UI representation
-  // String? iconName;
-  // int? colorValue;
+  String? iconName;
+  int? colorValue;
 
   // Isar requires a default constructor
   Goal();
@@ -49,15 +48,16 @@ class Goal {
     this.targetDate,
     this.isActive = true,
     // linkedAccount assigned after creation if needed
-  }) {
-    creationDate = DateTime.now(); // Set creation date automatically
-  }
+  });
 
   // You might add helper getters for progress:
-  double get progressPercent => (targetAmount > 0) ? (currentAmount / targetAmount).clamp(0.0, 1.0) : 0.0;
-  double get remainingAmount => (targetAmount - currentAmount).isNegative ? 0.0 : (targetAmount - currentAmount);
+  double get progressPercent =>
+      (targetAmount > 0) ? (currentAmount / targetAmount).clamp(0.0, 1.0) : 0.0;
+  double get remainingAmount =>
+      (targetAmount - currentAmount).isNegative
+          ? 0.0
+          : (targetAmount - currentAmount);
 
   factory Goal.fromJson(Map<String, dynamic> json) => _$GoalFromJson(json);
   Map<String, dynamic> toJson() => _$GoalToJson(this);
-
 }

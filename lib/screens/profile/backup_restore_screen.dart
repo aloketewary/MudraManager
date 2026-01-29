@@ -12,16 +12,8 @@ class BackupRestoreScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final textTheme = Theme.of(context).textTheme;
-    final color = Theme.of(context).colorScheme;
-
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          "Backup & Restore",
-          style: textTheme.titleLarge?.copyWith(color: color.onPrimary),
-        ),
-      ),
+      appBar: AppBar(title: const Text("Backup & Restore")),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -44,7 +36,10 @@ class BackupRestoreScreen extends ConsumerWidget {
               icon: Icons.restore_outlined,
               onTap: () async {
                 final isar = await ref.read(isarServiceProvider).getInstance();
-                final data = await BackupService.restoreEncryptedBackup(context, isar);
+                final data = await BackupService.restoreEncryptedBackup(
+                  context,
+                  isar,
+                );
                 if (data != null) {
                   // await restoreAppFromJson(data); // your data restorer
                   ScaffoldMessenger.of(context).showSnackBar(

@@ -8,21 +8,14 @@ class AboutScreen extends StatelessWidget {
     return await PackageInfo.fromPlatform();
   }
 
-
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
     final color = Theme.of(context).colorScheme;
-    String description = "Mudra Manager is a smart personal finance app that helps you track expenses, manage budgets, and organize transactions effortlessly. With offline support, SMS auto-detection, and insightful charts, it gives you full control over your money. Simple, secure, and powerful—perfect for building better financial habits every day.";
-
+    String description =
+        "Mudra Manager is a smart personal finance app that helps you track expenses, manage budgets, and organize transactions effortlessly. With offline support, SMS auto-detection, and insightful charts, it gives you full control over your money. Simple, secure, and powerful—perfect for building better financial habits every day.";
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          "About Mudra Manager",
-          style: textTheme.titleLarge?.copyWith(color: color.onPrimary),
-        ),
-      ),
+      appBar: AppBar(title: const Text("About Mudra Manager")),
       body: FutureBuilder<PackageInfo>(
         future: _getAppInfo(),
         builder: (context, snapshot) {
@@ -60,7 +53,6 @@ class AboutScreen extends StatelessWidget {
                     textAlign: TextAlign.justify,
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
-
                 ],
               ),
 

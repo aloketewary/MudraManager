@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mudra_manager/l10n/app_localizations.dart' show AppLocalizations;
+import 'package:mudra_manager/l10n/app_localizations.dart'
+    show AppLocalizations;
 import 'package:mudra_manager/providers/isar_provider.dart';
 import 'package:mudra_manager/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/providers/user_profile_provider.dart';
@@ -10,10 +11,6 @@ import 'package:mudra_manager/screens/profile/app_settings_page.dart'
     show AppSettingsPage;
 import 'package:mudra_manager/screens/profile/edit_user_profile_screen.dart'
     show EditUserProfileScreen;
-import 'package:mudra_manager/screens/profile/manage_account_screen.dart'
-    show ManageAccountScreen;
-import 'package:mudra_manager/screens/profile/manage_categories_screen.dart'
-    show ManageCategoriesScreen;
 import 'package:mudra_manager/screens/profile/profile_tile.dart';
 import 'package:mudra_manager/screens/profile/setting_screen.dart';
 import 'package:mudra_manager/screens/profile/sms_import_setting_screen.dart';
@@ -82,32 +79,6 @@ class ProfileScreen extends ConsumerWidget {
                     context,
                     MaterialPageRoute(
                       builder: (_) => const EditUserProfileScreen(),
-                    ),
-                  );
-                },
-              ),
-              ProfileTile(
-                title: "Accounts",
-                subtitle: "Manage your accounts",
-                icon: Icons.account_balance_wallet,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const ManageAccountScreen(),
-                    ),
-                  );
-                },
-              ),
-              ProfileTile(
-                title: "Category",
-                subtitle: "Manage your categories",
-                icon: Icons.category,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const ManageCategoriesScreen(),
                     ),
                   );
                 },
@@ -264,9 +235,12 @@ class ProfileScreen extends ConsumerWidget {
                               SizedBox(width: 16),
                               CommonButton(
                                 text: 'Logout',
-                                onPressed: () async{
+                                onPressed: () async {
                                   //Clear all data from Isar
-                                  final isar = await ref.read(isarServiceProvider).getInstance();
+                                  final isar =
+                                      await ref
+                                          .read(isarServiceProvider)
+                                          .getInstance();
 
                                   // 1. Clear database
                                   await isar.writeTxn(() async {
@@ -278,8 +252,10 @@ class ProfileScreen extends ConsumerWidget {
 
                                   // 3. Navigate to onboarding (and clear backstack)
                                   Navigator.of(context).pushAndRemoveUntil(
-                                    MaterialPageRoute(builder: (context) => OnboardingScreen()),
-                                        (route) => false,
+                                    MaterialPageRoute(
+                                      builder: (context) => OnboardingScreen(),
+                                    ),
+                                    (route) => false,
                                   );
                                 },
                                 backGroundColor: Colors.redAccent,

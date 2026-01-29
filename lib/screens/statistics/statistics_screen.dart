@@ -7,18 +7,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:mudra_manager/db/models/category.dart' show Category;
 import 'package:mudra_manager/db/models/transaction.dart' show Transaction;
-import 'package:mudra_manager/l10n/app_localizations.dart' show AppLocalizations;
+import 'package:mudra_manager/l10n/app_localizations.dart'
+    show AppLocalizations;
 import 'package:mudra_manager/models/pie_chart_card.dart' show PieCategory;
-import 'package:mudra_manager/providers/status_data_provider.dart' show StatsData, statsProvider;
+import 'package:mudra_manager/providers/status_data_provider.dart'
+    show StatsData, statsProvider;
 import 'package:mudra_manager/screens/reusable/animated_balance.dart';
 import 'package:mudra_manager/screens/reusable/no_data_found.dart';
 import 'package:mudra_manager/screens/reusable/responseive_layout_builder.dart';
-import 'package:mudra_manager/screens/statistics/expense_trend_widget.dart' show ExpenseTrendWidget;
+import 'package:mudra_manager/screens/statistics/expense_trend_widget.dart'
+    show ExpenseTrendWidget;
 import 'package:mudra_manager/screens/statistics/period_selector_screen.dart';
-import 'package:mudra_manager/screens/transaction/transaction_list_screen.dart' show TransactionListScreen;
+import 'package:mudra_manager/screens/transaction/transaction_list_screen.dart'
+    show TransactionListScreen;
 import 'package:mudra_manager/util/case_extension.dart';
-import 'package:mudra_manager/util/export_excel_pdf.dart' show exportStatsToExcel, exportStatsToPdf;
+import 'package:mudra_manager/util/export_excel_pdf.dart'
+    show exportStatsToExcel, exportStatsToPdf;
 import 'package:mudra_manager/util/icon_helper.dart' show IconHelper;
 import 'package:mudra_manager/util/localization_extension.dart';
 
@@ -29,7 +35,8 @@ class StatisticsScreen extends ConsumerStatefulWidget {
   ConsumerState<StatisticsScreen> createState() => StatisticsScreenState();
 }
 
-class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerProviderStateMixin {
+class StatisticsScreenState extends ConsumerState<StatisticsScreen>
+    with TickerProviderStateMixin {
   String _period = 'Month';
   StatsData? data;
   final GlobalKey pieKey = GlobalKey();
@@ -39,19 +46,27 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerP
   bool _isDisposed = false;
   int? touchedIndex;
   final Set<int> _disabledCategoryIndexes = {};
+  bool _showIncome = false;
 
   @override
   void initState() {
     super.initState();
     _controllers = List.generate(5, (index) {
-      return AnimationController(vsync: this, duration: Duration(milliseconds: 500));
+      return AnimationController(
+        vsync: this,
+        duration: Duration(milliseconds: 500),
+      );
     });
 
     _animations =
         _controllers
             .map(
-              (controller) =>
-                  Tween<Offset>(begin: Offset(0, 0.2), end: Offset.zero).animate(CurvedAnimation(parent: controller, curve: Curves.easeOut)),
+              (controller) => Tween<Offset>(
+                begin: Offset(0, 0.2),
+                end: Offset.zero,
+              ).animate(
+                CurvedAnimation(parent: controller, curve: Curves.easeOut),
+              ),
             )
             .toList();
 
@@ -84,7 +99,9 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerP
 
   @override
   Widget build(BuildContext context) {
-    final stats = ref.watch(statsProvider(_period)); // income, expense, spots, pieData, recentTxns
+    final stats = ref.watch(
+      statsProvider(_period),
+    ); // income, expense, spots, pieData, recentTxns
     var color = Theme.of(context).colorScheme;
     var textTheme = Theme.of(context).textTheme;
     final ctxt = AppLocalizations.of(context)!;
@@ -92,27 +109,34 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerP
     return stats.when(
       data: (d) {
         setLatestData(d);
-        List<PieCategory> pieData =
-            d.categoryData.entries.map((entry) {
-              var categoryData = d.categoryDataMap[entry.key];
-              return PieCategory(name: entry.key, value: entry.value, color: Color(categoryData?.colorValue ?? 0xFF000000));
-            }).toList();
         return SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              PeriodSelector(selected: _period, onChange: (p) => setState(() => _period = p)),
+              PeriodSelector(
+                selected: _period,
+                onChange: (p) => setState(() => _period = p),
+              ),
               const SizedBox(height: 16),
-              RepaintBoundary(key: lineKey, child: buildLineChartWithLegend(d.incomeSpots, d.expenseSpots, _period)),
+              RepaintBoundary(
+                key: lineKey,
+                child: buildLineChartWithLegend(
+                  d.incomeSpots,
+                  d.expenseSpots,
+                  _period,
+                ),
+              ),
               const SizedBox(height: 16),
-              buildMetricsRow(d.income, d.expense),
+              buildMetricsRow(d),
               Center(
                 child: Padding(
                   padding: EdgeInsets.only(top: 8, left: 8, right: 8),
                   child: Text(
                     ctxt.statistics_weTrimDownDecimalInfoText,
-                    style: textTheme.labelSmall?.copyWith(color: color.onSurface),
+                    style: textTheme.labelSmall?.copyWith(
+                      color: color.onSurface,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -124,12 +148,63 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerP
                 initiallyExpanded: true,
                 iconColor: color.primary,
                 leading: Icon(Icons.pie_chart_outline, color: color.primary),
-                title: Text(ctxt.statistics_byCategoryTitleText, style: textTheme.titleMedium?.copyWith(color: color.primary)),
-                subtitle: Text("Category wise expense chart", style: textTheme.labelSmall?.copyWith(color: color.primary)),
+                title: Text(
+                  ctxt.statistics_byCategoryTitleText,
+                  style: textTheme.titleMedium?.copyWith(color: color.primary),
+                ),
+                subtitle: Text(
+                  _showIncome
+                      ? "Category wise income chart"
+                      : "Category wise expense chart",
+                  style: textTheme.labelSmall?.copyWith(color: color.primary),
+                ),
+                trailing: SegmentedButton<bool>(
+                  segments: const [
+                    ButtonSegment(
+                      value: false,
+                      label: Text('Expense'),
+                      icon: Icon(Icons.arrow_downward),
+                    ),
+                    ButtonSegment(
+                      value: true,
+                      label: Text('Income'),
+                      icon: Icon(Icons.arrow_upward),
+                    ),
+                  ],
+                  selected: {_showIncome},
+                  onSelectionChanged: (newSelection) {
+                    setState(() {
+                      _showIncome = newSelection.first;
+                      _disabledCategoryIndexes.clear();
+                      touchedIndex = null;
+                    });
+                  },
+                  showSelectedIcon: false,
+                  style: SegmentedButton.styleFrom(
+                    visualDensity: VisualDensity.compact,
+                    textStyle: textTheme.labelSmall,
+                  ),
+                ),
                 children: [
                   RepaintBoundary(
                     key: pieKey,
-                    child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [buildCategoryPie(pieData), buildCategoryLegend(pieData)]),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        buildCategoryPie(
+                          _showIncome ? d.incomeCategoryData : d.categoryData,
+                          _showIncome
+                              ? d.incomeCategoryMapData
+                              : d.categoryDataMap,
+                        ),
+                        buildCategoryLegend(
+                          _showIncome ? d.incomeCategoryData : d.categoryData,
+                          _showIncome
+                              ? d.incomeCategoryMapData
+                              : d.categoryDataMap,
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 16),
                 ],
@@ -139,18 +214,36 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerP
                 iconColor: color.primary,
                 maintainState: true,
                 leading: Icon(Icons.trending_up_outlined, color: color.primary),
-                title: Text("Expense Trend by Category", style: textTheme.titleMedium?.copyWith(color: color.primary)),
-                subtitle: Text("Last 12 months category wise expense trends", style: textTheme.labelSmall?.copyWith(color: color.primary)),
-                children: [ExpenseTrendWidget(categoryTrends: d.categoryTrends), SizedBox(height: 8)],
+                title: Text(
+                  "Expense Trend by Category",
+                  style: textTheme.titleMedium?.copyWith(color: color.primary),
+                ),
+                subtitle: Text(
+                  "Last 12 months category wise expense trends",
+                  style: textTheme.labelSmall?.copyWith(color: color.primary),
+                ),
+                children: [
+                  ExpenseTrendWidget(categoryTrends: d.categoryTrends),
+                  SizedBox(height: 8),
+                ],
               ),
               ExpansionTile(
                 tilePadding: EdgeInsets.zero,
                 iconColor: color.primary,
                 maintainState: true,
                 leading: Icon(Icons.history_outlined, color: color.primary),
-                title: Text(ctxt.statistics_recentTransactionsTitleText, style: textTheme.titleMedium?.copyWith(color: color.primary)),
-                subtitle: Text("Last 5 latest transactions", style: textTheme.labelSmall?.copyWith(color: color.primary)),
-                children: [buildRecentTransactions(d.recent), SizedBox(height: 8)],
+                title: Text(
+                  ctxt.statistics_recentTransactionsTitleText,
+                  style: textTheme.titleMedium?.copyWith(color: color.primary),
+                ),
+                subtitle: Text(
+                  "Last 5 latest transactions",
+                  style: textTheme.labelSmall?.copyWith(color: color.primary),
+                ),
+                children: [
+                  buildRecentTransactions(d.recent),
+                  SizedBox(height: 8),
+                ],
               ),
               const SizedBox(height: 16),
             ],
@@ -162,14 +255,27 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerP
     );
   }
 
-  Widget buildCategoryLegend(List<PieCategory> data) {
+  Widget buildCategoryLegend(
+    Map<String, double> categoryData,
+    Map<String, Category> categoryMapData,
+  ) {
     final textTheme = Theme.of(context).textTheme;
+
+    final categories =
+        categoryData.entries.map((entry) {
+          var category = categoryMapData[entry.key];
+          return PieCategory(
+            name: entry.key,
+            value: entry.value,
+            color: Color(category?.colorValue ?? 0xFF000000),
+          );
+        }).toList();
 
     return Wrap(
       spacing: 8,
       runSpacing: 4,
       children:
-          data.asMap().entries.map((entry) {
+          categories.asMap().entries.map((entry) {
             final index = entry.key;
             final cat = entry.value;
             final isDisabled = _disabledCategoryIndexes.contains(index);
@@ -192,8 +298,10 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerP
                   Text(
                     cat.name.toUpperCase(),
                     style: textTheme.labelMedium?.copyWith(
-                      fontWeight: isDisabled ? FontWeight.normal : FontWeight.w600,
-                      decoration: isDisabled ? TextDecoration.lineThrough : null,
+                      fontWeight:
+                          isDisabled ? FontWeight.normal : FontWeight.w600,
+                      decoration:
+                          isDisabled ? TextDecoration.lineThrough : null,
                     ),
                   ),
                 ],
@@ -203,86 +311,160 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerP
     );
   }
 
-  Widget buildMetricsRow(double income, double expense) {
+  Widget buildMetricsRow(StatsData d) {
+    final income = d.income;
+    final expense = d.expense;
     final net = income - expense;
     final ctxt = AppLocalizations.of(context)!;
     return ResponsiveLayoutBuilder(
       columnWidget: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          _buildMetricCard(ctxt.statistics_metricIncomeText, income, Icons.arrow_upward),
-          SizedBox(height: 8),
-          _buildMetricCard(ctxt.statistics_metricExpenseText, expense, Icons.arrow_downward),
-          SizedBox(height: 8),
-          _buildMetricCard(ctxt.statistics_metricNetText, net, net >= 0 ? Icons.arrow_upward : Icons.arrow_downward),
+          Row(
+            children: [
+              _buildMetricCard(
+                ctxt.statistics_metricIncomeText,
+                income,
+                Icons.arrow_upward,
+              ),
+              const SizedBox(width: 8),
+              _buildMetricCard(
+                ctxt.statistics_metricExpenseText,
+                expense,
+                Icons.arrow_downward,
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              _buildMetricCard(
+                ctxt.statistics_metricNetText,
+                net,
+                net >= 0 ? Icons.arrow_upward : Icons.arrow_downward,
+                isNetCard: true,
+              ),
+              const SizedBox(width: 8),
+              _buildMetricCard(
+                "Savings Rate",
+                d.savingsRate,
+                Icons.savings_outlined,
+                isPercent: true,
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          _buildMetricCard(
+            "Avg. Daily Spend",
+            d.avgDailySpend,
+            Icons.calendar_today_outlined,
+          ),
         ],
       ),
-      rowWidget: SizedBox(
-        height: 200,
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildMetricCard(ctxt.statistics_metricIncomeText, income, Icons.arrow_upward),
-                _buildMetricCard(ctxt.statistics_metricExpenseText, expense, Icons.arrow_downward),
-              ],
-            ),
-            SizedBox(height: 8),
-            _buildMetricCard(ctxt.statistics_metricNetText, net, net >= 0 ? Icons.arrow_upward : Icons.arrow_downward, isNetCard: true),
-          ],
-        ),
+      rowWidget: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              _buildMetricCard(
+                ctxt.statistics_metricIncomeText,
+                income,
+                Icons.arrow_upward,
+              ),
+              const SizedBox(width: 8),
+              _buildMetricCard(
+                ctxt.statistics_metricExpenseText,
+                expense,
+                Icons.arrow_downward,
+              ),
+              const SizedBox(width: 8),
+              _buildMetricCard(
+                ctxt.statistics_metricNetText,
+                net,
+                net >= 0 ? Icons.arrow_upward : Icons.arrow_downward,
+                isNetCard: true,
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              _buildMetricCard(
+                "Savings Rate",
+                d.savingsRate,
+                Icons.savings_outlined,
+                isPercent: true,
+              ),
+              const SizedBox(width: 8),
+              _buildMetricCard(
+                "Avg. Daily Spend",
+                d.avgDailySpend,
+                Icons.calendar_today_outlined,
+              ),
+            ],
+          ),
+        ],
       ),
       sizedBoxHeight: 280,
     );
   }
 
-  Widget _buildMetricCard(String title, double value, IconData iconData, {bool isNetCard = false}) {
-    double allBoxWidthFactor = 0.2;
+  Widget _buildMetricCard(
+    String title,
+    double value,
+    IconData iconData, {
+    bool isNetCard = false,
+    bool isPercent = false,
+  }) {
     var color = Theme.of(context).colorScheme;
     var textTheme = Theme.of(context).textTheme;
 
     return Expanded(
-      flex: (allBoxWidthFactor * 100).toInt(),
-      child: SizedBox(
-        child: GestureDetector(
-          onTap: () {},
-          child: Container(
-            padding: const EdgeInsets.all(8.0),
-            margin: const EdgeInsets.only(right: 4.0),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16.0),
-              color: isNetCard ? color.primary : Colors.transparent,
-              border: Border.all(color: color.primary), // Subtle border
-            ),
-            child: Column(
+      child: Container(
+        padding: const EdgeInsets.all(8.0),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16.0),
+          color: isNetCard ? color.primary : Colors.transparent,
+          border: Border.all(color: color.primary),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    CircleAvatar(radius: 16, child: Icon(iconData, size: 16)),
-                    Expanded(
-                      child: Text(
-                        title.toUpperCase(),
-                        textAlign: TextAlign.center,
-                        style: textTheme.bodyMedium?.copyWith(color: isNetCard ? color.onPrimary : color.primary),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
+                Icon(
+                  iconData,
+                  size: 16,
+                  color: isNetCard ? color.onPrimary : color.primary,
                 ),
-                SizedBox(height: 8),
-                AnimatedBalance(
-                  value: value,
-                  style: textTheme.titleLarge?.copyWith(color: isNetCard ? color.onPrimary : color.primary),
-                  textAlign: TextAlign.center,
-                  overflow: TextOverflow.ellipsis,
-                  fixedStringLength: 0,
+                const SizedBox(width: 4),
+                Flexible(
+                  child: Text(
+                    title,
+                    style: textTheme.labelSmall?.copyWith(
+                      color: isNetCard ? color.onPrimary : color.primary,
+                      fontSize: 8,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ],
             ),
-          ),
+            const SizedBox(height: 4),
+            AnimatedBalance(
+              value: value,
+              style: textTheme.titleMedium?.copyWith(
+                color: isNetCard ? color.onPrimary : color.primary,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+              fixedStringLength: isPercent ? 1 : 0,
+              suffix: isPercent ? "%" : null,
+            ),
+          ],
         ),
       ),
     );
@@ -291,14 +473,22 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerP
   Widget _buildLegendItem(Color color, String label) {
     return Row(
       children: [
-        Container(width: 12, height: 12, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+        Container(
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
         const SizedBox(width: 6),
         Text(label, style: const TextStyle(fontSize: 12)),
       ],
     );
   }
 
-  Widget buildLineChartWithLegend(List<FlSpot> incomeSpots, List<FlSpot> expenseSpots, String period) {
+  Widget buildLineChartWithLegend(
+    List<FlSpot> incomeSpots,
+    List<FlSpot> expenseSpots,
+    String period,
+  ) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final ctxt = AppLocalizations.of(context)!;
@@ -317,7 +507,10 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerP
                       final isIncome = spot.barIndex == 0;
                       return LineTooltipItem(
                         '${isIncome ? ctxt.statistics_chartLineIncomeText : ctxt.statistics_chartLineExpenseText}: ${ctxt.formatCurrencyWithSign(0, spot.y)}',
-                        TextStyle(color: spot.bar.gradient?.colors.first, fontWeight: FontWeight.bold),
+                        TextStyle(
+                          color: spot.bar.gradient?.colors.first,
+                          fontWeight: FontWeight.bold,
+                        ),
                       );
                     }).toList();
                   },
@@ -329,14 +522,18 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerP
                   isCurved: true,
                   barWidth: 2.5,
                   dotData: FlDotData(show: true),
-                  gradient: LinearGradient(colors: [color.primary, color.primaryFixed]),
+                  gradient: LinearGradient(
+                    colors: [color.primary, color.primaryFixed],
+                  ),
                 ),
                 LineChartBarData(
                   spots: expenseSpots,
                   isCurved: true,
                   barWidth: 2.5,
                   dotData: FlDotData(show: true),
-                  gradient: LinearGradient(colors: [color.tertiary, color.tertiaryFixed]),
+                  gradient: LinearGradient(
+                    colors: [color.tertiary, color.tertiaryFixed],
+                  ),
                 ),
               ],
               titlesData: FlTitlesData(
@@ -351,7 +548,11 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerP
                         padding: EdgeInsets.only(top: 8),
                         child: Text(
                           _getXAxisLabel(index, period),
-                          style: textTheme.bodySmall?.copyWith(color: color.onSurface, fontWeight: FontWeight.w500, fontSize: 8),
+                          style: textTheme.bodySmall?.copyWith(
+                            color: color.onSurface,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 8,
+                          ),
                         ),
                       );
                     },
@@ -360,12 +561,20 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerP
                 leftTitles: AxisTitles(
                   sideTitles: SideTitles(
                     showTitles: true,
-                    getTitlesWidget: (value, _) => Text(_formatCompactNumber(value), style: textTheme.bodySmall),
+                    getTitlesWidget:
+                        (value, _) => Text(
+                          _formatCompactNumber(value),
+                          style: textTheme.bodySmall,
+                        ),
                     reservedSize: 40,
                   ),
                 ),
-                rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                rightTitles: AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+                topTitles: AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
               ),
               gridData: FlGridData(show: true),
               borderData: FlBorderData(show: true),
@@ -379,9 +588,15 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerP
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _buildLegendItem(color.primary, ctxt.statistics_chartLineIncomeText),
+            _buildLegendItem(
+              color.primary,
+              ctxt.statistics_chartLineIncomeText,
+            ),
             const SizedBox(width: 16),
-            _buildLegendItem(color.tertiary, ctxt.statistics_chartLineExpenseText),
+            _buildLegendItem(
+              color.tertiary,
+              ctxt.statistics_chartLineExpenseText,
+            ),
           ],
         ),
       ],
@@ -394,7 +609,9 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerP
     switch (filter) {
       case 'Today':
         // Show hourly labels
-        return ctxt.statistics_chartLineTodayHourText(ctxt.formatCompactNumber().format(index));
+        return ctxt.statistics_chartLineTodayHourText(
+          ctxt.formatCompactNumber().format(index),
+        );
       case 'Week':
         // Show weekday labels
         final date = now.subtract(Duration(days: 6 - index));
@@ -404,9 +621,15 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerP
         return ctxt.formatCompactNumber().format(index + 1);
       case 'Year':
         // Show months
-        return DateFormat('MMM', ctxt.localeName).format(DateTime(now.year, index + 1));
+        return DateFormat(
+          'MMM',
+          ctxt.localeName,
+        ).format(DateTime(now.year, index + 1));
       default:
-        return DateFormat('MMM', ctxt.localeName).format(DateTime(now.year, index + 1));
+        return DateFormat(
+          'MMM',
+          ctxt.localeName,
+        ).format(DateTime(now.year, index + 1));
     }
   }
 
@@ -415,53 +638,98 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerP
     return ctxt.formatCurrencyWithSign(1, value, compact: true);
   }
 
-  Widget buildCategoryPie(List<PieCategory> pieData) {
+  Widget buildCategoryPie(
+    Map<String, double> categoryData,
+    Map<String, Category> categoryMapData,
+  ) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final ctxt = AppLocalizations.of(context)!;
 
-    if (pieData.isEmpty) {
-      return NoDataFound(message: ctxt.statistics_categoryNotPresentText, iconData: Icons.category_outlined);
+    if (categoryData.isEmpty) {
+      return NoDataFound(
+        message: ctxt.statistics_categoryNotPresentText,
+        iconData: Icons.category_outlined,
+      );
     }
 
-    final total = pieData.fold<double>(0, (sum, item) => sum + item.value);
+    final categories =
+        categoryData.entries.map((entry) {
+          var category = categoryMapData[entry.key];
+          return PieCategory(
+            name: entry.key,
+            value: entry.value,
+            color: Color(category?.colorValue ?? 0xFF000000),
+          );
+        }).toList();
+
+    final total = categories.fold<double>(0, (sum, item) => sum + item.value);
     final indexMapping = <int>[];
 
     return SizedBox(
       height: 280,
       child: TweenAnimationBuilder<double>(
-        key: ValueKey(_disabledCategoryIndexes),
+        key: ValueKey(
+          _disabledCategoryIndexes.toString() + categoryData.keys.join(),
+        ),
         tween: Tween(begin: 0, end: 1),
         duration: const Duration(milliseconds: 500),
         curve: Curves.easeInOut,
         builder: (context, animatedFraction, child) {
           final sections =
-              pieData.asMap().entries.where((entry) => !_disabledCategoryIndexes.contains(entry.key)).map((entry) {
-                final i = entry.key;
-                final cat = entry.value;
-                final animatedValue = cat.value * animatedFraction;
-                final isTouched = i == touchedIndex;
-                final percentage = total > 0 ? (animatedValue / total) : 0.0;
-                indexMapping.add(entry.key);
+              categories
+                  .asMap()
+                  .entries
+                  .where(
+                    (entry) => !_disabledCategoryIndexes.contains(entry.key),
+                  )
+                  .map((entry) {
+                    final i = entry.key;
+                    final cat = entry.value;
+                    final animatedValue = cat.value * animatedFraction;
+                    final isTouched = i == touchedIndex;
+                    final percentage =
+                        total > 0 ? (animatedValue / total) : 0.0;
+                    indexMapping.add(entry.key);
 
-                return PieChartSectionData(
-                  value: animatedValue,
-                  gradient: LinearGradient(colors: [cat.color.withAlpha(180), cat.color.withAlpha(200), cat.color]),
-                  radius: isTouched ? 80 : 60 * animatedFraction,
-                  title: ctxt.formatPercentNumber(percentage),
-                  titleStyle: textTheme.bodySmall?.copyWith(color: color.secondary, fontWeight: FontWeight.bold),
-                );
-              }).toList();
+                    return PieChartSectionData(
+                      value: animatedValue,
+                      gradient: LinearGradient(
+                        colors: [
+                          cat.color.withAlpha(180),
+                          cat.color.withAlpha(200),
+                          cat.color,
+                        ],
+                      ),
+                      radius: isTouched ? 80 : 60 * animatedFraction,
+                      title: ctxt.formatPercentNumber(percentage),
+                      titleStyle: textTheme.bodySmall?.copyWith(
+                        color: color.secondary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    );
+                  })
+                  .toList();
 
           return PieChart(
             PieChartData(
               pieTouchData: PieTouchData(
                 enabled: true,
-                touchCallback: (FlTouchEvent event, PieTouchResponse? response) {
-                  if (!event.isInterestedForInteractions || response == null || response.touchedSection == null) return;
+                touchCallback: (
+                  FlTouchEvent event,
+                  PieTouchResponse? response,
+                ) {
+                  if (!event.isInterestedForInteractions ||
+                      response == null ||
+                      response.touchedSection == null)
+                    return;
 
-                  final touchedFilteredIndex = response.touchedSection!.touchedSectionIndex;
-                  final originalIndex = touchedFilteredIndex >= 0 ? indexMapping[touchedFilteredIndex] : touchedFilteredIndex;
+                  final touchedFilteredIndex =
+                      response.touchedSection!.touchedSectionIndex;
+                  final originalIndex =
+                      touchedFilteredIndex >= 0
+                          ? indexMapping[touchedFilteredIndex]
+                          : touchedFilteredIndex;
                   setState(() {
                     touchedIndex = originalIndex;
                   });
@@ -483,7 +751,10 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerP
     var textTheme = Theme.of(context).textTheme;
     final ctxt = AppLocalizations.of(context)!;
     if (list.isEmpty) {
-      return NoDataFound(message: ctxt.statistics_transactionNotPresentText, iconData: Icons.receipt_long_outlined);
+      return NoDataFound(
+        message: ctxt.statistics_transactionNotPresentText,
+        iconData: Icons.receipt_long_outlined,
+      );
     }
     return Column(
       children: [
@@ -500,7 +771,10 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerP
               child: FadeTransition(
                 opacity: _controllers[i],
                 child: Card.outlined(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0), side: BorderSide(width: 1, color: color.primary)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16.0),
+                    side: BorderSide(width: 1, color: color.primary),
+                  ),
                   child: InkWell(
                     borderRadius: BorderRadius.circular(16.0),
                     onTap: () {},
@@ -516,11 +790,19 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerP
                                 height: 48.0,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(8.0),
-                                  color: Color(t.category.value?.colorValue ?? 0xFF000000),
+                                  color: Color(
+                                    t.category.value?.colorValue ?? 0xFF000000,
+                                  ),
                                 ),
                                 child: Padding(
                                   padding: const EdgeInsets.all(8.0),
-                                  child: Icon(IconHelper.getIconData(t.category.value?.iconName), color: color.onPrimary, size: 24.0),
+                                  child: Icon(
+                                    IconHelper.getIconData(
+                                      t.category.value?.iconName,
+                                    ),
+                                    color: color.onPrimary,
+                                    size: 24.0,
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 16.0),
@@ -528,15 +810,24 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerP
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: <Widget>[
-                                    Text("${t.category.value?.name}", style: textTheme.labelLarge?.copyWith(color: color.primary)),
+                                    Text(
+                                      "${t.category.value?.name}",
+                                      style: textTheme.labelLarge?.copyWith(
+                                        color: color.primary,
+                                      ),
+                                    ),
                                     Text(
                                       '${t.account.value?.name} - ${t.account.value?.accountType.name.toTitleCase()}',
-                                      style: textTheme.labelMedium?.copyWith(color: color.primary),
+                                      style: textTheme.labelMedium?.copyWith(
+                                        color: color.primary,
+                                      ),
                                     ),
                                     if (t.description != '')
                                       Text(
                                         t.description ?? '',
-                                        style: textTheme.labelSmall?.copyWith(color: color.primary),
+                                        style: textTheme.labelSmall?.copyWith(
+                                          color: color.primary,
+                                        ),
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                   ],
@@ -548,11 +839,18 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerP
                                 children: <Widget>[
                                   Text(
                                     '${t.isExpense ? '-' : '+'} ${ctxt.formatCurrencyWithSign(2, t.amount)}',
-                                    style: textTheme.titleLarge?.copyWith(color: color.primary),
+                                    style: textTheme.titleLarge?.copyWith(
+                                      color: color.primary,
+                                    ),
                                   ),
                                   Text(
-                                    DateFormat('EEE, dd MMM yyyy', ctxt.localeName).format(t.date),
-                                    style: textTheme.labelSmall?.copyWith(color: color.primary),
+                                    DateFormat(
+                                      'EEE, dd MMM yyyy',
+                                      ctxt.localeName,
+                                    ).format(t.date),
+                                    style: textTheme.labelSmall?.copyWith(
+                                      color: color.primary,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -573,7 +871,9 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerP
               Navigator.of(context).push(
                 PageRouteBuilder(
                   transitionDuration: Duration(milliseconds: 300),
-                  pageBuilder: (_, animation, secondaryAnimation) => TransactionListScreen(showAppBar: true),
+                  pageBuilder:
+                      (_, animation, secondaryAnimation) =>
+                          TransactionListScreen(showAppBar: true),
                   transitionsBuilder: (_, animation, __, child) {
                     return FadeTransition(opacity: animation, child: child);
                   },
@@ -626,7 +926,8 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> with TickerP
   }
 
   Future<Uint8List> captureChartAsImage(GlobalKey key) async {
-    final boundary = key.currentContext?.findRenderObject() as RenderRepaintBoundary;
+    final boundary =
+        key.currentContext?.findRenderObject() as RenderRepaintBoundary;
     final image = await boundary.toImage(pixelRatio: 3.0);
     final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
     return byteData!.buffer.asUint8List();

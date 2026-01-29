@@ -1,20 +1,19 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mudra_manager/db/models/user_profile.dart';
 import 'package:mudra_manager/l10n/app_localizations.dart';
-import 'package:mudra_manager/providers/greeting_provider.dart';
-import 'package:mudra_manager/providers/user_profile_provider.dart';
 import 'package:mudra_manager/screens/budget/budget_mini_card.dart';
-import 'package:mudra_manager/screens/dashboard/cash_flow_screen.dart' show CashFlowScreen;
-import 'package:mudra_manager/screens/dashboard/filter_chip_screen.dart' show FilterChips;
+import 'package:mudra_manager/screens/dashboard/cash_flow_screen.dart'
+    show CashFlowScreen;
+import 'package:mudra_manager/screens/dashboard/filter_chip_screen.dart'
+    show FilterChips;
 import 'package:mudra_manager/screens/dashboard/net_worth_mini_card.dart';
+import 'package:mudra_manager/screens/goal/goal_mini_card.dart';
 import 'package:mudra_manager/screens/dashboard/swipeable_account_card.dart';
 import 'package:mudra_manager/screens/reusable/responseive_layout_builder.dart';
 import 'package:mudra_manager/screens/transaction/add_edit_transaction_screen.dart';
 import 'package:mudra_manager/screens/transaction/transfer_screen.dart';
-import 'package:shared_preferences/src/shared_preferences_legacy.dart';
+import 'package:mudra_manager/theme/design_tokens.dart';
 
 class DashboardHome extends ConsumerStatefulWidget {
   const DashboardHome({super.key});
@@ -54,7 +53,10 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
             AnimatedSwipeableAccountCards(),
             SizedBox(height: 16),
             Container(
-              margin: EdgeInsets.only(left: globalPadding, right: globalPadding),
+              margin: EdgeInsets.only(
+                left: globalPadding,
+                right: globalPadding,
+              ),
               child: ResponsiveLayoutBuilder(
                 sizedBoxHeight: 110,
                 columnWidget: Column(
@@ -65,29 +67,57 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                       child: SizedBox(
                         child: GestureDetector(
                           onTap: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => AddEditTransactionScreen()));
+                            HapticFeedback.lightImpact();
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder:
+                                    (context) => AddEditTransactionScreen(),
+                              ),
+                            );
                           },
                           child: Hero(
                             tag: 'addTransactionHero',
                             child: Container(
-                              // width: 120,
                               padding: const EdgeInsets.all(8.0),
                               decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(25.0),
-                                color: color.primary,
-                                // Light background color
-                                border: Border.all(color: color.primary), // Subtle border
+                                borderRadius: DesignTokens.borderRadiusLarge,
+                                gradient: LinearGradient(
+                                  colors: [
+                                    color.primary,
+                                    color.primary.withOpacity(0.85),
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                boxShadow: AppElevation.coloredElevation(
+                                  color.primary,
+                                  intensity: 0.25,
+                                ),
                               ),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: <Widget>[
-                                  CircleAvatar(radius: 20, child: Icon(Icons.add_circle_outline, size: 30)),
-                                  const SizedBox(width: 8.0),
+                                  CircleAvatar(
+                                    radius: 20,
+                                    backgroundColor: color.onPrimary
+                                        .withOpacity(0.2),
+                                    child: Icon(
+                                      Icons.add_circle_outline,
+                                      size: 30,
+                                      color: color.onPrimary,
+                                    ),
+                                  ),
+                                  SizedBox(width: DesignTokens.spacing8),
                                   Expanded(
                                     child: Text(
-                                      ctxt.dashboard_add_transaction_text.toUpperCase(),
+                                      ctxt.dashboard_add_transaction_text
+                                          .toUpperCase(),
                                       textAlign: TextAlign.center,
-                                      style: textTheme.labelLarge?.copyWith(color: color.onPrimary),
+                                      style: textTheme.labelLarge?.copyWith(
+                                        color: color.onPrimary,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
@@ -98,28 +128,53 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 8),
+                    SizedBox(height: DesignTokens.spacing8),
                     Expanded(
                       flex: (allBoxWidthFactor * 100).toInt(),
                       child: SizedBox(
                         child: GestureDetector(
                           onTap: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => TransferScreen()));
+                            HapticFeedback.lightImpact();
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => TransferScreen(),
+                              ),
+                            );
                           },
                           child: Container(
-                            // width: 120,
                             padding: const EdgeInsets.all(8.0),
-                            decoration: BoxDecoration(borderRadius: BorderRadius.circular(25.0), border: Border.all(color: color.primary)),
+                            decoration: BoxDecoration(
+                              borderRadius: DesignTokens.borderRadiusLarge,
+                              border: Border.all(
+                                color: color.primary,
+                                width: 2,
+                              ),
+                              color: color.surface,
+                              boxShadow: AppElevation.elevation1(color.primary),
+                            ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: <Widget>[
-                                CircleAvatar(radius: 20, child: Icon(Icons.arrow_circle_right_outlined, size: 30)),
-                                const SizedBox(width: 8.0),
+                                CircleAvatar(
+                                  radius: 20,
+                                  backgroundColor: color.primaryContainer,
+                                  child: Icon(
+                                    Icons.arrow_circle_right_outlined,
+                                    size: 30,
+                                    color: color.primary,
+                                  ),
+                                ),
+                                SizedBox(width: DesignTokens.spacing8),
                                 Expanded(
                                   child: Text(
-                                    ctxt.dashboard_add_transfer_text.toUpperCase(),
+                                    ctxt.dashboard_add_transfer_text
+                                        .toUpperCase(),
                                     textAlign: TextAlign.center,
-                                    style: textTheme.labelLarge?.copyWith(color: color.primary),
+                                    style: textTheme.labelLarge?.copyWith(
+                                      color: color.primary,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
@@ -139,58 +194,116 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                       child: SizedBox(
                         child: GestureDetector(
                           onTap: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => AddEditTransactionScreen()));
+                            HapticFeedback.lightImpact();
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder:
+                                    (context) => AddEditTransactionScreen(),
+                              ),
+                            );
                           },
-                          child: Hero(tag: 'addTransactionHero', child: Container(
-                            width: 120,
-                            padding: const EdgeInsets.all(8.0),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(25.0),
-                              color: color.primary,
-                              // Light background color
-                              border: Border.all(color: color.primary), // Subtle border
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                CircleAvatar(radius: 20, child: Icon(Icons.add_circle_outline, size: 30)),
-                                const SizedBox(width: 8.0),
-                                Expanded(
-                                  child: Text(
-                                    ctxt.dashboard_add_transaction_text.toUpperCase(),
-                                    textAlign: TextAlign.center,
-                                    style: textTheme.labelLarge?.copyWith(color: color.onPrimary),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
+                          child: Hero(
+                            tag: 'addTransactionHero',
+                            child: Container(
+                              width: 120,
+                              padding: const EdgeInsets.all(8.0),
+                              decoration: BoxDecoration(
+                                borderRadius: DesignTokens.borderRadiusLarge,
+                                gradient: LinearGradient(
+                                  colors: [
+                                    color.primary,
+                                    color.primary.withOpacity(0.85),
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
                                 ),
-                              ],
+                                boxShadow: AppElevation.coloredElevation(
+                                  color.primary,
+                                  intensity: 0.25,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: <Widget>[
+                                  CircleAvatar(
+                                    radius: 20,
+                                    backgroundColor: color.onPrimary
+                                        .withOpacity(0.2),
+                                    child: Icon(
+                                      Icons.add_circle_outline,
+                                      size: 30,
+                                      color: color.onPrimary,
+                                    ),
+                                  ),
+                                  SizedBox(width: DesignTokens.spacing8),
+                                  Expanded(
+                                    child: Text(
+                                      ctxt.dashboard_add_transaction_text
+                                          .toUpperCase(),
+                                      textAlign: TextAlign.center,
+                                      style: textTheme.labelLarge?.copyWith(
+                                        color: color.onPrimary,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          )),
+                          ),
                         ),
                       ),
                     ),
-                    SizedBox(width: 8),
+                    SizedBox(width: DesignTokens.spacing8),
                     Expanded(
                       flex: (allBoxWidthFactor * 100).toInt(),
                       child: SizedBox(
                         child: GestureDetector(
                           onTap: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => TransferScreen()));
+                            HapticFeedback.lightImpact();
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => TransferScreen(),
+                              ),
+                            );
                           },
                           child: Container(
                             width: 120,
                             padding: const EdgeInsets.all(8.0),
-                            decoration: BoxDecoration(borderRadius: BorderRadius.circular(25.0), border: Border.all(color: color.primary)),
+                            decoration: BoxDecoration(
+                              borderRadius: DesignTokens.borderRadiusLarge,
+                              border: Border.all(
+                                color: color.primary,
+                                width: 2,
+                              ),
+                              color: color.surface,
+                              boxShadow: AppElevation.elevation1(color.primary),
+                            ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: <Widget>[
-                                CircleAvatar(radius: 20, child: Icon(Icons.arrow_circle_right_outlined, size: 30)),
-                                const SizedBox(width: 8.0),
+                                CircleAvatar(
+                                  radius: 20,
+                                  backgroundColor: color.primaryContainer,
+                                  child: Icon(
+                                    Icons.arrow_circle_right_outlined,
+                                    size: 30,
+                                    color: color.primary,
+                                  ),
+                                ),
+                                SizedBox(width: DesignTokens.spacing8),
                                 Expanded(
                                   child: Text(
-                                    ctxt.dashboard_add_transfer_text.toUpperCase(),
+                                    ctxt.dashboard_add_transfer_text
+                                        .toUpperCase(),
                                     textAlign: TextAlign.center,
-                                    style: textTheme.labelLarge?.copyWith(color: color.primary),
+                                    style: textTheme.labelLarge?.copyWith(
+                                      color: color.primary,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
@@ -205,11 +318,20 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
               ),
             ),
             CashFlowScreen(globalPadding: globalPadding),
-            Container(margin: EdgeInsets.only(left: globalPadding, right: globalPadding), child: FilterChips()),
+            Container(
+              margin: EdgeInsets.only(
+                left: globalPadding,
+                right: globalPadding,
+              ),
+              child: FilterChips(),
+            ),
             SizedBox(height: 16),
             NetWorthMiniCard(globalPadding: globalPadding),
             SizedBox(height: 16),
             BudgetMiniCard(globalPadding: globalPadding),
+            SizedBox(height: 16),
+            GoalMiniCard(globalPadding: globalPadding),
+            SizedBox(height: 80), // Extra space for bottom nav
           ],
         ),
       ),

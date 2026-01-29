@@ -71,14 +71,8 @@ class _SecuritySettingsScreenState
   @override
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Security Settings',
-          style: textTheme.titleLarge?.copyWith(color: color.onPrimary),
-        ),
-      ),
+      appBar: AppBar(title: const Text('Security Settings')),
       body: ListView(
         children: [
           if (_biometricAvailable)

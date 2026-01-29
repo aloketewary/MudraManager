@@ -1,8 +1,6 @@
 import 'dart:convert';
-
 import 'package:crypto/crypto.dart';
 import 'package:intl/intl.dart';
-import 'package:mudra_manager/util/string_util.dart';
 
 class TransactionUtil {
   static final upiRegex = RegExp(r'[\w.-]+@[\w.-]+');
@@ -12,113 +10,43 @@ class TransactionUtil {
     'a/c bal',
     'available bal',
     'avl bal',
+    'avail bal',
     'curr bal',
+    'total bal',
+    'bal',
   ];
   static const trnKeywords = ['debited', 'credited', 'payment', 'spent'];
 
-  TransactionType getTypeOfTransaction(String? message) {
-    RegExp creditPattern = RegExp(r'credited|credit|deposited');
-    RegExp debitPattern = RegExp(r"debited|debit|deducted");
-    RegExp miscPattern = RegExp(r'payment|spent');
-    if (message == null || message.isEmpty) {
-      return TransactionType.noMatch;
-    }
-    if (debitPattern.hasMatch(message)) {
+  static final creditPattern = RegExp(r'credited|credit|deposited');
+  static final debitPattern = RegExp(r'debited|debit|deducted');
+  static final miscPattern = RegExp(r'payment|spent');
+
+  TransactionType getTypeOfTransaction(String message) {
+    final lowerMessage = message.toLowerCase();
+    if (debitPattern.hasMatch(lowerMessage)) {
       return TransactionType.debited;
-    } else if (creditPattern.hasMatch(message)) {
+    } else if (creditPattern.hasMatch(lowerMessage)) {
       return TransactionType.credited;
-    } else if (miscPattern.hasMatch(message)) {
+    } else if (miscPattern.hasMatch(lowerMessage)) {
       return TransactionType.debitMisc;
     }
     return TransactionType.noMatch;
   }
 
-  getCard(String? message) {
-    final messageList = processMessage(message);
-    final cardIndex = messageList.indexOf('card');
-    final card = CardDetails();
+  List<String> processMessage(String message) {
+    String processed = message.toLowerCase();
+    // Standardize account terms first
+    processed = processed.replaceAll(RegExp(r'a/c|acct|account'), ' ac ');
 
-    // Search for "card" and if not found return empty obj
-    if (cardIndex != -1) {
-      card.no = messageList[cardIndex + 1];
-      card.type = 'card';
+    // Standardize currency
+    processed = processed.replaceAll(RegExp(r'inr\.?|rs\.?'), ' rs. ');
 
-      // If the data is false positive
-      // return empty obj
-      // Else return the card info
-      if (int.tryParse(card.no ?? '')?.isNaN ?? true) {
-        return CardDetails();
-      } else {
-        return card;
-      }
-    } else {
-      return card;
-    }
-  }
+    // Clean up characters but PRESERVE word structures
+    processed = processed.replaceAll(RegExp(r'[:-]'), ' ');
+    processed = processed.replaceAll(RegExp(r'[*]'), '');
+    processed = processed.replaceAll(RegExp(r'\s+'), ' ');
 
-  String extractBondedAccountNo(String? accountNo) {
-    final strippedAccountNo = accountNo?.replaceAll('ac', '') ?? '';
-
-    if (int.tryParse(strippedAccountNo)?.isNaN ?? true) {
-      return '';
-    } else {
-      return strippedAccountNo;
-    }
-  }
-
-  List<String> processMessage(String? message) {
-    // convert to lower case
-    message = message?.toLowerCase();
-    // remove '-'
-    message = message?.replaceAll(RegExp(r'-'), '');
-    // remove ':'
-    message = message?.replaceAll(RegExp(r':'), '');
-    // remove '/'
-    message = message?.replaceAll(RegExp(r'/'), '');
-    // remove 'ending'
-    message = message?.replaceAll(RegExp(r'ending '), '');
-    // replace 'x'
-    message = message?.replaceAll(RegExp(r'x|[*]'), '');
-    // // remove 'is' 'with'
-    // message = message.replace(/\bis\b|\bwith\b/g, '');
-    // replace 'is'
-    message = message?.replaceAll(RegExp(r'is '), '');
-    // replace 'with'
-    message = message?.replaceAll(RegExp(r'with '), '');
-    // remove 'no.'
-    message = message?.replaceAll(RegExp(r'no. '), '');
-    // replace all ac, acct, account with ac
-    message = message?.replaceAll(RegExp(r'\bac\b|\bacct\b|\baccount\b'), 'ac');
-    // replace all 'rs' with 'rs. '
-    message = message?.replaceAll(RegExp(r'rs(?=\w)'), 'rs. ');
-    // replace all 'rs ' with 'rs. '
-    message = message?.replaceAll(RegExp(r'rs '), 'rs. ');
-    // replace all inr with rs.
-    message = message?.replaceAll(RegExp(r'inr(?=\w)'), 'rs. ');
-    //
-    message = message?.replaceAll(RegExp(r'inr '), 'rs. ');
-    // replace all 'rs. ' with 'rs.'
-    message = message?.replaceAll(RegExp(r'rs. '), 'rs.');
-    // replace all 'rs.' with 'rs. '
-    message = message?.replaceAll(RegExp(r'rs.(?=\w)'), 'rs. ');
-    // split message into words
-    var messageList = message?.split(' ') ?? [];
-    // remove '' from array
-    messageList = removeItemAll(messageList, '');
-
-    return messageList;
-  }
-
-  List<String> removeItemAll(List<String> arr, String value) {
-    var i = 0;
-    while (i < arr.length) {
-      if (arr[i] == value) {
-        arr.removeAt(i);
-      } else {
-        ++i;
-      }
-    }
-    return arr;
+    return processed.split(' ')..removeWhere((word) => word.isEmpty);
   }
 
   TransactionInfo getTransactionInfo(
@@ -127,284 +55,262 @@ class TransactionUtil {
     String? sender,
     String smsHash,
   ) {
-    var trn = TransactionInfo(
+    var info = TransactionInfo(
       address: address ?? '',
       sender: sender ?? '',
       body: message ?? '',
       smsHash: smsHash,
     );
-    if (message == null) {
-      return trn;
-    }
-    trn.transactionTime = getTransactionTime(message);
-    final processedMessage = processMessage(message);
-    trn.account = getAccount(processedMessage);
-    trn.balance = getBalance(processedMessage.join(' '));
-    trn.money = getMoneySpent(processedMessage);
+
+    if (message == null || message.isEmpty) return info;
+
+    info.transactionTime = getTransactionTime(message);
+    final processedWords = processMessage(message);
+    final fullProcessed = processedWords.join(' ');
+
+    info.account = getAccountFromWords(processedWords, fullProcessed);
+    info.money = getMoneySpentFromWords(processedWords);
+    info.balance = getBalanceFromProcessed(fullProcessed);
+
     final isValid =
-        [trn.balance, trn.money, trn.account].where((x) => x != '').length >= 2;
+        [
+          info.balance,
+          info.money,
+          info.account?.no,
+        ].where((x) => x != null && x != '').isNotEmpty ||
+        info.transactionTime != null;
 
     if (isValid) {
-      trn.typeOfTransaction = getTypeOfTransaction(processedMessage.join(' '));
+      info.typeOfTransaction = getTypeOfTransaction(fullProcessed);
     }
 
-    return trn;
+    return info;
   }
 
-  String getMoneySpent(List<String> message) {
-    message = processMessage(message.join(' '));
+  String getMoneySpentFromWords(List<String> words) {
+    int index = words.indexOf('rs.');
+    if (index == -1 || index + 1 >= words.length) return '';
 
-    var index = message.indexOf('rs.');
+    String amount = words[index + 1].replaceAll(',', '');
+    // Strip trailing punctuation
+    amount = amount.replaceAll(RegExp(r'[^\d]+$'), '');
 
-    // If "rs." does not exist
-    // Return ""
-    if (index == -1) {
-      return '';
-    } else {
-      var money = message[index + 1];
-
-      money = money.replaceAll(RegExp(r','), '');
-
-      // If data is false positive
-      // Look ahead one index and check for valid money
-      // Else return the found money
-      if (money.isNan()) {
-        money = message[index + 2];
-        money = money.replaceAll(RegExp(r','), '');
-
-        // If this is also false positive, return ""
-        // Else return the found money
-        if (money.isNan()) {
-          return '';
-        } else {
-          return money;
-        }
-      } else {
-        return money;
-      }
+    if (_isNotNumeric(amount) && index + 2 < words.length) {
+      amount = words[index + 2].replaceAll(',', '');
+      amount = amount.replaceAll(RegExp(r'[^\d]+$'), '');
     }
+
+    return _isNotNumeric(amount) ? '' : amount;
   }
 
-  AccountDetails getAccount(List<String> message) {
-    message = processMessage(message.join(' '));
-
-    var accountIndex = -1;
+  AccountDetails getAccountFromWords(List<String> words, String fullProcessed) {
     var account = AccountDetails();
-    var index = 0;
-    var fullMsg = message.join(' ');
-    if (upiRegex.hasMatch(fullMsg)) {
+
+    if (upiRegex.hasMatch(fullProcessed)) {
       account.type = 'UPI';
       account.no = 'N/A';
-      account.sendTo = upiRegex.stringMatch(fullMsg);
-      account.refNo = extractUPIRefNo(fullMsg, true);
+      String sendTo = upiRegex.stringMatch(fullProcessed)!;
+      if (sendTo.endsWith('.')) sendTo = sendTo.substring(0, sendTo.length - 1);
+      account.sendTo = sendTo;
+      account.refNo = extractUPIRefNo(fullProcessed, true);
       return account;
     }
-    for (var word in message) {
-      if (word == 'ac') {
-        if (index + 1 < message.length) {
-          final accountNo = trimLeadingAndTrailingChars(message[index + 1]);
-          if (int.tryParse(accountNo)?.isNaN ?? false) {
-            // continue searching for a valid account number
-            continue;
-          } else {
-            accountIndex = index;
-            account.type = 'account';
+
+    for (int i = 0; i < words.length; i++) {
+      final word = words[i];
+
+      bool isCard = word == 'card';
+      bool isAc = word == 'ac';
+
+      if (isCard || isAc) {
+        int nextIdx = i + 1;
+        // Skip possible connector words: 'ends', 'ending', 'with', 'no', '.', ':', '#'
+        while (nextIdx < words.length &&
+            (words[nextIdx] == 'ends' ||
+                words[nextIdx] == 'ending' ||
+                words[nextIdx] == 'with' ||
+                words[nextIdx] == 'no' ||
+                words[nextIdx] == 'nos' ||
+                words[nextIdx] == '.' ||
+                words[nextIdx] == '#' ||
+                words[nextIdx] == 'is')) {
+          nextIdx++;
+        }
+
+        if (nextIdx < words.length) {
+          final accountNo = _sanitizeAccountNo(words[nextIdx]);
+          if (accountNo.isNotEmpty && _isValidAccountNumber(accountNo)) {
+            account.type = isCard ? 'card' : 'account';
             account.no = accountNo;
-            account.refNo = extractUPIRefNo(fullMsg, false);
+            account.refNo = extractUPIRefNo(fullProcessed, false);
             return account;
           }
-        } else {
-          // continue searching for a valid account number
-          continue;
         }
-      } else if (word.contains('ac')) {
-        final extractedAccountNo = extractBondedAccountNo(word);
+      }
 
-        if (extractedAccountNo == '') {
-          continue;
-        } else {
-          accountIndex = index;
+      if (word.startsWith('x') ||
+          (word.length >= 2 && word.substring(0, 2) == 'ac')) {
+        final accountNo = _sanitizeAccountNo(word);
+        if (accountNo.isNotEmpty && _isValidAccountNumber(accountNo)) {
           account.type = 'account';
-          account.no = extractedAccountNo;
-          account.refNo = extractUPIRefNo(fullMsg, false);
+          account.no = accountNo;
+          account.refNo = extractUPIRefNo(fullProcessed, false);
           return account;
         }
       }
-      index += 1;
     }
     return account;
   }
 
-  String getBalance(String? message) {
-    var balance = '';
-    if (message?.isEmpty ?? true) {
-      return balance;
-    }
-    message = processMessage(message).join(' ');
-    var indexOfKeyword = -1;
+  bool _isValidAccountNumber(String accountNo) {
+    // Must contain at least one digit, OR be pure 'xxxx'
+    if (RegExp(r'^[xX]+$').hasMatch(accountNo)) return true;
+    return RegExp(r'\d').hasMatch(accountNo);
+  }
 
-    for (var word in balanceKeywords) {
-      indexOfKeyword = message.indexOf(word);
+  String _sanitizeAccountNo(String str) {
+    if (str.isEmpty) return '';
+    // Strip non-alphanumeric characters
+    String sanitized = str.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '');
+    // If it's pure obfuscation like 'xxxx', return it
+    if (RegExp(r'^[xX]+$').hasMatch(sanitized)) return sanitized;
+    // Strip leading 'x', 'ac', etc. but keep digits
+    String digitsOnly = sanitized.replaceFirst(RegExp(r'^[xa-z]+'), '');
+    if (digitsOnly.isNotEmpty) return digitsOnly;
+    return sanitized;
+  }
 
-      if (indexOfKeyword != -1) {
-        indexOfKeyword += word.length;
+  String getBalanceFromProcessed(String processedMsg) {
+    String matchedKeyword = '';
+
+    for (var keyword in balanceKeywords) {
+      if (processedMsg.contains(keyword)) {
+        matchedKeyword = keyword;
         break;
-      } else {
+      }
+    }
+
+    if (matchedKeyword.isEmpty) return '';
+
+    final searchStart =
+        processedMsg.indexOf(matchedKeyword) + matchedKeyword.length;
+    int rsIndex = processedMsg.indexOf('rs.', searchStart);
+
+    if (rsIndex == -1) {
+      final match = RegExp(
+        r'\d',
+      ).firstMatch(processedMsg.substring(searchStart));
+      if (match == null) return '';
+      return _extractNumericPart(processedMsg, searchStart + match.start);
+    }
+
+    return _extractNumericPart(processedMsg, rsIndex + 3);
+  }
+
+  String _extractNumericPart(String message, int startIndex) {
+    String result = '';
+    bool sawDigit = false;
+    bool sawDot = false;
+
+    for (int i = startIndex; i < message.length; i++) {
+      final char = message[i];
+      if (RegExp(r'[0-9]').hasMatch(char)) {
+        sawDigit = true;
+        result += char;
+      } else if (char == '.' && !sawDot && sawDigit) {
+        sawDot = true;
+        result += char;
+      } else if (char == ',' && sawDigit) {
         continue;
-      }
-    }
-    // send blank balance
-    if (indexOfKeyword == -1) {
-      return balance;
-    }
-    // found the index of keyword, moving on to finding 'rs.' occuring after index_of_keyword
-    var index = indexOfKeyword;
-    var indexOfRs = -1;
-    var nextThreeChars = message.substring(index, index + 4);
-
-    index += 3;
-
-    while (index < message.length) {
-      // discard first char
-      nextThreeChars = nextThreeChars.substring(1);
-      // add the current char at the end
-
-      if (nextThreeChars == 'rs.') {
-        indexOfRs = index + 2;
+      } else if (sawDigit) {
         break;
       }
-      nextThreeChars += message[index];
-      ++index;
     }
-
-    // no occurence of 'rs.'
-    if (indexOfRs == -1) {
-      return '';
-    }
-
-    balance = extractBalance(indexOfRs, message, message.length);
-
-    return balance;
+    return result;
   }
 
-  String trimLeadingAndTrailingChars(String str) {
-    final firstLast = [str[0], str[str.length - 1]];
-    final first = firstLast[0];
-    final last = firstLast[1];
-    if (last.isNan()) {
-      str = str.substring(0);
-    }
-    if (first.isNan()) {
-      str = str.substring(1);
-    }
-    return str;
-  }
+  DateTime? getTransactionTime(String message) {
+    final dateOnlyMsg = message.replaceAll(':', ' ').replaceAll('/', '-');
 
-  String extractBalance(int index, String? message, int length) {
-    var balance = '';
-    var sawNumber = false;
-    var invalidCharCount = 0;
-    var char = '';
+    final dateTimeRegex = RegExp(
+      r'(\d{2,4})-(\d{1,2})-(\d{2,4}) (\d{1,2}) (\d{1,2})( (\d{1,2}))?',
+    );
+    final dateRegex = RegExp(r'(\d{2,4})-(\d{1,2})-(\d{2,4})');
 
-    while (index < length) {
-      char = message?[index] ?? '';
-
-      if ('0'.toInt() <= char.toInt(defaultValue: -1) &&
-          char.toInt(defaultValue: -1) <= '9'.toInt()) {
-        sawNumber = true;
-        // is_start = false;
-        balance += char;
-      } else {
-        if (sawNumber == false) {
-        } else {
-          if (char == '.') {
-            if (invalidCharCount == 1) {
-              break;
-            } else {
-              balance += char;
-              invalidCharCount += 1;
-            }
-          } else if (char != ",") {
-            break;
-          }
+    try {
+      if (dateTimeRegex.hasMatch(dateOnlyMsg)) {
+        final match = dateTimeRegex.stringMatch(dateOnlyMsg)!;
+        final parts = match.trim().split(' ')..removeWhere((e) => e.isEmpty);
+        if (match.startsWith(RegExp(r'\d{4}'))) {
+          // YYYY-M-D H m s
+          String format = 'yyyy-M-d H m';
+          if (parts.length > 3) format += ' s';
+          return DateFormat(format).parse(match, true);
         }
-      }
-
-      ++index;
-    }
-
-    return balance;
-  }
-
-  DateTime? getTransactionTime(String? message) {
-    DateTime? dateTime;
-    if (message != null && message.isNotEmpty) {
-      var dateTimeRegex = RegExp(
-        r'(\d{2})-(\d{2})-(\d{4}) (\d{2}):(\d{2})?((:)?(\d{1,2}))',
-      );
-      var dateRegex = RegExp(r'(\d{2})-(\d{2})-(\d{2})');
-      var dateFullYearRegex = RegExp(r'(\d{2})-(\d{2})-(\d{4})');
-      if (dateTimeRegex.hasMatch(message)) {
-        var dateTimeStr = dateTimeRegex.stringMatch(message);
-        // message.replaceAll(regExp, '');
-        try {
-          dateTime = DateFormat('dd-MM-yyyy hh:mm:ss').parse(dateTimeStr!);
-        } catch (error) {
-          dateTime = DateFormat('dd-MM-yyyy hh:mm').parse(dateTimeStr!);
+        // D-M-YYYY H m s
+        String format = 'd-M-yyyy H m';
+        if (parts.length > 3) format += ' s';
+        return DateFormat(format).parse(match, true);
+      } else if (dateRegex.hasMatch(dateOnlyMsg)) {
+        final match = dateRegex.stringMatch(dateOnlyMsg)!;
+        if (match.startsWith(RegExp(r'\d{4}'))) {
+          return DateFormat('yyyy-M-d').parse(match);
         }
-      } else if (dateRegex.hasMatch(message)) {
-        var dateTimeStr = dateRegex.stringMatch(message);
-        // message.replaceAll(regExp, '');
-        dateTime = DateFormat('dd-MM-yy').parse(dateTimeStr!);
-      } else if (dateFullYearRegex.hasMatch(message)) {
-        var dateTimeStr = dateFullYearRegex.stringMatch(message);
-        // message.replaceAll(regExp, '');
-        dateTime = DateFormat('dd-MM-yyyy').parse(dateTimeStr!);
+        if (match.contains(RegExp(r'-\d{4}$'))) {
+          return DateFormat('d-M-yyyy').parse(match);
+        }
+        return DateFormat('d-M-yy').parse(match);
       }
-    }
-    return dateTime;
+    } catch (_) {}
+    return null;
   }
 
   String? extractUPIRefNo(String fullMsg, bool isUpiTxn) {
-    fullMsg = fullMsg.toLowerCase();
+    final lower = fullMsg.toLowerCase();
     if (isUpiTxn) {
-      fullMsg = fullMsg.replaceAll('(', ' ');
-      fullMsg = fullMsg.replaceAll(')', '#');
-      var finalMsg = fullMsg.replaceAll('upi ref no', '#');
-      return finalMsg.subStringAfter('#').trim().subStringBefore("#").trim();
+      String result = lower
+          .replaceAll('(', ' ')
+          .replaceAll(')', ' ')
+          .replaceAll('upi ref no', 'REF')
+          .replaceAll('upi ref', 'REF')
+          .replaceAll('ref no', 'REF');
+
+      if (result.contains('REF')) {
+        result = result.split('REF').last.trim();
+        result = result.split(' ').first.split('.').first;
+        return result;
+      }
     } else {
-      fullMsg = fullMsg.replaceAll('.', ' ');
-      var finalMsg = fullMsg.replaceAll('tn', '#');
-      return finalMsg
-          .subStringAfter('#')
-          .trimLeft()
-          .subStringBefore(" ")
-          .trim();
+      String result = lower
+          .replaceAll('.', ' ')
+          .replaceAll('tn', 'REF')
+          .replaceAll('ref no', 'REF');
+      if (result.contains('REF')) {
+        result = result.split('REF').last.trim();
+        result = result.split(' ').first;
+        return result;
+      }
     }
+    return null;
+  }
+
+  bool _isNotNumeric(String str) {
+    return double.tryParse(str.replaceAll(',', '')) == null;
   }
 }
 
 enum TransactionType { debited, credited, debitMisc, noMatch }
-
-class CardDetails {
-  String? type;
-  String? no;
-
-  CardDetails({this.type, this.no});
-}
 
 class AccountDetails {
   String? type;
   String? no;
   String? refNo;
   String? sendTo;
-
   AccountDetails({this.type, this.no, this.refNo, this.sendTo});
 
   @override
-  String toString() {
-    return 'AccountDetails[type: $type, no: $no, refNo: $refNo, sendTo: $sendTo]';
-  }
+  String toString() =>
+      'AccountDetails[type: $type, no: $no, refNo: $refNo, sendTo: $sendTo]';
 }
 
 class TransactionInfo {
@@ -431,18 +337,20 @@ class TransactionInfo {
   });
 
   @override
-  String toString() {
-    return 'TransactionInfo [account: $account, balance: $balance, money: $money, typeOfTransaction: $typeOfTransaction, transactionTime: $transactionTime]';
-  }
+  String toString() =>
+      'TransactionInfo [account: $account, balance: $balance, money: $money, typeOfTransaction: $typeOfTransaction, transactionTime: $transactionTime]';
 }
 
 bool checkForTransactionalMessage(String? body) {
-  final smsBody = body ?? '';
-  return (smsBody.contains('debit') ||
-      smsBody.contains('spent') ||
-      smsBody.contains('credit')) &&
-      !smsBody.contains('request') &&
-      !smsBody.contains('pending');
+  if (body == null || body.isEmpty) return false;
+  final lower = body.toLowerCase();
+  final hasTrn =
+      lower.contains('debit') ||
+      lower.contains('spent') ||
+      lower.contains('credit');
+  final isNotIrrelevant =
+      !lower.contains('request') && !lower.contains('pending');
+  return hasTrn && isNotIrrelevant;
 }
 
 String generateSmsHash(String address, int? date, String body) {

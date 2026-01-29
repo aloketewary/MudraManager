@@ -17,10 +17,7 @@ class NotificationPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Notifications',
-          style: textTheme.titleLarge?.copyWith(color: color.onPrimary),
-        ),
+        title: Text('Notifications', style: textTheme.titleLarge),
         actions: [
           IconButton(
             icon: const Icon(Icons.clear_all),

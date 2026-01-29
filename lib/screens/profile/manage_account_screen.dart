@@ -4,10 +4,9 @@ import 'package:mudra_manager/db/models/account.dart'
     show Account, GetAccountCollection;
 import 'package:mudra_manager/providers/account_providers.dart';
 import 'package:mudra_manager/providers/isar_provider.dart';
-import 'package:mudra_manager/screens/dashboard/dashboard_animated_card.dart'
-    show AnimatedAccountCard;
 import 'package:mudra_manager/screens/profile/account_form.dart'
     show AccountForm;
+import 'package:mudra_manager/util/account_type_extension.dart';
 
 class ManageAccountScreen extends ConsumerStatefulWidget {
   const ManageAccountScreen({super.key});
@@ -47,10 +46,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        title: Text(
-          "Manage Accounts",
-          style: textTheme.titleLarge?.copyWith(color: color.onPrimary),
-        ),
+        title: Text("Manage Accounts", style: textTheme.titleLarge),
       ),
       body: accountsAsync.when(
         data: (accounts) {
@@ -79,23 +75,15 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
             itemBuilder: (context, index) {
               if (accounts.length != index) {
                 final account = accounts[index];
-                return AnimatedAccountCard(
-                  totalBalance:
-                      _balanceMap[account.id]?.toStringAsFixed(2) ?? '0.0',
-                  accountNumber:
-                      'xxxx xxxx xxxx ${account.accountNumber ?? 'xxxx'}',
-                  accountName: account.name,
-                  backgroundColor: color.primary,
-                  accentColor: Color(
-                    account.colorValue ?? Colors.redAccent.toARGB32(),
-                  ),
-                  accountType: account.accountType,
+                return _AccountListCard(
+                  account: account,
+                  balance: _balanceMap[account.id]?.toStringAsFixed(2) ?? '0.0',
                   onArchive: () {
                     if (accounts.length == 1) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
+                        const SnackBar(
                           content: Text(
-                            'At least 1 accounts required to continue',
+                            'At least 1 account required to continue',
                           ),
                         ),
                       );
@@ -110,8 +98,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
                       ),
                     );
                   },
-                  onRemove: () {},
-                  showMenu: true,
+                  onRemove: () => showDeleteConfirmation(context, ref, account),
                 );
               } else {
                 return Padding(padding: EdgeInsets.only(bottom: 80.0));
@@ -238,5 +225,160 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
         context,
       ).showSnackBar(SnackBar(content: Text('"${account.name}" archived')));
     }
+  }
+}
+
+class _AccountListCard extends StatelessWidget {
+  final Account account;
+  final String balance;
+  final VoidCallback onEdit;
+  final VoidCallback onArchive;
+  final VoidCallback onRemove;
+
+  const _AccountListCard({
+    required this.account,
+    required this.balance,
+    required this.onEdit,
+    required this.onArchive,
+    required this.onRemove,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final accountColor = Color(account.colorValue ?? Colors.blue.value);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [accountColor, accountColor.withValues(alpha: 0.8)],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: accountColor.withValues(alpha: 0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: onEdit,
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    account.accountType.icon,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        account.name,
+                        style: textTheme.titleMedium?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '•••• ${account.accountNumber ?? "XXXX"}',
+                        style: textTheme.bodySmall?.copyWith(
+                          color: Colors.white.withValues(alpha: 0.8),
+                          letterSpacing: 2,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      balance,
+                      style: textTheme.titleLarge?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    SizedBox(
+                      height: 24,
+                      child: PopupMenuButton<String>(
+                        icon: Icon(
+                          Icons.more_horiz,
+                          color: Colors.white.withValues(alpha: 0.9),
+                        ),
+                        padding: EdgeInsets.zero,
+                        onSelected: (value) {
+                          if (value == 'edit') onEdit();
+                          if (value == 'archive') onArchive();
+                          if (value == 'delete') onRemove();
+                        },
+                        itemBuilder:
+                            (context) => [
+                              PopupMenuItem(
+                                value: 'edit',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.edit, color: color.secondary),
+                                    const SizedBox(width: 8),
+                                    const Text('Edit'),
+                                  ],
+                                ),
+                              ),
+                              PopupMenuItem(
+                                value: 'archive',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.archive, color: color.secondary),
+                                    const SizedBox(width: 8),
+                                    const Text('Archive'),
+                                  ],
+                                ),
+                              ),
+                              PopupMenuItem(
+                                value: 'delete',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.delete, color: color.error),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Delete',
+                                      style: TextStyle(color: color.error),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

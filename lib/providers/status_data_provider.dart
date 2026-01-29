@@ -4,7 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar/isar.dart';
 import 'package:mudra_manager/db/models/category.dart';
 import 'package:mudra_manager/db/models/transaction.dart'
-    show GetTransactionCollection, Transaction, TransactionQueryFilter, TransactionQueryLinks, TransactionQueryProperty, TransactionQuerySortBy;
+    show
+        GetTransactionCollection,
+        Transaction,
+        TransactionQueryFilter,
+        TransactionQueryLinks,
+        TransactionQueryProperty,
+        TransactionQuerySortBy;
 import 'package:mudra_manager/providers/isar_provider.dart';
 
 class StatsData {
@@ -13,8 +19,12 @@ class StatsData {
   final List<FlSpot> incomeSpots;
   final List<FlSpot> expenseSpots;
   final Map<String, double> categoryData;
-  final List<Transaction> recent;
   final Map<String, Category> categoryDataMap;
+  final Map<String, double> incomeCategoryData;
+  final Map<String, Category> incomeCategoryMapData;
+  final double savingsRate;
+  final double avgDailySpend;
+  final List<Transaction> recent;
   final Map<Category, List<FlSpot>> categoryTrends;
 
   StatsData({
@@ -23,14 +33,21 @@ class StatsData {
     required this.incomeSpots,
     required this.expenseSpots,
     required this.categoryData,
-    required this.recent,
     required this.categoryDataMap,
+    required this.incomeCategoryData,
+    required this.incomeCategoryMapData,
+    required this.savingsRate,
+    required this.avgDailySpend,
+    required this.recent,
     required this.categoryTrends,
   });
 }
 
 // 2. The provider:
-final statsProvider = FutureProvider.family<StatsData, String>((ref, period) async {
+final statsProvider = FutureProvider.family<StatsData, String>((
+  ref,
+  period,
+) async {
   final isar = await ref.watch(isarServiceProvider).getInstance();
 
   // 2.1 Determine the date range:
@@ -56,9 +73,23 @@ final statsProvider = FutureProvider.family<StatsData, String>((ref, period) asy
 
   // 2.2 Total income & expense sums:
   final income =
-      await isar.transactions.filter().dateBetween(start, end).and().isExpenseEqualTo(false).isTransferEqualTo(false).amountProperty().sum() ?? 0.0;
+      await isar.transactions
+          .filter()
+          .dateBetween(start, end)
+          .and()
+          .isExpenseEqualTo(false)
+          .isTransferEqualTo(false)
+          .amountProperty()
+          .sum();
   final expense =
-      await isar.transactions.filter().dateBetween(start, end).and().isExpenseEqualTo(true).isTransferEqualTo(false).amountProperty().sum() ?? 0.0;
+      await isar.transactions
+          .filter()
+          .dateBetween(start, end)
+          .and()
+          .isExpenseEqualTo(true)
+          .isTransferEqualTo(false)
+          .amountProperty()
+          .sum();
 
   // 2.3 Time-series points (e.g. one per day)
   List<FlSpot> incomeSpots = [];
@@ -66,7 +97,11 @@ final statsProvider = FutureProvider.family<StatsData, String>((ref, period) asy
   if (period == 'Year') {
     for (int month = 1; month <= 12; month++) {
       final monthStart = DateTime(start.year, month, 1);
-      final monthEnd = DateTime(start.year, month + 1, 1).subtract(const Duration(days: 1));
+      final monthEnd = DateTime(
+        start.year,
+        month + 1,
+        1,
+      ).subtract(const Duration(days: 1));
 
       final income =
           await isar.transactions
@@ -76,8 +111,7 @@ final statsProvider = FutureProvider.family<StatsData, String>((ref, period) asy
               .isExpenseEqualTo(false)
               .isTransferEqualTo(false)
               .amountProperty()
-              .sum() ??
-          0.0;
+              .sum();
 
       final expense =
           await isar.transactions
@@ -87,8 +121,7 @@ final statsProvider = FutureProvider.family<StatsData, String>((ref, period) asy
               .isExpenseEqualTo(true)
               .isTransferEqualTo(false)
               .amountProperty()
-              .sum() ??
-          0.0;
+              .sum();
 
       incomeSpots.add(FlSpot((month - 1).toDouble(), income));
       expenseSpots.add(FlSpot((month - 1).toDouble(), expense));
@@ -106,8 +139,7 @@ final statsProvider = FutureProvider.family<StatsData, String>((ref, period) asy
               .isExpenseEqualTo(false)
               .isTransferEqualTo(false)
               .amountProperty()
-              .sum() ??
-          0.0;
+              .sum();
 
       final expense =
           await isar.transactions
@@ -117,8 +149,7 @@ final statsProvider = FutureProvider.family<StatsData, String>((ref, period) asy
               .isExpenseEqualTo(true)
               .isTransferEqualTo(false)
               .amountProperty()
-              .sum() ??
-          0.0;
+              .sum();
 
       incomeSpots.add(FlSpot(hour.toDouble(), income));
       expenseSpots.add(FlSpot(hour.toDouble(), expense));
@@ -130,10 +161,23 @@ final statsProvider = FutureProvider.family<StatsData, String>((ref, period) asy
       final next = day.add(const Duration(days: 1));
 
       final dayIncome =
-          await isar.transactions.filter().dateBetween(day, next).and().isExpenseEqualTo(false).isTransferEqualTo(false).amountProperty().sum() ??
-          0.0;
+          await isar.transactions
+              .filter()
+              .dateBetween(day, next)
+              .and()
+              .isExpenseEqualTo(false)
+              .isTransferEqualTo(false)
+              .amountProperty()
+              .sum();
       final dayExpense =
-          await isar.transactions.filter().dateBetween(day, next).and().isExpenseEqualTo(true).isTransferEqualTo(false).amountProperty().sum() ?? 0.0;
+          await isar.transactions
+              .filter()
+              .dateBetween(day, next)
+              .and()
+              .isExpenseEqualTo(true)
+              .isTransferEqualTo(false)
+              .amountProperty()
+              .sum();
 
       incomeSpots.add(FlSpot(i.toDouble(), dayIncome));
       expenseSpots.add(FlSpot(i.toDouble(), dayExpense));
@@ -144,6 +188,8 @@ final statsProvider = FutureProvider.family<StatsData, String>((ref, period) asy
   final cats = await isar.categorys.where().findAll();
   final Map<String, double> categoryData = {};
   final Map<String, Category> categoryMapData = {};
+  final Map<String, double> incomeCategoryData = {};
+  final Map<String, Category> incomeCategoryMapData = {};
   final Map<Category, List<FlSpot>> categoryTrends = {};
 
   for (final cat in cats) {
@@ -156,18 +202,36 @@ final statsProvider = FutureProvider.family<StatsData, String>((ref, period) asy
             .and()
             .isExpenseEqualTo(true)
             .amountProperty()
-            .sum() ??
-        0.0;
+            .sum();
     if (catSpent > 0) {
       categoryData[cat.name] = catSpent;
       categoryMapData[cat.name] = cat;
+    }
+
+    final catIncome =
+        await isar.transactions
+            .filter()
+            .dateBetween(start, end)
+            .and()
+            .category((q) => q.idEqualTo(cat.id))
+            .and()
+            .isExpenseEqualTo(false)
+            .amountProperty()
+            .sum();
+    if (catIncome > 0) {
+      incomeCategoryData[cat.name] = catIncome;
+      incomeCategoryMapData[cat.name] = cat;
     }
 
     // 2.6 Trend data
     List<FlSpot> categorySpots = [];
     for (int i = 0; i < 12; i++) {
       final monthStart = DateTime(now.year, now.month - 11 + i, 1);
-      final monthEnd = DateTime(now.year, now.month - 11 + i + 1, 1).subtract(const Duration(days: 1));
+      final monthEnd = DateTime(
+        now.year,
+        now.month - 11 + i + 1,
+        1,
+      ).subtract(const Duration(days: 1));
 
       final expenseForMonth =
           await isar.transactions
@@ -178,16 +242,26 @@ final statsProvider = FutureProvider.family<StatsData, String>((ref, period) asy
               .and()
               .isExpenseEqualTo(true)
               .amountProperty()
-              .sum() ??
-          0.0;
+              .sum();
       categorySpots.add(FlSpot(i.toDouble(), expenseForMonth));
     }
     categoryTrends[cat] = categorySpots;
   }
 
   // 2.5 Recent 5 transactions in period
-  final recent = await isar.transactions.filter().dateBetween(start, end).isTransferEqualTo(false).sortByDateDesc().findAll();
+  final recent =
+      await isar.transactions
+          .filter()
+          .dateBetween(start, end)
+          .isTransferEqualTo(false)
+          .sortByDateDesc()
+          .findAll();
   final List<Transaction> recentFive = recent.take(5).toList();
+
+  // 2.7 Calculate new metrics
+  final savingsRate = income > 0 ? ((income - expense) / income) * 100 : 0.0;
+  final daysInPeriod = end.difference(start).inDays + 1;
+  final avgDailySpend = expense / (daysInPeriod > 0 ? daysInPeriod : 1);
 
   return StatsData(
     income: income,
@@ -195,8 +269,12 @@ final statsProvider = FutureProvider.family<StatsData, String>((ref, period) asy
     incomeSpots: incomeSpots,
     expenseSpots: expenseSpots,
     categoryData: categoryData,
-    recent: recentFive,
     categoryDataMap: categoryMapData,
+    incomeCategoryData: incomeCategoryData,
+    incomeCategoryMapData: incomeCategoryMapData,
+    savingsRate: savingsRate,
+    avgDailySpend: avgDailySpend,
+    recent: recentFive,
     categoryTrends: categoryTrends,
   );
 });

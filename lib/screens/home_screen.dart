@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/db/models/user_profile.dart' show UserProfile;
-import 'package:mudra_manager/l10n/app_localizations.dart' show AppLocalizations;
-import 'package:mudra_manager/providers/account_providers.dart' show balanceVisibilityProvider;
+import 'package:mudra_manager/l10n/app_localizations.dart'
+    show AppLocalizations;
+import 'package:mudra_manager/providers/account_providers.dart'
+    show balanceVisibilityProvider;
 import 'package:mudra_manager/providers/greeting_provider.dart';
-import 'package:mudra_manager/providers/isar_provider.dart' show reminderTimeProvider;
+import 'package:mudra_manager/providers/isar_provider.dart'
+    show reminderTimeProvider;
 import 'package:mudra_manager/providers/notification_record_service.dart';
 import 'package:mudra_manager/providers/user_profile_provider.dart';
 import 'package:mudra_manager/screens/notifications/notification_page_screen.dart';
@@ -12,10 +15,12 @@ import 'package:mudra_manager/screens/profile/profile_screen.dart';
 import 'package:mudra_manager/screens/statistics/statistics_screen.dart';
 import 'package:mudra_manager/screens/transaction/add_edit_transaction_screen.dart';
 import 'package:mudra_manager/screens/transaction/transaction_list_screen.dart';
-import 'package:mudra_manager/service/notification_service.dart' show NotificationService;
+import 'package:mudra_manager/service/notification_service.dart'
+    show NotificationService;
 import 'package:mudra_manager/util/localization_extension.dart';
 
 import 'dashboard/dashboard_home.dart';
+import 'utility/utility_screen.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -33,7 +38,13 @@ class HomePageState extends ConsumerState<HomePage> {
   @override
   void initState() {
     super.initState();
-    _pages = [DashboardHome(), TransactionListScreen(key: transactionListKey), StatisticsScreen(key: statisticsKey), ProfileScreen()];
+    _pages = [
+      DashboardHome(),
+      TransactionListScreen(key: transactionListKey),
+      UtilityScreen(),
+      StatisticsScreen(key: statisticsKey),
+      ProfileScreen(),
+    ];
     initNotification();
   }
 
@@ -57,7 +68,9 @@ class HomePageState extends ConsumerState<HomePage> {
       floatingActionButton:
           _selectedIndex == 1
               ? AnimatedSwitcher(
-                duration: const Duration(milliseconds: 500), // slower and smoother
+                duration: const Duration(
+                  milliseconds: 500,
+                ), // slower and smoother
                 switchInCurve: Curves.easeInOutBack,
                 switchOutCurve: Curves.easeIn,
                 child: FloatingActionButton.extended(
@@ -83,23 +96,56 @@ class HomePageState extends ConsumerState<HomePage> {
           _onTabSelected(index);
         },
         items: [
-          _buildBarItem(icon: Icons.home_outlined, selectedIcon: Icons.home, label: ctxt.home_screen_title, index: 0),
-          _buildBarItem(icon: Icons.receipt_long_outlined, selectedIcon: Icons.receipt_long, label: ctxt.transaction_screen_title, index: 1),
-          _buildBarItem(icon: Icons.auto_graph_outlined, selectedIcon: Icons.auto_graph, label: ctxt.statistics_screen_title, index: 2),
-          _buildBarItem(icon: Icons.person_outline, selectedIcon: Icons.person, label: ctxt.profile_screen_title, index: 3),
+          _buildBarItem(
+            icon: Icons.home_outlined,
+            selectedIcon: Icons.home,
+            label: ctxt.home_screen_title,
+            index: 0,
+          ),
+          _buildBarItem(
+            icon: Icons.receipt_long_outlined,
+            selectedIcon: Icons.receipt_long,
+            label: ctxt.transaction_screen_title,
+            index: 1,
+          ),
+          _buildBarItem(
+            icon: Icons.widgets_outlined,
+            selectedIcon: Icons.widgets,
+            label: "Utilities",
+            index: 2,
+          ),
+          _buildBarItem(
+            icon: Icons.auto_graph_outlined,
+            selectedIcon: Icons.auto_graph,
+            label: ctxt.statistics_screen_title,
+            index: 3,
+          ),
+          _buildBarItem(
+            icon: Icons.person_outline,
+            selectedIcon: Icons.person,
+            label: ctxt.profile_screen_title,
+            index: 4,
+          ),
         ],
       ),
       body: SafeArea(child: _pages[_selectedIndex]),
     );
   }
 
-  BottomNavigationBarItem _buildBarItem({required IconData icon, required IconData selectedIcon, required String label, required int index}) {
+  BottomNavigationBarItem _buildBarItem({
+    required IconData icon,
+    required IconData selectedIcon,
+    required String label,
+    required int index,
+  }) {
     final isSelected = _selectedIndex == index;
 
     return BottomNavigationBarItem(
       icon: AnimatedSwitcher(
         duration: Duration(milliseconds: 300),
-        transitionBuilder: (child, animation) => ScaleTransition(scale: animation, child: child),
+        transitionBuilder:
+            (child, animation) =>
+                ScaleTransition(scale: animation, child: child),
         child: Icon(
           isSelected ? selectedIcon : icon,
           key: ValueKey(isSelected), // important for AnimatedSwitcher
@@ -114,7 +160,8 @@ class HomePageState extends ConsumerState<HomePage> {
     Navigator.of(context).push(
       PageRouteBuilder(
         transitionDuration: Duration(milliseconds: 300),
-        pageBuilder: (_, animation, secondaryAnimation) => AddEditTransactionScreen(),
+        pageBuilder:
+            (_, animation, secondaryAnimation) => AddEditTransactionScreen(),
         transitionsBuilder: (_, animation, __, child) {
           return FadeTransition(opacity: animation, child: child);
         },
@@ -122,7 +169,10 @@ class HomePageState extends ConsumerState<HomePage> {
     );
   }
 
-  PreferredSizeWidget buildTopBar(AsyncValue<UserProfile?> profileAsync, int selectedIndex) {
+  PreferredSizeWidget buildTopBar(
+    AsyncValue<UserProfile?> profileAsync,
+    int selectedIndex,
+  ) {
     final greetingAsync = ref.watch(greetingProvider);
     final textTheme = Theme.of(context).textTheme;
     final color = Theme.of(context).colorScheme;
@@ -138,15 +188,25 @@ class HomePageState extends ConsumerState<HomePage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               greetingAsync.when(
-                data: (greeting) => Text('${ctxt.translate(greeting)},', style: textTheme.titleMedium?.copyWith(color: color.onPrimary)),
-                loading: () => Text('${ctxt.greeting_hello_text}, ', style: textTheme.titleMedium?.copyWith(color: color.onPrimary)),
+                data:
+                    (greeting) => Text(
+                      '${ctxt.translate(greeting)},',
+                      style: textTheme.titleMedium,
+                    ),
+                loading:
+                    () => Text(
+                      '${ctxt.greeting_hello_text}, ',
+                      style: textTheme.titleMedium,
+                    ),
                 error: (e, _) => Center(child: Text("Error: $e")),
               ),
               profileAsync.when(
                 data: (profile) {
                   return Text(
                     profile?.name ?? 'Awesome User',
-                    style: textTheme.titleLarge?.copyWith(color: color.onPrimary, fontWeight: FontWeight.bold),
+                    style: textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                     overflow: TextOverflow.ellipsis,
                   );
                 },
@@ -171,7 +231,12 @@ class HomePageState extends ConsumerState<HomePage> {
                   padding: const EdgeInsets.only(right: 16),
                   child: GestureDetector(
                     onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationPage()));
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const NotificationPage(),
+                        ),
+                      );
                     },
                     child: Stack(
                       children: [
@@ -182,11 +247,20 @@ class HomePageState extends ConsumerState<HomePage> {
                             top: 0,
                             child: Container(
                               padding: const EdgeInsets.all(2),
-                              decoration: BoxDecoration(color: Colors.red, borderRadius: BorderRadius.circular(10)),
-                              constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                              decoration: BoxDecoration(
+                                color: color.error,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              constraints: const BoxConstraints(
+                                minWidth: 16,
+                                minHeight: 16,
+                              ),
                               child: Text(
                                 '$notificationCount',
-                                style: const TextStyle(color: Colors.white, fontSize: 10),
+                                style: TextStyle(
+                                  color: color.onError,
+                                  fontSize: 10,
+                                ),
                                 textAlign: TextAlign.center,
                               ),
                             ),
@@ -201,7 +275,10 @@ class HomePageState extends ConsumerState<HomePage> {
         );
       case 1:
         return AppBar(
-          title: Text(ctxt.transaction_screen_title, style: textTheme.titleLarge?.copyWith(color: color.onPrimary)),
+          title: Text(
+            ctxt.transaction_screen_title,
+            style: textTheme.titleLarge,
+          ),
           actions: [
             IconButton(
               onPressed: () {
@@ -212,8 +289,13 @@ class HomePageState extends ConsumerState<HomePage> {
           ],
         );
       case 2:
+        return AppBar(title: Text("Utilities", style: textTheme.titleLarge));
+      case 3:
         return AppBar(
-          title: Text(ctxt.statistics_screen_title, style: textTheme.titleLarge?.copyWith(color: color.onPrimary)),
+          title: Text(
+            ctxt.statistics_screen_title,
+            style: textTheme.titleLarge,
+          ),
           actions: [
             IconButton(
               enableFeedback: true,
@@ -225,7 +307,9 @@ class HomePageState extends ConsumerState<HomePage> {
           ],
         );
       default:
-        return AppBar(title: Text(ctxt.profile_screen_title, style: textTheme.titleLarge?.copyWith(color: color.onPrimary)));
+        return AppBar(
+          title: Text(ctxt.profile_screen_title, style: textTheme.titleLarge),
+        );
     }
   }
 

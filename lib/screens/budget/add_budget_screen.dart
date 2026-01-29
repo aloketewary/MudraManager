@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:mudra_manager/db/models/budget.dart' show Budget, BudgetRecurrence;
-import 'package:mudra_manager/db/models/budget_category_allocation.dart' show BudgetCategoryAllocation;
+import 'package:mudra_manager/db/models/budget.dart'
+    show Budget, BudgetRecurrence;
+import 'package:mudra_manager/db/models/budget_category_allocation.dart'
+    show BudgetCategoryAllocation;
 import 'package:mudra_manager/db/models/category.dart' show Category;
-import 'package:mudra_manager/l10n/app_localizations.dart' show AppLocalizations;
+import 'package:mudra_manager/l10n/app_localizations.dart'
+    show AppLocalizations;
 import 'package:mudra_manager/providers/budget_service_provider.dart';
 import 'package:mudra_manager/providers/category_provider.dart';
 import 'package:mudra_manager/screens/reusable/common_button.dart';
@@ -40,7 +43,9 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
   void initState() {
     super.initState();
     _nameC = TextEditingController(text: widget.existing?.name);
-    _amountC = TextEditingController(text: widget.existing != null ? widget.existing!.amount.toString() : '');
+    _amountC = TextEditingController(
+      text: widget.existing != null ? widget.existing!.amount.toString() : '',
+    );
 
     if (widget.existing != null) {
       _startDate = widget.existing!.startDate;
@@ -52,7 +57,9 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
             final cat = alloc.category.value!;
             _selectedCats.add(cat);
             selectedCategories.add(cat.id);
-            _allocCtrls[cat.id] = TextEditingController(text: alloc.amount.toString());
+            _allocCtrls[cat.id] = TextEditingController(
+              text: alloc.amount.toString(),
+            );
             setState(() {});
           });
         }
@@ -73,7 +80,12 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
   Future<void> _pickDate(BuildContext ctx, bool isStart) async {
     final now = DateTime.now();
     final def = isStart ? (_startDate ?? now) : (_endDate ?? now);
-    final picked = await showDatePicker(context: ctx, initialDate: def, firstDate: DateTime(2000), lastDate: DateTime(2100));
+    final picked = await showDatePicker(
+      context: ctx,
+      initialDate: def,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
     if (picked != null) {
       setState(() {
         if (isStart) {
@@ -90,11 +102,15 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
     final ctxt = AppLocalizations.of(context)!;
 
     if (_startDate == null || _endDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(ctxt.budget_pickBothDatesErrorText)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(ctxt.budget_pickBothDatesErrorText)),
+      );
       return;
     }
     if (_selectedCats.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(ctxt.budget_selectAtLeastOneCategoryErrorText)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(ctxt.budget_selectAtLeastOneCategoryErrorText)),
+      );
       return;
     }
 
@@ -114,20 +130,35 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
     // Compute how to distribute unentered allocations
     final allocated = enteredAllocations.values.whereType<double>().toList();
     final remaining = totalAmount - allocated.fold(0.0, (a, b) => a + b);
-    final unenteredCats = enteredAllocations.entries.where((e) => e.value == null).map((e) => e.key).toList();
-    final distributeAmount = unenteredCats.isNotEmpty ? (remaining / unenteredCats.length) : 0.0;
+    final unenteredCats =
+        enteredAllocations.entries
+            .where((e) => e.value == null)
+            .map((e) => e.key)
+            .toList();
+    final distributeAmount =
+        unenteredCats.isNotEmpty ? (remaining / unenteredCats.length) : 0.0;
 
     // Validate manually entered allocations
     final totalAllocated = allocated.fold(0.0, (a, b) => a + b);
     final remainingBudget = totalAmount - totalAllocated;
 
     if (remainingBudget < 0) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(ctxt.budget_allocatedAmountExceedsTotalBudgetText)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(ctxt.budget_allocatedAmountExceedsTotalBudgetText),
+        ),
+      );
       return;
     }
 
     final bud =
-        widget.existing ?? Budget.create(name: _nameC.text.trim(), amount: double.parse(_amountC.text), startDate: _startDate!, endDate: _endDate!);
+        widget.existing ??
+        Budget.create(
+          name: _nameC.text.trim(),
+          amount: double.parse(_amountC.text),
+          startDate: _startDate!,
+          endDate: _endDate!,
+        );
     bud.recurrence = _recurrence;
 
     bud
@@ -152,7 +183,9 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
       final cat = _selectedCats.firstWhere((c) => c.id == categoryId);
       bud.categories.add(cat);
 
-      final alloc = BudgetCategoryAllocation()..amount = enteredAllocations[cat] ?? distributeAmount;
+      final alloc =
+          BudgetCategoryAllocation()
+            ..amount = enteredAllocations[cat] ?? distributeAmount;
       alloc.category.value = cat;
       alloc.budget.value = bud;
 
@@ -169,14 +202,20 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
     final catsAsync = ref.watch(categoryListProvider);
     final textTheme = Theme.of(context).textTheme;
     final color = Theme.of(context).colorScheme;
-    final totalAlloc = _selectedCats.fold<double>(0, (sum, cat) => sum + (double.tryParse(_allocCtrls[cat.id]?.text ?? '') ?? 0));
+    final totalAlloc = _selectedCats.fold<double>(
+      0,
+      (sum, cat) =>
+          sum + (double.tryParse(_allocCtrls[cat.id]?.text ?? '') ?? 0),
+    );
     final ctxt = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          widget.existing == null ? ctxt.budget_buttonAddText : ctxt.budget_buttonEditText,
-          style: textTheme.titleLarge?.copyWith(color: color.onPrimary),
+          widget.existing == null
+              ? ctxt.budget_buttonAddText
+              : ctxt.budget_buttonEditText,
+          style: textTheme.titleLarge,
         ),
       ),
       body: catsAsync.when(
@@ -194,15 +233,26 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
                           controller: _nameC,
                           labelText: ctxt.budget_budgetNameControllerText,
                           iconData: Icons.pie_chart_outline,
-                          validateField: (v) => v == null || v.isEmpty ? ctxt.budget_nameRequiredHintText : null,
+                          validateField:
+                              (v) =>
+                                  v == null || v.isEmpty
+                                      ? ctxt.budget_nameRequiredHintText
+                                      : null,
                         ),
                         CommonTextInputField(
                           controller: _amountC,
                           labelText: ctxt.budget_budgetAmountControllerText,
                           iconData: Icons.money,
-                          inputType: TextInputType.numberWithOptions(decimal: true),
+                          inputType: TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
                           validateField:
-                              (v) => v == null || double.tryParse(v) == null || double.parse(v) <= 0 ? ctxt.budget_amountRequiredHintText : null,
+                              (v) =>
+                                  v == null ||
+                                          double.tryParse(v) == null ||
+                                          double.parse(v) <= 0
+                                      ? ctxt.budget_amountRequiredHintText
+                                      : null,
                         ),
                         const SizedBox(height: 16),
 
@@ -214,16 +264,27 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
                                 style: OutlinedButton.styleFrom(
                                   backgroundColor: color.primary,
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16), // Adjust the radius for more or less rounding
+                                    borderRadius: BorderRadius.circular(
+                                      16,
+                                    ), // Adjust the radius for more or less rounding
                                   ),
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 16,
+                                  ),
                                 ),
                                 onPressed: () => _pickDate(context, true),
                                 child: Text(
                                   _startDate == null
                                       ? ctxt.budget_selectStartDateText
-                                      : ctxt.budget_selectedStartDateText(DateFormat('dd-MM-yyyy', ctxt.localeName).format(_startDate!)),
-                                  style: textTheme.labelLarge?.copyWith(color: color.onPrimary),
+                                      : ctxt.budget_selectedStartDateText(
+                                        DateFormat(
+                                          'dd-MM-yyyy',
+                                          ctxt.localeName,
+                                        ).format(_startDate!),
+                                      ),
+                                  style: textTheme.labelLarge?.copyWith(
+                                    color: color.onPrimary,
+                                  ),
                                 ),
                               ),
                             ),
@@ -231,39 +292,69 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
                             Expanded(
                               child: OutlinedButton(
                                 style: OutlinedButton.styleFrom(
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 16,
+                                  ),
                                 ),
                                 onPressed: () => _pickDate(context, false),
                                 child: Text(
                                   _endDate == null
                                       ? ctxt.budget_selectEndDateText
-                                      : ctxt.budget_selectedEndDateText(DateFormat('dd-MM-yyyy', ctxt.localeName).format(_endDate!)),
+                                      : ctxt.budget_selectedEndDateText(
+                                        DateFormat(
+                                          'dd-MM-yyyy',
+                                          ctxt.localeName,
+                                        ).format(_endDate!),
+                                      ),
                                 ),
                               ),
                             ),
                           ],
                         ),
                         const SizedBox(height: 16),
-                        Text(ctxt.budget_categoryTitle, style: textTheme.titleMedium?.copyWith(color: color.primary)),
+                        Text(
+                          ctxt.budget_categoryTitle,
+                          style: textTheme.titleMedium?.copyWith(
+                            color: color.primary,
+                          ),
+                        ),
                         const SizedBox(height: 8),
                         ListTile(
-                          leading: Icon(Icons.info_outline, color: Theme.of(context).colorScheme.primary),
-                          title: Text(ctxt.budget_categoryMessageInfoText, style: textTheme.labelMedium, textAlign: TextAlign.justify),
+                          leading: Icon(
+                            Icons.info_outline,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          title: Text(
+                            ctxt.budget_categoryMessageInfoText,
+                            style: textTheme.labelMedium,
+                            textAlign: TextAlign.justify,
+                          ),
                           tileColor: color.primaryContainer,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
                           contentPadding: const EdgeInsets.all(12),
                         ),
                         ...cats.map((cat) {
-                          final isSelected = selectedCategories.contains(cat.id);
+                          final isSelected = selectedCategories.contains(
+                            cat.id,
+                          );
 
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 2),
                             child: Card(
                               elevation: 2,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 10,
+                                ),
                                 child: Row(
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   mainAxisAlignment: MainAxisAlignment.start,
@@ -278,7 +369,12 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
                                             selectedCategories.remove(cat.id);
                                           } else {
                                             _selectedCats.add(cat);
-                                            _allocCtrls[cat.id] = TextEditingController(text: _allocCtrls[cat.id]?.text ?? '');
+                                            _allocCtrls[cat
+                                                .id] = TextEditingController(
+                                              text:
+                                                  _allocCtrls[cat.id]?.text ??
+                                                  '',
+                                            );
                                             selectedCategories.add(cat.id);
                                           }
                                         });
@@ -287,19 +383,30 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
                                     const SizedBox(width: 8),
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         mainAxisSize: MainAxisSize.min,
-                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
                                         children: [
-                                          Text(cat.name, style: textTheme.titleMedium),
+                                          Text(
+                                            cat.name,
+                                            style: textTheme.titleMedium,
+                                          ),
                                           if (isSelected)
                                             Padding(
-                                              padding: const EdgeInsets.only(top: 8.0),
+                                              padding: const EdgeInsets.only(
+                                                top: 8.0,
+                                              ),
                                               child: CommonTextInputField(
                                                 controller: _allocCtrls[cat.id],
-                                                labelText: ctxt.budget_allocateAmountText,
+                                                labelText:
+                                                    ctxt.budget_allocateAmountText,
                                                 iconData: Icons.numbers,
-                                                inputType: const TextInputType.numberWithOptions(decimal: true),
+                                                inputType:
+                                                    const TextInputType.numberWithOptions(
+                                                      decimal: true,
+                                                    ),
                                               ),
                                             ),
                                         ],
@@ -313,25 +420,41 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
                         }),
                         const SizedBox(height: 16),
                         Text(
-                          ctxt.budget_totalAllocatedBudgetText(ctxt.formatCurrencyWithSign(0, totalAlloc)),
-                          style: textTheme.titleMedium?.copyWith(color: color.secondary),
+                          ctxt.budget_totalAllocatedBudgetText(
+                            ctxt.formatCurrencyWithSign(0, totalAlloc),
+                          ),
+                          style: textTheme.titleMedium?.copyWith(
+                            color: color.secondary,
+                          ),
                         ),
                         const SizedBox(height: 16),
                         CommonDropdownField(
-                          value: widget.existing?.recurrence ?? BudgetRecurrence.none,
+                          value:
+                              widget.existing?.recurrence ??
+                              BudgetRecurrence.none,
                           items: BudgetRecurrence.values,
                           onChanged: (val) {
                             if (val != null) setState(() => _recurrence = val);
                           },
                           labelText: ctxt.budget_recurrenceText,
-                          itemBuilder: (BudgetRecurrence budget) => Row(children: [Text(ctxt.translate(budget.name).toTitleCase())]),
+                          itemBuilder:
+                              (BudgetRecurrence budget) => Row(
+                                children: [
+                                  Text(
+                                    ctxt.translate(budget.name).toTitleCase(),
+                                  ),
+                                ],
+                              ),
                         ),
                       ],
                     ),
                   ),
                 ),
                 CommonButton(
-                  text: widget.existing == null ? ctxt.budget_saveButtonText : ctxt.budget_updateButtonText,
+                  text:
+                      widget.existing == null
+                          ? ctxt.budget_saveButtonText
+                          : ctxt.budget_updateButtonText,
                   onPressed: _save,
                   backGroundColor: color.primary,
                   textColor: color.onPrimary,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:mudra_manager/theme/design_tokens.dart';
 
-class CommonTextInputField extends StatelessWidget {
+class CommonTextInputField extends StatefulWidget {
   final TextEditingController? controller;
   final String? labelText;
   final String? hintText;
@@ -19,28 +20,78 @@ class CommonTextInputField extends StatelessWidget {
   });
 
   @override
+  State<CommonTextInputField> createState() => _CommonTextInputFieldState();
+}
+
+class _CommonTextInputFieldState extends State<CommonTextInputField> {
+  final FocusNode _focusNode = FocusNode();
+  bool _isFocused = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode.addListener(_onFocusChange);
+  }
+
+  @override
+  void dispose() {
+    _focusNode.removeListener(_onFocusChange);
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  void _onFocusChange() {
+    setState(() {
+      _isFocused = _focusNode.hasFocus;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     var color = Theme.of(context).colorScheme;
+    
     return Padding(
-      padding: EdgeInsets.only(top: 8, bottom: 8),
-      child: TextFormField(
-        controller: controller,
-        decoration: InputDecoration(
-          labelText: labelText,
-          hintText: hintText,
-          prefixIcon: Icon(iconData),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
-          // fillColor: Colors.transparent,
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide(
-              color: color.secondary
-            )
-          ),
+      padding: EdgeInsets.symmetric(vertical: DesignTokens.spacing8),
+      child: AnimatedContainer(
+        duration: DesignTokens.durationNormal,
+        decoration: BoxDecoration(
+          borderRadius: DesignTokens.borderRadiusMedium,
+          boxShadow: _isFocused 
+            ? AppElevation.elevation1(color.primary)
+            : [],
         ),
-        textInputAction: TextInputAction.next,
-        keyboardType: inputType,
-        validator: validateField,
+        child: TextFormField(
+          controller: widget.controller,
+          focusNode: _focusNode,
+          decoration: InputDecoration(
+            labelText: widget.labelText,
+            hintText: widget.hintText,
+            prefixIcon: Icon(
+              widget.iconData,
+              color: _isFocused ? color.primary : color.onSurfaceVariant,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: DesignTokens.borderRadiusMedium,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: DesignTokens.borderRadiusMedium,
+              borderSide: BorderSide(
+                color: color.primary,
+                width: 2.0,
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: DesignTokens.borderRadiusMedium,
+              borderSide: BorderSide(
+                color: color.outline,
+                width: 1.0,
+              ),
+            ),
+          ),
+          textInputAction: TextInputAction.next,
+          keyboardType: widget.inputType,
+          validator: widget.validateField,
+        ),
       ),
     );
   }

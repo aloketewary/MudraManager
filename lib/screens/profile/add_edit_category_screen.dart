@@ -85,7 +85,7 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
       appBar: AppBar(
         title: Text(
           widget.existing == null ? 'Add Category' : 'Edit Category',
-          style: textTheme.titleLarge?.copyWith(color: color.onPrimary),
+          style: textTheme.titleLarge,
         ),
       ),
       body: Padding(

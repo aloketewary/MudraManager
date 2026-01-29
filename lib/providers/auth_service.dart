@@ -8,7 +8,7 @@ class AuthService {
   static const _pinKey = 'app_pin';
   static const _bioKey = 'bio_enabled';
 
-  final _storage = const FlutterSecureStorage();
+  final _storage = FlutterSecureStorage();
   final _localAuth = LocalAuthentication();
 
   /// Enable/disable biometric unlock

@@ -13,77 +13,62 @@ class AppTheme {
   TextTheme _buildTextTheme(TextTheme base) {
     return base.copyWith(
       displayLarge: base.displayLarge!.copyWith(
-        fontFamily: 'Onest',
         fontWeight: FontWeight.w900, // Black
         fontSize: 56.0,
       ),
       displayMedium: base.displayMedium!.copyWith(
-        fontFamily: 'Onest',
         fontWeight: FontWeight.w800, // ExtraBold
         fontSize: 48.0,
       ),
       displaySmall: base.displaySmall!.copyWith(
-        fontFamily: 'Onest',
         fontWeight: FontWeight.w700, // Bold
         fontSize: 40.0,
       ),
       headlineLarge: base.headlineLarge!.copyWith(
-        fontFamily: 'Onest',
         fontWeight: FontWeight.w700, // Bold
         fontSize: 32.0,
       ),
       headlineMedium: base.headlineMedium!.copyWith(
-        fontFamily: 'Onest',
         fontWeight: FontWeight.w600, // SemiBold
         fontSize: 28.0,
       ),
       headlineSmall: base.headlineSmall!.copyWith(
-        fontFamily: 'Onest',
         fontWeight: FontWeight.w600, // SemiBold
         fontSize: 24.0,
       ),
       titleLarge: base.titleLarge!.copyWith(
-        fontFamily: 'Onest',
         fontWeight: FontWeight.w500, // Medium
         fontSize: 22.0,
       ),
       titleMedium: base.titleMedium!.copyWith(
-        fontFamily: 'Onest',
         fontWeight: FontWeight.w500, // Medium
         fontSize: 16.0,
       ),
       titleSmall: base.titleSmall!.copyWith(
-        fontFamily: 'Onest',
         fontWeight: FontWeight.w400, // Regular
         fontSize: 14.0,
       ),
       bodyLarge: base.bodyLarge!.copyWith(
-        fontFamily: 'Onest',
         fontWeight: FontWeight.w400, // Regular
         fontSize: 16.0,
       ),
       bodyMedium: base.bodyMedium!.copyWith(
-        fontFamily: 'Onest',
         fontWeight: FontWeight.w400, // Regular
         fontSize: 14.0,
       ),
       bodySmall: base.bodySmall!.copyWith(
-        fontFamily: 'Onest',
         fontWeight: FontWeight.w300, // Light
         fontSize: 12.0,
       ),
       labelLarge: base.labelLarge!.copyWith(
-        fontFamily: 'Onest',
         fontWeight: FontWeight.w500, // Medium
         fontSize: 14.0,
       ),
       labelMedium: base.labelMedium!.copyWith(
-        fontFamily: 'Onest',
         fontWeight: FontWeight.w400, // Regular
         fontSize: 12.0,
       ),
       labelSmall: base.labelSmall!.copyWith(
-        fontFamily: 'Onest',
         fontWeight: FontWeight.w300, // Light
         fontSize: 10.0,
       ),
@@ -93,66 +78,84 @@ class AppTheme {
   // Build the Light Theme
   ThemeData buildLightTheme(AppColorTheme appTheme) {
     final ThemeData base = ThemeData.light(useMaterial3: true);
+    final colorScheme = appTheme.lightColorScheme();
+    final textTheme = _buildTextTheme(
+      base.textTheme,
+    ).apply(fontFamily: 'Onest');
+
     return base.copyWith(
       extensions: extensions,
-      colorScheme: appTheme.lightColorScheme(),
-      textTheme: _buildTextTheme(base.textTheme),
-      primaryTextTheme: _buildTextTheme(base.primaryTextTheme),
-      appBarTheme: _appBarTheme(base, appTheme.lightColorScheme(), Brightness.light),
-      buttonTheme: _buttonTheme(base, appTheme.lightColorScheme()),
-      elevatedButtonTheme: _elevatedButtonTheme(base, appTheme.lightColorScheme()),
-      outlinedButtonTheme: _outlinedButtonTheme(base, appTheme.lightColorScheme()),
-      inputDecorationTheme: _inputDecorationTheme(base, appTheme.lightColorScheme()),
-      cardTheme: _cardTheme(base, appTheme.lightColorScheme()),
-      dialogTheme: _dialogTheme(base, appTheme.lightColorScheme()),
-      chipTheme: _chipTheme(base, appTheme.lightColorScheme()),
-      tabBarTheme: _tabBarTheme(base, appTheme.lightColorScheme()),
-      tooltipTheme: _tooltipTheme(base, appTheme.lightColorScheme()),
+      colorScheme: colorScheme,
+      textTheme: textTheme,
+      primaryTextTheme: textTheme,
+      appBarTheme: _appBarTheme(base, colorScheme, textTheme, Brightness.light),
+      buttonTheme: _buttonTheme(base, colorScheme),
+      elevatedButtonTheme: _elevatedButtonTheme(base, colorScheme),
+      outlinedButtonTheme: _outlinedButtonTheme(base, colorScheme),
+      inputDecorationTheme: _inputDecorationTheme(base, colorScheme),
+      cardTheme: _cardTheme(base, colorScheme),
+      dialogTheme: _dialogTheme(base, colorScheme),
+      chipTheme: _chipTheme(base, colorScheme),
+      tabBarTheme: _tabBarTheme(base, colorScheme),
+      tooltipTheme: _tooltipTheme(base, colorScheme),
+      listTileTheme: _listTileTheme(base, colorScheme),
+      scaffoldBackgroundColor: colorScheme.surface,
     );
   }
 
   // Build the Dark Theme
   ThemeData buildDarkTheme(AppColorTheme appTheme) {
     final ThemeData base = ThemeData.dark(useMaterial3: true);
+    final colorScheme = appTheme.darkColorScheme();
+    final textTheme = _buildTextTheme(
+      base.textTheme,
+    ).apply(fontFamily: 'Onest');
+
     return base.copyWith(
       extensions: extensions,
-      colorScheme: appTheme.darkColorScheme(),
-      textTheme: _buildTextTheme(base.textTheme),
-      primaryTextTheme: _buildTextTheme(base.primaryTextTheme),
-      appBarTheme: _appBarTheme(base, appTheme.darkColorScheme(), Brightness.light),
-      buttonTheme: _buttonTheme(base, appTheme.darkColorScheme()),
-      elevatedButtonTheme: _elevatedButtonTheme(base, appTheme.darkColorScheme()),
-      outlinedButtonTheme: _outlinedButtonTheme(base, appTheme.darkColorScheme()),
-      inputDecorationTheme: _inputDecorationTheme(base, appTheme.darkColorScheme()),
-      cardTheme: _cardTheme(base, appTheme.darkColorScheme()),
-      dialogTheme: _dialogTheme(base, appTheme.darkColorScheme()),
-      chipTheme: _chipTheme(base, appTheme.darkColorScheme()),
-      tabBarTheme: _tabBarTheme(base, appTheme.darkColorScheme()),
-      tooltipTheme: _tooltipTheme(base, appTheme.darkColorScheme()),
+      colorScheme: colorScheme,
+      textTheme: textTheme,
+      primaryTextTheme: textTheme,
+      appBarTheme: _appBarTheme(base, colorScheme, textTheme, Brightness.dark),
+      buttonTheme: _buttonTheme(base, colorScheme),
+      elevatedButtonTheme: _elevatedButtonTheme(base, colorScheme),
+      outlinedButtonTheme: _outlinedButtonTheme(base, colorScheme),
+      inputDecorationTheme: _inputDecorationTheme(base, colorScheme),
+      cardTheme: _cardTheme(base, colorScheme),
+      dialogTheme: _dialogTheme(base, colorScheme),
+      chipTheme: _chipTheme(base, colorScheme),
+      tabBarTheme: _tabBarTheme(base, colorScheme),
+      tooltipTheme: _tooltipTheme(base, colorScheme),
+      listTileTheme: _listTileTheme(base, colorScheme),
+      scaffoldBackgroundColor: colorScheme.surface,
     );
   }
 
   // --- Component Theme Builders (Refactored to accept ColorScheme) ---
 
-  AppBarTheme _appBarTheme(
+  AppBarThemeData _appBarTheme(
     ThemeData baseTheme,
     ColorScheme colorScheme,
+    TextTheme textTheme,
     Brightness brightness,
   ) {
     return baseTheme.appBarTheme.copyWith(
-      backgroundColor: colorScheme.primary,
-      foregroundColor: colorScheme.onPrimary,
-      titleTextStyle: baseTheme.textTheme.titleLarge?.copyWith(
+      backgroundColor: colorScheme.surface,
+      foregroundColor: colorScheme.onSurface,
+      surfaceTintColor: colorScheme.surface,
+      titleTextStyle: textTheme.titleLarge?.copyWith(
         fontWeight: FontWeight.w600,
-        color: colorScheme.onPrimary,
+        color: colorScheme.onSurface,
       ),
       centerTitle: false,
       elevation: 0,
-      iconTheme: IconThemeData(color: colorScheme.onPrimary),
+      iconTheme: IconThemeData(color: colorScheme.onSurface),
       systemOverlayStyle: SystemUiOverlayStyle(
-        statusBarColor: colorScheme.primary,
-        statusBarBrightness: brightness,
-        statusBarIconBrightness: brightness,
+        statusBarColor: Colors.transparent,
+        statusBarBrightness:
+            brightness == Brightness.light ? Brightness.light : Brightness.dark,
+        statusBarIconBrightness:
+            brightness == Brightness.light ? Brightness.dark : Brightness.light,
       ),
     );
   }
@@ -296,5 +299,21 @@ class AppTheme {
       ),
     );
   }
-}
 
+  ListTileThemeData _listTileTheme(
+    ThemeData baseTheme,
+    ColorScheme colorScheme,
+  ) {
+    return baseTheme.listTileTheme.copyWith(
+      titleTextStyle: baseTheme.textTheme.titleMedium?.copyWith(
+        color: colorScheme.onSurface,
+        fontWeight: FontWeight.bold,
+      ),
+      subtitleTextStyle: baseTheme.textTheme.bodySmall?.copyWith(
+        color: colorScheme.onSurfaceVariant,
+      ),
+      iconColor: colorScheme.secondary,
+      textColor: colorScheme.onSurface,
+    );
+  }
+}

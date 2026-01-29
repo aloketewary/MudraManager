@@ -11,8 +11,20 @@ class AnimatedBalance extends ConsumerWidget {
   final Duration duration;
   final int fixedStringLength;
   final TextAlign textAlign;
+  final String? suffix;
+  final String? prefix;
 
-  const AnimatedBalance({super.key, required this.value, this.style, this.duration = const Duration(milliseconds: 500), this.overflow, this.fixedStringLength = 2, this.textAlign = TextAlign.left});
+  const AnimatedBalance({
+    super.key,
+    required this.value,
+    this.style,
+    this.duration = const Duration(milliseconds: 500),
+    this.overflow,
+    this.fixedStringLength = 2,
+    this.textAlign = TextAlign.left,
+    this.suffix,
+    this.prefix,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -23,7 +35,16 @@ class AnimatedBalance extends ConsumerWidget {
       tween: Tween<double>(begin: 0, end: value),
       duration: duration,
       builder: (context, animatedValue, _) {
-        return Text(ctxt.formatCurrencyWithSign(fixedStringLength, animatedValue), style: style ?? Theme.of(context).textTheme.headlineMedium, overflow: overflow, textAlign: textAlign);
+        final formattedValue = ctxt.formatCurrencyWithSign(
+          fixedStringLength,
+          animatedValue,
+        );
+        return Text(
+          '${prefix ?? ""}$formattedValue${suffix ?? ""}',
+          style: style ?? Theme.of(context).textTheme.headlineMedium,
+          overflow: overflow,
+          textAlign: textAlign,
+        );
       },
     );
   }

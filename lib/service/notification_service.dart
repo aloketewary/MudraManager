@@ -136,4 +136,38 @@ class NotificationService {
 
     await _plugin.show(id, title, body, notificationDetails);
   }
+
+  static Future<void> scheduleMonthlyGoalReminder(String body) async {
+    // ID 1 for monthly goal reminder
+    await _plugin.cancel(1);
+
+    final now = tz.TZDateTime.now(tz.local);
+    // Schedule for the 1st of next month at 9:00 AM
+    var scheduledDate = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month + 1,
+      1,
+      9,
+      0,
+    );
+
+    await _plugin.zonedSchedule(
+      1,
+      'Monthly Goal Status',
+      body,
+      scheduledDate,
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'goal_reminder_channel',
+          'Goal Reminders',
+          channelDescription: 'Monthly reminders for your goals',
+          importance: Importance.high,
+          priority: Priority.high,
+        ),
+      ),
+      matchDateTimeComponents: DateTimeComponents.dayOfMonthAndTime,
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+    );
+  }
 }

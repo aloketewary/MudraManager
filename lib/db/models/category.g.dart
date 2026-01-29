@@ -57,6 +57,19 @@ const CategorySchema = CollectionSchema(
           caseSensitive: false,
         )
       ],
+    ),
+    r'categoryType': IndexSchema(
+      id: -9139447922162606245,
+      name: r'categoryType',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'categoryType',
+          type: IndexType.value,
+          caseSensitive: false,
+        )
+      ],
     )
   },
   links: {},
@@ -220,6 +233,14 @@ extension CategoryQueryWhereSort on QueryBuilder<Category, Category, QWhere> {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         const IndexWhereClause.any(indexName: r'name'),
+      );
+    });
+  }
+
+  QueryBuilder<Category, Category, QAfterWhere> anyCategoryType() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        const IndexWhereClause.any(indexName: r'categoryType'),
       );
     });
   }
@@ -423,6 +444,96 @@ extension CategoryQueryWhere on QueryBuilder<Category, Category, QWhereClause> {
               upper: [''],
             ));
       }
+    });
+  }
+
+  QueryBuilder<Category, Category, QAfterWhereClause> categoryTypeEqualTo(
+      CategoryType categoryType) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'categoryType',
+        value: [categoryType],
+      ));
+    });
+  }
+
+  QueryBuilder<Category, Category, QAfterWhereClause> categoryTypeNotEqualTo(
+      CategoryType categoryType) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'categoryType',
+              lower: [],
+              upper: [categoryType],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'categoryType',
+              lower: [categoryType],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'categoryType',
+              lower: [categoryType],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'categoryType',
+              lower: [],
+              upper: [categoryType],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
+
+  QueryBuilder<Category, Category, QAfterWhereClause> categoryTypeGreaterThan(
+    CategoryType categoryType, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'categoryType',
+        lower: [categoryType],
+        includeLower: include,
+        upper: [],
+      ));
+    });
+  }
+
+  QueryBuilder<Category, Category, QAfterWhereClause> categoryTypeLessThan(
+    CategoryType categoryType, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'categoryType',
+        lower: [],
+        upper: [categoryType],
+        includeUpper: include,
+      ));
+    });
+  }
+
+  QueryBuilder<Category, Category, QAfterWhereClause> categoryTypeBetween(
+    CategoryType lowerCategoryType,
+    CategoryType upperCategoryType, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'categoryType',
+        lower: [lowerCategoryType],
+        includeLower: includeLower,
+        upper: [upperCategoryType],
+        includeUpper: includeUpper,
+      ));
     });
   }
 }

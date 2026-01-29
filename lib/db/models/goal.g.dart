@@ -17,43 +17,53 @@ const GoalSchema = CollectionSchema(
   name: r'Goal',
   id: 4693499363663894908,
   properties: {
-    r'creationDate': PropertySchema(
+    r'colorValue': PropertySchema(
       id: 0,
+      name: r'colorValue',
+      type: IsarType.long,
+    ),
+    r'creationDate': PropertySchema(
+      id: 1,
       name: r'creationDate',
       type: IsarType.dateTime,
     ),
     r'currentAmount': PropertySchema(
-      id: 1,
+      id: 2,
       name: r'currentAmount',
       type: IsarType.double,
     ),
+    r'iconName': PropertySchema(
+      id: 3,
+      name: r'iconName',
+      type: IsarType.string,
+    ),
     r'isActive': PropertySchema(
-      id: 2,
+      id: 4,
       name: r'isActive',
       type: IsarType.bool,
     ),
     r'name': PropertySchema(
-      id: 3,
+      id: 5,
       name: r'name',
       type: IsarType.string,
     ),
     r'progressPercent': PropertySchema(
-      id: 4,
+      id: 6,
       name: r'progressPercent',
       type: IsarType.double,
     ),
     r'remainingAmount': PropertySchema(
-      id: 5,
+      id: 7,
       name: r'remainingAmount',
       type: IsarType.double,
     ),
     r'targetAmount': PropertySchema(
-      id: 6,
+      id: 8,
       name: r'targetAmount',
       type: IsarType.double,
     ),
     r'targetDate': PropertySchema(
-      id: 7,
+      id: 9,
       name: r'targetDate',
       type: IsarType.dateTime,
     )
@@ -112,6 +122,12 @@ int _goalEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
+  {
+    final value = object.iconName;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   bytesCount += 3 + object.name.length * 3;
   return bytesCount;
 }
@@ -122,14 +138,16 @@ void _goalSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeDateTime(offsets[0], object.creationDate);
-  writer.writeDouble(offsets[1], object.currentAmount);
-  writer.writeBool(offsets[2], object.isActive);
-  writer.writeString(offsets[3], object.name);
-  writer.writeDouble(offsets[4], object.progressPercent);
-  writer.writeDouble(offsets[5], object.remainingAmount);
-  writer.writeDouble(offsets[6], object.targetAmount);
-  writer.writeDateTime(offsets[7], object.targetDate);
+  writer.writeLong(offsets[0], object.colorValue);
+  writer.writeDateTime(offsets[1], object.creationDate);
+  writer.writeDouble(offsets[2], object.currentAmount);
+  writer.writeString(offsets[3], object.iconName);
+  writer.writeBool(offsets[4], object.isActive);
+  writer.writeString(offsets[5], object.name);
+  writer.writeDouble(offsets[6], object.progressPercent);
+  writer.writeDouble(offsets[7], object.remainingAmount);
+  writer.writeDouble(offsets[8], object.targetAmount);
+  writer.writeDateTime(offsets[9], object.targetDate);
 }
 
 Goal _goalDeserialize(
@@ -139,13 +157,15 @@ Goal _goalDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = Goal();
-  object.creationDate = reader.readDateTime(offsets[0]);
-  object.currentAmount = reader.readDouble(offsets[1]);
+  object.colorValue = reader.readLongOrNull(offsets[0]);
+  object.creationDate = reader.readDateTime(offsets[1]);
+  object.currentAmount = reader.readDouble(offsets[2]);
+  object.iconName = reader.readStringOrNull(offsets[3]);
   object.id = id;
-  object.isActive = reader.readBool(offsets[2]);
-  object.name = reader.readString(offsets[3]);
-  object.targetAmount = reader.readDouble(offsets[6]);
-  object.targetDate = reader.readDateTimeOrNull(offsets[7]);
+  object.isActive = reader.readBool(offsets[4]);
+  object.name = reader.readString(offsets[5]);
+  object.targetAmount = reader.readDouble(offsets[8]);
+  object.targetDate = reader.readDateTimeOrNull(offsets[9]);
   return object;
 }
 
@@ -157,20 +177,24 @@ P _goalDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readDateTime(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 1:
-      return (reader.readDouble(offset)) as P;
+      return (reader.readDateTime(offset)) as P;
     case 2:
-      return (reader.readBool(offset)) as P;
+      return (reader.readDouble(offset)) as P;
     case 3:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 4:
-      return (reader.readDouble(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 5:
-      return (reader.readDouble(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 6:
       return (reader.readDouble(offset)) as P;
     case 7:
+      return (reader.readDouble(offset)) as P;
+    case 8:
+      return (reader.readDouble(offset)) as P;
+    case 9:
       return (reader.readDateTimeOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -461,6 +485,75 @@ extension GoalQueryWhere on QueryBuilder<Goal, Goal, QWhereClause> {
 }
 
 extension GoalQueryFilter on QueryBuilder<Goal, Goal, QFilterCondition> {
+  QueryBuilder<Goal, Goal, QAfterFilterCondition> colorValueIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'colorValue',
+      ));
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterFilterCondition> colorValueIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'colorValue',
+      ));
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterFilterCondition> colorValueEqualTo(
+      int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'colorValue',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterFilterCondition> colorValueGreaterThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'colorValue',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterFilterCondition> colorValueLessThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'colorValue',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterFilterCondition> colorValueBetween(
+    int? lower,
+    int? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'colorValue',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<Goal, Goal, QAfterFilterCondition> creationDateEqualTo(
       DateTime value) {
     return QueryBuilder.apply(this, (query) {
@@ -572,6 +665,151 @@ extension GoalQueryFilter on QueryBuilder<Goal, Goal, QFilterCondition> {
         upper: upper,
         includeUpper: includeUpper,
         epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterFilterCondition> iconNameIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'iconName',
+      ));
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterFilterCondition> iconNameIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'iconName',
+      ));
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterFilterCondition> iconNameEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'iconName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterFilterCondition> iconNameGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'iconName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterFilterCondition> iconNameLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'iconName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterFilterCondition> iconNameBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'iconName',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterFilterCondition> iconNameStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'iconName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterFilterCondition> iconNameEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'iconName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterFilterCondition> iconNameContains(String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'iconName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterFilterCondition> iconNameMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'iconName',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterFilterCondition> iconNameIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'iconName',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterFilterCondition> iconNameIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'iconName',
+        value: '',
       ));
     });
   }
@@ -1039,6 +1277,18 @@ extension GoalQueryLinks on QueryBuilder<Goal, Goal, QFilterCondition> {
 }
 
 extension GoalQuerySortBy on QueryBuilder<Goal, Goal, QSortBy> {
+  QueryBuilder<Goal, Goal, QAfterSortBy> sortByColorValue() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'colorValue', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterSortBy> sortByColorValueDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'colorValue', Sort.desc);
+    });
+  }
+
   QueryBuilder<Goal, Goal, QAfterSortBy> sortByCreationDate() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'creationDate', Sort.asc);
@@ -1060,6 +1310,18 @@ extension GoalQuerySortBy on QueryBuilder<Goal, Goal, QSortBy> {
   QueryBuilder<Goal, Goal, QAfterSortBy> sortByCurrentAmountDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'currentAmount', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterSortBy> sortByIconName() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'iconName', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterSortBy> sortByIconNameDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'iconName', Sort.desc);
     });
   }
 
@@ -1137,6 +1399,18 @@ extension GoalQuerySortBy on QueryBuilder<Goal, Goal, QSortBy> {
 }
 
 extension GoalQuerySortThenBy on QueryBuilder<Goal, Goal, QSortThenBy> {
+  QueryBuilder<Goal, Goal, QAfterSortBy> thenByColorValue() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'colorValue', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterSortBy> thenByColorValueDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'colorValue', Sort.desc);
+    });
+  }
+
   QueryBuilder<Goal, Goal, QAfterSortBy> thenByCreationDate() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'creationDate', Sort.asc);
@@ -1158,6 +1432,18 @@ extension GoalQuerySortThenBy on QueryBuilder<Goal, Goal, QSortThenBy> {
   QueryBuilder<Goal, Goal, QAfterSortBy> thenByCurrentAmountDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'currentAmount', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterSortBy> thenByIconName() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'iconName', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterSortBy> thenByIconNameDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'iconName', Sort.desc);
     });
   }
 
@@ -1247,6 +1533,12 @@ extension GoalQuerySortThenBy on QueryBuilder<Goal, Goal, QSortThenBy> {
 }
 
 extension GoalQueryWhereDistinct on QueryBuilder<Goal, Goal, QDistinct> {
+  QueryBuilder<Goal, Goal, QDistinct> distinctByColorValue() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'colorValue');
+    });
+  }
+
   QueryBuilder<Goal, Goal, QDistinct> distinctByCreationDate() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'creationDate');
@@ -1256,6 +1548,13 @@ extension GoalQueryWhereDistinct on QueryBuilder<Goal, Goal, QDistinct> {
   QueryBuilder<Goal, Goal, QDistinct> distinctByCurrentAmount() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'currentAmount');
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QDistinct> distinctByIconName(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'iconName', caseSensitive: caseSensitive);
     });
   }
 
@@ -1304,6 +1603,12 @@ extension GoalQueryProperty on QueryBuilder<Goal, Goal, QQueryProperty> {
     });
   }
 
+  QueryBuilder<Goal, int?, QQueryOperations> colorValueProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'colorValue');
+    });
+  }
+
   QueryBuilder<Goal, DateTime, QQueryOperations> creationDateProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'creationDate');
@@ -1313,6 +1618,12 @@ extension GoalQueryProperty on QueryBuilder<Goal, Goal, QQueryProperty> {
   QueryBuilder<Goal, double, QQueryOperations> currentAmountProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'currentAmount');
+    });
+  }
+
+  QueryBuilder<Goal, String?, QQueryOperations> iconNameProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'iconName');
     });
   }
 
@@ -1366,7 +1677,9 @@ Goal _$GoalFromJson(Map<String, dynamic> json) => Goal()
       ? null
       : DateTime.parse(json['targetDate'] as String)
   ..creationDate = DateTime.parse(json['creationDate'] as String)
-  ..isActive = json['isActive'] as bool;
+  ..isActive = json['isActive'] as bool
+  ..iconName = json['iconName'] as String?
+  ..colorValue = (json['colorValue'] as num?)?.toInt();
 
 Map<String, dynamic> _$GoalToJson(Goal instance) => <String, dynamic>{
       'id': instance.id,
@@ -1376,4 +1689,6 @@ Map<String, dynamic> _$GoalToJson(Goal instance) => <String, dynamic>{
       'targetDate': instance.targetDate?.toIso8601String(),
       'creationDate': instance.creationDate.toIso8601String(),
       'isActive': instance.isActive,
+      'iconName': instance.iconName,
+      'colorValue': instance.colorValue,
     };

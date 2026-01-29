@@ -11,7 +11,13 @@ import 'package:mudra_manager/providers/pending_transaction_prodiver.dart';
 import 'package:mudra_manager/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/util/string_util.dart';
 import 'package:mudra_manager/util/transaction_msg_util.dart'
-    show TransactionInfo, TransactionType, TransactionUtil, checkForTransactionalMessage, generateSmsHash;
+    show
+        TransactionInfo,
+        TransactionType,
+        TransactionUtil,
+        checkForTransactionalMessage,
+        generateSmsHash;
+import 'package:mudra_manager/main.dart' show setupSmsListener;
 import 'package:permission_handler/permission_handler.dart';
 
 class SmsImportSettingsScreen extends ConsumerStatefulWidget {
@@ -24,7 +30,8 @@ class SmsImportSettingsScreen extends ConsumerStatefulWidget {
 
 class _SmsImportSettingsScreenState
     extends ConsumerState<SmsImportSettingsScreen> {
-  bool _smsImportEnabled = SharedPrefsUtil.instance.getSmsImportEnabled(); // Toggle for SMS Import
+  bool _smsImportEnabled =
+      SharedPrefsUtil.instance.getSmsImportEnabled(); // Toggle for SMS Import
   TransactionUtil transactionUtil = TransactionUtil();
   bool _permissionGranted = false;
 
@@ -42,15 +49,8 @@ class _SmsImportSettingsScreenState
 
   @override
   Widget build(BuildContext context) {
-    var textTheme = Theme.of(context).textTheme;
-    var color = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'SMS Import Settings',
-          style: textTheme.titleLarge?.copyWith(color: color.onPrimary),
-        ),
-      ),
+      appBar: AppBar(title: const Text('SMS Import Settings')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -60,11 +60,46 @@ class _SmsImportSettingsScreenState
               'Automatically detect and add transactions from SMS messages.',
             ),
             value: _smsImportEnabled,
-            onChanged: (bool value) {
-              setState(() {
-                _smsImportEnabled = value;
-              });
-              SharedPrefsUtil.instance.setSmsImportEnabled(value);
+            onChanged: (bool value) async {
+              if (value) {
+                // Request permission first
+                final permission = await Permission.sms.request();
+                if (permission.isGranted) {
+                  setState(() {
+                    _smsImportEnabled = value;
+                  });
+                  SharedPrefsUtil.instance.setSmsImportEnabled(value);
+                  // Start listener - import from main.dart
+                  await setupSmsListener();
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'SMS import enabled. Financial transactions will be detected automatically.',
+                      ),
+                    ),
+                  );
+                } else {
+                  // Show error
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'SMS permission is required for automatic transaction detection',
+                      ),
+                    ),
+                  );
+                }
+              } else {
+                setState(() {
+                  _smsImportEnabled = value;
+                });
+                SharedPrefsUtil.instance.setSmsImportEnabled(value);
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('SMS import disabled')),
+                );
+              }
             },
           ),
           const SizedBox(height: 24),
@@ -79,7 +114,9 @@ class _SmsImportSettingsScreenState
           const SizedBox(height: 24),
           ListTile(
             title: const Text('Clear SMS transaction processing history'),
-            subtitle: Text('If scan sms not working clear this and re-scan sms again.'),
+            subtitle: Text(
+              'If scan sms not working clear this and re-scan sms again.',
+            ),
             leading: const Icon(Icons.clear_all),
             onTap: () => SharedPrefsUtil.instance.clearProcessedHashes(),
           ),
@@ -153,7 +190,7 @@ class _SmsImportSettingsScreenState
             child: Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.8),
+                color: Colors.white.withValues(alpha: 0.8),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Column(
@@ -179,6 +216,8 @@ class _SmsImportSettingsScreenState
 
     final query = SmsQuery();
     final messages = await query.getAllSms;
+
+    if (!mounted) return;
 
     final filteredMessages =
         messages
@@ -229,6 +268,7 @@ class _SmsImportSettingsScreenState
   }
 
   void _showFoundSmsMessage(int count) {
+    if (!mounted) return;
     // You can use a SnackBar, Dialog, Toast, anything.
     // Here's a quick SnackBar example:
     final message =
@@ -244,6 +284,7 @@ class _SmsImportSettingsScreenState
   }
 
   void processSmsForSaving(TransactionInfo sms) async {
+    if (!mounted) return;
     var pendingTxnService = ref.read(pendingTxnServiceProvider);
 
     var pending =
@@ -262,6 +303,7 @@ class _SmsImportSettingsScreenState
     try {
       pendingTxnService.save(pending);
     } catch (exp) {
+      if (!mounted) return;
       var message = 'Error saving pending transaction to database: $exp';
       ScaffoldMessenger.of(
         context,

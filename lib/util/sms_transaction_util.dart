@@ -23,7 +23,7 @@ class SmsProcessorService {
     final pending =
         PendingTransaction()
           ..date = sms.transactionTime ?? DateTime.now()
-          ..account = sms.account?.sendTo
+          ..account = sms.account?.no
           ..amount = sms.money?.toDouble()
           ..isIncome = sms.typeOfTransaction == TransactionType.credited
           ..body = sms.body
@@ -31,7 +31,7 @@ class SmsProcessorService {
           ..transactionRef = sms.account?.refNo
           ..category = sms.typeOfTransaction?.name
           ..smsHash = sms.smsHash
-          ..toAccount = sms.account?.type == 'UPI' ? sms.account?.sendTo : '';
+          ..toAccount = sms.account?.sendTo;
 
     try {
       final isar =
@@ -45,39 +45,41 @@ class SmsProcessorService {
     }
   }
 
-  void parseAndSaveTransaction(String sms) {
-    var transactionalMessage = checkForTransactionalMessage(sms);
-    if (transactionalMessage) {
-      var smsMessage = parseSms(sms);
-      checkForDuplicateEntryAndProcess(smsMessage);
+  /// Process raw SMS data and save as pending transaction if it's financial
+  void parseAndSaveTransaction({
+    required String body,
+    required String address,
+    String? sender,
+    required int timestamp,
+  }) {
+    // Check if this is a transactional message
+    if (!checkForTransactionalMessage(body)) {
+      return;
     }
-  }
 
-  parseSms(String sms) {
-    var smsMessage = SmsMessage.fromJson(json.decode(sms));
-    return smsMessage;
-  }
+    // Generate hash to prevent duplicates
+    final smsHash = generateSmsHash(address, timestamp, body);
 
-  void checkForDuplicateEntryAndProcess(SmsMessage sms) {
-    TransactionUtil transactionUtil = TransactionUtil();
-    var smsHash = generateSmsHash(
-      sms.address ?? '',
-      sms.date?.millisecondsSinceEpoch,
-      sms.body ?? '',
+    // Check if already processed
+    if (SharedPrefsUtil.instance.isAlreadyProcessed(smsHash)) {
+      debugPrint("Skipping already processed SMS from $address");
+      return;
+    }
+
+    // Mark as processed
+    SharedPrefsUtil.instance.storeProcessedHash(smsHash);
+
+    // Parse transaction info
+    final transactionUtil = TransactionUtil();
+    final transactionInfo = transactionUtil.getTransactionInfo(
+      body,
+      address,
+      sender,
+      smsHash,
     );
-    var alreadyProcessed = SharedPrefsUtil.instance.isAlreadyProcessed(smsHash);
-    if (!alreadyProcessed) {
-      SharedPrefsUtil.instance.storeProcessedHash(smsHash);
-      var transactionInfo = transactionUtil.getTransactionInfo(
-        sms.body,
-        sms.address,
-        sms.sender,
-        smsHash,
-      );
-      processSmsForSaving(transactionInfo);
-    } else {
-      debugPrint("Skipping already processed SMS from ${sms.address}");
-    }
+
+    // Save to pending transactions
+    processSmsForSaving(transactionInfo);
   }
 
   Future<Isar> getIsarInstance() async {
