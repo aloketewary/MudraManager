@@ -1,3 +1,4 @@
+import 'package:go_router/go_router.dart';
 // lib/screens/edit_user_profile_screen.dart
 
 import 'package:flutter/material.dart';
@@ -49,7 +50,7 @@ class _EditUserProfileScreenState extends ConsumerState<EditUserProfileScreen> {
                 setState(() {
                   _selectedAvatarIndex = index;
                 });
-                Navigator.pop(context);
+                context.pop();
               },
               child: CircleAvatar(child: Icon(iconDataList[index], size: 28)),
             );
@@ -175,7 +176,7 @@ class _EditUserProfileScreenState extends ConsumerState<EditUserProfileScreen> {
 
                         ref.invalidate(userProfileProvider); // Refresh UI
 
-                        if (context.mounted) Navigator.pop(context);
+                        if (context.mounted) context.pop();
                       }
                     },
                   ),

@@ -13,6 +13,7 @@ import 'package:mudra_manager/providers/shared_preference_provider.dart'
     show SharedPrefsUtil;
 import 'package:mudra_manager/util/string_util.dart';
 import 'package:mudra_manager/util/transaction_msg_util.dart';
+import 'package:mudra_manager/util/app_logger.dart';
 
 class SmsProcessorService {
   static final SmsProcessorService instance = SmsProcessorService._();
@@ -39,8 +40,14 @@ class SmsProcessorService {
       await isar.writeTxn(() async {
         await isar.pendingTransactions.put(pending);
       });
+      
+      AppLogger.logSMS('Transaction saved', details: {
+        'sender': sms.sender,
+        'amount': sms.money,
+        'type': sms.typeOfTransaction?.name,
+      });
     } catch (e) {
-      // Log for background — no context
+      AppLogger.error('Failed to save SMS transaction', error: e);
       print('Failed to save SMS transaction: $e');
     }
   }
@@ -54,6 +61,9 @@ class SmsProcessorService {
   }) {
     // Check if this is a transactional message
     if (!checkForTransactionalMessage(body)) {
+      AppLogger.logSMS('SMS filtered out (not transactional)', details: {
+        'sender': address,
+      });
       return;
     }
 
@@ -62,6 +72,10 @@ class SmsProcessorService {
 
     // Check if already processed
     if (SharedPrefsUtil.instance.isAlreadyProcessed(smsHash)) {
+      AppLogger.logSMS('SMS already processed', details: {
+        'sender': address,
+        'hash': smsHash.substring(0, 8),
+      });
       debugPrint("Skipping already processed SMS from $address");
       return;
     }
@@ -77,6 +91,12 @@ class SmsProcessorService {
       sender,
       smsHash,
     );
+
+    AppLogger.logSMS('SMS parsed successfully', details: {
+      'sender': address,
+      'amount': transactionInfo.money,
+      'account': transactionInfo.account?.no,
+    });
 
     // Save to pending transactions
     processSmsForSaving(transactionInfo);

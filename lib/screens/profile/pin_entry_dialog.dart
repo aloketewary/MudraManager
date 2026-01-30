@@ -1,3 +1,4 @@
+import 'package:go_router/go_router.dart';
 import 'dart:math';
 import 'package:flutter/material.dart';
 
@@ -31,7 +32,7 @@ class _PinEntryDialogState extends State<PinEntryDialog> {
     if (_input.length == widget.length) {
       // PIN complete
       Future.delayed(const Duration(milliseconds: 200), () {
-        Navigator.of(context).pop(_input.join());
+        context.pop(_input.join());
       });
     }
   }

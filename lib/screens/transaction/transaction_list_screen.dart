@@ -1,3 +1,4 @@
+import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -17,6 +18,7 @@ import 'package:mudra_manager/screens/transaction/add_edit_transaction_screen.da
 import 'package:mudra_manager/screens/transaction/transaction_card.dart';
 import 'package:mudra_manager/screens/transaction/transaction_group.dart';
 import 'package:mudra_manager/screens/transaction/transfer_screen.dart';
+import 'package:mudra_manager/util/dialog_utils.dart';
 
 class TransactionListScreen extends ConsumerStatefulWidget {
   final bool showAppBar;
@@ -39,16 +41,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
   DateTime _selectedDate = DateTime.now();
 
   void _onFabPressed() {
-    Navigator.of(context).push(
-      PageRouteBuilder(
-        transitionDuration: Duration(milliseconds: 300),
-        pageBuilder:
-            (_, animation, secondaryAnimation) => AddEditTransactionScreen(),
-        transitionsBuilder: (_, animation, __, child) {
-          return FadeTransition(opacity: animation, child: child);
-        },
-      ),
-    );
+    context.push('/add-transaction');
   }
 
   List<DateTime> generateCircularMonths({int count = 12}) {
@@ -141,14 +134,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                 ),
                 actions: [
                   TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => ReviewPendingTransactionsScreen(),
-                        ),
-                      );
-                    },
+                    onPressed: () => context.push('/pending-transactions'),
                     child: Text(
                       ctxt.transaction_listPendingTransactionMessageActionLabel
                           .toUpperCase(),
@@ -240,7 +226,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                 setState(() {
                   _filter = value!;
                 });
-                Navigator.pop(context);
+                context.pop();
               },
             ),
             RadioListTile<String>(
@@ -256,7 +242,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                 setState(() {
                   _filter = value!;
                 });
-                Navigator.pop(context);
+                context.pop();
               },
             ),
             RadioListTile<String>(
@@ -272,7 +258,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                 setState(() {
                   _filter = value!;
                 });
-                Navigator.pop(context);
+                context.pop();
               },
             ),
             const SizedBox(height: 16),
@@ -316,128 +302,24 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
         related: transaction.related.value,
         onEdit: () {
           transaction.isTransfer
-              ? Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder:
-                      (_) => TransferScreen(
-                        amount: transaction.amount.toStringAsFixed(2),
-                        note: transaction.description,
-                        date: transaction.date,
-                        fromAccount: transaction.related.value?.account.value,
-                        toAccount: transaction.account.value,
-                        fromId: transaction.related.value?.id,
-                        toId: transaction.id,
-                      ),
-                ),
-              )
-              : Navigator.of(context).push(
-                PageRouteBuilder(
-                  transitionDuration: Duration(milliseconds: 300),
-                  pageBuilder:
-                      (_, animation, secondaryAnimation) =>
-                          AddEditTransactionScreen(transaction: transaction),
-                  transitionsBuilder: (_, animation, __, child) {
-                    return FadeTransition(opacity: animation, child: child);
-                  },
-                ),
-              );
+              ? context.push('/transfer', extra: {
+                  'amount': transaction.amount.toStringAsFixed(2),
+                  'note': transaction.description,
+                  'date': transaction.date,
+                  'fromAccount': transaction.related.value?.account.value,
+                  'toAccount': transaction.account.value,
+                  'fromId': transaction.related.value?.id,
+                  'toId': transaction.id,
+                })
+              : context.push('/add-transaction', extra: {'transaction': transaction});
         },
         onRemove: () async {
-          final confirm = await showModalBottomSheet<bool>(
-            context: context,
-            backgroundColor: color.surface,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-            ),
-            builder:
-                (context) => SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 40,
-                          height: 4,
-                          margin: const EdgeInsets.only(bottom: 24),
-                          decoration: BoxDecoration(
-                            color: color.onSurfaceVariant.withValues(
-                              alpha: 0.4,
-                            ),
-                            borderRadius: BorderRadius.circular(2),
-                          ),
-                        ),
-                        Icon(
-                          Icons.delete_forever_rounded,
-                          size: 48,
-                          color: color.error,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          ctxt.transaction_deleteAlertTitleText,
-                          style: textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          ctxt.transaction_deleteAlertBodyText,
-                          style: textTheme.bodyMedium?.copyWith(
-                            color: color.onSurfaceVariant,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 32),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: OutlinedButton(
-                                onPressed: () => Navigator.pop(context, false),
-                                style: OutlinedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 16,
-                                  ),
-                                  side: BorderSide(color: color.outline),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                                child: Text(
-                                  ctxt.transaction_cancelButtonActionText
-                                      .toUpperCase(),
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: FilledButton(
-                                onPressed: () => Navigator.pop(context, true),
-                                style: FilledButton.styleFrom(
-                                  backgroundColor: color.error,
-                                  foregroundColor: color.onError,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 16,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                                child: Text(
-                                  ctxt.transaction_deleteButtonActionText
-                                      .toUpperCase(),
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+          final confirm = await DialogUtils.showDeleteConfirmation(
+            context,
+            title: ctxt.transaction_deleteAlertTitleText,
+            message: ctxt.transaction_deleteAlertBodyText,
+            cancelText: ctxt.transaction_cancelButtonActionText,
+            deleteText: ctxt.transaction_deleteButtonActionText,
           );
 
           if (confirm == true) {
@@ -449,7 +331,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
             await ref
                 .read(transactionProvider)
                 .deleteTransaction(transaction.id);
-            ref.invalidate(transactionProvider); // refresh list
+            ref.invalidate(transactionProvider);
           }
         },
       );

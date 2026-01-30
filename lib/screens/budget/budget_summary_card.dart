@@ -1,3 +1,4 @@
+import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -12,6 +13,7 @@ import 'package:mudra_manager/screens/budget/budget_category_mini_card.dart'
 import 'package:mudra_manager/screens/budget/budget_chart_screen.dart'
     show NestedCircularChart;
 import 'package:mudra_manager/screens/budget/chart_legend.dart';
+import 'package:mudra_manager/util/dialog_utils.dart';
 import 'package:mudra_manager/util/localization_extension.dart';
 
 class BudgetSummaryCard extends ConsumerStatefulWidget {
@@ -104,39 +106,14 @@ class BudgetSummaryCardState extends ConsumerState<BudgetSummaryCard> {
                   icon: Icon(Icons.more_horiz, color: color.onSurfaceVariant),
                   onSelected: (value) async {
                     if (value == 'edit') {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder:
-                              (_) =>
-                                  AddBudgetScreen(existing: widget.data.budget),
-                        ),
-                      );
+                      context.push('/add-budget');
                     } else if (value == 'delete') {
-                      final confirm = await showDialog<bool>(
-                        context: context,
-                        builder:
-                            (ctx) => AlertDialog(
-                              title: Text(ctxt.budget_buttonDeleteTitleText),
-                              content: Text(ctxt.budget_buttonDeleteBodyText),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(ctx, false),
-                                  child: Text(
-                                    ctxt.budget_buttonCancelActionText
-                                        .toUpperCase(),
-                                  ),
-                                ),
-                                TextButton(
-                                  onPressed: () => Navigator.pop(ctx, true),
-                                  child: Text(
-                                    ctxt.budget_buttonDeleteActionText
-                                        .toUpperCase(),
-                                    style: TextStyle(color: color.error),
-                                  ),
-                                ),
-                              ],
-                            ),
+                      final confirm = await DialogUtils.showDeleteConfirmation(
+                        context,
+                        title: ctxt.budget_buttonDeleteTitleText,
+                        message: ctxt.budget_buttonDeleteBodyText,
+                        cancelText: ctxt.budget_buttonCancelActionText,
+                        deleteText: ctxt.budget_buttonDeleteActionText,
                       );
                       if (confirm == true) {
                         await ref

@@ -1,3 +1,4 @@
+import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:mudra_manager/screens/budget/budget_dashboard.dart';
 import 'package:mudra_manager/screens/goal/goal_screen.dart';
@@ -105,10 +106,7 @@ class _UtilityCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         child: InkWell(
           onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => item.destination),
-            );
+            context.push('/manage-accounts');
           },
           child: Stack(
             children: [

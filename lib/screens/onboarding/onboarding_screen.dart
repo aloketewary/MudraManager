@@ -1,3 +1,4 @@
+import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar/isar.dart';
@@ -14,6 +15,7 @@ import 'package:mudra_manager/screens/onboarding/onboarding_background.dart' sho
 import 'package:mudra_manager/screens/reusable/common_text_input_field.dart';
 import 'package:mudra_manager/service/backup_restore_service.dart' show BackupService;
 import 'package:mudra_manager/util/localization_extension.dart';
+import 'package:mudra_manager/util/snackbar_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
@@ -76,7 +78,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       String hintText = ctxt.translate(currentPage.inputHint ?? '').toLowerCase();
       if (text.isEmpty) {
         // Show error
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(ctxt.onboard_pleaseFillThe(hintText))));
+        SnackbarService.error(ctxt.onboard_pleaseFillThe(hintText));
         return; // Stop here
       }
     }
@@ -87,12 +89,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       if (text.isEmpty) {
         String hintText = ctxt.translate(currentPage.inputHint ?? '').toLowerCase();
         // Show error
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(ctxt.onboard_pleaseFillThe(hintText))));
+        SnackbarService.error(ctxt.onboard_pleaseFillThe(hintText));
         return; // Stop here
       }
       if (balanceText.isEmpty) {
         // Show error
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(ctxt.onboard_pleaseFillThe(ctxt.onboard_initialBalance.toLowerCase()))));
+        SnackbarService.error(ctxt.onboard_pleaseFillThe(ctxt.onboard_initialBalance.toLowerCase()));
         return; // Stop here
       }
       // Try parsing as a double (allows for decimal numbers)
@@ -101,7 +103,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       if (balance == null) {
         String hintText = ctxt.translate(currentPage.inputHint ?? '').toLowerCase();
         // Show error if it's not a valid number
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(ctxt.onboard_pleaseEnterAValidNumberFor(hintText))));
+        SnackbarService.error(ctxt.onboard_pleaseEnterAValidNumberFor(hintText));
         return; // Stop here
       }
     }
@@ -134,7 +136,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     await createDefaultCategories(isar);
     if (context.mounted) {
       SharedPrefsUtil.instance.setOnboardingComplete();
-      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const HomePage()));
+      context.go('/home');
     }
   }
 
@@ -142,10 +144,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final isar = await ref.read(isarServiceProvider).getInstance();
     final data = await BackupService.restoreEncryptedBackup(context, isar);
     if (data != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Restore successful")),
-      );
-      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const HomePage()));
+      SnackbarService.success("Restore successful");
+      context.go('/home');
     }
   }
 

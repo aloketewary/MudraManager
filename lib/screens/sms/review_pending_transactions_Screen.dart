@@ -1,8 +1,10 @@
+import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:mudra_manager/db/models/account.dart' show Account;
-import 'package:mudra_manager/db/models/category.dart' show Category;
+import 'package:mudra_manager/db/models/category.dart' show Category, CategoryType;
 import 'package:mudra_manager/db/models/pending_transaction.dart'
     show PendingTransaction;
 import 'package:mudra_manager/db/models/transaction.dart' show Transaction;
@@ -17,9 +19,11 @@ import 'package:mudra_manager/screens/reusable/account_display_card.dart'
     show AccountDisplayCard;
 import 'package:mudra_manager/screens/reusable/category_card.dart'
     show CategoryCard;
-import 'package:mudra_manager/screens/reusable/common_button.dart';
+import 'package:mudra_manager/util/dialog_utils.dart';
 import 'package:mudra_manager/util/icon_helper.dart' show IconHelper;
 import 'package:mudra_manager/util/localization_extension.dart';
+import 'package:mudra_manager/util/snackbar_service.dart';
+import 'package:mudra_manager/util/category_matcher.dart';
 
 class ReviewPendingTransactionsScreen extends ConsumerStatefulWidget {
   const ReviewPendingTransactionsScreen({super.key});
@@ -44,30 +48,20 @@ class _ReviewPendingTransactionsScreenState
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_initialized) {
-      final balanceMap =
-          ref.watch(accountServiceProvider).getAccountBalanceMap();
-      balanceMap.then(
-        (val) => {
-          setState(() {
-            _balanceMap = val;
-          }),
-        },
-      );
+      ref.watch(accountServiceProvider).getAccountBalanceMap().then((val) {
+        if (mounted) setState(() => _balanceMap = val);
+      });
       _initialized = true;
     }
   }
 
   void _runStaggeredAnimations() async {
-    try {
-      if (_controllers.isNotEmpty) {
-        for (int i = 0; i < _controllers.length; i++) {
-          await Future.delayed(Duration(milliseconds: 100));
-          if (_isDisposed) return; // 🔐 Important check
-          _controllers[i].forward();
-        }
+    if (_controllers.isNotEmpty) {
+      for (int i = 0; i < _controllers.length; i++) {
+        await Future.delayed(Duration(milliseconds: 80));
+        if (_isDisposed) return;
+        _controllers[i].forward();
       }
-    } catch (err) {
-      debugPrint(err.toString());
     }
   }
 
@@ -77,7 +71,6 @@ class _ReviewPendingTransactionsScreenState
     for (var c in _controllers) {
       c.dispose();
     }
-    _controllers = List.empty();
     super.dispose();
   }
 
@@ -91,145 +84,240 @@ class _ReviewPendingTransactionsScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          ctxt.pendingTranx_reviewPendingTransactionsScreenTitle,
-          style: textTheme.titleLarge,
-        ),
+        title: Text(ctxt.pendingTranx_reviewPendingTransactionsScreenTitle),
         actions: [
           if (_isAutoProcessing)
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
-              child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: Center(
+                child: SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              ),
             )
           else ...[
             IconButton(
-              tooltip: "Auto Add Matched",
+              tooltip: "Auto Add",
               onPressed: _autoProcessTransactions,
-              icon: const Icon(Icons.auto_awesome),
+              icon: Icon(Icons.auto_awesome),
             ),
             IconButton(
               tooltip: "Clear All",
               onPressed: () async {
+                HapticFeedback.mediumImpact();
                 await pendingTransactionService.clearAll();
                 ref.invalidate(pendingTxnServiceProvider);
                 ref.invalidate(pendingTxnDataProvider);
               },
-              icon: const Icon(Icons.clear_all),
+              icon: Icon(Icons.clear_all),
             ),
           ],
         ],
       ),
-      body: Padding(
-        padding: EdgeInsets.only(bottom: 16),
-        child: pendingTransactionProvider.when(
-          data: (pendingTrans) {
-            _controllers = List.generate(pendingTrans.length, (index) {
-              return AnimationController(
-                vsync: this,
-                duration: Duration(milliseconds: 500),
-              );
-            });
+      body: pendingTransactionProvider.when(
+        data: (pendingTrans) {
+          if (pendingTrans.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.check_circle_outline,
+                    size: 80,
+                    color: color.primary.withOpacity(0.3),
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'No pending transactions',
+                    style: textTheme.titleLarge?.copyWith(
+                      color: color.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
 
-            _animations =
-                _controllers
-                    .map(
-                      (controller) => Tween<Offset>(
-                        begin: Offset(0, 0.2),
-                        end: Offset.zero,
-                      ).animate(
-                        CurvedAnimation(
-                          parent: controller,
-                          curve: Curves.easeOut,
-                        ),
-                      ),
-                    )
-                    .toList();
+          _controllers = List.generate(
+            pendingTrans.length,
+            (_) => AnimationController(
+              vsync: this,
+              duration: Duration(milliseconds: 400),
+            ),
+          );
+          _animations =
+              _controllers
+                  .map(
+                    (c) => Tween<Offset>(
+                      begin: Offset(0, 0.1),
+                      end: Offset.zero,
+                    ).animate(
+                      CurvedAnimation(parent: c, curve: Curves.easeOut),
+                    ),
+                  )
+                  .toList();
+          _runStaggeredAnimations();
 
-            _runStaggeredAnimations();
-            return ListView.builder(
-              itemCount: pendingTrans.length,
-              itemBuilder: (context, index) {
-                final transaction = pendingTrans[index];
-                return SlideTransition(
-                  position: _animations[index],
-                  child: FadeTransition(
-                    opacity: _controllers[index],
-                    child: Card.outlined(
-                      shadowColor: color.surface,
-                      color:
-                          (transaction?.amount ?? 0) > 0
-                              ? null
-                              : color.errorContainer,
-                      margin: const EdgeInsets.symmetric(
-                        horizontal: 16.0,
-                        vertical: 4.0,
+          return ListView.builder(
+            padding: EdgeInsets.symmetric(vertical: 8),
+            itemCount: pendingTrans.length,
+            itemBuilder: (context, index) {
+              final tx = pendingTrans[index];
+              final isIncome = (tx?.amount ?? 0) > 0;
+
+              return SlideTransition(
+                position: _animations[index],
+                child: FadeTransition(
+                  opacity: _controllers[index],
+                  child: Dismissible(
+                    key: Key(
+                      'pending_${tx?.date.millisecondsSinceEpoch}_$index',
+                    ),
+                    confirmDismiss: (direction) async {
+                      if (direction == DismissDirection.endToStart) {
+                        HapticFeedback.mediumImpact();
+                        return await DialogUtils.showDeleteConfirmation(
+                          context,
+                          title: "Delete Transaction?",
+                          message: "This action cannot be undone.",
+                        );
+                      } else if (direction == DismissDirection.startToEnd) {
+                        HapticFeedback.lightImpact();
+                        _showApproveBottomSheet(context, tx!);
+                        return false;
+                      }
+                      return false;
+                    },
+
+                    onDismissed: (direction) {
+                      if (direction == DismissDirection.endToStart) {
+                        _removePendingTransaction(tx!, false);
+                      }
+                    },
+                    background: Container(
+                      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: color.primary,
+                        borderRadius: BorderRadius.circular(20),
                       ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16.0),
-                        side: BorderSide(
-                          width: 1,
-                          color:
-                              (transaction?.amount ?? 0) > 0
-                                  ? color.primary
-                                  : color.error,
-                        ),
+                      alignment: Alignment.centerLeft,
+                      padding: EdgeInsets.only(left: 24),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.check_circle,
+                            color: color.onPrimary,
+                            size: 32,
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            'Approve',
+                            style: TextStyle(
+                              color: color.onPrimary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(16.0),
-                        child: ListTile(
-                          leading: const Icon(Icons.receipt_long_outlined),
-                          title: Text(
-                            transaction?.sender ?? 'Unknown Sender',
-                            style: textTheme.titleMedium?.copyWith(),
+                    ),
+                    secondaryBackground: Container(
+                      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: color.error,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      alignment: Alignment.centerRight,
+                      padding: EdgeInsets.only(right: 24),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.delete, color: color.onError, size: 32),
+                          SizedBox(height: 4),
+                          Text(
+                            'Delete',
+                            style: TextStyle(
+                              color: color.onError,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                ctxt.formatCurrencyWithSign(
-                                  2,
-                                  transaction?.amount ?? 0.0,
-                                ),
-                                style: textTheme.bodyLarge?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              Text(
-                                DateFormat(
-                                  'EEE, dd MMM yyyy',
-                                  ctxt.localeName,
-                                ).format(transaction?.date ?? DateTime.now()),
-                                style: textTheme.labelSmall,
-                              ),
-                            ],
+                        ],
+                      ),
+                    ),
+                    child: Container(
+                      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: color.surface,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: color.shadow.withOpacity(0.05),
+                            blurRadius: 10,
+                            offset: Offset(0, 4),
                           ),
-                          trailing: SizedBox(
-                            width: 100,
+                        ],
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(20),
+                          onTap: () {
+                            HapticFeedback.lightImpact();
+                            _showApproveBottomSheet(context, tx!);
+                          },
+                          child: Padding(
+                            padding: EdgeInsets.all(16),
                             child: Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
                               children: [
-                                IconButton.filled(
-                                  onPressed: () {
-                                    _removePendingTransaction(
-                                      transaction!,
-                                      false,
-                                    );
-                                  },
-                                  icon: Icon(
-                                    Icons.delete_outline,
-                                    color: color.onPrimary,
+                                Container(
+                                  padding: EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: (isIncome
+                                            ? color.primary
+                                            : color.error)
+                                        .withOpacity(0.1),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.receipt_long_outlined,
+                                    color:
+                                        isIncome ? color.primary : color.error,
+                                    size: 24,
                                   ),
                                 ),
-                                IconButton.filled(
-                                  onPressed: () {
-                                    _showApproveBottomSheet(
-                                      context,
-                                      transaction!,
-                                    );
-                                  },
-                                  icon: Icon(
-                                    Icons.task_alt_outlined,
-                                    color: color.onPrimary,
+                                SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        tx?.sender ?? 'Unknown',
+                                        style: textTheme.titleMedium?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      SizedBox(height: 4),
+                                      Text(
+                                        DateFormat(
+                                          'EEE, dd MMM',
+                                          ctxt.localeName,
+                                        ).format(tx?.date ?? DateTime.now()),
+                                        style: textTheme.bodySmall?.copyWith(
+                                          color: color.onSurfaceVariant,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Text(
+                                  '${isIncome ? '+' : '-'} ${ctxt.formatCurrencyWithSign(2, (tx?.amount ?? 0.0).abs())}',
+                                  style: textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                    color:
+                                        isIncome ? color.primary : color.error,
                                   ),
                                 ),
                               ],
@@ -239,13 +327,13 @@ class _ReviewPendingTransactionsScreenState
                       ),
                     ),
                   ),
-                );
-              },
-            );
-          },
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Center(child: Text('Error: $e')),
-        ),
+                ),
+              );
+            },
+          );
+        },
+        loading: () => Center(child: CircularProgressIndicator()),
+        error: (e, _) => Center(child: Text('Error: $e')),
       ),
     );
   }
@@ -254,54 +342,18 @@ class _ReviewPendingTransactionsScreenState
     PendingTransaction pendingTx,
     bool isApproved,
   ) async {
-    final textTheme = Theme.of(context).textTheme;
-    final color = Theme.of(context).colorScheme;
-
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Text(
-              "Delete Transaction?",
-              style: textTheme.titleLarge?.copyWith(color: color.primary),
-            ),
-            content: Text(
-              "This action cannot be undone.",
-              style: textTheme.bodyLarge,
-            ),
-            actions: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  CommonButton(
-                    onPressed: () => Navigator.pop(context, false),
-                    text: "Cancel",
-                    backGroundColor: color.secondary,
-                    textColor: color.onSecondary,
-                  ),
-                  SizedBox(width: 8),
-                  CommonButton(
-                    onPressed: () => Navigator.pop(context, true),
-                    text: "Delete",
-                    backGroundColor: color.primary,
-                    textColor: color.onPrimary,
-                  ),
-                ],
-              ),
-            ],
-          ),
+    final confirm = await DialogUtils.showDeleteConfirmation(
+      context,
+      title: "Delete Transaction?",
+      message: "This action cannot be undone.",
     );
+
     if (confirm == true) {
       await ref.read(pendingTxnServiceProvider).remove(pendingTx);
       ref.invalidate(pendingTxnServiceProvider);
-      if (!isApproved) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Removed ${pendingTx.sender}')));
+      if (!isApproved && mounted) {
+        SnackbarService.success('Removed ${pendingTx.sender}');
       }
-    } else {
-      await ref.read(pendingTxnServiceProvider).remove(pendingTx);
-      ref.invalidate(pendingTxnServiceProvider);
     }
   }
 
@@ -318,39 +370,32 @@ class _ReviewPendingTransactionsScreenState
     );
     txn.account.value = account;
     txn.category.value = category;
-    txn.tags.clear();
     await ref.read(transactionProvider).addTransaction(txn);
     ref.invalidate(transactionProvider);
     _removePendingTransaction(pendingTx, true);
-    Navigator.pop(context);
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Approved ${pendingTx.sender}')));
+    if (mounted) {
+      SnackbarService.success('Approved ${pendingTx.sender}');
+      context.pop();
+    }
   }
 
   void _autoProcessTransactions() async {
     setState(() => _isAutoProcessing = true);
-
     try {
       final accounts = await ref.read(accountsProvider.future);
       final categories = await ref.read(categoryListProvider.future);
-
       final count = await ref
           .read(pendingTxnServiceProvider)
           .autoProcessAll(accounts: accounts, categories: categories);
-
       ref.invalidate(pendingTxnDataProvider);
       ref.invalidate(transactionProvider);
-
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Successfully auto-added $count transactions!')),
-      );
+      if (mounted) {
+        SnackbarService.success('Auto-added $count transactions!');
+      }
     } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Auto-process failed: $e')));
+      if (mounted) {
+        SnackbarService.error('Failed: $e');
+      }
     } finally {
       if (mounted) setState(() => _isAutoProcessing = false);
     }
@@ -362,9 +407,20 @@ class _ReviewPendingTransactionsScreenState
   ) async {
     Account? selectedAccount;
     Category? selectedCategory;
-    var accountsService = ref.watch(accountsProvider);
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+
+    // Pre-select suggested category
+    final categories = await ref.read(categoryListProvider.future);
+    final relevantCategories = categories.where(
+      (c) =>
+          (pendingTx.isIncome == true && c.categoryType == CategoryType.income) ||
+          (pendingTx.isIncome == false && c.categoryType == CategoryType.expense),
+    ).toList();
+    selectedCategory = CategoryMatcher.matchByKeywords(
+      pendingTx.body,
+      relevantCategories,
+    );
 
     showModalBottomSheet(
       context: context,
@@ -372,296 +428,262 @@ class _ReviewPendingTransactionsScreenState
       useSafeArea: true,
       enableDrag: true,
       showDragHandle: true,
-      builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-            left: 16,
-            right: 16,
-            top: 24,
-          ),
-          child: StatefulBuilder(
-            builder: (context, setState) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Assign Details',
-                    style: textTheme.titleLarge?.copyWith(
-                      color: color.onPrimaryContainer,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    "Transaction Message Body",
-                    style: textTheme.titleMedium,
-                  ),
-                  Padding(
-                    padding: EdgeInsets.all(8),
-                    child: Text(
-                      pendingTx.body,
-                      style: textTheme.bodyMedium?.copyWith(
-                        color: color.onSurface,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    "Select Account",
-                    style: textTheme.titleLarge?.copyWith(color: color.primary),
-                  ),
-                  Consumer(
-                    builder: (context, ref, _) {
-                      final accountsAsync = ref.watch(accountsProvider);
-                      return accountsAsync.when(
-                        data: (accounts) {
-                          return SizedBox(
-                            height: 180, // Adjust height as needed
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              padding: const EdgeInsets.all(16.0),
-                              itemCount: accounts.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                var account = accounts[index];
-                                var totalBalance = _balanceMap[account.id];
-                                var isNegative = (totalBalance ?? 0) < 0;
-                                return AccountDisplayCard(
-                                  title: account.name,
-                                  amount:
-                                      "${isNegative ? "-" : ""} ₹${totalBalance?.abs().toStringAsFixed(2)}",
-                                  accountType: account.accountType,
-                                  startColor: color.onSecondary,
-                                  endColor: Color(
-                                    account.colorValue ?? 0xFF000000,
-                                  ),
-                                  isSelected: selectedAccount?.id == account.id,
-                                  accountNumber: account.accountNumber,
-                                  callbackAction: () {
-                                    setState(() => selectedAccount = account);
-                                  },
-                                );
-                              },
-                            ),
-                          );
-                        },
-                        loading:
-                            () => SizedBox(
-                              width: 50,
-                              child: const CircularProgressIndicator(),
-                            ),
-                        error: (err, _) => Text('Error loading accounts'),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Select Category",
-                        style: textTheme.titleLarge?.copyWith(
-                          color: color.primary,
+      builder:
+          (context) => Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+              left: 16,
+              right: 16,
+              top: 16,
+            ),
+            child: StatefulBuilder(
+              builder:
+                  (context, setState) => SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Assign Details',
+                          style: textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      IconButton.filled(
-                        onPressed: () {
-                          setState(() {
-                            _isCategoryExpanded = !_isCategoryExpanded;
-                          });
-                        },
-                        icon: Icon(
-                          _isCategoryExpanded
-                              ? Icons.close_fullscreen
-                              : Icons.open_in_full_outlined,
+                        SizedBox(height: 12),
+                        Container(
+                          padding: EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: color.surfaceContainerHighest,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            pendingTx.body,
+                            style: textTheme.bodyMedium,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    height: _isCategoryExpanded ? 200 : 90,
-                    child: Consumer(
-                      builder: (context, ref, _) {
-                        final categoriesAsync = ref.watch(categoryListProvider);
-                        return categoriesAsync.when(
-                          data: (categories) {
-                            return SingleChildScrollView(
-                              child: AnimatedSwitcher(
-                                duration: const Duration(milliseconds: 300),
-                                switchInCurve: Curves.easeInOut,
-                                switchOutCurve: Curves.easeInOut,
-                                child:
-                                    _isCategoryExpanded
-                                        ? AnimatedSize(
-                                          duration: const Duration(
-                                            milliseconds: 300,
-                                          ),
-                                          curve: Curves.easeInOut,
-                                          child: Wrap(
-                                            key: const ValueKey('wrapView'),
-                                            spacing: 16,
-                                            runSpacing: 16,
-                                            alignment:
-                                                WrapAlignment.spaceEvenly,
-                                            runAlignment:
-                                                WrapAlignment.spaceEvenly,
-                                            children: [
-                                              ...categories.map((cat) {
-                                                return SizedBox(
-                                                  height: 60,
-                                                  child: CategoryCard(
-                                                    label: cat.name,
-                                                    color: Color(
-                                                      cat.colorValue ??
-                                                          0xFF000000,
+                        SizedBox(height: 20),
+                        Text(
+                          "Select Account",
+                          style: textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        Consumer(
+                          builder:
+                              (context, ref, _) => ref
+                                  .watch(accountsProvider)
+                                  .when(
+                                    data:
+                                        (accounts) => SizedBox(
+                                          height: 140,
+                                          child: ListView.builder(
+                                            scrollDirection: Axis.horizontal,
+                                            itemCount: accounts.length,
+                                            itemBuilder: (context, index) {
+                                              var account = accounts[index];
+                                              var balance =
+                                                  _balanceMap[account.id] ?? 0;
+                                              return AccountDisplayCard(
+                                                title: account.name,
+                                                amount:
+                                                    "₹${balance.abs().toStringAsFixed(2)}",
+                                                accountType:
+                                                    account.accountType,
+                                                startColor: color.onSecondary,
+                                                endColor: Color(
+                                                  account.colorValue ??
+                                                      0xFF000000,
+                                                ),
+                                                isSelected:
+                                                    selectedAccount?.id ==
+                                                    account.id,
+                                                accountNumber:
+                                                    account.accountNumber,
+                                                callbackAction:
+                                                    () => setState(
+                                                      () =>
+                                                          selectedAccount =
+                                                              account,
                                                     ),
-                                                    icon:
-                                                        IconHelper.iconFromName(
-                                                          cat.iconName ??
-                                                              Icons.category
-                                                                  .toString(),
-                                                        ),
-                                                    isSelected:
-                                                        selectedCategory?.id ==
-                                                        cat.id,
-                                                    callbackAction: () {
-                                                      setState(
-                                                        () =>
-                                                            selectedCategory =
-                                                                cat,
-                                                      );
-                                                    },
-                                                    isUnderWrap: true,
-                                                  ),
-                                                );
-                                              }),
-                                              CategoryCard(
-                                                label: "Add New \nCategory",
-                                                color: color.secondary,
-                                                icon: Icons.add,
-                                                isSelected: false,
-                                                isNewCard: true,
-                                                callbackAction: () {
-                                                  Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                      builder:
-                                                          (_) =>
-                                                              AddEditCategoryScreen(),
-                                                    ),
-                                                  );
-                                                },
-                                                isUnderWrap: true,
-                                              ),
-                                            ],
-                                          ),
-                                        )
-                                        : AnimatedSize(
-                                          duration: const Duration(
-                                            milliseconds: 300,
-                                          ),
-                                          curve: Curves.easeInOut,
-                                          child: SizedBox(
-                                            key: const ValueKey('listView'),
-                                            height: 90,
-                                            child: ListView.builder(
-                                              scrollDirection: Axis.horizontal,
-                                              padding: const EdgeInsets.all(
-                                                16.0,
-                                              ),
-                                              itemCount: categories.length + 1,
-                                              itemBuilder: (
-                                                BuildContext context,
-                                                int index,
-                                              ) {
-                                                if (index < categories.length) {
-                                                  var category =
-                                                      categories[index];
-                                                  return CategoryCard(
-                                                    label: category.name,
-                                                    color: Color(
-                                                      category.colorValue ??
-                                                          0xFF000000,
-                                                    ),
-                                                    icon:
-                                                        IconHelper.iconFromName(
-                                                          category.iconName ??
-                                                              Icons.category
-                                                                  .toString(),
-                                                        ),
-                                                    isSelected:
-                                                        selectedCategory?.id ==
-                                                        category.id,
-                                                    callbackAction: () {
-                                                      setState(
-                                                        () =>
-                                                            selectedCategory =
-                                                                category,
-                                                      );
-                                                    },
-                                                  );
-                                                } else {
-                                                  return CategoryCard(
-                                                    label: "Add New \nCategory",
-                                                    color: color.secondary,
-                                                    icon: Icons.add,
-                                                    isSelected: false,
-                                                    isNewCard: true,
-                                                    callbackAction: () {
-                                                      Navigator.push(
-                                                        context,
-                                                        MaterialPageRoute(
-                                                          builder:
-                                                              (_) =>
-                                                                  AddEditCategoryScreen(),
-                                                        ),
-                                                      );
-                                                    },
-                                                  );
-                                                }
-                                              },
-                                            ),
+                                              );
+                                            },
                                           ),
                                         ),
+                                    loading:
+                                        () => Center(
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                    error: (_, __) => Text('Error'),
+                                  ),
+                        ),
+                        SizedBox(height: 20),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Select Category",
+                              style: textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
                               ),
-                            );
-                          },
-                          loading: () => const CircularProgressIndicator(),
-                          error: (err, _) => Text('Error loading categories'),
-                        );
-                      },
+                            ),
+                            IconButton.filledTonal(
+                              onPressed:
+                                  () => setState(
+                                    () =>
+                                        _isCategoryExpanded =
+                                            !_isCategoryExpanded,
+                                  ),
+                              icon: Icon(
+                                _isCategoryExpanded
+                                    ? Icons.close_fullscreen
+                                    : Icons.open_in_full,
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 8),
+                        SizedBox(
+                          height: _isCategoryExpanded ? 200 : 90,
+                          child: Consumer(
+                            builder:
+                                (context, ref, _) => ref
+                                    .watch(categoryListProvider)
+                                    .when(
+                                      data:
+                                          (categories) =>
+                                              _isCategoryExpanded
+                                                  ? Wrap(
+                                                    spacing: 12,
+                                                    runSpacing: 12,
+                                                    children: [
+                                                      ...categories.map(
+                                                        (cat) => SizedBox(
+                                                          height: 60,
+                                                          child: CategoryCard(
+                                                            label: cat.name,
+                                                            color: Color(
+                                                              cat.colorValue ??
+                                                                  0xFF000000,
+                                                            ),
+                                                            icon: IconHelper.iconFromName(
+                                                              cat.iconName ??
+                                                                  'category',
+                                                            ),
+                                                            isSelected:
+                                                                selectedCategory
+                                                                    ?.id ==
+                                                                cat.id,
+                                                            callbackAction:
+                                                                () => setState(
+                                                                  () =>
+                                                                      selectedCategory =
+                                                                          cat,
+                                                                ),
+                                                            isUnderWrap: true,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      CategoryCard(
+                                                        label: "Add",
+                                                        color: color.secondary,
+                                                        icon: Icons.add,
+                                                        isSelected: false,
+                                                        isNewCard: true,
+                                                        callbackAction:
+                                                            () => context.push('/add-category'),
+                                                        isUnderWrap: true,
+                                                      ),
+                                                    ],
+                                                  )
+                                                  : ListView.builder(
+                                                    scrollDirection:
+                                                        Axis.horizontal,
+                                                    itemCount:
+                                                        categories.length + 1,
+                                                    itemBuilder: (
+                                                      context,
+                                                      index,
+                                                    ) {
+                                                      if (index <
+                                                          categories.length) {
+                                                        var cat =
+                                                            categories[index];
+                                                        return CategoryCard(
+                                                          label: cat.name,
+                                                          color: Color(
+                                                            cat.colorValue ??
+                                                                0xFF000000,
+                                                          ),
+                                                          icon:
+                                                              IconHelper.iconFromName(
+                                                                cat.iconName ??
+                                                                    'category',
+                                                              ),
+                                                          isSelected:
+                                                              selectedCategory
+                                                                  ?.id ==
+                                                              cat.id,
+                                                          callbackAction:
+                                                              () => setState(
+                                                                () =>
+                                                                    selectedCategory =
+                                                                        cat,
+                                                              ),
+                                                        );
+                                                      }
+                                                      return CategoryCard(
+                                                        label: "Add",
+                                                        color: color.secondary,
+                                                        icon: Icons.add,
+                                                        isSelected: false,
+                                                        isNewCard: true,
+                                                        callbackAction:
+                                                            () => context.push('/add-category'),
+                                                      );
+                                                    },
+                                                  ),
+                                      loading:
+                                          () => Center(
+                                            child: CircularProgressIndicator(),
+                                          ),
+                                      error: (_, __) => Text('Error'),
+                                    ),
+                          ),
+                        ),
+                        SizedBox(height: 24),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 56,
+                          child: FilledButton.icon(
+                            onPressed: () {
+                              if (selectedCategory != null &&
+                                  selectedAccount != null) {
+                                _approveTransaction(
+                                  pendingTx,
+                                  selectedAccount!,
+                                  selectedCategory!,
+                                );
+                              } else {
+                                SnackbarService.warning('Select Account & Category');
+                              }
+                            },
+                            icon: Icon(Icons.check_circle),
+                            label: Text(
+                              'APPROVE TRANSACTION',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1,
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 16),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  CommonButton(
-                    text: 'Approve Transaction',
-                    backGroundColor: color.primary,
-                    textColor: color.onPrimary,
-                    onPressed: () {
-                      if (selectedCategory?.id != null &&
-                          selectedAccount?.id != null) {
-                        _approveTransaction(
-                          pendingTx,
-                          selectedAccount!,
-                          selectedCategory!,
-                        );
-                        Navigator.pop(context);
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Select Account and Category'),
-                          ),
-                        );
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                ],
-              );
-            },
+            ),
           ),
-        );
-      },
     );
   }
 }

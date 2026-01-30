@@ -1,3 +1,4 @@
+import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -6,6 +7,7 @@ import 'package:mudra_manager/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/screens/profile/profile_tile.dart';
 import 'package:mudra_manager/service/backup_restore_service.dart'
     show BackupService;
+import 'package:mudra_manager/util/snackbar_service.dart';
 
 class BackupRestoreScreen extends ConsumerWidget {
   const BackupRestoreScreen({super.key});
@@ -25,9 +27,7 @@ class BackupRestoreScreen extends ConsumerWidget {
               icon: Icons.backup_outlined,
               onTap: () async {
                 await BackupService.createEncryptedBackup();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Backup completed")),
-                );
+                SnackbarService.success("Backup completed");
               },
             ),
             ProfileTile(
@@ -42,9 +42,7 @@ class BackupRestoreScreen extends ConsumerWidget {
                 );
                 if (data != null) {
                   // await restoreAppFromJson(data); // your data restorer
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Restore successful")),
-                  );
+                  SnackbarService.success("Restore successful");
                 }
               },
             ),

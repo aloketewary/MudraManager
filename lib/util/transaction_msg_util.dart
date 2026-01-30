@@ -89,15 +89,19 @@ class TransactionUtil {
 
   String getMoneySpentFromWords(List<String> words) {
     int index = words.indexOf('rs.');
+    if (index == -1) {
+      // Try without dot
+      index = words.indexOf('rs');
+    }
     if (index == -1 || index + 1 >= words.length) return '';
 
     String amount = words[index + 1].replaceAll(',', '');
     // Strip trailing punctuation
-    amount = amount.replaceAll(RegExp(r'[^\d]+$'), '');
+    amount = amount.replaceAll(RegExp(r'[^\d.]+$'), '');
 
     if (_isNotNumeric(amount) && index + 2 < words.length) {
       amount = words[index + 2].replaceAll(',', '');
-      amount = amount.replaceAll(RegExp(r'[^\d]+$'), '');
+      amount = amount.replaceAll(RegExp(r'[^\d.]+$'), '');
     }
 
     return _isNotNumeric(amount) ? '' : amount;
@@ -218,8 +222,13 @@ class TransactionUtil {
         sawDigit = true;
         result += char;
       } else if (char == '.' && !sawDot && sawDigit) {
-        sawDot = true;
-        result += char;
+        // Only add dot if followed by digit
+        if (i + 1 < message.length && RegExp(r'[0-9]').hasMatch(message[i + 1])) {
+          sawDot = true;
+          result += char;
+        } else {
+          break;
+        }
       } else if (char == ',' && sawDigit) {
         continue;
       } else if (sawDigit) {
@@ -344,13 +353,45 @@ class TransactionInfo {
 bool checkForTransactionalMessage(String? body) {
   if (body == null || body.isEmpty) return false;
   final lower = body.toLowerCase();
+  
+  // Must have transaction keywords
   final hasTrn =
       lower.contains('debit') ||
       lower.contains('spent') ||
       lower.contains('credit');
-  final isNotIrrelevant =
-      !lower.contains('request') && !lower.contains('pending');
-  return hasTrn && isNotIrrelevant;
+  
+  if (!hasTrn) return false;
+  
+  // Exclude future/pending transactions
+  final isFuture =
+      lower.contains('will be debited') ||
+      lower.contains('will be credited') ||
+      lower.contains('to be debited') ||
+      lower.contains('to be credited') ||
+      lower.contains('request') ||
+      lower.contains('pending') ||
+      lower.contains('authorization') ||
+      lower.contains('hold');
+  
+  // Exclude bill reminders and due payments
+  final isBillReminder =
+      lower.contains('due') ||
+      lower.contains('pay by') ||
+      lower.contains('payment due') ||
+      lower.contains('bill due') ||
+      lower.contains('minimum due') ||
+      lower.contains('total due') ||
+      lower.contains('outstanding') ||
+      lower.contains('overdue') ||
+      lower.contains('reminder');
+  
+  // Exclude OTP and verification messages
+  final isOTP =
+      lower.contains('otp') ||
+      lower.contains('verification code') ||
+      lower.contains('verify');
+  
+  return !isFuture && !isBillReminder && !isOTP;
 }
 
 String generateSmsHash(String address, int? date, String body) {

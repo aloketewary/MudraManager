@@ -1,3 +1,4 @@
+import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/db/models/account.dart'
@@ -67,7 +68,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
       await isar.accounts.put(account);
     });
 
-    Navigator.of(context).pop();
+    context.pop();
     ref.invalidate(accountsProvider);
   }
 

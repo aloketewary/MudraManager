@@ -4,65 +4,48 @@ import 'package:mudra_manager/providers/auth_service.dart';
 import 'package:mudra_manager/screens/profile/pin_entry_dialog.dart'
     show PinEntryDialog;
 
-class AuthGate extends ConsumerStatefulWidget {
+final _authUnlockedProvider = StateProvider<bool>((ref) => false);
+
+class AuthGate extends ConsumerWidget {
   final Widget child;
-  const AuthGate({required this.child, Key? key}) : super(key: key);
+  const AuthGate({required this.child, super.key});
 
   @override
-  ConsumerState<AuthGate> createState() => _AuthGateState();
-}
-
-class _AuthGateState extends ConsumerState<AuthGate> {
-  bool _initialized = false;
-  bool _unlocked    = false;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!_initialized) {
-      _initialized = true;
-      _runAuthFlow();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final unlocked = ref.watch(_authUnlockedProvider);
+    
+    if (!unlocked) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _runAuthFlow(context, ref);
+      });
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
+    return child;
   }
 
-  Future<void> _runAuthFlow() async {
+  Future<void> _runAuthFlow(BuildContext context, WidgetRef ref) async {
     final auth = ref.read(authServiceProvider);
 
     final pinSet = await auth.hasPin();
     final bioEnabled = await auth.isBiometricEnabled() && await auth.canCheckBiometrics();
 
-    // 1) If PIN is set, require PIN entry
     if (pinSet) {
-      await _promptPin(auth);
-    }
-    // 2) Else if biometric is enabled, require biometric
-    else if (bioEnabled) {
+      await _promptPin(context, ref, auth);
+    } else if (bioEnabled) {
       final ok = await auth.authenticateBiometric();
-      if (!ok) return _runAuthFlow(); // retry on failure
+      if (!ok) return _runAuthFlow(context, ref);
     }
-    // 3) Otherwise, no lock configured—just unlock
-    setState(() => _unlocked = true);
+    ref.read(_authUnlockedProvider.notifier).state = true;
   }
 
-
-  Future<void> _promptPin(AuthService auth) async {
+  Future<void> _promptPin(BuildContext context, WidgetRef ref, AuthService auth) async {
     final pin = await showDialog<String>(
       context: context,
       barrierDismissible: false,
       builder: (_) => const PinEntryDialog(length: 4),
     );
     if (pin == null || !await auth.validatePin(pin)) {
-      // retry until success
-      return _runAuthFlow();
+      return _runAuthFlow(context, ref);
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (!_unlocked) {
-      // blank or splash while locking
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
-    return widget.child;
   }
 }

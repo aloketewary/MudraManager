@@ -1,14 +1,17 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar/isar.dart';
 import 'package:mudra_manager/db/isar_service.dart' show IsarService;
 import 'package:mudra_manager/db/models/pending_transaction.dart';
 import 'package:mudra_manager/db/models/account.dart' show Account;
-import 'package:mudra_manager/db/models/category.dart'
+import 'package:mudra_manager/db/models/category.dart' as db_category
     show Category, CategoryType;
 import 'package:mudra_manager/db/models/transaction.dart'
     show GetTransactionCollection, Transaction;
 import 'package:mudra_manager/providers/isar_provider.dart';
 import 'package:mudra_manager/util/transaction_msg_util.dart';
+import 'package:mudra_manager/util/category_matcher.dart';
+import 'package:mudra_manager/util/app_logger.dart';
 
 final pendingTxnServiceProvider = Provider<PendingTransactionService>((ref) {
   final isarService = ref.watch(isarServiceProvider);
@@ -75,11 +78,15 @@ class PendingTransactionService {
 
   Future<int> autoProcessAll({
     required List<Account> accounts,
-    required List<Category> categories,
+    required List<db_category.Category> categories,
   }) async {
+    AppLogger.info('Starting auto-process for pending transactions');
     var isar = await isarService.getInstance();
     final pendingTxns = await getAllPendingTransaction();
-    if (pendingTxns.isEmpty) return 0;
+    if (pendingTxns.isEmpty) {
+      AppLogger.info('No pending transactions to process');
+      return 0;
+    }
 
     int successCount = 0;
 
@@ -128,22 +135,29 @@ class PendingTransactionService {
 
           await isar.pendingTransactions.delete(pending.id);
           successCount++;
+          
+          AppLogger.logAction('transaction_auto_added', parameters: {
+            'sender': pending.sender,
+            'amount': pending.amount,
+            'category': match.category.name,
+            'account': match.account.name,
+          });
         } else {
-          // Small log to help debug
-          print(
-            "DEBUG: No match for pending ${pending.id} (Acc: ${pending.account}, Sender: ${pending.sender})",
+          AppLogger.warning(
+            "No match for pending ${pending.id} (Acc: ${pending.account}, Sender: ${pending.sender})",
           );
         }
       }
     });
 
+    AppLogger.info('Auto-processed $successCount transactions');
     return successCount;
   }
 
   static MatchingResult? matchTransaction({
     required PendingTransaction pending,
     required List<Account> accounts,
-    required List<Category> categories,
+    required List<db_category.Category> categories,
   }) {
     if (pending.account == null || pending.account!.isEmpty) return null;
 
@@ -160,36 +174,39 @@ class PendingTransactionService {
 
     if (matchedAccount == null) return null;
 
-    // 2. Try to find a matching category
-    Category? matchedCategory;
-    final bodyLower = pending.body.toLowerCase();
-
-    // Filter categories by type (income/expense)
+    // 2. Filter categories by type (income/expense)
     final relevantCategories =
         categories
             .where(
               (c) =>
                   (pending.isIncome == true &&
-                      c.categoryType == CategoryType.income) ||
+                      c.categoryType == db_category.CategoryType.income) ||
                   (pending.isIncome == false &&
-                      c.categoryType == CategoryType.expense),
+                      c.categoryType == db_category.CategoryType.expense),
             )
             .toList();
 
-    for (var cat in relevantCategories) {
-      if (bodyLower.contains(cat.name.toLowerCase())) {
-        matchedCategory = cat;
-        break;
-      }
+    if (relevantCategories.isEmpty) return null;
+
+    // 3. Try keyword-based matching (NEW)
+    db_category.Category? matchedCategory = CategoryMatcher.matchByKeywords(
+      pending.body,
+      relevantCategories,
+    );
+
+    // 4. Fallback with smart logic based on amount
+    if (matchedCategory == null) {
+      matchedCategory = CategoryMatcher.getFallbackCategory(
+        relevantCategories,
+        pending.amount,
+      );
     }
 
-    // If no category match, try to find "Other" or "Misc" or first available of right type
-    if (matchedCategory == null && relevantCategories.isNotEmpty) {
-      matchedCategory = relevantCategories.firstWhere(
-        (c) =>
-            c.name.toLowerCase().contains('other') ||
-            c.name.toLowerCase().contains('misc'),
-        orElse: () => relevantCategories.first,
+    // 5. Debug logging
+    if (matchedCategory == null) {
+      debugPrint(
+        'No category match for: ${pending.body.substring(0, pending.body.length > 50 ? 50 : pending.body.length)}... '
+        '(Amount: ${pending.amount}, Sender: ${pending.sender})',
       );
     }
 
@@ -203,6 +220,6 @@ class PendingTransactionService {
 
 class MatchingResult {
   final Account account;
-  final Category category;
+  final db_category.Category category;
   MatchingResult({required this.account, required this.category});
 }

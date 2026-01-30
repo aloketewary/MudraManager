@@ -1,3 +1,4 @@
+import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:mudra_manager/util/case_extension.dart';
 import 'package:mudra_manager/util/icon_helper.dart';
@@ -34,7 +35,7 @@ class IconPickerBottomSheet extends StatelessWidget {
               children:
                   _iconMap.entries.map((entry) {
                     return GestureDetector(
-                      onTap: () => Navigator.pop(context, entry.key),
+                      onTap: () => context.pop(entry.key),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [

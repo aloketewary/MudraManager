@@ -12,14 +12,12 @@ class NotificationService {
   static const _reminderTimeKey = 'daily_reminder_time_key';
 
   static Future<void> initialize() async {
-    // Time zone setup
     tz.initializeTimeZones();
     String timeZoneName = await FlutterNativeTimezoneLatest.getLocalTimezone();
     if (timeZoneName == 'Asia/Calcutta') {
       timeZoneName = 'Asia/Kolkata';
     }
 
-    // This handles unknown or unsupported timezones gracefully
     final location = tz.getLocation(
       tz.timeZoneDatabase.locations.containsKey(timeZoneName)
           ? timeZoneName
@@ -28,12 +26,16 @@ class NotificationService {
     tz.setLocalLocation(location);
 
     await requestNotificationPermission();
-    const androidSettings = AndroidInitializationSettings(
-      '@mipmap/ic_launcher',
+    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const iosSettings = DarwinInitializationSettings(
+      requestAlertPermission: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
     );
 
     const initializationSettings = InitializationSettings(
       android: androidSettings,
+      iOS: iosSettings,
     );
 
     await _plugin.initialize(initializationSettings);
@@ -76,10 +78,9 @@ class NotificationService {
           importance: Importance.high,
           priority: Priority.high,
         ),
+        iOS: DarwinNotificationDetails(),
       ),
-      // androidAllowWhileIdle: true,
       matchDateTimeComponents: DateTimeComponents.time,
-      // uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
     );
   }
@@ -132,7 +133,10 @@ class NotificationService {
       priority: Priority.high,
     );
 
-    const notificationDetails = NotificationDetails(android: androidDetails);
+    const notificationDetails = NotificationDetails(
+      android: androidDetails,
+      iOS: DarwinNotificationDetails(),
+    );
 
     await _plugin.show(id, title, body, notificationDetails);
   }
@@ -165,6 +169,7 @@ class NotificationService {
           importance: Importance.high,
           priority: Priority.high,
         ),
+        iOS: DarwinNotificationDetails(),
       ),
       matchDateTimeComponents: DateTimeComponents.dayOfMonthAndTime,
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,

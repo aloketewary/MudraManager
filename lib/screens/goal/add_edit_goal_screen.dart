@@ -1,3 +1,4 @@
+import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -71,7 +72,7 @@ class _AddEditGoalScreenState extends ConsumerState<AddEditGoalScreen> {
       await service.updateGoal(goal);
     }
 
-    if (mounted) Navigator.pop(context);
+    if (mounted) context.pop();
   }
 
   @override
@@ -99,11 +100,11 @@ class _AddEditGoalScreenState extends ConsumerState<AddEditGoalScreen> {
                         content: const Text("This action cannot be undone."),
                         actions: [
                           TextButton(
-                            onPressed: () => Navigator.pop(context, false),
+                            onPressed: () => context.pop(false),
                             child: const Text("Cancel"),
                           ),
                           TextButton(
-                            onPressed: () => Navigator.pop(context, true),
+                            onPressed: () => context.pop(true),
                             child: const Text("Delete"),
                           ),
                         ],
@@ -113,7 +114,7 @@ class _AddEditGoalScreenState extends ConsumerState<AddEditGoalScreen> {
                   await ref
                       .read(goalServiceProvider)
                       .deleteGoal(widget.goal!.id);
-                  if (mounted) Navigator.pop(context);
+                  if (mounted) context.pop();
                 }
               },
             ),

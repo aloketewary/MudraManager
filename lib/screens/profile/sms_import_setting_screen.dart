@@ -1,3 +1,4 @@
+import 'package:go_router/go_router.dart';
 import 'dart:convert';
 import 'dart:ui';
 
@@ -18,6 +19,7 @@ import 'package:mudra_manager/util/transaction_msg_util.dart'
         checkForTransactionalMessage,
         generateSmsHash;
 import 'package:mudra_manager/main.dart' show setupSmsListener;
+import 'package:mudra_manager/util/snackbar_service.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class SmsImportSettingsScreen extends ConsumerStatefulWidget {
@@ -72,22 +74,14 @@ class _SmsImportSettingsScreenState
                   // Start listener - import from main.dart
                   await setupSmsListener();
                   if (!context.mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'SMS import enabled. Financial transactions will be detected automatically.',
-                      ),
-                    ),
+                  SnackbarService.success(
+                    'SMS import enabled. Financial transactions will be detected automatically.',
                   );
                 } else {
                   // Show error
                   if (!context.mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'SMS permission is required for automatic transaction detection',
-                      ),
-                    ),
+                  SnackbarService.error(
+                    'SMS permission is required for automatic transaction detection',
                   );
                 }
               } else {
@@ -96,9 +90,7 @@ class _SmsImportSettingsScreenState
                 });
                 SharedPrefsUtil.instance.setSmsImportEnabled(value);
                 if (!context.mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('SMS import disabled')),
-                );
+                SnackbarService.info('SMS import disabled');
               }
             },
           ),
@@ -158,7 +150,7 @@ class _SmsImportSettingsScreenState
                 return ListTile(
                   title: Text(entry.key),
                   onTap: () {
-                    Navigator.pop(context, entry.value);
+                    context.pop(entry.value);
                   },
                 );
               }).toList(),
@@ -264,7 +256,7 @@ class _SmsImportSettingsScreenState
     }
 
     // 2. After scanning, close progress dialog
-    if (context.mounted) Navigator.pop(context);
+    if (context.mounted) context.pop();
   }
 
   void _showFoundSmsMessage(int count) {
@@ -276,11 +268,7 @@ class _SmsImportSettingsScreenState
             ? "🔎 Found $count SMS related messages!"
             : "No SMS found for selected period.";
 
-    // Assuming you have a `BuildContext context` nearby:
-    // (or pass context if needed)
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    SnackbarService.info(message);
   }
 
   void processSmsForSaving(TransactionInfo sms) async {
@@ -305,9 +293,7 @@ class _SmsImportSettingsScreenState
     } catch (exp) {
       if (!mounted) return;
       var message = 'Error saving pending transaction to database: $exp';
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(message)));
+      SnackbarService.error(message);
     }
   }
 

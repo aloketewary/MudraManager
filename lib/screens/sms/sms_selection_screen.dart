@@ -1,6 +1,8 @@
+import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mudra_manager/db/models/transaction.dart';
+import 'package:mudra_manager/util/snackbar_service.dart';
 import 'package:telephony/telephony.dart';
 
 class SmsSelectionScreen extends StatefulWidget {
@@ -64,9 +66,7 @@ class _SmsSelectionScreenState extends State<SmsSelectionScreen> {
 
   void _onAddSelected() {
     if (_selectedMessages.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Please select at least one SMS")),
-      );
+      SnackbarService.warning("Please select at least one SMS");
       return;
     }
 
@@ -83,7 +83,7 @@ class _SmsSelectionScreenState extends State<SmsSelectionScreen> {
     // Now save transactions to DB (Isar or whatever you use)
     // saveTransactions(transactions);
 
-    Navigator.pop(context); // Back to home
+    context.pop(); // Back to home
   }
 
   double _parseAmount(String? body) {

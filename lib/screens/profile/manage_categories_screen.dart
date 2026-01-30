@@ -1,3 +1,4 @@
+import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/db/models/category.dart'
@@ -7,7 +8,9 @@ import 'package:mudra_manager/providers/transaction_provider.dart';
 import 'package:mudra_manager/screens/profile/add_edit_category_screen.dart';
 import 'package:mudra_manager/screens/reusable/no_data_found.dart'
     show NoDataFound;
+import 'package:mudra_manager/util/dialog_utils.dart';
 import 'package:mudra_manager/util/icon_helper.dart';
+import 'package:mudra_manager/util/snackbar_service.dart';
 
 class ManageCategoriesScreen extends ConsumerWidget {
   const ManageCategoriesScreen({super.key});
@@ -99,16 +102,7 @@ class ManageCategoriesScreen extends ConsumerWidget {
                     icon: Icon(Icons.more_vert, color: color.onSurfaceVariant),
                     onSelected: (value) {
                       if (value == 'edit') {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder:
-                                (_) => AddEditCategoryScreen(
-                                  key: key,
-                                  existing: category,
-                                ),
-                          ),
-                        );
+                        context.push('/add-category');
                       } else if (value == 'delete') {
                         _deleteCategory(context, ref, category);
                       }
@@ -158,10 +152,7 @@ class ManageCategoriesScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const AddEditCategoryScreen()),
-          );
+          context.push('/add-category');
         },
         icon: const Icon(Icons.add),
         label: const Text("Add Category"),
@@ -174,47 +165,19 @@ class ManageCategoriesScreen extends ConsumerWidget {
     WidgetRef ref,
     Category category,
   ) async {
-    var color = Theme.of(context).colorScheme;
-    var textTheme = Theme.of(context).textTheme;
-
-    final shouldDelete = await showDialog<bool>(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Text('Delete Category', style: textTheme.titleLarge),
-            content: Text(
-              'Are you sure you want to delete this category?\nAll associated transactions will also be removed.',
-              style: textTheme.bodyLarge,
-            ),
-            actions: [
-              OutlinedButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: Text(
-                  'Cancel'.toUpperCase(),
-                  style: textTheme.labelLarge?.copyWith(color: color.primary),
-                ),
-              ),
-              OutlinedButton(
-                onPressed: () => Navigator.pop(context, true),
-                style: OutlinedButton.styleFrom(backgroundColor: color.primary),
-                child: Text(
-                  'Delete'.toUpperCase(),
-                  style: textTheme.labelLarge?.copyWith(color: color.onPrimary),
-                ),
-              ),
-            ],
-          ),
+    final shouldDelete = await DialogUtils.showDeleteConfirmation(
+      context,
+      title: 'Delete Category',
+      message:
+          'Are you sure you want to delete this category?\nAll associated transactions will also be removed.',
     );
 
-    if (shouldDelete != true) return;
-    final categoryProvider = ref.read(categoryServiceProvider);
-    categoryProvider.deleteCategoryWithTransactions(category.id);
-    // Invalidate category and transaction providers to refresh UI
-    ref.invalidate(categoryListProvider);
-    ref.invalidate(transactionProvider); // if you have one
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Category and its transactions deleted")),
-    );
+    if (shouldDelete == true) {
+      final categoryProvider = ref.read(categoryServiceProvider);
+      categoryProvider.deleteCategoryWithTransactions(category.id);
+      ref.invalidate(categoryListProvider);
+      ref.invalidate(transactionProvider);
+      SnackbarService.success("Category and its transactions deleted");
+    }
   }
 }

@@ -1,3 +1,4 @@
+import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/db/models/account.dart'
@@ -7,6 +8,8 @@ import 'package:mudra_manager/providers/isar_provider.dart';
 import 'package:mudra_manager/screens/profile/account_form.dart'
     show AccountForm;
 import 'package:mudra_manager/util/account_type_extension.dart';
+import 'package:mudra_manager/util/dialog_utils.dart';
+import 'package:mudra_manager/util/snackbar_service.dart';
 
 class ManageAccountScreen extends ConsumerStatefulWidget {
   const ManageAccountScreen({super.key});
@@ -80,23 +83,15 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
                   balance: _balanceMap[account.id]?.toStringAsFixed(2) ?? '0.0',
                   onArchive: () {
                     if (accounts.length == 1) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'At least 1 account required to continue',
-                          ),
-                        ),
+                      SnackbarService.warning(
+                        'At least 1 account required to continue',
                       );
                     } else {
                       showArchiveConfirmation(context, ref, account);
                     }
                   },
                   onEdit: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => AccountForm(account: account),
-                      ),
-                    );
+                    context.push('/manage-accounts/add', extra: {'account': account});
                   },
                   onRemove: () => showDeleteConfirmation(context, ref, account),
                 );
@@ -112,9 +107,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          Navigator.of(
-            context,
-          ).push(MaterialPageRoute(builder: (_) => const AccountForm()));
+          context.push('/manage-accounts/add');
         },
         icon: const Icon(Icons.add),
         label: Text("Add Account"),
@@ -127,42 +120,15 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
     WidgetRef ref,
     Account account,
   ) async {
-    final isarService = ref.read(isarServiceProvider);
-    final isar = await isarService.getInstance();
-    var textTheme = Theme.of(context).textTheme;
-    var color = Theme.of(context).colorScheme;
-
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder:
-          (ctx) => AlertDialog(
-            title: const Text('Delete Account'),
-            content: Text('Are you sure you want to delete "${account.name}"?'),
-            actions: [
-              OutlinedButton(
-                onPressed: () => Navigator.of(ctx).pop(false),
-                child: Text(
-                  'Cancel',
-                  style: textTheme.titleMedium?.copyWith(
-                    color: color.onSurface,
-                  ),
-                ),
-              ),
-              OutlinedButton(
-                onPressed: () => Navigator.of(ctx).pop(true),
-                style: ElevatedButton.styleFrom(backgroundColor: color.error),
-                child: Text(
-                  'Delete',
-                  style: textTheme.titleMedium?.copyWith(
-                    color: color.onPrimary,
-                  ),
-                ),
-              ),
-            ],
-          ),
+    final confirmed = await DialogUtils.showDeleteConfirmation(
+      context,
+      title: 'Delete Account',
+      message: 'Are you sure you want to delete "${account.name}"?',
     );
 
     if (confirmed == true) {
+      final isarService = ref.read(isarServiceProvider);
+      final isar = await isarService.getInstance();
       await isar.writeTxn(() async {
         await isar.accounts.delete(account.id);
       });
@@ -190,7 +156,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
             ),
             actions: [
               OutlinedButton(
-                onPressed: () => Navigator.of(ctx).pop(false),
+                onPressed: () => context.pop(false),
                 child: Text(
                   'Cancel',
                   style: textTheme.titleMedium?.copyWith(
@@ -199,7 +165,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
                 ),
               ),
               OutlinedButton(
-                onPressed: () => Navigator.of(ctx).pop(true),
+                onPressed: () => context.pop(true),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: color.secondary,
                 ),
@@ -221,9 +187,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
       });
       ref.invalidate(accountsProvider);
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('"${account.name}" archived')));
+      SnackbarService.success('"${account.name}" archived');
     }
   }
 }

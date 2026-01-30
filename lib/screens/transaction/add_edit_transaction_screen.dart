@@ -1,3 +1,4 @@
+import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -21,6 +22,7 @@ import 'package:mudra_manager/screens/reusable/simple_calculator.dart'
 import 'package:mudra_manager/service/notification_service.dart';
 import 'package:mudra_manager/util/icon_helper.dart' show IconHelper;
 import 'package:mudra_manager/util/localization_extension.dart';
+import 'package:mudra_manager/util/snackbar_service.dart';
 
 class AddEditTransactionScreen extends ConsumerStatefulWidget {
   final Transaction? transaction;
@@ -90,7 +92,7 @@ class _AddEditTransactionScreenState
           padding: const EdgeInsets.all(16.0),
           child: SimpleCalculator(
             onResultSelected: (value) {
-              Navigator.pop(context);
+              context.pop();
               onResult(value); // Pass result back to amount field
             },
           ),
@@ -125,7 +127,7 @@ class _AddEditTransactionScreenState
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.close, color: onHeaderColor),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => context.pop(),
         ),
         centerTitle: true,
         title: Container(
@@ -719,14 +721,7 @@ class _AddEditTransactionScreenState
                                         // Add Category Button
                                         return GestureDetector(
                                           onTap:
-                                              () => Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder:
-                                                      (_) =>
-                                                          AddEditCategoryScreen(),
-                                                ),
-                                              ),
+                                              () => context.push('/add-category'),
                                           child: Container(
                                             width: 80, // Slimmer for "Add"
                                             margin: const EdgeInsets.symmetric(
@@ -1016,15 +1011,11 @@ class _AddEditTransactionScreenState
     final ctxt = AppLocalizations.of(context)!;
     if (_formKey.currentState?.validate() ?? false) {
       if (_selectedAccount == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(ctxt.transaction_selectOneAccountErrorText)),
-        );
+        SnackbarService.error(ctxt.transaction_selectOneAccountErrorText);
         return;
       }
       if (_selectedCategory == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(ctxt.transaction_selectOneCategoryErrorText)),
-        );
+        SnackbarService.error(ctxt.transaction_selectOneCategoryErrorText);
         return;
       }
 
@@ -1045,11 +1036,11 @@ class _AddEditTransactionScreenState
       txn.tags.addAll(selectedTags);
 
       await ref.read(transactionProvider).addTransaction(txn);
-      invalidateAll(ref);
       await _checkLowBalance(txn.account.value);
       await _checkBudgetOverspend(txn);
+      invalidateAll(ref);
 
-      if (mounted) Navigator.pop(context);
+      if (mounted) context.pop();
     }
   }
 
@@ -1096,7 +1087,7 @@ class _AddEditTransactionScreenState
                     await isar.writeTxn(() async {
                       await isar.tags.put(tag);
                     });
-                    Navigator.pop(context);
+                    context.pop();
                     ref.invalidate(tagListProvider); // Trigger refresh
                   }
                 },

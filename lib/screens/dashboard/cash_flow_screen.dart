@@ -1,3 +1,4 @@
+import 'package:go_router/go_router.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -96,22 +97,7 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
                     Hero(
                       tag: 'cashFlowPage',
                       child: IconButton.filled(
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            PageRouteBuilder(
-                              transitionDuration: Duration(milliseconds: 300),
-                              pageBuilder:
-                                  (_, animation, secondaryAnimation) =>
-                                      TransactionListScreen(showAppBar: true),
-                              transitionsBuilder: (_, animation, __, child) {
-                                return FadeTransition(
-                                  opacity: animation,
-                                  child: child,
-                                );
-                              },
-                            ),
-                          );
-                        },
+                        onPressed: () => context.push('/transactions'),
                         icon: Icon(Icons.open_in_new),
                       ),
                     ),

@@ -1,3 +1,4 @@
+import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -15,6 +16,7 @@ import 'package:mudra_manager/screens/reusable/common_dropdown_field.dart';
 import 'package:mudra_manager/screens/reusable/common_text_input_field.dart';
 import 'package:mudra_manager/util/case_extension.dart';
 import 'package:mudra_manager/util/localization_extension.dart';
+import 'package:mudra_manager/util/snackbar_service.dart';
 
 class AddBudgetScreen extends ConsumerStatefulWidget {
   final Budget? existing;
@@ -102,15 +104,11 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
     final ctxt = AppLocalizations.of(context)!;
 
     if (_startDate == null || _endDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(ctxt.budget_pickBothDatesErrorText)),
-      );
+      SnackbarService.error(ctxt.budget_pickBothDatesErrorText);
       return;
     }
     if (_selectedCats.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(ctxt.budget_selectAtLeastOneCategoryErrorText)),
-      );
+      SnackbarService.error(ctxt.budget_selectAtLeastOneCategoryErrorText);
       return;
     }
 
@@ -143,11 +141,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
     final remainingBudget = totalAmount - totalAllocated;
 
     if (remainingBudget < 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(ctxt.budget_allocatedAmountExceedsTotalBudgetText),
-        ),
-      );
+      SnackbarService.error(ctxt.budget_allocatedAmountExceedsTotalBudgetText);
       return;
     }
 
@@ -194,7 +188,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
 
     await service.save(bud);
 
-    Navigator.pop(context);
+    context.pop();
   }
 
   @override

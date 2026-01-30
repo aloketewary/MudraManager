@@ -1,3 +1,4 @@
+import 'package:go_router/go_router.dart';
 // In your home/dashboard screen
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

@@ -1,3 +1,4 @@
+import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -68,13 +69,7 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                         child: GestureDetector(
                           onTap: () {
                             HapticFeedback.lightImpact();
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder:
-                                    (context) => AddEditTransactionScreen(),
-                              ),
-                            );
+                            context.push('/add-transaction');
                           },
                           child: Hero(
                             tag: 'addTransactionHero',
@@ -135,12 +130,7 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                         child: GestureDetector(
                           onTap: () {
                             HapticFeedback.lightImpact();
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => TransferScreen(),
-                              ),
-                            );
+                            context.push('/unknown');
                           },
                           child: Container(
                             padding: const EdgeInsets.all(8.0),
@@ -195,13 +185,7 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                         child: GestureDetector(
                           onTap: () {
                             HapticFeedback.lightImpact();
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder:
-                                    (context) => AddEditTransactionScreen(),
-                              ),
-                            );
+                            context.push('/add-transaction');
                           },
                           child: Hero(
                             tag: 'addTransactionHero',
@@ -263,12 +247,7 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                         child: GestureDetector(
                           onTap: () {
                             HapticFeedback.lightImpact();
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => TransferScreen(),
-                              ),
-                            );
+                            context.push('/unknown');
                           },
                           child: Container(
                             width: 120,

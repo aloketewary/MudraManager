@@ -1,9 +1,9 @@
+import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/providers/goal_provider.dart';
 import 'package:mudra_manager/screens/reusable/no_data_found.dart';
-import 'package:mudra_manager/screens/goal/add_edit_goal_screen.dart';
-import 'package:mudra_manager/screens/goal/goal_card.dart';
+import 'package:mudra_manager/screens/goal/goal_circular_card.dart';
 
 class GoalMiniCard extends ConsumerWidget {
   final double globalPadding;
@@ -26,50 +26,49 @@ class GoalMiniCard extends ConsumerWidget {
             children: [
               Text(
                 "Goals",
-                style: textTheme.titleLarge?.copyWith(color: color.primary),
+                style: textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: color.primary,
+                ),
               ),
-              IconButton.filled(
+              IconButton.filledTonal(
                 onPressed: () {
-                  // This will be navigated via the Home page tab switching
-                  // but for now, we can just open the goal list or handled by the parent
+                  context.push('/goal-screen');
                 },
-                icon: const Icon(Icons.open_in_new),
+                icon: const Icon(Icons.open_in_new, size: 20),
               ),
             ],
           ),
         ),
+        SizedBox(height: 12),
         goalsAsync.when(
           data: (goals) {
             if (goals.isEmpty) {
-              return NoDataFound(
-                message: "No goals found. Add one!",
-                iconData: Icons.emoji_flags_outlined,
-                action: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const AddEditGoalScreen(),
-                      ),
-                    );
-                  },
-                  child: const Text("Add Goal"),
+              return Padding(
+                padding: EdgeInsets.symmetric(horizontal: globalPadding),
+                child: NoDataFound(
+                  message: "No goals found. Add one!",
+                  iconData: Icons.emoji_flags_outlined,
+                  action: ElevatedButton(
+                    onPressed: () {
+                      context.push('/add-goal');
+                    },
+                    child: const Text("Add Goal"),
+                  ),
                 ),
               );
             }
-            // Just show the first goal for the mini card, or a horizontal list
-            // BudgetMiniCard shows all budgets in a column, let's do the same for consistency
-            return Column(
-              children:
-                  goals.map((goal) {
-                    return Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: globalPadding,
-                        vertical: 4,
-                      ),
-                      child: GoalCard(goal: goal),
-                    );
-                  }).toList(),
+            // Horizontal scrolling circular cards
+            return SizedBox(
+              height: 220,
+              child: ListView.builder(
+                padding: EdgeInsets.symmetric(horizontal: globalPadding),
+                scrollDirection: Axis.horizontal,
+                itemCount: goals.length,
+                itemBuilder: (context, index) {
+                  return GoalCircularCard(goal: goals[index]);
+                },
+              ),
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),

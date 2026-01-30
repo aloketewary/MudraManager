@@ -31,6 +31,7 @@ import 'package:mudra_manager/db/models/transaction.dart';
 import 'package:mudra_manager/db/models/user_profile.dart';
 import 'package:mudra_manager/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/util/env.dart' show Env;
+import 'package:mudra_manager/util/snackbar_service.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -70,7 +71,7 @@ class BackupService {
 
     if (result == null || result.files.single.path == null) return null;
     if (result.files.first.extension != 'mudra') {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Invalid file type, select  `.mudra`  type file")));
+      SnackbarService.error("Invalid file type, select  `.mudra`  type file");
       return null;
     }
     final dir = await getApplicationDocumentsDirectory();

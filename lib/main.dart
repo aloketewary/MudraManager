@@ -3,33 +3,26 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/l10n/app_localizations.dart';
 import 'package:mudra_manager/providers/l10n_provider.dart';
 import 'package:mudra_manager/providers/shared_preference_provider.dart';
-import 'package:mudra_manager/screens/home_screen.dart';
-import 'package:mudra_manager/screens/onboarding/onboarding_screen.dart';
+import 'package:mudra_manager/router/app_router.dart';
 import 'package:mudra_manager/service/notification_service.dart';
 import 'package:mudra_manager/theme/app_theme.dart';
 import 'package:mudra_manager/theme/theme_provider.dart';
-import 'package:mudra_manager/util/auth_gate.dart';
 import 'package:mudra_manager/util/sms_transaction_util.dart';
+import 'package:mudra_manager/util/snackbar_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:telephony/telephony.dart'; // Re-export setupSmsListener so it can be called from settings\nexport 'main.dart' show setupSmsListener;
+import 'package:telephony/telephony.dart';
+
+export 'main.dart' show setupSmsListener;
 
 final Telephony telephony = Telephony.instance;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Workmanager().initialize(callbackDispatcher, isInDebugMode: false);
-  // Workmanager().registerPeriodicTask(
-  //   "budgetRollover",
-  //   "budgetRolloverTask",
-  //   frequency: const Duration(hours: 24),
-  // );
   var sharedPrefs = await SharedPreferences.getInstance();
   SharedPrefsUtil.init(sharedPrefs);
   await NotificationService.initialize();
 
   final completed = SharedPrefsUtil.instance.isOnboardingComplete();
-
-  // Set up SMS listener if user has enabled it
   setupSmsListener();
 
   runApp(ProviderScope(child: MudraManagerApp(showOnboarding: !completed)));
@@ -46,16 +39,14 @@ class MudraManagerApp extends ConsumerWidget {
     var appTheme = AppTheme.instance;
     final appColorTheme = ref.watch(themeNotifierProvider);
 
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Mudra Manager',
       theme: appTheme.buildLightTheme(appColorTheme),
       darkTheme: appTheme.buildDarkTheme(appColorTheme),
       themeMode: themeMode,
-      // You can toggle this
       debugShowCheckedModeBanner: false,
-      home: AuthGate(
-        child: showOnboarding ? const OnboardingScreen() : const HomePage(),
-      ),
+      scaffoldMessengerKey: SnackbarService.scaffoldMessengerKey,
+      routerConfig: AppRouter.router(showOnboarding),
       locale: ref.watch(localeProvider),
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -72,7 +63,6 @@ class MudraManagerApp extends ConsumerWidget {
 }
 
 Future<void> setupSmsListener() async {
-  // Only set up listener if user has enabled SMS import
   if (!SharedPrefsUtil.instance.getSmsImportEnabled()) {
     debugPrint('SMS import is disabled, skipping listener setup');
     return;
@@ -99,7 +89,6 @@ Future<void> setupSmsListener() async {
   }
 }
 
-// Background handler for SMS received when app is closed
 @pragma('vm:entry-point')
 void backgroundMessageHandler(SmsMessage message) {
   debugPrint('Background SMS received from: ${message.address}');

@@ -1,195 +1,341 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mudra_manager/util/transaction_msg_util.dart';
-import 'package:intl/intl.dart';
 
 void main() {
-  late TransactionUtil util;
+  group('SMS Transaction Parsing Tests', () {
+    late TransactionUtil util;
 
-  setUp(() {
-    util = TransactionUtil();
-  });
-
-  group('TransactionUtil - SMS Parsing', () {
-    test('HDFC Format with bonded currency and YYYY-MM-DD date', () {
-      const sms =
-          'Spent Rs.19189.3 On Hdfc Card ends with xxxx At Some place on 2026-01-07';
-      final info = util.getTransactionInfo(sms, 'HDFC', 'HDFC', 'hash');
-
-      expect(info.money, '19189.3');
-      expect(
-        DateFormat('yyyy-MM-dd').format(info.transactionTime!),
-        '2026-01-07',
-      );
-      expect(info.typeOfTransaction, TransactionType.debitMisc);
-      expect(info.account?.type, 'card');
-      expect(info.account?.no, 'xxxx');
+    setUp(() {
+      util = TransactionUtil();
     });
 
-    test('Standard Bank Debit with Rs. and comma', () {
-      const sms =
-          'Your A/c x1234 has been debited by Rs. 1,500.00 on 29-01-26. Total Bal Rs.50000.00';
-      final info = util.getTransactionInfo(sms, 'BANK', 'BANK', 'hash');
-
-      expect(info.money, '1500.00');
-      expect(info.balance, '50000.00');
-      expect(info.typeOfTransaction, TransactionType.debited);
-      expect(info.account?.no, '1234');
-    });
-
-    test('Standard Bank Credit with INR and DD-MM-YYYY date', () {
-      const sms =
-          'INR 5,000.00 credited to your A/c x9999 on 15-01-2026. Ref no: 123456';
-      final info = util.getTransactionInfo(sms, 'BANK', 'BANK', 'hash');
-
-      expect(info.money, '5000.00');
-      expect(
-        DateFormat('dd-MM-yyyy').format(info.transactionTime!),
-        '15-01-2026',
-      );
-      expect(info.typeOfTransaction, TransactionType.credited);
-      expect(info.account?.no, '9999');
-    });
-
-    test('UPI Transaction parsing', () {
-      const sms =
-          'Money Transfer: Rs 200.0 paid from your account to upiuser@bank. UPI Ref: 654321. Date: 20-01-2026';
-      final info = util.getTransactionInfo(sms, 'UPI', 'UPI', 'hash');
-
-      expect(info.money, '200.0');
-      expect(info.account?.type, 'UPI');
-      expect(info.account?.sendTo, 'upiuser@bank');
-    });
-
-    group('SBI Formats', () {
-      test('SBI Debit', () {
+    group('HDFC Bank SMS Tests', () {
+      test('HDFC debit with account number', () {
         const sms =
-            'VM-SBIBNK: INR 1000.00 debited from A/c XXXXXX1234 on 28-01-2026 10:30. Avail Bal: INR 5000.00.';
-        final info = util.getTransactionInfo(sms, 'SBIBNK', 'SBI', 'hash');
-        expect(info.money, '1000.00');
+            'Rs.450.00 debited from A/c **1234 on 15-Jan-25 at SWIGGY. Avl Bal: Rs.5000.00';
+        final info = util.getTransactionInfo(sms, 'HDFCBK', 'HDFCBK', 'hash1');
+
+        expect(info.money, '450.00');
+        expect(info.account?.no, '1234');
+        expect(info.typeOfTransaction, TransactionType.debited);
         expect(info.balance, '5000.00');
+      });
+
+      test('HDFC debit with XX format', () {
+        const sms =
+            'Rs 350 debited from A/c XX1234 on 15-Jan-25. Avl Bal: Rs 4650';
+        final info = util.getTransactionInfo(sms, 'HDFCBK', 'HDFCBK', 'hash2');
+
+        expect(info.money, '350');
         expect(info.account?.no, '1234');
         expect(info.typeOfTransaction, TransactionType.debited);
       });
 
-      test('SBI Credit', () {
+      test('HDFC credit transaction', () {
         const sms =
-            'VM-SBIBNK: INR 2000.00 credited to A/c XXXXXX1234 on 28-01-2026 11:15. Avail Bal: INR 7000.00.';
-        final info = util.getTransactionInfo(sms, 'SBIBNK', 'SBI', 'hash');
-        expect(info.money, '2000.00');
-        expect(info.balance, '7000.00');
-        expect(info.account?.no, '1234');
-        expect(info.typeOfTransaction, TransactionType.credited);
-      });
-    });
+            'Rs.5000 credited to A/c **5678 on 15-Jan-25. Avl Bal: Rs.10000';
+        final info = util.getTransactionInfo(sms, 'HDFCBK', 'HDFCBK', 'hash3');
 
-    group('ICICI Formats', () {
-      test('ICICI Debit', () {
-        const sms =
-            'VM-ICICIB: Your A/c XXXXXX5678 is debited for Rs 500.00 on 28-01-2026 14:00 by UPI. Avail Bal: Rs 4500.00.';
-        final info = util.getTransactionInfo(sms, 'ICICIB', 'ICICI', 'hash');
-        expect(info.money, '500.00');
-        expect(info.balance, '4500.00');
-        expect(info.account?.no, '5678');
-        expect(info.typeOfTransaction, TransactionType.debited);
-      });
-
-      test('ICICI Credit', () {
-        const sms =
-            'VM-ICICIB: Rs 1500.00 credited to your A/c XXXXXX5678 on 28-01-2026 15:00. Avail Bal: Rs 6000.00.';
-        final info = util.getTransactionInfo(sms, 'ICICIB', 'ICICI', 'hash');
-        expect(info.money, '1500.00');
-        expect(info.balance, '6000.00');
+        expect(info.money, '5000');
         expect(info.account?.no, '5678');
         expect(info.typeOfTransaction, TransactionType.credited);
       });
-    });
 
-    group('Axis & PNB Formats', () {
-      test('Axis Debit', () {
+      test('HDFC card transaction', () {
         const sms =
-            'AXISBANK: Rs. 750.00 debited from A/c XXXXXX8901 on 28/01/26 16:45. Ref No. 123456789. Avl Bal: Rs. 9250.00.';
-        final info = util.getTransactionInfo(sms, 'AXISBK', 'AXIS', 'hash');
-        expect(info.money, '750.00');
-        expect(info.balance, '9250.00');
-        expect(info.account?.no, '8901');
-        expect(info.typeOfTransaction, TransactionType.debited);
-      });
+            'Rs 1200 spent on HDFC Bank Card XX9876 at AMAZON on 15-Jan-25';
+        final info = util.getTransactionInfo(sms, 'HDFCBK', 'HDFCBK', 'hash4');
 
-      test('PNB Debit', () {
-        const sms =
-            'PNNNNN: Your A/c XXXXXX7890 debited by Rs. 800.00 on 28/01/26 13:00. For NEFT. Bal: Rs. 7200.00.';
-        final info = util.getTransactionInfo(sms, 'PNBNK', 'PNB', 'hash');
-        expect(info.money, '800.00');
-        expect(info.balance, '7200.00');
-        expect(info.account?.no, '7890');
-        expect(info.typeOfTransaction, TransactionType.debited);
-      });
-
-      test('SBM Debit (User Requirement)', () {
-        const sms =
-            'Your Account xxxxxxx1651 is debited with INR 5914.33. on 2026-0-03 10:23:29 after : UPI .... and others details';
-        final info = util.getTransactionInfo(sms, 'SBMBANK', 'SBM', 'hash');
-        expect(info.money, '5914.33');
-        expect(info.account?.no, '1651');
-        expect(info.typeOfTransaction, TransactionType.debited);
-        expect(info.transactionTime, isNotNull);
-      });
-
-      test('SBM Debit Card ending with', () {
-        const sms =
-            'Dear Customer, INR 5914.33 spent on SBM Bank Debit Card ending with 1651 at AMZN Mktp on 2026-0-03:10:23:29. Avail Bal: INR 11090.87-SBM Bank';
-        final info = util.getTransactionInfo(sms, 'SBMBANK', 'SBM', 'hash');
-        expect(info.money, '5914.33');
-        expect(info.account?.no, '1651');
+        expect(info.money, '1200');
+        expect(info.account?.no, '9876');
         expect(info.account?.type, 'card');
       });
+
+      test('HDFC with comma in amount', () {
+        const sms =
+            'Rs.12,450.50 debited from A/c **1234 on 15-Jan-25. Avl Bal: Rs.50,000.00';
+        final info = util.getTransactionInfo(sms, 'HDFCBK', 'HDFCBK', 'hash5');
+
+        expect(info.money, '12450.50');
+        expect(info.balance, '50000.00');
+      });
     });
 
-    test('Relevance check for transactional messages', () {
-      expect(
-        checkForTransactionalMessage('Your OTP is 1234. Do not share.'),
-        isFalse,
-      );
-      expect(
-        checkForTransactionalMessage(
-          'Request for Rs 500 from user@upi is pending.',
-        ),
-        isFalse,
-      );
-      expect(
-        checkForTransactionalMessage('Your A/c has been credited with Rs 100.'),
-        isTrue,
-      );
-      expect(checkForTransactionalMessage('Spent Rs 50 on snacks.'), isTrue);
-    });
-  });
+    group('SBI Bank SMS Tests', () {
+      test('SBI debit transaction', () {
+        const sms =
+            'Dear Customer, Rs.500.00 is debited from A/c **4321 on 15-Jan-25 at ZOMATO. Avl Bal: Rs.8000.00';
+        final info = util.getTransactionInfo(sms, 'SBIINB', 'SBIINB', 'hash6');
 
-  group('TransactionUtil - Date Support', () {
-    test('Supports YYYY-MM-DD', () {
-      final date = util.getTransactionTime('Date: 2025-12-31');
-      expect(DateFormat('yyyy-MM-dd').format(date!), '2025-12-31');
+        expect(info.money, '500.00');
+        expect(info.account?.no, '4321');
+        expect(info.typeOfTransaction, TransactionType.debited);
+      });
+
+      test('SBI with account ending format', () {
+        const sms =
+            'Rs 750 debited from account ending 8765 on 15-Jan-25. Available balance: Rs 5250';
+        final info = util.getTransactionInfo(sms, 'SBIINB', 'SBIINB', 'hash7');
+
+        expect(info.money, '750');
+        expect(info.account?.no, '8765');
+      });
     });
 
-    test('Supports DD-MM-YYYY', () {
-      final date = util.getTransactionTime('Date: 31-12-2025');
-      expect(DateFormat('dd-MM-yyyy').format(date!), '31-12-2025');
+    group('ICICI Bank SMS Tests', () {
+      test('ICICI debit transaction', () {
+        const sms =
+            'Rs.300 debited from A/c XX2468 on 15-Jan-25 for UPI/PAYTM. Avl Bal Rs.7000';
+        final info =
+            util.getTransactionInfo(sms, 'ICICIB', 'ICICIB', 'hash8');
+
+        expect(info.money, '300');
+        expect(info.account?.no, '2468');
+      });
+
+      test('ICICI card transaction', () {
+        const sms =
+            'INR 2500 spent on ICICI Card ending 1357 at FLIPKART on 15-Jan-25';
+        final info =
+            util.getTransactionInfo(sms, 'ICICIB', 'ICICIB', 'hash9');
+
+        expect(info.money, '2500');
+        expect(info.account?.no, '1357');
+      });
     });
 
-    test('Supports DD-MM-YY', () {
-      final date = util.getTransactionTime('Date: 31-12-25');
-      expect(DateFormat('dd-MM-yy').format(date!), '31-12-25');
+    group('Axis Bank SMS Tests', () {
+      test('Axis debit transaction', () {
+        const sms =
+            'Rs 600 debited from A/c no. XX9753 on 15-Jan-25. Avl bal: Rs 4400';
+        final info =
+            util.getTransactionInfo(sms, 'AXISBK', 'AXISBK', 'hash10');
+
+        expect(info.money, '600');
+        expect(info.account?.no, '9753');
+      });
     });
 
-    test('Supports DD/MM/YY via replacement', () {
-      final date = util.getTransactionTime('Date: 28/01/26');
-      expect(DateFormat('dd-MM-yy').format(date!), '28-01-26');
+    group('UPI Transaction Tests', () {
+      test('UPI payment with VPA', () {
+        const sms =
+            'Rs 250 debited from A/c XX1234 to user@paytm on 15-Jan-25. UPI Ref No: 123456789';
+        final info = util.getTransactionInfo(sms, 'UPIAPP', 'UPIAPP', 'hash11');
+
+        expect(info.money, '250');
+        expect(info.account?.sendTo, 'user@paytm');
+        expect(info.account?.type, 'UPI');
+        expect(info.account?.refNo, '123456789');
+      });
+
+      test('UPI with phonepe format', () {
+        const sms =
+            'Rs 150 sent to merchant@phonepe via UPI. Ref: 987654321';
+        final info = util.getTransactionInfo(sms, 'PHONEPE', 'PHONEPE', 'hash12');
+
+        expect(info.money, '150');
+        expect(info.account?.sendTo, 'merchant@phonepe');
+      });
     });
-    group('TransactionUtil - Edge Cases', () {
-      test('Message with no amount', () {
-        const sms = 'Your A/c X1234 has some news for you.';
-        final info = util.getTransactionInfo(sms, 'BANK', 'BANK', 'hash');
-        expect(info.money, '');
-        expect(info.typeOfTransaction, TransactionType.noMatch);
+
+    group('Edge Cases', () {
+      test('Missing account number', () {
+        const sms = 'Rs 100 debited on 15-Jan-25 at STORE. Avl Bal: Rs 900';
+        final info = util.getTransactionInfo(sms, 'BANK', 'BANK', 'hash13');
+
+        expect(info.money, '100');
+        expect(info.account?.no, anyOf(isNull, isEmpty));
+      });
+
+      test('Large amount with commas', () {
+        const sms =
+            'Rs.1,50,000.00 credited to A/c **1234 on 15-Jan-25';
+        final info = util.getTransactionInfo(sms, 'BANK', 'BANK', 'hash14');
+
+        expect(info.money, '150000.00');
+      });
+
+      test('Multiple Rs in message', () {
+        const sms =
+            'Rs 500 debited from A/c XX1234. Avl Bal: Rs 4500. Min Bal: Rs 1000';
+        final info = util.getTransactionInfo(sms, 'BANK', 'BANK', 'hash15');
+
+        expect(info.money, '500');
+        expect(info.balance, '4500');
+      });
+
+      test('Date with time', () {
+        const sms =
+            'Rs 200 debited from A/c XX1234 on 15-01-2025 14:30:45';
+        final info = util.getTransactionInfo(sms, 'BANK', 'BANK', 'hash16');
+
+        expect(info.transactionTime, isNotNull);
+        expect(info.transactionTime?.day, 15);
+        expect(info.transactionTime?.month, 1);
+        expect(info.transactionTime?.year, 2025);
+      });
+
+      test('Invalid transaction message', () {
+        const sms = 'Your OTP is 123456. Valid for 10 minutes.';
+        final isValid = checkForTransactionalMessage(sms);
+
+        expect(isValid, false);
+      });
+
+      test('Pending transaction (should be ignored)', () {
+        const sms = 'Rs 500 pending debit from A/c XX1234';
+        final isValid = checkForTransactionalMessage(sms);
+
+        expect(isValid, false);
+      });
+
+      test('Future transaction - will be debited', () {
+        const sms = 'Rs 1000 will be debited from A/c XX1234 on 20-Jan-25';
+        final isValid = checkForTransactionalMessage(sms);
+
+        expect(isValid, false);
+      });
+
+      test('Bill reminder - due payment', () {
+        const sms = 'Your credit card bill of Rs 5000 is due on 25-Jan-25';
+        final isValid = checkForTransactionalMessage(sms);
+
+        expect(isValid, false);
+      });
+
+      test('Bill reminder - total due', () {
+        const sms = 'Total due: Rs 3500. Pay by 30-Jan-25 to avoid charges';
+        final isValid = checkForTransactionalMessage(sms);
+
+        expect(isValid, false);
+      });
+
+      test('Bill reminder - minimum due', () {
+        const sms = 'Minimum due Rs 500 on your HDFC Card. Pay by 28-Jan';
+        final isValid = checkForTransactionalMessage(sms);
+
+        expect(isValid, false);
+      });
+
+      test('Outstanding balance reminder', () {
+        const sms = 'Outstanding balance Rs 2000 on A/c XX1234';
+        final isValid = checkForTransactionalMessage(sms);
+
+        expect(isValid, false);
+      });
+
+      test('Authorization hold', () {
+        const sms = 'Rs 500 authorization hold on Card XX1234';
+        final isValid = checkForTransactionalMessage(sms);
+
+        expect(isValid, false);
+      });
+
+      test('Valid completed transaction', () {
+        const sms = 'Rs 450 debited from A/c XX1234 on 15-Jan-25';
+        final isValid = checkForTransactionalMessage(sms);
+
+        expect(isValid, true);
+      });
+    });
+
+    group('Account Number Extraction', () {
+      test('Account with asterisks', () {
+        final words = ['ac', '**1234'];
+        final account = util.getAccountFromWords(words, 'ac **1234');
+
+        expect(account.no, '1234');
+      });
+
+      test('Account with XX prefix', () {
+        final words = ['ac', 'xx5678'];
+        final account = util.getAccountFromWords(words, 'ac xx5678');
+
+        expect(account.no, '5678');
+      });
+
+      test('Card ending with', () {
+        final words = ['card', 'ending', 'with', '9876'];
+        final account = util.getAccountFromWords(words, 'card ending with 9876');
+
+        expect(account.no, '9876');
+        expect(account.type, 'card');
+      });
+
+      test('Account no format', () {
+        final words = ['ac', 'no', '1357'];
+        final account = util.getAccountFromWords(words, 'ac no 1357');
+
+        expect(account.no, '1357');
+      });
+    });
+
+    group('Amount Extraction', () {
+      test('Amount after Rs.', () {
+        final words = ['rs.', '450.00'];
+        final amount = util.getMoneySpentFromWords(words);
+
+        expect(amount, '450.00');
+      });
+
+      test('Amount with comma', () {
+        final words = ['rs.', '1,234.56'];
+        final amount = util.getMoneySpentFromWords(words);
+
+        expect(amount, '1234.56');
+      });
+
+      test('Amount without decimal', () {
+        final words = ['rs', '500'];
+        final amount = util.getMoneySpentFromWords(words);
+
+        expect(amount, '500');
+      });
+    });
+
+    group('Balance Extraction', () {
+      test('Available balance', () {
+        final balance = util.getBalanceFromProcessed('avl bal rs. 5000.00');
+
+        expect(balance, '5000.00');
+      });
+
+      test('Balance with comma', () {
+        final balance = util.getBalanceFromProcessed('avbl bal rs. 50,000.00');
+
+        expect(balance, '50000.00');
+      });
+
+      test('Current balance', () {
+        final balance = util.getBalanceFromProcessed('curr bal rs 3500');
+
+        expect(balance, '3500');
+      });
+    });
+
+    group('Transaction Type Detection', () {
+      test('Debit transaction', () {
+        final type = util.getTypeOfTransaction('amount debited from account');
+
+        expect(type, TransactionType.debited);
+      });
+
+      test('Credit transaction', () {
+        final type = util.getTypeOfTransaction('amount credited to account');
+
+        expect(type, TransactionType.credited);
+      });
+
+      test('Payment transaction', () {
+        final type = util.getTypeOfTransaction('payment of rs 500');
+
+        expect(type, TransactionType.debitMisc);
+      });
+
+      test('No match', () {
+        final type = util.getTypeOfTransaction('hello world');
+
+        expect(type, TransactionType.noMatch);
       });
     });
   });

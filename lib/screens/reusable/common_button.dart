@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:mudra_manager/theme/design_tokens.dart';
 
-class CommonButton extends StatefulWidget {
+class CommonButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
   final Color? backGroundColor;
   final Color? textColor;
   final IconData? iconData;
   final TextStyle? textStyle;
+  final bool isOutlined;
+  final double? width;
 
   const CommonButton({
     super.key,
@@ -17,84 +18,81 @@ class CommonButton extends StatefulWidget {
     this.iconData,
     this.textColor,
     this.textStyle,
+    this.isOutlined = false,
+    this.width,
   });
-
-  @override
-  State<CommonButton> createState() => _CommonButtonState();
-}
-
-class _CommonButtonState extends State<CommonButton> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: DesignTokens.durationFast,
-      vsync: this,
-    );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _handleTapDown(TapDownDetails details) {
-    _controller.forward();
-  }
-
-  void _handleTapUp(TapUpDetails details) {
-    _controller.reverse();
-    widget.onPressed();
-  }
-
-  void _handleTapCancel() {
-    _controller.reverse();
-  }
 
   @override
   Widget build(BuildContext context) {
     var textTheme = Theme.of(context).textTheme;
     var color = Theme.of(context).colorScheme;
     
-    return ScaleTransition(
-      scale: _scaleAnimation,
-      child: GestureDetector(
-        onTapDown: _handleTapDown,
-        onTapUp: _handleTapUp,
-        onTapCancel: _handleTapCancel,
-        child: ElevatedButton(
-          onPressed: null, // Handled by GestureDetector
-          style: ElevatedButton.styleFrom(
-            backgroundColor: widget.backGroundColor ?? color.primary,
+    final buttonColor = backGroundColor ?? color.primary;
+    final contentColor = textColor ?? (isOutlined ? buttonColor : color.onPrimary);
+
+    if (isOutlined) {
+      return SizedBox(
+        width: width,
+        child: OutlinedButton(
+          onPressed: onPressed,
+          style: OutlinedButton.styleFrom(
+            foregroundColor: contentColor,
+            side: BorderSide(color: buttonColor, width: 2),
             shape: RoundedRectangleBorder(
-              borderRadius: DesignTokens.borderRadiusMedium,
+              borderRadius: BorderRadius.circular(12),
             ),
-            elevation: DesignTokens.elevation2,
+            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           ),
           child: Row(
+            mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              if (widget.iconData != null) Icon(
-                widget.iconData, 
-                color: widget.textColor ?? color.onPrimary, 
-                size: DesignTokens.iconSizeMedium,
-              ),
-              if (widget.iconData != null) SizedBox(width: DesignTokens.spacing12),
+              if (iconData != null) ...[
+                Icon(iconData, size: 20),
+                SizedBox(width: 8),
+              ],
               Text(
-                widget.text.toUpperCase(), 
-                style: widget.textStyle ?? textTheme.labelLarge?.copyWith(
-                  color: widget.textColor ?? color.onPrimary,
+                text,
+                style: textStyle ?? textTheme.labelLarge?.copyWith(
+                  color: contentColor,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],
           ),
+        ),
+      );
+    }
+
+    return SizedBox(
+      width: width,
+      child: FilledButton(
+        onPressed: onPressed,
+        style: FilledButton.styleFrom(
+          backgroundColor: buttonColor,
+          foregroundColor: contentColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          elevation: 2,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (iconData != null) ...[
+              Icon(iconData, size: 20),
+              SizedBox(width: 8),
+            ],
+            Text(
+              text,
+              style: textStyle ?? textTheme.labelLarge?.copyWith(
+                color: contentColor,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
         ),
       ),
     );

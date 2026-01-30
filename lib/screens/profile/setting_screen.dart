@@ -1,8 +1,10 @@
+import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/providers/auth_service.dart';
 import 'package:mudra_manager/screens/profile/pin_entry_dialog.dart';
+import 'package:mudra_manager/util/snackbar_service.dart';
 
 class SecuritySettingsScreen extends ConsumerStatefulWidget {
   const SecuritySettingsScreen({super.key});
@@ -43,9 +45,7 @@ class _SecuritySettingsScreenState
       // ask once to confirm
       final ok = await auth.authenticateBiometric();
       if (!ok) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Biometric auth failed')));
+        SnackbarService.error('Biometric auth failed');
         return;
       }
     }

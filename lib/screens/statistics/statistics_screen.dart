@@ -1,3 +1,4 @@
+import 'package:go_router/go_router.dart';
 import 'dart:math';
 import 'dart:typed_data' show Uint8List;
 import 'dart:ui' as ui;
@@ -867,19 +868,7 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen>
         ),
         Center(
           child: TextButton(
-            onPressed: () {
-              Navigator.of(context).push(
-                PageRouteBuilder(
-                  transitionDuration: Duration(milliseconds: 300),
-                  pageBuilder:
-                      (_, animation, secondaryAnimation) =>
-                          TransactionListScreen(showAppBar: true),
-                  transitionsBuilder: (_, animation, __, child) {
-                    return FadeTransition(opacity: animation, child: child);
-                  },
-                ),
-              );
-            },
+            onPressed: () => context.push('/transactions'),
             child: Text(ctxt.statistics_showAllButtonText.toUpperCase()),
           ),
         ),
@@ -899,7 +888,7 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen>
                 leading: const Icon(Icons.picture_as_pdf),
                 title: Text(ctxt.statistics_exportToPdfButtonText),
                 onTap: () async {
-                  Navigator.pop(context);
+                  context.pop();
                   Uint8List pieImage = await captureChartAsImage(pieKey);
                   Uint8List lineImage = await captureChartAsImage(lineKey);
 
@@ -910,7 +899,7 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen>
                 leading: const Icon(Icons.table_chart),
                 title: Text(ctxt.statistics_exportToExcelButtonText),
                 onTap: () {
-                  Navigator.pop(context);
+                  context.pop();
                   exportStatsToExcel(data!);
                 },
               ),

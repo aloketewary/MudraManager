@@ -1,7 +1,7 @@
+import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/providers/goal_provider.dart';
-import 'package:mudra_manager/screens/goal/add_edit_goal_screen.dart';
 import 'package:mudra_manager/screens/goal/goal_card.dart';
 import 'package:mudra_manager/screens/reusable/no_data_found.dart';
 
@@ -32,12 +32,7 @@ class GoalScreen extends ConsumerWidget {
               return GoalCard(
                 goal: goal,
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => AddEditGoalScreen(goal: goal),
-                    ),
-                  );
+                  context.push('/add-goal');
                 },
               );
             },
@@ -48,12 +43,7 @@ class GoalScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'addGoalHero',
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const AddEditGoalScreen()),
-          );
-        },
+        onPressed: () => context.push('/add-goal'),
         child: const Icon(Icons.add),
       ),
     );

@@ -1,8 +1,10 @@
+import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/theme/theme_preview_screen.dart';
 import 'package:mudra_manager/theme/theme_provider.dart';
+import 'package:mudra_manager/util/snackbar_service.dart';
 
 class ThemePickerScreen extends ConsumerStatefulWidget {
   const ThemePickerScreen({super.key});
@@ -22,9 +24,7 @@ class _ThemePickerScreenState extends ConsumerState<ThemePickerScreen> {
 
   void _applyTheme() {
     ref.read(themeNotifierProvider.notifier).setTheme(_tempSelectedTheme);
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text("Theme applied!")));
+    SnackbarService.success("Theme applied!");
   }
 
   @override

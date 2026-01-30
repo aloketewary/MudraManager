@@ -1,6 +1,8 @@
+import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mudra_manager/l10n/app_localizations.dart' show AppLocalizations;
+import 'package:mudra_manager/util/snackbar_service.dart';
 
 class SwipeableWeeklyCalendar extends StatefulWidget {
   final bool allowFutureDateSelection;
@@ -86,9 +88,7 @@ class _SwipeableWeeklyCalendarState extends State<SwipeableWeeklyCalendar> {
         });
       } else {
         // Optionally show a message to the user that future dates are not allowed
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Future dates are not allowed.')),
-        );
+        SnackbarService.warning('Future dates are not allowed.');
       }
     }
   }
@@ -149,9 +149,7 @@ class _SwipeableWeeklyCalendarState extends State<SwipeableWeeklyCalendar> {
                 widget.onDateSelected(day);
               });
             } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Future dates are not allowed.')),
-              );
+              SnackbarService.warning('Future dates are not allowed.');
             }
           },
           child: Container(

@@ -1,3 +1,4 @@
+import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 
 class CommonDialogScreen extends StatelessWidget {
@@ -25,14 +26,14 @@ class CommonDialogScreen extends StatelessWidget {
       content: Text(message, style: textTheme.bodyLarge),
       actions: [
         OutlinedButton(
-          onPressed: () => Navigator.of(context).pop(false),
+          onPressed: () => context.pop(false),
           child: Text(
             cancelLabel.toUpperCase(),
             style: textTheme.labelLarge?.copyWith(color: color.primary),
           ),
         ),
         OutlinedButton(
-          onPressed: () => Navigator.of(context).pop(true),
+          onPressed: () => context.pop(true),
           style: OutlinedButton.styleFrom(
             backgroundColor: color.primary,
           ),

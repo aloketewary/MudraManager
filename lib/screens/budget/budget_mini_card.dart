@@ -1,3 +1,4 @@
+import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -46,12 +47,7 @@ class _BudgetMiniCardState extends ConsumerState<BudgetMiniCard> {
                 child: IconButton.filled(
                   onPressed:
                       () => {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const BudgetDashboard(),
-                          ),
-                        ),
+                        context.push('/budget-dashboard'),
                       },
                   icon: Icon(Icons.open_in_new),
                 ),
@@ -67,12 +63,7 @@ class _BudgetMiniCardState extends ConsumerState<BudgetMiniCard> {
                 iconData: Icons.pie_chart_outline,
                 action: ElevatedButton(
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const AddBudgetScreen(),
-                      ),
-                    );
+                    context.push('/add-budget');
                   },
                   child: Text(ctxt.dashboard_mini_budget_add_text),
                 ),
