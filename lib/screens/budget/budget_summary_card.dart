@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:mudra_manager/l10n/app_localizations.dart'
@@ -162,7 +163,10 @@ class BudgetSummaryCardState extends ConsumerState<BudgetSummaryCard> {
 
           // Content Section
           GestureDetector(
-            onTap: () => setState(() => _expanded = !_expanded),
+            onTap: () {
+              HapticFeedback.mediumImpact();
+              setState(() => _expanded = !_expanded);
+            },
             behavior: HitTestBehavior.opaque,
             child: Padding(
               padding: const EdgeInsets.all(20.0),

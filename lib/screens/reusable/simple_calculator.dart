@@ -17,7 +17,7 @@ class _SimpleCalculatorState extends State<SimpleCalculator> {
   String result = '';
 
   void onButtonPressed(String value) {
-    HapticFeedback.lightImpact();
+    HapticFeedback.mediumImpact();
     setState(() {
       if (value == 'AC') {
         input = '';

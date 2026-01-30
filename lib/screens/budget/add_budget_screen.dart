@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:mudra_manager/db/models/budget.dart'
@@ -266,7 +267,10 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
                                     vertical: 16,
                                   ),
                                 ),
-                                onPressed: () => _pickDate(context, true),
+                                onPressed: () {
+              HapticFeedback.mediumImpact();
+              _pickDate(context, true);
+            },
                                 child: Text(
                                   _startDate == null
                                       ? ctxt.budget_selectStartDateText
@@ -293,7 +297,10 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
                                     vertical: 16,
                                   ),
                                 ),
-                                onPressed: () => _pickDate(context, false),
+                                onPressed: () {
+              HapticFeedback.mediumImpact();
+              _pickDate(context, false);
+            },
                                 child: Text(
                                   _endDate == null
                                       ? ctxt.budget_selectEndDateText

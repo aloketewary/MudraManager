@@ -1,118 +1,99 @@
-import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
 
-  Future<PackageInfo> _getAppInfo() async {
-    return await PackageInfo.fromPlatform();
-  }
-
   @override
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme;
-    String description =
-        "Mudra Manager is a smart personal finance app that helps you track expenses, manage budgets, and organize transactions effortlessly. With offline support, SMS auto-detection, and insightful charts, it gives you full control over your money. Simple, secure, and powerful—perfect for building better financial habits every day.";
+    final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
       appBar: AppBar(title: const Text("About Mudra Manager")),
       body: FutureBuilder<PackageInfo>(
-        future: _getAppInfo(),
+        future: PackageInfo.fromPlatform(),
         builder: (context, snapshot) {
           final info = snapshot.data;
-
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              // App Header
-              Column(
-                children: [
-                  CircleAvatar(
-                    backgroundColor: color.primary,
-                    radius: 48,
-                    child: Image.asset(
-                      'assets/logo/rupee.png',
-                      // color: color.primary,
-                      width: 72,
+              Container(
+                padding: EdgeInsets.all(24),
+                decoration: BoxDecoration(color: color.surfaceContainerHighest, borderRadius: BorderRadius.circular(16)),
+                child: Column(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(16),
+                      decoration: BoxDecoration(color: color.primary.withValues(alpha: 0.1), shape: BoxShape.circle),
+                      child: Image.asset('assets/logo/rupee.png', width: 64, height: 64),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    "Mudra Manager",
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  const SizedBox(height: 12),
-                  if (info != null)
+                    SizedBox(height: 16),
+                    Text("Mudra Manager", style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+                    SizedBox(height: 8),
+                    if (info != null) Text("Version ${info.version} (${info.buildNumber})", style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant)),
+                    SizedBox(height: 16),
                     Text(
-                      "Version ${info.version} (${info.buildNumber})",
-                      style: TextStyle(color: Colors.grey[600]),
+                      "Mudra Manager is a smart personal finance app that helps you track expenses, manage budgets, and organize transactions effortlessly. With offline support, SMS auto-detection, and insightful charts, it gives you full control over your money.",
+                      textAlign: TextAlign.center,
+                      style: textTheme.bodyMedium?.copyWith(color: color.onSurfaceVariant),
                     ),
-                  const SizedBox(height: 8),
-                  Text(
-                    description,
-                    textAlign: TextAlign.justify,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ],
+                  ],
+                ),
               ),
-
-              const SizedBox(height: 32),
-
-              // Meet the Team
-              _buildSectionHeader("Meet the Minds Behind the App"),
-              _buildTeamMember(
-                name: "Aloke Tewary",
-                role: "Product Designer",
-                icon: Icons.design_services,
-              ),
-              _buildTeamMember(
-                name: "Aloke Tewary",
-                role: "Flutter Developer",
-                icon: Icons.code,
-              ),
-              _buildTeamMember(
-                name: "Sougata Chakraborty",
-                role: "Backend and Testing Engineer",
-                icon: Icons.storage_outlined,
-              ),
-
-              const SizedBox(height: 32),
-
-              // Other Details
-              _buildSectionHeader("More Information"),
-              ListTile(
-                leading: const Icon(Icons.privacy_tip_outlined),
-                title: const Text("Privacy Policy"),
-                onTap: () {
-                  // TODO: Open privacy policy
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.email_outlined),
-                title: const Text("Contact Us"),
-                subtitle: const Text("support@mudramanager.app"),
-                onTap: () {
-                  // TODO: Open email intent or form
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.verified_user_outlined),
-                title: const Text('License'),
-                subtitle: const Text('MIT License'),
-                onTap: () {
-                  showLicensePage(
-                    context: context,
-                    applicationName: info?.appName,
-                    applicationVersion: info?.version,
-                  );
-                },
-              ),
-              const Spacer(),
+              SizedBox(height: 24),
+              Text("Meet the Team", style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: color.onSurfaceVariant)),
+              SizedBox(height: 12),
+              _buildTeamCard(context, color, textTheme, "Aloke Tewary", "Product Designer", Icons.design_services),
+              SizedBox(height: 8),
+              _buildTeamCard(context, color, textTheme, "Aloke Tewary", "Flutter Developer", Icons.code),
+              SizedBox(height: 8),
+              _buildTeamCard(context, color, textTheme, "Sougata Chakraborty", "Backend & Testing", Icons.storage_outlined),
+              SizedBox(height: 24),
+              Text("More Information", style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: color.onSurfaceVariant)),
+              SizedBox(height: 12),
+              _buildInfoCard(context, color, textTheme, Icons.privacy_tip_outlined, "Privacy Policy", "View our privacy policy", () {}),
+              SizedBox(height: 8),
+              _buildInfoCard(context, color, textTheme, Icons.email_outlined, "Contact Us", "support@mudramanager.app", () {}),
+              SizedBox(height: 8),
+              _buildInfoCard(context, color, textTheme, Icons.verified_user_outlined, "License", "MIT License", () {
+                HapticFeedback.mediumImpact();
+                showLicensePage(context: context, applicationName: info?.appName, applicationVersion: info?.version);
+              }),
+              SizedBox(height: 32),
               Center(
-                child: Text(
-                  '© ${DateTime.now().year} ${info?.appName}',
-                  style: Theme.of(context).textTheme.labelSmall,
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Made with ',
+                          style: textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: color.onSurface.withValues(alpha: 0.6),
+                            shadows: [
+                              Shadow(color: Colors.black.withValues(alpha: 0.1), offset: Offset(0, 2), blurRadius: 4),
+                            ],
+                          ),
+                        ),
+                        Icon(Icons.favorite, size: 28, color: Colors.red),
+                        Text(
+                          ' in India',
+                          style: textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: color.onSurface.withValues(alpha: 0.6),
+                            shadows: [
+                              Shadow(color: Colors.black.withValues(alpha: 0.1), offset: Offset(0, 2), blurRadius: 4),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 8),
+                    Text('© ${DateTime.now().year} ${info?.appName ?? "Mudra Manager"}', style: textTheme.labelSmall?.copyWith(color: color.onSurfaceVariant)),
+                  ],
                 ),
               ),
             ],
@@ -122,25 +103,53 @@ class AboutScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionHeader(String title) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Text(
-        title,
-        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+  Widget _buildTeamCard(BuildContext context, ColorScheme color, TextTheme textTheme, String name, String role, IconData icon) {
+    return Container(
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(color: color.surfaceContainerHighest, borderRadius: BorderRadius.circular(16)),
+      child: Row(
+        children: [
+          Container(padding: EdgeInsets.all(12), decoration: BoxDecoration(color: color.primary.withValues(alpha: 0.1), shape: BoxShape.circle), child: Icon(icon, color: color.primary, size: 24)),
+          SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(name, style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+                SizedBox(height: 2),
+                Text(role, style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant)),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildTeamMember({
-    required String name,
-    required String role,
-    required IconData icon,
-  }) {
-    return ListTile(
-      leading: Icon(icon, color: Colors.teal),
-      title: Text(name),
-      subtitle: Text(role),
+  Widget _buildInfoCard(BuildContext context, ColorScheme color, TextTheme textTheme, IconData icon, String title, String subtitle, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.all(16),
+        decoration: BoxDecoration(color: color.surfaceContainerHighest, borderRadius: BorderRadius.circular(16)),
+        child: Row(
+          children: [
+            Container(padding: EdgeInsets.all(12), decoration: BoxDecoration(color: color.primary.withValues(alpha: 0.1), shape: BoxShape.circle), child: Icon(icon, color: color.primary, size: 24)),
+            SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+                  SizedBox(height: 2),
+                  Text(subtitle, style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant)),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right, color: color.onSurfaceVariant),
+          ],
+        ),
+      ),
     );
   }
 }

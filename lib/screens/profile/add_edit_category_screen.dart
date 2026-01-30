@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/db/models/category.dart'
     show Category, CategoryType, GetCategoryCollection;
@@ -82,81 +83,296 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
   Widget build(BuildContext context) {
     var textTheme = Theme.of(context).textTheme;
     var color = Theme.of(context).colorScheme;
+    final headerColor = _selectedColor ?? color.primary;
+
     return Scaffold(
+      backgroundColor: headerColor,
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.close, color: Colors.white),
+          onPressed: () {
+            HapticFeedback.mediumImpact();
+            context.pop();
+          },
+        ),
+        centerTitle: true,
         title: Text(
           widget.existing == null ? 'Add Category' : 'Edit Category',
-          style: textTheme.titleLarge,
+          style: textTheme.titleLarge?.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Expanded(
-              child: Form(
-                key: _formKey,
-                child: ListView(
-                  children: [
-                    CommonTextInputField(
-                      controller: _nameController,
-                      labelText: 'Category Name',
-                      hintText: 'Enter category name',
-                      iconData: Icons.category,
-                      validateField:
-                          (val) =>
-                              val == null || val.trim().isEmpty
-                                  ? 'Required'
-                                  : null,
+      body: Column(
+        children: [
+          SizedBox(
+            height: MediaQuery.of(context).size.height * 0.25,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    HapticFeedback.mediumImpact();
+                    _pickIcon();
+                  },
+                  child: Container(
+                    padding: EdgeInsets.all(32),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.2),
+                      shape: BoxShape.circle,
                     ),
-                    CommonDropdownField<CategoryType>(
-                      value: _selectedType,
-                      items: CategoryType.values,
-                      labelText: 'Category Type',
-                      onChanged:
-                          (value) => setState(() => _selectedType = value!),
-                      itemBuilder:
-                          (CategoryType type) =>
-                              Row(children: [Text(type.name.capitalize())]),
+                    child: Icon(
+                      _selectedIcon != null
+                          ? IconHelper.iconFromName(_selectedIcon!)
+                          : Icons.category,
+                      size: 64,
+                      color: Colors.white,
                     ),
+                  ),
+                ),
+                SizedBox(height: 16),
+                Text(
+                  'TAP TO CHANGE ICON',
+                  style: textTheme.labelSmall?.copyWith(
+                    color: Colors.white.withValues(alpha: 0.7),
+                    letterSpacing: 1.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                color: color.surface,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.1),
+                    blurRadius: 10,
+                    offset: Offset(0, -5),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+                child: Form(
+                  key: _formKey,
+                  child: ListView(
+                    padding: EdgeInsets.only(
+                      top: 32,
+                      left: 24,
+                      right: 24,
+                      bottom: 24,
+                    ),
+                    children: [
+                      Text(
+                        'Category Name',
+                        style: textTheme.titleMedium?.copyWith(
+                          color: color.onSurfaceVariant,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 12),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: color.surfaceContainer,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: TextFormField(
+                          controller: _nameController,
+                          decoration: InputDecoration(
+                            hintText: 'Enter category name',
+                            border: InputBorder.none,
+                            icon: Icon(
+                              Icons.edit,
+                              color: color.onSurfaceVariant,
+                            ),
+                          ),
+                          validator:
+                              (val) =>
+                                  val == null || val.trim().isEmpty
+                                      ? 'Required'
+                                      : null,
+                        ),
+                      ),
+                      SizedBox(height: 24),
+                      Text(
+                        'Category Type',
+                        style: textTheme.titleMedium?.copyWith(
+                          color: color.onSurfaceVariant,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 12),
+                      Row(
+                        children:
+                            CategoryType.values.map((type) {
+                              final isSelected = _selectedType == type;
+                              return Expanded(
+                                child: Padding(
+                                  padding: EdgeInsets.only(
+                                    right: type == CategoryType.expense ? 8 : 0,
+                                    left: type == CategoryType.income ? 8 : 0,
+                                  ),
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      HapticFeedback.mediumImpact();
+                                      setState(() => _selectedType = type);
+                                    },
+                                    child: AnimatedContainer(
+                                      duration: Duration(milliseconds: 200),
+                                      padding: EdgeInsets.symmetric(
+                                        vertical: 16,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color:
+                                            isSelected
+                                                ? headerColor.withValues(
+                                                  alpha: 0.1,
+                                                )
+                                                : color.surfaceContainer,
+                                        borderRadius: BorderRadius.circular(16),
+                                        border: Border.all(
+                                          color:
+                                              isSelected
+                                                  ? headerColor
+                                                  : Colors.transparent,
+                                          width: 2,
+                                        ),
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            type == CategoryType.expense
+                                                ? Icons.arrow_upward
+                                                : Icons.arrow_downward,
+                                            color:
+                                                isSelected
+                                                    ? headerColor
+                                                    : color.onSurfaceVariant,
+                                            size: 20,
+                                          ),
+                                          SizedBox(width: 8),
+                                          Text(
+                                            type.name.capitalize(),
+                                            style: textTheme.titleSmall
+                                                ?.copyWith(
+                                                  color:
+                                                      isSelected
+                                                          ? headerColor
+                                                          : color
+                                                              .onSurfaceVariant,
+                                                  fontWeight:
+                                                      isSelected
+                                                          ? FontWeight.bold
+                                                          : FontWeight.normal,
+                                                ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                      ),
+                      SizedBox(height: 24),
+                      Text(
+                        'Color',
+                        style: textTheme.titleMedium?.copyWith(
+                          color: color.onSurfaceVariant,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 12),
+                      GestureDetector(
+                        onTap: () {
+                          HapticFeedback.mediumImpact();
+                          _pickColor();
+                        },
+                        child: Container(
+                          padding: EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                headerColor.withValues(alpha: 0.8),
+                                headerColor,
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: headerColor.withValues(alpha: 0.3),
+                                blurRadius: 8,
+                                offset: Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.palette, color: Colors.white),
+                              SizedBox(width: 12),
+                              Text(
+                                'TAP TO CHANGE COLOR',
+                                style: textTheme.titleSmall?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1.0,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 48),
+                      FilledButton(
+                        onPressed: () async {
+                          HapticFeedback.mediumImpact();
+                          await _save();
+                          context.pop(true);
+                        },
+                        style: FilledButton.styleFrom(
+                          backgroundColor: headerColor,
+                          foregroundColor: Colors.white,
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 2,
+                          minimumSize: Size(double.infinity, 52),
+                        ),
+                        child: Text(
+                          (widget.existing == null
+                              ? 'SAVE CATEGORY'
+                              : 'UPDATE CATEGORY'),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+                      ),
 
-                    Row(
-                      children: [
-                        CommonIconPickerButton(
-                          label: 'Icon:',
-                          selectedIcon:
-                              _selectedIcon != null
-                                  ? IconHelper.iconFromName(_selectedIcon!)
-                                  : Icons.add,
-                          onPressed: _pickIcon,
-                          backgroundColor: color.onPrimary,
-                          textColor: color.onPrimaryContainer,
-                          iconBackGroundColor: _selectedColor,
-                        ),
-                        const Spacer(),
-                        CommonColorPickerButton(
-                          label: 'Pick Color',
-                          onPressed: _pickColor,
-                          backgroundColor: _selectedColor,
-                          textColor: color.onPrimary,
-                        ),
-                      ],
-                    ),
-                  ],
+                      SizedBox(
+                        height: MediaQuery.of(context).viewInsets.bottom,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-            CommonButton(
-              text: widget.existing == null ? 'save' : 'update',
-              backGroundColor: color.primary,
-              textColor: color.onPrimary,
-              onPressed: () async {
-                await _save();
-                context.pop(true);
-              },
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

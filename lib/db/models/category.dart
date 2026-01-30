@@ -22,6 +22,8 @@ class Category {
   String? iconName;
   int? colorValue;
 
+  List<String>? keywords;
+
   // Isar requires a default constructor
   Category();
 
@@ -29,6 +31,7 @@ class Category {
   Category.create({
     required this.name,
     this.categoryType = CategoryType.expense, // Default to expense
+    this.keywords,
   });
 
   factory Category.fromJson(Map<String, dynamic> json) =>

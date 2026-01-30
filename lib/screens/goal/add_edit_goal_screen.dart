@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:mudra_manager/db/models/goal.dart';
@@ -100,11 +101,17 @@ class _AddEditGoalScreenState extends ConsumerState<AddEditGoalScreen> {
                         content: const Text("This action cannot be undone."),
                         actions: [
                           TextButton(
-                            onPressed: () => context.pop(false),
+                            onPressed: () {
+              HapticFeedback.mediumImpact();
+              context.pop(false);
+            },
                             child: const Text("Cancel"),
                           ),
                           TextButton(
-                            onPressed: () => context.pop(true),
+                            onPressed: () {
+              HapticFeedback.mediumImpact();
+              context.pop(true);
+            },
                             child: const Text("Delete"),
                           ),
                         ],
@@ -196,7 +203,10 @@ class _AddEditGoalScreenState extends ConsumerState<AddEditGoalScreen> {
                       'entertainment',
                     ].map((icon) {
                       return GestureDetector(
-                        onTap: () => setState(() => _selectedIcon = icon),
+                        onTap: () {
+              HapticFeedback.mediumImpact();
+              setState(() => _selectedIcon = icon);
+            },
                         child: Container(
                           margin: const EdgeInsets.only(right: 8),
                           padding: const EdgeInsets.all(8),
@@ -235,7 +245,10 @@ class _AddEditGoalScreenState extends ConsumerState<AddEditGoalScreen> {
                 children:
                     Colors.primaries.map((c) {
                       return GestureDetector(
-                        onTap: () => setState(() => _selectedColor = c),
+                        onTap: () {
+              HapticFeedback.mediumImpact();
+              setState(() => _selectedColor = c);
+            },
                         child: Container(
                           width: 40,
                           height: 40,

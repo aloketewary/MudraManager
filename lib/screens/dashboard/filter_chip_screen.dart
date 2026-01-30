@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 // In your home/dashboard screen
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/db/filter_type.dart' show FilterType;
 import 'package:mudra_manager/l10n/app_localizations.dart' show AppLocalizations;
@@ -28,7 +29,10 @@ class FilterChips extends ConsumerWidget {
             child: SizedBox(
               width: 80,
               child: GestureDetector(
-                onTap: () => {ref.read(filterProvider.notifier).state = filter},
+                onTap: () {
+                  HapticFeedback.mediumImpact();
+                  ref.read(filterProvider.notifier).state = filter;
+                },
                 child: Container(
                   width: 80,
                   padding: const EdgeInsets.all(8.0),

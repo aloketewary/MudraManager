@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:mudra_manager/db/models/account.dart' show Account, AccountType;
@@ -127,7 +128,10 @@ class _AddEditTransactionScreenState
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.close, color: onHeaderColor),
-          onPressed: () => context.pop(),
+          onPressed: () {
+              HapticFeedback.mediumImpact();
+              context.pop();
+            },
         ),
         centerTitle: true,
         title: Container(
@@ -926,31 +930,19 @@ class _AddEditTransactionScreenState
                         },
                       ),
 
-                      const SizedBox(height: 48), // Spacer for button
+                      const SizedBox(height: 48),
 
-                      SizedBox(
-                        width: double.infinity,
-                        height: 56,
-                        child: FilledButton(
-                          onPressed: _saveTransaction,
-                          style: FilledButton.styleFrom(
-                            backgroundColor: headerColor,
-                            foregroundColor: onHeaderColor,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            elevation: 4,
-                            shadowColor: headerColor.withValues(alpha: 0.4),
-                          ),
-                          child: Text(
-                            ctxt.transaction_saveTransactionButtonLabel
-                                .toUpperCase(),
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 1.2,
-                            ),
-                          ),
+                      FilledButton(
+                        onPressed: _saveTransaction,
+                        style: FilledButton.styleFrom(
+                          backgroundColor: headerColor,
+                          foregroundColor: onHeaderColor,
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          elevation: 2,
+                          minimumSize: Size(double.infinity, 52),
                         ),
+                        child: Text(ctxt.transaction_saveTransactionButtonLabel.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.2)),
                       ),
 
                       SizedBox(
@@ -987,7 +979,10 @@ class _AddEditTransactionScreenState
   Widget _buildTypeToggle(String label, bool isExpenseBtn, Color onColor) {
     final isSelected = _isExpense == isExpenseBtn;
     return GestureDetector(
-      onTap: () => setState(() => _isExpense = isExpenseBtn),
+      onTap: () {
+              HapticFeedback.mediumImpact();
+              setState(() => _isExpense = isExpenseBtn);
+            },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
         decoration: BoxDecoration(

@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/providers/goal_provider.dart';
 import 'package:mudra_manager/screens/goal/goal_card.dart';
@@ -41,10 +42,15 @@ class GoalScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, st) => Center(child: Text("Error: $e")),
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: FloatingActionButton.extended(
         heroTag: 'addGoalHero',
-        onPressed: () => context.push('/add-goal'),
-        child: const Icon(Icons.add),
+        onPressed: () {
+          HapticFeedback.mediumImpact();
+          context.push('/add-goal');
+        },
+        icon: const Icon(Icons.add),
+        label: const Text("Add Goal"),
       ),
     );
   }

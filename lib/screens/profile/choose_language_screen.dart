@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/l10n/app_localizations.dart'
     show AppLocalizations;
@@ -83,7 +84,10 @@ class _ChooseLanguageScreenState extends ConsumerState<ChooseLanguageScreen> {
         ],
       ),
       trailing: isSelected ? Icon(Icons.check, color: color.primary) : null,
-      onTap: () => LanguageService.changeLanguage(context, ref, locale),
+      onTap: () {
+              HapticFeedback.mediumImpact();
+              LanguageService.changeLanguage(context, ref, locale);
+            },
     );
   }
 }

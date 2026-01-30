@@ -76,6 +76,18 @@ class PendingTransactionService {
     });
   }
 
+  Future<bool> processTransaction({
+    required PendingTransaction pending,
+    required List<Account> accounts,
+    required List<db_category.Category> categories,
+  }) async {
+    var isar = await isarService.getInstance();
+    return await isar.writeTxn(() async {
+      final transactionUtil = TransactionUtil();
+      return await _processSingleTransactionInternal(isar, pending, accounts, categories, transactionUtil);
+    });
+  }
+
   Future<int> autoProcessAll({
     required List<Account> accounts,
     required List<db_category.Category> categories,
@@ -94,64 +106,81 @@ class PendingTransactionService {
       final transactionUtil = TransactionUtil();
       for (var pending in pendingTxns) {
         if (pending == null) continue;
-
-        // HEAL: If account is missing, try to re-parse it from the body
-        if (pending.account == null || pending.account!.isEmpty) {
-          final info = transactionUtil.getTransactionInfo(
-            pending.body,
-            pending.sender,
-            pending.sender,
-            '',
-          );
-          if (info.account?.no != null && info.account!.no!.isNotEmpty) {
-            pending.account = info.account!.no;
-            pending.amount ??= double.tryParse(info.money ?? '');
-            pending.isIncome ??=
-                info.typeOfTransaction == TransactionType.credited;
-            // Optionally update the DB record so it stays healed
-            await isar.pendingTransactions.put(pending);
-          }
-        }
-
-        final match = matchTransaction(
-          pending: pending,
-          accounts: accounts,
-          categories: categories,
-        );
-
-        if (match != null) {
-          final txn = Transaction.create(
-            date: pending.date,
-            amount: pending.amount ?? 0.0,
-            isExpense: pending.isIncome == false,
-            description: "Auto-imported: ${pending.sender}",
-          );
-          txn.account.value = match.account;
-          txn.category.value = match.category;
-
-          await isar.transactions.put(txn);
-          await txn.account.save();
-          await txn.category.save();
-
-          await isar.pendingTransactions.delete(pending.id);
+        if (await _processSingleTransactionInternal(
+          isar,
+          pending,
+          accounts,
+          categories,
+          transactionUtil,
+        )) {
           successCount++;
-          
-          AppLogger.logAction('transaction_auto_added', parameters: {
-            'sender': pending.sender,
-            'amount': pending.amount,
-            'category': match.category.name,
-            'account': match.account.name,
-          });
-        } else {
-          AppLogger.warning(
-            "No match for pending ${pending.id} (Acc: ${pending.account}, Sender: ${pending.sender})",
-          );
         }
       }
     });
 
     AppLogger.info('Auto-processed $successCount transactions');
     return successCount;
+  }
+
+  Future<bool> _processSingleTransactionInternal(
+    Isar isar,
+    PendingTransaction pending,
+    List<Account> accounts,
+    List<db_category.Category> categories,
+    TransactionUtil transactionUtil,
+  ) async {
+    // HEAL: If account is missing, try to re-parse it from the body
+    if (pending.account == null || pending.account!.isEmpty) {
+      final info = transactionUtil.getTransactionInfo(
+        pending.body,
+        pending.sender,
+        pending.sender,
+        '',
+      );
+      if (info.account?.no != null && info.account!.no!.isNotEmpty) {
+        pending.account = info.account!.no;
+        pending.amount ??= double.tryParse(info.money ?? '');
+        pending.isIncome ??= info.typeOfTransaction == TransactionType.credited;
+        // Optionally update the DB record so it stays healed
+        await isar.pendingTransactions.put(pending);
+      }
+    }
+
+    final match = matchTransaction(
+      pending: pending,
+      accounts: accounts,
+      categories: categories,
+    );
+
+    if (match != null) {
+      final txn = Transaction.create(
+        date: pending.date,
+        amount: pending.amount ?? 0.0,
+        isExpense: pending.isIncome == false,
+        description: "Auto-imported: ${pending.sender}",
+      );
+      txn.account.value = match.account;
+      txn.category.value = match.category;
+
+      await isar.transactions.put(txn);
+      await txn.account.save();
+      await txn.category.save();
+
+      await isar.pendingTransactions.delete(pending.id);
+
+      AppLogger.logAction('transaction_auto_added', parameters: {
+        'sender': pending.sender,
+        'amount': pending.amount,
+        'category': match.category.name,
+        'account': match.account.name,
+      });
+      return true;
+    } else {
+      AppLogger.warning(
+        "No match for pending ${pending.id} (Acc: ${pending.account}, Sender: ${pending.sender})",
+      );
+      return false;
+    }
   }
 
   static MatchingResult? matchTransaction({
@@ -195,12 +224,10 @@ class PendingTransactionService {
     );
 
     // 4. Fallback with smart logic based on amount
-    if (matchedCategory == null) {
-      matchedCategory = CategoryMatcher.getFallbackCategory(
+    matchedCategory ??= CategoryMatcher.getFallbackCategory(
         relevantCategories,
         pending.amount,
       );
-    }
 
     // 5. Debug logging
     if (matchedCategory == null) {

@@ -2,6 +2,7 @@ import 'package:go_router/go_router.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:mudra_manager/db/filter_type.dart' show FilterType;
@@ -97,7 +98,10 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
                     Hero(
                       tag: 'cashFlowPage',
                       child: IconButton.filled(
-                        onPressed: () => context.push('/transactions'),
+                        onPressed: () {
+              HapticFeedback.mediumImpact();
+              context.push('/transactions');
+            },
                         icon: Icon(Icons.open_in_new),
                       ),
                     ),
@@ -180,7 +184,10 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
       child: SizedBox(
         height: 170,
         child: GestureDetector(
-          onTap: () => {},
+          onTap: () {
+              HapticFeedback.mediumImpact();
+              {};
+            },
           child: Container(
             padding: const EdgeInsets.all(8.0),
             margin: const EdgeInsets.only(right: 8.0),

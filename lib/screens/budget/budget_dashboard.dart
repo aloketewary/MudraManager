@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/l10n/app_localizations.dart';
 import 'package:mudra_manager/providers/budget_service_provider.dart';
@@ -52,7 +53,10 @@ class _BudgetDashboardState extends ConsumerState<BudgetDashboard> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push('/add-budget'),
+        onPressed: () {
+              HapticFeedback.mediumImpact();
+              context.push('/add-budget');
+            },
         icon: const Icon(Icons.add),
         label: Text(ctxt.budget_dashboardAddBudgetText),
       ),

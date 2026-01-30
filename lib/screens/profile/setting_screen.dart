@@ -1,4 +1,3 @@
-import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,15 +9,13 @@ class SecuritySettingsScreen extends ConsumerStatefulWidget {
   const SecuritySettingsScreen({super.key});
 
   @override
-  ConsumerState<SecuritySettingsScreen> createState() =>
-      _SecuritySettingsScreenState();
+  ConsumerState<SecuritySettingsScreen> createState() => _SecuritySettingsScreenState();
 }
 
-class _SecuritySettingsScreenState
-    extends ConsumerState<SecuritySettingsScreen> {
+class _SecuritySettingsScreenState extends ConsumerState<SecuritySettingsScreen> {
   bool _biometricAvailable = false;
   bool _pinEnabled = false;
-  bool _bioEnabled = false; // <— add this
+  bool _bioEnabled = false;
 
   @override
   void initState() {
@@ -30,8 +27,7 @@ class _SecuritySettingsScreenState
     final auth = ref.read(authServiceProvider);
     final canBio = await auth.canCheckBiometrics();
     final hasPin = await auth.hasPin();
-    final bioOn = await auth.isBiometricEnabled(); // <— read from storage
-
+    final bioOn = await auth.isBiometricEnabled();
     setState(() {
       _biometricAvailable = canBio;
       _pinEnabled = hasPin;
@@ -40,9 +36,9 @@ class _SecuritySettingsScreenState
   }
 
   Future<void> _toggleBiometric(bool on) async {
+    HapticFeedback.mediumImpact();
     final auth = ref.read(authServiceProvider);
     if (on) {
-      // ask once to confirm
       final ok = await auth.authenticateBiometric();
       if (!ok) {
         SnackbarService.error('Biometric auth failed');
@@ -51,19 +47,20 @@ class _SecuritySettingsScreenState
     }
     await auth.setBiometricEnabled(on);
     setState(() => _bioEnabled = on);
+    SnackbarService.success(on ? 'Biometric enabled' : 'Biometric disabled');
   }
 
   Future<void> _togglePin(bool on) async {
+    HapticFeedback.mediumImpact();
     final auth = ref.read(authServiceProvider);
     if (on) {
-      final pin = await showDialog<String>(
-        context: context,
-        builder: (_) => const PinEntryDialog(length: 4),
-      );
+      final pin = await showDialog<String>(context: context, builder: (_) => const PinEntryDialog(length: 4));
       if (pin == null || pin.length < 4) return;
       await auth.setPin(pin);
+      SnackbarService.success('PIN enabled');
     } else {
       await auth.clearPin();
+      SnackbarService.success('PIN disabled');
     }
     setState(() => _pinEnabled = on);
   }
@@ -71,39 +68,76 @@ class _SecuritySettingsScreenState
   @override
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Security Settings')),
       body: ListView(
+        padding: EdgeInsets.all(16),
         children: [
-          if (_biometricAvailable)
-            SwitchListTile(
-              title: const Text('Enable Biometric Unlock'),
-              subtitle: const Text('Use fingerprint'),
-              value: _bioEnabled,
-              onChanged: _toggleBiometric,
-              activeColor: color.secondary,
-            ),
-          SwitchListTile(
-            title: const Text('Enable PIN Unlock'),
-            subtitle: const Text('Use PIN to unlock app'),
-            value: _pinEnabled,
-            onChanged: _togglePin,
-            activeColor: color.secondary,
-          ),
-          const SizedBox(height: 24),
-          const Divider(indent: 16, endIndent: 16),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-            child: Text(
-              'Regarding PIN Unlock:',
-              style: Theme.of(context).textTheme.titleLarge,
+          if (_biometricAvailable) Container(
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(color: color.surfaceContainerHighest, borderRadius: BorderRadius.circular(16)),
+            child: Row(
+              children: [
+                Container(padding: EdgeInsets.all(12), decoration: BoxDecoration(color: color.primary.withValues(alpha: 0.1), shape: BoxShape.circle), child: Icon(Icons.fingerprint, color: color.primary, size: 24)),
+                SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Biometric Unlock', style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+                      SizedBox(height: 2),
+                      Text('Use fingerprint or face', style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant)),
+                    ],
+                  ),
+                ),
+                Switch(value: _bioEnabled, onChanged: _toggleBiometric),
+              ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: const Text(
-              'The PIN you entered is secured and the digits are randomized every time you enter it.',
-              style: TextStyle(color: Colors.grey),
+          if (_biometricAvailable) SizedBox(height: 8),
+          Container(
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(color: color.surfaceContainerHighest, borderRadius: BorderRadius.circular(16)),
+            child: Row(
+              children: [
+                Container(padding: EdgeInsets.all(12), decoration: BoxDecoration(color: color.primary.withValues(alpha: 0.1), shape: BoxShape.circle), child: Icon(Icons.pin, color: color.primary, size: 24)),
+                SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('PIN Unlock', style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+                      SizedBox(height: 2),
+                      Text('Use PIN to unlock app', style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant)),
+                    ],
+                  ),
+                ),
+                Switch(value: _pinEnabled, onChanged: _togglePin),
+              ],
+            ),
+          ),
+          SizedBox(height: 24),
+          Container(
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(color: color.primaryContainer.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(16), border: Border.all(color: color.primary.withValues(alpha: 0.3))),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.info_outline, color: color.primary, size: 20),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('About PIN Security', style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: color.primary)),
+                      SizedBox(height: 4),
+                      Text('Your PIN is securely stored and digits are randomized on entry for enhanced security.', style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant)),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
         ],

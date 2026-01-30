@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mudra_manager/util/case_extension.dart';
 import 'package:mudra_manager/util/icon_helper.dart';
 
@@ -14,50 +15,91 @@ class IconPickerBottomSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     var textTheme = Theme.of(context).textTheme;
     var color = Theme.of(context).colorScheme;
+    final headerColor = backgroundColor ?? color.primary;
+    
     return Container(
-      padding: const EdgeInsets.all(16),
-      height: 450,
+      decoration: BoxDecoration(
+        color: color.surface,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+      ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "Pick an Icon",
-            style: textTheme.titleLarge?.copyWith(
-              color: color.primary,
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  headerColor.withValues(alpha: 0.8),
+                  headerColor,
+                ],
+              ),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+            ),
+            child: Column(
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  margin: EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                Text(
+                  'Pick an Icon',
+                  style: textTheme.headlineSmall?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 16),
           Expanded(
-            child: GridView.count(
-              crossAxisCount: 4,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              children:
-                  _iconMap.entries.map((entry) {
-                    return GestureDetector(
-                      onTap: () => context.pop(entry.key),
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: GridView.count(
+                crossAxisCount: 4,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                children: _iconMap.entries.map((entry) {
+                  return GestureDetector(
+                    onTap: () {
+                      HapticFeedback.mediumImpact();
+                      context.pop(entry.key);
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: color.surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                       child: Column(
-                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          CircleAvatar(
-                            radius: 24,
-                            backgroundColor: backgroundColor,
-                            child: Icon(
-                              entry.value,
-                              size: 28,
-                              color: color.onPrimary,
-                            ),
+                          Icon(
+                            entry.value,
+                            size: 32,
+                            color: headerColor,
                           ),
-                          const SizedBox(height: 4),
+                          SizedBox(height: 4),
                           Text(
-                            entry.key.toTitleCase().split("_").join(" "),
-                            style: textTheme.labelMedium?.copyWith(color: color.primary),
+                            entry.key.toTitleCase().split('_').first,
+                            style: textTheme.labelSmall?.copyWith(
+                              color: color.onSurfaceVariant,
+                            ),
                             overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
                           ),
                         ],
                       ),
-                    );
-                  }).toList(),
+                    ),
+                  );
+                }).toList(),
+              ),
             ),
           ),
         ],

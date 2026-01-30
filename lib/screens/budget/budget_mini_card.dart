@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:mudra_manager/l10n/app_localizations.dart';
@@ -88,7 +89,10 @@ class _BudgetMiniCardState extends ConsumerState<BudgetMiniCard> {
                       child: SizedBox(
                         height: 210,
                         child: GestureDetector(
-                          onTap: () => {},
+                          onTap: () {
+              HapticFeedback.mediumImpact();
+              {};
+            },
                           child: Container(
                             // width: 120,
                             padding: const EdgeInsets.all(8.0),

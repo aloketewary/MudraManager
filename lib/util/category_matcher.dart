@@ -1,223 +1,110 @@
-import 'package:mudra_manager/db/models/category.dart' as db_category;
+import 'package:mudra_manager/db/models/category.dart';
 
 class CategoryMatcher {
   static final Map<String, List<String>> defaultKeywords = {
-    'food': [
-      'swiggy',
-      'zomato',
-      'uber eats',
-      'dominos',
-      'mcdonald',
-      'kfc',
-      'pizza',
-      'restaurant',
-      'cafe',
-      'food',
-      'dining',
-      'burger',
-      'biryani',
-      'meal',
+    'Food & Dining': [
+      'swiggy', 'zomato', 'uber eats', 'dominos', 'mcdonald',
+      'kfc', 'pizza', 'restaurant', 'cafe', 'food', 'dining', 'burger', 'coffee'
     ],
-    'transport': [
-      'uber',
-      'ola',
-      'rapido',
-      'petrol',
-      'fuel',
-      'parking',
-      'toll',
-      'metro',
-      'bus',
-      'taxi',
-      'cab',
-      'auto',
-      'bike',
-      'car',
+    'Transportation': [
+      'uber', 'ola', 'rapido', 'petrol', 'fuel', 'parking',
+      'toll', 'metro', 'bus', 'taxi', 'cab', 'ride'
     ],
-    'shopping': [
-      'amazon',
-      'flipkart',
-      'myntra',
-      'ajio',
-      'meesho',
-      'shopping',
-      'mall',
-      'store',
-      'retail',
-      'purchase',
+    'Shopping': [
+      'amazon', 'flipkart', 'myntra', 'ajio', 'meesho',
+      'shopping', 'mall', 'store', 'fashion', 'retail'
     ],
-    'bill': [
-      'electricity',
-      'water',
-      'gas',
-      'internet',
-      'broadband',
-      'mobile recharge',
-      'dth',
-      'bill payment',
-      'utility',
-      'airtel',
-      'jio',
-      'vodafone',
-      'bsnl',
+    'Bills & Utilities': [
+      'electricity', 'water', 'gas', 'internet', 'broadband',
+      'mobile recharge', 'dth', 'bill payment', 'airtel', 'jio', 'vi', 'bsnl'
     ],
-    'entertainment': [
-      'netflix',
-      'prime',
-      'hotstar',
-      'spotify',
-      'youtube',
-      'movie',
-      'cinema',
-      'pvr',
-      'inox',
-      'gaming',
-      'subscription',
+    'Entertainment': [
+      'netflix', 'prime', 'hotstar', 'spotify', 'youtube',
+      'movie', 'cinema', 'pvr', 'inox', 'bookmyshow'
     ],
-    'health': [
-      'pharmacy',
-      'hospital',
-      'doctor',
-      'medicine',
-      'apollo',
-      'medplus',
-      'health',
-      'clinic',
-      'medical',
-      'pharma',
+    'Healthcare': [
+      'pharmacy', 'hospital', 'doctor', 'medicine', 'apollo',
+      'medplus', 'health', 'clinic', 'lab'
     ],
-    'grocery': [
-      'bigbasket',
-      'grofers',
-      'blinkit',
-      'zepto',
-      'dunzo',
-      'grocery',
-      'supermarket',
-      'dmart',
-      'reliance fresh',
-      'more',
-    ],
-    'education': [
-      'school',
-      'college',
-      'university',
-      'course',
-      'tuition',
-      'education',
-      'training',
-      'udemy',
-      'coursera',
-      'byju',
-    ],
-    'investment': [
-      'mutual fund',
-      'sip',
-      'stock',
-      'share',
-      'zerodha',
-      'groww',
-      'upstox',
-      'investment',
-      'trading',
-    ],
-    'insurance': [
-      'insurance',
-      'premium',
-      'policy',
-      'lic',
-      'hdfc life',
-      'icici prudential',
-    ],
-    'transfer': [
-      'transfer',
-      'sent',
-      'upi',
-      'imps',
-      'neft',
-      'rtgs',
-    ],
-    'salary': [
-      'salary',
-      'credited',
-      'income',
-      'payment received',
+    'Groceries': [
+      'bigbasket', 'grofers', 'blinkit', 'zepto', 'dunzo',
+      'grocery', 'supermarket', 'dmart', 'kirana'
     ],
   };
 
-  static db_category.Category? matchByKeywords(
+  static Category? matchByKeywords(
     String smsBody,
-    List<db_category.Category> categories,
+    List<Category> categories,
   ) {
-    if (categories.isEmpty) return null;
-
     final bodyLower = smsBody.toLowerCase();
 
-    // Try matching with default keywords
-    for (var entry in defaultKeywords.entries) {
-      final keywordGroup = entry.key;
-      final keywords = entry.value;
-
-      for (var keyword in keywords) {
-        if (bodyLower.contains(keyword)) {
-          // Find category that matches this keyword group
-          final cat = categories.cast<db_category.Category?>().firstWhere(
-            (c) => c?.name.toLowerCase().contains(keywordGroup) ?? false,
-            orElse: () => null,
-          );
-          if (cat != null) return cat;
+    // First try user-defined keywords
+    for (var cat in categories) {
+      if (cat.keywords != null) {
+        for (var keyword in cat.keywords!) {
+          if (bodyLower.contains(keyword.toLowerCase())) {
+            return cat;
+          }
         }
       }
     }
 
-    // Fallback: try direct category name matching
-    for (var cat in categories) {
-      if (bodyLower.contains(cat.name.toLowerCase())) {
-        return cat;
+    // Then try default keywords
+    for (var entry in defaultKeywords.entries) {
+      final categoryName = entry.key;
+      final keywords = entry.value;
+
+      for (var keyword in keywords) {
+        if (bodyLower.contains(keyword)) {
+          // Find category by name in the provided list
+          try {
+            final cat = categories.firstWhere(
+              (c) => c.name.toLowerCase() == categoryName.toLowerCase(),
+            );
+            return cat;
+          } catch (_) {
+            // Category with this name doesn't exist in user's DB
+            continue;
+          }
+        }
       }
     }
 
     return null;
   }
 
-  static db_category.Category? getFallbackCategory(
-    List<db_category.Category> categories,
-    double? amount,
-  ) {
+  static Category? getFallbackCategory(List<Category> categories, double? amount) {
     if (categories.isEmpty) return null;
-
-    final amt = amount?.abs() ?? 0;
+    
+    final absAmount = amount?.abs() ?? 0;
 
     // Large amounts (>5000) -> likely bills or shopping
-    if (amt > 5000) {
-      final cat = categories.cast<db_category.Category?>().firstWhere(
-        (c) =>
-            (c?.name.toLowerCase().contains('bill') ?? false) ||
-            (c?.name.toLowerCase().contains('shopping') ?? false),
-        orElse: () => null,
-      );
-      if (cat != null) return cat;
+    if (absAmount > 5000) {
+      try {
+        return categories.firstWhere(
+          (c) => c.name.toLowerCase().contains('bill') ||
+                 c.name.toLowerCase().contains('shopping'),
+        );
+      } catch (_) {}
     }
-
     // Small amounts (<500) -> likely food or transport
-    if (amt < 500) {
-      final cat = categories.cast<db_category.Category?>().firstWhere(
-        (c) =>
-            (c?.name.toLowerCase().contains('food') ?? false) ||
-            (c?.name.toLowerCase().contains('transport') ?? false),
-        orElse: () => null,
-      );
-      if (cat != null) return cat;
+    else if (absAmount < 500) {
+      try {
+        return categories.firstWhere(
+          (c) => c.name.toLowerCase().contains('food') ||
+                 c.name.toLowerCase().contains('transport'),
+        );
+      } catch (_) {}
     }
 
     // Default to "Other" or "Misc"
-    final other = categories.cast<db_category.Category?>().firstWhere(
-      (c) =>
-          (c?.name.toLowerCase().contains('other') ?? false) ||
-          (c?.name.toLowerCase().contains('misc') ?? false),
-      orElse: () => categories.isNotEmpty ? categories.first : null,
-    );
-
-    return other;
+    try {
+      return categories.firstWhere(
+        (c) => c.name.toLowerCase().contains('other') ||
+               c.name.toLowerCase().contains('misc'),
+      );
+    } catch (_) {
+      return categories.first;
+    }
   }
 }

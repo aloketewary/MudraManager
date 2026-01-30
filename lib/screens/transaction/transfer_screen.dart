@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:mudra_manager/db/models/account.dart' show Account;
@@ -324,7 +325,10 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
                   var accountBalance = service.getAccountBalance(acct.id);
                   final selected = acct.id == from?.id;
                   return GestureDetector(
-                    onTap: () => onFromChanged(acct),
+                    onTap: () {
+              HapticFeedback.mediumImpact();
+              onFromChanged(acct);
+            },
                     child: AccountCardMini(
                       account: acct,
                       selected: selected,
@@ -345,7 +349,10 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
                   var accountBalance = service.getAccountBalance(acct.id);
                   final selected = acct.id == to?.id;
                   return GestureDetector(
-                    onTap: () => onToChanged(acct),
+                    onTap: () {
+              HapticFeedback.mediumImpact();
+              onToChanged(acct);
+            },
                     child: AccountCardMini(
                       account: acct,
                       selected: selected,

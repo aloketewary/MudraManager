@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/db/models/account.dart'
     show Account, GetAccountCollection;
@@ -156,7 +157,10 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
             ),
             actions: [
               OutlinedButton(
-                onPressed: () => context.pop(false),
+                onPressed: () {
+              HapticFeedback.mediumImpact();
+              context.pop(false);
+            },
                 child: Text(
                   'Cancel',
                   style: textTheme.titleMedium?.copyWith(
@@ -165,7 +169,10 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
                 ),
               ),
               OutlinedButton(
-                onPressed: () => context.pop(true),
+                onPressed: () {
+              HapticFeedback.mediumImpact();
+              context.pop(true);
+            },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: color.secondary,
                 ),

@@ -68,7 +68,7 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                       child: SizedBox(
                         child: GestureDetector(
                           onTap: () {
-                            HapticFeedback.lightImpact();
+                            HapticFeedback.mediumImpact();
                             context.push('/add-transaction');
                           },
                           child: Hero(
@@ -129,8 +129,8 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                       child: SizedBox(
                         child: GestureDetector(
                           onTap: () {
-                            HapticFeedback.lightImpact();
-                            context.push('/unknown');
+                            HapticFeedback.mediumImpact();
+                            context.push('/transfer');
                           },
                           child: Container(
                             padding: const EdgeInsets.all(8.0),
@@ -184,7 +184,7 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                       child: SizedBox(
                         child: GestureDetector(
                           onTap: () {
-                            HapticFeedback.lightImpact();
+                            HapticFeedback.mediumImpact();
                             context.push('/add-transaction');
                           },
                           child: Hero(
@@ -246,8 +246,8 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                       child: SizedBox(
                         child: GestureDetector(
                           onTap: () {
-                            HapticFeedback.lightImpact();
-                            context.push('/unknown');
+                            HapticFeedback.mediumImpact();
+                            context.push('/transfer');
                           },
                           child: Container(
                             width: 120,

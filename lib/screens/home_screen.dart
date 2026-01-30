@@ -57,7 +57,7 @@ class HomePageState extends ConsumerState<HomePage> with TickerProviderStateMixi
   }
 
   void _onTabSelected(int index) {
-    HapticFeedback.lightImpact();
+    HapticFeedback.mediumImpact();
     setState(() => _selectedIndex = index);
   }
 
@@ -90,7 +90,7 @@ class HomePageState extends ConsumerState<HomePage> with TickerProviderStateMixi
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                color: color.shadow.withOpacity(0.2),
+                color: color.shadow.withValues(alpha: 0.2),
                 blurRadius: 20,
                 offset: Offset(0, 8),
               ),
@@ -117,13 +117,15 @@ class HomePageState extends ConsumerState<HomePage> with TickerProviderStateMixi
           ),
         ),
       ),
-      body: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: EdgeInsets.only(bottom: 80),
-          child: _pages[_selectedIndex],
-        ),
-      ),
+      body: _selectedIndex == 4
+          ? _pages[_selectedIndex]
+          : SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: EdgeInsets.only(bottom: 80),
+                child: _pages[_selectedIndex],
+              ),
+            ),
     );
   }
 
@@ -144,7 +146,7 @@ class HomePageState extends ConsumerState<HomePage> with TickerProviderStateMixi
     );
   }
 
-  PreferredSizeWidget buildTopBar(AsyncValue<UserProfile?> profileAsync, int selectedIndex) {
+  PreferredSizeWidget? buildTopBar(AsyncValue<UserProfile?> profileAsync, int selectedIndex) {
     final greetingAsync = ref.watch(greetingProvider);
     final textTheme = Theme.of(context).textTheme;
     final color = Theme.of(context).colorScheme;
@@ -215,8 +217,8 @@ class HomePageState extends ConsumerState<HomePage> with TickerProviderStateMixi
           title: Text(ctxt.statistics_screen_title, style: textTheme.titleLarge),
           actions: [IconButton(icon: Icon(Icons.save_alt_outlined), onPressed: () => statisticsKey.currentState?.showExportOptions(context))],
         );
-      default:
-        return AppBar(title: Text(ctxt.profile_screen_title, style: textTheme.titleLarge));
+      case 4:
+        return null;
     }
   }
 

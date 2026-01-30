@@ -1,14 +1,14 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mudra_manager/l10n/app_localizations.dart'
-    show AppLocalizations;
+import 'package:mudra_manager/providers/account_providers.dart';
+import 'package:mudra_manager/providers/budget_service_provider.dart';
+import 'package:mudra_manager/providers/category_provider.dart';
 import 'package:mudra_manager/providers/isar_provider.dart';
 import 'package:mudra_manager/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/providers/user_profile_provider.dart';
-import 'package:mudra_manager/screens/profile/profile_tile.dart';
-import 'package:mudra_manager/theme/mudra_manager_avatar_icons.dart'
-    show MudraManagerAvatarIcons;
+import 'package:mudra_manager/theme/mudra_manager_avatar_icons.dart' show MudraManagerAvatarIcons;
 import 'package:mudra_manager/util/snackbar_service.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -18,318 +18,383 @@ class ProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     var iconDataList = MudraManagerAvatarIcons.iconDataList;
     final profileAsync = ref.watch(userProfileProvider);
+    final accountsAsync = ref.watch(accountsProvider);
+    final categoriesAsync = ref.watch(categoryListProvider);
+    final budgetsAsync = ref.watch(budgetServiceProvider).getFilterBudget(DateTime.now());
     var textTheme = Theme.of(context).textTheme;
     var color = Theme.of(context).colorScheme;
-    final ctxt = AppLocalizations.of(context)!;
 
-    return Column(
-      children: [
-        const SizedBox(height: 20),
-
-        // Avatar + Name + Email
-        Center(
-          child: profileAsync.when(
-            data: (profile) {
-              return Column(
-                children: [
-                  CircleAvatar(
-                    radius: 48,
-                    child: Icon(
-                      iconDataList[profile?.avatarIndex ?? 0],
-                      size: 48,
+    return profileAsync.when(
+      data: (profile) => CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 200,
+            pinned: true,
+            leading: SizedBox.shrink(),
+            flexibleSpace: LayoutBuilder(
+              builder: (context, constraints) {
+                final isCollapsed = constraints.biggest.height <= kToolbarHeight + MediaQuery.of(context).padding.top + 20;
+                return FlexibleSpaceBar(
+                  centerTitle: false,
+                  titlePadding: EdgeInsets.only(left: 16, bottom: 16),
+                  title: isCollapsed
+                      ? Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 16,
+                              backgroundColor: Colors.white.withValues(alpha: 0.2),
+                              child: Icon(iconDataList[profile?.avatarIndex ?? 0], size: 16, color: Colors.white),
+                            ),
+                            SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                profile?.name ?? 'Unknown',
+                                style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        )
+                      : SizedBox.shrink(),
+                  background: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [color.primary.withValues(alpha: 0.8), color.primary],
+                      ),
+                    ),
+                    child: SafeArea(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Stack(
+                            children: [
+                              Container(
+                                padding: EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  gradient: LinearGradient(
+                                    colors: [Colors.white.withValues(alpha: 0.3), Colors.white.withValues(alpha: 0.1)],
+                                  ),
+                                ),
+                                child: CircleAvatar(
+                                  radius: 40,
+                                  backgroundColor: Colors.white.withValues(alpha: 0.2),
+                                  child: Icon(iconDataList[profile?.avatarIndex ?? 0], size: 40, color: Colors.white),
+                                ),
+                              ),
+                              Positioned(
+                                right: 0,
+                                bottom: 0,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    HapticFeedback.mediumImpact();
+                                    context.push('/edit-profile');
+                                  },
+                                  child: Container(
+                                    padding: EdgeInsets.all(6),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      shape: BoxShape.circle,
+                                      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 4, offset: Offset(0, 2))],
+                                    ),
+                                    child: Icon(Icons.edit, size: 14, color: color.primary),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 12),
+                          Text(profile?.name ?? 'Unknown', style: textTheme.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
+                          SizedBox(height: 4),
+                          Text(profile?.email ?? '', style: textTheme.bodySmall?.copyWith(color: Colors.white.withValues(alpha: 0.8))),
+                          if (profile?.phone != null && profile!.phone!.isNotEmpty) ...[
+                            SizedBox(height: 2),
+                            Text(profile.phone!, style: textTheme.bodySmall?.copyWith(color: Colors.white.withValues(alpha: 0.8))),
+                          ],
+                        ],
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    profile?.name ?? 'Unknown',
-                    style: Theme.of(context).textTheme.titleLarge,
+                );
+              },
+            ),
+          ),
+          SliverPadding(
+            padding: EdgeInsets.all(16),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                SizedBox(
+                  height: 110,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _buildStatCard(
+                          context,
+                          Icons.account_balance_wallet,
+                          accountsAsync.when(data: (accounts) => accounts.length.toString(), loading: () => '...', error: (_, __) => '0'),
+                          'Accounts',
+                        ),
+                      ),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: _buildStatCard(
+                          context,
+                          Icons.category,
+                          categoriesAsync.when(data: (categories) => categories.length.toString(), loading: () => '...', error: (_, __) => '0'),
+                          'Categories',
+                        ),
+                      ),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: FutureBuilder(
+                          future: budgetsAsync,
+                          builder: (context, snapshot) => _buildStatCard(context, Icons.pie_chart, snapshot.hasData ? (snapshot.data as List).length.toString() : '...', 'Budgets'),
+                        ),
+                      ),
+                    ],
                   ),
-                  Text(
-                    profile?.email ?? '',
-                    style: Theme.of(context).textTheme.titleSmall,
+                ),
+                SizedBox(height: 24),
+                _buildSectionHeader(context, 'Account & Data'),
+                SizedBox(height: 12),
+                _buildSettingCard(context, Icons.account_balance_wallet_outlined, 'Low Balance Threshold', '₹${SharedPrefsUtil.instance.getLowBalanceThreshold().toStringAsFixed(0)}', () => _showThresholdBottomSheet(context, ref, color, textTheme)),
+                SizedBox(height: 8),
+                _buildSettingCard(context, Icons.backup, 'Backup & Restore', 'Manage your data', () {
+                  HapticFeedback.mediumImpact();
+                  context.push('/backup-restore');
+                }),
+                SizedBox(height: 24),
+                _buildSectionHeader(context, 'Preferences'),
+                SizedBox(height: 12),
+                _buildSettingCard(context, Icons.settings, 'App Settings', 'Customize your experience', () {
+                  HapticFeedback.mediumImpact();
+                  context.push('/app-settings');
+                }),
+                SizedBox(height: 8),
+                _buildSettingCard(context, Icons.lock, 'Security', 'PIN or Fingerprint', () {
+                  HapticFeedback.mediumImpact();
+                  context.push('/security');
+                }),
+                SizedBox(height: 8),
+                _buildSettingCard(context, Icons.sms, 'SMS Import', 'Auto-import transactions', () {
+                  HapticFeedback.mediumImpact();
+                  context.push('/sms-import');
+                }),
+                SizedBox(height: 24),
+                _buildSectionHeader(context, 'About'),
+                SizedBox(height: 12),
+                _buildSettingCard(context, Icons.info_outline, 'About App', 'Version & Info', () {
+                  HapticFeedback.mediumImpact();
+                  context.push('/about');
+                }),
+                SizedBox(height: 24),
+                _buildSectionHeader(context, 'Danger Zone'),
+                SizedBox(height: 12),
+                _buildSettingCard(context, Icons.logout, 'Logout', 'Clear all data', () => _showLogoutBottomSheet(context, ref, color, textTheme), isDestructive: true),
+                SizedBox(height: 80),
+              ]),
+            ),
+          ),
+        ],
+      ),
+      loading: () => Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(child: Text('Error: $e')),
+    );
+  }
+
+  Widget _buildStatCard(BuildContext context, IconData icon, String value, String label) {
+    final textTheme = Theme.of(context).textTheme;
+    final color = Theme.of(context).colorScheme;
+    return Container(
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.outlineVariant.withValues(alpha: 0.5)),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: color.primary, size: 24),
+          SizedBox(height: 4),
+          Text(value, style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+          Text(label, style: textTheme.labelSmall?.copyWith(color: color.onSurfaceVariant), overflow: TextOverflow.ellipsis),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(BuildContext context, String title) {
+    final textTheme = Theme.of(context).textTheme;
+    final color = Theme.of(context).colorScheme;
+    return Text(title, style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: color.onSurfaceVariant));
+  }
+
+  Widget _buildSettingCard(BuildContext context, IconData icon, String title, String subtitle, VoidCallback onTap, {bool isDestructive = false}) {
+    final textTheme = Theme.of(context).textTheme;
+    final color = Theme.of(context).colorScheme;
+    final cardColor = isDestructive ? color.errorContainer : color.surfaceContainerHighest;
+    final iconColor = isDestructive ? color.error : color.primary;
+
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.mediumImpact();
+        onTap();
+      },
+      child: Container(
+        padding: EdgeInsets.all(16),
+        decoration: BoxDecoration(color: cardColor, borderRadius: BorderRadius.circular(16)),
+        child: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(color: iconColor.withValues(alpha: 0.1), shape: BoxShape.circle),
+              child: Icon(icon, color: iconColor, size: 24),
+            ),
+            SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: isDestructive ? color.onErrorContainer : color.onSurface)),
+                  SizedBox(height: 2),
+                  Text(subtitle, style: textTheme.bodySmall?.copyWith(color: isDestructive ? color.onErrorContainer.withValues(alpha: 0.7) : color.onSurfaceVariant)),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right, color: isDestructive ? color.onErrorContainer : color.onSurfaceVariant),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showThresholdBottomSheet(BuildContext context, WidgetRef ref, ColorScheme color, TextTheme textTheme) async {
+    final prefsService = SharedPrefsUtil.instance;
+    final currentThreshold = prefsService.getLowBalanceThreshold();
+    final controller = TextEditingController(text: currentThreshold.toStringAsFixed(2));
+
+    final newThreshold = await showModalBottomSheet<double>(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) {
+        return Padding(
+          padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom, left: 24, right: 24, top: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(width: 40, height: 4, decoration: BoxDecoration(color: color.onSurfaceVariant.withValues(alpha: 0.4), borderRadius: BorderRadius.circular(2))),
+              SizedBox(height: 24),
+              Icon(Icons.account_balance_wallet_outlined, size: 48, color: color.primary),
+              SizedBox(height: 16),
+              Text('Set Low Balance Threshold', style: textTheme.titleLarge?.copyWith(color: color.onSurface, fontWeight: FontWeight.bold)),
+              SizedBox(height: 8),
+              Text('Get notified when account balance falls below this amount', style: textTheme.bodyMedium?.copyWith(color: color.onSurfaceVariant), textAlign: TextAlign.center),
+              SizedBox(height: 24),
+              TextField(
+                controller: controller,
+                keyboardType: TextInputType.numberWithOptions(decimal: true),
+                autofocus: true,
+                decoration: InputDecoration(
+                  labelText: 'Threshold Amount',
+                  prefixText: '₹ ',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  filled: true,
+                  fillColor: color.surfaceContainerHighest.withValues(alpha: 0.3),
+                ),
+              ),
+              SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () {
+                        HapticFeedback.mediumImpact();
+                        context.pop();
+                      },
+                      style: OutlinedButton.styleFrom(padding: EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                      child: Text('Cancel'),
+                    ),
+                  ),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: () {
+                        final value = double.tryParse(controller.text.trim());
+                        if (value != null) context.pop(value);
+                      },
+                      style: FilledButton.styleFrom(padding: EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                      child: Text('Save'),
+                    ),
                   ),
                 ],
-              );
-            },
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Center(child: Text("Error: $e")),
-          ),
-        ),
-
-        const SizedBox(height: 24),
-
-        // Section Tiles
-        Expanded(
-          child: ListView(
-            children: [
-              ProfileTile(
-                title: ctxt.profile_userProfileTitleText,
-                subtitle: ctxt.profile_userProfileSubtitleText,
-                icon: Icons.person,
-                onTap: () => context.push('/edit-profile'),
               ),
-              ProfileTile(
-                title: "Low Balance Threshold",
-                subtitle:
-                    "Set the low balance threshold\nCurrent threshold ${SharedPrefsUtil.instance.getLowBalanceThreshold().toStringAsFixed(0)}",
-                icon: Icons.account_balance_wallet_outlined,
-                onTap: () async {
-                  final prefsService = SharedPrefsUtil.instance;
-                  final currentThreshold =
-                      prefsService.getLowBalanceThreshold();
-                  final controller = TextEditingController(
-                    text: currentThreshold.toStringAsFixed(2),
-                  );
-
-                  final newThreshold = await showModalBottomSheet<double>(
-                    context: context,
-                    isScrollControlled: true,
-                    shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(20),
-                      ),
-                    ),
-                    builder: (ctx) {
-                      return Padding(
-                        padding: EdgeInsets.only(
-                          bottom: MediaQuery.of(ctx).viewInsets.bottom,
-                          left: 24,
-                          right: 24,
-                          top: 16,
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: 40,
-                              height: 4,
-                              decoration: BoxDecoration(
-                                color: color.onSurfaceVariant.withOpacity(0.4),
-                                borderRadius: BorderRadius.circular(2),
-                              ),
-                            ),
-                            const SizedBox(height: 24),
-                            Icon(
-                              Icons.account_balance_wallet_outlined,
-                              size: 48,
-                              color: color.primary,
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'Set Low Balance Threshold',
-                              style: textTheme.titleLarge?.copyWith(
-                                color: color.onSurface,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Get notified when account balance falls below this amount',
-                              style: textTheme.bodyMedium?.copyWith(
-                                color: color.onSurfaceVariant,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 24),
-                            TextField(
-                              controller: controller,
-                              keyboardType: TextInputType.numberWithOptions(
-                                decimal: true,
-                              ),
-                              autofocus: true,
-                              decoration: InputDecoration(
-                                labelText: 'Threshold Amount',
-                                prefixText: '₹ ',
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                filled: true,
-                                fillColor: color.surfaceVariant.withOpacity(
-                                  0.3,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 24),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: OutlinedButton(
-                                    onPressed: () => context.pop(),
-                                    style: OutlinedButton.styleFrom(
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 16,
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                    ),
-                                    child: Text('Cancel'),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: FilledButton(
-                                    onPressed: () {
-                                      final value = double.tryParse(
-                                        controller.text.trim(),
-                                      );
-                                      if (value != null) {
-                                        context.pop(value);
-                                      }
-                                    },
-                                    style: FilledButton.styleFrom(
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 16,
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                    ),
-                                    child: Text('Save'),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 24),
-                          ],
-                        ),
-                      );
-                    },
-                  );
-
-                  if (newThreshold != null) {
-                    prefsService.setLowBalanceThreshold(newThreshold);
-                    SnackbarService.success(
-                      'Threshold updated to ₹${newThreshold.toStringAsFixed(2)}',
-                    );
-                  }
-                },
-              ),
-
-              ProfileTile(
-                title: "App Settings",
-                subtitle: "Update app related settings",
-                icon: Icons.settings,
-                onTap: () => context.push('/app-settings'),
-              ),
-
-              ProfileTile(
-                title: "Security",
-                subtitle: "Protect your app with PIN or Fingerprint",
-                icon: Icons.lock,
-                onTap: () => context.push('/security'),
-              ),
-              ProfileTile(
-                title: "SMS Import",
-                subtitle: "Auto-import transactions from your SMS messages",
-                icon: Icons.sms,
-                onTap: () => context.push('/sms-import'),
-              ),
-              ProfileTile(
-                title: "Logout",
-                subtitle: "Clear Everything and Logout",
-                icon: Icons.logout,
-                isLogout: true,
-                onTap: () {
-                  showModalBottomSheet(
-                    context: context,
-                    shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(20),
-                      ),
-                    ),
-                    builder: (ctx) {
-                      return Padding(
-                        padding: const EdgeInsets.all(24),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: 40,
-                              height: 4,
-                              decoration: BoxDecoration(
-                                color: color.onSurfaceVariant.withOpacity(0.4),
-                                borderRadius: BorderRadius.circular(2),
-                              ),
-                            ),
-                            const SizedBox(height: 24),
-                            Icon(
-                              Icons.logout,
-                              size: 48,
-                              color: Colors.redAccent,
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'Logout',
-                              style: textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Are you sure you want to logout? All data will be cleared.',
-                              style: textTheme.bodyMedium?.copyWith(
-                                color: color.onSurfaceVariant,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 24),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: OutlinedButton(
-                                    onPressed: () => context.pop(),
-                                    style: OutlinedButton.styleFrom(
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 16,
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                    ),
-                                    child: Text('Cancel'),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: FilledButton(
-                                    onPressed: () async {
-                                      final isar =
-                                          await ref
-                                              .read(isarServiceProvider)
-                                              .getInstance();
-                                      await isar.writeTxn(() async {
-                                        await isar.clear();
-                                      });
-                                      SharedPrefsUtil.instance.clear();
-                                      context.go('/onboarding');
-                                    },
-                                    style: FilledButton.styleFrom(
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 16,
-                                      ),
-                                      backgroundColor: Colors.redAccent,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                    ),
-                                    child: Text('Logout'),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                          ],
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
+              SizedBox(height: 24),
             ],
           ),
-        ),
-      ],
+        );
+      },
+    );
+
+    if (newThreshold != null && context.mounted) {
+      prefsService.setLowBalanceThreshold(newThreshold);
+      SnackbarService.success('Threshold updated to ₹${newThreshold.toStringAsFixed(2)}');
+    }
+  }
+
+  void _showLogoutBottomSheet(BuildContext context, WidgetRef ref, ColorScheme color, TextTheme textTheme) {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) {
+        return Padding(
+          padding: EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(width: 40, height: 4, decoration: BoxDecoration(color: color.onSurfaceVariant.withValues(alpha: 0.4), borderRadius: BorderRadius.circular(2))),
+              SizedBox(height: 24),
+              Icon(Icons.logout, size: 48, color: Colors.redAccent),
+              SizedBox(height: 16),
+              Text('Logout', style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+              SizedBox(height: 8),
+              Text('Are you sure you want to logout? All data will be cleared.', style: textTheme.bodyMedium?.copyWith(color: color.onSurfaceVariant), textAlign: TextAlign.center),
+              SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () {
+                        HapticFeedback.mediumImpact();
+                        context.pop();
+                      },
+                      style: OutlinedButton.styleFrom(padding: EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                      child: Text('Cancel'),
+                    ),
+                  ),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: () async {
+                        final isar = await ref.read(isarServiceProvider).getInstance();
+                        await isar.writeTxn(() async => await isar.clear());
+                        SharedPrefsUtil.instance.clear();
+                        if (ctx.mounted) ctx.go('/onboarding');
+                      },
+                      style: FilledButton.styleFrom(padding: EdgeInsets.symmetric(vertical: 16), backgroundColor: Colors.redAccent, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                      child: Text('Logout'),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 8),
+            ],
+          ),
+        );
+      },
     );
   }
 }

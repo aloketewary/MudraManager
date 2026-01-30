@@ -4,6 +4,7 @@ import 'dart:ui';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
 import 'package:mudra_manager/db/models/pending_transaction.dart'
@@ -51,81 +52,117 @@ class _SmsImportSettingsScreenState
 
   @override
   Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Scaffold(
       appBar: AppBar(title: const Text('SMS Import Settings')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          SwitchListTile(
-            title: const Text('Enable SMS Import'),
-            subtitle: const Text(
-              'Automatically detect and add transactions from SMS messages.',
-            ),
-            value: _smsImportEnabled,
-            onChanged: (bool value) async {
-              if (value) {
-                // Request permission first
-                final permission = await Permission.sms.request();
-                if (permission.isGranted) {
-                  setState(() {
-                    _smsImportEnabled = value;
-                  });
-                  SharedPrefsUtil.instance.setSmsImportEnabled(value);
-                  // Start listener - import from main.dart
-                  await setupSmsListener();
-                  if (!context.mounted) return;
-                  SnackbarService.success(
-                    'SMS import enabled. Financial transactions will be detected automatically.',
-                  );
-                } else {
-                  // Show error
-                  if (!context.mounted) return;
-                  SnackbarService.error(
-                    'SMS permission is required for automatic transaction detection',
-                  );
-                }
-              } else {
-                setState(() {
-                  _smsImportEnabled = value;
-                });
-                SharedPrefsUtil.instance.setSmsImportEnabled(value);
-                if (!context.mounted) return;
-                SnackbarService.info('SMS import disabled');
-              }
-            },
-          ),
-          const SizedBox(height: 24),
-          ListTile(
-            title: const Text('Rescan SMS Now'),
-            subtitle: const Text(
-              'Scan your recent SMS messages for transactions.',
-            ),
-            leading: const Icon(Icons.sync),
-            onTap: () => _showSmsScanOptions(context),
-          ),
-          const SizedBox(height: 24),
-          ListTile(
-            title: const Text('Clear SMS transaction processing history'),
-            subtitle: Text(
-              'If scan sms not working clear this and re-scan sms again.',
-            ),
-            leading: const Icon(Icons.clear_all),
-            onTap: () => SharedPrefsUtil.instance.clearProcessedHashes(),
-          ),
-          const SizedBox(height: 24),
-          const Divider(),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: Text(
-              'How it Works:',
-              style: Theme.of(context).textTheme.titleLarge,
+          Container(
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(color: color.surfaceContainerHighest, borderRadius: BorderRadius.circular(16)),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Enable SMS Import', style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+                      SizedBox(height: 4),
+                      Text('Auto-detect transactions from SMS', style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant)),
+                    ],
+                  ),
+                ),
+                Switch(
+                  value: _smsImportEnabled,
+                  onChanged: (bool value) async {
+                    HapticFeedback.mediumImpact();
+                    if (value) {
+                      final permission = await Permission.sms.request();
+                      if (permission.isGranted) {
+                        setState(() => _smsImportEnabled = value);
+                        SharedPrefsUtil.instance.setSmsImportEnabled(value);
+                        await setupSmsListener();
+                        if (!context.mounted) return;
+                        SnackbarService.success('SMS import enabled');
+                      } else {
+                        if (!context.mounted) return;
+                        SnackbarService.error('SMS permission required');
+                      }
+                    } else {
+                      setState(() => _smsImportEnabled = value);
+                      SharedPrefsUtil.instance.setSmsImportEnabled(value);
+                      if (!context.mounted) return;
+                      SnackbarService.info('SMS import disabled');
+                    }
+                  },
+                ),
+              ],
             ),
           ),
-          const Text(
-            'We scan your SMS messages from trusted sources like banks or wallets to automatically create transactions for you.',
-            style: TextStyle(color: Colors.grey),
+          SizedBox(height: 8),
+          _buildSettingCard(context, color, textTheme, Icons.sync, 'Rescan SMS Now', 'Scan recent messages for transactions', () {
+            HapticFeedback.mediumImpact();
+            _showSmsScanOptions(context);
+          }),
+          SizedBox(height: 8),
+          _buildSettingCard(context, color, textTheme, Icons.clear_all, 'Clear Processing History', 'Reset SMS scan history', () {
+            HapticFeedback.mediumImpact();
+            SharedPrefsUtil.instance.clearProcessedHashes();
+            SnackbarService.success('Processing history cleared');
+          }),
+          SizedBox(height: 24),
+          Container(
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(color: color.primaryContainer.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(16), border: Border.all(color: color.primary.withValues(alpha: 0.3))),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.info_outline, color: color.primary, size: 20),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('How it Works', style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: color.primary)),
+                      SizedBox(height: 4),
+                      Text('We scan SMS from trusted sources like banks or wallets to automatically create transactions.', style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSettingCard(BuildContext context, ColorScheme color, TextTheme textTheme, IconData icon, String title, String subtitle, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.all(16),
+        decoration: BoxDecoration(color: color.surfaceContainerHighest, borderRadius: BorderRadius.circular(16)),
+        child: Row(
+          children: [
+            Container(padding: EdgeInsets.all(12), decoration: BoxDecoration(color: color.primary.withValues(alpha: 0.1), shape: BoxShape.circle), child: Icon(icon, color: color.primary, size: 24)),
+            SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+                  SizedBox(height: 2),
+                  Text(subtitle, style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant)),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right, color: color.onSurfaceVariant),
+          ],
+        ),
       ),
     );
   }

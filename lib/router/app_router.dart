@@ -151,7 +151,10 @@ class AppRouter {
               ),
               GoRoute(
                 path: '/add-category',
-                builder: (context, state) => AddEditCategoryScreen(),
+                builder: (context, state) {
+                  final extra = state.extra as Map<String, dynamic>?;
+                  return AddEditCategoryScreen(existing: extra?['category']);
+                },
               ),
               GoRoute(
                 path: '/budget-dashboard',
@@ -163,7 +166,10 @@ class AppRouter {
               ),
               GoRoute(
                 path: '/manage-accounts/add',
-                builder: (context, state) => const AccountForm(),
+                builder: (context, state) {
+                  final extra = state.extra as Map<String, dynamic>?;
+                  return AccountForm(account: extra?['account']);
+                },
               ),
             ],
           ),

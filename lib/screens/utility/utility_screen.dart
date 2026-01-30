@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mudra_manager/screens/budget/budget_dashboard.dart';
 import 'package:mudra_manager/screens/goal/goal_screen.dart';
 import 'package:mudra_manager/screens/profile/manage_account_screen.dart';
@@ -106,7 +107,16 @@ class _UtilityCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         child: InkWell(
           onTap: () {
-            context.push('/manage-accounts');
+            HapticFeedback.mediumImpact();
+            if (item.title == "Budgets") {
+              context.push('/budget-dashboard');
+            } else if (item.title == "Goals") {
+              context.push('/goal-screen');
+            } else if (item.title == "Accounts") {
+              context.push('/manage-accounts');
+            } else if (item.title == "Categories") {
+              context.push('/manage-categories');
+            }
           },
           child: Stack(
             children: [

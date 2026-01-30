@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/db/models/category.dart'
     show Category, CategoryType, GetCategoryCollection;
@@ -102,7 +103,7 @@ class ManageCategoriesScreen extends ConsumerWidget {
                     icon: Icon(Icons.more_vert, color: color.onSurfaceVariant),
                     onSelected: (value) {
                       if (value == 'edit') {
-                        context.push('/add-category');
+                        context.push('/add-category', extra: {'category': category});
                       } else if (value == 'delete') {
                         _deleteCategory(context, ref, category);
                       }
@@ -150,8 +151,10 @@ class ManageCategoriesScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, stack) => Center(child: Text("Error: $err")),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
+          HapticFeedback.mediumImpact();
           context.push('/add-category');
         },
         icon: const Icon(Icons.add),
