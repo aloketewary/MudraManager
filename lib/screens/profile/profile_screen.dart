@@ -157,6 +157,23 @@ class ProfileScreen extends ConsumerWidget {
                   ),
                 ),
                 SizedBox(height: 24),
+                _buildSectionHeader(context, 'Management'),
+                SizedBox(height: 12),
+                _buildSettingCard(context, Icons.receipt_long_outlined, 'Bills', 'Manage recurring bills', () {
+                  HapticFeedback.mediumImpact();
+                  context.push('/bills');
+                }),
+                SizedBox(height: 8),
+                _buildSettingCard(context, Icons.account_balance_wallet_outlined, 'Accounts', 'Manage your accounts', () {
+                  HapticFeedback.mediumImpact();
+                  context.push('/manage-accounts');
+                }),
+                SizedBox(height: 8),
+                _buildSettingCard(context, Icons.category_outlined, 'Categories', 'Manage your categories', () {
+                  HapticFeedback.mediumImpact();
+                  context.push('/manage-categories');
+                }),
+                SizedBox(height: 24),
                 _buildSectionHeader(context, 'Account & Data'),
                 SizedBox(height: 12),
                 _buildSettingCard(context, Icons.account_balance_wallet_outlined, 'Low Balance Threshold', '₹${SharedPrefsUtil.instance.getLowBalanceThreshold().toStringAsFixed(0)}', () => _showThresholdBottomSheet(context, ref, color, textTheme)),
@@ -168,6 +185,11 @@ class ProfileScreen extends ConsumerWidget {
                 SizedBox(height: 24),
                 _buildSectionHeader(context, 'Preferences'),
                 SizedBox(height: 12),
+                _buildSettingCard(context, Icons.notifications_outlined, 'Notifications', 'Daily & weekly summaries', () {
+                  HapticFeedback.mediumImpact();
+                  context.push('/notification-settings');
+                }),
+                SizedBox(height: 8),
                 _buildSettingCard(context, Icons.settings, 'App Settings', 'Customize your experience', () {
                   HapticFeedback.mediumImpact();
                   context.push('/app-settings');

@@ -26,6 +26,7 @@ class TransactionCard extends StatefulWidget {
   final VoidCallback onEdit;
   final VoidCallback onRemove;
   final Transaction? related;
+  final String? tripName;
 
   const TransactionCard({
     super.key,
@@ -40,6 +41,7 @@ class TransactionCard extends StatefulWidget {
     required this.onRemove,
     required this.isTransfer,
     required this.related,
+    this.tripName,
   });
 
   @override
@@ -70,128 +72,215 @@ class _TransactionCardState extends State<TransactionCard> {
           ),
         ],
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(20),
-          onTap: () {
-            setState(() {
-              _isExpanded = !_isExpanded;
-            });
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                widget.isTransfer
-                    ? buildTransferCard(_isExpanded)
-                    : buildNormalCard(_isExpanded),
+      child: Stack(
+        children: [
+          if (widget.tripName != null)
+            Positioned(
+              top: 0,
+              right: 0,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.teal.shade400, Colors.teal.shade600],
+                  ),
+                  borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(20),
+                    bottomLeft: Radius.circular(12),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.beach_access_outlined, size: 12, color: Colors.white),
+                    SizedBox(width: 4),
+                    Text(
+                      'TRIP',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(20),
+              onTap: () {
+                setState(() {
+                  _isExpanded = !_isExpanded;
+                });
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    widget.isTransfer
+                        ? buildTransferCard(_isExpanded)
+                        : buildNormalCard(_isExpanded),
 
-                AnimatedSize(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
-                  child:
-                      _isExpanded
-                          ? Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(height: 16),
-                              const Divider(height: 1),
-                              const SizedBox(height: 16),
-                              if (widget.description?.isNotEmpty == true)
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: 12.0),
-                                  child: Text(
-                                    widget.description!,
-                                    style: textTheme.bodyMedium?.copyWith(
-                                      color: color.onSurfaceVariant,
-                                      fontStyle: FontStyle.italic,
+                    AnimatedSize(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                      child:
+                          _isExpanded
+                              ? Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(height: 16),
+                                  const Divider(height: 1),
+                                  const SizedBox(height: 16),
+                                  if (widget.description?.isNotEmpty == true)
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                        bottom: 12.0,
+                                      ),
+                                      child: Text(
+                                        widget.description!,
+                                        style: textTheme.bodyMedium?.copyWith(
+                                          color: color.onSurfaceVariant,
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                ),
-                              if (widget.tags.isNotEmpty)
-                                Wrap(
-                                  spacing: 8.0,
-                                  runSpacing: 8.0,
-                                  children:
-                                      widget.tags.map((tag) {
-                                        return Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 8,
-                                            vertical: 4,
+                                  const SizedBox(height: 2),
+                                  if (widget.tripName != null) ...[
+                                    SizedBox(width: 8),
+                                    Text(
+                                      'This transaction also added in below trip(s)',
+                                      style: textTheme.labelSmall?.copyWith(),
+                                    ),
+                                    SizedBox(width: 8),
+                                    Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.teal.withValues(
+                                          alpha: 0.15,
+                                        ),
+                                        borderRadius: BorderRadius.circular(6),
+                                        border: Border.all(
+                                          color: Colors.teal.withValues(
+                                            alpha: 0.3,
                                           ),
-                                          decoration: BoxDecoration(
-                                            color: color.secondaryContainer,
-                                            borderRadius: BorderRadius.circular(
-                                              8,
+                                        ),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.card_travel,
+                                            size: 14,
+                                            color: Colors.teal,
+                                          ),
+                                          SizedBox(width: 3),
+                                          Text(
+                                            widget.tripName!,
+                                            style: textTheme.labelSmall
+                                                ?.copyWith(
+                                                  color: Colors.teal,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                  if (widget.tags.isNotEmpty)
+                                    Wrap(
+                                      spacing: 8.0,
+                                      runSpacing: 8.0,
+                                      children:
+                                          widget.tags.map((tag) {
+                                            return Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 8,
+                                                    vertical: 4,
+                                                  ),
+                                              decoration: BoxDecoration(
+                                                color: color.secondaryContainer,
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                              ),
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Icon(
+                                                    Icons.tag,
+                                                    size: 14,
+                                                    color:
+                                                        color
+                                                            .onSecondaryContainer,
+                                                  ),
+                                                  const SizedBox(width: 4),
+                                                  Text(
+                                                    tag.name,
+                                                    style: textTheme.labelSmall
+                                                        ?.copyWith(
+                                                          color:
+                                                              color
+                                                                  .onSecondaryContainer,
+                                                        ),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                          }).toList(),
+                                    ),
+                                  const SizedBox(height: 16),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      OutlinedButton.icon(
+                                        onPressed: widget.onEdit,
+                                        icon: const Icon(Icons.edit, size: 18),
+                                        label: const Text("Edit"),
+                                        style: OutlinedButton.styleFrom(
+                                          foregroundColor: color.primary,
+                                          side: BorderSide(
+                                            color: color.primary.withValues(
+                                              alpha: 0.5,
                                             ),
                                           ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Icon(
-                                                Icons.tag,
-                                                size: 14,
-                                                color:
-                                                    color.onSecondaryContainer,
-                                              ),
-                                              const SizedBox(width: 4),
-                                              Text(
-                                                tag.name,
-                                                style: textTheme.labelSmall
-                                                    ?.copyWith(
-                                                      color:
-                                                          color
-                                                              .onSecondaryContainer,
-                                                    ),
-                                              ),
-                                            ],
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      OutlinedButton.icon(
+                                        onPressed: widget.onRemove,
+                                        icon: const Icon(
+                                          Icons.delete,
+                                          size: 18,
+                                        ),
+                                        label: const Text("Delete"),
+                                        style: OutlinedButton.styleFrom(
+                                          foregroundColor: color.error,
+                                          side: BorderSide(
+                                            color: color.error.withValues(
+                                              alpha: 0.5,
+                                            ),
                                           ),
-                                        );
-                                      }).toList(),
-                                ),
-                              const SizedBox(height: 16),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  OutlinedButton.icon(
-                                    onPressed: widget.onEdit,
-                                    icon: const Icon(Icons.edit, size: 18),
-                                    label: const Text("Edit"),
-                                    style: OutlinedButton.styleFrom(
-                                      foregroundColor: color.primary,
-                                      side: BorderSide(
-                                        color: color.primary.withValues(
-                                          alpha: 0.5,
                                         ),
                                       ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  OutlinedButton.icon(
-                                    onPressed: widget.onRemove,
-                                    icon: const Icon(Icons.delete, size: 18),
-                                    label: const Text("Delete"),
-                                    style: OutlinedButton.styleFrom(
-                                      foregroundColor: color.error,
-                                      side: BorderSide(
-                                        color: color.error.withValues(
-                                          alpha: 0.5,
-                                        ),
-                                      ),
-                                    ),
+                                    ],
                                   ),
                                 ],
-                              ),
-                            ],
-                          )
-                          : const SizedBox.shrink(),
+                              )
+                              : const SizedBox.shrink(),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -229,11 +318,17 @@ class _TransactionCardState extends State<TransactionCard> {
                 ),
               ),
               const SizedBox(height: 2),
-              Text(
-                '${widget.account?.name} • ${widget.account?.accountType.name.toTitleCase()}',
-                style: textTheme.bodySmall?.copyWith(
-                  color: color.onSurfaceVariant,
-                ),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      '${widget.account?.name} • ${widget.account?.accountType.name.toTitleCase()}',
+                      style: textTheme.bodySmall?.copyWith(
+                        color: color.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

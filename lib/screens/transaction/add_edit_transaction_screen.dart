@@ -17,6 +17,7 @@ import 'package:mudra_manager/providers/notification_record_service.dart';
 import 'package:mudra_manager/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/providers/tag_provider.dart';
 import 'package:mudra_manager/providers/transaction_provider.dart';
+import 'package:mudra_manager/providers/budget_alert_provider.dart';
 import 'package:mudra_manager/screens/profile/add_edit_category_screen.dart';
 import 'package:mudra_manager/screens/reusable/simple_calculator.dart'
     show SimpleCalculator;
@@ -24,6 +25,8 @@ import 'package:mudra_manager/service/notification_service.dart';
 import 'package:mudra_manager/util/icon_helper.dart' show IconHelper;
 import 'package:mudra_manager/util/localization_extension.dart';
 import 'package:mudra_manager/util/snackbar_service.dart';
+import 'package:mudra_manager/service/budget_alert_service.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class AddEditTransactionScreen extends ConsumerStatefulWidget {
   final Transaction? transaction;
@@ -1032,7 +1035,7 @@ class _AddEditTransactionScreenState
 
       await ref.read(transactionProvider).addTransaction(txn);
       await _checkLowBalance(txn.account.value);
-      await _checkBudgetOverspend(txn);
+      await _checkBudgetAlerts(txn);
       invalidateAll(ref);
 
       if (mounted) context.pop();
@@ -1127,28 +1130,18 @@ class _AddEditTransactionScreenState
     }
   }
 
-  Future<void> _checkBudgetOverspend(Transaction txn) async {
-    if (!txn.isExpense) return;
-    var notificationService = ref.watch(notificationRecordServiceProvider);
+  Future<void> _checkBudgetAlerts(Transaction txn) async {
+    if (!txn.isExpense || txn.isTransfer) return;
 
-    final now = DateTime.now();
-    var budgetService = ref.read(budgetServiceProvider);
-    final budgets = await budgetService.getFilterBudget(now);
+    final notificationsPlugin = FlutterLocalNotificationsPlugin();
+    final alertService = BudgetAlertService(
+      ref.read(isarServiceProvider),
+      notificationsPlugin,
+    );
 
-    for (var budget in budgets) {
-      final spent = await budgetService.calculateSpentAmount(budget);
-      if (spent > budget.amount) {
-        await notificationService.logNotification(
-          title: 'Budget Exceeded Alert',
-          body: 'Your budget "${budget.name}" has been exceeded.',
-          type: 'budget_overspent',
-        );
-        await NotificationService.showLocalNotification(
-          id: (2000 + budget.id).toInt(),
-          title: 'Budget Exceeded!',
-          body: 'Your budget "${budget.name}" has been exceeded.',
-        );
-      }
+    final alerts = await alertService.checkBudgetsAfterTransaction(txn);
+    if (alerts.isNotEmpty) {
+      ref.read(budgetAlertsProvider.notifier).addAlerts(alerts);
     }
   }
 }

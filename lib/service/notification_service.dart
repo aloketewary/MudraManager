@@ -2,6 +2,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_native_timezone_latest/flutter_native_timezone_latest.dart';
+import 'package:intl/intl.dart';
+import 'package:isar/isar.dart';
+import 'package:mudra_manager/db/models/account.dart';
+import 'package:mudra_manager/db/models/transaction.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -52,23 +56,18 @@ class NotificationService {
   }
 
   static Future<void> scheduleDailyReminder(TimeOfDay time) async {
-    // Cancel any existing notification with the same ID
     await _plugin.cancel(0);
-
-    // Save the selected time to storage (e.g., SharedPreferences)
     await _saveReminderTime(time);
 
-    // Schedule the new notification
     final scheduledDate = _nextInstanceOfTime(time);
-    // _plugin.resolvePlatformSpecificImplementation();
     if (kDebugMode) {
       print(scheduledDate);
     }
 
     await _plugin.zonedSchedule(
       0,
-      'Daily Expense Reminder',
-      'Don\'t forget to track your expenses today!',
+      'Daily Expense Summary',
+      'Tap to view your spending summary',
       scheduledDate,
       const NotificationDetails(
         android: AndroidNotificationDetails(
@@ -82,6 +81,168 @@ class NotificationService {
       ),
       matchDateTimeComponents: DateTimeComponents.time,
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+    );
+  }
+
+  static Future<void> showDailySummary() async {
+    final isar = Isar.getInstance();
+    if (isar == null) return;
+
+    final yesterday = DateTime.now().subtract(const Duration(days: 1));
+    final startOfDay = DateTime(yesterday.year, yesterday.month, yesterday.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1));
+
+    final transactions = await isar.transactions
+        .filter()
+        .dateBetween(startOfDay, endOfDay)
+        .findAll();
+
+    if (transactions.isEmpty) {
+      await showLocalNotification(
+        id: 100,
+        title: '📊 Yesterday\'s Summary',
+        body: 'No transactions recorded yesterday',
+      );
+      return;
+    }
+
+    double totalSpent = 0;
+    double totalIncome = 0;
+    final categorySpending = <String, double>{};
+
+    for (final tx in transactions) {
+      if (tx.isTransfer) continue;
+      
+      if (tx.isExpense) {
+        totalSpent += tx.amount;
+        final cat = tx.category.value;
+        if (cat != null) {
+          categorySpending[cat.name] = (categorySpending[cat.name] ?? 0) + tx.amount;
+        }
+      } else {
+        totalIncome += tx.amount;
+      }
+    }
+
+    String topCategory = 'None';
+    if (categorySpending.isNotEmpty) {
+      topCategory = categorySpending.entries.reduce((a, b) => a.value > b.value ? a : b).key;
+    }
+
+    final accounts = await isar.collection<Account>().where().findAll();
+    double totalBalance = 0;
+    for (final acc in accounts) {
+      final txs = await isar.transactions.filter().account((q) => q.idEqualTo(acc.id)).findAll();
+      final balance = acc.initialBalance + txs.fold<double>(0, (sum, tx) => sum + (tx.isExpense ? -tx.amount : tx.amount));
+      totalBalance += balance;
+    }
+
+    final body = '💸 Spent: ₹${totalSpent.toStringAsFixed(0)} | '
+        '💰 Income: ₹${totalIncome.toStringAsFixed(0)}\n'
+        '🏆 Top: $topCategory | Balance: ₹${totalBalance.toStringAsFixed(0)}';
+
+    await showLocalNotification(
+      id: 100,
+      title: '📊 Yesterday\'s Summary',
+      body: body,
+    );
+  }
+
+  static Future<void> scheduleWeeklySummary([int weekday = DateTime.sunday]) async {
+    await _plugin.cancel(2);
+
+    final now = tz.TZDateTime.now(tz.local);
+    var scheduledDate = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      9,
+      0,
+    );
+
+    while (scheduledDate.weekday != weekday) {
+      scheduledDate = scheduledDate.add(const Duration(days: 1));
+    }
+
+    if (scheduledDate.isBefore(now)) {
+      scheduledDate = scheduledDate.add(const Duration(days: 7));
+    }
+
+    await _plugin.zonedSchedule(
+      2,
+      'Weekly Summary',
+      'Tap to view your week',
+      scheduledDate,
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'weekly_summary_channel',
+          'Weekly Summary',
+          channelDescription: 'Weekly spending summary',
+          importance: Importance.high,
+          priority: Priority.high,
+        ),
+        iOS: DarwinNotificationDetails(),
+      ),
+      matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+    );
+  }
+
+  static Future<void> showWeeklySummary() async {
+    final isar = Isar.getInstance();
+    if (isar == null) return;
+
+    final now = DateTime.now();
+    final startOfWeek = now.subtract(Duration(days: now.weekday % 7));
+    final startDate = DateTime(startOfWeek.year, startOfWeek.month, startOfWeek.day);
+    final endDate = startDate.add(const Duration(days: 7));
+
+    final transactions = await isar.transactions
+        .filter()
+        .dateBetween(startDate, endDate)
+        .findAll();
+
+    if (transactions.isEmpty) {
+      await showLocalNotification(
+        id: 101,
+        title: '📅 Weekly Summary',
+        body: 'No transactions this week',
+      );
+      return;
+    }
+
+    double totalSpent = 0;
+    double totalIncome = 0;
+    final categorySpending = <String, double>{};
+
+    for (final tx in transactions) {
+      if (tx.isTransfer) continue;
+      
+      if (tx.isExpense) {
+        totalSpent += tx.amount;
+        final cat = tx.category.value;
+        if (cat != null) {
+          categorySpending[cat.name] = (categorySpending[cat.name] ?? 0) + tx.amount;
+        }
+      } else {
+        totalIncome += tx.amount;
+      }
+    }
+
+    String topCategory = 'None';
+    if (categorySpending.isNotEmpty) {
+      topCategory = categorySpending.entries.reduce((a, b) => a.value > b.value ? a : b).key;
+    }
+
+    final body = '💸 Spent: ₹${totalSpent.toStringAsFixed(0)} | '
+        '💰 Income: ₹${totalIncome.toStringAsFixed(0)}\n'
+        '🏆 Top Category: $topCategory | ${transactions.length} transactions';
+
+    await showLocalNotification(
+      id: 101,
+      title: '📅 This Week\'s Summary',
+      body: body,
     );
   }
 

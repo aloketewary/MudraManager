@@ -14,6 +14,8 @@ import 'package:mudra_manager/screens/dashboard/swipeable_account_card.dart';
 import 'package:mudra_manager/screens/reusable/responseive_layout_builder.dart';
 import 'package:mudra_manager/screens/transaction/add_edit_transaction_screen.dart';
 import 'package:mudra_manager/screens/transaction/transfer_screen.dart';
+import 'package:mudra_manager/screens/reusable/budget_alert_banner.dart';
+import 'package:mudra_manager/providers/budget_alert_provider.dart';
 import 'package:mudra_manager/theme/design_tokens.dart';
 
 class DashboardHome extends ConsumerStatefulWidget {
@@ -42,6 +44,7 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
     final textTheme = Theme.of(context).textTheme;
     final color = Theme.of(context).colorScheme;
     var ctxt = AppLocalizations.of(context)!;
+    final alerts = ref.watch(budgetAlertsProvider);
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -50,6 +53,13 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            if (alerts.isNotEmpty)
+              BudgetAlertBanner(
+                alerts: alerts,
+                onDismiss: () {
+                  ref.read(budgetAlertsProvider.notifier).dismissAlert(alerts.first);
+                },
+              ),
             SizedBox(height: 16),
             AnimatedSwipeableAccountCards(),
             SizedBox(height: 16),

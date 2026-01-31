@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:io';
+import 'package:crypto/crypto.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
@@ -19,6 +20,7 @@ import 'package:mudra_manager/backup/tag_backup.dart' show TagBackup;
 import 'package:mudra_manager/backup/transaction_backup.dart' show TransactionBackup;
 import 'package:mudra_manager/backup/user_profile_backup.dart' show UserProfileBackup;
 import 'package:mudra_manager/db/models/account.dart';
+import 'package:mudra_manager/db/models/backup_metadata.dart';
 import 'package:mudra_manager/db/models/budget.dart';
 import 'package:mudra_manager/db/models/budget_category_allocation.dart';
 import 'package:mudra_manager/db/models/category.dart' show Category, GetCategoryCollection;
@@ -30,68 +32,137 @@ import 'package:mudra_manager/db/models/tag.dart';
 import 'package:mudra_manager/db/models/transaction.dart';
 import 'package:mudra_manager/db/models/user_profile.dart';
 import 'package:mudra_manager/providers/shared_preference_provider.dart';
-import 'package:mudra_manager/util/env.dart' show Env;
 import 'package:mudra_manager/util/snackbar_service.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class BackupService {
-  // Keys for Encryption
-  static final encryptKey = encrypt.Key.fromUtf8(Env.encryptKey);
-  static final encryptIv = encrypt.IV.fromUtf8(Env.encryptIv);
   static const _backupFileName = 'mudra_backup';
   static const _backupFileNameExtension = '.mudra';
 
-  /// Encrypt and save backup
-  static Future<void> createEncryptedBackup() async {
+  /// Create encrypted backup with password
+  static Future<String?> createEncryptedBackup(String password, {bool includeAttachments = true}) async {
     var isar = Isar.getInstance();
-    if (isar == null) return;
+    if (isar == null) return null;
+    
     final dbData = await exportAll(isar);
     final settings = await SharedPrefsUtil.instance.exportAll();
-    final content = jsonEncode({'db': dbData, 'settings': settings});
+    final recordCount = dbData.values.fold<int>(0, (sum, list) => sum + list.length);
+    
+    final content = jsonEncode({
+      'db': dbData,
+      'settings': settings,
+      'includeAttachments': includeAttachments,
+      'version': '1.0',
+      'timestamp': DateTime.now().toIso8601String(),
+    });
 
-    final encryptedData = encrypt.Encrypter(encrypt.AES(encryptKey)).encrypt(content, iv: encryptIv);
-    final encryptedBytes = encryptedData.bytes;
+    final key = _deriveKey(password);
+    final iv = encrypt.IV.fromSecureRandom(16);
+    final encrypter = encrypt.Encrypter(encrypt.AES(key));
+    final encrypted = encrypter.encrypt(content, iv: iv);
+    
+    final hash = sha256.convert(utf8.encode(content)).toString();
+    final finalData = jsonEncode({
+      'data': encrypted.base64,
+      'iv': iv.base64,
+      'hash': hash,
+    });
 
-    var dateTime = DateTime.now();
-
-    await saveBackupFile(encryptedBytes, dateTime);
-    await SharedPrefsUtil.instance.saveBackupDate(dateTime);
+    final dateTime = DateTime.now();
+    final filePath = await saveBackupFile(utf8.encode(finalData), dateTime);
+    
+    if (filePath != null) {
+      final fileSize = File(filePath).lengthSync();
+      await _saveBackupMetadata(isar, dateTime, fileSize, filePath, includeAttachments, recordCount);
+      await SharedPrefsUtil.instance.saveBackupDate(dateTime);
+    }
+    
+    return filePath;
   }
 
-  /// Restore backup
-  static Future<String?> restoreEncryptedBackup(BuildContext context, Isar isar) async {
+  /// Restore backup with password
+  static Future<String?> restoreEncryptedBackup(BuildContext context, Isar isar, String password) async {
     await FilePicker.platform.clearTemporaryFiles();
     final result = await FilePicker.platform.pickFiles(
       allowMultiple: false,
       type: FileType.any,
       dialogTitle: 'Select Backup File',
-      // allowedExtensions: ['mudra'],
     );
 
     if (result == null || result.files.single.path == null) return null;
     if (result.files.first.extension != 'mudra') {
-      SnackbarService.error("Invalid file type, select  `.mudra`  type file");
+      SnackbarService.error("Invalid file type, select `.mudra` file");
       return null;
     }
-    final dir = await getApplicationDocumentsDirectory();
-    final selectedFile = File(result.files.single.path!);
-    final currentDbFile = File('${dir.path}/mm_temp.json');
-    if (selectedFile.existsSync()) {
-      final encryptedData = await selectedFile.readAsBytes();
-      final decryptedData = encrypt.Encrypter(encrypt.AES(encryptKey)).decryptBytes(encrypt.Encrypted(encryptedData), iv: encryptIv);
-      await currentDbFile.writeAsBytes(decryptedData);
-    }
 
-    final data = jsonDecode(currentDbFile.readAsStringSync());
-    final dataMap = {'db': data['db'], 'settings': data['settings']};
-    if (dataMap['db'] != null) {
-      await performRestore(isar, dataMap['db']);
+    try {
+      final selectedFile = File(result.files.single.path!);
+      final fileContent = await selectedFile.readAsString();
+      final backupData = jsonDecode(fileContent);
+      
+      final key = _deriveKey(password);
+      final iv = encrypt.IV.fromBase64(backupData['iv']);
+      final encrypter = encrypt.Encrypter(encrypt.AES(key));
+      
+      final decrypted = encrypter.decrypt64(backupData['data'], iv: iv);
+      final data = jsonDecode(decrypted);
+      
+      final hash = sha256.convert(utf8.encode(decrypted)).toString();
+      if (hash != backupData['hash']) {
+        SnackbarService.error("Backup file corrupted or tampered");
+        return null;
+      }
+
+      if (data['db'] != null) {
+        await performRestore(isar, data['db']);
+      }
+      if (data['settings'] != null) {
+        await SharedPrefsUtil.instance.importAll(data['settings']);
+      }
+      
+      return 'success';
+    } catch (e) {
+      SnackbarService.error("Invalid password or corrupted file");
+      return null;
     }
-    if (dataMap['settings'] != null) {
-      await SharedPrefsUtil.instance.importAll(dataMap['settings']);
-    }
-    return 'success';
+  }
+
+  static encrypt.Key _deriveKey(String password) {
+    final bytes = utf8.encode(password);
+    final hash = sha256.convert(bytes);
+    return encrypt.Key(Uint8List.fromList(hash.bytes));
+  }
+
+  static Future<void> _saveBackupMetadata(
+    Isar isar,
+    DateTime date,
+    int size,
+    String path,
+    bool includesAttachments,
+    int recordCount,
+  ) async {
+    final metadata = BackupMetadata.create(
+      backupDate: date,
+      fileSize: size,
+      fileName: path.split('/').last,
+      filePath: path,
+      includesAttachments: includesAttachments,
+      recordCount: recordCount,
+    );
+    await isar.writeTxn(() => isar.backupMetadatas.put(metadata));
+  }
+
+  static Future<List<BackupMetadata>> getBackupHistory() async {
+    final isar = Isar.getInstance();
+    if (isar == null) return [];
+    return await isar.backupMetadatas.where().sortByBackupDateDesc().findAll();
+  }
+
+  static Future<BackupMetadata?> getLastBackup() async {
+    final isar = Isar.getInstance();
+    if (isar == null) return null;
+    return await isar.backupMetadatas.where().sortByBackupDateDesc().findFirst();
   }
 
   static Future<Map<String, List<Map<String, dynamic>>>> exportAll(Isar isar) async {
@@ -294,15 +365,17 @@ class BackupService {
     return null;
   }
 
-  static Future<void> saveBackupFile(Uint8List content, DateTime dateTime) async {
+  static Future<String?> saveBackupFile(Uint8List content, DateTime dateTime) async {
     final userDir = await pickBackupFolder();
     final dir = await getApplicationDocumentsDirectory();
     final directory = userDir ?? dir;
-    final file = File('${directory.path}/${_backupFileName}_${DateFormat('yyyyMMdd_HHmmss').format(dateTime)}$_backupFileNameExtension');
+    final fileName = '${_backupFileName}_${DateFormat('yyyyMMdd_HHmmss').format(dateTime)}$_backupFileNameExtension';
+    final file = File('${directory.path}/$fileName');
     await file.create(recursive: true);
     await file.writeAsBytes(content);
     if (kDebugMode) {
       print("Backup saved at ${file.path}");
     }
+    return file.path;
   }
 }

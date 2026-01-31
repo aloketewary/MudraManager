@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:mudra_manager/providers/isar_provider.dart';
 import 'package:mudra_manager/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/service/backup_restore_service.dart' show BackupService;
+import 'package:mudra_manager/util/dialog_utils.dart';
 import 'package:mudra_manager/util/snackbar_service.dart';
 
 class BackupRestoreScreen extends ConsumerWidget {
@@ -21,16 +22,33 @@ class BackupRestoreScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _buildSettingCard(context, color, textTheme, Icons.backup_outlined, "Backup Data", "Export all database and settings", () async {
+          _buildSettingCard(context, ref, color, textTheme, Icons.backup_outlined, "Backup Data", "Export all database and settings", () async {
             HapticFeedback.mediumImpact();
-            await BackupService.createEncryptedBackup();
-            SnackbarService.success("Backup completed");
+            final password = await DialogUtils.showPasswordDialog(context, isRestore: false);
+            if (password == null) return;
+            
+            final includeAttachments = await DialogUtils.showConfirmation(
+              context,
+              title: 'Include Attachments?',
+              message: 'Include receipt images in backup? This will increase file size.',
+              confirmText: 'Yes',
+              cancelText: 'No',
+              icon: Icons.attach_file,
+            );
+            
+            final filePath = await BackupService.createEncryptedBackup(password, includeAttachments: includeAttachments ?? false);
+            if (filePath != null) {
+              SnackbarService.success("Backup completed");
+            }
           }),
           SizedBox(height: 8),
-          _buildSettingCard(context, color, textTheme, Icons.restore_outlined, "Restore Backup", "Import database and settings", () async {
+          _buildSettingCard(context, ref, color, textTheme, Icons.restore_outlined, "Restore Backup", "Import database and settings", () async {
             HapticFeedback.mediumImpact();
+            final password = await DialogUtils.showPasswordDialog(context, isRestore: true);
+            if (password == null) return;
+            
             final isar = await ref.read(isarServiceProvider).getInstance();
-            final data = await BackupService.restoreEncryptedBackup(context, isar);
+            final data = await BackupService.restoreEncryptedBackup(context, isar, password);
             if (data != null) {
               SnackbarService.success("Restore successful");
             }
@@ -60,7 +78,7 @@ class BackupRestoreScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildSettingCard(BuildContext context, ColorScheme color, TextTheme textTheme, IconData icon, String title, String subtitle, VoidCallback onTap) {
+  Widget _buildSettingCard(BuildContext context, WidgetRef ref, ColorScheme color, TextTheme textTheme, IconData icon, String title, String subtitle, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: Container(

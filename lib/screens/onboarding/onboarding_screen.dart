@@ -14,6 +14,7 @@ import 'package:mudra_manager/screens/home_screen.dart';
 import 'package:mudra_manager/screens/onboarding/onboarding_background.dart' show OnboardingBackground;
 import 'package:mudra_manager/screens/reusable/common_text_input_field.dart';
 import 'package:mudra_manager/service/backup_restore_service.dart' show BackupService;
+import 'package:mudra_manager/util/dialog_utils.dart';
 import 'package:mudra_manager/util/localization_extension.dart';
 import 'package:mudra_manager/util/snackbar_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -140,9 +141,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     }
   }
 
-  _onRestoreButton(BuildContext context) async{
+  _onRestoreButton(BuildContext context) async {
+    final password = await DialogUtils.showPasswordDialog(context, isRestore: true);
+    if (password == null) return;
+    
     final isar = await ref.read(isarServiceProvider).getInstance();
-    final data = await BackupService.restoreEncryptedBackup(context, isar);
+    final data = await BackupService.restoreEncryptedBackup(context, isar, password);
     if (data != null) {
       SnackbarService.success("Restore successful");
       context.go('/home');

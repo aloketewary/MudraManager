@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:home_widget/home_widget.dart';
 import 'package:mudra_manager/l10n/app_localizations.dart';
 import 'package:mudra_manager/providers/l10n_provider.dart';
 import 'package:mudra_manager/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/router/app_router.dart';
+import 'package:mudra_manager/service/bill_service.dart';
 import 'package:mudra_manager/service/notification_service.dart';
+import 'package:mudra_manager/service/recurring_transaction_scheduler.dart';
+import 'package:mudra_manager/service/summary_scheduler.dart';
 import 'package:mudra_manager/theme/app_theme.dart';
 import 'package:mudra_manager/theme/theme_provider.dart';
 import 'package:mudra_manager/util/sms_transaction_util.dart';
@@ -21,11 +25,24 @@ void main() async {
   var sharedPrefs = await SharedPreferences.getInstance();
   SharedPrefsUtil.init(sharedPrefs);
   await NotificationService.initialize();
+  await RecurringTransactionScheduler.initialize();
+  await SummaryScheduler.checkAndShowSummaries();
+  await BillService.scheduleBillReminders();
+  await BillService.createPendingTransactionsForDueBills();
+  await HomeWidget.setAppGroupId('group.mudra_manager');
+  HomeWidget.registerInteractivityCallback(backgroundCallback);
 
   final completed = SharedPrefsUtil.instance.isOnboardingComplete();
   setupSmsListener();
 
   runApp(ProviderScope(child: MudraManagerApp(showOnboarding: !completed)));
+}
+
+@pragma('vm:entry-point')
+void backgroundCallback(Uri? uri) async {
+  if (uri?.host == 'add_transaction') {
+    await HomeWidget.setAppGroupId('group.mudra_manager');
+  }
 }
 
 class MudraManagerApp extends ConsumerWidget {
