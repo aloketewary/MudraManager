@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:mudra_manager/providers/trip_provider.dart';
 import 'package:mudra_manager/util/dialog_utils.dart';
+import 'package:mudra_manager/theme/app_colors.dart';
 
 class TripDetailScreen extends ConsumerStatefulWidget {
   final int tripId;
@@ -35,15 +36,15 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
   Color _getStatusColor(String status) {
     switch (status) {
       case 'Active':
-        return Colors.green;
+        return AppColors.tripActive;
       case 'Upcoming':
-        return Colors.blue;
+        return AppColors.tripUpcoming;
       case 'Past':
-        return Colors.orange;
+        return AppColors.tripPast;
       case 'Completed':
-        return Colors.grey;
+        return AppColors.tripCompleted;
       default:
-        return Colors.grey;
+        return AppColors.tripCompleted;
     }
   }
 
@@ -64,15 +65,21 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
     final tripAsync = ref.watch(tripByIdProvider(widget.tripId));
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return tripAsync.when(
       data: (trip) {
-        if (trip == null)
+        if (trip == null) {
           return Scaffold(body: Center(child: Text('Trip not found')));
+        }
 
         final participants = trip.participants.toList();
         final duration = trip.endDate.difference(trip.startDate).inDays + 1;
-        final status = _getTripStatus(trip.startDate, trip.endDate, trip.isActive);
+        final status = _getTripStatus(
+          trip.startDate,
+          trip.endDate,
+          trip.isActive,
+        );
         final statusColor = _getStatusColor(status);
 
         return Scaffold(
@@ -85,12 +92,14 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
               IconButton(
                 onPressed: () {
                   HapticFeedback.mediumImpact();
-                  context.push('/edit-trip/${widget.tripId}');
+                  context.push('/edit-trip', extra: trip.id);
                 },
                 icon: Icon(Icons.edit_outlined),
                 tooltip: 'Edit Trip',
                 style: IconButton.styleFrom(
-                  backgroundColor: color.primaryContainer.withValues(alpha: 0.5),
+                  backgroundColor: color.primaryContainer.withValues(
+                    alpha: 0.5,
+                  ),
                   foregroundColor: color.primary,
                 ),
               ),
@@ -181,18 +190,22 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                 margin: EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [statusColor.withValues(alpha: 0.4), statusColor.withValues(alpha: 0.9)],
+                    colors: AppColors.glassGradient(
+                      statusColor,
+                      Theme.of(context).brightness == Brightness.dark,
+                    ),
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: statusColor.withValues(alpha: 0.3),
-                      blurRadius: 12,
-                      offset: Offset(0, 4),
-                    ),
-                  ],
+                  border: Border.all(
+                    color: statusColor.withValues(alpha: 0.3),
+                    width: 1.5,
+                  ),
+                  boxShadow: AppColors.glassShadow(
+                    statusColor,
+                    Theme.of(context).brightness == Brightness.dark,
+                  ),
                 ),
                 child: Column(
                   children: [
@@ -209,7 +222,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                             child: Icon(
                               Icons.calendar_today,
                               size: 18,
-                              color: Colors.white,
+                              color: AppColors.textColor(isDark),
                             ),
                           ),
                           SizedBox(width: 12),
@@ -220,7 +233,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                                 Text(
                                   '${DateFormat.MMMd().format(trip.startDate)} - ${DateFormat.MMMd().format(trip.endDate)}',
                                   style: TextStyle(
-                                    color: Colors.white,
+                                    color: AppColors.textColor(isDark),
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -229,7 +242,9 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                                 Text(
                                   '$duration days',
                                   style: TextStyle(
-                                    color: Colors.white70,
+                                    color: AppColors.textColor(
+                                      isDark,
+                                    ).withValues(alpha: 0.8),
                                     fontSize: 12,
                                   ),
                                 ),
@@ -242,13 +257,15 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: statusColor,
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
                               status,
                               style: TextStyle(
-                                color: statusColor.withValues(alpha: 0.8),
+                                color: AppColors.textColor(
+                                  isDark,
+                                ).withValues(alpha: 0.8),
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -282,7 +299,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                                         child: Text(
                                           trip.description!,
                                           style: TextStyle(
-                                            color: Colors.white,
+                                            color: AppColors.textColor(isDark),
                                             fontSize: 13,
                                           ),
                                         ),
@@ -294,13 +311,17 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                                         Icon(
                                           Icons.people,
                                           size: 16,
-                                          color: Colors.white70,
+                                          color: AppColors.textColor(
+                                            isDark,
+                                          ).withValues(alpha: 0.8),
                                         ),
                                         SizedBox(width: 8),
                                         Text(
                                           '${participants.length} Participants',
                                           style: TextStyle(
-                                            color: Colors.white70,
+                                            color: AppColors.textColor(
+                                              isDark,
+                                            ).withValues(alpha: 0.8),
                                             fontSize: 12,
                                             fontWeight: FontWeight.w500,
                                           ),
@@ -320,7 +341,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                                                     vertical: 6,
                                                   ),
                                                   decoration: BoxDecoration(
-                                                    color: Colors.white
+                                                    color: statusColor
                                                         .withValues(alpha: 0.2),
                                                     borderRadius:
                                                         BorderRadius.circular(
@@ -334,15 +355,20 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                                                       CircleAvatar(
                                                         radius: 12,
                                                         backgroundColor:
-                                                            Colors.white,
+                                                            statusColor
+                                                                .withValues(
+                                                                  alpha: 0.8,
+                                                                ),
                                                         child: Text(
                                                           p.name[0]
                                                               .toUpperCase(),
                                                           style: TextStyle(
                                                             color:
-                                                                Colors
-                                                                    .teal
-                                                                    .shade700,
+                                                                AppColors.textColor(
+                                                                  isDark,
+                                                                ).withValues(
+                                                                  alpha: 0.8,
+                                                                ),
                                                             fontWeight:
                                                                 FontWeight.bold,
                                                             fontSize: 10,
@@ -353,7 +379,10 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                                                       Text(
                                                         p.name,
                                                         style: TextStyle(
-                                                          color: Colors.white,
+                                                          color:
+                                                              AppColors.textColor(
+                                                                isDark,
+                                                              ),
                                                           fontSize: 12,
                                                           fontWeight:
                                                               FontWeight.w500,
@@ -390,7 +419,9 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                             Text(
                               _isExpanded ? 'Hide Details' : 'Show Details',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: AppColors.textColor(isDark).withValues(
+                                  alpha: 0.8,
+                                ),
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -400,7 +431,9 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                               _isExpanded
                                   ? Icons.keyboard_arrow_up
                                   : Icons.keyboard_arrow_down,
-                              color: Colors.white,
+                              color: AppColors.textColor(isDark).withValues(
+                                alpha: 0.8,
+                              ),
                               size: 20,
                             ),
                           ],
@@ -533,13 +566,13 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
               padding: EdgeInsets.all(16),
               child: Row(
                 children: [
-                  Container(
-                    padding: EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: color.primaryContainer.withValues(alpha: 0.5),
-                      borderRadius: BorderRadius.circular(12),
+                  CircleAvatar(
+                    radius: 24,
+                    backgroundColor: color.primary,
+                    child: Text(
+                      paidBy?.name[0].toUpperCase() ?? '?',
+                      style: TextStyle(color: color.onPrimary),
                     ),
-                    child: Icon(Icons.receipt, color: color.primary, size: 24),
                   ),
                   SizedBox(width: 16),
                   Expanded(
@@ -548,15 +581,6 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                       children: [
                         Row(
                           children: [
-                            CircleAvatar(
-                              radius: 16,
-                              backgroundColor: color.primary,
-                              child: Text(
-                                paidBy?.name[0].toUpperCase() ?? '?',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ),
-                            SizedBox(width: 6),
                             Text(
                               'Paid by ${paidBy?.name ?? "Unknown"}',
                               style: textTheme.titleMedium?.copyWith(

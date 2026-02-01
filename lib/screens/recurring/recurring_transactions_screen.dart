@@ -7,6 +7,7 @@ import 'package:mudra_manager/db/models/recurring_transaction.dart';
 import 'package:mudra_manager/db/models/frequency.dart';
 import 'package:mudra_manager/providers/recurring_transaction_provider.dart';
 import 'package:mudra_manager/util/icon_helper.dart';
+import 'package:mudra_manager/theme/app_colors.dart';
 
 class RecurringTransactionsScreen extends ConsumerWidget {
   const RecurringTransactionsScreen({super.key});
@@ -70,16 +71,22 @@ class _RecurringCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final color = item.isExpense ? Colors.red : Colors.green;
+    final color = item.isExpense ? AppColors.expense : AppColors.income;
     final frequencyText = _getFrequencyText(item.frequency);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest,
+        gradient: LinearGradient(
+          colors: AppColors.glassGradient(color, isDark),
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.2)),
+        border: Border.all(color: color.withValues(alpha: 0.3), width: 1.5),
+        boxShadow: AppColors.glassShadow(color, isDark),
       ),
       child: Material(
         color: Colors.transparent,
@@ -93,8 +100,15 @@ class _RecurringCard extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.1),
+                    color: AppColors.white,
                     borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: color.withValues(alpha: 0.2),
+                        blurRadius: 8,
+                        offset: Offset(0, 4),
+                      ),
+                    ],
                   ),
                   child: Icon(
                     IconHelper.iconFromName(item.category.value?.iconName ?? 'category'),
@@ -109,12 +123,17 @@ class _RecurringCard extends ConsumerWidget {
                     children: [
                       Text(
                         item.category.value?.name ?? 'Unknown',
-                        style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                        style: textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: color,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         '$frequencyText • Next: ${DateFormat('MMM d').format(item.nextDueDate)}',
-                        style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+                        style: textTheme.bodySmall?.copyWith(
+                          color: color.withValues(alpha: 0.7),
+                        ),
                       ),
                       if (!item.isActive)
                         Text(
@@ -137,7 +156,9 @@ class _RecurringCard extends ConsumerWidget {
                     const SizedBox(height: 4),
                     Text(
                       item.account.value?.name ?? '',
-                      style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+                      style: textTheme.bodySmall?.copyWith(
+                        color: color.withValues(alpha: 0.6),
+                      ),
                     ),
                   ],
                 ),

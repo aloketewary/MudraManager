@@ -40,6 +40,8 @@ PODS:
     - Flutter
   - flutter_secure_storage (6.0.0):
     - Flutter
+  - home_widget (0.0.1):
+    - Flutter
   - isar_flutter_libs (1.0.0):
     - Flutter
   - local_auth_darwin (0.0.1):
@@ -72,6 +74,7 @@ DEPENDENCIES:
   - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
   - flutter_native_timezone_latest (from `.symlinks/plugins/flutter_native_timezone_latest/ios`)
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
+  - home_widget (from `.symlinks/plugins/home_widget/ios`)
   - isar_flutter_libs (from `.symlinks/plugins/isar_flutter_libs/ios`)
   - local_auth_darwin (from `.symlinks/plugins/local_auth_darwin/darwin`)
   - open_file_ios (from `.symlinks/plugins/open_file_ios/ios`)
@@ -100,6 +103,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_native_timezone_latest/ios"
   flutter_secure_storage:
     :path: ".symlinks/plugins/flutter_secure_storage/ios"
+  home_widget:
+    :path: ".symlinks/plugins/home_widget/ios"
   isar_flutter_libs:
     :path: ".symlinks/plugins/isar_flutter_libs/ios"
   local_auth_darwin:
@@ -127,6 +132,7 @@ SPEC CHECKSUMS:
   flutter_local_notifications: a5a732f069baa862e728d839dd2ebb904737effb
   flutter_native_timezone_latest: c9138923a99d853406f8bc139c63085fcd33f293
   flutter_secure_storage: 1ed9476fba7e7a782b22888f956cce43e2c62f13
+  home_widget: f169fc41fd807b4d46ab6615dc44d62adbf9f64f
   isar_flutter_libs: 9fc2cfb928c539e1b76c481ba5d143d556d94920
   local_auth_darwin: 553ce4f9b16d3fdfeafce9cf042e7c9f77c1c391
   open_file_ios: 5ff7526df64e4394b4fe207636b67a95e83078bb

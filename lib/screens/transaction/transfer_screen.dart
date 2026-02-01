@@ -6,10 +6,8 @@ import 'package:intl/intl.dart';
 import 'package:mudra_manager/db/models/account.dart' show Account;
 import 'package:mudra_manager/providers/account_providers.dart';
 import 'package:mudra_manager/providers/transaction_provider.dart';
-import 'package:mudra_manager/screens/reusable/common_button.dart';
-import 'package:mudra_manager/screens/reusable/common_text_input_field.dart';
-import 'package:mudra_manager/screens/transaction/account_card_mini.dart'
-    show AccountCardMini;
+import 'package:mudra_manager/screens/transaction/account_card_mini.dart' show AccountCardMini;
+import 'package:mudra_manager/theme/app_colors.dart';
 
 class TransferScreen extends ConsumerStatefulWidget {
   final Account? fromAccount;
@@ -92,203 +90,196 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
   @override
   Widget build(BuildContext ctx) {
     final accountsAsync = ref.watch(accountsProvider);
-    var color = Theme.of(context).colorScheme;
-    var textTheme = Theme.of(context).textTheme;
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final service = ref.watch(accountServiceProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Transfer Funds'),
+        title: Text('Transfer Funds'),
         actions: [
-          IconButton.outlined(
+          IconButton(
+            icon: Icon(Icons.refresh),
             onPressed: () {
+              HapticFeedback.mediumImpact();
               setState(() {
                 _fromAccount = null;
                 _toAccount = null;
               });
             },
-            icon: const Icon(Icons.undo_outlined),
+            tooltip: 'Reset',
           ),
         ],
       ),
       body: accountsAsync.when(
         data: (accounts) {
-          return Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                Expanded(
-                  child: Form(
-                    key: _formKey,
-                    child: ListView(
-                      children: [
-                        AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 300),
-                          switchInCurve: Curves.easeIn,
-                          switchOutCurve: Curves.easeOut,
-                          child:
-                              _toAccount?.id == null
-                                  ? Column(
-                                    key: const ValueKey("accountSelector"),
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.all(8),
-                                        child: Text(
-                                          "Select Accounts",
-                                          style: textTheme.titleLarge?.copyWith(
-                                            color: color.primary,
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 12),
-                                      buildTransferSelector(
-                                        accounts: accounts,
-                                        from: _fromAccount,
-                                        to: _toAccount,
-                                        onFromChanged:
-                                            (v) => setState(() {
-                                              _fromAccount =
-                                                  _fromAccount == v ? null : v;
-                                            }),
-                                        onToChanged:
-                                            (v) => setState(() {
-                                              _toAccount =
-                                                  _toAccount == v ? null : v;
-                                            }),
-                                      ),
-                                      const SizedBox(height: 12),
-                                    ],
-                                  )
-                                  : const SizedBox.shrink(
-                                    key: ValueKey("empty"),
-                                  ),
+          return ListView(
+            padding: EdgeInsets.all(16),
+            children: [
+              Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (_toAccount?.id == null) ...[
+                      Padding(
+                        padding: EdgeInsets.only(left: 4, bottom: 16),
+                        child: Text('SELECT ACCOUNTS', style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700, color: color.primary, letterSpacing: 0.5, fontSize: 12)),
+                      ),
+                      SizedBox(
+                        height: 150,
+                        child: buildTransferSelector(
+                          accounts: accounts,
+                          from: _fromAccount,
+                          to: _toAccount,
+                          onFromChanged: (v) => setState(() => _fromAccount = _fromAccount == v ? null : v),
+                          onToChanged: (v) => setState(() => _toAccount = _toAccount == v ? null : v),
                         ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
+                      ),
+                      SizedBox(height: 24),
+                    ],
+                    Container(
+                      padding: EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(colors: AppColors.glassGradient(AppColors.transfer, isDark), begin: Alignment.topLeft, end: Alignment.bottomRight),
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(color: AppColors.transfer.withValues(alpha: 0.3), width: 1.5),
+                        boxShadow: AppColors.glassShadow(AppColors.transfer, isDark),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
                               children: [
-                                Padding(
-                                  padding: EdgeInsets.all(8),
-                                  child: Text(
-                                    "From".toUpperCase(),
-                                    style: textTheme.titleLarge?.copyWith(
-                                      color: color.primary,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  height: 150,
-                                  child:
-                                      _fromAccount != null
-                                          ? AccountCardMini(
-                                            account: _fromAccount!,
-                                            selected: true,
-                                            balance: service.getAccountBalance(
-                                              _fromAccount!.id,
-                                            ),
-                                          )
-                                          : AccountCardMini.skeleton(),
-                                ),
+                                Text('FROM', style: textTheme.labelSmall?.copyWith(color: AppColors.transfer.withValues(alpha: 0.7), fontWeight: FontWeight.w700, letterSpacing: 0.5)),
+                                SizedBox(height: 12),
+                                SizedBox(height: 140, child: _fromAccount != null ? AccountCardMini(account: _fromAccount!, selected: true, balance: service.getAccountBalance(_fromAccount!.id)) : AccountCardMini.skeleton()),
                               ],
                             ),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 32),
-                              child: Icon(
-                                Icons.arrow_forward_ios_outlined,
-                                size: 32,
-                                color: color.secondary,
-                              ),
-                            ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Padding(
-                                  padding: EdgeInsets.all(8),
-                                  child: Text(
-                                    "To".toUpperCase(),
-                                    style: textTheme.titleLarge?.copyWith(
-                                      color: color.primary,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  height: 150,
-                                  child:
-                                      _toAccount != null
-                                          ? AccountCardMini(
-                                            account: _toAccount!,
-                                            selected: true,
-                                            balance: service.getAccountBalance(
-                                              _toAccount!.id,
-                                            ),
-                                          )
-                                          : AccountCardMini.skeleton(),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        CommonTextInputField(
-                          controller: _amountC,
-                          labelText: "Amount",
-                          inputType: TextInputType.numberWithOptions(
-                            decimal: true,
                           ),
-                          iconData: Icons.money,
-                          validateField: (v) {
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 12),
+                            child: Container(
+                              padding: EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: AppColors.white,
+                                borderRadius: BorderRadius.circular(14),
+                                boxShadow: [BoxShadow(color: AppColors.transfer.withValues(alpha: 0.15), blurRadius: 12, offset: Offset(0, 4))],
+                              ),
+                              child: Icon(Icons.arrow_forward, color: AppColors.transfer, size: 24),
+                            ),
+                          ),
+                          Expanded(
+                            child: Column(
+                              children: [
+                                Text('TO', style: textTheme.labelSmall?.copyWith(color: AppColors.transfer.withValues(alpha: 0.7), fontWeight: FontWeight.w700, letterSpacing: 0.5)),
+                                SizedBox(height: 12),
+                                SizedBox(height: 140, child: _toAccount != null ? AccountCardMini(account: _toAccount!, selected: true, balance: service.getAccountBalance(_toAccount!.id)) : AccountCardMini.skeleton()),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                        SizedBox(height: 24),
+                        Padding(
+                          padding: EdgeInsets.only(left: 4, bottom: 16),
+                          child: Text('TRANSFER DETAILS', style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700, color: color.primary, letterSpacing: 0.5, fontSize: 12)),
+                        ),
+                        TextFormField(
+                          controller: _amountC,
+                          keyboardType: TextInputType.numberWithOptions(decimal: true),
+                          style: textTheme.bodyLarge,
+                          decoration: InputDecoration(
+                            labelText: 'Amount',
+                            prefixIcon: Icon(Icons.currency_rupee),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: color.outline, width: 1.5)),
+                            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: color.outline, width: 1.5)),
+                            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: color.primary, width: 2)),
+                          ),
+                          validator: (v) {
                             final x = double.tryParse(v ?? '');
-                            return x == null || x <= 0
-                                ? 'Enter valid amount'
-                                : null;
+                            return x == null || x <= 0 ? 'Enter valid amount' : null;
                           },
                         ),
-                        const SizedBox(height: 12),
-                        // Date picker
-                        ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          title: Text(
-                            'Date: ${DateFormat.yMMMd().format(_date)}',
-                          ),
-                          trailing: const Icon(Icons.calendar_today),
+                        SizedBox(height: 16),
+                        GestureDetector(
                           onTap: () async {
-                            final pick = await showDatePicker(
-                              context: context,
-                              initialDate: _date,
-                              firstDate: DateTime(2000),
-                              lastDate: DateTime.now(),
-                            );
+                            final pick = await showDatePicker(context: context, initialDate: _date, firstDate: DateTime(2000), lastDate: DateTime.now());
                             if (pick != null) setState(() => _date = pick);
                           },
+                          child: Container(
+                            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(colors: AppColors.glassGradient(color.primary, isDark), begin: Alignment.topLeft, end: Alignment.bottomRight),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: color.primary.withValues(alpha: 0.3), width: 1.5),
+                              boxShadow: AppColors.glassShadow(color.primary, isDark),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.white,
+                                    borderRadius: BorderRadius.circular(12),
+                                    boxShadow: [BoxShadow(color: color.primary.withValues(alpha: 0.15), blurRadius: 12, offset: Offset(0, 4))],
+                                  ),
+                                  child: Icon(Icons.calendar_today, color: color.primary, size: 20),
+                                ),
+                                SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text('Date', style: textTheme.labelMedium?.copyWith(color: color.primary.withValues(alpha: 0.7))),
+                                      SizedBox(height: 2),
+                                      Text(DateFormat.yMMMd().format(_date), style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600, color: color.primary, letterSpacing: -0.2)),
+                                    ],
+                                  ),
+                                ),
+                                Icon(Icons.arrow_forward_ios_rounded, color: color.primary.withValues(alpha: 0.5), size: 18),
+                              ],
+                            ),
+                          ),
                         ),
-
-                        const SizedBox(height: 12),
-                        CommonTextInputField(
+                        SizedBox(height: 16),
+                        TextFormField(
                           controller: _noteC,
-                          labelText: "Note (optional)",
-                          iconData: Icons.note,
+                          style: textTheme.bodyLarge,
+                          maxLines: 3,
+                          decoration: InputDecoration(
+                            labelText: 'Note (optional)',
+                            prefixIcon: Icon(Icons.note_outlined),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: color.outline, width: 1.5)),
+                            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: color.outline, width: 1.5)),
+                            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: color.primary, width: 2)),
+                          ),
                         ),
-                      ],
-                    ),
-                  ),
+                        SizedBox(height: 24),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: _submit,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.transfer,
+                              foregroundColor: Colors.white,
+                              padding: EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                              elevation: 0,
+                            ),
+                            child: Text(isUpdate ? 'Update Transfer' : 'Transfer', style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600, color: Colors.white)),
+                          ),
+                        ),
+                        SizedBox(height: 16),
+                  ],
                 ),
-
-                CommonButton(
-                  text: isUpdate ? 'Update Transfer' : 'Transfer',
-                  backGroundColor: color.secondary,
-                  textColor: color.onSecondary,
-                  onPressed: _submit,
-                ),
-              ],
-            ),
+              ),
+            ],
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Error loading accounts')),
       ),
     );

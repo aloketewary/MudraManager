@@ -9,6 +9,7 @@ import 'package:mudra_manager/providers/transaction_provider.dart';
 import 'package:mudra_manager/screens/profile/add_edit_category_screen.dart';
 import 'package:mudra_manager/screens/reusable/no_data_found.dart'
     show NoDataFound;
+import 'package:mudra_manager/theme/app_colors.dart';
 import 'package:mudra_manager/util/dialog_utils.dart';
 import 'package:mudra_manager/util/icon_helper.dart';
 import 'package:mudra_manager/util/snackbar_service.dart';
@@ -53,21 +54,19 @@ class ManageCategoriesScreen extends ConsumerWidget {
               );
 
               final categoryColor = Color(category.colorValue ?? 0xFFE0E0E0);
+              final isDark = Theme.of(context).brightness == Brightness.dark;
+              final gradientColors = AppColors.glassGradient(categoryColor, isDark);
 
               return Container(
                 decoration: BoxDecoration(
-                  color: color.surface,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: color.outlineVariant.withValues(alpha: 0.5),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: gradientColors,
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: color.shadow.withValues(alpha: 0.05),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: categoryColor.withValues(alpha: 0.3), width: 1.5),
+                  boxShadow: AppColors.glassShadow(categoryColor, isDark),
                 ),
                 child: ListTile(
                   contentPadding: const EdgeInsets.symmetric(
@@ -77,8 +76,9 @@ class ManageCategoriesScreen extends ConsumerWidget {
                   leading: Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: categoryColor.withValues(alpha: 0.1),
+                      color: AppColors.white,
                       shape: BoxShape.circle,
+                      boxShadow: [BoxShadow(color: categoryColor.withValues(alpha: 0.2), blurRadius: 8, offset: Offset(0, 2))],
                     ),
                     child: Icon(
                       IconHelper.getIconData(category.iconName),
@@ -90,17 +90,17 @@ class ManageCategoriesScreen extends ConsumerWidget {
                     category.name,
                     style: textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: color.onSurface,
+                      color: categoryColor,
                     ),
                   ),
                   subtitle: Text(
                     '${count} transaction${count == 1 ? '' : 's'} • ${category.categoryType.name.toUpperCase()}',
                     style: textTheme.bodySmall?.copyWith(
-                      color: color.onSurfaceVariant,
+                      color: categoryColor,
                     ),
                   ),
                   trailing: PopupMenuButton<String>(
-                    icon: Icon(Icons.more_vert, color: color.onSurfaceVariant),
+                    icon: Icon(Icons.more_vert, color: categoryColor),
                     onSelected: (value) {
                       if (value == 'edit') {
                         context.push('/add-category', extra: {'category': category});

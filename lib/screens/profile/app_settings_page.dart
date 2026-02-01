@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/l10n/app_localizations.dart';
 import 'package:mudra_manager/providers/isar_provider.dart' show reminderTimeProvider;
 import 'package:mudra_manager/service/notification_service.dart' show NotificationService;
+import 'package:mudra_manager/theme/app_colors.dart';
 import 'package:mudra_manager/theme/theme_provider.dart';
 import 'package:mudra_manager/util/snackbar_service.dart';
 
@@ -29,7 +30,7 @@ class AppSettingsPage extends ConsumerWidget {
             context.push('/language');
           }),
           SizedBox(height: 8),
-          _buildSettingCard(context, color, textTheme, Icons.color_lens_outlined, ctxt.app_settings_theme_mode_title, _getSubtitle(currentTheme, ctxt), () {
+          _buildSettingCard(context, color, textTheme, Icons.brightness_6_outlined, ctxt.app_settings_theme_mode_title, _getSubtitle(currentTheme, ctxt), () {
             HapticFeedback.mediumImpact();
             showModalBottomSheet(
               context: context,
@@ -56,50 +57,47 @@ class AppSettingsPage extends ConsumerWidget {
               ),
             );
           }),
-          SizedBox(height: 8),
-          _buildSettingCard(context, color, textTheme, Icons.format_paint_outlined, 'Choose Theme', 'Select your preferred theme', () {
-            HapticFeedback.mediumImpact();
-            context.push('/theme');
-          }),
-          SizedBox(height: 8),
-          Consumer(builder: (context, ref, _) {
-            final reminderTime = ref.watch(reminderTimeProvider);
-            return _buildSettingCard(context, color, textTheme, Icons.notifications_active_outlined, ctxt.app_settings_daily_reminder_title, reminderTime != null ? "Set at ${reminderTime.format(context)}" : "Set a daily notification time", () async {
-              HapticFeedback.mediumImpact();
-              final selectedTime = await showTimePicker(context: context, initialTime: reminderTime ?? TimeOfDay.now());
-              if (selectedTime != null) {
-                await NotificationService.scheduleDailyReminder(selectedTime);
-                ref.read(reminderTimeProvider.notifier).state = selectedTime;
-                SnackbarService.success('Reminder set for ${selectedTime.format(context)}');
-              }
-            });
-          }),
         ],
       ),
     );
   }
 
   Widget _buildSettingCard(BuildContext context, ColorScheme color, TextTheme textTheme, IconData icon, String title, String subtitle, VoidCallback onTap) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final gradientColors = AppColors.glassGradient(color.primary, isDark);
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: EdgeInsets.all(16),
-        decoration: BoxDecoration(color: color.surfaceContainerHighest, borderRadius: BorderRadius.circular(16)),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: gradientColors,
+          ),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: color.primary.withValues(alpha: 0.3), width: 1.5),
+          boxShadow: AppColors.glassShadow(color.primary, isDark),
+        ),
         child: Row(
           children: [
-            Container(padding: EdgeInsets.all(12), decoration: BoxDecoration(color: color.primary.withValues(alpha: 0.1), shape: BoxShape.circle), child: Icon(icon, color: color.primary, size: 24)),
+            Container(
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(color: AppColors.white, shape: BoxShape.circle, boxShadow: [BoxShadow(color: color.primary.withValues(alpha: 0.2), blurRadius: 8, offset: Offset(0, 2))]),
+              child: Icon(icon, color: color.primary, size: 24),
+            ),
             SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+                  Text(title, style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: color.primary)),
                   SizedBox(height: 2),
-                  Text(subtitle, style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant)),
+                  Text(subtitle, style: textTheme.bodySmall?.copyWith(color: color.primary)),
                 ],
               ),
             ),
-            Icon(Icons.chevron_right, color: color.onSurfaceVariant),
+            Icon(Icons.chevron_right, color: color.primary),
           ],
         ),
       ),

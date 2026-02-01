@@ -129,35 +129,43 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-          child: TextField(
-            onChanged: (value) {
-              setState(() {
-                _searchQuery = value.toLowerCase();
-              });
-            },
-            decoration: InputDecoration(
-              hintText: 'Search transactions...',
-              prefixIcon: Icon(Icons.search, color: color.primary),
-              suffixIcon: _searchQuery.isNotEmpty || _selectedCategoryId != null || _filterStartDate != null
-                  ? IconButton(
-                      icon: Icon(Icons.clear),
-                      onPressed: () {
-                        HapticFeedback.mediumImpact();
-                        setState(() {
-                          _searchQuery = '';
-                          _selectedCategoryId = null;
-                          _filterStartDate = null;
-                          _filterEndDate = null;
-                        });
-                      },
-                    )
-                  : null,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+          child: Material(
+            child: TextField(
+              onChanged: (value) {
+                setState(() {
+                  _searchQuery = value.toLowerCase();
+                });
+              },
+              decoration: InputDecoration(
+                hintText: 'Search transactions...',
+                prefixIcon: Icon(Icons.search, color: color.primary),
+                suffixIcon:
+                    _searchQuery.isNotEmpty ||
+                            _selectedCategoryId != null ||
+                            _filterStartDate != null
+                        ? IconButton(
+                          icon: Icon(Icons.clear),
+                          onPressed: () {
+                            HapticFeedback.mediumImpact();
+                            setState(() {
+                              _searchQuery = '';
+                              _selectedCategoryId = null;
+                              _filterStartDate = null;
+                              _filterEndDate = null;
+                            });
+                          },
+                        )
+                        : null,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                filled: true,
+                fillColor: color.surfaceContainerHighest,
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
               ),
-              filled: true,
-              fillColor: color.surfaceContainerHighest,
-              contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),
           ),
         ),
@@ -203,9 +211,9 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                 actions: [
                   TextButton(
                     onPressed: () {
-              HapticFeedback.mediumImpact();
-              context.push('/pending-transactions');
-            },
+                      HapticFeedback.mediumImpact();
+                      context.push('/pending-transactions');
+                    },
                     child: Text(
                       ctxt.transaction_listPendingTransactionMessageActionLabel
                           .toUpperCase(),
@@ -235,12 +243,15 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
           child: sectionedAsync.when(
             data: (sectioned) {
               final filtered = _filterTransactions(sectioned);
-              
+
               if (filtered.isEmpty) {
                 return NoDataFound(
-                  message: _searchQuery.isNotEmpty || _selectedCategoryId != null || _filterStartDate != null
-                      ? 'No matching transactions'
-                      : ctxt.transaction_noTransactionFoundText,
+                  message:
+                      _searchQuery.isNotEmpty ||
+                              _selectedCategoryId != null ||
+                              _filterStartDate != null
+                          ? 'No matching transactions'
+                          : ctxt.transaction_noTransactionFoundText,
                   iconData: Icons.receipt_long_outlined,
                 );
               }
@@ -251,9 +262,15 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                   final entry = filtered[index];
                   if (entry is TxHeader) {
                     return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 12,
+                        horizontal: 20,
+                      ),
                       child: Text(
-                        formatDateHeader(entry.group, ctxt.localeName).toUpperCase(),
+                        formatDateHeader(
+                          entry.group,
+                          ctxt.localeName,
+                        ).toUpperCase(),
                         style: textTheme.labelMedium?.copyWith(
                           color: color.onSurfaceVariant,
                           fontWeight: FontWeight.bold,
@@ -262,14 +279,16 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                       ),
                     );
                   }
-                  
+
                   final transaction = (entry as TxItem).txn;
                   transaction.tags.load();
                   transaction.related.load();
                   final tags = transaction.tags.toList();
-                  
+
                   return FutureBuilder<String?>(
-                    future: ref.read(tripServiceProvider).getTripNameByTransactionId(transaction.id),
+                    future: ref
+                        .read(tripServiceProvider)
+                        .getTripNameByTransactionId(transaction.id),
                     builder: (context, snapshot) {
                       return TransactionCard(
                         category: transaction.category.value,
@@ -284,32 +303,48 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                         tripName: snapshot.data,
                         onEdit: () {
                           transaction.isTransfer
-                              ? context.push('/transfer', extra: {
-                                  'amount': transaction.amount.toStringAsFixed(2),
+                              ? context.push(
+                                '/transfer',
+                                extra: {
+                                  'amount': transaction.amount.toStringAsFixed(
+                                    2,
+                                  ),
                                   'note': transaction.description,
                                   'date': transaction.date,
-                                  'fromAccount': transaction.related.value?.account.value,
+                                  'fromAccount':
+                                      transaction.related.value?.account.value,
                                   'toAccount': transaction.account.value,
                                   'fromId': transaction.related.value?.id,
                                   'toId': transaction.id,
-                                })
-                              : context.push('/add-transaction', extra: {'transaction': transaction});
+                                },
+                              )
+                              : context.push(
+                                '/add-transaction',
+                                extra: {'transaction': transaction},
+                              );
                         },
                         onRemove: () async {
-                          final confirm = await DialogUtils.showDeleteConfirmation(
-                            context,
-                            title: ctxt.transaction_deleteAlertTitleText,
-                            message: ctxt.transaction_deleteAlertBodyText,
-                            cancelText: ctxt.transaction_cancelButtonActionText,
-                            deleteText: ctxt.transaction_deleteButtonActionText,
-                          );
+                          final confirm =
+                              await DialogUtils.showDeleteConfirmation(
+                                context,
+                                title: ctxt.transaction_deleteAlertTitleText,
+                                message: ctxt.transaction_deleteAlertBodyText,
+                                cancelText:
+                                    ctxt.transaction_cancelButtonActionText,
+                                deleteText:
+                                    ctxt.transaction_deleteButtonActionText,
+                              );
 
                           if (confirm == true) {
-                            await ref.read(tripServiceProvider).removeTransactionFromTrip(transaction.id);
+                            await ref
+                                .read(tripServiceProvider)
+                                .removeTransactionFromTrip(transaction.id);
                             if (transaction.isTransfer) {
                               await ref
                                   .read(transactionProvider)
-                                  .deleteTransaction(transaction.related.value?.id ?? 0);
+                                  .deleteTransaction(
+                                    transaction.related.value?.id ?? 0,
+                                  );
                             }
                             await ref
                                 .read(transactionProvider)
@@ -338,7 +373,9 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
   }
 
   List<TxListEntry> _filterTransactions(List<TxListEntry> sectioned) {
-    if (_searchQuery.isEmpty && _selectedCategoryId == null && _filterStartDate == null) {
+    if (_searchQuery.isEmpty &&
+        _selectedCategoryId == null &&
+        _filterStartDate == null) {
       return sectioned;
     }
 
@@ -353,7 +390,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
 
       final txItem = entry as TxItem;
       final tx = txItem.txn;
-      
+
       bool matches = true;
 
       if (_searchQuery.isNotEmpty) {
@@ -366,11 +403,17 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
       }
 
       if (_filterStartDate != null && _filterEndDate != null) {
-        matches = matches && tx.date.isAfter(_filterStartDate!) && tx.date.isBefore(_filterEndDate!);
+        matches =
+            matches &&
+            tx.date.isAfter(_filterStartDate!) &&
+            tx.date.isBefore(_filterEndDate!);
       }
 
       if (matches) {
-        if (currentDate != null && (filtered.isEmpty || filtered.last is! TxHeader || (filtered.last as TxHeader).group != currentDate)) {
+        if (currentDate != null &&
+            (filtered.isEmpty ||
+                filtered.last is! TxHeader ||
+                (filtered.last as TxHeader).group != currentDate)) {
           filtered.add(TxHeader(currentDate));
         }
         filtered.add(txItem);
@@ -405,7 +448,9 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                     padding: EdgeInsets.all(16.0),
                     child: Text(
                       'Filter Options',
-                      style: textTheme.titleLarge?.copyWith(color: color.primary),
+                      style: textTheme.titleLarge?.copyWith(
+                        color: color.primary,
+                      ),
                     ),
                   ),
                   Divider(),
@@ -413,7 +458,9 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                     padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     child: Text(
                       'Transaction Type',
-                      style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                      style: textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                   RadioListTile<String>(
@@ -429,7 +476,9 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                   RadioListTile<String>(
                     value: 'income',
                     groupValue: _filter,
-                    title: Text(ctxt.transaction_list_filter_income.toUpperCase()),
+                    title: Text(
+                      ctxt.transaction_list_filter_income.toUpperCase(),
+                    ),
                     onChanged: (value) {
                       HapticFeedback.mediumImpact();
                       setState(() => _filter = value!);
@@ -439,7 +488,9 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                   RadioListTile<String>(
                     value: 'expense',
                     groupValue: _filter,
-                    title: Text(ctxt.transaction_list_filter_expense.toUpperCase()),
+                    title: Text(
+                      ctxt.transaction_list_filter_expense.toUpperCase(),
+                    ),
                     onChanged: (value) {
                       HapticFeedback.mediumImpact();
                       setState(() => _filter = value!);
@@ -451,25 +502,33 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                     padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     child: Text(
                       'Category',
-                      style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                      style: textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                  ...categories.map((cat) => RadioListTile<int?>(
-                    value: cat.id,
-                    groupValue: _selectedCategoryId,
-                    title: Row(
-                      children: [
-                        Icon(IconHelper.getIconData(cat.iconName), size: 20, color: Color(cat.colorValue ?? 0xFF9E9E9E)),
-                        SizedBox(width: 8),
-                        Text(cat.name),
-                      ],
+                  ...categories.map(
+                    (cat) => RadioListTile<int?>(
+                      value: cat.id,
+                      groupValue: _selectedCategoryId,
+                      title: Row(
+                        children: [
+                          Icon(
+                            IconHelper.getIconData(cat.iconName),
+                            size: 20,
+                            color: Color(cat.colorValue ?? 0xFF9E9E9E),
+                          ),
+                          SizedBox(width: 8),
+                          Text(cat.name),
+                        ],
+                      ),
+                      onChanged: (value) {
+                        HapticFeedback.mediumImpact();
+                        setState(() => _selectedCategoryId = value);
+                        setModalState(() {});
+                      },
                     ),
-                    onChanged: (value) {
-                      HapticFeedback.mediumImpact();
-                      setState(() => _selectedCategoryId = value);
-                      setModalState(() {});
-                    },
-                  )),
+                  ),
                   RadioListTile<int?>(
                     value: null,
                     groupValue: _selectedCategoryId,
@@ -490,7 +549,9 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                       },
                       style: ElevatedButton.styleFrom(
                         minimumSize: Size(double.infinity, 52),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                       child: Text('APPLY FILTERS'),
                     ),
@@ -504,6 +565,4 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
       },
     );
   }
-
-
 }

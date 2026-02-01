@@ -25,7 +25,11 @@ class TripService {
 
   Future<List<Trip>> getActiveTrips() async {
     final isar = await isarService.getInstance();
-    return await isar.trips.filter().isActiveEqualTo(true).sortByStartDateDesc().findAll();
+    return await isar.trips
+        .filter()
+        .isActiveEqualTo(true)
+        .sortByStartDateDesc()
+        .findAll();
   }
 
   Future<Trip?> getTripById(int id) async {
@@ -36,7 +40,14 @@ class TripService {
     return trip;
   }
 
-  Future<void> addTransactionToTrip(int tripId, Transaction transaction, int paidById, SplitType splitType, List<int> participantIds, List<double> splitAmounts) async {
+  Future<void> addTransactionToTrip(
+    int tripId,
+    Transaction transaction,
+    int paidById,
+    SplitType splitType,
+    List<int> participantIds,
+    List<double> splitAmounts,
+  ) async {
     final isar = await isarService.getInstance();
     await isar.writeTxn(() async {
       final tripTxn = TripTransaction.create(
@@ -57,7 +68,9 @@ class TripService {
     });
   }
 
-  Future<Map<String, Map<String, double>>> calculateSettlements(int tripId) async {
+  Future<Map<String, Map<String, double>>> calculateSettlements(
+    int tripId,
+  ) async {
     final isar = await isarService.getInstance();
     final trip = await isar.trips.get(tripId);
     await trip?.transactions.load();
@@ -67,20 +80,23 @@ class TripService {
     for (var tripTxn in trip?.transactions ?? []) {
       await tripTxn.transaction.load();
       await tripTxn.paidBy.load();
-      
+
       final txn = tripTxn.transaction.value;
       final paidBy = tripTxn.paidBy.value;
-      
+
       if (txn == null || paidBy == null) continue;
-      
+
       final amount = txn.amount;
       final paidById = paidBy.id;
-      
+
       balances[paidById] = (balances[paidById] ?? 0) + amount;
 
-      for (var i = 0; i < tripTxn.participantIds.length; i++) {
-        final participantId = tripTxn.participantIds[i];
-        final share = tripTxn.splitAmounts[i];
+      final participantIds = tripTxn.participantIds;
+      final splitAmounts = tripTxn.splitAmounts;
+      
+      for (var i = 0; i < participantIds.length; i++) {
+        final participantId = participantIds[i];
+        final share = splitAmounts[i];
         balances[participantId] = (balances[participantId] ?? 0) - share;
       }
     }
@@ -93,11 +109,13 @@ class TripService {
       if (balance > 0.01) {
         balances.forEach((otherId, otherBalance) {
           if (otherId != id && otherBalance < -0.01) {
-            final settleAmount = balance < -otherBalance ? balance : -otherBalance;
+            final settleAmount =
+                balance < -otherBalance ? balance : -otherBalance;
             final fromName = participantMap[otherId] ?? 'Unknown';
             final toName = participantMap[id] ?? 'Unknown';
             settlements.putIfAbsent(fromName, () => {});
-            settlements[fromName]![toName] = (settlements[fromName]![toName] ?? 0) + settleAmount;
+            settlements[fromName]![toName] =
+                (settlements[fromName]![toName] ?? 0) + settleAmount;
           }
         });
       }
@@ -122,17 +140,17 @@ class TripService {
     await isar.writeTxn(() async {
       final trip = await isar.trips.get(tripId);
       if (trip == null) return;
-      
+
       await trip.transactions.load();
       for (var tripTxn in trip.transactions) {
         await isar.tripTransactions.delete(tripTxn.id);
       }
-      
+
       await trip.participants.load();
       for (var participant in trip.participants) {
         await isar.tripParticipants.delete(participant.id);
       }
-      
+
       await isar.trips.delete(tripId);
     });
   }
@@ -142,58 +160,62 @@ class TripService {
     await isar.writeTxn(() async {
       final trip = await isar.trips.get(tripId);
       if (trip == null) return;
-      
+
       await trip.transactions.load();
       trip.transactions.removeWhere((t) => t.id == tripTransactionId);
       await trip.transactions.save();
-      
+
       await isar.tripTransactions.delete(tripTransactionId);
     });
   }
 
   Future<String?> getTripNameByTransactionId(int transactionId) async {
     final isar = await isarService.getInstance();
-    final tripTxn = await isar.tripTransactions
-        .filter()
-        .transaction((q) => q.idEqualTo(transactionId))
-        .findFirst();
-    
+    final tripTxn =
+        await isar.tripTransactions
+            .filter()
+            .transaction((q) => q.idEqualTo(transactionId))
+            .findFirst();
+
     if (tripTxn == null) return null;
-    
-    final trip = await isar.trips
-        .filter()
-        .transactions((q) => q.idEqualTo(tripTxn.id))
-        .findFirst();
-    
+
+    final trip =
+        await isar.trips
+            .filter()
+            .transactions((q) => q.idEqualTo(tripTxn.id))
+            .findFirst();
+
     return trip?.name;
   }
 
   Future<void> removeTransactionFromTrip(int transactionId) async {
     final isar = await isarService.getInstance();
     await isar.writeTxn(() async {
-      final tripTxn = await isar.tripTransactions
-          .filter()
-          .transaction((q) => q.idEqualTo(transactionId))
-          .findFirst();
-      
+      final tripTxn =
+          await isar.tripTransactions
+              .filter()
+              .transaction((q) => q.idEqualTo(transactionId))
+              .findFirst();
+
       if (tripTxn == null) return;
-      
-      final trip = await isar.trips
-          .filter()
-          .transactions((q) => q.idEqualTo(tripTxn.id))
-          .findFirst();
-      
+
+      final trip =
+          await isar.trips
+              .filter()
+              .transactions((q) => q.idEqualTo(tripTxn.id))
+              .findFirst();
+
       if (trip != null) {
         await trip.transactions.load();
         trip.transactions.removeWhere((t) => t.id == tripTxn.id);
         await trip.transactions.save();
       }
-      
+
       await isar.tripTransactions.delete(tripTxn.id);
     });
   }
 
-    Future<void> updateTrip(
+  Future<void> updateTrip(
     Trip trip, {
     required List<TripParticipant> newParticipants,
     required bool clearTransactions,
@@ -206,7 +228,7 @@ class TripService {
       // 2. Update Participants
       // Save all participants (updates existing ones, creates new ones)
       await isar.tripParticipants.putAll(newParticipants);
-      
+
       // Update the links: Load current, clear, and add new list
       await trip.participants.load();
       trip.participants.clear();
@@ -217,17 +239,18 @@ class TripService {
       if (clearTransactions) {
         await trip.transactions.load();
         final txnsToDelete = trip.transactions.toList();
-        
+
         // Delete the TripTransaction objects to prevent orphans
         if (txnsToDelete.isNotEmpty) {
-           await isar.tripTransactions.deleteAll(txnsToDelete.map((e) => e.id).toList());
+          await isar.tripTransactions.deleteAll(
+            txnsToDelete.map((e) => e.id).toList(),
+          );
         }
-        
+
         // Clear the links
         trip.transactions.clear();
         await trip.transactions.save();
       }
     });
   }
-
 }

@@ -1,5 +1,4 @@
 import 'dart:math';
-import 'dart:typed_data' show Uint8List;
 import 'dart:ui' as ui;
 
 import 'package:fl_chart/fl_chart.dart';
@@ -152,21 +151,32 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen>
               ),
               const SizedBox(height: 12),
               InsightGridCard(
-                topCategory: d.categoryData.isNotEmpty
-                    ? d.categoryData.entries.first.key
-                    : 'N/A',
-                topCategoryAmount: d.categoryData.isNotEmpty
-                    ? d.categoryData.entries.first.value
-                    : 0,
-                topCategoryPercent: d.categoryData.isNotEmpty && d.expense > 0
-                    ? (d.categoryData.entries.first.value / d.expense) * 100
-                    : 0,
+                topCategory:
+                    d.categoryData.isNotEmpty
+                        ? d.categoryData.entries.first.key
+                        : 'N/A',
+                topCategoryAmount:
+                    d.categoryData.isNotEmpty
+                        ? d.categoryData.entries.first.value
+                        : 0,
+                topCategoryPercent:
+                    d.categoryData.isNotEmpty && d.expense > 0
+                        ? (d.categoryData.entries.first.value / d.expense) * 100
+                        : 0,
                 avgDailySpend: d.avgDailySpend,
-                topCategoryColor: d.categoryData.isNotEmpty
-                    ? Color(d.categoryDataMap[d.categoryData.entries.first.key]
-                            ?.colorValue ??
-                        0xFF000000)
-                    : color.primary,
+                topCategoryColor:
+                    d.categoryData.isNotEmpty
+                        ? Color(
+                          d
+                                  .categoryDataMap[d
+                                      .categoryData
+                                      .entries
+                                      .first
+                                      .key]
+                                  ?.colorValue ??
+                              0xFF000000,
+                        )
+                        : color.primary,
               ),
               const SizedBox(height: 24),
               Text(
@@ -400,8 +410,10 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen>
             final t = list[i];
             t.category.loadSync();
             t.account.loadSync();
-            final categoryColor = Color(t.category.value?.colorValue ?? 0xFF000000);
-            
+            final categoryColor = Color(
+              t.category.value?.colorValue ?? 0xFF000000,
+            );
+
             return SlideTransition(
               position: _animations[i],
               child: FadeTransition(
@@ -425,7 +437,10 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen>
                       borderRadius: BorderRadius.circular(20),
                       onTap: () {
                         HapticFeedback.mediumImpact();
-                        context.push('/add-transaction', extra: {'transaction': t});
+                        context.push(
+                          '/add-transaction',
+                          extra: {'transaction': t},
+                        );
                       },
                       child: Padding(
                         padding: EdgeInsets.all(16),
@@ -439,7 +454,9 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen>
                                 borderRadius: BorderRadius.circular(14),
                               ),
                               child: Icon(
-                                IconHelper.getIconData(t.category.value?.iconName),
+                                IconHelper.getIconData(
+                                  t.category.value?.iconName,
+                                ),
                                 color: categoryColor,
                                 size: 24,
                               ),
@@ -472,12 +489,18 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen>
                                   '${t.isExpense ? '-' : '+'} ${ctxt.formatCurrencyWithSign(2, t.amount)}',
                                   style: textTheme.titleMedium?.copyWith(
                                     fontWeight: FontWeight.bold,
-                                    color: t.isExpense ? color.error : color.primary,
+                                    color:
+                                        t.isExpense
+                                            ? color.error
+                                            : color.primary,
                                   ),
                                 ),
                                 SizedBox(height: 2),
                                 Text(
-                                  DateFormat('MMM dd', ctxt.localeName).format(t.date),
+                                  DateFormat(
+                                    'MMM dd',
+                                    ctxt.localeName,
+                                  ).format(t.date),
                                   style: textTheme.bodySmall?.copyWith(
                                     color: color.onSurfaceVariant,
                                   ),
@@ -521,10 +544,8 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen>
                 onTap: () async {
                   HapticFeedback.mediumImpact();
                   context.pop();
-                  Uint8List pieImage = await captureChartAsImage(pieKey);
-                  Uint8List lineImage = await captureChartAsImage(lineKey);
-
-                  exportStatsToPdf(context, data!, pieImage, lineImage);
+                  final lineImage = await captureChartAsImage(lineKey);
+                  exportStatsToPdf(context, data!, null, lineImage);
                 },
               ),
               ListTile(
@@ -546,108 +567,117 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen>
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.7,
-        minChildSize: 0.5,
-        maxChildSize: 0.95,
-        builder: (_, controller) => Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          child: Column(
-            children: [
-              SizedBox(height: 12),
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    Icon(Icons.pie_chart_outline,
-                        color: Theme.of(context).colorScheme.primary),
-                    SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'Category Breakdown',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
+      builder:
+          (context) => DraggableScrollableSheet(
+            initialChildSize: 0.7,
+            minChildSize: 0.5,
+            maxChildSize: 0.95,
+            builder:
+                (_, controller) => Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(24),
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      SizedBox(height: 12),
+                      Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.all(16),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.pie_chart_outline,
+                              color: Theme.of(context).colorScheme.primary,
                             ),
-                      ),
-                    ),
-                    SizedBox(width: 8),
-                    SegmentedButton<bool>(
-                      segments: const [
-                        ButtonSegment(
-                          value: false,
-                          label: Text('Exp'),
-                          icon: Icon(Icons.arrow_downward, size: 16),
+                            SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'Category Breakdown',
+                                style: Theme.of(context).textTheme.titleLarge
+                                    ?.copyWith(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            SizedBox(width: 8),
+                            SegmentedButton<bool>(
+                              segments: const [
+                                ButtonSegment(
+                                  value: false,
+                                  label: Text('Exp'),
+                                  icon: Icon(Icons.arrow_downward, size: 16),
+                                ),
+                                ButtonSegment(
+                                  value: true,
+                                  label: Text('Inc'),
+                                  icon: Icon(Icons.arrow_upward, size: 16),
+                                ),
+                              ],
+                              selected: {_showIncome},
+                              onSelectionChanged: (newSelection) {
+                                final newValue = newSelection.first;
+                                Navigator.of(context).pop();
+                                setState(() {
+                                  _showIncome = newValue;
+                                  _disabledCategoryIndexes.clear();
+                                  touchedIndex = null;
+                                });
+                                Future.microtask(
+                                  () => _showCategoryBreakdown(context, d),
+                                );
+                              },
+                              showSelectedIcon: false,
+                              style: SegmentedButton.styleFrom(
+                                visualDensity: VisualDensity.compact,
+                              ),
+                            ),
+                          ],
                         ),
-                        ButtonSegment(
-                          value: true,
-                          label: Text('Inc'),
-                          icon: Icon(Icons.arrow_upward, size: 16),
+                      ),
+                      Expanded(
+                        child: ListView(
+                          controller: controller,
+                          padding: EdgeInsets.all(16),
+                          children: [
+                            RepaintBoundary(
+                              key: pieKey,
+                              child: Column(
+                                children: [
+                                  buildCategoryPie(
+                                    _showIncome
+                                        ? d.incomeCategoryData
+                                        : d.categoryData,
+                                    _showIncome
+                                        ? d.incomeCategoryMapData
+                                        : d.categoryDataMap,
+                                  ),
+                                  SizedBox(height: 16),
+                                  buildCategoryLegend(
+                                    _showIncome
+                                        ? d.incomeCategoryData
+                                        : d.categoryData,
+                                    _showIncome
+                                        ? d.incomeCategoryMapData
+                                        : d.categoryDataMap,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                      selected: {_showIncome},
-                      onSelectionChanged: (newSelection) {
-                        final newValue = newSelection.first;
-                        Navigator.of(context).pop();
-                        setState(() {
-                          _showIncome = newValue;
-                          _disabledCategoryIndexes.clear();
-                          touchedIndex = null;
-                        });
-                        Future.microtask(
-                          () => _showCategoryBreakdown(context, d),
-                        );
-                      },
-                      showSelectedIcon: false,
-                      style: SegmentedButton.styleFrom(
-                        visualDensity: VisualDensity.compact,
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              Expanded(
-                child: ListView(
-                  controller: controller,
-                  padding: EdgeInsets.all(16),
-                  children: [
-                    RepaintBoundary(
-                      key: pieKey,
-                      child: Column(
-                        children: [
-                          buildCategoryPie(
-                            _showIncome ? d.incomeCategoryData : d.categoryData,
-                            _showIncome
-                                ? d.incomeCategoryMapData
-                                : d.categoryDataMap,
-                          ),
-                          SizedBox(height: 16),
-                          buildCategoryLegend(
-                            _showIncome ? d.incomeCategoryData : d.categoryData,
-                            _showIncome
-                                ? d.incomeCategoryMapData
-                                : d.categoryDataMap,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
           ),
-        ),
-      ),
     );
   }
 
@@ -656,55 +686,62 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen>
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.7,
-        minChildSize: 0.5,
-        maxChildSize: 0.95,
-        builder: (_, controller) => Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          child: Column(
-            children: [
-              SizedBox(height: 12),
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    Icon(Icons.trending_up_outlined,
-                        color: Theme.of(context).colorScheme.primary),
-                    SizedBox(width: 8),
-                    Text(
-                      'Expense Trends',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+      builder:
+          (context) => DraggableScrollableSheet(
+            initialChildSize: 0.7,
+            minChildSize: 0.5,
+            maxChildSize: 0.95,
+            builder:
+                (_, controller) => Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(24),
                     ),
-                  ],
+                  ),
+                  child: Column(
+                    children: [
+                      SizedBox(height: 12),
+                      Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.all(16),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.trending_up_outlined,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            SizedBox(width: 8),
+                            Text(
+                              'Expense Trends',
+                              style: Theme.of(context).textTheme.titleLarge
+                                  ?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: ListView(
+                          controller: controller,
+                          padding: EdgeInsets.all(16),
+                          children: [
+                            ExpenseTrendWidget(
+                              categoryTrends: d.categoryTrends,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              Expanded(
-                child: ListView(
-                  controller: controller,
-                  padding: EdgeInsets.all(16),
-                  children: [
-                    ExpenseTrendWidget(categoryTrends: d.categoryTrends),
-                  ],
-                ),
-              ),
-            ],
           ),
-        ),
-      ),
     );
   }
 
@@ -713,55 +750,58 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen>
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.7,
-        minChildSize: 0.5,
-        maxChildSize: 0.95,
-        builder: (_, controller) => Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          child: Column(
-            children: [
-              SizedBox(height: 12),
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    Icon(Icons.history_outlined,
-                        color: Theme.of(context).colorScheme.primary),
-                    SizedBox(width: 8),
-                    Text(
-                      'Recent Transactions',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+      builder:
+          (context) => DraggableScrollableSheet(
+            initialChildSize: 0.7,
+            minChildSize: 0.5,
+            maxChildSize: 0.95,
+            builder:
+                (_, controller) => Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(24),
                     ),
-                  ],
+                  ),
+                  child: Column(
+                    children: [
+                      SizedBox(height: 12),
+                      Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.all(16),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.history_outlined,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            SizedBox(width: 8),
+                            Text(
+                              'Recent Transactions',
+                              style: Theme.of(context).textTheme.titleLarge
+                                  ?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: ListView(
+                          controller: controller,
+                          padding: EdgeInsets.all(16),
+                          children: [buildRecentTransactions(d.recent)],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              Expanded(
-                child: ListView(
-                  controller: controller,
-                  padding: EdgeInsets.all(16),
-                  children: [
-                    buildRecentTransactions(d.recent),
-                  ],
-                ),
-              ),
-            ],
           ),
-        ),
-      ),
     );
   }
 

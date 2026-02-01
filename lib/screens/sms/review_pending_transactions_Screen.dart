@@ -19,6 +19,7 @@ import 'package:mudra_manager/screens/reusable/account_display_card.dart'
     show AccountDisplayCard;
 import 'package:mudra_manager/screens/reusable/category_card.dart'
     show CategoryCard;
+import 'package:mudra_manager/theme/app_colors.dart';
 import 'package:mudra_manager/util/dialog_utils.dart';
 import 'package:mudra_manager/util/icon_helper.dart' show IconHelper;
 import 'package:mudra_manager/util/localization_extension.dart';
@@ -80,6 +81,7 @@ class _ReviewPendingTransactionsScreenState
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final ctxt = AppLocalizations.of(context)!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
@@ -248,12 +250,23 @@ class _ReviewPendingTransactionsScreenState
                     child: Container(
                       margin: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                       decoration: BoxDecoration(
-                        color: color.surface,
+                        gradient: LinearGradient(
+                          colors: AppColors.glassGradient(
+                            isIncome ? AppColors.income : AppColors.expense,
+                            isDark,
+                          ),
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
                         borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
+                        border: Border.all(
+                          color: (isIncome ? AppColors.income : AppColors.expense).withValues(alpha: 0.2),
+                          width: 1.5,
+                        ),
+                        boxShadow: const [
                           BoxShadow(
-                            color: color.shadow.withOpacity(0.05),
-                            blurRadius: 10,
+                            color: AppColors.cardShadow,
+                            blurRadius: 8,
                             offset: Offset(0, 4),
                           ),
                         ],

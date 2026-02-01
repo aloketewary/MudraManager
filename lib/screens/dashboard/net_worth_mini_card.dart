@@ -1,11 +1,10 @@
-import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/l10n/app_localizations.dart';
 import 'package:mudra_manager/providers/account_providers.dart';
 import 'package:mudra_manager/screens/reusable/animated_balance.dart';
-import 'package:mudra_manager/screens/transaction/transaction_list_screen.dart';
+import 'package:mudra_manager/theme/app_colors.dart';
 import 'package:mudra_manager/util/localization_extension.dart';
 
 class NetWorthMiniCard extends ConsumerStatefulWidget {
@@ -42,29 +41,33 @@ class _NetWorthMiniCardState extends ConsumerState<NetWorthMiniCard> {
 
   @override
   Widget build(BuildContext context) {
-    final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final ctxt = AppLocalizations.of(context)!;
     double totalBalance = _balanceMap.values.fold(0.0, (sum, value) => sum + value);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Padding(
       padding: EdgeInsets.all(widget.globalPadding),
       child: SizedBox(
-        height: 150,
+        height: 180,
         child: GestureDetector(
           onTap: () {
               HapticFeedback.mediumImpact();
-              {};
             },
           child: Container(
-            // width: 120,
-            padding: const EdgeInsets.all(8.0),
-            // margin: const EdgeInsets.only(right: 8.0),
+            padding: const EdgeInsets.all(16.0),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12.0),
-              color: color.primary,
-              // Light background color
-              border: Border.all(color: color.primary), // Subtle border
+              borderRadius: BorderRadius.circular(16.0),
+              gradient: LinearGradient(
+                colors: AppColors.glassGradient(AppColors.netWorth, isDark),
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              border: Border.all(
+                color: AppColors.netWorth.withValues(alpha: 0.3),
+                width: 1.5,
+              ),
+              boxShadow: AppColors.glassShadow(AppColors.netWorth, isDark),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -72,13 +75,23 @@ class _NetWorthMiniCardState extends ConsumerState<NetWorthMiniCard> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    CircleAvatar(radius: 16, child: Icon(Icons.money, size: 16)),
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppColors.netWorth.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.account_balance_wallet, size: 20, color: AppColors.netWorth),
+                    ),
                     const SizedBox(width: 8.0),
                     Expanded(
                       child: Text(
                         ctxt.dashboard_netWorthTitle.toUpperCase(),
                         textAlign: TextAlign.center,
-                        style: textTheme.labelLarge?.copyWith(color: color.onPrimary),
+                        style: textTheme.labelLarge?.copyWith(
+                          color: AppColors.netWorth,
+                          fontWeight: FontWeight.bold,
+                        ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -88,16 +101,23 @@ class _NetWorthMiniCardState extends ConsumerState<NetWorthMiniCard> {
                   height: 100,
                   child: Stack(
                     alignment: Alignment.centerLeft,
-                    // or whatever aligns best for you
                     children: [
                       Text(
                         ctxt.formatCurrencyWithSign(0, totalBalance),
-                        style: textTheme.titleLarge?.copyWith(color: color.onPrimary.withAlpha(10), fontSize: 80, fontWeight: FontWeight.bold),
+                        style: textTheme.titleLarge?.copyWith(
+                          color: AppColors.white.withAlpha(10),
+                          fontSize: 80,
+                          fontWeight: FontWeight.bold,
+                        ),
                         overflow: TextOverflow.fade,
                       ),
                       AnimatedBalance(
                         value: totalBalance,
-                        style: textTheme.titleLarge?.copyWith(color: color.onPrimary, fontSize: 40, fontWeight: FontWeight.bold),
+                        style: textTheme.titleLarge?.copyWith(
+                          color: AppColors.netWorth,
+                          fontSize: 40,
+                          fontWeight: FontWeight.bold,
+                        ),
                         fixedStringLength: 0,
                         overflow: TextOverflow.fade,
                       ),

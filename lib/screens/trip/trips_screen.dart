@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:mudra_manager/providers/trip_provider.dart';
+import 'package:mudra_manager/theme/app_colors.dart';
 
 class TripsScreen extends ConsumerWidget {
   const TripsScreen({super.key});
@@ -20,18 +21,18 @@ class TripsScreen extends ConsumerWidget {
     return 'Active';
   }
 
-  Color _getStatusColor(String status) {
+  Color _getStatusColor(String status, ColorScheme color) {
     switch (status) {
       case 'Active':
-        return Colors.green;
+        return AppColors.tripActive;
       case 'Upcoming':
-        return Colors.blue;
+        return AppColors.tripUpcoming;
       case 'Past':
-        return Colors.orange;
+        return AppColors.tripPast;
       case 'Completed':
-        return Colors.grey;
+        return AppColors.tripCompleted;
       default:
-        return Colors.grey;
+        return AppColors.tripCompleted;
     }
   }
 
@@ -64,12 +65,18 @@ class TripsScreen extends ConsumerWidget {
                             width: 40,
                             height: 4,
                             decoration: BoxDecoration(
-                              color: Colors.grey[300],
+                              color: color.onSurfaceVariant.withValues(
+                                alpha: 0.3,
+                              ),
                               borderRadius: BorderRadius.circular(2),
                             ),
                           ),
                           SizedBox(height: 24),
-                          Icon(Icons.card_travel, size: 64, color: Colors.teal),
+                          Icon(
+                            Icons.card_travel,
+                            size: 64,
+                            color: color.primary,
+                          ),
                           SizedBox(height: 16),
                           Text(
                             'How it works',
@@ -112,13 +119,15 @@ class TripsScreen extends ConsumerWidget {
                   Container(
                     padding: EdgeInsets.all(32),
                     decoration: BoxDecoration(
-                      color: Colors.teal.withValues(alpha: 0.1),
+                      color: color.surfaceContainerHighest.withValues(
+                        alpha: 0.1,
+                      ),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       Icons.card_travel,
                       size: 64,
-                      color: Colors.teal,
+                      color: color.primary,
                     ),
                   ),
                   SizedBox(height: 24),
@@ -165,15 +174,25 @@ class TripsScreen extends ConsumerWidget {
               final trip = trips[index];
               final duration =
                   trip.endDate.difference(trip.startDate).inDays + 1;
-              final status = _getTripStatus(trip.startDate, trip.endDate, trip.isActive);
-              final statusColor = _getStatusColor(status);
+              final status = _getTripStatus(
+                trip.startDate,
+                trip.endDate,
+                trip.isActive,
+              );
+              final statusColor = _getStatusColor(status, color);
+              final isDark = Theme.of(context).brightness == Brightness.dark;
 
-              return Card(
+              return Container(
                 margin: EdgeInsets.only(bottom: 16),
-                elevation: 0,
-                color: color.surfaceContainerHighest,
-                shape: RoundedRectangleBorder(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: AppColors.glassGradient(statusColor, isDark),
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
                   borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: statusColor.withValues(alpha: 0.3), width: 1.5),
+                  boxShadow: AppColors.glassShadow(statusColor, isDark),
                 ),
                 child: InkWell(
                   onTap: () {
@@ -182,7 +201,7 @@ class TripsScreen extends ConsumerWidget {
                   },
                   borderRadius: BorderRadius.circular(20),
                   child: Padding(
-                    padding: EdgeInsets.all(20),
+                    padding: EdgeInsets.all(8),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -191,15 +210,11 @@ class TripsScreen extends ConsumerWidget {
                             Container(
                               padding: EdgeInsets.all(16),
                               decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [statusColor, statusColor.withValues(alpha: 0.9)],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
+                                color: AppColors.white,
                                 borderRadius: BorderRadius.circular(16),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: statusColor.withValues(alpha: 0.3),
+                                    color: statusColor.withValues(alpha: 0.2),
                                     blurRadius: 8,
                                     offset: Offset(0, 4),
                                   ),
@@ -209,7 +224,7 @@ class TripsScreen extends ConsumerWidget {
                                 trip.isActive
                                     ? Icons.flight_takeoff
                                     : Icons.check_circle,
-                                color: Colors.white,
+                                color: statusColor,
                                 size: 28,
                               ),
                             ),
@@ -222,6 +237,7 @@ class TripsScreen extends ConsumerWidget {
                                     trip.name,
                                     style: textTheme.titleLarge?.copyWith(
                                       fontWeight: FontWeight.bold,
+                                      color: AppColors.textColor(isDark),
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
@@ -232,13 +248,13 @@ class TripsScreen extends ConsumerWidget {
                                       Icon(
                                         Icons.calendar_today,
                                         size: 14,
-                                        color: color.onSurfaceVariant,
+                                        color: AppColors.textColor(isDark).withValues(alpha: 0.7),
                                       ),
                                       SizedBox(width: 4),
                                       Text(
                                         '${DateFormat.MMMd().format(trip.startDate)} - ${DateFormat.MMMd().format(trip.endDate)}',
                                         style: textTheme.bodySmall?.copyWith(
-                                          color: color.onSurfaceVariant,
+                                          color: AppColors.textColor(isDark).withValues(alpha: 0.7),
                                         ),
                                       ),
                                       SizedBox(width: 8),
@@ -248,15 +264,13 @@ class TripsScreen extends ConsumerWidget {
                                           vertical: 2,
                                         ),
                                         decoration: BoxDecoration(
-                                          color: color.primaryContainer,
-                                          borderRadius: BorderRadius.circular(
-                                            4,
-                                          ),
+                                          color: statusColor.withValues(alpha: 0.2),
+                                          borderRadius: BorderRadius.circular(4),
                                         ),
                                         child: Text(
                                           '$duration days',
                                           style: textTheme.labelSmall?.copyWith(
-                                            color: color.onPrimaryContainer,
+                                            color: AppColors.textColor(isDark).withValues(alpha: 0.7),
                                             fontWeight: FontWeight.w600,
                                           ),
                                         ),
@@ -267,6 +281,7 @@ class TripsScreen extends ConsumerWidget {
                               ),
                             ),
                             Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 Container(
                                   padding: EdgeInsets.symmetric(
@@ -274,48 +289,30 @@ class TripsScreen extends ConsumerWidget {
                                     vertical: 4,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: statusColor.withValues(
-                                      alpha: 0.2,
-                                    ),
-                                    borderRadius: BorderRadius.circular(
-                                      8,
-                                    ),
+                                    color: statusColor.withValues(alpha: 0.2),
+                                    borderRadius: BorderRadius.circular(8),
                                     border: Border.all(
-                                      color: statusColor.withValues(
-                                        alpha: 0.3,
-                                      ),
+                                      color: statusColor.withValues(alpha: 0.3),
                                     ),
                                   ),
                                   child: Text(
                                     status.toUpperCase(),
-                                    style: textTheme.labelSmall
-                                        ?.copyWith(
-                                          color: statusColor,
-                                          fontWeight: FontWeight.bold,
-                                          letterSpacing: 0.5,
-                                          fontSize: 9,
-                                        ),
+                                    style: textTheme.labelSmall?.copyWith(
+                                      color: AppColors.textColor(isDark).withValues(alpha: 0.7),
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 0.5,
+                                      fontSize: 9,
+                                    ),
                                   ),
                                 ),
                                 SizedBox(height: 8),
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: color.primaryContainer.withValues(alpha: 0.5),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: IconButton(
-                                    icon: Icon(Icons.edit_outlined, size: 18),
-                                    color: color.primary,
-                                    onPressed: () {
-                                      HapticFeedback.mediumImpact();
-                                      context.push('/edit-trip', extra: trip.id);
-                                    },
-                                    constraints: BoxConstraints(
-                                      minWidth: 36,
-                                      minHeight: 36,
-                                    ),
-                                    padding: EdgeInsets.all(6),
-                                  ),
+                                IconButton(
+                                  icon: Icon(Icons.edit_outlined, size: 18),
+                                  color: color.primary,
+                                  onPressed: () {
+                                    HapticFeedback.mediumImpact();
+                                    context.push('/edit-trip', extra: trip.id);
+                                  },
                                 ),
                               ],
                             ),

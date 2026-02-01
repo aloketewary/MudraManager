@@ -32,11 +32,12 @@ class GoalMiniCard extends ConsumerWidget {
                   color: color.primary,
                 ),
               ),
-              IconButton.filledTonal(
-                onPressed: () {
-                  context.push('/goal-screen');
-                },
-                icon: const Icon(Icons.open_in_new, size: 20),
+              Hero(
+                tag: 'goalExpandHero',
+                child: TextButton(
+                  onPressed: () => context.push('/goal-screen'),
+                  child: const Text('View All'),
+                ),
               ),
             ],
           ),

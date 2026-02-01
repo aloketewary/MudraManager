@@ -33,7 +33,7 @@ class GoalScreen extends ConsumerWidget {
               return GoalCard(
                 goal: goal,
                 onTap: () {
-                  context.push('/add-goal');
+                  context.push('/add-goal', extra: {'goal': goal});
                 },
               );
             },
@@ -44,7 +44,7 @@ class GoalScreen extends ConsumerWidget {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: FloatingActionButton.extended(
-        heroTag: 'addGoalHero',
+        heroTag: 'goalExpandHero',
         onPressed: () {
           HapticFeedback.mediumImpact();
           context.push('/add-goal');

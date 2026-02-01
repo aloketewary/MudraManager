@@ -8,7 +8,9 @@ import 'package:mudra_manager/providers/category_provider.dart';
 import 'package:mudra_manager/providers/isar_provider.dart';
 import 'package:mudra_manager/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/providers/user_profile_provider.dart';
-import 'package:mudra_manager/theme/mudra_manager_avatar_icons.dart' show MudraManagerAvatarIcons;
+import 'package:mudra_manager/theme/app_colors.dart';
+import 'package:mudra_manager/theme/mudra_manager_avatar_icons.dart'
+    show MudraManagerAvatarIcons;
 import 'package:mudra_manager/util/snackbar_service.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -20,229 +22,423 @@ class ProfileScreen extends ConsumerWidget {
     final profileAsync = ref.watch(userProfileProvider);
     final accountsAsync = ref.watch(accountsProvider);
     final categoriesAsync = ref.watch(categoryListProvider);
-    final budgetsAsync = ref.watch(budgetServiceProvider).getFilterBudget(DateTime.now());
+    final budgetsAsync = ref
+        .watch(budgetServiceProvider)
+        .getFilterBudget(DateTime.now());
     var textTheme = Theme.of(context).textTheme;
     var color = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return profileAsync.when(
-      data: (profile) => CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 200,
-            pinned: true,
-            leading: SizedBox.shrink(),
-            flexibleSpace: LayoutBuilder(
-              builder: (context, constraints) {
-                final isCollapsed = constraints.biggest.height <= kToolbarHeight + MediaQuery.of(context).padding.top + 20;
-                return FlexibleSpaceBar(
-                  centerTitle: false,
-                  titlePadding: EdgeInsets.only(left: 16, bottom: 16),
-                  title: isCollapsed
-                      ? Row(
-                          children: [
-                            CircleAvatar(
-                              radius: 16,
-                              backgroundColor: Colors.white.withValues(alpha: 0.2),
-                              child: Icon(iconDataList[profile?.avatarIndex ?? 0], size: 16, color: Colors.white),
-                            ),
-                            SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                profile?.name ?? 'Unknown',
-                                style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        )
-                      : SizedBox.shrink(),
-                  background: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [color.primary.withValues(alpha: 0.8), color.primary],
-                      ),
-                    ),
-                    child: SafeArea(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Stack(
-                            children: [
-                              Container(
-                                padding: EdgeInsets.all(4),
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  gradient: LinearGradient(
-                                    colors: [Colors.white.withValues(alpha: 0.3), Colors.white.withValues(alpha: 0.1)],
-                                  ),
-                                ),
-                                child: CircleAvatar(
-                                  radius: 40,
-                                  backgroundColor: Colors.white.withValues(alpha: 0.2),
-                                  child: Icon(iconDataList[profile?.avatarIndex ?? 0], size: 40, color: Colors.white),
-                                ),
-                              ),
-                              Positioned(
-                                right: 0,
-                                bottom: 0,
-                                child: GestureDetector(
-                                  onTap: () {
-                                    HapticFeedback.mediumImpact();
-                                    context.push('/edit-profile');
-                                  },
-                                  child: Container(
-                                    padding: EdgeInsets.all(6),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      shape: BoxShape.circle,
-                                      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 4, offset: Offset(0, 2))],
+      data:
+          (profile) => CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                expandedHeight: 200,
+                pinned: true,
+                leading: SizedBox.shrink(),
+                flexibleSpace: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isCollapsed =
+                        constraints.biggest.height <=
+                        kToolbarHeight +
+                            MediaQuery.of(context).padding.top +
+                            20;
+                    return FlexibleSpaceBar(
+                      centerTitle: false,
+                      titlePadding: EdgeInsets.only(left: 16, bottom: 16),
+                      title:
+                          isCollapsed
+                              ? Row(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 16,
+                                    backgroundColor:
+                                        isDark
+                                            ? AppColors.white
+                                            : AppColors.dark,
+                                    child: Icon(
+                                      iconDataList[profile?.avatarIndex ?? 0],
+                                      size: 16,
+                                      color:
+                                          isDark
+                                              ? AppColors.dark
+                                              : AppColors.white,
                                     ),
-                                    child: Icon(Icons.edit, size: 14, color: color.primary),
                                   ),
-                                ),
-                              ),
+                                  SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      profile?.name ?? 'Unknown',
+                                      style: textTheme.titleLarge?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.textColor(isDark),
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              )
+                              : SizedBox.shrink(),
+                      background: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              color.primary.withValues(alpha: 0.8),
+                              color.primary,
                             ],
                           ),
-                          SizedBox(height: 12),
-                          Text(profile?.name ?? 'Unknown', style: textTheme.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
-                          SizedBox(height: 4),
-                          Text(profile?.email ?? '', style: textTheme.bodySmall?.copyWith(color: Colors.white.withValues(alpha: 0.8))),
-                          if (profile?.phone != null && profile!.phone!.isNotEmpty) ...[
-                            SizedBox(height: 2),
-                            Text(profile.phone!, style: textTheme.bodySmall?.copyWith(color: Colors.white.withValues(alpha: 0.8))),
-                          ],
+                        ),
+                        child: SafeArea(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Stack(
+                                children: [
+                                  Container(
+                                    padding: EdgeInsets.all(4),
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          (isDark
+                                                  ? AppColors.white
+                                                  : AppColors.dark)
+                                              .withValues(alpha: 0.3),
+                                          (isDark
+                                                  ? AppColors.white
+                                                  : AppColors.dark)
+                                              .withValues(alpha: 0.1),
+                                        ],
+                                      ),
+                                    ),
+                                    child: CircleAvatar(
+                                      radius: 40,
+                                      backgroundColor:
+                                          isDark
+                                              ? AppColors.white
+                                              : AppColors.dark,
+                                      child: Icon(
+                                        iconDataList[profile?.avatarIndex ?? 0],
+                                        size: 40,
+                                        color:
+                                            isDark
+                                                ? AppColors.dark
+                                                : AppColors.white,
+                                      ),
+                                    ),
+                                  ),
+                                  Positioned(
+                                    right: 0,
+                                    bottom: 0,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        HapticFeedback.mediumImpact();
+                                        context.push('/edit-profile');
+                                      },
+                                      child: Container(
+                                        padding: EdgeInsets.all(6),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          shape: BoxShape.circle,
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black.withValues(
+                                                alpha: 0.2,
+                                              ),
+                                              blurRadius: 4,
+                                              offset: Offset(0, 2),
+                                            ),
+                                          ],
+                                        ),
+                                        child: Icon(
+                                          Icons.edit,
+                                          size: 14,
+                                          color: color.primary,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 12),
+                              Text(
+                                profile?.name ?? 'Unknown',
+                                style: textTheme.titleLarge?.copyWith(
+                                  color: AppColors.textColor(isDark),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                profile?.email ?? '',
+                                style: textTheme.bodySmall?.copyWith(
+                                  color: AppColors.textColor(isDark).withValues(alpha: 0.8),
+                                ),
+                              ),
+                              if (profile?.phone != null &&
+                                  profile!.phone!.isNotEmpty) ...[
+                                SizedBox(height: 2),
+                                Text(
+                                  profile.phone!,
+                                  style: textTheme.bodySmall?.copyWith(
+                                    color: AppColors.textColor(isDark).withValues(alpha: 0.8),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              SliverPadding(
+                padding: EdgeInsets.all(16),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    SizedBox(
+                      height: 110,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: _buildStatCard(
+                              context,
+                              Icons.account_balance_wallet,
+                              accountsAsync.when(
+                                data: (accounts) => accounts.length.toString(),
+                                loading: () => '...',
+                                error: (_, __) => '0',
+                              ),
+                              'Accounts',
+                            ),
+                          ),
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: _buildStatCard(
+                              context,
+                              Icons.category,
+                              categoriesAsync.when(
+                                data:
+                                    (categories) =>
+                                        categories.length.toString(),
+                                loading: () => '...',
+                                error: (_, __) => '0',
+                              ),
+                              'Categories',
+                            ),
+                          ),
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: FutureBuilder(
+                              future: budgetsAsync,
+                              builder:
+                                  (context, snapshot) => _buildStatCard(
+                                    context,
+                                    Icons.pie_chart,
+                                    snapshot.hasData
+                                        ? (snapshot.data as List).length
+                                            .toString()
+                                        : '...',
+                                    'Budgets',
+                                  ),
+                            ),
+                          ),
                         ],
                       ),
                     ),
-                  ),
-                );
-              },
-            ),
-          ),
-          SliverPadding(
-            padding: EdgeInsets.all(16),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                SizedBox(
-                  height: 110,
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: _buildStatCard(
-                          context,
-                          Icons.account_balance_wallet,
-                          accountsAsync.when(data: (accounts) => accounts.length.toString(), loading: () => '...', error: (_, __) => '0'),
-                          'Accounts',
-                        ),
+                    SizedBox(height: 24),
+                    _buildSectionHeader(context, 'Management'),
+                    SizedBox(height: 16),
+                    _buildSettingCard(
+                      context,
+                      Icons.receipt_long_outlined,
+                      'Bills',
+                      'Manage recurring bills',
+                      () {
+                        HapticFeedback.mediumImpact();
+                        context.push('/bills');
+                      },
+                    ),
+                    SizedBox(height: 12),
+                    _buildSettingCard(
+                      context,
+                      Icons.account_balance_wallet_outlined,
+                      'Accounts',
+                      'Manage your accounts',
+                      () {
+                        HapticFeedback.mediumImpact();
+                        context.push('/manage-accounts');
+                      },
+                    ),
+                    SizedBox(height: 12),
+                    _buildSettingCard(
+                      context,
+                      Icons.category_outlined,
+                      'Categories',
+                      'Manage your categories',
+                      () {
+                        HapticFeedback.mediumImpact();
+                        context.push('/manage-categories');
+                      },
+                    ),
+                    SizedBox(height: 32),
+                    _buildSectionHeader(context, 'Account & Data'),
+                    SizedBox(height: 16),
+                    _buildSettingCard(
+                      context,
+                      Icons.account_balance_wallet_outlined,
+                      'Low Balance Threshold',
+                      '₹${SharedPrefsUtil.instance.getLowBalanceThreshold().toStringAsFixed(0)}',
+                      () => _showThresholdBottomSheet(
+                        context,
+                        ref,
+                        color,
+                        textTheme,
                       ),
-                      SizedBox(width: 12),
-                      Expanded(
-                        child: _buildStatCard(
-                          context,
-                          Icons.category,
-                          categoriesAsync.when(data: (categories) => categories.length.toString(), loading: () => '...', error: (_, __) => '0'),
-                          'Categories',
-                        ),
+                    ),
+                    SizedBox(height: 12),
+                    _buildSettingCard(
+                      context,
+                      Icons.backup,
+                      'Backup & Restore',
+                      'Manage your data',
+                      () {
+                        HapticFeedback.mediumImpact();
+                        context.push('/backup-restore');
+                      },
+                    ),
+                    SizedBox(height: 32),
+                    _buildSectionHeader(context, 'Preferences'),
+                    SizedBox(height: 16),
+                    _buildSettingCard(
+                      context,
+                      Icons.notifications_outlined,
+                      'Notifications',
+                      'Daily & weekly summaries',
+                      () {
+                        HapticFeedback.mediumImpact();
+                        context.push('/notification-settings');
+                      },
+                    ),
+                    SizedBox(height: 12),
+                    _buildSettingCard(
+                      context,
+                      Icons.settings,
+                      'App Settings',
+                      'Customize your experience',
+                      () {
+                        HapticFeedback.mediumImpact();
+                        context.push('/app-settings');
+                      },
+                    ),
+                    SizedBox(height: 12),
+                    _buildSettingCard(
+                      context,
+                      Icons.lock,
+                      'Security',
+                      'PIN or Fingerprint',
+                      () {
+                        HapticFeedback.mediumImpact();
+                        context.push('/security');
+                      },
+                    ),
+                    SizedBox(height: 12),
+                    _buildSettingCard(
+                      context,
+                      Icons.sms,
+                      'SMS Import',
+                      'Auto-import transactions',
+                      () {
+                        HapticFeedback.mediumImpact();
+                        context.push('/sms-import');
+                      },
+                    ),
+                    SizedBox(height: 32),
+                    _buildSectionHeader(context, 'About'),
+                    SizedBox(height: 16),
+                    _buildSettingCard(
+                      context,
+                      Icons.info_outline,
+                      'About App',
+                      'Version & Info',
+                      () {
+                        HapticFeedback.mediumImpact();
+                        context.push('/about');
+                      },
+                    ),
+                    SizedBox(height: 32),
+                    _buildSectionHeader(context, 'Danger Zone'),
+                    SizedBox(height: 16),
+                    _buildSettingCard(
+                      context,
+                      Icons.logout,
+                      'Logout',
+                      'Clear all data',
+                      () => _showLogoutBottomSheet(
+                        context,
+                        ref,
+                        color,
+                        textTheme,
                       ),
-                      SizedBox(width: 12),
-                      Expanded(
-                        child: FutureBuilder(
-                          future: budgetsAsync,
-                          builder: (context, snapshot) => _buildStatCard(context, Icons.pie_chart, snapshot.hasData ? (snapshot.data as List).length.toString() : '...', 'Budgets'),
-                        ),
-                      ),
-                    ],
-                  ),
+                      isDestructive: true,
+                    ),
+                    SizedBox(height: 80),
+                  ]),
                 ),
-                SizedBox(height: 24),
-                _buildSectionHeader(context, 'Management'),
-                SizedBox(height: 12),
-                _buildSettingCard(context, Icons.receipt_long_outlined, 'Bills', 'Manage recurring bills', () {
-                  HapticFeedback.mediumImpact();
-                  context.push('/bills');
-                }),
-                SizedBox(height: 8),
-                _buildSettingCard(context, Icons.account_balance_wallet_outlined, 'Accounts', 'Manage your accounts', () {
-                  HapticFeedback.mediumImpact();
-                  context.push('/manage-accounts');
-                }),
-                SizedBox(height: 8),
-                _buildSettingCard(context, Icons.category_outlined, 'Categories', 'Manage your categories', () {
-                  HapticFeedback.mediumImpact();
-                  context.push('/manage-categories');
-                }),
-                SizedBox(height: 24),
-                _buildSectionHeader(context, 'Account & Data'),
-                SizedBox(height: 12),
-                _buildSettingCard(context, Icons.account_balance_wallet_outlined, 'Low Balance Threshold', '₹${SharedPrefsUtil.instance.getLowBalanceThreshold().toStringAsFixed(0)}', () => _showThresholdBottomSheet(context, ref, color, textTheme)),
-                SizedBox(height: 8),
-                _buildSettingCard(context, Icons.backup, 'Backup & Restore', 'Manage your data', () {
-                  HapticFeedback.mediumImpact();
-                  context.push('/backup-restore');
-                }),
-                SizedBox(height: 24),
-                _buildSectionHeader(context, 'Preferences'),
-                SizedBox(height: 12),
-                _buildSettingCard(context, Icons.notifications_outlined, 'Notifications', 'Daily & weekly summaries', () {
-                  HapticFeedback.mediumImpact();
-                  context.push('/notification-settings');
-                }),
-                SizedBox(height: 8),
-                _buildSettingCard(context, Icons.settings, 'App Settings', 'Customize your experience', () {
-                  HapticFeedback.mediumImpact();
-                  context.push('/app-settings');
-                }),
-                SizedBox(height: 8),
-                _buildSettingCard(context, Icons.lock, 'Security', 'PIN or Fingerprint', () {
-                  HapticFeedback.mediumImpact();
-                  context.push('/security');
-                }),
-                SizedBox(height: 8),
-                _buildSettingCard(context, Icons.sms, 'SMS Import', 'Auto-import transactions', () {
-                  HapticFeedback.mediumImpact();
-                  context.push('/sms-import');
-                }),
-                SizedBox(height: 24),
-                _buildSectionHeader(context, 'About'),
-                SizedBox(height: 12),
-                _buildSettingCard(context, Icons.info_outline, 'About App', 'Version & Info', () {
-                  HapticFeedback.mediumImpact();
-                  context.push('/about');
-                }),
-                SizedBox(height: 24),
-                _buildSectionHeader(context, 'Danger Zone'),
-                SizedBox(height: 12),
-                _buildSettingCard(context, Icons.logout, 'Logout', 'Clear all data', () => _showLogoutBottomSheet(context, ref, color, textTheme), isDestructive: true),
-                SizedBox(height: 80),
-              ]),
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
       loading: () => Center(child: CircularProgressIndicator()),
       error: (e, _) => Center(child: Text('Error: $e')),
     );
   }
 
-  Widget _buildStatCard(BuildContext context, IconData icon, String value, String label) {
+  Widget _buildStatCard(
+    BuildContext context,
+    IconData icon,
+    String value,
+    String label,
+  ) {
     final textTheme = Theme.of(context).textTheme;
     final color = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final gradientColors = AppColors.glassGradient(color.primary, isDark);
     return Container(
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.surfaceContainerHighest,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: gradientColors,
+        ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.outlineVariant.withValues(alpha: 0.5)),
+        border: Border.all(
+          color: color.primary.withValues(alpha: 0.3),
+          width: 1.5,
+        ),
+        boxShadow: AppColors.glassShadow(color.primary, isDark),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(icon, color: color.primary, size: 24),
           SizedBox(height: 4),
-          Text(value, style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-          Text(label, style: textTheme.labelSmall?.copyWith(color: color.onSurfaceVariant), overflow: TextOverflow.ellipsis),
+          Text(
+            value,
+            style: textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: color.primary,
+            ),
+          ),
+          Text(
+            label,
+            style: textTheme.labelSmall?.copyWith(color: color.primary),
+            overflow: TextOverflow.ellipsis,
+          ),
         ],
       ),
     );
@@ -251,14 +447,32 @@ class ProfileScreen extends ConsumerWidget {
   Widget _buildSectionHeader(BuildContext context, String title) {
     final textTheme = Theme.of(context).textTheme;
     final color = Theme.of(context).colorScheme;
-    return Text(title, style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: color.onSurfaceVariant));
+    return Padding(
+      padding: EdgeInsets.only(left: 4),
+      child: Text(
+        title,
+        style: textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.w700,
+          color: color.primary,
+          letterSpacing: 0.5,
+        ),
+      ),
+    );
   }
 
-  Widget _buildSettingCard(BuildContext context, IconData icon, String title, String subtitle, VoidCallback onTap, {bool isDestructive = false}) {
+  Widget _buildSettingCard(
+    BuildContext context,
+    IconData icon,
+    String title,
+    String subtitle,
+    VoidCallback onTap, {
+    bool isDestructive = false,
+  }) {
     final textTheme = Theme.of(context).textTheme;
     final color = Theme.of(context).colorScheme;
-    final cardColor = isDestructive ? color.errorContainer : color.surfaceContainerHighest;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final iconColor = isDestructive ? color.error : color.primary;
+    final gradientColors = AppColors.glassGradient(iconColor, isDark);
 
     return GestureDetector(
       onTap: () {
@@ -266,55 +480,131 @@ class ProfileScreen extends ConsumerWidget {
         onTap();
       },
       child: Container(
-        padding: EdgeInsets.all(16),
-        decoration: BoxDecoration(color: cardColor, borderRadius: BorderRadius.circular(16)),
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: gradientColors,
+          ),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: iconColor.withValues(alpha: 0.3),
+            width: 1.5,
+          ),
+          boxShadow: AppColors.glassShadow(iconColor, isDark),
+        ),
         child: Row(
           children: [
             Container(
-              padding: EdgeInsets.all(12),
-              decoration: BoxDecoration(color: iconColor.withValues(alpha: 0.1), shape: BoxShape.circle),
-              child: Icon(icon, color: iconColor, size: 24),
+              padding: EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: color.surface,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: iconColor.withValues(alpha: 0.15),
+                    blurRadius: 12,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Icon(icon, color: iconColor, size: 26),
             ),
-            SizedBox(width: 16),
+            SizedBox(width: 18),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: isDestructive ? color.onErrorContainer : color.onSurface)),
-                  SizedBox(height: 2),
-                  Text(subtitle, style: textTheme.bodySmall?.copyWith(color: isDestructive ? color.onErrorContainer.withValues(alpha: 0.7) : color.onSurfaceVariant)),
+                  Text(
+                    title,
+                    style: textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: iconColor,
+                      letterSpacing: -0.2,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: iconColor.withValues(alpha: 0.75),
+                      fontSize: 13,
+                    ),
+                  ),
                 ],
               ),
             ),
-            Icon(Icons.chevron_right, color: isDestructive ? color.onErrorContainer : color.onSurfaceVariant),
+            Icon(
+              Icons.arrow_forward_ios_rounded,
+              color: iconColor.withValues(alpha: 0.5),
+              size: 18,
+            ),
           ],
         ),
       ),
     );
   }
 
-  void _showThresholdBottomSheet(BuildContext context, WidgetRef ref, ColorScheme color, TextTheme textTheme) async {
+  void _showThresholdBottomSheet(
+    BuildContext context,
+    WidgetRef ref,
+    ColorScheme color,
+    TextTheme textTheme,
+  ) async {
     final prefsService = SharedPrefsUtil.instance;
     final currentThreshold = prefsService.getLowBalanceThreshold();
-    final controller = TextEditingController(text: currentThreshold.toStringAsFixed(2));
+    final controller = TextEditingController(
+      text: currentThreshold.toStringAsFixed(2),
+    );
 
     final newThreshold = await showModalBottomSheet<double>(
       context: context,
       isScrollControlled: true,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (ctx) {
         return Padding(
-          padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom, left: 24, right: 24, top: 16),
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(ctx).viewInsets.bottom,
+            left: 24,
+            right: 24,
+            top: 16,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(width: 40, height: 4, decoration: BoxDecoration(color: color.onSurfaceVariant.withValues(alpha: 0.4), borderRadius: BorderRadius.circular(2))),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: color.onSurfaceVariant.withValues(alpha: 0.4),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
               SizedBox(height: 24),
-              Icon(Icons.account_balance_wallet_outlined, size: 48, color: color.primary),
+              Icon(
+                Icons.account_balance_wallet_outlined,
+                size: 48,
+                color: color.primary,
+              ),
               SizedBox(height: 16),
-              Text('Set Low Balance Threshold', style: textTheme.titleLarge?.copyWith(color: color.onSurface, fontWeight: FontWeight.bold)),
+              Text(
+                'Set Low Balance Threshold',
+                style: textTheme.titleLarge?.copyWith(
+                  color: color.onSurface,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               SizedBox(height: 8),
-              Text('Get notified when account balance falls below this amount', style: textTheme.bodyMedium?.copyWith(color: color.onSurfaceVariant), textAlign: TextAlign.center),
+              Text(
+                'Get notified when account balance falls below this amount',
+                style: textTheme.bodyMedium?.copyWith(
+                  color: color.onSurfaceVariant,
+                ),
+                textAlign: TextAlign.center,
+              ),
               SizedBox(height: 24),
               TextField(
                 controller: controller,
@@ -323,9 +613,13 @@ class ProfileScreen extends ConsumerWidget {
                 decoration: InputDecoration(
                   labelText: 'Threshold Amount',
                   prefixText: '₹ ',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   filled: true,
-                  fillColor: color.surfaceContainerHighest.withValues(alpha: 0.3),
+                  fillColor: color.surfaceContainerHighest.withValues(
+                    alpha: 0.3,
+                  ),
                 ),
               ),
               SizedBox(height: 24),
@@ -337,7 +631,12 @@ class ProfileScreen extends ConsumerWidget {
                         HapticFeedback.mediumImpact();
                         context.pop();
                       },
-                      style: OutlinedButton.styleFrom(padding: EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                      style: OutlinedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
                       child: Text('Cancel'),
                     ),
                   ),
@@ -348,7 +647,12 @@ class ProfileScreen extends ConsumerWidget {
                         final value = double.tryParse(controller.text.trim());
                         if (value != null) context.pop(value);
                       },
-                      style: FilledButton.styleFrom(padding: EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                      style: FilledButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
                       child: Text('Save'),
                     ),
                   ),
@@ -363,27 +667,54 @@ class ProfileScreen extends ConsumerWidget {
 
     if (newThreshold != null && context.mounted) {
       prefsService.setLowBalanceThreshold(newThreshold);
-      SnackbarService.success('Threshold updated to ₹${newThreshold.toStringAsFixed(2)}');
+      SnackbarService.success(
+        'Threshold updated to ₹${newThreshold.toStringAsFixed(2)}',
+      );
     }
   }
 
-  void _showLogoutBottomSheet(BuildContext context, WidgetRef ref, ColorScheme color, TextTheme textTheme) {
+  void _showLogoutBottomSheet(
+    BuildContext context,
+    WidgetRef ref,
+    ColorScheme color,
+    TextTheme textTheme,
+  ) {
     showModalBottomSheet(
       context: context,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (ctx) {
         return Padding(
           padding: EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(width: 40, height: 4, decoration: BoxDecoration(color: color.onSurfaceVariant.withValues(alpha: 0.4), borderRadius: BorderRadius.circular(2))),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: color.onSurfaceVariant.withValues(alpha: 0.4),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
               SizedBox(height: 24),
               Icon(Icons.logout, size: 48, color: Colors.redAccent),
               SizedBox(height: 16),
-              Text('Logout', style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+              Text(
+                'Logout',
+                style: textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               SizedBox(height: 8),
-              Text('Are you sure you want to logout? All data will be cleared.', style: textTheme.bodyMedium?.copyWith(color: color.onSurfaceVariant), textAlign: TextAlign.center),
+              Text(
+                'Are you sure you want to logout? All data will be cleared.',
+                style: textTheme.bodyMedium?.copyWith(
+                  color: color.onSurfaceVariant,
+                ),
+                textAlign: TextAlign.center,
+              ),
               SizedBox(height: 24),
               Row(
                 children: [
@@ -393,7 +724,12 @@ class ProfileScreen extends ConsumerWidget {
                         HapticFeedback.mediumImpact();
                         context.pop();
                       },
-                      style: OutlinedButton.styleFrom(padding: EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                      style: OutlinedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
                       child: Text('Cancel'),
                     ),
                   ),
@@ -401,12 +737,19 @@ class ProfileScreen extends ConsumerWidget {
                   Expanded(
                     child: FilledButton(
                       onPressed: () async {
-                        final isar = await ref.read(isarServiceProvider).getInstance();
+                        final isar =
+                            await ref.read(isarServiceProvider).getInstance();
                         await isar.writeTxn(() async => await isar.clear());
                         SharedPrefsUtil.instance.clear();
                         if (ctx.mounted) ctx.go('/onboarding');
                       },
-                      style: FilledButton.styleFrom(padding: EdgeInsets.symmetric(vertical: 16), backgroundColor: Colors.redAccent, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                      style: FilledButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        backgroundColor: Colors.redAccent,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
                       child: Text('Logout'),
                     ),
                   ),

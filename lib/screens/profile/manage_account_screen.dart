@@ -6,8 +6,7 @@ import 'package:mudra_manager/db/models/account.dart'
     show Account, GetAccountCollection;
 import 'package:mudra_manager/providers/account_providers.dart';
 import 'package:mudra_manager/providers/isar_provider.dart';
-import 'package:mudra_manager/screens/profile/account_form.dart'
-    show AccountForm;
+import 'package:mudra_manager/theme/app_colors.dart';
 import 'package:mudra_manager/util/account_type_extension.dart';
 import 'package:mudra_manager/util/dialog_utils.dart';
 import 'package:mudra_manager/util/snackbar_service.dart';
@@ -46,6 +45,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
     var color = Theme.of(context).colorScheme;
     final accountsAsync = ref.watch(accountsProvider);
     var textTheme = Theme.of(context).textTheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
@@ -75,6 +75,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
             );
           }
           return ListView.builder(
+            padding: EdgeInsets.all(16),
             itemCount: accounts.length + 1,
             itemBuilder: (context, index) {
               if (accounts.length != index) {
@@ -82,6 +83,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
                 return _AccountListCard(
                   account: account,
                   balance: _balanceMap[account.id]?.toStringAsFixed(2) ?? '0.0',
+                  isDark: isDark,
                   onArchive: () {
                     if (accounts.length == 1) {
                       SnackbarService.warning(
@@ -202,6 +204,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
 class _AccountListCard extends StatelessWidget {
   final Account account;
   final String balance;
+  final bool isDark;
   final VoidCallback onEdit;
   final VoidCallback onArchive;
   final VoidCallback onRemove;
@@ -209,6 +212,7 @@ class _AccountListCard extends StatelessWidget {
   const _AccountListCard({
     required this.account,
     required this.balance,
+    required this.isDark,
     required this.onEdit,
     required this.onArchive,
     required this.onRemove,
@@ -219,23 +223,19 @@ class _AccountListCard extends StatelessWidget {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final accountColor = Color(account.colorValue ?? Colors.blue.value);
+    final gradientColors = AppColors.glassGradient(accountColor, isDark);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [accountColor, accountColor.withValues(alpha: 0.8)],
+          colors: gradientColors,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: accountColor.withValues(alpha: 0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: accountColor.withValues(alpha: 0.3), width: 1.5),
+        boxShadow: AppColors.glassShadow(accountColor, isDark),
       ),
       child: Material(
         color: Colors.transparent,
@@ -243,22 +243,23 @@ class _AccountListCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           onTap: onEdit,
           child: Padding(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    shape: BoxShape.circle,
+                    color: color.surface,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [BoxShadow(color: accountColor.withValues(alpha: 0.15), blurRadius: 12, offset: Offset(0, 4))],
                   ),
                   child: Icon(
                     account.accountType.icon,
-                    color: Colors.white,
-                    size: 24,
+                    color: accountColor,
+                    size: 26,
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 18),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -266,16 +267,18 @@ class _AccountListCard extends StatelessWidget {
                       Text(
                         account.name,
                         style: textTheme.titleMedium?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
+                          color: accountColor,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: -0.2,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         '•••• ${account.accountNumber ?? "XXXX"}',
-                        style: textTheme.bodySmall?.copyWith(
-                          color: Colors.white.withValues(alpha: 0.8),
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: accountColor.withValues(alpha: 0.75),
                           letterSpacing: 2,
+                          fontSize: 13,
                         ),
                       ),
                     ],
@@ -287,7 +290,7 @@ class _AccountListCard extends StatelessWidget {
                     Text(
                       balance,
                       style: textTheme.titleLarge?.copyWith(
-                        color: Colors.white,
+                        color: accountColor,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -297,7 +300,7 @@ class _AccountListCard extends StatelessWidget {
                       child: PopupMenuButton<String>(
                         icon: Icon(
                           Icons.more_horiz,
-                          color: Colors.white.withValues(alpha: 0.9),
+                          color: accountColor.withValues(alpha: 0.7),
                         ),
                         padding: EdgeInsets.zero,
                         onSelected: (value) {

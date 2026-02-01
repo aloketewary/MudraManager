@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/service/notification_service.dart';
 import 'package:mudra_manager/service/summary_scheduler.dart';
+import 'package:mudra_manager/theme/app_colors.dart';
 import 'package:mudra_manager/util/snackbar_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -152,6 +153,8 @@ class _NotificationSettingsScreenState extends ConsumerState<NotificationSetting
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final gradientColors = AppColors.glassGradient(color.primary, isDark);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Notification Settings')),
@@ -161,16 +164,23 @@ class _NotificationSettingsScreenState extends ConsumerState<NotificationSetting
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: color.surfaceContainerHighest,
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: gradientColors,
+              ),
               borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: color.primary.withValues(alpha: 0.3), width: 1.5),
+              boxShadow: AppColors.glassShadow(color.primary, isDark),
             ),
             child: Row(
               children: [
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: color.primary.withValues(alpha: 0.1),
+                    color: AppColors.white,
                     shape: BoxShape.circle,
+                    boxShadow: [BoxShadow(color: color.primary.withValues(alpha: 0.2), blurRadius: 8, offset: Offset(0, 2))],
                   ),
                   child: Icon(Icons.today, color: color.primary, size: 24),
                 ),
@@ -179,9 +189,9 @@ class _NotificationSettingsScreenState extends ConsumerState<NotificationSetting
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Daily Summary', style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+                      Text('Daily Summary', style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: color.primary)),
                       const SizedBox(height: 2),
-                      Text('Yesterday\'s spending summary', style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant)),
+                      Text('Yesterday\'s spending summary', style: textTheme.bodySmall?.copyWith(color: color.primary)),
                     ],
                   ),
                 ),
@@ -196,19 +206,25 @@ class _NotificationSettingsScreenState extends ConsumerState<NotificationSetting
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: color.surfaceContainerHighest,
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: gradientColors,
+                  ),
                   borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: color.primary.withValues(alpha: 0.3), width: 1.5),
+                  boxShadow: AppColors.glassShadow(color.primary, isDark),
                 ),
                 child: Row(
                   children: [
                     Icon(Icons.access_time, color: color.primary),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: Text('Reminder Time', style: textTheme.titleSmall),
+                      child: Text('Reminder Time', style: textTheme.titleSmall?.copyWith(color: color.primary)),
                     ),
                     Text(_reminderTime.format(context), style: textTheme.titleMedium?.copyWith(color: color.primary)),
                     const SizedBox(width: 8),
-                    Icon(Icons.chevron_right, color: color.onSurfaceVariant),
+                    Icon(Icons.chevron_right, color: color.primary),
                   ],
                 ),
               ),
@@ -227,16 +243,23 @@ class _NotificationSettingsScreenState extends ConsumerState<NotificationSetting
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: color.surfaceContainerHighest,
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: gradientColors,
+              ),
               borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: color.primary.withValues(alpha: 0.3), width: 1.5),
+              boxShadow: AppColors.glassShadow(color.primary, isDark),
             ),
             child: Row(
               children: [
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: color.primary.withValues(alpha: 0.1),
+                    color: AppColors.white,
                     shape: BoxShape.circle,
+                    boxShadow: [BoxShadow(color: color.primary.withValues(alpha: 0.2), blurRadius: 8, offset: Offset(0, 2))],
                   ),
                   child: Icon(Icons.calendar_today, color: color.primary, size: 24),
                 ),
@@ -245,9 +268,9 @@ class _NotificationSettingsScreenState extends ConsumerState<NotificationSetting
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Weekly Summary', style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+                      Text('Weekly Summary', style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: color.primary)),
                       const SizedBox(height: 2),
-                      Text('Every ${_getDayName(_weeklyDay)} at 9:00 AM', style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant)),
+                      Text('Every ${_getDayName(_weeklyDay)} at 9:00 AM', style: textTheme.bodySmall?.copyWith(color: color.primary)),
                     ],
                   ),
                 ),
@@ -262,19 +285,25 @@ class _NotificationSettingsScreenState extends ConsumerState<NotificationSetting
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: color.surfaceContainerHighest,
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: gradientColors,
+                  ),
                   borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: color.primary.withValues(alpha: 0.3), width: 1.5),
+                  boxShadow: AppColors.glassShadow(color.primary, isDark),
                 ),
                 child: Row(
                   children: [
                     Icon(Icons.event, color: color.primary),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: Text('Summary Day', style: textTheme.titleSmall),
+                      child: Text('Summary Day', style: textTheme.titleSmall?.copyWith(color: color.primary)),
                     ),
                     Text(_getDayName(_weeklyDay), style: textTheme.titleMedium?.copyWith(color: color.primary)),
                     const SizedBox(width: 8),
-                    Icon(Icons.chevron_right, color: color.onSurfaceVariant),
+                    Icon(Icons.chevron_right, color: color.primary),
                   ],
                 ),
               ),
@@ -292,9 +321,14 @@ class _NotificationSettingsScreenState extends ConsumerState<NotificationSetting
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: color.primaryContainer.withValues(alpha: 0.3),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: gradientColors,
+              ),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: color.primary.withValues(alpha: 0.3)),
+              border: Border.all(color: color.primary.withValues(alpha: 0.3), width: 1.5),
+              boxShadow: AppColors.glassShadow(color.primary, isDark),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -304,7 +338,7 @@ class _NotificationSettingsScreenState extends ConsumerState<NotificationSetting
                 Expanded(
                   child: Text(
                     'Summaries show total spent, income, top category, and current balance from your transactions.',
-                    style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+                    style: textTheme.bodySmall?.copyWith(color: color.primary),
                   ),
                 ),
               ],

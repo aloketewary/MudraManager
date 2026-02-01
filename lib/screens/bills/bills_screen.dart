@@ -6,6 +6,7 @@ import 'package:mudra_manager/db/models/recurring_bill.dart';
 import 'package:mudra_manager/service/bill_service.dart';
 import 'package:mudra_manager/util/dialog_utils.dart';
 import 'package:mudra_manager/util/snackbar_service.dart';
+import 'package:mudra_manager/theme/app_colors.dart';
 
 final billsProvider = StreamProvider<List<RecurringBill>>((ref) {
   final isar = Isar.getInstance()!;
@@ -75,65 +76,71 @@ class BillsScreen extends ConsumerWidget {
     final daysUntilDue = bill.nextDueDate?.difference(DateTime.now()).inDays ?? 0;
     final isOverdue = daysUntilDue < 0;
     final isDueSoon = daysUntilDue <= 3 && daysUntilDue >= 0;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final gradientColors = isOverdue 
-        ? [Colors.red.shade400, Colors.red.shade600]
+    final billColor = isOverdue 
+        ? AppColors.billOverdue
         : isDueSoon 
-            ? [Colors.orange.shade400, Colors.orange.shade600]
-            : [color.primary, color.secondary];
+            ? AppColors.billDueSoon
+            : AppColors.billNormal;
+
+    final gradientColors = AppColors.glassGradient(billColor, isDark);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         gradient: LinearGradient(colors: gradientColors, begin: Alignment.topLeft, end: Alignment.bottomRight),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: gradientColors[0].withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 4))],
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: billColor.withValues(alpha: 0.3), width: 1.5),
+        boxShadow: AppColors.glassShadow(billColor, isDark),
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           onTap: () {},
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             child: Row(
               children: [
                 Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(12),
+                    color: AppColors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [BoxShadow(color: billColor.withValues(alpha: 0.15), blurRadius: 12, offset: const Offset(0, 4))],
                   ),
-                  child: const Icon(Icons.receipt_long_rounded, color: Colors.white, size: 28),
+                  child: Icon(Icons.receipt_long_rounded, color: billColor, size: 26),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 18),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(bill.name, style: textTheme.titleMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
+                      Text(bill.name, style: textTheme.titleMedium?.copyWith(color: billColor, fontWeight: FontWeight.w600, letterSpacing: -0.2)),
                       const SizedBox(height: 4),
-                      Text('₹${bill.amount.toStringAsFixed(0)}', style: textTheme.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.w600)),
+                      Text('₹${bill.amount.toStringAsFixed(0)}', style: textTheme.titleLarge?.copyWith(color: billColor, fontWeight: FontWeight.bold)),
                       if (bill.nextDueDate != null) ...[
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 6),
                         Row(
                           children: [
-                            Icon(Icons.calendar_today, size: 14, color: Colors.white.withValues(alpha: 0.9)),
+                            Icon(Icons.calendar_today, size: 14, color: billColor.withValues(alpha: 0.75)),
                             const SizedBox(width: 4),
                             Text(
                               DateFormat('MMM dd, yyyy').format(bill.nextDueDate!),
-                              style: textTheme.bodySmall?.copyWith(color: Colors.white.withValues(alpha: 0.9)),
+                              style: textTheme.bodySmall?.copyWith(color: billColor.withValues(alpha: 0.75)),
                             ),
                             const SizedBox(width: 8),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                               decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.2),
+                                color: billColor.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: billColor.withValues(alpha: 0.3), width: 1),
                               ),
                               child: Text(
                                 bill.frequency.name.toUpperCase(),
-                                style: textTheme.labelSmall?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+                                style: textTheme.labelSmall?.copyWith(color: billColor, fontWeight: FontWeight.bold, fontSize: 10),
                               ),
                             ),
                           ],
@@ -143,7 +150,7 @@ class BillsScreen extends ConsumerWidget {
                   ),
                 ),
                 PopupMenuButton<String>(
-                  icon: const Icon(Icons.more_vert, color: Colors.white),
+                  icon: Icon(Icons.more_vert, color: billColor.withValues(alpha: 0.7)),
                   itemBuilder: (context) => [
                     const PopupMenuItem(value: 'paid', child: Row(children: [Icon(Icons.check_circle_outline), SizedBox(width: 8), Text('Mark as Paid')])),
                     const PopupMenuItem(value: 'delete', child: Row(children: [Icon(Icons.delete_outline), SizedBox(width: 8), Text('Delete')])),
@@ -181,6 +188,8 @@ class BillsScreen extends ConsumerWidget {
     BillFrequency selectedFrequency = BillFrequency.monthly;
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final gradientColors = AppColors.glassGradient(color.primary, isDark);
 
     showModalBottomSheet(
       context: context,
@@ -191,7 +200,7 @@ class BillsScreen extends ConsumerWidget {
           padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
           decoration: BoxDecoration(
             color: color.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
           ),
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
@@ -204,10 +213,12 @@ class BillsScreen extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(colors: [color.primary, color.secondary]),
-                        borderRadius: BorderRadius.circular(12),
+                        gradient: LinearGradient(colors: gradientColors, begin: Alignment.topLeft, end: Alignment.bottomRight),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: color.primary.withValues(alpha: 0.3), width: 1.5),
+                        boxShadow: AppColors.glassShadow(color.primary, isDark),
                       ),
-                      child: const Icon(Icons.receipt_long_rounded, color: Colors.white),
+                      child: Icon(Icons.receipt_long_rounded, color: color.primary),
                     ),
                     const SizedBox(width: 16),
                     Text('Add New Bill', style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
@@ -218,8 +229,10 @@ class BillsScreen extends ConsumerWidget {
                   controller: nameController,
                   decoration: InputDecoration(
                     labelText: 'Bill Name',
-                    prefixIcon: const Icon(Icons.label_outline),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    prefixIcon: Icon(Icons.label_outline, color: color.primary),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: color.primary.withValues(alpha: 0.3), width: 1.5)),
+                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: color.primary.withValues(alpha: 0.3), width: 1.5)),
+                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: color.primary, width: 1.5)),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -228,8 +241,10 @@ class BillsScreen extends ConsumerWidget {
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     labelText: 'Amount',
-                    prefixIcon: const Icon(Icons.currency_rupee),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    prefixIcon: Icon(Icons.currency_rupee, color: color.primary),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: color.primary.withValues(alpha: 0.3), width: 1.5)),
+                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: color.primary.withValues(alpha: 0.3), width: 1.5)),
+                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: color.primary, width: 1.5)),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -237,8 +252,10 @@ class BillsScreen extends ConsumerWidget {
                   value: selectedFrequency,
                   decoration: InputDecoration(
                     labelText: 'Frequency',
-                    prefixIcon: const Icon(Icons.repeat),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    prefixIcon: Icon(Icons.repeat, color: color.primary),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: color.primary.withValues(alpha: 0.3), width: 1.5)),
+                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: color.primary.withValues(alpha: 0.3), width: 1.5)),
+                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: color.primary, width: 1.5)),
                   ),
                   items: const [
                     DropdownMenuItem(value: BillFrequency.monthly, child: Text('Monthly')),
@@ -260,12 +277,12 @@ class BillsScreen extends ConsumerWidget {
                     );
                     if (date != null) setState(() => selectedDate = date);
                   },
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                   child: Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      border: Border.all(color: color.outline),
-                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: color.primary.withValues(alpha: 0.3), width: 1.5),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                     child: Row(
                       children: [
@@ -289,14 +306,18 @@ class BillsScreen extends ConsumerWidget {
                     Expanded(
                       child: OutlinedButton(
                         onPressed: () => Navigator.pop(context),
-                        style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          side: BorderSide(color: color.primary.withValues(alpha: 0.3), width: 1.5),
+                        ),
                         child: const Text('Cancel'),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: FilledButton(
-                        onPressed: () async {
+                      child: GestureDetector(
+                        onTap: () async {
                           if (nameController.text.isEmpty || amountController.text.isEmpty) {
                             SnackbarService.error('Please fill all fields');
                             return;
@@ -315,8 +336,21 @@ class BillsScreen extends ConsumerWidget {
                           Navigator.pop(context);
                           SnackbarService.success('Bill added');
                         },
-                        style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
-                        child: const Text('Add Bill'),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(colors: gradientColors, begin: Alignment.topLeft, end: Alignment.bottomRight),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: color.primary.withValues(alpha: 0.3), width: 1.5),
+                            boxShadow: AppColors.glassShadow(color.primary, isDark),
+                          ),
+                          child: Center(
+                            child: Text(
+                              'Add Bill',
+                              style: textTheme.titleMedium?.copyWith(color: color.primary, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ],

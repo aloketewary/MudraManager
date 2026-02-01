@@ -1,5 +1,4 @@
-import 'package:mudra_manager/backup/backable_model.dart' show BackupAdapter, Backupable;
-import 'package:mudra_manager/db/models/account.dart' show Account;
+import 'package:mudra_manager/backup/backable_model.dart' show BackupAdapter;
 import 'package:mudra_manager/db/models/goal.dart' show Goal;
 
 class GoalBackup implements BackupAdapter<Goal> {

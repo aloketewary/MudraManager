@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mudra_manager/service/budget_alert_service.dart';
+import 'package:mudra_manager/theme/app_colors.dart';
 
 class BudgetAlertBanner extends StatelessWidget {
   final List<BudgetAlert> alerts;
@@ -20,22 +21,33 @@ class BudgetAlertBanner extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     final color = alert.threshold == 100
-        ? Colors.red
+        ? AppColors.expense
         : alert.threshold == 90
-            ? Colors.orange
-            : Colors.amber;
+            ? Color(0xFFF59E0B)
+            : Color(0xFFFBBF24);
 
     return Container(
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color, width: 2),
+        gradient: LinearGradient(
+          colors: [color.withValues(alpha: 0.15), color.withValues(alpha: 0.05)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withValues(alpha: 0.3), width: 2),
+        boxShadow: const [
+          BoxShadow(
+            color: AppColors.cardShadow,
+            blurRadius: 8,
+            offset: Offset(0, 4),
+          ),
+        ],
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
           onTap: () => _showDetails(context, alert),
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -46,7 +58,7 @@ class BudgetAlertBanner extends StatelessWidget {
                       ? Icons.error
                       : Icons.warning_amber_rounded,
                   color: color,
-                  size: 32,
+                  size: 36,
                 ),
                 const SizedBox(width: 12),
                 Expanded(

@@ -6,10 +6,8 @@ import 'package:intl/intl.dart';
 import 'package:mudra_manager/l10n/app_localizations.dart';
 import 'package:mudra_manager/providers/budget_service_provider.dart';
 import 'package:mudra_manager/db/models/budget.dart' show Budget;
-import 'package:mudra_manager/screens/budget/add_budget_screen.dart'
-    show AddBudgetScreen;
-import 'package:mudra_manager/screens/budget/budget_dashboard.dart';
 import 'package:mudra_manager/screens/reusable/no_data_found.dart';
+import 'package:mudra_manager/theme/app_colors.dart';
 import 'package:mudra_manager/theme/design_tokens.dart';
 import 'package:mudra_manager/util/localization_extension.dart';
 
@@ -30,6 +28,7 @@ class _BudgetMiniCardState extends ConsumerState<BudgetMiniCard> {
     var textTheme = Theme.of(context).textTheme;
     final ctxt = AppLocalizations.of(context)!;
     final formatter = DateFormat('dd MMM yy', ctxt.localeName);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -45,12 +44,9 @@ class _BudgetMiniCardState extends ConsumerState<BudgetMiniCard> {
               ),
               Hero(
                 tag: 'budgetExpandHero',
-                child: IconButton.filled(
-                  onPressed:
-                      () => {
-                        context.push('/budget-dashboard'),
-                      },
-                  icon: Icon(Icons.open_in_new),
+                child: TextButton(
+                  onPressed: () => context.push('/budget-dashboard'),
+                  child: const Text('View All'),
                 ),
               ),
             ],
@@ -87,23 +83,33 @@ class _BudgetMiniCardState extends ConsumerState<BudgetMiniCard> {
                         vertical: 8,
                       ),
                       child: SizedBox(
-                        height: 210,
+                        height: 230,
                         child: GestureDetector(
                           onTap: () {
-              HapticFeedback.mediumImpact();
-              {};
-            },
+                            HapticFeedback.mediumImpact();
+
+                          },
                           child: Container(
-                            // width: 120,
-                            padding: const EdgeInsets.all(8.0),
-                            margin: EdgeInsets.only(right: 8.0),
+                            padding: const EdgeInsets.all(16.0),
                             decoration: BoxDecoration(
                               borderRadius: DesignTokens.borderRadiusMedium,
+                              gradient: LinearGradient(
+                                colors: AppColors.glassGradient(
+                                  percent >= 1.0 ? AppColors.expense : Color(0xFFF59E0B),
+                                  isDark,
+                                ),
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
                               border: Border.all(
-                                color:
-                                    percent == 1.0
-                                        ? color.error
-                                        : color.primary,
+                                color: percent >= 1.0
+                                    ? AppColors.expense.withValues(alpha: 0.3)
+                                    : Color(0xFFF59E0B).withValues(alpha: 0.3),
+                                width: 1.5,
+                              ),
+                              boxShadow: AppColors.glassShadow(
+                                percent >= 1.0 ? AppColors.expense : Color(0xFFF59E0B),
+                                isDark,
                               ),
                             ),
                             child: Column(
@@ -113,21 +119,28 @@ class _BudgetMiniCardState extends ConsumerState<BudgetMiniCard> {
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: <Widget>[
-                                    CircleAvatar(
-                                      radius: 16,
+                                    Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: (percent >= 1.0 ? AppColors.expense : Color(0xFFF59E0B)).withValues(alpha: 0.15),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
                                       child: Icon(
-                                        percent == 1.0
+                                        percent >= 1.0
                                             ? Icons.warning_amber
-                                            : Icons.bubble_chart_outlined,
-                                        size: 16,
+                                            : Icons.pie_chart_outline,
+                                        size: 20,
+                                        color: percent >= 1.0 ? AppColors.expense : Color(0xFFF59E0B),
                                       ),
                                     ),
                                     const SizedBox(width: 8.0),
                                     Expanded(
                                       child: Text(
                                         budget.name.toUpperCase(),
-                                        // textAlign: TextAlign.center,
-                                        style: textTheme.labelLarge?.copyWith(),
+                                        style: textTheme.labelLarge?.copyWith(
+                                          color: percent >= 1.0 ? AppColors.expense : Color(0xFFF59E0B),
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
@@ -156,7 +169,7 @@ class _BudgetMiniCardState extends ConsumerState<BudgetMiniCard> {
                                                 ctxt.budget_dashboardMiniCardBudgetTitleText,
                                                 style: textTheme.labelLarge
                                                     ?.copyWith(
-                                                      color: color.primaryFixed,
+                                                      color: color.onSurfaceVariant,
                                                     ),
                                                 overflow: TextOverflow.fade,
                                               ),
@@ -167,7 +180,7 @@ class _BudgetMiniCardState extends ConsumerState<BudgetMiniCard> {
                                                 ),
                                                 style: textTheme.titleLarge
                                                     ?.copyWith(
-                                                      color: color.primary,
+                                                      color: percent >= 1.0 ? AppColors.expense : Color(0xFFF59E0B),
                                                       fontWeight:
                                                           FontWeight.w600,
                                                     ),
@@ -177,8 +190,7 @@ class _BudgetMiniCardState extends ConsumerState<BudgetMiniCard> {
                                                 "${ctxt.budget_dashboardMiniCardSpentTitleText} (${ctxt.formatCompactNumber().format((spent / budget.amount) * 100)}%)",
                                                 style: textTheme.titleSmall
                                                     ?.copyWith(
-                                                      color:
-                                                          color.secondaryFixed,
+                                                      color: color.onSurfaceVariant,
                                                     ),
                                                 overflow: TextOverflow.fade,
                                               ),
@@ -189,8 +201,7 @@ class _BudgetMiniCardState extends ConsumerState<BudgetMiniCard> {
                                                 ),
                                                 style: textTheme.titleLarge
                                                     ?.copyWith(
-                                                      color: color.secondary,
-                                                      // fontSize: 40,
+                                                      color: percent >= 1.0 ? AppColors.expense : Color(0xFFF59E0B),
                                                       fontWeight:
                                                           FontWeight.w600,
                                                     ),
@@ -216,15 +227,11 @@ class _BudgetMiniCardState extends ConsumerState<BudgetMiniCard> {
                                                     value: percent,
                                                     strokeWidth: 12,
                                                     backgroundColor:
-                                                        color.secondary,
+                                                        (percent >= 1.0 ? AppColors.expense : Color(0xFFF59E0B)).withValues(alpha: 0.15),
                                                     valueColor:
                                                         AlwaysStoppedAnimation<
                                                           Color
-                                                        >(
-                                                          percent >= 1.0
-                                                              ? color.error
-                                                              : color.primary,
-                                                        ),
+                                                        >(percent >= 1.0 ? AppColors.expense : Color(0xFFF59E0B)),
                                                   ),
                                                 ),
                                                 Text(
@@ -233,7 +240,9 @@ class _BudgetMiniCardState extends ConsumerState<BudgetMiniCard> {
                                                   ),
                                                   style: textTheme.labelLarge
                                                       ?.copyWith(
-                                                        color: color.primary,
+                                                        color: percent >= 1.0 ? AppColors.expense : Color(0xFFF59E0B),
+                                                        fontWeight:
+                                                            FontWeight.bold,
                                                       ),
                                                 ),
                                               ],
@@ -248,7 +257,7 @@ class _BudgetMiniCardState extends ConsumerState<BudgetMiniCard> {
                                   "${formatter.format(sDate)} - ${formatter.format(eDate)}",
                                   textAlign: TextAlign.center,
                                   style: textTheme.labelMedium?.copyWith(
-                                    color: color.primary,
+                                    color: color.onSurfaceVariant,
                                   ),
                                 ),
                               ],

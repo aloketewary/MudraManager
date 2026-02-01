@@ -1,4 +1,4 @@
-import 'package:mudra_manager/backup/backable_model.dart' show BackupAdapter, Backupable;
+import 'package:mudra_manager/backup/backable_model.dart' show BackupAdapter;
 import 'package:mudra_manager/db/models/notification_record.dart' show NotificationRecord;
 
 class NotificationRecordBackup implements BackupAdapter<NotificationRecord> {

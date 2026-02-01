@@ -1,4 +1,4 @@
-import 'package:mudra_manager/backup/backable_model.dart' show BackupAdapter, Backupable;
+import 'package:mudra_manager/backup/backable_model.dart' show BackupAdapter;
 import 'package:mudra_manager/db/models/pending_transaction.dart' show PendingTransaction;
 
 class PendingTransactionBackup implements BackupAdapter<PendingTransaction> {

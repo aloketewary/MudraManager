@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mudra_manager/l10n/app_localizations.dart';
+import 'package:mudra_manager/theme/app_colors.dart';
 import 'package:mudra_manager/util/localization_extension.dart';
 
 class InsightGridCard extends StatelessWidget {
@@ -37,20 +38,22 @@ class InsightGridCard extends StatelessWidget {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final ctxt = AppLocalizations.of(context)!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       height: 140,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        color: color.surface,
-        border: Border.all(color: color.primary.withOpacity(0.2)),
-        boxShadow: [
-          BoxShadow(
-            color: color.shadow.withOpacity(0.05),
-            blurRadius: 8,
-            offset: Offset(0, 2),
-          ),
-        ],
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: AppColors.glassGradient(topCategoryColor, isDark),
+        ),
+        border: Border.all(
+          color: topCategoryColor.withValues(alpha: 0.3),
+          width: 1.5,
+        ),
+        boxShadow: AppColors.glassShadow(topCategoryColor, isDark),
       ),
       padding: EdgeInsets.all(16),
       child: Column(
@@ -83,7 +86,7 @@ class InsightGridCard extends StatelessWidget {
                 topCategory,
                 style: textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: color.primary,
+                  color: topCategoryColor,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -92,7 +95,7 @@ class InsightGridCard extends StatelessWidget {
               Text(
                 ctxt.formatCurrencyWithSign(0, topCategoryAmount),
                 style: textTheme.titleMedium?.copyWith(
-                  color: color.primary,
+                  color: topCategoryColor,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -113,20 +116,22 @@ class InsightGridCard extends StatelessWidget {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final ctxt = AppLocalizations.of(context)!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       height: 140,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        color: color.surface,
-        border: Border.all(color: color.primary.withOpacity(0.2)),
-        boxShadow: [
-          BoxShadow(
-            color: color.shadow.withOpacity(0.05),
-            blurRadius: 8,
-            offset: Offset(0, 2),
-          ),
-        ],
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: AppColors.glassGradient(color.primary, isDark),
+        ),
+        border: Border.all(
+          color: color.primary.withValues(alpha: 0.3),
+          width: 1.5,
+        ),
+        boxShadow: AppColors.glassShadow(color.primary, isDark),
       ),
       padding: EdgeInsets.all(16),
       child: Column(
@@ -168,9 +173,7 @@ class InsightGridCard extends StatelessWidget {
             height: 4,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(2),
-              gradient: LinearGradient(
-                colors: [color.primary, color.primaryContainer],
-              ),
+              color: color.primary,
             ),
           ),
         ],

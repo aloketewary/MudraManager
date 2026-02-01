@@ -56,8 +56,8 @@ echo "📦 Getting packages..."
 flutter pub get
 
 # Step 5: Build APK
-echo "🏗️ Building APK..."
-flutter build apk --release
+echo "🏗️ Building appbundle..."
+flutter build appbundle --release
 
 # Step 6: Git commit (Optional)
 echo "📝 Committing version bump..."

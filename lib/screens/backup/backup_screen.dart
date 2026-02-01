@@ -32,7 +32,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
     final last = await BackupService.getLastBackup();
     final prefs = await SharedPreferences.getInstance();
     final frequency = prefs.getString('backup_reminder_frequency') ?? 'weekly';
-    
+
     setState(() {
       _backupHistory = history;
       _lastBackup = last;
@@ -48,12 +48,12 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
     if (includeAttachments == null) return;
 
     setState(() => _isLoading = true);
-    
+
     final filePath = await BackupService.createEncryptedBackup(
       password,
       includeAttachments: includeAttachments,
     );
-    
+
     setState(() => _isLoading = false);
 
     if (filePath != null) {
@@ -69,18 +69,22 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
     final password = await _showPasswordDialog(isRestore: true);
     if (password == null) return;
 
-    final confirmed = await DialogUtils.showConfirmDialog(
+    final confirmed = await DialogUtils.showConfirmation(
       context,
-      'Restore Backup',
-      'This will replace all current data. Continue?',
+      title: 'Restore Backup',
+      message: 'This will replace all current data. Continue?',
     );
     if (confirmed != true) return;
 
     setState(() => _isLoading = true);
-    
+
     final isar = Isar.getInstance()!;
-    final result = await BackupService.restoreEncryptedBackup(context, isar, password);
-    
+    final result = await BackupService.restoreEncryptedBackup(
+      context,
+      isar,
+      password,
+    );
+
     setState(() => _isLoading = false);
 
     if (result == 'success') {
@@ -91,115 +95,122 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
   Future<String?> _showPasswordDialog({required bool isRestore}) async {
     final controller = TextEditingController();
     final confirmController = TextEditingController();
-    
+
     return showDialog<String>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(isRestore ? 'Enter Password' : 'Set Backup Password'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: controller,
-              obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Password',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            if (!isRestore) ...[
-              const SizedBox(height: 16),
-              TextField(
-                controller: confirmController,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'Confirm Password',
-                  border: OutlineInputBorder(),
+      builder:
+          (context) => AlertDialog(
+            title: Text(isRestore ? 'Enter Password' : 'Set Backup Password'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: controller,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Password',
+                    border: OutlineInputBorder(),
+                  ),
                 ),
+                if (!isRestore) ...[
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: confirmController,
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Confirm Password',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () {
+                  if (!isRestore && controller.text != confirmController.text) {
+                    SnackbarService.error('Passwords do not match');
+                    return;
+                  }
+                  if (controller.text.length < 6) {
+                    SnackbarService.error(
+                      'Password must be at least 6 characters',
+                    );
+                    return;
+                  }
+                  Navigator.pop(context, controller.text);
+                },
+                child: const Text('Continue'),
               ),
             ],
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
           ),
-          FilledButton(
-            onPressed: () {
-              if (!isRestore && controller.text != confirmController.text) {
-                SnackbarService.error('Passwords do not match');
-                return;
-              }
-              if (controller.text.length < 6) {
-                SnackbarService.error('Password must be at least 6 characters');
-                return;
-              }
-              Navigator.pop(context, controller.text);
-            },
-            child: const Text('Continue'),
-          ),
-        ],
-      ),
     );
   }
 
   Future<bool?> _showAttachmentDialog() async {
     return showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Include Attachments?'),
-        content: const Text('Include receipt images in backup? This will increase file size.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('No'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Include Attachments?'),
+            content: const Text(
+              'Include receipt images in backup? This will increase file size.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('No'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Yes'),
+              ),
+            ],
           ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Yes'),
-          ),
-        ],
-      ),
     );
   }
 
   void _showBackupLocationDialog(String path) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Backup Created'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Backup saved at:'),
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: SelectableText(
-                path,
-                style: const TextStyle(fontSize: 12),
-              ),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Backup Created'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Backup saved at:'),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade200,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: SelectableText(
+                    path,
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Upload this file to Google Drive, Dropbox, or any cloud storage for safekeeping.',
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            const Text(
-              'Upload this file to Google Drive, Dropbox, or any cloud storage for safekeeping.',
-              style: TextStyle(fontSize: 12, color: Colors.grey),
-            ),
-          ],
-        ),
-        actions: [
-          FilledButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+            actions: [
+              FilledButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -213,23 +224,22 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Backup & Restore'),
-      ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                _buildLastBackupCard(),
-                const SizedBox(height: 16),
-                _buildActionsCard(),
-                const SizedBox(height: 16),
-                _buildReminderCard(),
-                const SizedBox(height: 16),
-                _buildHistoryCard(),
-              ],
-            ),
+      appBar: AppBar(title: const Text('Backup & Restore')),
+      body:
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  _buildLastBackupCard(),
+                  const SizedBox(height: 16),
+                  _buildActionsCard(),
+                  const SizedBox(height: 16),
+                  _buildReminderCard(),
+                  const SizedBox(height: 16),
+                  _buildHistoryCard(),
+                ],
+              ),
     );
   }
 
@@ -246,12 +256,26 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
             ),
             const SizedBox(height: 12),
             if (_lastBackup != null) ...[
-              _buildInfoRow('Date', DateFormat('MMM dd, yyyy hh:mm a').format(_lastBackup!.backupDate)),
-              _buildInfoRow('Size', '${(_lastBackup!.fileSize / 1024).toStringAsFixed(2)} KB'),
+              _buildInfoRow(
+                'Date',
+                DateFormat(
+                  'MMM dd, yyyy hh:mm a',
+                ).format(_lastBackup!.backupDate),
+              ),
+              _buildInfoRow(
+                'Size',
+                '${(_lastBackup!.fileSize / 1024).toStringAsFixed(2)} KB',
+              ),
               _buildInfoRow('Records', '${_lastBackup!.recordCount}'),
-              _buildInfoRow('Attachments', _lastBackup!.includesAttachments ? 'Included' : 'Excluded'),
+              _buildInfoRow(
+                'Attachments',
+                _lastBackup!.includesAttachments ? 'Included' : 'Excluded',
+              ),
             ] else
-              const Text('No backups yet', style: TextStyle(color: Colors.grey)),
+              const Text(
+                'No backups yet',
+                style: TextStyle(color: Colors.grey),
+              ),
           ],
         ),
       ),
@@ -334,15 +358,28 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
             ),
             const SizedBox(height: 12),
             if (_backupHistory.isEmpty)
-              const Text('No backup history', style: TextStyle(color: Colors.grey))
+              const Text(
+                'No backup history',
+                style: TextStyle(color: Colors.grey),
+              )
             else
-              ..._backupHistory.take(5).map((backup) => ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: const Icon(Icons.folder_zip),
-                    title: Text(backup.fileName),
-                    subtitle: Text(DateFormat('MMM dd, yyyy hh:mm a').format(backup.backupDate)),
-                    trailing: Text('${(backup.fileSize / 1024).toStringAsFixed(1)} KB'),
-                  )),
+              ..._backupHistory
+                  .take(5)
+                  .map(
+                    (backup) => ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(Icons.folder_zip),
+                      title: Text(backup.fileName),
+                      subtitle: Text(
+                        DateFormat(
+                          'MMM dd, yyyy hh:mm a',
+                        ).format(backup.backupDate),
+                      ),
+                      trailing: Text(
+                        '${(backup.fileSize / 1024).toStringAsFixed(1)} KB',
+                      ),
+                    ),
+                  ),
           ],
         ),
       ),

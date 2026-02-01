@@ -1,4 +1,4 @@
-import 'package:mudra_manager/backup/backable_model.dart' show BackupAdapter, Backupable;
+import 'package:mudra_manager/backup/backable_model.dart' show BackupAdapter;
 import 'package:mudra_manager/db/models/category.dart' show Category, CategoryType;
 
 class CategoryBackup implements BackupAdapter<Category> {

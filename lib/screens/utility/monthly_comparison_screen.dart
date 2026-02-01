@@ -5,6 +5,7 @@ import 'package:mudra_manager/db/isar_service.dart';
 import 'package:mudra_manager/db/models/transaction.dart';
 import 'package:mudra_manager/providers/isar_provider.dart';
 import 'package:mudra_manager/l10n/app_localizations.dart';
+import 'package:mudra_manager/theme/app_colors.dart';
 import 'package:mudra_manager/util/localization_extension.dart';
 
 class MonthlyComparisonScreen extends ConsumerWidget {
@@ -52,7 +53,7 @@ class MonthlyComparisonScreen extends ConsumerWidget {
               _ComparisonCard(
                 title: 'Income',
                 icon: Icons.trending_up,
-                color: Colors.green,
+                color: AppColors.income,
                 currentAmount: currentIncome,
                 lastAmount: lastIncome,
                 percentageChange: incomeChange,
@@ -64,7 +65,7 @@ class MonthlyComparisonScreen extends ConsumerWidget {
               _ComparisonCard(
                 title: 'Expense',
                 icon: Icons.trending_down,
-                color: Colors.red,
+                color: AppColors.expense,
                 currentAmount: currentExpense,
                 lastAmount: lastExpense,
                 percentageChange: expenseChange,
@@ -76,7 +77,7 @@ class MonthlyComparisonScreen extends ConsumerWidget {
               _ComparisonCard(
                 title: 'Balance',
                 icon: Icons.account_balance_wallet,
-                color: Colors.blue,
+                color: AppColors.transfer,
                 currentAmount: currentBalance,
                 lastAmount: lastBalance,
                 percentageChange: balanceChange,
@@ -165,14 +166,20 @@ class _ComparisonCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isPositive = percentageChange >= 0;
     final changeColor = title == 'Expense' 
-        ? (isPositive ? Colors.red : Colors.green)
-        : (isPositive ? Colors.green : Colors.red);
+        ? (isPositive ? AppColors.expense : AppColors.income)
+        : (isPositive ? AppColors.income : AppColors.expense);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest,
+        gradient: LinearGradient(
+          colors: AppColors.glassGradient(color, isDark),
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.2)),
+        border: Border.all(color: color.withValues(alpha: 0.3), width: 1.5),
+        boxShadow: AppColors.glassShadow(color, isDark),
       ),
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -181,18 +188,26 @@ class _ComparisonCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: color.withValues(alpha: 0.2),
+                      blurRadius: 8,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
                 ),
-                child: Icon(icon, color: color, size: 24),
+                child: Icon(icon, color: color, size: 28),
               ),
               const SizedBox(width: 12),
               Text(
                 title,
                 style: textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
+                  color: AppColors.textColor(isDark),
                 ),
               ),
             ],
@@ -207,7 +222,7 @@ class _ComparisonCard extends StatelessWidget {
                   Text(
                     'Current Month',
                     style: textTheme.labelMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
+                      color: AppColors.textColor(isDark).withValues(alpha: 0.7),
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -215,7 +230,7 @@ class _ComparisonCard extends StatelessWidget {
                     l10n.formatCurrencyWithSign(0, currentAmount),
                     style: textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: color,
+                      color: AppColors.textColor(isDark),
                     ),
                   ),
                 ],
@@ -226,14 +241,14 @@ class _ComparisonCard extends StatelessWidget {
                   Text(
                     'Last Month',
                     style: textTheme.labelMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
+                      color: AppColors.textColor(isDark).withValues(alpha: 0.7),
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     l10n.formatCurrencyWithSign(0, lastAmount),
                     style: textTheme.titleMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
+                      color: AppColors.textColor(isDark).withValues(alpha: 0.6),
                     ),
                   ),
                 ],
@@ -259,7 +274,7 @@ class _ComparisonCard extends StatelessWidget {
                 Text(
                   '${percentageChange.abs().toStringAsFixed(1)}%',
                   style: textTheme.labelLarge?.copyWith(
-                    color: changeColor,
+                    color: AppColors.textColor(isDark).withValues(alpha: 0.9),
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -267,7 +282,7 @@ class _ComparisonCard extends StatelessWidget {
                 Text(
                   'vs last month',
                   style: textTheme.labelSmall?.copyWith(
-                    color: changeColor,
+                    color: AppColors.textColor(isDark).withValues(alpha: 0.9),
                   ),
                 ),
               ],

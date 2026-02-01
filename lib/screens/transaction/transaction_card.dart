@@ -8,6 +8,7 @@ import 'package:mudra_manager/db/models/tag.dart';
 import 'package:mudra_manager/db/models/transaction.dart' show Transaction;
 import 'package:mudra_manager/l10n/app_localizations.dart'
     show AppLocalizations;
+import 'package:mudra_manager/theme/app_colors.dart';
 import 'package:mudra_manager/util/account_type_extension.dart';
 import 'package:mudra_manager/util/case_extension.dart';
 import 'package:mudra_manager/util/icon_helper.dart';
@@ -58,17 +59,29 @@ class _TransactionCardState extends State<TransactionCard> {
     widget.related?.category.load();
     widget.related?.account.load();
     final ctxt = AppLocalizations.of(context)!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       decoration: BoxDecoration(
-        color: color.surface,
+        gradient: LinearGradient(
+          colors: AppColors.glassGradient(
+            widget.isTransfer ? AppColors.transfer : (widget.isExpense ? AppColors.expense : AppColors.income),
+            isDark,
+          ),
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [
+        border: Border.all(
+          color: (widget.isTransfer ? AppColors.transfer : (widget.isExpense ? AppColors.expense : AppColors.income)).withValues(alpha: 0.2),
+          width: 1.5,
+        ),
+        boxShadow: const [
           BoxShadow(
-            color: color.shadow.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: AppColors.cardShadow,
+            blurRadius: 8,
+            offset: Offset(0, 4),
           ),
         ],
       ),
@@ -82,7 +95,7 @@ class _TransactionCardState extends State<TransactionCard> {
                 padding: EdgeInsets.symmetric(horizontal: 10, vertical: 2),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Colors.teal.shade400, Colors.teal.shade600],
+                    colors: [AppColors.tripActive.withValues(alpha: 0.9), AppColors.tripActiveDark],
                   ),
                   borderRadius: BorderRadius.only(
                     topRight: Radius.circular(20),
@@ -92,12 +105,16 @@ class _TransactionCardState extends State<TransactionCard> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.beach_access_outlined, size: 12, color: Colors.white),
+                    Icon(
+                      Icons.beach_access_outlined,
+                      size: 12,
+                      color: AppColors.white,
+                    ),
                     SizedBox(width: 4),
                     Text(
                       'TRIP',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: AppColors.white,
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                       ),
@@ -152,7 +169,7 @@ class _TransactionCardState extends State<TransactionCard> {
                                   if (widget.tripName != null) ...[
                                     SizedBox(width: 8),
                                     Text(
-                                      'This transaction also added in below trip(s)',
+                                      'This transaction is part of below trip(s)',
                                       style: textTheme.labelSmall?.copyWith(),
                                     ),
                                     SizedBox(width: 8),
@@ -162,12 +179,12 @@ class _TransactionCardState extends State<TransactionCard> {
                                         vertical: 2,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: Colors.teal.withValues(
+                                        color: color.primary.withValues(
                                           alpha: 0.15,
                                         ),
                                         borderRadius: BorderRadius.circular(6),
                                         border: Border.all(
-                                          color: Colors.teal.withValues(
+                                          color: color.primary.withValues(
                                             alpha: 0.3,
                                           ),
                                         ),
@@ -178,14 +195,14 @@ class _TransactionCardState extends State<TransactionCard> {
                                           Icon(
                                             Icons.card_travel,
                                             size: 14,
-                                            color: Colors.teal,
+                                            color: color.primary,
                                           ),
                                           SizedBox(width: 3),
                                           Text(
                                             widget.tripName!,
                                             style: textTheme.labelSmall
                                                 ?.copyWith(
-                                                  color: Colors.teal,
+                                                  color: color.primary,
                                                   fontWeight: FontWeight.w600,
                                                 ),
                                           ),

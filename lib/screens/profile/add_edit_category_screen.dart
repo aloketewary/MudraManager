@@ -8,11 +8,7 @@ import 'package:mudra_manager/providers/category_provider.dart';
 import 'package:mudra_manager/providers/isar_provider.dart';
 import 'package:mudra_manager/screens/profile/icon_picker_bottom_sheet.dart'
     show IconPickerBottomSheet;
-import 'package:mudra_manager/screens/reusable/common_button.dart';
-import 'package:mudra_manager/screens/reusable/common_color_button.dart';
-import 'package:mudra_manager/screens/reusable/common_dropdown_field.dart';
-import 'package:mudra_manager/screens/reusable/common_icon_button.dart';
-import 'package:mudra_manager/screens/reusable/common_text_input_field.dart';
+import 'package:mudra_manager/theme/app_colors.dart';
 import 'package:mudra_manager/util/case_extension.dart';
 import 'package:mudra_manager/util/icon_helper.dart' show IconHelper;
 import 'package:mudra_manager/util/simple_color_picker.dart'
@@ -84,6 +80,8 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
     var textTheme = Theme.of(context).textTheme;
     var color = Theme.of(context).colorScheme;
     final headerColor = _selectedColor ?? color.primary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final gradientColors = AppColors.glassGradient(headerColor, isDark);
 
     return Scaffold(
       backgroundColor: headerColor,
@@ -130,15 +128,15 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
                           ? IconHelper.iconFromName(_selectedIcon!)
                           : Icons.category,
                       size: 64,
-                      color: Colors.white,
+                      color: color.surface,
                     ),
                   ),
                 ),
                 SizedBox(height: 16),
                 Text(
                   'TAP TO CHANGE ICON',
-                  style: textTheme.labelSmall?.copyWith(
-                    color: Colors.white.withValues(alpha: 0.7),
+                  style: textTheme.labelMedium?.copyWith(
+                    color: color.surface.withValues(alpha: 0.7),
                     letterSpacing: 1.5,
                   ),
                 ),
@@ -149,7 +147,7 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
             child: Container(
               decoration: BoxDecoration(
                 color: color.surface,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+                borderRadius: BorderRadius.vertical(top: Radius.zero),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.1),
@@ -159,7 +157,7 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
                 ],
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+                borderRadius: BorderRadius.vertical(top: Radius.zero),
                 child: Form(
                   key: _formKey,
                   child: ListView(
@@ -179,20 +177,28 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
                       ),
                       SizedBox(height: 12),
                       Container(
-                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
-                          color: color.surfaceContainer,
                           borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: headerColor.withValues(alpha: 0.3),
+                            width: 1.5,
+                          ),
                         ),
                         child: TextFormField(
                           controller: _nameController,
                           decoration: InputDecoration(
                             hintText: 'Enter category name',
                             border: InputBorder.none,
-                            icon: Icon(
-                              Icons.edit,
-                              color: color.onSurfaceVariant,
-                            ),
+                            enabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
+                            errorBorder: InputBorder.none,
+                            focusedErrorBorder: InputBorder.none,
+                            disabledBorder: InputBorder.none,
+                            icon: Icon(Icons.edit, color: headerColor),
                           ),
                           validator:
                               (val) =>
@@ -217,8 +223,8 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
                               return Expanded(
                                 child: Padding(
                                   padding: EdgeInsets.only(
-                                    right: type == CategoryType.expense ? 8 : 0,
-                                    left: type == CategoryType.income ? 8 : 0,
+                                    right: type == CategoryType.expense ? 0 : 8,
+                                    left: type == CategoryType.income ? 0 : 8,
                                   ),
                                   child: GestureDetector(
                                     onTap: () {
@@ -231,20 +237,32 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
                                         vertical: 16,
                                       ),
                                       decoration: BoxDecoration(
-                                        color:
+                                        gradient:
                                             isSelected
-                                                ? headerColor.withValues(
-                                                  alpha: 0.1,
+                                                ? LinearGradient(
+                                                  begin: Alignment.topLeft,
+                                                  end: Alignment.bottomRight,
+                                                  colors: gradientColors,
                                                 )
-                                                : color.surfaceContainer,
-                                        borderRadius: BorderRadius.circular(16),
+                                                : null,
+                                        borderRadius: BorderRadius.circular(20),
                                         border: Border.all(
                                           color:
                                               isSelected
-                                                  ? headerColor
-                                                  : Colors.transparent,
-                                          width: 2,
+                                                  ? headerColor.withValues(
+                                                    alpha: 0.3,
+                                                  )
+                                                  : color.outlineVariant
+                                                      .withValues(alpha: 0.3),
+                                          width: 1.5,
                                         ),
+                                        boxShadow:
+                                            isSelected
+                                                ? AppColors.glassShadow(
+                                                  headerColor,
+                                                  isDark,
+                                                )
+                                                : [],
                                       ),
                                       child: Row(
                                         mainAxisAlignment:
@@ -304,29 +322,27 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
                             gradient: LinearGradient(
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
-                              colors: [
-                                headerColor.withValues(alpha: 0.8),
-                                headerColor,
-                              ],
+                              colors: gradientColors,
                             ),
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(
-                                color: headerColor.withValues(alpha: 0.3),
-                                blurRadius: 8,
-                                offset: Offset(0, 4),
-                              ),
-                            ],
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: headerColor.withValues(alpha: 0.3),
+                              width: 1.5,
+                            ),
+                            boxShadow: AppColors.glassShadow(
+                              headerColor,
+                              isDark,
+                            ),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.palette, color: Colors.white),
+                              Icon(Icons.palette, color: headerColor),
                               SizedBox(width: 12),
                               Text(
                                 'TAP TO CHANGE COLOR',
                                 style: textTheme.titleSmall?.copyWith(
-                                  color: Colors.white,
+                                  color: headerColor,
                                   fontWeight: FontWeight.bold,
                                   letterSpacing: 1.0,
                                 ),
@@ -336,29 +352,41 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
                         ),
                       ),
                       SizedBox(height: 48),
-                      FilledButton(
-                        onPressed: () async {
+                      GestureDetector(
+                        onTap: () async {
                           HapticFeedback.mediumImpact();
                           await _save();
                           context.pop(true);
                         },
-                        style: FilledButton.styleFrom(
-                          backgroundColor: headerColor,
-                          foregroundColor: Colors.white,
-                          padding: EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          padding: EdgeInsets.symmetric(vertical: 18),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: gradientColors,
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: headerColor.withValues(alpha: 0.3),
+                              width: 1.5,
+                            ),
+                            boxShadow: AppColors.glassShadow(
+                              headerColor,
+                              isDark,
+                            ),
                           ),
-                          elevation: 2,
-                          minimumSize: Size(double.infinity, 52),
-                        ),
-                        child: Text(
-                          (widget.existing == null
-                              ? 'SAVE CATEGORY'
-                              : 'UPDATE CATEGORY'),
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.2,
+                          child: Center(
+                            child: Text(
+                              (widget.existing == null
+                                  ? 'SAVE CATEGORY'
+                                  : 'UPDATE CATEGORY'),
+                              style: textTheme.titleMedium?.copyWith(
+                                color: headerColor,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1.2,
+                              ),
+                            ),
                           ),
                         ),
                       ),

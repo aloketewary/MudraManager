@@ -11,7 +11,7 @@ import 'package:mudra_manager/l10n/app_localizations.dart'
 import 'package:mudra_manager/providers/filter_provider.dart';
 import 'package:mudra_manager/screens/reusable/animated_balance.dart';
 import 'package:mudra_manager/screens/reusable/responseive_layout_builder.dart';
-import 'package:mudra_manager/screens/transaction/transaction_list_screen.dart';
+import 'package:mudra_manager/theme/app_colors.dart';
 import 'package:mudra_manager/theme/design_tokens.dart';
 import 'package:mudra_manager/util/localization_extension.dart';
 
@@ -97,12 +97,12 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
                     ),
                     Hero(
                       tag: 'cashFlowPage',
-                      child: IconButton.filled(
+                      child: TextButton(
                         onPressed: () {
-              HapticFeedback.mediumImpact();
-              context.push('/transactions');
-            },
-                        icon: Icon(Icons.open_in_new),
+                          HapticFeedback.mediumImpact();
+                          context.push('/transactions');
+                        },
+                        child: const Text('View All'),
                       ),
                     ),
                   ],
@@ -178,42 +178,39 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
     final ctxt = AppLocalizations.of(context)!;
     final tiltAngleRadians = math.pi * tiltAngleDegrees / 180;
     final tiltExpenseAngleRadians = math.pi * tiltExpenseAngleDegrees / 180;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Expanded(
       flex: (rightBoxWidthFactor * 100).toInt(),
       child: SizedBox(
-        height: 170,
+        height: 190,
         child: GestureDetector(
           onTap: () {
-              HapticFeedback.mediumImpact();
-              {};
-            },
+            HapticFeedback.mediumImpact();
+          },
           child: Container(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(16.0),
             margin: const EdgeInsets.only(right: 8.0),
             decoration: BoxDecoration(
               borderRadius: DesignTokens.borderRadiusMedium,
-              gradient:
-                  isExpense
-                      ? null
-                      : LinearGradient(
-                        colors: [
-                          color.primary,
-                          color.primary.withOpacity(0.85),
-                          color.primaryContainer,
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-              color: isExpense ? color.surface : null,
-              border: Border.all(color: color.primary, width: 2),
-              boxShadow:
-                  isExpense
-                      ? AppElevation.elevation1(color.primary)
-                      : AppElevation.coloredElevation(
-                        color.primary,
-                        intensity: 0.25,
-                      ),
+              gradient: LinearGradient(
+                colors: AppColors.glassGradient(
+                  isExpense ? AppColors.expense : AppColors.income,
+                  isDark,
+                ),
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              border: Border.all(
+                color: isExpense
+                    ? AppColors.expense.withValues(alpha: 0.3)
+                    : AppColors.income.withValues(alpha: 0.3),
+                width: 1.5,
+              ),
+              boxShadow: AppColors.glassShadow(
+                isExpense ? AppColors.expense : AppColors.income,
+                isDark,
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -222,11 +219,15 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
                     ? Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        CircleAvatar(
-                          radius: 16,
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: AppColors.income.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                           child: Transform.rotate(
                             angle: tiltAngleRadians,
-                            child: Icon(Icons.arrow_downward, size: 16),
+                            child: const Icon(Icons.arrow_downward, size: 20, color: AppColors.income),
                           ),
                         ),
                         const SizedBox(width: 8.0),
@@ -235,7 +236,8 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
                             ctxt.transaction_type_income.toUpperCase(),
                             textAlign: TextAlign.center,
                             style: textTheme.labelLarge?.copyWith(
-                              color: color.onPrimary,
+                              color: AppColors.income,
+                              fontWeight: FontWeight.bold,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -250,17 +252,22 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
                             ctxt.transaction_type_expense.toUpperCase(),
                             textAlign: TextAlign.center,
                             style: textTheme.labelLarge?.copyWith(
-                              color: color.primary,
+                              color: AppColors.expense,
+                              fontWeight: FontWeight.bold,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         const SizedBox(width: 8.0),
-                        CircleAvatar(
-                          radius: 16,
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: AppColors.expense.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                           child: Transform.rotate(
                             angle: tiltExpenseAngleRadians,
-                            child: Icon(Icons.arrow_upward, size: 16),
+                            child: const Icon(Icons.arrow_upward, size: 20, color: AppColors.expense),
                           ),
                         ),
                       ],
@@ -274,10 +281,7 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
                       Text(
                         ctxt.formatCurrencyWithSign(0, value),
                         style: textTheme.titleLarge?.copyWith(
-                          color:
-                              isExpense
-                                  ? color.primary.withAlpha(10)
-                                  : color.onPrimary.withAlpha(10),
+                          color: (isExpense ? AppColors.expense : AppColors.income).withAlpha(10),
                           fontSize: 80,
                           fontWeight: FontWeight.bold,
                         ),
@@ -286,7 +290,7 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
                       AnimatedBalance(
                         value: value,
                         style: textTheme.titleLarge?.copyWith(
-                          color: isExpense ? color.primary : color.onPrimary,
+                          color: isExpense ? AppColors.expense : AppColors.income,
                           fontSize: 40,
                           fontWeight: FontWeight.bold,
                         ),
@@ -305,7 +309,7 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
                         ).format(startDate)
                         : "${DateFormat("dd MMM yy", ctxt.localeName).format(startDate)} - ${DateFormat("dd MMM yy", ctxt.localeName).format(endDate)}",
                     style: textTheme.labelMedium?.copyWith(
-                      color: isExpense ? color.primary : color.onPrimary,
+                      color: color.onSurfaceVariant,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),

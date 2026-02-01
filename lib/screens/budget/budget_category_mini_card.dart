@@ -1,12 +1,10 @@
-import 'package:go_router/go_router.dart';
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:mudra_manager/db/models/category.dart';
 import 'package:mudra_manager/l10n/app_localizations.dart'
     show AppLocalizations;
 import 'package:mudra_manager/util/icon_helper.dart';
 import 'package:mudra_manager/util/localization_extension.dart';
+import 'package:mudra_manager/theme/app_colors.dart';
 
 class BudgetCategoryMiniCard extends StatelessWidget {
   final Category category;
@@ -26,6 +24,7 @@ class BudgetCategoryMiniCard extends StatelessWidget {
     var textTheme = Theme.of(context).textTheme;
     var categoryColor = Color(category.colorValue ?? 0xFF000000);
     final ctxt = AppLocalizations.of(context)!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Calculate progress with safety
     final progress = allocated > 0 ? (spent / allocated).clamp(0.0, 1.0) : 0.0;
@@ -35,9 +34,14 @@ class BudgetCategoryMiniCard extends StatelessWidget {
       width: 140,
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: color.surfaceContainerLowest,
+        gradient: LinearGradient(
+          colors: AppColors.glassGradient(categoryColor, isDark),
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(20.0),
-        border: Border.all(color: color.outline.withValues(alpha: 0.1)),
+        border: Border.all(color: categoryColor.withValues(alpha: 0.3), width: 1.5),
+        boxShadow: AppColors.glassShadow(categoryColor, isDark),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -47,8 +51,15 @@ class BudgetCategoryMiniCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: categoryColor.withValues(alpha: 0.1),
+                  color: AppColors.white,
                   shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: categoryColor.withValues(alpha: 0.2),
+                      blurRadius: 8,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: Icon(
                   IconHelper.getIconData(category.iconName),
@@ -58,13 +69,16 @@ class BudgetCategoryMiniCard extends StatelessWidget {
               ),
               const Spacer(),
               if (isOverBudget)
-                Icon(Icons.warning_amber_rounded, size: 16, color: color.error),
+                Icon(Icons.warning_amber_rounded, size: 16, color: AppColors.expense),
             ],
           ),
           const Spacer(),
           Text(
             category.name,
-            style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+            style: textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: categoryColor,
+            ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -72,7 +86,7 @@ class BudgetCategoryMiniCard extends StatelessWidget {
           Text(
             "${ctxt.formatCurrencyWithSign(0, spent)} / ${ctxt.formatCurrencyWithSign(0, allocated)}",
             style: textTheme.bodySmall?.copyWith(
-              color: color.onSurfaceVariant,
+              color: categoryColor.withValues(alpha: 0.7),
               fontSize: 10,
             ),
           ),
@@ -82,9 +96,9 @@ class BudgetCategoryMiniCard extends StatelessWidget {
             child: LinearProgressIndicator(
               value: progress,
               minHeight: 6,
-              backgroundColor: color.surfaceContainerHighest,
+              backgroundColor: categoryColor.withValues(alpha: 0.1),
               valueColor: AlwaysStoppedAnimation<Color>(
-                isOverBudget ? color.error : categoryColor,
+                isOverBudget ? AppColors.expense : categoryColor,
               ),
             ),
           ),

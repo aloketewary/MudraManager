@@ -57,7 +57,7 @@ class BudgetAlertService {
     return alerts;
   }
 
-  Future<double> _calculateSpent(dynamic isar, Budget budget, DateTime start, DateTime end) async {
+  Future<double> _calculateSpent(Isar isar, Budget budget, DateTime start, DateTime end) async {
     final categoryIds = budget.categories.map((c) => c.id).toList();
     final transactions = await isar.transactions
         .filter()
@@ -77,7 +77,7 @@ class BudgetAlertService {
     return null;
   }
 
-  Future<bool> _hasNotified(dynamic isar, int budgetId, int threshold, DateTime periodStart) async {
+  Future<bool> _hasNotified(Isar isar, int budgetId, int threshold, DateTime periodStart) async {
     final existing = await isar.notificationRecords
         .filter()
         .typeContains('budget_alert_${budgetId}_$threshold')
@@ -111,7 +111,7 @@ class BudgetAlertService {
     );
   }
 
-  Future<void> _saveNotificationRecord(dynamic isar, int budgetId, int threshold, DateTime start, DateTime end) async {
+  Future<void> _saveNotificationRecord(Isar isar, int budgetId, int threshold, DateTime start, DateTime end) async {
     final record = NotificationRecord()
       ..title = 'Budget Alert'
       ..body = 'Budget threshold $threshold% reached'

@@ -10,7 +10,6 @@ import 'package:mudra_manager/db/models/transaction.dart' show Transaction;
 import 'package:mudra_manager/l10n/app_localizations.dart'
     show AppLocalizations;
 import 'package:mudra_manager/providers/account_providers.dart';
-import 'package:mudra_manager/providers/budget_service_provider.dart';
 import 'package:mudra_manager/providers/category_provider.dart';
 import 'package:mudra_manager/providers/isar_provider.dart';
 import 'package:mudra_manager/providers/notification_record_service.dart';
@@ -18,10 +17,10 @@ import 'package:mudra_manager/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/providers/tag_provider.dart';
 import 'package:mudra_manager/providers/transaction_provider.dart';
 import 'package:mudra_manager/providers/budget_alert_provider.dart';
-import 'package:mudra_manager/screens/profile/add_edit_category_screen.dart';
 import 'package:mudra_manager/screens/reusable/simple_calculator.dart'
     show SimpleCalculator;
 import 'package:mudra_manager/service/notification_service.dart';
+import 'package:mudra_manager/theme/app_colors.dart';
 import 'package:mudra_manager/util/icon_helper.dart' show IconHelper;
 import 'package:mudra_manager/util/localization_extension.dart';
 import 'package:mudra_manager/util/snackbar_service.dart';
@@ -121,7 +120,9 @@ class _AddEditTransactionScreenState
             : const Color(
               0xFF00BFA5,
             ); // Hardcoded Teal/Green for income distinction if theme doesn't suffice
-    final onHeaderColor = Colors.white;
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final onHeaderColor = AppColors.white;
 
     return Scaffold(
       backgroundColor: headerColor,
@@ -132,9 +133,9 @@ class _AddEditTransactionScreenState
         leading: IconButton(
           icon: Icon(Icons.close, color: onHeaderColor),
           onPressed: () {
-              HapticFeedback.mediumImpact();
-              context.pop();
-            },
+            HapticFeedback.mediumImpact();
+            context.pop();
+          },
         ),
         centerTitle: true,
         title: Container(
@@ -173,7 +174,7 @@ class _AddEditTransactionScreenState
         children: [
           // --- TOP SECTION (Amount) ---
           SizedBox(
-            height: MediaQuery.of(context).size.height * 0.25,
+            height: MediaQuery.of(context).size.height * 0.20,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -230,9 +231,7 @@ class _AddEditTransactionScreenState
             child: Container(
               decoration: BoxDecoration(
                 color: color.surface,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(32),
-                ),
+                borderRadius: const BorderRadius.vertical(top: Radius.zero),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.1),
@@ -270,239 +269,11 @@ class _AddEditTransactionScreenState
                           return accountsAsync.when(
                             data:
                                 (accounts) => SizedBox(
-                                  height: 120,
-                                  child: ListView.separated(
-                                    scrollDirection: Axis.horizontal,
-                                    itemCount: accounts.length,
-                                    separatorBuilder:
-                                        (_, __) => const SizedBox(width: 12),
-                                    itemBuilder: (context, index) {
-                                      final account = accounts[index];
-                                      final isSelected =
-                                          _selectedAccount?.id == account.id;
-                                      final balance =
-                                          _balanceMap[account.id] ??
-                                          account.initialBalance;
-
-                                      return GestureDetector(
-                                        onTap:
-                                            () => setState(
-                                              () => _selectedAccount = account,
-                                            ),
-                                        child: AnimatedContainer(
-                                          duration: const Duration(
-                                            milliseconds: 200,
-                                          ),
-                                          width: 140,
-                                          margin: const EdgeInsets.symmetric(
-                                            vertical: 4,
-                                          ), // Space for shadow
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(
-                                              24,
-                                            ),
-                                            gradient:
-                                                isSelected
-                                                    ? LinearGradient(
-                                                      begin: Alignment.topLeft,
-                                                      end:
-                                                          Alignment.bottomRight,
-                                                      colors: [
-                                                        Color(
-                                                          account.colorValue ??
-                                                              0xFF000000,
-                                                        ).withValues(
-                                                          alpha: 0.8,
-                                                        ),
-                                                        Color(
-                                                          account.colorValue ??
-                                                              0xFF000000,
-                                                        ),
-                                                      ],
-                                                    )
-                                                    : LinearGradient(
-                                                      begin: Alignment.topLeft,
-                                                      end:
-                                                          Alignment.bottomRight,
-                                                      colors: [
-                                                        color
-                                                            .surfaceContainerHighest
-                                                            .withValues(
-                                                              alpha: 0.6,
-                                                            ),
-                                                        color
-                                                            .surfaceContainerHighest
-                                                            .withValues(
-                                                              alpha: 0.3,
-                                                            ),
-                                                      ],
-                                                    ),
-                                            boxShadow:
-                                                isSelected
-                                                    ? [
-                                                      BoxShadow(
-                                                        color: Color(
-                                                          account.colorValue ??
-                                                              0xFF000000,
-                                                        ).withValues(
-                                                          alpha: 0.3,
-                                                        ),
-                                                        blurRadius: 8,
-                                                        offset: const Offset(
-                                                          0,
-                                                          4,
-                                                        ),
-                                                      ),
-                                                    ]
-                                                    : [],
-                                            border: Border.all(
-                                              color: Colors.white.withValues(
-                                                alpha: 0.2,
-                                              ),
-                                              width: 1.5,
-                                            ),
-                                          ),
-                                          child: ClipRRect(
-                                            borderRadius: BorderRadius.circular(
-                                              24,
-                                            ),
-                                            child: Stack(
-                                              children: [
-                                                // Watermark Icon
-                                                // if (isSelected)
-                                                Positioned(
-                                                  right: -15,
-                                                  bottom: -15,
-                                                  child: Transform.rotate(
-                                                    angle: -0.2,
-                                                    child: Icon(
-                                                      _getIconForAccountType(
-                                                        account.accountType,
-                                                      ),
-                                                      size: 80,
-                                                      color: Colors.white
-                                                          .withValues(
-                                                            alpha: 0.15,
-                                                          ),
-                                                    ),
-                                                  ),
-                                                ),
-
-                                                // Content
-                                                Padding(
-                                                  padding: const EdgeInsets.all(
-                                                    16,
-                                                  ),
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceBetween,
-                                                    children: [
-                                                      // Icon Container
-                                                      Container(
-                                                        padding:
-                                                            const EdgeInsets.all(
-                                                              8,
-                                                            ),
-                                                        decoration: BoxDecoration(
-                                                          color:
-                                                              isSelected
-                                                                  ? Colors.white
-                                                                      .withValues(
-                                                                        alpha:
-                                                                            0.2,
-                                                                      )
-                                                                  : color
-                                                                      .surface,
-                                                          shape:
-                                                              BoxShape.circle,
-                                                        ),
-                                                        child: Icon(
-                                                          _getIconForAccountType(
-                                                            account.accountType,
-                                                          ),
-                                                          color:
-                                                              isSelected
-                                                                  ? Colors.white
-                                                                  : color
-                                                                      .onSurfaceVariant,
-                                                          size: 20,
-                                                        ),
-                                                      ),
-
-                                                      // Text Data
-                                                      Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        children: [
-                                                          Text(
-                                                            account.name,
-                                                            style: textTheme
-                                                                .labelMedium
-                                                                ?.copyWith(
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold,
-                                                                  color:
-                                                                      isSelected
-                                                                          ? Colors
-                                                                              .white
-                                                                          : color
-                                                                              .onSurfaceVariant,
-                                                                ),
-                                                            maxLines: 1,
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .ellipsis,
-                                                          ),
-                                                          const SizedBox(
-                                                            height: 2,
-                                                          ),
-                                                          Text(
-                                                            ctxt.formatCurrencyWithSign(
-                                                              2,
-                                                              balance,
-                                                              compact: true,
-                                                            ),
-                                                            style: textTheme.labelLarge?.copyWith(
-                                                              color:
-                                                                  isSelected
-                                                                      ? Colors
-                                                                          .white
-                                                                          .withValues(
-                                                                            alpha:
-                                                                                0.8,
-                                                                          )
-                                                                      : color
-                                                                          .onSurfaceVariant
-                                                                          .withValues(
-                                                                            alpha:
-                                                                                0.7,
-                                                                          ),
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w500,
-                                                            ),
-                                                            maxLines: 1,
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .ellipsis,
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      );
-                                    },
+                                  height: 130,
+                                  child: _buildAccountListView(
+                                    accounts,
+                                    textTheme,
+                                    color,
                                   ),
                                 ),
                             loading: () => const SizedBox(height: 90),
@@ -531,247 +302,10 @@ class _AddEditTransactionScreenState
                             data:
                                 (categories) => SizedBox(
                                   height: 120,
-                                  child: ListView.separated(
-                                    scrollDirection: Axis.horizontal,
-                                    itemCount: categories.length + 1,
-                                    separatorBuilder:
-                                        (_, __) => const SizedBox(width: 12),
-                                    itemBuilder: (context, index) {
-                                      if (index < categories.length) {
-                                        final cat = categories[index];
-                                        final isSelected =
-                                            _selectedCategory?.id == cat.id;
-                                        return GestureDetector(
-                                          onTap:
-                                              () => setState(
-                                                () => _selectedCategory = cat,
-                                              ),
-                                          child: AnimatedContainer(
-                                            duration: const Duration(
-                                              milliseconds: 200,
-                                            ),
-                                            width:
-                                                120, // Slightly narrower since less text
-                                            margin: const EdgeInsets.symmetric(
-                                              vertical: 4,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(24),
-                                              gradient:
-                                                  isSelected
-                                                      ? LinearGradient(
-                                                        begin:
-                                                            Alignment.topLeft,
-                                                        end:
-                                                            Alignment
-                                                                .bottomRight,
-                                                        colors: [
-                                                          Color(
-                                                            cat.colorValue ??
-                                                                0xFF000000,
-                                                          ).withValues(
-                                                            alpha: 0.8,
-                                                          ),
-                                                          Color(
-                                                            cat.colorValue ??
-                                                                0xFF000000,
-                                                          ),
-                                                        ],
-                                                      )
-                                                      : LinearGradient(
-                                                        begin:
-                                                            Alignment.topLeft,
-                                                        end:
-                                                            Alignment
-                                                                .bottomRight,
-                                                        colors: [
-                                                          color
-                                                              .surfaceContainerHighest
-                                                              .withValues(
-                                                                alpha: 0.6,
-                                                              ),
-                                                          color
-                                                              .surfaceContainerHighest
-                                                              .withValues(
-                                                                alpha: 0.3,
-                                                              ),
-                                                        ],
-                                                      ),
-                                              boxShadow:
-                                                  isSelected
-                                                      ? [
-                                                        BoxShadow(
-                                                          color: Color(
-                                                            cat.colorValue ??
-                                                                0xFF000000,
-                                                          ).withValues(
-                                                            alpha: 0.3,
-                                                          ),
-                                                          blurRadius: 8,
-                                                          offset: const Offset(
-                                                            0,
-                                                            4,
-                                                          ),
-                                                        ),
-                                                      ]
-                                                      : [],
-                                              border: Border.all(
-                                                color: Colors.white.withValues(
-                                                  alpha: 0.2,
-                                                ),
-                                                width: 1.5,
-                                              ),
-                                            ),
-                                            child: ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(24),
-                                              child: Stack(
-                                                children: [
-                                                  // Watermark Icon
-                                                  if (isSelected)
-                                                    Positioned(
-                                                      right: -15,
-                                                      bottom: -15,
-                                                      child: Transform.rotate(
-                                                        angle: -0.2,
-                                                        child: Icon(
-                                                          IconHelper.iconFromName(
-                                                            cat.iconName ??
-                                                                'category',
-                                                          ),
-                                                          size: 70,
-                                                          color: Colors.white
-                                                              .withValues(
-                                                                alpha: 0.15,
-                                                              ),
-                                                        ),
-                                                      ),
-                                                    ),
-
-                                                  // Content
-                                                  Padding(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                          16,
-                                                        ),
-                                                    child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .spaceBetween,
-                                                      children: [
-                                                        Container(
-                                                          padding:
-                                                              const EdgeInsets.all(
-                                                                8,
-                                                              ),
-                                                          decoration: BoxDecoration(
-                                                            color:
-                                                                isSelected
-                                                                    ? Colors
-                                                                        .white
-                                                                        .withValues(
-                                                                          alpha:
-                                                                              0.2,
-                                                                        )
-                                                                    : color
-                                                                        .surface,
-                                                            shape:
-                                                                BoxShape.circle,
-                                                          ),
-                                                          child: Icon(
-                                                            IconHelper.iconFromName(
-                                                              cat.iconName ??
-                                                                  'category',
-                                                            ),
-                                                            color:
-                                                                isSelected
-                                                                    ? Colors
-                                                                        .white
-                                                                    : color
-                                                                        .onSurfaceVariant,
-                                                            size: 20,
-                                                          ),
-                                                        ),
-                                                        Text(
-                                                          cat.name,
-                                                          style: textTheme
-                                                              .labelMedium
-                                                              ?.copyWith(
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold,
-                                                                color:
-                                                                    isSelected
-                                                                        ? Colors
-                                                                            .white
-                                                                        : color
-                                                                            .onSurfaceVariant,
-                                                              ),
-                                                          maxLines: 2,
-                                                          overflow:
-                                                              TextOverflow
-                                                                  .ellipsis,
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        );
-                                      } else {
-                                        // Add Category Button
-                                        return GestureDetector(
-                                          onTap:
-                                              () => context.push('/add-category'),
-                                          child: Container(
-                                            width: 80, // Slimmer for "Add"
-                                            margin: const EdgeInsets.symmetric(
-                                              vertical: 4,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(24),
-                                              color: color
-                                                  .surfaceContainerHighest
-                                                  .withValues(alpha: 0.3),
-                                              border: Border.all(
-                                                color: color.outline.withValues(
-                                                  alpha: 0.5,
-                                                ),
-                                                width: 1,
-                                                style: BorderStyle.solid,
-                                              ),
-                                            ),
-                                            child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                Icon(
-                                                  Icons.add,
-                                                  color: color.onSurfaceVariant,
-                                                ),
-                                                const SizedBox(height: 4),
-                                                Text(
-                                                  "Add",
-                                                  style: textTheme.labelSmall
-                                                      ?.copyWith(
-                                                        color:
-                                                            color
-                                                                .onSurfaceVariant,
-                                                      ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        );
-                                      }
-                                    },
+                                  child: _buildCategoryListView(
+                                    categories,
+                                    textTheme,
+                                    color,
                                   ),
                                 ),
                             loading: () => const SizedBox(height: 90),
@@ -792,10 +326,11 @@ class _AddEditTransactionScreenState
                                 context: context,
                                 initialDate: _selectedDate,
                                 firstDate: DateTime(2000),
-                                lastDate: DateTime.now(), // Block future dates
+                                lastDate: DateTime.now(),
                               );
-                              if (pick != null)
+                              if (pick != null) {
                                 setState(() => _selectedDate = pick);
+                              }
                             },
                             borderRadius: BorderRadius.circular(16),
                             child: Container(
@@ -804,8 +339,11 @@ class _AddEditTransactionScreenState
                                 vertical: 16,
                               ),
                               decoration: BoxDecoration(
-                                color: color.surfaceContainer,
                                 borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: color.outline.withValues(alpha: 0.3),
+                                  width: 1.5,
+                                ),
                               ),
                               child: Row(
                                 children: [
@@ -816,7 +354,9 @@ class _AddEditTransactionScreenState
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    DateFormat('MMM d').format(_selectedDate),
+                                    DateFormat(
+                                      'MMM dd, yyyy',
+                                    ).format(_selectedDate),
                                     style: textTheme.titleSmall?.copyWith(
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -833,8 +373,11 @@ class _AddEditTransactionScreenState
                                 horizontal: 16,
                               ),
                               decoration: BoxDecoration(
-                                color: color.surfaceContainer,
                                 borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: color.outline.withValues(alpha: 0.3),
+                                  width: 1.5,
+                                ),
                               ),
                               child: TextFormField(
                                 controller: _descController,
@@ -938,14 +481,52 @@ class _AddEditTransactionScreenState
                       FilledButton(
                         onPressed: _saveTransaction,
                         style: FilledButton.styleFrom(
-                          backgroundColor: headerColor,
+                          backgroundColor: Colors.transparent,
                           foregroundColor: onHeaderColor,
                           padding: EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          elevation: 2,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 0,
                           minimumSize: Size(double.infinity, 52),
+                        ).copyWith(
+                          backgroundColor: WidgetStateProperty.all(
+                            Colors.transparent,
+                          ),
                         ),
-                        child: Text(ctxt.transaction_saveTransactionButtonLabel.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.2)),
+                        child: Container(
+                          width: double.infinity,
+                          height: 52,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: AppColors.glassGradient(
+                                headerColor,
+                                Theme.of(context).brightness == Brightness.dark,
+                              ),
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: headerColor.withValues(alpha: 0.3),
+                              width: 1.5,
+                            ),
+                            boxShadow: AppColors.glassShadow(
+                              headerColor,
+                              Theme.of(context).brightness == Brightness.dark,
+                            ),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            ctxt.transaction_saveTransactionButtonLabel
+                                .toUpperCase(),
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.2,
+                              color: headerColor,
+                            ),
+                          ),
+                        ),
                       ),
 
                       SizedBox(
@@ -983,9 +564,9 @@ class _AddEditTransactionScreenState
     final isSelected = _isExpense == isExpenseBtn;
     return GestureDetector(
       onTap: () {
-              HapticFeedback.mediumImpact();
-              setState(() => _isExpense = isExpenseBtn);
-            },
+        HapticFeedback.mediumImpact();
+        setState(() => _isExpense = isExpenseBtn);
+      },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
         decoration: BoxDecoration(
@@ -1008,6 +589,11 @@ class _AddEditTransactionScreenState
   Future<void> _saveTransaction() async {
     final ctxt = AppLocalizations.of(context)!;
     if (_formKey.currentState?.validate() ?? false) {
+      if (_amountController.text.isEmpty ||
+          double.tryParse(_amountController.text) == null) {
+        SnackbarService.error('Please enter a valid amount.');
+        return;
+      }
       if (_selectedAccount == null) {
         SnackbarService.error(ctxt.transaction_selectOneAccountErrorText);
         return;
@@ -1069,27 +655,79 @@ class _AddEditTransactionScreenState
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 12),
-              TextField(
-                controller: controller,
-                decoration: InputDecoration(
-                  labelText: ctxt.transaction_tagNameControllerText,
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.outline.withValues(alpha: 0.3),
+                    width: 1.5,
+                  ),
+                ),
+                child: TextField(
+                  controller: controller,
+                  decoration: InputDecoration(
+                    labelText: ctxt.transaction_tagNameControllerText,
+                    border: InputBorder.none,
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () async {
-                  final name = controller.text.trim();
-                  if (name.isNotEmpty) {
-                    final tag = Tag()..name = name;
-                    final isar = await isarService.getInstance();
-                    await isar.writeTxn(() async {
-                      await isar.tags.put(tag);
-                    });
-                    context.pop();
-                    ref.invalidate(tagListProvider); // Trigger refresh
-                  }
-                },
-                child: Text(ctxt.transaction_saveTagButtonLabel),
+              Container(
+                width: double.infinity,
+                height: 48,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: AppColors.glassGradient(
+                      Theme.of(context).colorScheme.primary,
+                      Theme.of(context).brightness == Brightness.dark,
+                    ),
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.3),
+                    width: 1.5,
+                  ),
+                  boxShadow: AppColors.glassShadow(
+                    Theme.of(context).colorScheme.primary,
+                    Theme.of(context).brightness == Brightness.dark,
+                  ),
+                ),
+                child: ElevatedButton(
+                  onPressed: () async {
+                    final name = controller.text.trim();
+                    if (name.isNotEmpty) {
+                      final tag = Tag()..name = name;
+                      final isar = await isarService.getInstance();
+                      await isar.writeTxn(() async {
+                        await isar.tags.put(tag);
+                      });
+                      if (mounted) {
+                        Navigator.of(context).pop();
+                        ref.invalidate(tagListProvider);
+                      }
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    foregroundColor: Theme.of(context).colorScheme.primary,
+                    elevation: 0,
+                    shadowColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    ctxt.transaction_saveTagButtonLabel,
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
               ),
             ],
           ),
@@ -1143,5 +781,346 @@ class _AddEditTransactionScreenState
     if (alerts.isNotEmpty) {
       ref.read(budgetAlertsProvider.notifier).addAlerts(alerts);
     }
+  }
+
+  Widget? _buildAccountListView(
+    List<Account> accounts,
+    TextTheme textTheme,
+    ColorScheme color,
+  ) {
+    final ctxt = AppLocalizations.of(context)!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return ListView.separated(
+      scrollDirection: Axis.horizontal,
+      itemCount: accounts.length,
+      separatorBuilder: (_, __) => const SizedBox(width: 12),
+      itemBuilder: (context, index) {
+        final account = accounts[index];
+        final isSelected = _selectedAccount?.id == account.id;
+        final balance = _balanceMap[account.id] ?? account.initialBalance;
+
+        return GestureDetector(
+          onTap: () => setState(() => _selectedAccount = account),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: 150,
+            margin: const EdgeInsets.symmetric(vertical: 4),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              gradient:
+                  isSelected
+                      ? LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: AppColors.glassGradient(
+                          Color(
+                            account.colorValue ?? AppColors.dark.toARGB32(),
+                          ),
+                          isDark,
+                        ),
+                      )
+                      : null,
+              border: Border.all(
+                color:
+                    isSelected
+                        ? Color(
+                          account.colorValue ?? AppColors.dark.toARGB32(),
+                        ).withValues(alpha: 0.3)
+                        : color.outline.withValues(alpha: 0.3),
+                width: 1.5,
+              ),
+              boxShadow:
+                  isSelected
+                      ? AppColors.glassShadow(
+                        Color(account.colorValue ?? AppColors.dark.toARGB32()),
+                        isDark,
+                      )
+                      : null,
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: Stack(
+                children: [
+                  // Watermark Icon
+                  // if (isSelected)
+                  Positioned(
+                    right: -15,
+                    bottom: -15,
+                    child: Transform.rotate(
+                      angle: -0.2,
+                      child: Icon(
+                        _getIconForAccountType(account.accountType),
+                        size: 80,
+                        color: (isSelected
+                                ? AppColors.textColor(isDark)
+                                : Color(
+                                  account.colorValue ??
+                                      AppColors.dark.toARGB32(),
+                                ))
+                            .withValues(alpha: 0.15),
+                      ),
+                    ),
+                  ),
+
+                  // Content
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // Icon Container
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: isSelected ? AppColors.white : color.surface,
+                            shape: BoxShape.circle,
+                            boxShadow:
+                                isSelected
+                                    ? [
+                                      BoxShadow(
+                                        color: Color(
+                                          account.colorValue ??
+                                              AppColors.dark.toARGB32(),
+                                        ).withValues(alpha: 0.2),
+                                        blurRadius: 8,
+                                        offset: Offset(0, 4),
+                                      ),
+                                    ]
+                                    : null,
+                          ),
+                          child: Icon(
+                            _getIconForAccountType(account.accountType),
+                            color:
+                                isSelected
+                                    ? Color(
+                                      account.colorValue ??
+                                          AppColors.dark.toARGB32(),
+                                    )
+                                    : color.onSurfaceVariant,
+                            size: 20,
+                          ),
+                        ),
+
+                        // Text Data
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              account.name,
+                              style: textTheme.labelLarge?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color:
+                                    isSelected
+                                        ? AppColors.textColor(
+                                          isDark,
+                                        ).withValues(alpha: 0.7)
+                                        : color.onSurfaceVariant,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              ctxt.formatCurrencyWithSign(
+                                2,
+                                balance,
+                                compact: true,
+                              ),
+                              style: textTheme.labelLarge?.copyWith(
+                                color:
+                                    isSelected
+                                        ? AppColors.textColor(
+                                          isDark,
+                                        ).withValues(alpha: 0.7)
+                                        : color.onSurfaceVariant.withValues(
+                                          alpha: 0.7,
+                                        ),
+                                fontWeight: FontWeight.w500,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget? _buildCategoryListView(
+    List<Category> categories,
+    TextTheme textTheme,
+    ColorScheme color,
+  ) {
+    final ctxt = AppLocalizations.of(context)!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return ListView.separated(
+      scrollDirection: Axis.horizontal,
+      itemCount: categories.length + 1,
+      separatorBuilder: (_, __) => const SizedBox(width: 12),
+      itemBuilder: (context, index) {
+        if (index < categories.length) {
+          final cat = categories[index];
+          final isSelected = _selectedCategory?.id == cat.id;
+          return GestureDetector(
+            onTap: () => setState(() => _selectedCategory = cat),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: 120,
+              margin: const EdgeInsets.symmetric(vertical: 4),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(24),
+                gradient:
+                    isSelected
+                        ? LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: AppColors.glassGradient(
+                            Color(cat.colorValue ?? AppColors.dark.toARGB32()),
+                            isDark,
+                          ),
+                        )
+                        : null,
+                border: Border.all(
+                  color:
+                      isSelected
+                          ? Color(
+                            cat.colorValue ?? 0xFF000000,
+                          ).withValues(alpha: 0.3)
+                          : color.outline.withValues(alpha: 0.3),
+                  width: 1.5,
+                ),
+                boxShadow:
+                    isSelected
+                        ? AppColors.glassShadow(
+                          Color(cat.colorValue ?? 0xFF000000),
+                          Theme.of(context).brightness == Brightness.dark,
+                        )
+                        : null,
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(24),
+                child: Stack(
+                  children: [
+                    // Watermark Icon
+                    Positioned(
+                      right: -15,
+                      bottom: -15,
+                      child: Transform.rotate(
+                        angle: -0.2,
+                        child: Icon(
+                          IconHelper.iconFromName(cat.iconName ?? 'category'),
+                          size: 70,
+                          color: (isSelected
+                                ? AppColors.textColor(isDark)
+                                : Color(
+                                  cat.colorValue ??
+                                      AppColors.dark.toARGB32(),
+                                )).withValues(alpha: 0.15),
+                        ),
+                      ),
+                    ),
+
+                    // Content
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color:
+                                  isSelected ? AppColors.white : color.surface,
+                              shape: BoxShape.circle,
+                              boxShadow:
+                                  isSelected
+                                      ? [
+                                        BoxShadow(
+                                          color: Color(
+                                            cat.colorValue ?? 0xFF000000,
+                                          ).withValues(alpha: 0.2),
+                                          blurRadius: 8,
+                                          offset: Offset(0, 4),
+                                        ),
+                                      ]
+                                      : null,
+                            ),
+                            child: Icon(
+                              IconHelper.iconFromName(
+                                cat.iconName ?? 'category',
+                              ),
+                              color:
+                                  isSelected
+                                      ? Color(cat.colorValue ?? 0xFF000000)
+                                      : color.onSurfaceVariant,
+                              size: 20,
+                            ),
+                          ),
+                          Text(
+                            cat.name,
+                            style: textTheme.labelLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color:
+                                  isSelected
+                                      ? Color(cat.colorValue ?? 0xFF000000)
+                                      : color.onSurfaceVariant,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        } else {
+          // Add Category Button
+          return GestureDetector(
+            onTap: () => context.push('/add-category'),
+            child: Container(
+              width: 80, // Slimmer for "Add"
+              margin: const EdgeInsets.symmetric(vertical: 4),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(24),
+                color: color.surfaceContainerHighest.withValues(alpha: 0.3),
+                border: Border.all(
+                  color: color.outline.withValues(alpha: 0.5),
+                  width: 1,
+                  style: BorderStyle.solid,
+                ),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.add, color: color.onSurfaceVariant),
+                  const SizedBox(height: 4),
+                  Text(
+                    "Add",
+                    style: textTheme.labelSmall?.copyWith(
+                      color: color.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+      },
+    );
   }
 }

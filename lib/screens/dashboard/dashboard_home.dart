@@ -12,11 +12,11 @@ import 'package:mudra_manager/screens/dashboard/net_worth_mini_card.dart';
 import 'package:mudra_manager/screens/goal/goal_mini_card.dart';
 import 'package:mudra_manager/screens/dashboard/swipeable_account_card.dart';
 import 'package:mudra_manager/screens/reusable/responseive_layout_builder.dart';
-import 'package:mudra_manager/screens/transaction/add_edit_transaction_screen.dart';
-import 'package:mudra_manager/screens/transaction/transfer_screen.dart';
 import 'package:mudra_manager/screens/reusable/budget_alert_banner.dart';
 import 'package:mudra_manager/providers/budget_alert_provider.dart';
+import 'package:mudra_manager/theme/app_colors.dart';
 import 'package:mudra_manager/theme/design_tokens.dart';
+import 'package:mudra_manager/screens/trip/active_trip_mini_card.dart';
 
 class DashboardHome extends ConsumerStatefulWidget {
   const DashboardHome({super.key});
@@ -45,6 +45,7 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
     final color = Theme.of(context).colorScheme;
     var ctxt = AppLocalizations.of(context)!;
     final alerts = ref.watch(budgetAlertsProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -57,7 +58,9 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
               BudgetAlertBanner(
                 alerts: alerts,
                 onDismiss: () {
-                  ref.read(budgetAlertsProvider.notifier).dismissAlert(alerts.first);
+                  ref
+                      .read(budgetAlertsProvider.notifier)
+                      .dismissAlert(alerts.first);
                 },
               ),
             SizedBox(height: 16),
@@ -84,33 +87,30 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                           child: Hero(
                             tag: 'addTransactionHero',
                             child: Container(
-                              padding: const EdgeInsets.all(8.0),
+                              padding: const EdgeInsets.all(16.0),
                               decoration: BoxDecoration(
                                 borderRadius: DesignTokens.borderRadiusLarge,
                                 gradient: LinearGradient(
-                                  colors: [
-                                    color.primary,
-                                    color.primary.withOpacity(0.85),
-                                  ],
+                                  colors: AppColors.glassGradient(color.primary, isDark),
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
                                 ),
-                                boxShadow: AppElevation.coloredElevation(
-                                  color.primary,
-                                  intensity: 0.25,
+                                border: Border.all(
+                                  color: color.primary.withValues(alpha: 0.3),
+                                  width: 1.5,
                                 ),
+                                boxShadow: AppColors.glassShadow(color.primary, isDark),
                               ),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: <Widget>[
                                   CircleAvatar(
                                     radius: 20,
-                                    backgroundColor: color.onPrimary
-                                        .withOpacity(0.2),
+                                    backgroundColor: color.primary.withValues(alpha: 0.15),
                                     child: Icon(
                                       Icons.add_circle_outline,
-                                      size: 30,
-                                      color: color.onPrimary,
+                                      size: 24,
+                                      color: color.primary,
                                     ),
                                   ),
                                   SizedBox(width: DesignTokens.spacing8),
@@ -120,7 +120,7 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                                           .toUpperCase(),
                                       textAlign: TextAlign.center,
                                       style: textTheme.labelLarge?.copyWith(
-                                        color: color.onPrimary,
+                                        color: color.primary,
                                         fontWeight: FontWeight.w600,
                                       ),
                                       overflow: TextOverflow.ellipsis,
@@ -143,26 +143,30 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                             context.push('/transfer');
                           },
                           child: Container(
-                            padding: const EdgeInsets.all(8.0),
+                            padding: const EdgeInsets.all(16.0),
                             decoration: BoxDecoration(
                               borderRadius: DesignTokens.borderRadiusLarge,
-                              border: Border.all(
-                                color: color.primary,
-                                width: 2,
+                              gradient: LinearGradient(
+                                colors: AppColors.glassGradient(AppColors.transfer, isDark),
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
                               ),
-                              color: color.surface,
-                              boxShadow: AppElevation.elevation1(color.primary),
+                              border: Border.all(
+                                color: AppColors.transfer.withValues(alpha: 0.3),
+                                width: 1.5,
+                              ),
+                              boxShadow: AppColors.glassShadow(AppColors.transfer, isDark),
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: <Widget>[
                                 CircleAvatar(
                                   radius: 20,
-                                  backgroundColor: color.primaryContainer,
-                                  child: Icon(
-                                    Icons.arrow_circle_right_outlined,
-                                    size: 30,
-                                    color: color.primary,
+                                  backgroundColor: AppColors.transfer.withValues(alpha: 0.15),
+                                  child: const Icon(
+                                    Icons.swap_horiz,
+                                    size: 24,
+                                    color: AppColors.transfer,
                                   ),
                                 ),
                                 SizedBox(width: DesignTokens.spacing8),
@@ -172,7 +176,7 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                                         .toUpperCase(),
                                     textAlign: TextAlign.center,
                                     style: textTheme.labelLarge?.copyWith(
-                                      color: color.primary,
+                                      color: AppColors.transfer,
                                       fontWeight: FontWeight.w600,
                                     ),
                                     overflow: TextOverflow.ellipsis,
@@ -201,33 +205,30 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                             tag: 'addTransactionHero',
                             child: Container(
                               width: 120,
-                              padding: const EdgeInsets.all(8.0),
+                              padding: const EdgeInsets.all(16.0),
                               decoration: BoxDecoration(
                                 borderRadius: DesignTokens.borderRadiusLarge,
                                 gradient: LinearGradient(
-                                  colors: [
-                                    color.primary,
-                                    color.primary.withOpacity(0.85),
-                                  ],
+                                  colors: AppColors.glassGradient(color.primary, isDark),
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
                                 ),
-                                boxShadow: AppElevation.coloredElevation(
-                                  color.primary,
-                                  intensity: 0.25,
+                                border: Border.all(
+                                  color: color.primary.withValues(alpha: 0.3),
+                                  width: 1.5,
                                 ),
+                                boxShadow: AppColors.glassShadow(color.primary, isDark),
                               ),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: <Widget>[
                                   CircleAvatar(
                                     radius: 20,
-                                    backgroundColor: color.onPrimary
-                                        .withOpacity(0.2),
+                                    backgroundColor: color.primary.withValues(alpha: 0.15),
                                     child: Icon(
                                       Icons.add_circle_outline,
-                                      size: 30,
-                                      color: color.onPrimary,
+                                      size: 24,
+                                      color: color.primary,
                                     ),
                                   ),
                                   SizedBox(width: DesignTokens.spacing8),
@@ -237,7 +238,7 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                                           .toUpperCase(),
                                       textAlign: TextAlign.center,
                                       style: textTheme.labelLarge?.copyWith(
-                                        color: color.onPrimary,
+                                        color: color.primary,
                                         fontWeight: FontWeight.w600,
                                       ),
                                       overflow: TextOverflow.ellipsis,
@@ -261,26 +262,30 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                           },
                           child: Container(
                             width: 120,
-                            padding: const EdgeInsets.all(8.0),
+                            padding: const EdgeInsets.all(16.0),
                             decoration: BoxDecoration(
                               borderRadius: DesignTokens.borderRadiusLarge,
-                              border: Border.all(
-                                color: color.primary,
-                                width: 2,
+                              gradient: LinearGradient(
+                                colors: AppColors.glassGradient(AppColors.transfer, isDark),
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
                               ),
-                              color: color.surface,
-                              boxShadow: AppElevation.elevation1(color.primary),
+                              border: Border.all(
+                                color: AppColors.transfer.withValues(alpha: 0.3),
+                                width: 1.5,
+                              ),
+                              boxShadow: AppColors.glassShadow(AppColors.transfer, isDark),
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: <Widget>[
                                 CircleAvatar(
                                   radius: 20,
-                                  backgroundColor: color.primaryContainer,
-                                  child: Icon(
-                                    Icons.arrow_circle_right_outlined,
-                                    size: 30,
-                                    color: color.primary,
+                                  backgroundColor: AppColors.transfer.withValues(alpha: 0.15),
+                                  child: const Icon(
+                                    Icons.swap_horiz,
+                                    size: 24,
+                                    color: AppColors.transfer,
                                   ),
                                 ),
                                 SizedBox(width: DesignTokens.spacing8),
@@ -290,7 +295,7 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                                         .toUpperCase(),
                                     textAlign: TextAlign.center,
                                     style: textTheme.labelLarge?.copyWith(
-                                      color: color.primary,
+                                      color: AppColors.transfer,
                                       fontWeight: FontWeight.w600,
                                     ),
                                     overflow: TextOverflow.ellipsis,
@@ -316,6 +321,8 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
             ),
             SizedBox(height: 16),
             NetWorthMiniCard(globalPadding: globalPadding),
+            SizedBox(height: 16),
+            ActiveTripMiniCard(globalPadding: globalPadding),
             SizedBox(height: 16),
             BudgetMiniCard(globalPadding: globalPadding),
             SizedBox(height: 16),

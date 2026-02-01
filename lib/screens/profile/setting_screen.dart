@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/providers/auth_service.dart';
 import 'package:mudra_manager/screens/profile/pin_entry_dialog.dart';
+import 'package:mudra_manager/theme/app_colors.dart';
 import 'package:mudra_manager/util/snackbar_service.dart';
 
 class SecuritySettingsScreen extends ConsumerStatefulWidget {
@@ -69,6 +70,8 @@ class _SecuritySettingsScreenState extends ConsumerState<SecuritySettingsScreen>
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final gradientColors = AppColors.glassGradient(color.primary, isDark);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Security Settings')),
@@ -77,18 +80,31 @@ class _SecuritySettingsScreenState extends ConsumerState<SecuritySettingsScreen>
         children: [
           if (_biometricAvailable) Container(
             padding: EdgeInsets.all(16),
-            decoration: BoxDecoration(color: color.surfaceContainerHighest, borderRadius: BorderRadius.circular(16)),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: gradientColors,
+              ),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: color.primary.withValues(alpha: 0.3), width: 1.5),
+              boxShadow: AppColors.glassShadow(color.primary, isDark),
+            ),
             child: Row(
               children: [
-                Container(padding: EdgeInsets.all(12), decoration: BoxDecoration(color: color.primary.withValues(alpha: 0.1), shape: BoxShape.circle), child: Icon(Icons.fingerprint, color: color.primary, size: 24)),
+                Container(
+                  padding: EdgeInsets.all(12),
+                  decoration: BoxDecoration(color: AppColors.white, shape: BoxShape.circle, boxShadow: [BoxShadow(color: color.primary.withValues(alpha: 0.2), blurRadius: 8, offset: Offset(0, 2))]),
+                  child: Icon(Icons.fingerprint, color: color.primary, size: 24),
+                ),
                 SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Biometric Unlock', style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+                      Text('Biometric Unlock', style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: color.primary)),
                       SizedBox(height: 2),
-                      Text('Use fingerprint or face', style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant)),
+                      Text('Use fingerprint or face', style: textTheme.bodySmall?.copyWith(color: color.primary)),
                     ],
                   ),
                 ),
@@ -99,18 +115,31 @@ class _SecuritySettingsScreenState extends ConsumerState<SecuritySettingsScreen>
           if (_biometricAvailable) SizedBox(height: 8),
           Container(
             padding: EdgeInsets.all(16),
-            decoration: BoxDecoration(color: color.surfaceContainerHighest, borderRadius: BorderRadius.circular(16)),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: gradientColors,
+              ),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: color.primary.withValues(alpha: 0.3), width: 1.5),
+              boxShadow: AppColors.glassShadow(color.primary, isDark),
+            ),
             child: Row(
               children: [
-                Container(padding: EdgeInsets.all(12), decoration: BoxDecoration(color: color.primary.withValues(alpha: 0.1), shape: BoxShape.circle), child: Icon(Icons.pin, color: color.primary, size: 24)),
+                Container(
+                  padding: EdgeInsets.all(12),
+                  decoration: BoxDecoration(color: AppColors.white, shape: BoxShape.circle, boxShadow: [BoxShadow(color: color.primary.withValues(alpha: 0.2), blurRadius: 8, offset: Offset(0, 2))]),
+                  child: Icon(Icons.pin, color: color.primary, size: 24),
+                ),
                 SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('PIN Unlock', style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+                      Text('PIN Unlock', style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: color.primary)),
                       SizedBox(height: 2),
-                      Text('Use PIN to unlock app', style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant)),
+                      Text('Use PIN to unlock app', style: textTheme.bodySmall?.copyWith(color: color.primary)),
                     ],
                   ),
                 ),
@@ -121,7 +150,16 @@ class _SecuritySettingsScreenState extends ConsumerState<SecuritySettingsScreen>
           SizedBox(height: 24),
           Container(
             padding: EdgeInsets.all(16),
-            decoration: BoxDecoration(color: color.primaryContainer.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(16), border: Border.all(color: color.primary.withValues(alpha: 0.3))),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: AppColors.glassGradient(color.primary, isDark),
+              ),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: color.primary.withValues(alpha: 0.3), width: 1.5),
+              boxShadow: AppColors.glassShadow(color.primary, isDark),
+            ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -133,7 +171,7 @@ class _SecuritySettingsScreenState extends ConsumerState<SecuritySettingsScreen>
                     children: [
                       Text('About PIN Security', style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: color.primary)),
                       SizedBox(height: 4),
-                      Text('Your PIN is securely stored and digits are randomized on entry for enhanced security.', style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant)),
+                      Text('Your PIN is securely stored and digits are randomized on entry for enhanced security.', style: textTheme.bodySmall?.copyWith(color: color.primary)),
                     ],
                   ),
                 ),

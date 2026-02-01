@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mudra_manager/screens/reusable/animated_balance.dart';
+import 'package:mudra_manager/theme/app_colors.dart';
 
 class MetricCarouselCard extends StatelessWidget {
   final double income;
@@ -17,6 +18,7 @@ class MetricCarouselCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return SizedBox(
       height: 160,
       child: ListView(
@@ -28,7 +30,8 @@ class MetricCarouselCard extends StatelessWidget {
             'Income',
             income,
             Icons.arrow_upward,
-            [Colors.green.shade400, Colors.green.shade600],
+            AppColors.income,
+            isDark,
             savingsRate > 0 ? savingsRate : null,
           ),
           _buildMetricCard(
@@ -36,7 +39,8 @@ class MetricCarouselCard extends StatelessWidget {
             'Expense',
             expense,
             Icons.arrow_downward,
-            [Colors.red.shade400, Colors.red.shade600],
+            AppColors.expense,
+            isDark,
             null,
           ),
           _buildMetricCard(
@@ -44,9 +48,8 @@ class MetricCarouselCard extends StatelessWidget {
             'Net',
             net,
             net >= 0 ? Icons.trending_up : Icons.trending_down,
-            net >= 0
-                ? [Colors.blue.shade400, Colors.blue.shade600]
-                : [Colors.orange.shade400, Colors.orange.shade600],
+            net >= 0 ? AppColors.transfer : Color(0xFFFF9800),
+            isDark,
             null,
           ),
           _buildMetricCard(
@@ -54,7 +57,8 @@ class MetricCarouselCard extends StatelessWidget {
             'Savings',
             savingsRate,
             Icons.savings_outlined,
-            [Colors.purple.shade400, Colors.purple.shade600],
+            AppColors.netWorth,
+            isDark,
             null,
             isPercent: true,
           ),
@@ -68,7 +72,8 @@ class MetricCarouselCard extends StatelessWidget {
     String title,
     double value,
     IconData icon,
-    List<Color> gradientColors,
+    Color baseColor,
+    bool isDark,
     double? progress, {
     bool isPercent = false,
   }) {
@@ -82,22 +87,20 @@ class MetricCarouselCard extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: gradientColors,
+          colors: AppColors.glassGradient(baseColor, isDark),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: gradientColors.first.withOpacity(0.3),
-            blurRadius: 8,
-            offset: Offset(0, 4),
-          ),
-        ],
+        border: Border.all(
+          color: baseColor.withValues(alpha: 0.3),
+          width: 1.5,
+        ),
+        boxShadow: AppColors.glassShadow(baseColor, isDark),
       ),
       child: Stack(
         children: [
           Positioned(
             right: -10,
             bottom: -10,
-            child: Icon(icon, size: 80, color: Colors.white.withOpacity(0.1)),
+            child: Icon(icon, size: 80, color: baseColor.withValues(alpha: 0.08)),
           ),
           Padding(
             padding: EdgeInsets.all(16),
@@ -106,13 +109,13 @@ class MetricCarouselCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Icon(icon, color: Colors.white, size: 20),
+                    Icon(icon, color: baseColor, size: 20),
                     SizedBox(width: 6),
                     Flexible(
                       child: Text(
                         title,
                         style: textTheme.labelLarge?.copyWith(
-                          color: Colors.white,
+                          color: baseColor,
                           fontWeight: FontWeight.w600,
                         ),
                         overflow: TextOverflow.ellipsis,
@@ -124,7 +127,7 @@ class MetricCarouselCard extends StatelessWidget {
                 AnimatedBalance(
                   value: isPercent ? value : value,
                   style: textTheme.headlineSmall?.copyWith(
-                    color: Colors.white,
+                    color: baseColor,
                     fontWeight: FontWeight.bold,
                   ),
                   suffix: isPercent ? '%' : null,
@@ -138,8 +141,8 @@ class MetricCarouselCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(4),
                     child: LinearProgressIndicator(
                       value: progress / 100,
-                      backgroundColor: Colors.white.withOpacity(0.3),
-                      valueColor: AlwaysStoppedAnimation(Colors.white),
+                      backgroundColor: baseColor.withValues(alpha: 0.2),
+                      valueColor: AlwaysStoppedAnimation(baseColor),
                       minHeight: 6,
                     ),
                   ),
@@ -149,7 +152,7 @@ class MetricCarouselCard extends StatelessWidget {
                   Text(
                     'Saved ${progress.toStringAsFixed(1)}%',
                     style: textTheme.labelSmall?.copyWith(
-                      color: Colors.white.withOpacity(0.9),
+                      color: baseColor.withValues(alpha: 0.8),
                     ),
                   ),
               ],

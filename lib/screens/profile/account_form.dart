@@ -6,11 +6,7 @@ import 'package:mudra_manager/db/models/account.dart'
     show Account, AccountType, GetAccountCollection;
 import 'package:mudra_manager/providers/account_providers.dart';
 import 'package:mudra_manager/providers/isar_provider.dart';
-import 'package:mudra_manager/screens/reusable/common_button.dart';
-import 'package:mudra_manager/screens/reusable/common_color_button.dart';
-import 'package:mudra_manager/screens/reusable/common_dropdown_field.dart'
-    show CommonDropdownField;
-import 'package:mudra_manager/screens/reusable/common_text_input_field.dart';
+import 'package:mudra_manager/theme/app_colors.dart';
 import 'package:mudra_manager/util/account_type_extension.dart';
 import 'package:mudra_manager/util/simple_color_picker.dart'
     show SimpleColorPickerDialog;
@@ -86,6 +82,8 @@ class _AccountFormState extends ConsumerState<AccountForm> {
     var color = Theme.of(context).colorScheme;
     var textTheme = Theme.of(context).textTheme;
     final headerColor = _selectedColor ?? color.primary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final gradientColors = AppColors.glassGradient(headerColor, isDark);
 
     return Scaffold(
       backgroundColor: headerColor,
@@ -112,7 +110,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
       body: Column(
         children: [
           SizedBox(
-            height: MediaQuery.of(context).size.height * 0.25,
+            height: MediaQuery.of(context).size.height * 0.20,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -125,14 +123,14 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                   child: Icon(
                     _selectedType?.icon ?? Icons.account_balance_wallet,
                     size: 64,
-                    color: Colors.white,
+                    color: color.surface,
                   ),
                 ),
                 SizedBox(height: 16),
                 Text(
                   (_selectedType?.label ?? 'Account').toUpperCase(),
                   style: textTheme.labelLarge?.copyWith(
-                    color: Colors.white.withValues(alpha: 0.7),
+                    color: color.surface.withValues(alpha: 0.7),
                     letterSpacing: 1.5,
                   ),
                 ),
@@ -143,7 +141,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
             child: Container(
               decoration: BoxDecoration(
                 color: color.surface,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+                borderRadius: BorderRadius.vertical(top: Radius.zero),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.1),
@@ -153,7 +151,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                 ],
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+                borderRadius: BorderRadius.vertical(top: Radius.zero),
                 child: Form(
                   key: _formKey,
                   child: ListView(
@@ -173,19 +171,24 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                       ),
                       SizedBox(height: 12),
                       Container(
-                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                         decoration: BoxDecoration(
-                          color: color.surfaceContainer,
                           borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: headerColor.withValues(alpha: 0.3), width: 1.5),
                         ),
                         child: TextFormField(
                           controller: _nameController,
                           decoration: InputDecoration(
                             hintText: 'Enter account name',
                             border: InputBorder.none,
+                            errorBorder: InputBorder.none,
+                            focusedErrorBorder: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            disabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
                             icon: Icon(
                               Icons.account_balance_wallet_outlined,
-                              color: color.onSurfaceVariant,
+                              color: headerColor,
                             ),
                           ),
                           validator:
@@ -205,10 +208,10 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                       ),
                       SizedBox(height: 12),
                       Container(
-                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                         decoration: BoxDecoration(
-                          color: color.surfaceContainer,
                           borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: headerColor.withValues(alpha: 0.3), width: 1.5),
                         ),
                         child: TextFormField(
                           controller: _accountNumberController,
@@ -216,9 +219,14 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                           decoration: InputDecoration(
                             hintText: 'Last 4 digits',
                             border: InputBorder.none,
+                            errorBorder: InputBorder.none,
+                            focusedErrorBorder: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            disabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
                             icon: Icon(
                               Icons.numbers,
-                              color: color.onSurfaceVariant,
+                              color: headerColor,
                             ),
                           ),
                           validator:
@@ -240,10 +248,10 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                       ),
                       SizedBox(height: 12),
                       Container(
-                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                         decoration: BoxDecoration(
-                          color: color.surfaceContainer,
                           borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: headerColor.withValues(alpha: 0.3), width: 1.5),
                         ),
                         child: TextFormField(
                           controller: _balanceController,
@@ -253,9 +261,14 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                           decoration: InputDecoration(
                             hintText: 'Enter initial balance',
                             border: InputBorder.none,
+                            errorBorder: InputBorder.none,
+                            focusedErrorBorder: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            disabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
                             icon: Icon(
                               Icons.currency_rupee,
-                              color: color.onSurfaceVariant,
+                              color: headerColor,
                             ),
                           ),
                           validator:
@@ -298,38 +311,16 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                                           ? LinearGradient(
                                             begin: Alignment.topLeft,
                                             end: Alignment.bottomRight,
-                                            colors: [
-                                              headerColor.withValues(
-                                                alpha: 0.8,
-                                              ),
-                                              headerColor,
-                                            ],
+                                            colors: gradientColors,
                                           )
-                                          : LinearGradient(
-                                            begin: Alignment.topLeft,
-                                            end: Alignment.bottomRight,
-                                            colors: [
-                                              color.surfaceContainerHighest
-                                                  .withValues(alpha: 0.6),
-                                              color.surfaceContainerHighest
-                                                  .withValues(alpha: 0.3),
-                                            ],
-                                          ),
-                                  borderRadius: BorderRadius.circular(16),
+                                          : null,
+                                  borderRadius: BorderRadius.circular(20),
                                   boxShadow:
                                       isSelected
-                                          ? [
-                                            BoxShadow(
-                                              color: headerColor.withValues(
-                                                alpha: 0.3,
-                                              ),
-                                              blurRadius: 8,
-                                              offset: Offset(0, 4),
-                                            ),
-                                          ]
+                                          ? AppColors.glassShadow(headerColor, isDark)
                                           : [],
                                   border: Border.all(
-                                    color: Colors.white.withValues(alpha: 0.2),
+                                    color: isSelected ? headerColor.withValues(alpha: 0.3) : color.outlineVariant.withValues(alpha: 0.3),
                                     width: 1.5,
                                   ),
                                 ),
@@ -340,7 +331,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                                       type.icon,
                                       color:
                                           isSelected
-                                              ? Colors.white
+                                              ? headerColor
                                               : color.onSurfaceVariant,
                                       size: 32,
                                     ),
@@ -350,7 +341,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                                       style: textTheme.labelSmall?.copyWith(
                                         color:
                                             isSelected
-                                                ? Colors.white
+                                                ? headerColor
                                                 : color.onSurfaceVariant,
                                         fontWeight:
                                             isSelected
@@ -388,29 +379,21 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                             gradient: LinearGradient(
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
-                              colors: [
-                                headerColor.withValues(alpha: 0.8),
-                                headerColor,
-                              ],
+                              colors: gradientColors,
                             ),
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(
-                                color: headerColor.withValues(alpha: 0.3),
-                                blurRadius: 8,
-                                offset: Offset(0, 4),
-                              ),
-                            ],
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: headerColor.withValues(alpha: 0.3), width: 1.5),
+                            boxShadow: AppColors.glassShadow(headerColor, isDark),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.palette, color: Colors.white),
+                              Icon(Icons.palette, color: headerColor),
                               SizedBox(width: 12),
                               Text(
                                 'TAP TO CHANGE COLOR',
                                 style: textTheme.titleSmall?.copyWith(
-                                  color: Colors.white,
+                                  color: headerColor,
                                   fontWeight: FontWeight.bold,
                                   letterSpacing: 1.0,
                                 ),
@@ -420,28 +403,34 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                         ),
                       ),
                       SizedBox(height: 48),
-                      FilledButton(
-                        onPressed: () {
+                      GestureDetector(
+                        onTap: () {
                           HapticFeedback.mediumImpact();
                           _saveAccount();
                         },
-                        style: FilledButton.styleFrom(
-                          backgroundColor: headerColor,
-                          foregroundColor: Colors.white,
-                          padding: EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          padding: EdgeInsets.symmetric(vertical: 18),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: gradientColors,
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: headerColor.withValues(alpha: 0.3), width: 1.5),
+                            boxShadow: AppColors.glassShadow(headerColor, isDark),
                           ),
-                          elevation: 2,
-                          minimumSize: Size(double.infinity, 52),
-                        ),
-                        child: Text(
-                          (widget.account == null
-                              ? 'SAVE ACCOUNT'
-                              : 'UPDATE ACCOUNT'),
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.2,
+                          child: Center(
+                            child: Text(
+                              (widget.account == null
+                                  ? 'SAVE ACCOUNT'
+                                  : 'UPDATE ACCOUNT'),
+                              style: textTheme.titleMedium?.copyWith(
+                                color: headerColor,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1.2,
+                              ),
+                            ),
                           ),
                         ),
                       ),

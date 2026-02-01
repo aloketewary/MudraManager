@@ -2,6 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mudra_manager/l10n/app_localizations.dart';
+import 'package:mudra_manager/theme/app_colors.dart';
 import 'package:mudra_manager/util/localization_extension.dart';
 
 class HeroChartCard extends StatelessWidget {
@@ -21,6 +22,7 @@ class HeroChartCard extends StatelessWidget {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final ctxt = AppLocalizations.of(context)!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       decoration: BoxDecoration(
@@ -28,18 +30,13 @@ class HeroChartCard extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            color.surface,
-            color.surfaceContainerHighest.withOpacity(0.3),
-          ],
+          colors: AppColors.glassGradient(color.primary, isDark),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: color.shadow.withOpacity(0.1),
-            blurRadius: 12,
-            offset: Offset(0, 4),
-          ),
-        ],
+        border: Border.all(
+          color: color.primary.withValues(alpha: 0.3),
+          width: 1.5,
+        ),
+        boxShadow: AppColors.glassShadow(color.primary, isDark),
       ),
       padding: EdgeInsets.all(16),
       child: Column(

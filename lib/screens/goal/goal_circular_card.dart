@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/db/models/goal.dart';
 import 'package:mudra_manager/l10n/app_localizations.dart';
+import 'package:mudra_manager/theme/app_colors.dart';
 import 'package:mudra_manager/util/icon_helper.dart';
 import 'package:mudra_manager/util/localization_extension.dart';
 import 'package:mudra_manager/util/dialog_utils.dart';
@@ -19,6 +20,7 @@ class GoalCircularCard extends ConsumerWidget {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final ctxt = AppLocalizations.of(context)!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final progress = (goal.currentAmount / goal.targetAmount).clamp(0.0, 1.0);
     final remaining = goal.targetAmount - goal.currentAmount;
@@ -75,15 +77,13 @@ class GoalCircularCard extends ConsumerWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            cardColor.withValues(alpha: 0.15),
-            cardColor.withValues(alpha: 0.05),
-          ],
+          colors: AppColors.glassGradient(cardColor, isDark),
         ),
         border: Border.all(
-          color: cardColor.withValues(alpha: 0.2),
+          color: cardColor.withValues(alpha: 0.3),
           width: 1.5,
         ),
+        boxShadow: AppColors.glassShadow(cardColor, isDark),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(24),

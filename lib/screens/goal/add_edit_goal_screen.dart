@@ -7,6 +7,7 @@ import 'package:mudra_manager/db/models/goal.dart';
 import 'package:mudra_manager/l10n/app_localizations.dart';
 import 'package:mudra_manager/providers/goal_provider.dart';
 import 'package:mudra_manager/util/icon_helper.dart';
+import 'package:mudra_manager/theme/app_colors.dart';
 
 class AddEditGoalScreen extends ConsumerStatefulWidget {
   final Goal? goal;
@@ -81,6 +82,7 @@ class _AddEditGoalScreenState extends ConsumerState<AddEditGoalScreen> {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final ctxt = AppLocalizations.of(context)!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
@@ -212,16 +214,22 @@ class _AddEditGoalScreenState extends ConsumerState<AddEditGoalScreen> {
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color:
-                                _selectedIcon == icon
-                                    ? color.primaryContainer
-                                    : Colors.transparent,
+                            gradient: _selectedIcon == icon
+                                ? LinearGradient(
+                                    colors: AppColors.glassGradient(color.primary, isDark),
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  )
+                                : null,
                             border: Border.all(
-                              color:
-                                  _selectedIcon == icon
-                                      ? color.primary
-                                      : color.outline,
+                              color: _selectedIcon == icon
+                                  ? color.primary.withValues(alpha: 0.3)
+                                  : color.outline,
+                              width: _selectedIcon == icon ? 1.5 : 1,
                             ),
+                            boxShadow: _selectedIcon == icon
+                                ? AppColors.glassShadow(color.primary, isDark)
+                                : null,
                           ),
                           child: Icon(
                             IconHelper.getIconData(icon),
@@ -257,12 +265,20 @@ class _AddEditGoalScreenState extends ConsumerState<AddEditGoalScreen> {
                             shape: BoxShape.circle,
                             color: c,
                             border: Border.all(
-                              color:
-                                  _selectedColor == c
-                                      ? Colors.black
-                                      : Colors.transparent,
-                              width: 2,
+                              color: _selectedColor == c
+                                  ? Colors.white
+                                  : Colors.transparent,
+                              width: 3,
                             ),
+                            boxShadow: _selectedColor == c
+                                ? [
+                                    BoxShadow(
+                                      color: c.withValues(alpha: 0.4),
+                                      blurRadius: 8,
+                                      offset: Offset(0, 4),
+                                    ),
+                                  ]
+                                : null,
                           ),
                         ),
                       );

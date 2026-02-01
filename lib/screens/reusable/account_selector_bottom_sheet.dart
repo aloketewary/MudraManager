@@ -1,0 +1,112 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/db/models/account.dart';
+import 'package:mudra_manager/providers/account_providers.dart';
+import 'package:mudra_manager/screens/reusable/account_display_card.dart';
+import 'package:mudra_manager/l10n/app_localizations.dart';
+import 'package:mudra_manager/util/localization_extension.dart';
+
+class AccountSelectorBottomSheet extends ConsumerWidget {
+  final Account? selectedAccount;
+  final Function(Account) onAccountSelected;
+
+  const AccountSelectorBottomSheet({
+    super.key,
+    this.selectedAccount,
+    required this.onAccountSelected,
+  });
+
+  static Future<Account?> show(
+    BuildContext context, {
+    Account? selectedAccount,
+  }) {
+    return showModalBottomSheet<Account>(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => AccountSelectorBottomSheet(
+        selectedAccount: selectedAccount,
+        onAccountSelected: (account) => Navigator.pop(context, account),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final accountsAsync = ref.watch(accountsProvider);
+    final textTheme = Theme.of(context).textTheme;
+    final l10n = AppLocalizations.of(context)!;
+
+    return DraggableScrollableSheet(
+      initialChildSize: 0.6,
+      minChildSize: 0.4,
+      maxChildSize: 0.9,
+      expand: false,
+      builder: (context, scrollController) => Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Select Account',
+                  style: textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: accountsAsync.when(
+              data: (accounts) {
+                if (accounts.isEmpty) {
+                  return Center(
+                    child: Text(
+                      'No accounts found',
+                      style: textTheme.bodyMedium,
+                    ),
+                  );
+                }
+                return ListView.builder(
+                  controller: scrollController,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: accounts.length,
+                  itemBuilder: (context, index) {
+                    final account = accounts[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: AccountDisplayCard(
+                        title: account.name,
+                        amount: l10n.formatCurrencyWithSign(0, account.balance),
+                        accountType: account.accountType,
+                        startColor: Colors.blue,
+                        endColor: Colors.blue.shade100,
+                        isSelected: selectedAccount?.id == account.id,
+                        accountNumber: account.accountNumber,
+                        callbackAction: () => onAccountSelected(account),
+                      ),
+                    );
+                  },
+                );
+              },
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (e, _) => Center(child: Text('Error: $e')),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

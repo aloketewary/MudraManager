@@ -16,6 +16,7 @@ import 'package:mudra_manager/screens/budget/budget_chart_screen.dart'
 import 'package:mudra_manager/screens/budget/chart_legend.dart';
 import 'package:mudra_manager/util/dialog_utils.dart';
 import 'package:mudra_manager/util/localization_extension.dart';
+import 'package:mudra_manager/theme/app_colors.dart';
 
 class BudgetSummaryCard extends ConsumerStatefulWidget {
   final BudgetWithProgress data;
@@ -44,23 +45,23 @@ class BudgetSummaryCardState extends ConsumerState<BudgetSummaryCard> {
     // Status color logic
     final statusColor =
         pct >= 1.0
-            ? color.error
+            ? AppColors.expense
             : pct >= 0.8
             ? Colors.orange
             : color.primary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: color.surface,
+        gradient: LinearGradient(
+          colors: AppColors.glassGradient(statusColor, isDark),
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(24.0),
-        boxShadow: [
-          BoxShadow(
-            color: color.shadow.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        border: Border.all(color: statusColor.withValues(alpha: 0.3), width: 1.5),
+        boxShadow: AppColors.glassShadow(statusColor, isDark),
       ),
       child: Column(
         children: [
@@ -72,8 +73,15 @@ class BudgetSummaryCardState extends ConsumerState<BudgetSummaryCard> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.1),
+                    color: AppColors.white,
                     shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: statusColor.withValues(alpha: 0.2),
+                        blurRadius: 8,
+                        offset: Offset(0, 4),
+                      ),
+                    ],
                   ),
                   child: Icon(
                     pct >= 1.0
@@ -92,12 +100,13 @@ class BudgetSummaryCardState extends ConsumerState<BudgetSummaryCard> {
                         b.name,
                         style: textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
+                          color: statusColor,
                         ),
                       ),
                       Text(
                         "${formatter.format(widget.data.startDate)} - ${formatter.format(widget.data.endDate)}",
                         style: textTheme.bodySmall?.copyWith(
-                          color: color.onSurfaceVariant,
+                          color: statusColor.withValues(alpha: 0.7),
                         ),
                       ),
                     ],
