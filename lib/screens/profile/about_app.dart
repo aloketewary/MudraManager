@@ -190,17 +190,17 @@ class AboutScreen extends StatelessWidget {
                       SizedBox(height: 16),
                       _buildInfoCard(context, color, textTheme, isDark, Icons.privacy_tip_outlined, "Privacy Policy", "View our privacy policy", () {
                         HapticFeedback.mediumImpact();
-                        _launchURL('https://YOUR_USERNAME.github.io/mudra_manager/privacy-policy.html');
+                        _launchURL('https://aloketewary.github.io/MudraManager/privacy-policy.html');
                       }),
                       SizedBox(height: 12),
                       _buildInfoCard(context, color, textTheme, isDark, Icons.description_outlined, "Terms & Conditions", "View terms and conditions", () {
                         HapticFeedback.mediumImpact();
-                        _launchURL('https://YOUR_USERNAME.github.io/mudra_manager/terms-conditions.html');
+                        _launchURL('https://aloketewary.github.io/MudraManager//terms-conditions.html');
                       }),
                       SizedBox(height: 12),
-                      _buildInfoCard(context, color, textTheme, isDark, Icons.email_outlined, "Contact Us", "support@mudramanager.app", () {
+                      _buildInfoCard(context, color, textTheme, isDark, Icons.email_outlined, "Contact Us", "aloke@duck.com", () {
                         HapticFeedback.mediumImpact();
-                        _launchURL('mailto:support@mudramanager.app');
+                        _launchURL('mailto:aloke@duck.com');
                       }),
                       SizedBox(height: 12),
                       _buildInfoCard(context, color, textTheme, isDark, Icons.verified_user_outlined, "License", "MIT License", () {

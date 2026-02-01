@@ -6,73 +6,113 @@
     <title>Mudra Manager - Smart Personal Finance</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }
-        .hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-align: center; padding: 80px 20px; }
-        .hero h1 { font-size: 3em; margin-bottom: 20px; }
-        .hero p { font-size: 1.3em; margin-bottom: 30px; opacity: 0.9; }
-        .btn { display: inline-block; padding: 15px 40px; background: white; color: #667eea; text-decoration: none; border-radius: 30px; font-weight: bold; margin: 10px; transition: transform 0.3s; }
-        .btn:hover { transform: translateY(-3px); }
-        .features { max-width: 1200px; margin: 60px auto; padding: 0 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; }
-        .feature { text-align: center; padding: 30px; }
-        .feature-icon { font-size: 3em; margin-bottom: 15px; }
-        .feature h3 { margin-bottom: 10px; color: #667eea; }
-        footer { background: #2d3748; color: white; text-align: center; padding: 40px 20px; }
-        .footer-links { margin: 20px 0; }
-        .footer-links a { color: white; text-decoration: none; margin: 0 15px; }
-        .footer-links a:hover { text-decoration: underline; }
-        @media (max-width: 600px) { .hero h1 { font-size: 2em; } }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; overflow-x: hidden; }
+        .hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 100px 20px; position: relative; overflow: hidden; }
+        .hero::before { content: ''; position: absolute; top: -50%; right: -10%; width: 500px; height: 500px; background: rgba(255,255,255,0.1); border-radius: 50%; }
+        .hero::after { content: ''; position: absolute; bottom: -30%; left: -5%; width: 400px; height: 400px; background: rgba(255,255,255,0.1); border-radius: 50%; }
+        .hero-content { max-width: 1200px; margin: 0 auto; text-align: center; position: relative; z-index: 1; }
+        .hero h1 { font-size: 4em; margin-bottom: 20px; animation: fadeInUp 0.8s; }
+        .hero p { font-size: 1.5em; margin-bottom: 15px; opacity: 0.95; animation: fadeInUp 0.8s 0.2s both; }
+        .hero .tagline { font-size: 1.2em; opacity: 0.85; margin-bottom: 40px; animation: fadeInUp 0.8s 0.4s both; }
+        .btn { display: inline-block; padding: 18px 50px; background: white; color: #667eea; text-decoration: none; border-radius: 50px; font-weight: bold; font-size: 1.1em; margin: 10px; transition: all 0.3s; box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: fadeInUp 0.8s 0.6s both; }
+        .btn:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(0,0,0,0.3); }
+        .features { max-width: 1200px; margin: 80px auto; padding: 0 20px; }
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 40px; }
+        .feature { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); transition: all 0.3s; text-align: center; }
+        .feature:hover { transform: translateY(-10px); box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
+        .feature-icon { font-size: 4em; margin-bottom: 20px; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .feature h3 { margin-bottom: 15px; color: #667eea; font-size: 1.5em; }
+        .feature p { color: #666; line-height: 1.8; }
+        .stats { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); padding: 80px 20px; text-align: center; }
+        .stats-grid { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; }
+        .stat { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
+        .stat-number { font-size: 3em; font-weight: bold; color: #667eea; margin-bottom: 10px; }
+        .stat-label { color: #666; font-size: 1.1em; }
+        footer { background: #1a202c; color: white; padding: 60px 20px 30px; }
+        .footer-content { max-width: 1200px; margin: 0 auto; text-align: center; }
+        .footer-links { margin: 30px 0; }
+        .footer-links a { color: white; text-decoration: none; margin: 0 20px; font-size: 1.1em; transition: color 0.3s; }
+        .footer-links a:hover { color: #667eea; }
+        .footer-bottom { margin-top: 40px; padding-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); opacity: 0.7; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @media (max-width: 768px) { .hero h1 { font-size: 2.5em; } .hero p { font-size: 1.2em; } .features-grid { gap: 30px; } }
     </style>
 </head>
 <body>
     <div class="hero">
-        <h1>💰 Mudra Manager</h1>
-        <p>Smart Personal Finance Management</p>
-        <p>Track expenses, manage budgets & auto-import SMS transactions</p>
-        <a href="https://play.google.com/store" class="btn">📱 Download on Play Store</a>
+        <div class="hero-content">
+            <h1>💰 Mudra Manager</h1>
+            <p>Smart Personal Finance Management</p>
+            <p class="tagline">Track expenses, manage budgets & auto-import SMS transactions</p>
+            <a href="https://play.google.com/store" class="btn">📱 Download on Play Store</a>
+        </div>
     </div>
 
     <div class="features">
-        <div class="feature">
-            <div class="feature-icon">📊</div>
-            <h3>Smart Dashboard</h3>
-            <p>Real-time overview of your financial health with beautiful charts</p>
+        <div class="features-grid">
+            <div class="feature">
+                <div class="feature-icon">📊</div>
+                <h3>Smart Dashboard</h3>
+                <p>Real-time overview of your financial health with beautiful interactive charts and insights</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">📩</div>
+                <h3>SMS Auto-Import</h3>
+                <p>Automatically detect and categorize transactions from bank SMS messages</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">💰</div>
+                <h3>Budget Tracking</h3>
+                <p>Set monthly budgets and get smart alerts when approaching spending limits</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🔒</div>
+                <h3>Secure & Private</h3>
+                <p>All data stays on your device. No cloud sync required. Complete privacy guaranteed</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">✈️</div>
+                <h3>Trip & Split</h3>
+                <p>Track group expenses and split bills with friends effortlessly</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">📈</div>
+                <h3>Detailed Reports</h3>
+                <p>Export comprehensive financial data to Excel or PDF formats</p>
+            </div>
         </div>
-        <div class="feature">
-            <div class="feature-icon">📩</div>
-            <h3>SMS Auto-Import</h3>
-            <p>Automatically detect transactions from bank SMS messages</p>
-        </div>
-        <div class="feature">
-            <div class="feature-icon">💰</div>
-            <h3>Budget Tracking</h3>
-            <p>Set monthly budgets and get alerts when approaching limits</p>
-        </div>
-        <div class="feature">
-            <div class="feature-icon">🔒</div>
-            <h3>Secure & Private</h3>
-            <p>All data stays on your device. No cloud sync required</p>
-        </div>
-        <div class="feature">
-            <div class="feature-icon">✈️</div>
-            <h3>Trip & Split</h3>
-            <p>Track group expenses and split bills with friends</p>
-        </div>
-        <div class="feature">
-            <div class="feature-icon">📈</div>
-            <h3>Detailed Reports</h3>
-            <p>Export financial data to Excel or PDF formats</p>
+    </div>
+
+    <div class="stats">
+        <div class="stats-grid">
+            <div class="stat">
+                <div class="stat-number">100%</div>
+                <div class="stat-label">Private</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">0</div>
+                <div class="stat-label">Ads</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">∞</div>
+                <div class="stat-label">Transactions</div>
+            </div>
         </div>
     </div>
 
     <footer>
-        <h3>Mudra Manager</h3>
-        <p>Made with ❤️ in India</p>
-        <div class="footer-links">
-            <a href="privacy-policy.html">Privacy Policy</a>
-            <a href="terms-conditions.html">Terms & Conditions</a>
-            <a href="mailto:support@mudramanager.app">Contact Us</a>
+        <div class="footer-content">
+            <h2 style="margin-bottom: 20px;">Mudra Manager</h2>
+            <p style="font-size: 1.2em; margin-bottom: 10px;">Made with ❤️ in India</p>
+            <div class="footer-links">
+                <a href="privacy-policy.html">Privacy Policy</a>
+                <a href="terms-conditions.html">Terms & Conditions</a>
+                <a href="mailto:aloke@duck.com">Contact Us</a>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2025 Mudra Manager. All rights reserved.</p>
+            </div>
         </div>
-        <p style="margin-top: 20px; opacity: 0.7;">© 2025 Mudra Manager. All rights reserved.</p>
     </footer>
 </body>
 </html>
