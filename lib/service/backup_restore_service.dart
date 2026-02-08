@@ -7,7 +7,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/backup/account_backup.dart' show AccountBackup;
 import 'package:mudra_manager/backup/budget_backup.dart' show BudgetBackup;
 import 'package:mudra_manager/backup/budget_category_allocation_backup.dart' show BudgetCategoryAllocationBackup;

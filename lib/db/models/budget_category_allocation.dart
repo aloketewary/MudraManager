@@ -1,4 +1,4 @@
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:mudra_manager/db/models/budget.dart' show Budget;
 import 'package:mudra_manager/db/models/category.dart' show Category;

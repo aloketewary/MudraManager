@@ -1,4 +1,4 @@
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/db/models/account.dart';
 import 'package:mudra_manager/db/models/category.dart';
 

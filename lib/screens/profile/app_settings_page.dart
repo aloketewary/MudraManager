@@ -2,25 +2,29 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/components/adaptive_text.dart';
 import 'package:mudra_manager/l10n/app_localizations.dart';
-import 'package:mudra_manager/providers/isar_provider.dart' show reminderTimeProvider;
-import 'package:mudra_manager/service/notification_service.dart' show NotificationService;
 import 'package:mudra_manager/theme/theme_provider.dart';
-import 'package:mudra_manager/util/snackbar_service.dart';
 
 class AppSettingsPage extends ConsumerWidget {
   const AppSettingsPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currentTheme = ref.watch(appThemeModeProvider);
-    final themeNotifier = ref.read(appThemeModeProvider.notifier);
+    final currentTheme = ref.watch(themeModeProvider);
+    final themeNotifier = ref.read(themeModeProvider.notifier);
     var textTheme = Theme.of(context).textTheme;
     var color = Theme.of(context).colorScheme;
     var ctxt = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(title: Text(ctxt.app_settings_appbar_title, style: textTheme.titleLarge)),
+      appBar: AppBar(
+        title: AdaptiveText(
+          ctxt.app_settings_appbar_title,
+          style: textTheme.titleLarge,
+          maxLines: 1,
+        ),
+      ),
       body: ListView(
         padding: EdgeInsets.all(16),
         children: [
@@ -113,7 +117,7 @@ class AppSettingsPage extends ConsumerWidget {
       case AppThemeMode.dark:
         return Icons.dark_mode;
       case AppThemeMode.amoled:
-        return Icons.smartphone;
+        return Icons.circle;
       case AppThemeMode.system:
         return Icons.phone_android;
     }

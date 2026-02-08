@@ -1,14 +1,12 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/db/isar_service.dart';
 import 'package:mudra_manager/db/models/pending_transaction.dart'
     show
         GetPendingTransactionCollection,
-        PendingTransaction,
-        PendingTransactionSchema;
+        PendingTransaction;
 import 'package:mudra_manager/providers/shared_preference_provider.dart'
     show SharedPrefsUtil;
 import 'package:mudra_manager/util/string_util.dart';
@@ -48,7 +46,6 @@ class SmsProcessorService {
       });
     } catch (e) {
       AppLogger.error('Failed to save SMS transaction', error: e);
-      print('Failed to save SMS transaction: $e');
     }
   }
 

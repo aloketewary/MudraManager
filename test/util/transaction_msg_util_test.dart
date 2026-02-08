@@ -59,6 +59,19 @@ void main() {
         expect(info.money, '12450.50');
         expect(info.balance, '50000.00');
       });
+
+      test('HDFC UPI Sent format', () {
+        const sms =
+            'Sent Rs.154.00\nFrom HDFC Bank A/C *7334\nTo SRI LAKSHMI VEGETABLE AND\nOn 01/02/26\nRef 639830420941\nNot You?\nCall 18002586161/SMS BLOCK UPI to 7308080808';
+        final info = util.getTransactionInfo(sms, 'HDFCBK', 'HDFCBK', 'hash5a');
+
+        expect(info.money, '154.00');
+        expect(info.account?.no, '7334');
+        expect(info.typeOfTransaction, TransactionType.debited);
+        expect(info.transactionTime, isNotNull);
+        expect(info.transactionTime?.day, 1);
+        expect(info.transactionTime?.month, 2);
+      });
     });
 
     group('SBI Bank SMS Tests', () {
@@ -196,6 +209,13 @@ void main() {
         expect(isValid, false);
       });
 
+      test('Future insurance payment - will be debited', () {
+        const sms = 'Alert: INR 26291.46 will be debited on 08/10/2025 from HDFC Bank Card 1234 for Hdfc Life Insurance ID: sdfsdfsdf Act: http//hdfcbank.com/sdsfsf';
+        final isValid = checkForTransactionalMessage(sms);
+
+        expect(isValid, false);
+      });
+
       test('Bill reminder - due payment', () {
         const sms = 'Your credit card bill of Rs 5000 is due on 25-Jan-25';
         final isValid = checkForTransactionalMessage(sms);
@@ -233,6 +253,13 @@ void main() {
 
       test('Valid completed transaction', () {
         const sms = 'Rs 450 debited from A/c XX1234 on 15-Jan-25';
+        final isValid = checkForTransactionalMessage(sms);
+
+        expect(isValid, true);
+      });
+
+      test('Valid sent transaction', () {
+        const sms = 'Sent Rs.154.00 From HDFC Bank A/C *7334';
         final isValid = checkForTransactionalMessage(sms);
 
         expect(isValid, true);

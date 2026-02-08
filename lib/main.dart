@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:mudra_manager/l10n/app_localizations.dart';
@@ -15,7 +16,7 @@ import 'package:mudra_manager/theme/theme_provider.dart';
 import 'package:mudra_manager/util/sms_transaction_util.dart';
 import 'package:mudra_manager/util/snackbar_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:telephony/telephony.dart';
+import 'package:another_telephony/telephony.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
@@ -25,6 +26,10 @@ final Telephony telephony = Telephony.instance;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
   var sharedPrefs = await SharedPreferences.getInstance();
   SharedPrefsUtil.init(sharedPrefs);
   
@@ -66,49 +71,43 @@ class MudraManagerApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final appThemeMode = ref.watch(appThemeModeProvider);
+    final appThemeMode = ref.watch(themeModeProvider);
     var appTheme = AppTheme.instance;
     final appColorTheme = ref.watch(themeNotifierProvider);
-    final systemBrightness = MediaQuery.platformBrightnessOf(context);
 
     return DynamicColorBuilder(
       builder: (lightDynamic, darkDynamic) {
-        ColorScheme lightColorScheme;
-        ColorScheme darkColorScheme;
-        ColorScheme amoledColorScheme;
+        ColorScheme lightScheme;
+        ColorScheme darkScheme;
+        ColorScheme amoledScheme;
 
-        if (lightDynamic != null && darkDynamic != null) {
-          lightColorScheme = lightDynamic.harmonized();
-          darkColorScheme = darkDynamic.harmonized();
-          amoledColorScheme = appColorTheme.amoledColorScheme();
+        if (appColorTheme == AppColorTheme.dynamic &&
+            lightDynamic != null &&
+            darkDynamic != null) {
+          lightScheme = lightDynamic.harmonized();
+          darkScheme = darkDynamic.harmonized();
+          amoledScheme = darkDynamic.harmonized().copyWith(
+            surface: Colors.black,
+          ); // Using black for amoled
         } else {
-          lightColorScheme = appColorTheme.lightColorScheme();
-          darkColorScheme = appColorTheme.darkColorScheme();
-          amoledColorScheme = appColorTheme.amoledColorScheme();
-        }
-
-        ThemeData currentTheme;
-
-        switch (appThemeMode) {
-          case AppThemeMode.light:
-            currentTheme = appTheme.buildLightThemeWithScheme(lightColorScheme);
-            break;
-          case AppThemeMode.dark:
-            currentTheme = appTheme.buildDarkThemeWithScheme(darkColorScheme);
-            break;
-          case AppThemeMode.amoled:
-            currentTheme = appTheme.buildDarkThemeWithScheme(amoledColorScheme);
-            break;
-          case AppThemeMode.system:
-            currentTheme = systemBrightness == Brightness.light
-                ? appTheme.buildLightThemeWithScheme(lightColorScheme)
-                : appTheme.buildDarkThemeWithScheme(darkColorScheme);
-            break;
+          lightScheme = appColorTheme.lightColorScheme();
+          darkScheme = appColorTheme.darkColorScheme();
+          amoledScheme = appColorTheme.amoledColorScheme();
         }
 
         return MaterialApp.router(
           title: 'Mudra Manager',
-          theme: currentTheme,
+          theme: appTheme.buildTheme(lightScheme),
+          darkTheme:
+              appThemeMode == AppThemeMode.amoled
+                  ? appTheme.buildTheme(amoledScheme)
+                  : appTheme.buildTheme(darkScheme),
+          themeMode: switch (appThemeMode) {
+            AppThemeMode.light => ThemeMode.light,
+            AppThemeMode.dark => ThemeMode.dark,
+            AppThemeMode.amoled => ThemeMode.dark,
+            AppThemeMode.system => ThemeMode.system,
+          },
           debugShowCheckedModeBanner: false,
           scaffoldMessengerKey: SnackbarService.scaffoldMessengerKey,
           routerConfig: AppRouter.router(showOnboarding),
@@ -116,12 +115,12 @@ class MudraManagerApp extends ConsumerWidget {
           supportedLocales: AppLocalizations.supportedLocales,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           localeResolutionCallback: (locale, supportedLocales) {
-            for (var supportedLocale in supportedLocales) {
-              if (supportedLocale.languageCode == locale?.languageCode) {
-                return supportedLocale;
-              }
-            }
-            return supportedLocales.first;
+            if (locale == null) return supportedLocales.first;
+
+            return supportedLocales.firstWhere(
+              (l) => l.languageCode == locale.languageCode,
+              orElse: () => supportedLocales.first,
+            );
           },
           builder: (context, child) {
             NotificationService.setContext(context);
@@ -135,6 +134,8 @@ class MudraManagerApp extends ConsumerWidget {
               ],
             );
           },
+          themeAnimationCurve: Curves.easeOutCubic,
+          themeAnimationDuration: const Duration(milliseconds: 350),
         );
       },
     );
@@ -147,16 +148,18 @@ Future<void> setupSmsListener() async {
     return;
   }
 
-  final bool? permissionsGranted = await telephony.requestSmsPermissions;
+  final telephony = Telephony.instance;
+  final bool? permissionsGranted =
+      await telephony.requestPhoneAndSmsPermissions;
 
-  if (permissionsGranted ?? false) {
+  if (permissionsGranted == true) {
     debugPrint('Setting up SMS listener for automatic transaction detection');
     telephony.listenIncomingSms(
       onNewMessage: (SmsMessage message) {
         SmsProcessorService.instance.parseAndSaveTransaction(
           body: message.body ?? '',
           address: message.address ?? '',
-          sender: message.address,
+          sender: message.address ?? '',
           timestamp: message.date ?? DateTime.now().millisecondsSinceEpoch,
         );
       },
@@ -174,7 +177,7 @@ void backgroundMessageHandler(SmsMessage message) {
   SmsProcessorService.instance.parseAndSaveTransaction(
     body: message.body ?? '',
     address: message.address ?? '',
-    sender: message.address,
+    sender: message.address ?? '',
     timestamp: message.date ?? DateTime.now().millisecondsSinceEpoch,
   );
 }

@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/db/isar_service.dart' show IsarService;
 import 'package:mudra_manager/db/models/goal.dart';
 import 'package:mudra_manager/providers/isar_provider.dart';

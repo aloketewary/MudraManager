@@ -1,6 +1,6 @@
 // lib/models/user_profile.dart
 
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'user_profile.g.dart';

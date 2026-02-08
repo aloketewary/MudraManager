@@ -1,7 +1,7 @@
 // lib/providers/user_profile_provider.dart
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/db/isar_service.dart';
 import 'package:mudra_manager/db/models/user_profile.dart' show GetUserProfileCollection, UserProfile, UserProfileQuerySortBy;
 

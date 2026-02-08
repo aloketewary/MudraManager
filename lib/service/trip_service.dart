@@ -1,4 +1,4 @@
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/db/isar_service.dart';
 import 'package:mudra_manager/db/models/trip.dart';
 import 'package:mudra_manager/db/models/transaction.dart';
@@ -79,8 +79,8 @@ class TripService {
 
     final balances = <int, double>{};
 
-    for (var tripTxn in trip?.transactions ?? []) {
-      await tripTxn.transaction.load();
+    for (var tripTxn in trip?.transactions.toList() ?? []) {
+      await tripTxn.load();
       await tripTxn.paidBy.load();
 
       final txn = tripTxn.transaction.value;

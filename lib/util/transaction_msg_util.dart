@@ -17,9 +17,9 @@ class TransactionUtil {
   ];
   static const trnKeywords = ['debited', 'credited', 'payment', 'spent'];
 
-  static final creditPattern = RegExp(r'credited|credit|deposited');
-  static final debitPattern = RegExp(r'debited|debit|deducted');
-  static final miscPattern = RegExp(r'payment|spent');
+  static final creditPattern = RegExp(r'credited|credit|deposited|received');
+  static final debitPattern = RegExp(r'debited|debit|deducted|sent|paid');
+  static final miscPattern = RegExp(r'payment|spent|transfer');
 
   TransactionType getTypeOfTransaction(String message) {
     final lowerMessage = message.toLowerCase();
@@ -358,7 +358,11 @@ bool checkForTransactionalMessage(String? body) {
   final hasTrn =
       lower.contains('debit') ||
       lower.contains('spent') ||
-      lower.contains('credit');
+      lower.contains('credit') ||
+      lower.contains('sent') ||
+      lower.contains('paid') ||
+      lower.contains('transfer') ||
+      lower.contains('received');
   
   if (!hasTrn) return false;
   

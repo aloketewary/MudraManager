@@ -74,7 +74,7 @@ class HomePageState extends ConsumerState<HomePage>
     return Scaffold(
       appBar: buildTopBar(profileAsync, _selectedIndex),
       extendBody: true,
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButtonLocation: _selectedIndex == 1 ? FloatingActionButtonLocation.centerFloat : FloatingActionButtonLocation.endFloat,
       floatingActionButton:
           _selectedIndex == 1
               ? FloatingActionButton.extended(

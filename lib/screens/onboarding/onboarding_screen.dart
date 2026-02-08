@@ -1,7 +1,7 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/db/models/account.dart' show Account, AccountType, GetAccountCollection;
 import 'package:mudra_manager/db/models/category.dart' show Category, CategoryType, GetCategoryCollection;
 import 'package:mudra_manager/db/models/user_profile.dart' show GetUserProfileCollection, UserProfile;

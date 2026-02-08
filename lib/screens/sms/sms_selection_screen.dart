@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:mudra_manager/db/models/transaction.dart';
 import 'package:mudra_manager/l10n/app_localizations.dart';
 import 'package:mudra_manager/util/snackbar_service.dart';
-import 'package:telephony/telephony.dart';
+import 'package:another_telephony/telephony.dart';
 
 class SmsSelectionScreen extends StatefulWidget {
   final List<SmsMessage> messages;

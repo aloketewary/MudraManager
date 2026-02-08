@@ -271,7 +271,7 @@ abstract class AppLocalizations {
   /// This is text of Theme Mode AMOLED dark
   ///
   /// In en, this message translates to:
-  /// **'AMOLED Dark'**
+  /// **'AMOLED'**
   String get app_settings_theme_mode_amoled;
 
   /// This is subtitle of Theme Mode tile

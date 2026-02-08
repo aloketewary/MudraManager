@@ -10,7 +10,7 @@ import file_picker
 import flutter_local_notifications
 import flutter_native_timezone_latest
 import flutter_secure_storage_macos
-import isar_flutter_libs
+import isar_community_flutter_libs
 import local_auth_darwin
 import open_file_mac
 import package_info_plus

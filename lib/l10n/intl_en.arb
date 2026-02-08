@@ -112,7 +112,7 @@
   "@app_settings_theme_mode_system_default": {
     "description": "This is text of Theme Mode system default"
   },
-  "app_settings_theme_mode_amoled": "AMOLED Dark",
+  "app_settings_theme_mode_amoled": "AMOLED",
   "@app_settings_theme_mode_amoled": {
     "description": "This is text of Theme Mode AMOLED dark"
   },

@@ -5,7 +5,7 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   dynamic_color
   flutter_secure_storage_windows
-  isar_flutter_libs
+  isar_community_flutter_libs
   local_auth_windows
   permission_handler_windows
   printing

@@ -41,9 +41,15 @@ class _ReviewPendingTransactionsScreenState
   Map<int, double> _balanceMap = {};
   bool _initialized = false;
   bool _isAutoProcessing = false;
-  late List<AnimationController> _controllers;
-  late List<Animation<Offset>> _animations;
+  List<AnimationController> _controllers = [];
+  List<Animation<Offset>> _animations = [];
   bool _isDisposed = false;
+
+  // Filter states
+  DateTime? _startDate;
+  DateTime? _endDate;
+  bool? _filterIncome; // null = all, true = income, false = expense
+  String _searchQuery = '';
 
   @override
   void didChangeDependencies() {
@@ -60,7 +66,7 @@ class _ReviewPendingTransactionsScreenState
     if (_controllers.isNotEmpty) {
       for (int i = 0; i < _controllers.length; i++) {
         await Future.delayed(Duration(milliseconds: 80));
-        if (_isDisposed) return;
+        if (_isDisposed || i >= _controllers.length) return;
         _controllers[i].forward();
       }
     }
@@ -88,6 +94,11 @@ class _ReviewPendingTransactionsScreenState
       appBar: AppBar(
         title: Text(ctxt.pendingTranx_reviewPendingTransactionsScreenTitle),
         actions: [
+          IconButton(
+            tooltip: "Filter",
+            onPressed: _showFilterBottomSheet,
+            icon: Icon(Icons.filter_list),
+          ),
           if (_isAutoProcessing)
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 16),
@@ -120,7 +131,34 @@ class _ReviewPendingTransactionsScreenState
       ),
       body: pendingTransactionProvider.when(
         data: (pendingTrans) {
-          if (pendingTrans.isEmpty) {
+          // Apply filters
+          var filtered =
+              pendingTrans.where((tx) {
+                if (tx == null) return false;
+
+                // Date filter
+                if (_startDate != null && tx.date.isBefore(_startDate!))
+                  return false;
+                if (_endDate != null && tx.date.isAfter(_endDate!))
+                  return false;
+
+                // Income/Expense filter
+                if (_filterIncome != null && tx.isIncome != _filterIncome)
+                  return false;
+
+                // Sender search
+                if (_searchQuery.isNotEmpty &&
+                    !(tx.sender?.toLowerCase().contains(
+                          _searchQuery.toLowerCase(),
+                        ) ??
+                        false)) {
+                  return false;
+                }
+
+                return true;
+              }).toList();
+
+          if (filtered.isEmpty) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -136,14 +174,18 @@ class _ReviewPendingTransactionsScreenState
                     style: textTheme.titleLarge?.copyWith(
                       color: color.onSurfaceVariant,
                     ),
+                    maxLines: 1,
                   ),
                 ],
               ),
             );
           }
 
+          for (var c in _controllers) {
+            c.dispose();
+          }
           _controllers = List.generate(
-            pendingTrans.length,
+            filtered.length,
             (_) => AnimationController(
               vsync: this,
               duration: Duration(milliseconds: 400),
@@ -164,9 +206,9 @@ class _ReviewPendingTransactionsScreenState
 
           return ListView.builder(
             padding: EdgeInsets.symmetric(vertical: 8),
-            itemCount: pendingTrans.length,
+            itemCount: filtered.length,
             itemBuilder: (context, index) {
-              final tx = pendingTrans[index];
+              final tx = filtered[index];
               final isIncome = (tx?.amount ?? 0) > 0;
 
               return SlideTransition(
@@ -221,6 +263,7 @@ class _ReviewPendingTransactionsScreenState
                               color: color.onPrimary,
                               fontWeight: FontWeight.bold,
                             ),
+                            maxLines: 1,
                           ),
                         ],
                       ),
@@ -244,6 +287,7 @@ class _ReviewPendingTransactionsScreenState
                               color: color.onError,
                               fontWeight: FontWeight.bold,
                             ),
+                            maxLines: 1,
                           ),
                         ],
                       ),
@@ -500,7 +544,7 @@ class _ReviewPendingTransactionsScreenState
                                         .when(
                                           data:
                                               (accounts) => SizedBox(
-                                                height: 120,
+                                                height: 150,
                                                 child: ListView.separated(
                                                   scrollDirection:
                                                       Axis.horizontal,
@@ -1114,5 +1158,197 @@ class _ReviewPendingTransactionsScreenState
       case AccountType.other:
         return Icons.attach_money;
     }
+  }
+
+  void _showFilterBottomSheet() {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: color.surface,
+      builder:
+          (context) => Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+            ),
+            child: SingleChildScrollView(
+              child: StatefulBuilder(
+                builder:
+                    (context, setModalState) => Container(
+                      decoration: BoxDecoration(
+                        color: color.surface,
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(24),
+                        ),
+                        border: Border.all(
+                          color: color.primary.withValues(alpha: 0.3),
+                          width: 1.5,
+                        ),
+                      ),
+                      padding: EdgeInsets.all(16),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Filter Transactions',
+                            style: textTheme.titleLarge?.copyWith(
+                              color: color.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 16),
+                          TextField(
+                            decoration: InputDecoration(
+                              labelText: 'Search by sender',
+                              prefixIcon: Icon(
+                                Icons.search,
+                                color: color.primary,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(
+                                  color: color.primary.withValues(alpha: 0.3),
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(
+                                  color: color.primary.withValues(alpha: 0.3),
+                                ),
+                              ),
+                            ),
+                            onChanged:
+                                (value) =>
+                                    setModalState(() => _searchQuery = value),
+                          ),
+                          SizedBox(height: 16),
+                          Text(
+                            'Type',
+                            style: textTheme.titleMedium?.copyWith(
+                              color: color.primary,
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          SegmentedButton<bool?>(
+                            segments: [
+                              ButtonSegment(
+                                value: null,
+                                label: Text('All'),
+                                icon: Icon(Icons.all_inclusive),
+                              ),
+                              ButtonSegment(
+                                value: true,
+                                label: Text('Income'),
+                                icon: Icon(Icons.arrow_downward),
+                              ),
+                              ButtonSegment(
+                                value: false,
+                                label: Text('Expense'),
+                                icon: Icon(Icons.arrow_upward),
+                              ),
+                            ],
+                            selected: {_filterIncome},
+                            onSelectionChanged: (Set<bool?> selected) {
+                              setModalState(
+                                () => _filterIncome = selected.first,
+                              );
+                            },
+                          ),
+                          SizedBox(height: 16),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  onPressed: () async {
+                                    final date = await showDatePicker(
+                                      context: context,
+                                      initialDate: _startDate ?? DateTime.now(),
+                                      firstDate: DateTime(2020),
+                                      lastDate: DateTime.now(),
+                                    );
+                                    if (date != null)
+                                      setModalState(() => _startDate = date);
+                                  },
+                                  icon: Icon(Icons.calendar_today),
+                                  label: Text(
+                                    _startDate == null
+                                        ? 'Start Date'
+                                        : DateFormat(
+                                          'dd MMM',
+                                        ).format(_startDate!),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: 8),
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  onPressed: () async {
+                                    final date = await showDatePicker(
+                                      context: context,
+                                      initialDate: _endDate ?? DateTime.now(),
+                                      firstDate: DateTime(2020),
+                                      lastDate: DateTime.now(),
+                                    );
+                                    if (date != null)
+                                      setModalState(() => _endDate = date);
+                                  },
+                                  icon: Icon(Icons.calendar_today),
+                                  label: Text(
+                                    _endDate == null
+                                        ? 'End Date'
+                                        : DateFormat(
+                                          'dd MMM',
+                                        ).format(_endDate!),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 16),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: OutlinedButton(
+                                  onPressed: () {
+                                    setModalState(() {
+                                      _startDate = null;
+                                      _endDate = null;
+                                      _filterIncome = null;
+                                      _searchQuery = '';
+                                    });
+                                    setState(() {});
+                                    Navigator.pop(context);
+                                  },
+                                  child: Text('Clear'),
+                                ),
+                              ),
+                              SizedBox(width: 8),
+                              Expanded(
+                                child: FilledButton(
+                                  style: FilledButton.styleFrom(
+                                    backgroundColor: color.primary,
+                                    foregroundColor: color.onPrimary,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {});
+                                    Navigator.pop(context);
+                                  },
+                                  child: Text('Apply'),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+              ),
+            ),
+          ),
+    );
   }
 }

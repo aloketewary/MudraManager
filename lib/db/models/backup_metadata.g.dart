@@ -32,11 +32,7 @@ const BackupMetadataSchema = CollectionSchema(
       name: r'filePath',
       type: IsarType.string,
     ),
-    r'fileSize': PropertySchema(
-      id: 3,
-      name: r'fileSize',
-      type: IsarType.long,
-    ),
+    r'fileSize': PropertySchema(id: 3, name: r'fileSize', type: IsarType.long),
     r'includesAttachments': PropertySchema(
       id: 4,
       name: r'includesAttachments',
@@ -46,8 +42,9 @@ const BackupMetadataSchema = CollectionSchema(
       id: 5,
       name: r'recordCount',
       type: IsarType.long,
-    )
+    ),
   },
+
   estimateSize: _backupMetadataEstimateSize,
   serialize: _backupMetadataSerialize,
   deserialize: _backupMetadataDeserialize,
@@ -56,10 +53,11 @@ const BackupMetadataSchema = CollectionSchema(
   indexes: {},
   links: {},
   embeddedSchemas: {},
+
   getId: _backupMetadataGetId,
   getLinks: _backupMetadataGetLinks,
   attach: _backupMetadataAttach,
-  version: '3.1.0+1',
+  version: '3.3.0',
 );
 
 int _backupMetadataEstimateSize(
@@ -142,7 +140,10 @@ List<IsarLinkBase<dynamic>> _backupMetadataGetLinks(BackupMetadata object) {
 }
 
 void _backupMetadataAttach(
-    IsarCollection<dynamic> col, Id id, BackupMetadata object) {
+  IsarCollection<dynamic> col,
+  Id id,
+  BackupMetadata object,
+) {
   object.id = id;
 }
 
@@ -158,17 +159,16 @@ extension BackupMetadataQueryWhereSort
 extension BackupMetadataQueryWhere
     on QueryBuilder<BackupMetadata, BackupMetadata, QWhereClause> {
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterWhereClause> idEqualTo(
-      Id id) {
+    Id id,
+  ) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IdWhereClause.between(
-        lower: id,
-        upper: id,
-      ));
+      return query.addWhereClause(IdWhereClause.between(lower: id, upper: id));
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterWhereClause> idNotEqualTo(
-      Id id) {
+    Id id,
+  ) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
@@ -191,8 +191,9 @@ extension BackupMetadataQueryWhere
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterWhereClause> idGreaterThan(
-      Id id,
-      {bool include = false}) {
+    Id id, {
+    bool include = false,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IdWhereClause.greaterThan(lower: id, includeLower: include),
@@ -201,8 +202,9 @@ extension BackupMetadataQueryWhere
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterWhereClause> idLessThan(
-      Id id,
-      {bool include = false}) {
+    Id id, {
+    bool include = false,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IdWhereClause.lessThan(upper: id, includeUpper: include),
@@ -217,12 +219,14 @@ extension BackupMetadataQueryWhere
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IdWhereClause.between(
-        lower: lowerId,
-        includeLower: includeLower,
-        upper: upperId,
-        includeUpper: includeUpper,
-      ));
+      return query.addWhereClause(
+        IdWhereClause.between(
+          lower: lowerId,
+          includeLower: includeLower,
+          upper: upperId,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 }
@@ -230,109 +234,111 @@ extension BackupMetadataQueryWhere
 extension BackupMetadataQueryFilter
     on QueryBuilder<BackupMetadata, BackupMetadata, QFilterCondition> {
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterFilterCondition>
-      backupDateEqualTo(DateTime value) {
+  backupDateEqualTo(DateTime value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'backupDate',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'backupDate', value: value),
+      );
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterFilterCondition>
-      backupDateGreaterThan(
-    DateTime value, {
-    bool include = false,
-  }) {
+  backupDateGreaterThan(DateTime value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'backupDate',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'backupDate',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterFilterCondition>
-      backupDateLessThan(
-    DateTime value, {
-    bool include = false,
-  }) {
+  backupDateLessThan(DateTime value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'backupDate',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'backupDate',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterFilterCondition>
-      backupDateBetween(
+  backupDateBetween(
     DateTime lower,
     DateTime upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'backupDate',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'backupDate',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterFilterCondition>
-      fileNameEqualTo(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  fileNameEqualTo(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'fileName',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'fileName',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterFilterCondition>
-      fileNameGreaterThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'fileName',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BackupMetadata, BackupMetadata, QAfterFilterCondition>
-      fileNameLessThan(
+  fileNameGreaterThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'fileName',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'fileName',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterFilterCondition>
-      fileNameBetween(
+  fileNameLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'fileName',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BackupMetadata, BackupMetadata, QAfterFilterCondition>
+  fileNameBetween(
     String lower,
     String upper, {
     bool includeLower = true,
@@ -340,153 +346,158 @@ extension BackupMetadataQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'fileName',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'fileName',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterFilterCondition>
-      fileNameStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  fileNameStartsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'fileName',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'fileName',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterFilterCondition>
-      fileNameEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  fileNameEndsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'fileName',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'fileName',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterFilterCondition>
-      fileNameContains(String value, {bool caseSensitive = true}) {
+  fileNameContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'fileName',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'fileName',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterFilterCondition>
-      fileNameMatches(String pattern, {bool caseSensitive = true}) {
+  fileNameMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'fileName',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'fileName',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterFilterCondition>
-      fileNameIsEmpty() {
+  fileNameIsEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'fileName',
-        value: '',
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'fileName', value: ''),
+      );
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterFilterCondition>
-      fileNameIsNotEmpty() {
+  fileNameIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'fileName',
-        value: '',
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'fileName', value: ''),
+      );
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterFilterCondition>
-      filePathIsNull() {
+  filePathIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'filePath',
-      ));
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'filePath'),
+      );
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterFilterCondition>
-      filePathIsNotNull() {
+  filePathIsNotNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'filePath',
-      ));
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'filePath'),
+      );
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterFilterCondition>
-      filePathEqualTo(
-    String? value, {
-    bool caseSensitive = true,
-  }) {
+  filePathEqualTo(String? value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'filePath',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'filePath',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterFilterCondition>
-      filePathGreaterThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'filePath',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BackupMetadata, BackupMetadata, QAfterFilterCondition>
-      filePathLessThan(
+  filePathGreaterThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'filePath',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'filePath',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterFilterCondition>
-      filePathBetween(
+  filePathLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'filePath',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BackupMetadata, BackupMetadata, QAfterFilterCondition>
+  filePathBetween(
     String? lower,
     String? upper, {
     bool includeLower = true,
@@ -494,178 +505,177 @@ extension BackupMetadataQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'filePath',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'filePath',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterFilterCondition>
-      filePathStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  filePathStartsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'filePath',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'filePath',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterFilterCondition>
-      filePathEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  filePathEndsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'filePath',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'filePath',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterFilterCondition>
-      filePathContains(String value, {bool caseSensitive = true}) {
+  filePathContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'filePath',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'filePath',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterFilterCondition>
-      filePathMatches(String pattern, {bool caseSensitive = true}) {
+  filePathMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'filePath',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'filePath',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterFilterCondition>
-      filePathIsEmpty() {
+  filePathIsEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'filePath',
-        value: '',
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'filePath', value: ''),
+      );
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterFilterCondition>
-      filePathIsNotEmpty() {
+  filePathIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'filePath',
-        value: '',
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'filePath', value: ''),
+      );
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterFilterCondition>
-      fileSizeEqualTo(int value) {
+  fileSizeEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'fileSize',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'fileSize', value: value),
+      );
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterFilterCondition>
-      fileSizeGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
+  fileSizeGreaterThan(int value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'fileSize',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'fileSize',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterFilterCondition>
-      fileSizeLessThan(
-    int value, {
-    bool include = false,
-  }) {
+  fileSizeLessThan(int value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'fileSize',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'fileSize',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterFilterCondition>
-      fileSizeBetween(
+  fileSizeBetween(
     int lower,
     int upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'fileSize',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'fileSize',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterFilterCondition> idEqualTo(
-      Id value) {
+    Id value,
+  ) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'id',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'id', value: value),
+      );
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterFilterCondition>
-      idGreaterThan(
-    Id value, {
-    bool include = false,
-  }) {
+  idGreaterThan(Id value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'id',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'id',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterFilterCondition>
-      idLessThan(
-    Id value, {
-    bool include = false,
-  }) {
+  idLessThan(Id value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'id',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'id',
+          value: value,
+        ),
+      );
     });
   }
 
@@ -676,79 +686,79 @@ extension BackupMetadataQueryFilter
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'id',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'id',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterFilterCondition>
-      includesAttachmentsEqualTo(bool value) {
+  includesAttachmentsEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'includesAttachments',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'includesAttachments', value: value),
+      );
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterFilterCondition>
-      recordCountEqualTo(int value) {
+  recordCountEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'recordCount',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'recordCount', value: value),
+      );
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterFilterCondition>
-      recordCountGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
+  recordCountGreaterThan(int value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'recordCount',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'recordCount',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterFilterCondition>
-      recordCountLessThan(
-    int value, {
-    bool include = false,
-  }) {
+  recordCountLessThan(int value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'recordCount',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'recordCount',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterFilterCondition>
-      recordCountBetween(
+  recordCountBetween(
     int lower,
     int upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'recordCount',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'recordCount',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 }
@@ -762,14 +772,14 @@ extension BackupMetadataQueryLinks
 extension BackupMetadataQuerySortBy
     on QueryBuilder<BackupMetadata, BackupMetadata, QSortBy> {
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterSortBy>
-      sortByBackupDate() {
+  sortByBackupDate() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'backupDate', Sort.asc);
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterSortBy>
-      sortByBackupDateDesc() {
+  sortByBackupDateDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'backupDate', Sort.desc);
     });
@@ -782,7 +792,7 @@ extension BackupMetadataQuerySortBy
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterSortBy>
-      sortByFileNameDesc() {
+  sortByFileNameDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'fileName', Sort.desc);
     });
@@ -795,7 +805,7 @@ extension BackupMetadataQuerySortBy
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterSortBy>
-      sortByFilePathDesc() {
+  sortByFilePathDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'filePath', Sort.desc);
     });
@@ -808,35 +818,35 @@ extension BackupMetadataQuerySortBy
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterSortBy>
-      sortByFileSizeDesc() {
+  sortByFileSizeDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'fileSize', Sort.desc);
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterSortBy>
-      sortByIncludesAttachments() {
+  sortByIncludesAttachments() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'includesAttachments', Sort.asc);
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterSortBy>
-      sortByIncludesAttachmentsDesc() {
+  sortByIncludesAttachmentsDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'includesAttachments', Sort.desc);
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterSortBy>
-      sortByRecordCount() {
+  sortByRecordCount() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'recordCount', Sort.asc);
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterSortBy>
-      sortByRecordCountDesc() {
+  sortByRecordCountDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'recordCount', Sort.desc);
     });
@@ -846,14 +856,14 @@ extension BackupMetadataQuerySortBy
 extension BackupMetadataQuerySortThenBy
     on QueryBuilder<BackupMetadata, BackupMetadata, QSortThenBy> {
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterSortBy>
-      thenByBackupDate() {
+  thenByBackupDate() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'backupDate', Sort.asc);
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterSortBy>
-      thenByBackupDateDesc() {
+  thenByBackupDateDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'backupDate', Sort.desc);
     });
@@ -866,7 +876,7 @@ extension BackupMetadataQuerySortThenBy
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterSortBy>
-      thenByFileNameDesc() {
+  thenByFileNameDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'fileName', Sort.desc);
     });
@@ -879,7 +889,7 @@ extension BackupMetadataQuerySortThenBy
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterSortBy>
-      thenByFilePathDesc() {
+  thenByFilePathDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'filePath', Sort.desc);
     });
@@ -892,7 +902,7 @@ extension BackupMetadataQuerySortThenBy
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterSortBy>
-      thenByFileSizeDesc() {
+  thenByFileSizeDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'fileSize', Sort.desc);
     });
@@ -911,28 +921,28 @@ extension BackupMetadataQuerySortThenBy
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterSortBy>
-      thenByIncludesAttachments() {
+  thenByIncludesAttachments() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'includesAttachments', Sort.asc);
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterSortBy>
-      thenByIncludesAttachmentsDesc() {
+  thenByIncludesAttachmentsDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'includesAttachments', Sort.desc);
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterSortBy>
-      thenByRecordCount() {
+  thenByRecordCount() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'recordCount', Sort.asc);
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QAfterSortBy>
-      thenByRecordCountDesc() {
+  thenByRecordCountDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'recordCount', Sort.desc);
     });
@@ -942,21 +952,23 @@ extension BackupMetadataQuerySortThenBy
 extension BackupMetadataQueryWhereDistinct
     on QueryBuilder<BackupMetadata, BackupMetadata, QDistinct> {
   QueryBuilder<BackupMetadata, BackupMetadata, QDistinct>
-      distinctByBackupDate() {
+  distinctByBackupDate() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'backupDate');
     });
   }
 
-  QueryBuilder<BackupMetadata, BackupMetadata, QDistinct> distinctByFileName(
-      {bool caseSensitive = true}) {
+  QueryBuilder<BackupMetadata, BackupMetadata, QDistinct> distinctByFileName({
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'fileName', caseSensitive: caseSensitive);
     });
   }
 
-  QueryBuilder<BackupMetadata, BackupMetadata, QDistinct> distinctByFilePath(
-      {bool caseSensitive = true}) {
+  QueryBuilder<BackupMetadata, BackupMetadata, QDistinct> distinctByFilePath({
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'filePath', caseSensitive: caseSensitive);
     });
@@ -969,14 +981,14 @@ extension BackupMetadataQueryWhereDistinct
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QDistinct>
-      distinctByIncludesAttachments() {
+  distinctByIncludesAttachments() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'includesAttachments');
     });
   }
 
   QueryBuilder<BackupMetadata, BackupMetadata, QDistinct>
-      distinctByRecordCount() {
+  distinctByRecordCount() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'recordCount');
     });
@@ -992,7 +1004,7 @@ extension BackupMetadataQueryProperty
   }
 
   QueryBuilder<BackupMetadata, DateTime, QQueryOperations>
-      backupDateProperty() {
+  backupDateProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'backupDate');
     });
@@ -1017,7 +1029,7 @@ extension BackupMetadataQueryProperty
   }
 
   QueryBuilder<BackupMetadata, bool, QQueryOperations>
-      includesAttachmentsProperty() {
+  includesAttachmentsProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'includesAttachments');
     });

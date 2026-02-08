@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/db/models/recurring_bill.dart';
 import 'package:mudra_manager/service/bill_service.dart';
 import 'package:mudra_manager/util/dialog_utils.dart';

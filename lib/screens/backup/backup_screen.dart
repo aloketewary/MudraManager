@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/db/models/backup_metadata.dart';
 import 'package:mudra_manager/service/backup_restore_service.dart';
 import 'package:mudra_manager/util/dialog_utils.dart';
@@ -283,6 +283,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
   }
 
   Widget _buildActionsCard() {
+    final color = Theme.of(context).colorScheme;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -292,7 +293,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
               width: double.infinity,
               child: FilledButton.icon(
                 onPressed: _createBackup,
-                icon: const Icon(Icons.backup),
+                icon:  Icon(Icons.backup, color: color.surface,),
                 label: const Text('Create Backup'),
               ),
             ),
@@ -301,7 +302,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
               width: double.infinity,
               child: OutlinedButton.icon(
                 onPressed: _restoreBackup,
-                icon: const Icon(Icons.restore),
+                icon: Icon(Icons.restore, color: color.surface,),
                 label: const Text('Restore Backup'),
               ),
             ),

@@ -1,4 +1,4 @@
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/db/models/backup_metadata.dart';
 import 'package:mudra_manager/db/models/budget.dart';
 import 'package:mudra_manager/db/models/budget_category_allocation.dart';

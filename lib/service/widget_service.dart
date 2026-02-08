@@ -1,5 +1,5 @@
 import 'package:home_widget/home_widget.dart';
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/providers/account_providers.dart';
 import 'package:mudra_manager/providers/isar_provider.dart';
 import 'package:mudra_manager/db/models/account.dart';

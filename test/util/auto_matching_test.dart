@@ -2,10 +2,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mudra_manager/db/models/account.dart';
 import 'package:mudra_manager/db/models/category.dart';
 import 'package:mudra_manager/db/models/pending_transaction.dart';
-import 'package:mudra_manager/providers/pending_transaction_prodiver.dart';
+import 'package:mudra_manager/providers/transaction_matching_service.dart';
 
 void main() {
-  group('PendingTransactionService - matchTransaction', () {
+  group('TransactionMatchingService - matchTransaction', () {
     late List<Account> mockAccounts;
     late List<Category> mockCategories;
 
@@ -28,7 +28,7 @@ void main() {
             ..body = 'Some transaction on SBM'
             ..isIncome = false;
 
-      final result = PendingTransactionService.matchTransaction(
+      final result = TransactionMatchingService.matchTransaction(
         pending: pending,
         accounts: mockAccounts,
         categories: mockCategories,
@@ -45,7 +45,7 @@ void main() {
             ..body = 'HDFC bank alert'
             ..isIncome = false;
 
-      final result = PendingTransactionService.matchTransaction(
+      final result = TransactionMatchingService.matchTransaction(
         pending: pending,
         accounts: mockAccounts,
         categories: mockCategories,
@@ -62,7 +62,7 @@ void main() {
             ..body = 'Unknown bank'
             ..isIncome = false;
 
-      final result = PendingTransactionService.matchTransaction(
+      final result = TransactionMatchingService.matchTransaction(
         pending: pending,
         accounts: mockAccounts,
         categories: mockCategories,
@@ -78,7 +78,24 @@ void main() {
             ..body = 'Spent Rs. 500 on Grocery shop'
             ..isIncome = false;
 
-      final result = PendingTransactionService.matchTransaction(
+      final result = TransactionMatchingService.matchTransaction(
+        pending: pending,
+        accounts: mockAccounts,
+        categories: mockCategories,
+      );
+
+      expect(result, isNotNull);
+      expect(result!.category.name, 'Grocery');
+    });
+
+    test('should match vegetable transaction to Grocery category', () {
+      final pending =
+          PendingTransaction()
+            ..account = '7334'
+            ..body = 'Sent Rs.154.00\nFrom HDFC Bank A/C *7334\nTo SRI LAKSHMI VEGETABLE AND\nOn 01/02/26'
+            ..isIncome = false;
+
+      final result = TransactionMatchingService.matchTransaction(
         pending: pending,
         accounts: mockAccounts,
         categories: mockCategories,
@@ -95,7 +112,7 @@ void main() {
             ..body = 'Random expense'
             ..isIncome = false;
 
-      final result = PendingTransactionService.matchTransaction(
+      final result = TransactionMatchingService.matchTransaction(
         pending: pending,
         accounts: mockAccounts,
         categories: mockCategories,
@@ -112,7 +129,7 @@ void main() {
             ..body = 'Salary credited'
             ..isIncome = true;
 
-      final result = PendingTransactionService.matchTransaction(
+      final result = TransactionMatchingService.matchTransaction(
         pending: pending,
         accounts: mockAccounts,
         categories: mockCategories,

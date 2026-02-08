@@ -1,4 +1,4 @@
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/db/isar_service.dart';
 import 'package:mudra_manager/db/models/recurring_transaction.dart';
 import 'package:mudra_manager/db/models/transaction.dart';

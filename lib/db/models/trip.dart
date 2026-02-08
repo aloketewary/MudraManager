@@ -1,4 +1,4 @@
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/db/models/transaction.dart';
 
 part 'trip.g.dart';
@@ -9,16 +9,16 @@ class Trip {
 
   late String name;
   String? description;
-  
+
   @Index()
   late DateTime startDate;
-  
+
   @Index()
   late DateTime endDate;
-  
+
   @Index()
   late bool isActive;
-  
+
   late DateTime createdAt;
 
   final participants = IsarLinks<TripParticipant>();
@@ -45,11 +45,7 @@ class TripParticipant {
 
   TripParticipant();
 
-  TripParticipant.create({
-    required this.name,
-    this.phone,
-    this.email,
-  });
+  TripParticipant.create({required this.name, this.phone, this.email});
 }
 
 @collection
@@ -58,13 +54,13 @@ class TripTransaction {
 
   final transaction = IsarLink<Transaction>();
   final paidBy = IsarLink<TripParticipant>();
-  
+
   @enumerated
   late SplitType splitType;
-  
+
   late List<int> participantIds;
   late List<double> splitAmounts;
-  
+
   late DateTime addedAt;
 
   TripTransaction();
@@ -85,19 +81,17 @@ class Settlement {
   final trip = IsarLink<Trip>();
   final from = IsarLink<TripParticipant>();
   final to = IsarLink<TripParticipant>();
-  
+
   late double amount;
-  
+
   @Index()
   late bool isSettled;
-  
+
   DateTime? settledAt;
   late DateTime createdAt;
 
   Settlement();
 
-  Settlement.create({
-    required this.amount,
-    this.isSettled = false,
-  }) : createdAt = DateTime.now();
+  Settlement.create({required this.amount, this.isSettled = false})
+    : createdAt = DateTime.now();
 }

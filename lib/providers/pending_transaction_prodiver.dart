@@ -1,17 +1,16 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/db/isar_service.dart' show IsarService;
-import 'package:mudra_manager/db/models/pending_transaction.dart';
 import 'package:mudra_manager/db/models/account.dart' show Account;
 import 'package:mudra_manager/db/models/category.dart' as db_category
-    show Category, CategoryType;
+    show Category;
+import 'package:mudra_manager/db/models/pending_transaction.dart';
 import 'package:mudra_manager/db/models/transaction.dart'
     show GetTransactionCollection, Transaction;
 import 'package:mudra_manager/providers/isar_provider.dart';
 import 'package:mudra_manager/providers/transaction_matching_service.dart';
-import 'package:mudra_manager/util/transaction_msg_util.dart';
 import 'package:mudra_manager/util/app_logger.dart';
+import 'package:mudra_manager/util/transaction_msg_util.dart';
 
 final pendingTxnServiceProvider = Provider<PendingTransactionService>((ref) {
   final isarService = ref.watch(isarServiceProvider);

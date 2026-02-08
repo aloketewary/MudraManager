@@ -1,21 +1,27 @@
-import 'package:go_router/go_router.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:another_telephony/telephony.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
-import 'package:mudra_manager/db/models/pending_transaction.dart' show PendingTransaction;
+import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+import 'package:mudra_manager/db/models/pending_transaction.dart'
+    show PendingTransaction;
+import 'package:mudra_manager/main.dart' show setupSmsListener;
 import 'package:mudra_manager/providers/pending_transaction_prodiver.dart';
 import 'package:mudra_manager/providers/shared_preference_provider.dart';
-
-import 'package:mudra_manager/util/string_util.dart';
-import 'package:mudra_manager/util/transaction_msg_util.dart' show TransactionInfo, TransactionType, TransactionUtil, checkForTransactionalMessage, generateSmsHash;
-import 'package:mudra_manager/main.dart' show setupSmsListener;
 import 'package:mudra_manager/util/snackbar_service.dart';
+import 'package:mudra_manager/util/string_util.dart';
+import 'package:mudra_manager/util/transaction_msg_util.dart'
+    show
+        TransactionInfo,
+        TransactionType,
+        TransactionUtil,
+        checkForTransactionalMessage;
 import 'package:permission_handler/permission_handler.dart';
 
 class SmsImportSettingsScreen extends ConsumerStatefulWidget {
@@ -28,8 +34,7 @@ class SmsImportSettingsScreen extends ConsumerStatefulWidget {
 
 class _SmsImportSettingsScreenState
     extends ConsumerState<SmsImportSettingsScreen> {
-  bool _smsImportEnabled =
-      SharedPrefsUtil.instance.getSmsImportEnabled(); // Toggle for SMS Import
+  bool _smsImportEnabled = SharedPrefsUtil.instance.getSmsImportEnabled();
   TransactionUtil transactionUtil = TransactionUtil();
   bool _permissionGranted = false;
 
@@ -64,7 +69,9 @@ class _SmsImportSettingsScreenState
                 gradient: LinearGradient(colors: gradientColors, begin: Alignment.topLeft, end: Alignment.bottomRight),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: color.primary.withValues(alpha: 0.3), width: 1.5),
-                boxShadow: [BoxShadow(color: color.primary.withValues(alpha: 0.15), blurRadius: 12, offset: Offset(0, 4))],
+                boxShadow: [
+                  BoxShadow(color: color.primary.withValues(alpha: 0.15), blurRadius: 12, offset: Offset(0, 4)),
+                ],
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -74,14 +81,23 @@ class _SmsImportSettingsScreenState
                     decoration: BoxDecoration(
                       color: color.onSurface,
                       borderRadius: BorderRadius.circular(16),
-                      boxShadow: [BoxShadow(color: color.primary.withValues(alpha: 0.15), blurRadius: 12, offset: Offset(0, 4))],
+                      boxShadow: [
+                        BoxShadow(color: color.primary.withValues(alpha: 0.15), blurRadius: 12, offset: Offset(0, 4)),
+                      ],
                     ),
                     child: Icon(Icons.phone_iphone, color: color.primary, size: 48),
                   ),
                   SizedBox(height: 20),
-                  Text('Not Available on iOS', style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: color.primary)),
+                  Text(
+                    'Not Available on iOS',
+                    style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: color.primary),
+                  ),
                   SizedBox(height: 12),
-                  Text('SMS import is only available on Android devices due to iOS platform restrictions.', textAlign: TextAlign.center, style: textTheme.bodyMedium?.copyWith(color: color.primary.withValues(alpha: 0.75))),
+                  Text(
+                    'SMS import is only available on Android devices due to iOS platform restrictions.',
+                    textAlign: TextAlign.center,
+                    style: textTheme.bodyMedium?.copyWith(color: color.primary.withValues(alpha: 0.75)),
+                  ),
                 ],
               ),
             ),
@@ -117,17 +133,12 @@ class _SmsImportSettingsScreenState
                       children: [
                         Text(
                           'Enable SMS Import',
-                          style: textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: color.onSurface,
-                          ),
+                          style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: color.onSurface),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           'Auto-detect transactions from SMS',
-                          style: textTheme.bodySmall?.copyWith(
-                            color: color.onSurfaceVariant,
-                          ),
+                          style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
                         ),
                       ],
                     ),
@@ -211,17 +222,12 @@ class _SmsImportSettingsScreenState
                       children: [
                         Text(
                           'How it Works',
-                          style: textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: color.onSurface,
-                          ),
+                          style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: color.onSurface),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           'We scan SMS from trusted sources like banks or wallets to automatically create transactions.',
-                          style: textTheme.bodySmall?.copyWith(
-                            color: color.onSurfaceVariant,
-                          ),
+                          style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
                         ),
                       ],
                     ),
@@ -269,18 +275,10 @@ class _SmsImportSettingsScreenState
                   children: [
                     Text(
                       title,
-                      style: textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: color.onSurface,
-                      ),
+                      style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: color.onSurface),
                     ),
                     const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: textTheme.bodySmall?.copyWith(
-                        color: color.onSurfaceVariant,
-                      ),
-                    ),
+                    Text(subtitle, style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant)),
                   ],
                 ),
               ),
@@ -306,9 +304,7 @@ class _SmsImportSettingsScreenState
 
     await showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (context) {
         return Padding(
           padding: const EdgeInsets.all(16),
@@ -324,12 +320,7 @@ class _SmsImportSettingsScreenState
                 ),
               ),
               const SizedBox(height: 16),
-              Text(
-                'Select Scan Period',
-                style: textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              Text('Select Scan Period', style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
               const SizedBox(height: 16),
               ...options.entries.map((entry) {
                 return Card(
@@ -345,25 +336,12 @@ class _SmsImportSettingsScreenState
                       padding: const EdgeInsets.all(16),
                       child: Row(
                         children: [
-                          Icon(
-                            Icons.calendar_month,
-                            color: color.primary,
-                            size: 24,
-                          ),
+                          Icon(Icons.calendar_month, color: color.primary, size: 24),
                           const SizedBox(width: 16),
                           Expanded(
-                            child: Text(
-                              entry.key,
-                              style: textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
+                            child: Text(entry.key, style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500)),
                           ),
-                          Icon(
-                            Icons.arrow_forward_ios,
-                            color: color.onSurfaceVariant,
-                            size: 16,
-                          ),
+                          Icon(Icons.arrow_forward_ios, color: color.onSurfaceVariant, size: 16),
                         ],
                       ),
                     ),
@@ -389,7 +367,9 @@ class _SmsImportSettingsScreenState
 
   void _rescanSmsFrom(DateTime startDate) async {
     final now = DateTime.now();
-    // 1. Show fancy loading dialog
+    int processedCount = 0;
+    int scannedCount = 0;
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -404,26 +384,15 @@ class _SmsImportSettingsScreenState
               color: color.surface,
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
-                BoxShadow(
-                  color: color.shadow.withValues(alpha: 0.1),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
+                BoxShadow(color: color.shadow.withValues(alpha: 0.1), blurRadius: 10, offset: const Offset(0, 4)),
               ],
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                CircularProgressIndicator(
-                  color: color.primary,
-                ),
+                CircularProgressIndicator(color: color.primary),
                 const SizedBox(height: 20),
-                Text(
-                  "Scanning your SMS...",
-                  style: textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                Text("Scanning your SMS...", style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
               ],
             ),
           ),
@@ -431,68 +400,78 @@ class _SmsImportSettingsScreenState
       },
     );
 
-    final query = SmsQuery();
-    final messages = await query.getAllSms;
+    try {
+      final telephony = Telephony.instance;
+      final startMillis = startDate.millisecondsSinceEpoch;
+      final allMessages = await telephony.getInboxSms(
+        columns: [SmsColumn.ADDRESS, SmsColumn.BODY, SmsColumn.DATE],
+        filter: SmsFilter.where(
+          SmsColumn.DATE,
+        ).greaterThanOrEqualTo(startMillis.toString()),
+      );
 
-    if (!mounted) return;
+      if (!mounted) return;
 
-    final filteredMessages =
-        messages
-            .where((sms) {
-              return sms.date != null &&
-                  sms.date!.isAfter(startDate) &&
-                  sms.date!.isBefore(now);
-            })
-            .where((sms) {
-              return checkForTransactionalMessage(sms.body);
-            })
-            .toList();
+      final filteredMessages =
+          allMessages.where((sms) {
+            if (sms.date == null) return false;
+            final smsDate = DateTime.fromMillisecondsSinceEpoch(sms.date!);
+            return smsDate.isBefore(now);
+          }).toList();
 
-    debugPrint(
-      'Found ${filteredMessages.length} SMS between $startDate and $now',
-    );
-    _showFoundSmsMessage(filteredMessages.length);
+      const batchSize = 50;
+      for (int i = 0; i < filteredMessages.length; i += batchSize) {
+        if (!mounted) break;
 
-    // Optionally show a SnackBar or dialog to user
-    if (filteredMessages.isNotEmpty) {
-      for (var sms in filteredMessages) {
-        var smsHash = generateSmsHash(
-          sms.address ?? '',
-          sms.date?.millisecondsSinceEpoch,
-          sms.body ?? '',
-        );
-        var alreadyProcessed = SharedPrefsUtil.instance.isAlreadyProcessed(
-          smsHash,
-        );
-        if (!alreadyProcessed) {
+        final batch = filteredMessages.skip(i).take(batchSize);
+
+        for (var sms in batch) {
+          scannedCount++;
+          if (!checkForTransactionalMessage(sms.body)) continue;
+
+          var smsHash = generateSmsHash(
+            sms.address ?? '',
+            sms.date,
+            sms.body ?? '',
+          );
+          if (SharedPrefsUtil.instance.isAlreadyProcessed(smsHash)) continue;
+
           SharedPrefsUtil.instance.storeProcessedHash(smsHash);
           var transactionInfo = transactionUtil.getTransactionInfo(
             sms.body,
             sms.address,
-            sms.sender,
+            null,
             smsHash,
           );
           processSmsForSaving(transactionInfo);
-        } else {
-          debugPrint("Skipping already processed SMS from ${sms.address}");
+          processedCount++;
         }
-      }
-      ref.invalidate(pendingTxnServiceProvider);
-    }
 
-    // 2. After scanning, close progress dialog
-    if (context.mounted) context.pop();
+        await Future.delayed(Duration(milliseconds: 50));
+      }
+
+      if (mounted) {
+        ref.invalidate(pendingTxnServiceProvider);
+      }
+    } catch (e) {
+      debugPrint('Error scanning SMS: $e');
+      if (mounted) {
+        SnackbarService.error('Failed to scan SMS');
+      }
+    } finally {
+      if (context.mounted) context.pop();
+      if (mounted) {
+        _showFoundSmsMessage(processedCount);
+      }
+    }
   }
 
   void _showFoundSmsMessage(int count) {
     if (!mounted) return;
-    // You can use a SnackBar, Dialog, Toast, anything.
-    // Here's a quick SnackBar example:
     final message =
         count > 0
             ? "🔎 Found $count SMS related messages!"
             : "No SMS found for selected period.";
-
     SnackbarService.info(message);
   }
 

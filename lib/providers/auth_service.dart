@@ -10,6 +10,7 @@ class AuthService {
 
   final _storage = FlutterSecureStorage();
   final _localAuth = LocalAuthentication();
+  bool _authenticating = false;
 
   /// Enable/disable biometric unlock
   Future<void> setBiometricEnabled(bool enabled) =>
@@ -44,9 +45,17 @@ class AuthService {
 
   /// Perform biometric auth
   Future<bool> authenticateBiometric() async {
-    return await _localAuth.authenticate(
-      localizedReason: 'Please authenticate to unlock the app',
-      options: const AuthenticationOptions(biometricOnly: true),
-    );
+    if (_authenticating) return false;
+    _authenticating = true;
+    try {
+      return await _localAuth.authenticate(
+        localizedReason: 'Please authenticate to unlock the app',
+        options: const AuthenticationOptions(biometricOnly: true),
+      );
+    } catch (e) {
+      return false;
+    } finally {
+      _authenticating = false;
+    }
   }
 }

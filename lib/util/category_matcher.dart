@@ -2,33 +2,33 @@ import 'package:mudra_manager/db/models/category.dart';
 
 class CategoryMatcher {
   static final Map<String, List<String>> defaultKeywords = {
-    'Food & Dining': [
+    'Food': [
       'swiggy', 'zomato', 'uber eats', 'dominos', 'mcdonald',
-      'kfc', 'pizza', 'restaurant', 'cafe', 'food', 'dining', 'burger', 'coffee'
+      'kfc', 'pizza', 'restaurant', 'cafe', 'food', 'dining', 'burger', 'coffee', 'meal'
     ],
-    'Transportation': [
+    'Transport': [
       'uber', 'ola', 'rapido', 'petrol', 'fuel', 'parking',
-      'toll', 'metro', 'bus', 'taxi', 'cab', 'ride'
+      'toll', 'metro', 'bus', 'taxi', 'cab', 'ride', 'transport'
     ],
     'Shopping': [
       'amazon', 'flipkart', 'myntra', 'ajio', 'meesho',
-      'shopping', 'mall', 'store', 'fashion', 'retail'
+      'shopping', 'mall', 'store', 'fashion', 'retail', 'shop'
     ],
-    'Bills & Utilities': [
+    'Bills': [
       'electricity', 'water', 'gas', 'internet', 'broadband',
-      'mobile recharge', 'dth', 'bill payment', 'airtel', 'jio', 'vi', 'bsnl'
+      'mobile recharge', 'dth', 'bill payment', 'airtel', 'jio', 'vi', 'bsnl', 'bill', 'utility'
     ],
     'Entertainment': [
       'netflix', 'prime', 'hotstar', 'spotify', 'youtube',
-      'movie', 'cinema', 'pvr', 'inox', 'bookmyshow'
+      'movie', 'cinema', 'pvr', 'inox', 'bookmyshow', 'entertainment'
     ],
     'Healthcare': [
       'pharmacy', 'hospital', 'doctor', 'medicine', 'apollo',
-      'medplus', 'health', 'clinic', 'lab'
+      'medplus', 'health', 'clinic', 'lab', 'medical'
     ],
-    'Groceries': [
+    'Grocery': [
       'bigbasket', 'grofers', 'blinkit', 'zepto', 'dunzo',
-      'grocery', 'supermarket', 'dmart', 'kirana'
+      'grocery', 'supermarket', 'dmart', 'kirana', 'vegetable', 'fruit', 'veggie', 'groceries'
     ],
   };
 
@@ -49,17 +49,26 @@ class CategoryMatcher {
       }
     }
 
-    // Then try default keywords
+    // Then try default keywords with flexible category name matching
     for (var entry in defaultKeywords.entries) {
       final categoryName = entry.key;
       final keywords = entry.value;
 
       for (var keyword in keywords) {
         if (bodyLower.contains(keyword)) {
-          // Find category by name in the provided list
+          // Try exact match first
           try {
             final cat = categories.firstWhere(
               (c) => c.name.toLowerCase() == categoryName.toLowerCase(),
+            );
+            return cat;
+          } catch (_) {}
+
+          // Try partial match (e.g., "Grocery" matches "Groceries")
+          try {
+            final cat = categories.firstWhere(
+              (c) => c.name.toLowerCase().contains(categoryName.toLowerCase().split(' ').first) ||
+                     categoryName.toLowerCase().contains(c.name.toLowerCase()),
             );
             return cat;
           } catch (_) {

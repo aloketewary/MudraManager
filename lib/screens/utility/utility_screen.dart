@@ -324,9 +324,6 @@ class UtilityScreenState extends State<UtilityScreen> {
                 itemBuilder:
                     (context, index) => _UtilityCard(item: visibleItems[index]),
               ),
-
-      floatingActionButton: null,
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }

@@ -106,7 +106,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get app_settings_theme_mode_system_default => 'System Default';
 
   @override
-  String get app_settings_theme_mode_amoled => 'AMOLED Dark';
+  String get app_settings_theme_mode_amoled => 'AMOLED';
 
   @override
   String get app_settings_theme_mode_subtitle => 'Choose your preferred theme';
