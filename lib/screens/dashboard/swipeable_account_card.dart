@@ -1,4 +1,3 @@
-import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/db/models/account.dart';
@@ -95,7 +94,7 @@ class _AnimatedSwipeableAccountCardsState
     return accountsAsync.when(
       data: (accounts) {
         if (accounts.isEmpty) {
-          return const Center(child: Text("No accounts yet"));
+          return Center(child: Text(ctxt.common_noAccountsYet));
         }
         List<AccountCard> cards =
             accounts.map((account) {
@@ -117,82 +116,86 @@ class _AnimatedSwipeableAccountCardsState
 
         // Use accounts list instead of _cards
         return SizedBox(
-          height: 280,
+          height: 240,
           width: size.width - 16,
           child: Stack(
-            alignment: Alignment.center,
             children: [
-              // same layout logic as before, but with `accounts[_getIndex(...)]`
-              // Previous card (behind)
-              AnimatedPositioned(
-                duration: const Duration(milliseconds: 300),
-                top: 2,
-                left: 18,
-                right: 18,
-                child: AnimatedScale(
-                  scale: 1,
-                  duration: const Duration(milliseconds: 300),
-                  child: AnimatedAccountCard(
-                    totalBalance: cards[_getIndex(2, cards)].totalBalance,
-                    accountNumber: cards[_getIndex(2, cards)].accountNumber,
-                    backgroundColor: color.primary,
-                    accentColor: cards[_getIndex(2, cards)].accentColor,
-                    accountName: cards[_getIndex(2, cards)].accountName,
-                    accountType: cards[_getIndex(2, cards)].accountType,
-                    onArchive: () {},
-                    onEdit: () {},
-                    onRemove: () {},
-                    showMenu: false,
-                    isBehind: true,
+              // Third card (back)
+              if (cards.length > 2)
+                Positioned(
+                  top: 8,
+                  left: 16,
+                  right: 16,
+                  child: Transform.scale(
+                    scale: 0.92,
+                    child: Container(
+                      height: 220,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            cards[_getIndex(2, cards)].accentColor.withValues(alpha: 0.7),
+                            cards[_getIndex(2, cards)].accentColor.withValues(alpha: 0.5),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
                   ),
                 ),
-              ),
 
-              // Next card (bottom)
-              AnimatedPositioned(
-                duration: const Duration(milliseconds: 300),
-                top: 8,
-                left: 12,
-                right: 12,
-                child: AnimatedScale(
-                  scale: 1,
-                  duration: const Duration(milliseconds: 300),
-                  child: AnimatedAccountCard(
-                    totalBalance: cards[_getIndex(1, cards)].totalBalance,
-                    accountNumber: cards[_getIndex(1, cards)].accountNumber,
-                    backgroundColor: color.primary,
-                    accentColor: cards[_getIndex(1, cards)].accentColor,
-                    accountName: cards[_getIndex(1, cards)].accountName,
-                    accountType: cards[_getIndex(1, cards)].accountType,
-                    onArchive: () {},
-                    onEdit: () {},
-                    onRemove: () {},
-                    showMenu: false,
+              // Second card (middle)
+              if (cards.length > 1)
+                Positioned(
+                  top: 4,
+                  left: 8,
+                  right: 8,
+                  child: Transform.scale(
+                    scale: 0.96,
+                    child: Container(
+                      height: 230,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            cards[_getIndex(1, cards)].accentColor.withValues(alpha: 0.8),
+                            cards[_getIndex(1, cards)].accentColor.withValues(alpha: 0.6),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
                   ),
                 ),
-              ),
 
-              // Current card (center, draggable)
-              GestureDetector(
-                onVerticalDragUpdate: _onVerticalDragUpdate,
-                onVerticalDragEnd:
-                    (dragDetails) => _onVerticalDragEnd(dragDetails, cards),
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 300),
-                  child: Transform.translate(
-                    key: ValueKey<int>(currentIndex),
-                    offset: _dragOffset,
-                    child: AnimatedAccountCard(
-                      totalBalance: cards[currentIndex].totalBalance,
-                      accountNumber: cards[currentIndex].accountNumber,
-                      backgroundColor: color.primary,
-                      accentColor: cards[currentIndex].accentColor,
-                      accountName: cards[currentIndex].accountName,
-                      accountType: cards[currentIndex].accountType,
-                      onArchive: () {},
-                      onEdit: () {},
-                      onRemove: () {},
-                      showMenu: false,
+              // Current card (front)
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: GestureDetector(
+                  onVerticalDragUpdate: _onVerticalDragUpdate,
+                  onVerticalDragEnd:
+                      (dragDetails) => _onVerticalDragEnd(dragDetails, cards),
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    child: Transform.translate(
+                      key: ValueKey<int>(currentIndex),
+                      offset: _dragOffset,
+                      child: AnimatedAccountCard(
+                        totalBalance: cards[currentIndex].totalBalance,
+                        accountNumber: cards[currentIndex].accountNumber,
+                        backgroundColor: color.surface,
+                        accentColor: cards[currentIndex].accentColor,
+                        accountName: cards[currentIndex].accountName,
+                        accountType: cards[currentIndex].accountType,
+                        onArchive: () {},
+                        onEdit: () {},
+                        onRemove: () {},
+                        showMenu: false,
+                      ),
                     ),
                   ),
                 ),
@@ -202,26 +205,29 @@ class _AnimatedSwipeableAccountCardsState
         );
       },
       loading:
-          () => AnimatedSwitcher(
-            duration: const Duration(milliseconds: 300),
-            child: Transform.translate(
-              key: ValueKey<int>(currentIndex),
-              offset: _dragOffset,
-              child: AnimatedAccountCard(
-                totalBalance: '---',
-                accountNumber: '---',
-                backgroundColor: color.surfaceVariant,
-                accentColor: color.primary,
-                accountName: 'Loading',
-                accountType: AccountType.cash,
-                onArchive: () {},
-                onEdit: () {},
-                onRemove: () {},
-                showMenu: false,
+          () => SizedBox(
+            height: 220,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              child: Transform.translate(
+                key: ValueKey<int>(currentIndex),
+                offset: _dragOffset,
+                child: AnimatedAccountCard(
+                  totalBalance: '---',
+                  accountNumber: '---',
+                  backgroundColor: color.surfaceVariant,
+                  accentColor: color.primary,
+                  accountName: ctxt.common_loading,
+                  accountType: AccountType.cash,
+                  onArchive: () {},
+                  onEdit: () {},
+                  onRemove: () {},
+                  showMenu: false,
+                ),
               ),
             ),
           ),
-      error: (e, st) => Center(child: Text("Error: $e")),
+      error: (e, st) => Center(child: Text(ctxt.common_errorText(e.toString()))),
     );
   }
 }

@@ -7,7 +7,7 @@ import 'package:mudra_manager/db/models/goal.dart';
 import 'package:mudra_manager/l10n/app_localizations.dart';
 import 'package:mudra_manager/providers/goal_provider.dart';
 import 'package:mudra_manager/util/icon_helper.dart';
-import 'package:mudra_manager/theme/app_colors.dart';
+
 
 class AddEditGoalScreen extends ConsumerStatefulWidget {
   final Goal? goal;
@@ -211,32 +211,20 @@ class _AddEditGoalScreenState extends ConsumerState<AddEditGoalScreen> {
             },
                         child: Container(
                           margin: const EdgeInsets.only(right: 8),
-                          padding: const EdgeInsets.all(8),
+                          padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            gradient: _selectedIcon == icon
-                                ? LinearGradient(
-                                    colors: AppColors.glassGradient(color.primary, isDark),
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  )
-                                : null,
+                            color: _selectedIcon == icon
+                                ? color.primaryContainer
+                                : color.surfaceContainerHighest,
                             border: Border.all(
-                              color: _selectedIcon == icon
-                                  ? color.primary.withValues(alpha: 0.3)
-                                  : color.outline,
-                              width: _selectedIcon == icon ? 1.5 : 1,
+                              color: _selectedIcon == icon ? color.primary : color.outline,
+                              width: _selectedIcon == icon ? 2 : 1,
                             ),
-                            boxShadow: _selectedIcon == icon
-                                ? AppColors.glassShadow(color.primary, isDark)
-                                : null,
                           ),
                           child: Icon(
                             IconHelper.getIconData(icon),
-                            color:
-                                _selectedIcon == icon
-                                    ? color.primary
-                                    : color.onSurfaceVariant,
+                            color: _selectedIcon == icon ? color.primary : color.onSurfaceVariant,
                           ),
                         ),
                       );

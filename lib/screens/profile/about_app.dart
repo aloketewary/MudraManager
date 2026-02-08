@@ -1,114 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:mudra_manager/theme/app_colors.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-
-class LicenseScreen extends StatelessWidget {
-  final String? appName;
-  final String? version;
-  
-  const LicenseScreen({super.key, this.appName, this.version});
-
-  @override
-  Widget build(BuildContext context) {
-    final color = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Scaffold(
-      appBar: AppBar(title: Text("Licenses")),
-      body: FutureBuilder<LicenseData>(
-        future: LicenseRegistry.licenses.fold<LicenseData>(
-          LicenseData(0, []),
-          (prev, license) => LicenseData(prev.count + 1, [...prev.licenses, license]),
-        ),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
-          final data = snapshot.data!;
-          
-          return ListView(
-            padding: EdgeInsets.all(16),
-            children: [
-              Container(
-                padding: EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(colors: AppColors.glassGradient(color.primary, isDark), begin: Alignment.topLeft, end: Alignment.bottomRight),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: color.primary.withValues(alpha: 0.3), width: 1.5),
-                  boxShadow: AppColors.glassShadow(color.primary, isDark),
-                ),
-                child: Column(
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: AppColors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [BoxShadow(color: color.primary.withValues(alpha: 0.15), blurRadius: 12, offset: Offset(0, 4))],
-                      ),
-                      child: Icon(Icons.verified_user, color: color.primary, size: 48),
-                    ),
-                    SizedBox(height: 16),
-                    Text(appName ?? "Mudra Manager", style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold, color: color.primary)),
-                    if (version != null) ...[
-                      SizedBox(height: 8),
-                      Text("Version $version", style: textTheme.bodyMedium?.copyWith(color: color.primary.withValues(alpha: 0.75))),
-                    ],
-                    SizedBox(height: 16),
-                    Text("${data.count} packages", style: textTheme.titleMedium?.copyWith(color: color.primary.withValues(alpha: 0.85))),
-                  ],
-                ),
-              ),
-              SizedBox(height: 24),
-              ...data.licenses.map((license) => Padding(
-                padding: EdgeInsets.only(bottom: 12),
-                child: _buildLicenseCard(context, color, textTheme, isDark, license),
-              )),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildLicenseCard(BuildContext context, ColorScheme color, TextTheme textTheme, bool isDark, LicenseEntry license) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(colors: AppColors.glassGradient(color.primary, isDark), begin: Alignment.topLeft, end: Alignment.bottomRight),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.primary.withValues(alpha: 0.3), width: 1.5),
-        boxShadow: AppColors.glassShadow(color.primary, isDark),
-      ),
-      child: ExpansionTile(
-        tilePadding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-        childrenPadding: EdgeInsets.fromLTRB(20, 0, 20, 16),
-        leading: Container(
-          padding: EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: AppColors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [BoxShadow(color: color.primary.withValues(alpha: 0.15), blurRadius: 12, offset: Offset(0, 4))],
-          ),
-          child: Icon(Icons.description_outlined, color: color.primary, size: 20),
-        ),
-        title: Text(license.packages.join(", "), style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600, color: color.primary, letterSpacing: -0.2)),
-        children: license.paragraphs.map((para) => Padding(
-          padding: EdgeInsets.only(top: 12),
-          child: Text(para.text, style: textTheme.bodySmall?.copyWith(color: color.primary.withValues(alpha: 0.75), height: 1.5)),
-        )).toList(),
-      ),
-    );
-  }
-}
-
-class LicenseData {
-  final int count;
-  final List<LicenseEntry> licenses;
-  LicenseData(this.count, this.licenses);
-}
+import 'package:mudra_manager/components/made_with_love_footer.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
@@ -117,7 +12,6 @@ class AboutScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       body: FutureBuilder<PackageInfo>(
@@ -135,27 +29,60 @@ class AboutScreen extends StatelessWidget {
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        colors: AppColors.glassGradient(color.primary, isDark).map((c) => c.withValues(alpha: (c.a * 3).clamp(0, 1))).toList(),
+                        colors: [
+                          color.primaryContainer,
+                          color.secondaryContainer,
+                        ],
                       ),
                     ),
                     child: SafeArea(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          SizedBox(height: 40),
-                          Container(
-                            padding: EdgeInsets.all(24),
-                            decoration: BoxDecoration(
-                              color: AppColors.white,
-                              shape: BoxShape.circle,
-                              boxShadow: [BoxShadow(color: color.primary.withValues(alpha: 0.2), blurRadius: 24, offset: Offset(0, 8))],
+                          SizedBox(height: 60),
+                          Hero(
+                            tag: 'app_logo',
+                            child: Container(
+                              padding: EdgeInsets.all(24),
+                              decoration: BoxDecoration(
+                                color: color.surface,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: color.shadow.withValues(alpha: 0.15),
+                                    blurRadius: 24,
+                                    offset: Offset(0, 12),
+                                  ),
+                                ],
+                              ),
+                              child: Image.asset('assets/logo/rupee.png', width: 72, height: 72),
                             ),
-                            child: Image.asset('assets/logo/rupee.png', width: 80, height: 80),
                           ),
                           SizedBox(height: 20),
-                          Text("Mudra Manager", style: textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold, color: color.primary)),
+                          Text(
+                            "Mudra Manager",
+                            style: textTheme.headlineLarge?.copyWith(
+                              fontWeight: FontWeight.w900,
+                              color: color.onPrimaryContainer,
+                              letterSpacing: -0.5,
+                            ),
+                          ),
                           SizedBox(height: 8),
-                          if (info != null) Text("v${info.version}", style: textTheme.bodyLarge?.copyWith(color: color.primary.withValues(alpha: 0.7))),
+                          if (info != null)
+                            Container(
+                              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: color.surface.withValues(alpha: 0.9),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                "v${info.version}",
+                                style: textTheme.labelLarge?.copyWith(
+                                  color: color.primary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
                         ],
                       ),
                     ),
@@ -164,67 +91,67 @@ class AboutScreen extends StatelessWidget {
               ),
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: EdgeInsets.all(16),
+                  padding: EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        "Smart personal finance app that helps you track expenses, manage budgets, and organize transactions effortlessly.",
-                        textAlign: TextAlign.center,
-                        style: textTheme.bodyLarge?.copyWith(color: color.onSurfaceVariant, height: 1.5),
+                      Card(
+                        elevation: 0,
+                        color: color.surfaceContainerLow,
+                        child: Padding(
+                          padding: EdgeInsets.all(24),
+                          child: Column(
+                            children: [
+                              Icon(
+                                Icons.auto_awesome,
+                                color: color.primary,
+                                size: 32,
+                              ),
+                              SizedBox(height: 16),
+                              Text(
+                                "Smart personal finance app that helps you track expenses, manage budgets, and organize transactions effortlessly with AI-powered SMS parsing.",
+                                textAlign: TextAlign.center,
+                                style: textTheme.bodyLarge?.copyWith(
+                                  color: color.onSurface,
+                                  height: 1.6,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                       SizedBox(height: 32),
-                      _buildFeatureGrid(context, color, textTheme, isDark),
-                      SizedBox(height: 32),
-                      Padding(
-                        padding: EdgeInsets.only(left: 4),
-                        child: Text("MEET THE TEAM", style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700, color: color.primary, letterSpacing: 0.5, fontSize: 12)),
-                      ),
+                      _buildSectionHeader(context, "Features", Icons.star_outline),
                       SizedBox(height: 16),
-                      _buildTeamGrid(context, color, textTheme, isDark),
+                      _buildFeatureGrid(context, color, textTheme),
                       SizedBox(height: 32),
-                      Padding(
-                        padding: EdgeInsets.only(left: 4),
-                        child: Text("MORE INFORMATION", style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700, color: color.primary, letterSpacing: 0.5, fontSize: 12)),
-                      ),
+                      _buildSectionHeader(context, "Development Team", Icons.group_outlined),
                       SizedBox(height: 16),
-                      _buildInfoCard(context, color, textTheme, isDark, Icons.privacy_tip_outlined, "Privacy Policy", "View our privacy policy", () {
+                      _buildTeamList(context, color, textTheme),
+                      SizedBox(height: 32),
+                      _buildSectionHeader(context, "Legal & Support", Icons.info_outline),
+                      SizedBox(height: 16),
+                      _buildInfoCard(context, color, textTheme, Icons.privacy_tip_outlined, "Privacy Policy", "How we protect your data", () {
                         HapticFeedback.mediumImpact();
                         _launchURL('https://aloketewary.github.io/MudraManager/privacy-policy.html');
                       }),
                       SizedBox(height: 12),
-                      _buildInfoCard(context, color, textTheme, isDark, Icons.description_outlined, "Terms & Conditions", "View terms and conditions", () {
+                      _buildInfoCard(context, color, textTheme, Icons.description_outlined, "Terms & Conditions", "App usage terms and conditions", () {
                         HapticFeedback.mediumImpact();
                         _launchURL('https://aloketewary.github.io/MudraManager//terms-conditions.html');
                       }),
                       SizedBox(height: 12),
-                      _buildInfoCard(context, color, textTheme, isDark, Icons.email_outlined, "Contact Us", "aloke@duck.com", () {
+                      _buildInfoCard(context, color, textTheme, Icons.email_outlined, "Contact Support", "aloke@duck.com", () {
                         HapticFeedback.mediumImpact();
                         _launchURL('mailto:aloke@duck.com');
                       }),
                       SizedBox(height: 12),
-                      _buildInfoCard(context, color, textTheme, isDark, Icons.verified_user_outlined, "License", "MIT License", () {
+                      _buildInfoCard(context, color, textTheme, Icons.verified_user_outlined, "Open Source Licenses", "View third-party licenses", () {
                         HapticFeedback.mediumImpact();
                         Navigator.push(context, MaterialPageRoute(builder: (_) => LicenseScreen(appName: info?.appName, version: info?.version)));
                       }),
-                      SizedBox(height: 32),
-                      Center(
-                        child: Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text('Made with ', style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: color.onSurface.withValues(alpha: 0.6))),
-                                Icon(Icons.favorite, size: 28, color: Colors.red),
-                                Text(' in India', style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: color.onSurface.withValues(alpha: 0.6))),
-                              ],
-                            ),
-                            SizedBox(height: 8),
-                            Text('© ${DateTime.now().year} ${info?.appName ?? "Mudra Manager"}', style: textTheme.labelSmall?.copyWith(color: color.onSurfaceVariant)),
-                          ],
-                        ),
-                      ),
-                      SizedBox(height: 16),
+                      SizedBox(height: 40),
+                      MadeWithLoveFooter(appName: info?.appName),
                     ],
                   ),
                 ),
@@ -236,6 +163,33 @@ class AboutScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildSectionHeader(BuildContext context, String title, IconData icon) {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    
+    return Row(
+      children: [
+        Container(
+          padding: EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: color.primaryContainer,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(icon, color: color.onPrimaryContainer, size: 20),
+        ),
+        SizedBox(width: 12),
+        Text(
+          title.toUpperCase(),
+          style: textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: color.primary,
+            letterSpacing: 0.5,
+          ),
+        ),
+      ],
+    );
+  }
+
   void _launchURL(String url) async {
     final uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) {
@@ -243,139 +197,363 @@ class AboutScreen extends StatelessWidget {
     }
   }
 
-  Widget _buildFeatureGrid(BuildContext context, ColorScheme color, TextTheme textTheme, bool isDark) {
+  Widget _buildFeatureGrid(BuildContext context, ColorScheme color, TextTheme textTheme) {
     final features = [
-      (Icons.sms_outlined, "SMS Auto-Import", Color(0xFF06B6D4)),
-      (Icons.pie_chart_outline, "Budget Tracking", Color(0xFFF59E0B)),
-      (Icons.bar_chart, "Insights & Reports", Color(0xFF6366F1)),
-      (Icons.lock_outline, "Secure & Private", Color(0xFF10B981)),
+      (Icons.sms_outlined, "SMS Auto-Import", "Automatic transaction detection"),
+      (Icons.pie_chart_outline, "Budget Tracking", "Smart spending limits"),
+      (Icons.analytics_outlined, "Insights & Reports", "Detailed financial analytics"),
+      (Icons.security, "Secure & Private", "Local-first data storage"),
     ];
     return GridView.builder(
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, crossAxisSpacing: 12, mainAxisSpacing: 12, childAspectRatio: 1.3),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+        childAspectRatio: 1.4,
+      ),
       itemCount: features.length,
       itemBuilder: (context, index) {
         final feature = features[index];
-        return Container(
-          padding: EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(colors: AppColors.glassGradient(feature.$3, isDark), begin: Alignment.topLeft, end: Alignment.bottomRight),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: feature.$3.withValues(alpha: 0.3), width: 1.5),
-            boxShadow: AppColors.glassShadow(feature.$3, isDark),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  borderRadius: BorderRadius.circular(14),
-                  boxShadow: [BoxShadow(color: feature.$3.withValues(alpha: 0.15), blurRadius: 12, offset: Offset(0, 4))],
+        return Card(
+          elevation: 0,
+          color: color.surfaceContainerHighest,
+          child: Padding(
+            padding: EdgeInsets.all(12),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: color.primaryContainer,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(feature.$1, color: color.onPrimaryContainer, size: 20),
                 ),
-                child: Icon(feature.$1, color: feature.$3, size: 28),
-              ),
-              SizedBox(height: 12),
-              Text(feature.$2, textAlign: TextAlign.center, style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600, color: feature.$3, letterSpacing: -0.2)),
-            ],
+                SizedBox(height: 8),
+                Flexible(
+                  child: Text(
+                    feature.$2,
+                    textAlign: TextAlign.center,
+                    style: textTheme.labelLarge?.copyWith(
+                      color: color.onSurface,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                SizedBox(height: 2),
+                Flexible(
+                  child: Text(
+                    feature.$3,
+                    textAlign: TextAlign.center,
+                    style: textTheme.labelSmall?.copyWith(
+                      color: color.onSurfaceVariant,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },
     );
   }
 
-  Widget _buildTeamGrid(BuildContext context, ColorScheme color, TextTheme textTheme, bool isDark) {
+  Widget _buildTeamList(BuildContext context, ColorScheme color, TextTheme textTheme) {
     final team = [
-      ("Aloke Tewary", "Product Designer", Icons.design_services, Color(0xFF06B6D4)),
-      ("Aloke Tewary", "Flutter Developer", Icons.code, Color(0xFF6366F1)),
-      ("Sougata Chakraborty", "Backend & Testing", Icons.storage_outlined, Color(0xFF10B981)),
+      ("Aloke Tewary", "Product Designer & Developer", Icons.design_services, color.primary),
+      ("Sougata Chakraborty", "Backend & Quality Assurance", Icons.engineering, color.secondary),
     ];
     return Column(
-      children: team.map((member) => Padding(
-        padding: EdgeInsets.only(bottom: 12),
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(colors: AppColors.glassGradient(member.$4, isDark), begin: Alignment.topLeft, end: Alignment.bottomRight),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: member.$4.withValues(alpha: 0.3), width: 1.5),
-            boxShadow: AppColors.glassShadow(member.$4, isDark),
+      children: team.map((member) => Card(
+        margin: EdgeInsets.only(bottom: 12),
+        elevation: 0,
+        color: color.surfaceContainerHighest,
+        child: ListTile(
+          contentPadding: EdgeInsets.all(16),
+          leading: Container(
+            padding: EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: member.$4.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(member.$3, color: member.$4, size: 24),
           ),
-          child: Row(
-            children: [
-              Container(
-                padding: EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [BoxShadow(color: member.$4.withValues(alpha: 0.15), blurRadius: 12, offset: Offset(0, 4))],
-                ),
-                child: Icon(member.$3, color: member.$4, size: 26),
+          title: Text(
+            member.$1,
+            style: textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: color.onSurface,
+            ),
+          ),
+          subtitle: Padding(
+            padding: EdgeInsets.only(top: 4),
+            child: Text(
+              member.$2,
+              style: textTheme.bodyMedium?.copyWith(
+                color: color.onSurfaceVariant,
               ),
-              SizedBox(width: 18),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(member.$1, style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600, color: member.$4, letterSpacing: -0.2)),
-                    SizedBox(height: 4),
-                    Text(member.$2, style: textTheme.bodyMedium?.copyWith(color: member.$4.withValues(alpha: 0.75), fontSize: 13)),
-                  ],
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       )).toList(),
     );
   }
 
-
-
-  Widget _buildInfoCard(BuildContext context, ColorScheme color, TextTheme textTheme, bool isDark, IconData icon, String title, String subtitle, VoidCallback onTap) {
-    final gradientColors = AppColors.glassGradient(color.primary, isDark);
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: gradientColors,
+  Widget _buildInfoCard(BuildContext context, ColorScheme color, TextTheme textTheme, IconData icon, String title, String subtitle, VoidCallback onTap) {
+    return Card(
+      elevation: 0,
+      color: color.surfaceContainerHighest,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: color.primaryContainer,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Icon(icon, color: color.onPrimaryContainer, size: 24),
+              ),
+              SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: color.onSurface,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: color.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right, color: color.onSurfaceVariant, size: 20),
+            ],
           ),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: color.primary.withValues(alpha: 0.3), width: 1.5),
-          boxShadow: AppColors.glassShadow(color.primary, isDark),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: AppColors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [BoxShadow(color: color.primary.withValues(alpha: 0.15), blurRadius: 12, offset: Offset(0, 4))],
-              ),
-              child: Icon(icon, color: color.primary, size: 26),
-            ),
-            SizedBox(width: 18),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600, color: color.primary, letterSpacing: -0.2)),
-                  SizedBox(height: 4),
-                  Text(subtitle, style: textTheme.bodyMedium?.copyWith(color: color.primary.withValues(alpha: 0.75), fontSize: 13)),
-                ],
-              ),
-            ),
-            Icon(Icons.arrow_forward_ios_rounded, color: color.primary.withValues(alpha: 0.5), size: 18),
-          ],
         ),
       ),
     );
   }
+}
+
+class LicenseScreen extends StatelessWidget {
+  final String? appName;
+  final String? version;
+  
+  const LicenseScreen({super.key, this.appName, this.version});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Open Source Licenses"),
+        backgroundColor: color.surface,
+        surfaceTintColor: color.surfaceTint,
+      ),
+      body: FutureBuilder<LicenseData>(
+        future: LicenseRegistry.licenses.fold<LicenseData>(
+          LicenseData(0, []),
+          (prev, license) => LicenseData(prev.count + 1, [...prev.licenses, license]),
+        ),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text(
+                    'Loading licenses...',
+                    style: textTheme.bodyLarge?.copyWith(
+                      color: color.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+          
+          final data = snapshot.data!;
+          
+          return CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Card(
+                    elevation: 0,
+                    color: color.primaryContainer,
+                    child: Padding(
+                      padding: EdgeInsets.all(24),
+                      child: Column(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: color.surface,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.verified_user,
+                              color: color.primary,
+                              size: 32,
+                            ),
+                          ),
+                          SizedBox(height: 16),
+                          Text(
+                            appName ?? "Mudra Manager",
+                            style: textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: color.onPrimaryContainer,
+                            ),
+                          ),
+                          if (version != null) ...[ 
+                            SizedBox(height: 8),
+                            Container(
+                              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: color.surface.withValues(alpha: 0.9),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Text(
+                                "Version $version",
+                                style: textTheme.labelLarge?.copyWith(
+                                  color: color.primary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                          SizedBox(height: 16),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.inventory_2_outlined,
+                                color: color.onPrimaryContainer,
+                                size: 20,
+                              ),
+                              SizedBox(width: 8),
+                              Text(
+                                "${data.count} open source packages",
+                                style: textTheme.titleMedium?.copyWith(
+                                  color: color.onPrimaryContainer,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              SliverPadding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final license = data.licenses[index];
+                      return Card(
+                        margin: EdgeInsets.only(bottom: 12),
+                        elevation: 0,
+                        color: color.surfaceContainerHighest,
+                        child: Theme(
+                          data: Theme.of(context).copyWith(
+                            dividerColor: Colors.transparent,
+                          ),
+                          child: ExpansionTile(
+                            tilePadding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                            childrenPadding: EdgeInsets.fromLTRB(20, 0, 20, 20),
+                            leading: Container(
+                              padding: EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: color.primaryContainer,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Icon(
+                                Icons.description_outlined,
+                                color: color.onPrimaryContainer,
+                                size: 20,
+                              ),
+                            ),
+                            title: Text(
+                              license.packages.join(", "),
+                              style: textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: color.onSurface,
+                              ),
+                            ),
+                            subtitle: Padding(
+                              padding: EdgeInsets.only(top: 4),
+                              child: Text(
+                                '${license.paragraphs.length} license ${license.paragraphs.length == 1 ? 'paragraph' : 'paragraphs'}',
+                                style: textTheme.bodySmall?.copyWith(
+                                  color: color.onSurfaceVariant,
+                                ),
+                              ),
+                            ),
+                            children: license.paragraphs.map((para) => Container(
+                              margin: EdgeInsets.only(top: 12),
+                              padding: EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: color.surfaceContainerLow,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                para.text,
+                                style: textTheme.bodySmall?.copyWith(
+                                  color: color.onSurface,
+                                  height: 1.5,
+                                ),
+                              ),
+                            )).toList(),
+                          ),
+                        ),
+                      );
+                    },
+                    childCount: data.licenses.length,
+                  ),
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: SizedBox(height: 20),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class LicenseData {
+  final int count;
+  final List<LicenseEntry> licenses;
+  LicenseData(this.count, this.licenses);
 }

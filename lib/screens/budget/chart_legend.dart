@@ -38,9 +38,12 @@ class ChartLegend extends StatelessWidget {
                   margin: const EdgeInsets.only(right: 6),
                   decoration: BoxDecoration(color: color, shape: BoxShape.circle),
                 ),
-                Text(
-                  ctxt.budget_dashboardPieChartLabelText(ctxt.formatPercentNumber((spentPercent)), name, ctxt.formatPercentNumber((valuePercent))),
-                  style: textTheme.bodySmall,
+                Flexible(
+                  child: Text(
+                    ctxt.budget_dashboardPieChartLabelText(ctxt.formatPercentNumber((spentPercent)), name, ctxt.formatPercentNumber((valuePercent))),
+                    style: textTheme.bodySmall,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ],
             );

@@ -7,7 +7,7 @@ import 'package:mudra_manager/db/models/notification_record.dart'
     show NotificationRecord;
 import 'package:mudra_manager/providers/notification_record_service.dart';
 import 'package:mudra_manager/screens/reusable/no_data_found.dart';
-import 'package:mudra_manager/theme/app_colors.dart';
+
 
 class NotificationPage extends ConsumerWidget {
   const NotificationPage({super.key});
@@ -54,108 +54,75 @@ class NotificationPage extends ConsumerWidget {
                   sliver: SliverList(
                     delegate: SliverChildBuilderDelegate((context, index) {
                       final n = data[index];
-                      final notifColor = _getColorForType(n.type);
+                      final notifColor = _getColorForType(n.type, color);
                       return Padding(
                         padding: EdgeInsets.only(bottom: 12),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: AppColors.glassGradient(
-                                notifColor,
-                                isDark,
-                              ),
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: notifColor.withValues(
-                                alpha: n.isRead ? 0.2 : 0.3,
-                              ),
-                              width: 1.5,
-                            ),
-                            boxShadow: AppColors.glassShadow(
-                              notifColor,
-                              isDark,
-                            ),
-                          ),
-                          child: ListTile(
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 12,
-                            ),
-                            leading: Container(
-                              padding: EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: color.surface,
-                                borderRadius: BorderRadius.circular(14),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: notifColor.withValues(alpha: 0.15),
-                                    blurRadius: 12,
-                                    offset: Offset(0, 4),
-                                  ),
-                                ],
-                              ),
-                              child: Icon(
-                                _getIconForType(n.type),
-                                color: notifColor,
-                                size: 24,
-                              ),
-                            ),
-                            title: Text(
-                              n.title,
-                              style: textTheme.titleMedium?.copyWith(
-                                fontWeight:
-                                    n.isRead
-                                        ? FontWeight.w500
-                                        : FontWeight.w600,
-                                color: notifColor.withValues(
-                                  alpha: n.isRead ? 0.7 : 1,
-                                ),
-                                letterSpacing: -0.2,
-                              ),
-                            ),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                SizedBox(height: 4),
-                                Text(
-                                  n.body,
-                                  style: textTheme.bodyMedium?.copyWith(
-                                    color: notifColor.withValues(
-                                      alpha: n.isRead ? 0.6 : 0.75,
+                        child: Card(
+                          elevation: 0,
+                          color: color.surfaceContainerHighest,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(12),
+                            onTap: () {
+                              HapticFeedback.lightImpact();
+                              notificationService.readNotification(record: n);
+                            },
+                            child: Padding(
+                              padding: EdgeInsets.all(16),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    padding: EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: notifColor.withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
-                                    fontSize: 13,
+                                    child: Icon(
+                                      _getIconForType(n.type),
+                                      color: notifColor,
+                                      size: 24,
+                                    ),
                                   ),
-                                ),
-                                SizedBox(height: 6),
-                                Text(
-                                  DateFormat(
-                                    'MMM dd, yyyy • hh:mm a',
-                                  ).format(n.timestamp),
-                                  style: textTheme.bodySmall?.copyWith(
-                                    color: notifColor.withValues(alpha: 0.5),
-                                    fontSize: 12,
+                                  SizedBox(width: 16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          n.title,
+                                          style: textTheme.titleMedium?.copyWith(
+                                            fontWeight: n.isRead ? FontWeight.w500 : FontWeight.w600,
+                                          ),
+                                        ),
+                                        SizedBox(height: 4),
+                                        Text(
+                                          n.body,
+                                          style: textTheme.bodyMedium?.copyWith(
+                                            color: color.onSurfaceVariant,
+                                          ),
+                                        ),
+                                        SizedBox(height: 6),
+                                        Text(
+                                          DateFormat('MMM dd, yyyy • hh:mm a').format(n.timestamp),
+                                          style: textTheme.bodySmall?.copyWith(
+                                            color: color.onSurfaceVariant,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
-                            trailing:
-                                !n.isRead
-                                    ? Container(
+                                  if (!n.isRead)
+                                    Container(
                                       width: 8,
                                       height: 8,
                                       decoration: BoxDecoration(
                                         color: notifColor,
                                         shape: BoxShape.circle,
                                       ),
-                                    )
-                                    : null,
-                            onTap: () {
-                              HapticFeedback.lightImpact();
-                              notificationService.readNotification(record: n);
-                            },
+                                    ),
+                                ],
+                              ),
+                            ),
                           ),
                         ),
                       );
@@ -169,18 +136,18 @@ class NotificationPage extends ConsumerWidget {
     );
   }
 
-  Color _getColorForType(String? type) {
+  Color _getColorForType(String? type, ColorScheme color) {
     switch (type) {
       case 'low_balance':
-        return Color(0xFFF59E0B);
+        return color.tertiary;
       case 'budget_overspent':
-        return AppColors.expense;
+        return color.error;
       case 'budget_near_limit':
-        return Color(0xFFF59E0B);
+        return color.secondary;
       case 'reminder':
-        return Color(0xFF6366F1);
+        return color.primary;
       default:
-        return Color(0xFF06B6D4);
+        return color.primary;
     }
   }
 

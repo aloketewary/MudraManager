@@ -16,7 +16,8 @@ import 'package:mudra_manager/screens/budget/budget_chart_screen.dart'
 import 'package:mudra_manager/screens/budget/chart_legend.dart';
 import 'package:mudra_manager/util/dialog_utils.dart';
 import 'package:mudra_manager/util/localization_extension.dart';
-import 'package:mudra_manager/theme/app_colors.dart';
+
+import 'package:mudra_manager/components/currency_text.dart';
 
 class BudgetSummaryCard extends ConsumerStatefulWidget {
   final BudgetWithProgress data;
@@ -45,24 +46,16 @@ class BudgetSummaryCardState extends ConsumerState<BudgetSummaryCard> {
     // Status color logic
     final statusColor =
         pct >= 1.0
-            ? AppColors.expense
+            ? color.error
             : pct >= 0.8
             ? Colors.orange
             : color.primary;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Container(
+    return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: AppColors.glassGradient(statusColor, isDark),
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(24.0),
-        border: Border.all(color: statusColor.withValues(alpha: 0.3), width: 1.5),
-        boxShadow: AppColors.glassShadow(statusColor, isDark),
-      ),
+      elevation: 0,
+      color: color.surfaceContainerHighest,
       child: Column(
         children: [
           // Header Section
@@ -73,20 +66,11 @@ class BudgetSummaryCardState extends ConsumerState<BudgetSummaryCard> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppColors.white,
+                    color: statusColor.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: statusColor.withValues(alpha: 0.2),
-                        blurRadius: 8,
-                        offset: Offset(0, 4),
-                      ),
-                    ],
                   ),
                   child: Icon(
-                    pct >= 1.0
-                        ? Icons.warning_rounded
-                        : Icons.pie_chart_rounded,
+                    pct >= 1.0 ? Icons.warning_rounded : Icons.pie_chart_rounded,
                     color: statusColor,
                     size: 24,
                   ),
@@ -100,14 +84,16 @@ class BudgetSummaryCardState extends ConsumerState<BudgetSummaryCard> {
                         b.name,
                         style: textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: statusColor,
+                          color: color.onSurface,
                         ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                       Text(
                         "${formatter.format(widget.data.startDate)} - ${formatter.format(widget.data.endDate)}",
                         style: textTheme.bodySmall?.copyWith(
-                          color: statusColor.withValues(alpha: 0.7),
+                          color: color.onSurfaceVariant,
                         ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
@@ -116,7 +102,7 @@ class BudgetSummaryCardState extends ConsumerState<BudgetSummaryCard> {
                   icon: Icon(Icons.more_horiz, color: color.onSurfaceVariant),
                   onSelected: (value) async {
                     if (value == 'edit') {
-                      context.push('/add-budget');
+                      context.push('/add-budget', extra: {'budget': b});
                     } else if (value == 'delete') {
                       final confirm = await DialogUtils.showDeleteConfirmation(
                         context,
@@ -212,13 +198,15 @@ class BudgetSummaryCardState extends ConsumerState<BudgetSummaryCard> {
                                 color: color.onSurfaceVariant,
                                 letterSpacing: 1.2,
                               ),
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            Text(
-                              ctxt.formatCurrencyWithSign(0, b.amount),
+                            CurrencyText(
+                              amount: b.amount,
                               style: textTheme.headlineMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                color: color.primary,
+                                color: color.onSurface,
                               ),
+                              maxLines: 1,
                             ),
                             const SizedBox(height: 12),
                             Text(
@@ -228,26 +216,27 @@ class BudgetSummaryCardState extends ConsumerState<BudgetSummaryCard> {
                                 color: color.onSurfaceVariant,
                                 letterSpacing: 1.2,
                               ),
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            RichText(
-                              text: TextSpan(
-                                children: [
-                                  TextSpan(
-                                    text: ctxt.formatCurrencyWithSign(0, spent),
+                            Row(
+                              children: [
+                                Flexible(
+                                  child: CurrencyText(
+                                    amount: spent,
                                     style: textTheme.titleLarge?.copyWith(
                                       fontWeight: FontWeight.w600,
                                       color: statusColor,
                                     ),
+                                    maxLines: 1,
                                   ),
-                                  TextSpan(
-                                    text:
-                                        "  (${ctxt.formatPercentNumber(pct)})",
-                                    style: textTheme.bodyMedium?.copyWith(
-                                      color: statusColor,
-                                    ),
+                                ),
+                                Text(
+                                  "  (${ctxt.formatPercentNumber(pct)})",
+                                  style: textTheme.bodyMedium?.copyWith(
+                                    color: color.onSurfaceVariant,
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -279,6 +268,7 @@ class BudgetSummaryCardState extends ConsumerState<BudgetSummaryCard> {
                             ctxt.budget_categoriesTitle,
                             style: textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
+                              color: color.onSurface,
                             ),
                           ),
                         ),
@@ -314,7 +304,7 @@ class BudgetSummaryCardState extends ConsumerState<BudgetSummaryCard> {
                     _expanded
                         ? Icons.keyboard_arrow_up_rounded
                         : Icons.keyboard_arrow_down_rounded,
-                    color: color.onSurfaceVariant.withValues(alpha: 0.5),
+                    color: color.onSurfaceVariant,
                   ),
                 ],
               ),

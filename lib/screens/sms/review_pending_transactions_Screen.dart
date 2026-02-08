@@ -4,7 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:mudra_manager/db/models/account.dart' show Account, AccountType;
-import 'package:mudra_manager/db/models/category.dart' show Category, CategoryType;
+import 'package:mudra_manager/db/models/category.dart'
+    show Category, CategoryType;
 import 'package:mudra_manager/db/models/pending_transaction.dart'
     show PendingTransaction;
 import 'package:mudra_manager/db/models/transaction.dart' show Transaction;
@@ -19,7 +20,7 @@ import 'package:mudra_manager/screens/reusable/account_display_card.dart'
     show AccountDisplayCard;
 import 'package:mudra_manager/screens/reusable/category_card.dart'
     show CategoryCard;
-import 'package:mudra_manager/theme/app_colors.dart';
+
 import 'package:mudra_manager/util/dialog_utils.dart';
 import 'package:mudra_manager/util/icon_helper.dart' show IconHelper;
 import 'package:mudra_manager/util/localization_extension.dart';
@@ -100,12 +101,12 @@ class _ReviewPendingTransactionsScreenState
             )
           else ...[
             IconButton(
-              tooltip: "Auto Add",
+              tooltip: ctxt.sms_autoAddTooltip,
               onPressed: _autoProcessTransactions,
               icon: Icon(Icons.auto_awesome),
             ),
             IconButton(
-              tooltip: "Clear All",
+              tooltip: ctxt.sms_clearAllTooltip,
               onPressed: () async {
                 HapticFeedback.mediumImpact();
                 await pendingTransactionService.clearAll();
@@ -131,7 +132,7 @@ class _ReviewPendingTransactionsScreenState
                   ),
                   SizedBox(height: 16),
                   Text(
-                    'No pending transactions',
+                    ctxt.sms_noPendingTransactions,
                     style: textTheme.titleLarge?.copyWith(
                       color: color.onSurfaceVariant,
                     ),
@@ -181,8 +182,8 @@ class _ReviewPendingTransactionsScreenState
                         HapticFeedback.mediumImpact();
                         return await DialogUtils.showDeleteConfirmation(
                           context,
-                          title: "Delete Transaction?",
-                          message: "This action cannot be undone.",
+                          title: ctxt.transaction_deleteAlertTitleText,
+                          message: ctxt.transaction_deleteAlertBodyText,
                         );
                       } else if (direction == DismissDirection.startToEnd) {
                         HapticFeedback.mediumImpact();
@@ -194,7 +195,7 @@ class _ReviewPendingTransactionsScreenState
 
                     onDismissed: (direction) {
                       if (direction == DismissDirection.endToStart) {
-                        _removePendingTransaction(tx!, false);
+                        _removePendingTransaction(tx!, false, ctxt);
                       }
                     },
                     background: Container(
@@ -215,7 +216,7 @@ class _ReviewPendingTransactionsScreenState
                           ),
                           SizedBox(height: 4),
                           Text(
-                            'Approve',
+                            ctxt.sms_approveLabel,
                             style: TextStyle(
                               color: color.onPrimary,
                               fontWeight: FontWeight.bold,
@@ -238,7 +239,7 @@ class _ReviewPendingTransactionsScreenState
                           Icon(Icons.delete, color: color.onError, size: 32),
                           SizedBox(height: 4),
                           Text(
-                            'Delete',
+                            ctxt.common_deleteLabel,
                             style: TextStyle(
                               color: color.onError,
                               fontWeight: FontWeight.bold,
@@ -247,93 +248,67 @@ class _ReviewPendingTransactionsScreenState
                         ],
                       ),
                     ),
-                    child: Container(
+                    child: Card(
                       margin: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: AppColors.glassGradient(
-                            isIncome ? AppColors.income : AppColors.expense,
-                            isDark,
-                          ),
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: (isIncome ? AppColors.income : AppColors.expense).withValues(alpha: 0.2),
-                          width: 1.5,
-                        ),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: AppColors.cardShadow,
-                            blurRadius: 8,
-                            offset: Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(20),
-                          onTap: () {
-                            HapticFeedback.mediumImpact();
-                            _showApproveBottomSheet(context, tx!);
-                          },
-                          child: Padding(
-                            padding: EdgeInsets.all(16),
-                            child: Row(
-                              children: [
-                                Container(
-                                  padding: EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: (isIncome
-                                            ? color.primary
-                                            : color.error)
-                                        .withOpacity(0.1),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(
-                                    Icons.receipt_long_outlined,
-                                    color:
-                                        isIncome ? color.primary : color.error,
-                                    size: 24,
-                                  ),
+                      elevation: 0,
+                      color: color.surfaceContainerHighest,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: () {
+                          HapticFeedback.mediumImpact();
+                          _showApproveBottomSheet(context, tx!);
+                        },
+                        child: Padding(
+                          padding: EdgeInsets.all(16),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: (isIncome
+                                          ? color.primary
+                                          : color.error)
+                                      .withOpacity(0.1),
+                                  shape: BoxShape.circle,
                                 ),
-                                SizedBox(width: 16),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        tx?.sender ?? 'Unknown',
-                                        style: textTheme.titleMedium?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                child: Icon(
+                                  Icons.receipt_long_outlined,
+                                  color: isIncome ? color.primary : color.error,
+                                  size: 24,
+                                ),
+                              ),
+                              SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      tx?.sender ?? 'Unknown',
+                                      style: textTheme.titleMedium?.copyWith(
+                                        fontWeight: FontWeight.bold,
                                       ),
-                                      SizedBox(height: 4),
-                                      Text(
-                                        DateFormat(
-                                          'EEE, dd MMM',
-                                          ctxt.localeName,
-                                        ).format(tx?.date ?? DateTime.now()),
-                                        style: textTheme.bodySmall?.copyWith(
-                                          color: color.onSurfaceVariant,
-                                        ),
+                                    ),
+                                    SizedBox(height: 4),
+                                    Text(
+                                      DateFormat(
+                                        'EEE, dd MMM',
+                                        ctxt.localeName,
+                                      ).format(tx?.date ?? DateTime.now()),
+                                      style: textTheme.bodySmall?.copyWith(
+                                        color: color.onSurfaceVariant,
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
                                 ),
-                                Text(
-                                  '${isIncome ? '+' : '-'} ${ctxt.formatCurrencyWithSign(2, (tx?.amount ?? 0.0).abs())}',
-                                  style: textTheme.titleLarge?.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                    color:
-                                        isIncome ? color.primary : color.error,
-                                  ),
+                              ),
+                              Text(
+                                '${isIncome ? '+' : '-'} ${ctxt.formatCurrencyWithSign(2, (tx?.amount ?? 0.0).abs())}',
+                                style: textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  color: isIncome ? color.primary : color.error,
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -353,11 +328,12 @@ class _ReviewPendingTransactionsScreenState
   void _removePendingTransaction(
     PendingTransaction pendingTx,
     bool isApproved,
+    AppLocalizations ctxt
   ) async {
     final confirm = await DialogUtils.showDeleteConfirmation(
       context,
-      title: "Delete Transaction?",
-      message: "This action cannot be undone.",
+      title: ctxt.transaction_deleteAlertTitleText,
+      message: ctxt.transaction_deleteAlertBodyText,
     );
 
     if (confirm == true) {
@@ -373,18 +349,19 @@ class _ReviewPendingTransactionsScreenState
     PendingTransaction pendingTx,
     Account account,
     Category category,
+    AppLocalizations ctxt,
   ) async {
     final txn = Transaction.create(
       date: pendingTx.date,
       amount: pendingTx.amount ?? 0.0,
       isExpense: pendingTx.isIncome == false,
-      description: "Imported from SMS",
+      description: ctxt.sms_importedFromSmsDescription,
     );
     txn.account.value = account;
     txn.category.value = category;
     await ref.read(transactionProvider).addTransaction(txn);
     ref.invalidate(transactionProvider);
-    _removePendingTransaction(pendingTx, true);
+    _removePendingTransaction(pendingTx, true, ctxt);
     if (mounted) {
       SnackbarService.success('Approved ${pendingTx.sender}');
       context.pop();
@@ -421,14 +398,20 @@ class _ReviewPendingTransactionsScreenState
     Category? selectedCategory;
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final ctxt = AppLocalizations.of(context)!;
 
     // Pre-select suggested category
     final categories = await ref.read(categoryListProvider.future);
-    final relevantCategories = categories.where(
-      (c) =>
-          (pendingTx.isIncome == true && c.categoryType == CategoryType.income) ||
-          (pendingTx.isIncome == false && c.categoryType == CategoryType.expense),
-    ).toList();
+    final relevantCategories =
+        categories
+            .where(
+              (c) =>
+                  (pendingTx.isIncome == true &&
+                      c.categoryType == CategoryType.income) ||
+                  (pendingTx.isIncome == false &&
+                      c.categoryType == CategoryType.expense),
+            )
+            .toList();
     selectedCategory = CategoryMatcher.matchByKeywords(
       pendingTx.body,
       relevantCategories,
@@ -445,411 +428,673 @@ class _ReviewPendingTransactionsScreenState
             initialChildSize: 0.9,
             minChildSize: 0.5,
             maxChildSize: 0.95,
-            builder: (_, controller) => Padding(
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom,
-                left: 16,
-                right: 16,
-                top: 8,
-              ),
-              child: StatefulBuilder(
-                builder:
-                    (context, setState) => SingleChildScrollView(
-                      controller: controller,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Approve Transaction',
-                            style: textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          SizedBox(height: 16),
-                          Container(
-                            padding: EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: color.surfaceContainerHighest,
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
+            builder:
+                (_, controller) => Padding(
+                  padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).viewInsets.bottom,
+                    left: 16,
+                    right: 16,
+                    top: 8,
+                  ),
+                  child: StatefulBuilder(
+                    builder:
+                        (context, setState) => SingleChildScrollView(
+                          controller: controller,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                ctxt.sms_approveTransactionTitle,
+                                style: textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              SizedBox(height: 16),
+                              Container(
+                                padding: EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: color.surfaceContainerHighest,
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Icon(Icons.sms_outlined, size: 20, color: color.primary),
-                                    SizedBox(width: 8),
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.sms_outlined,
+                                          size: 20,
+                                          color: color.primary,
+                                        ),
+                                        SizedBox(width: 8),
+                                        Text(
+                                          'SMS Details',
+                                          style: textTheme.labelLarge?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: 8),
                                     Text(
-                                      'SMS Details',
-                                      style: textTheme.labelLarge?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                      pendingTx.body,
+                                      style: textTheme.bodyMedium,
                                     ),
                                   ],
                                 ),
-                                SizedBox(height: 8),
+                              ),
+                              SizedBox(height: 24),
                                 Text(
-                                  pendingTx.body,
-                                  style: textTheme.bodyMedium,
+                                'Select Account',
+                                style: textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: color.onSurfaceVariant,
                                 ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: 24),
-                          Text(
-                            'Select Account',
-                            style: textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: color.onSurfaceVariant,
-                            ),
-                          ),
-                          SizedBox(height: 16),
-                          Consumer(
-                            builder:
-                                (context, ref, _) => ref
-                                    .watch(accountsProvider)
-                                    .when(
-                                      data:
-                                          (accounts) => SizedBox(
-                                            height: 120,
-                                            child: ListView.separated(
-                                              scrollDirection: Axis.horizontal,
-                                              itemCount: accounts.length,
-                                              separatorBuilder: (_, __) => SizedBox(width: 12),
-                                              itemBuilder: (context, index) {
-                                                final account = accounts[index];
-                                                final isSelected = selectedAccount?.id == account.id;
-                                                final balance = _balanceMap[account.id] ?? account.initialBalance;
+                              ),
+                              SizedBox(height: 16),
+                              Consumer(
+                                builder:
+                                    (context, ref, _) => ref
+                                        .watch(accountsProvider)
+                                        .when(
+                                          data:
+                                              (accounts) => SizedBox(
+                                                height: 120,
+                                                child: ListView.separated(
+                                                  scrollDirection:
+                                                      Axis.horizontal,
+                                                  itemCount: accounts.length,
+                                                  separatorBuilder:
+                                                      (_, __) =>
+                                                          SizedBox(width: 12),
+                                                  itemBuilder: (
+                                                    context,
+                                                    index,
+                                                  ) {
+                                                    final account =
+                                                        accounts[index];
+                                                    final isSelected =
+                                                        selectedAccount?.id ==
+                                                        account.id;
+                                                    final balance =
+                                                        _balanceMap[account
+                                                            .id] ??
+                                                        account.initialBalance;
 
-                                                return GestureDetector(
-                                                  onTap: () {
-                                                    HapticFeedback.mediumImpact();
-                                                    setState(() => selectedAccount = account);
-                                                  },
-                                                  child: AnimatedContainer(
-                                                    duration: Duration(milliseconds: 200),
-                                                    width: 140,
-                                                    margin: EdgeInsets.symmetric(vertical: 4),
-                                                    decoration: BoxDecoration(
-                                                      borderRadius: BorderRadius.circular(24),
-                                                      gradient: isSelected
-                                                          ? LinearGradient(
-                                                              begin: Alignment.topLeft,
-                                                              end: Alignment.bottomRight,
-                                                              colors: [
-                                                                Color(account.colorValue ?? 0xFF000000).withValues(alpha: 0.8),
-                                                                Color(account.colorValue ?? 0xFF000000),
-                                                              ],
-                                                            )
-                                                          : LinearGradient(
-                                                              begin: Alignment.topLeft,
-                                                              end: Alignment.bottomRight,
-                                                              colors: [
-                                                                color.surfaceContainerHighest.withValues(alpha: 0.6),
-                                                                color.surfaceContainerHighest.withValues(alpha: 0.3),
-                                                              ],
-                                                            ),
-                                                      boxShadow: isSelected
-                                                          ? [
-                                                              BoxShadow(
-                                                                color: Color(account.colorValue ?? 0xFF000000).withValues(alpha: 0.3),
-                                                                blurRadius: 8,
-                                                                offset: Offset(0, 4),
-                                                              ),
-                                                            ]
-                                                          : [],
-                                                      border: Border.all(
-                                                        color: Colors.white.withValues(alpha: 0.2),
-                                                        width: 1.5,
-                                                      ),
-                                                    ),
-                                                    child: ClipRRect(
-                                                      borderRadius: BorderRadius.circular(24),
-                                                      child: Stack(
-                                                        children: [
-                                                          Positioned(
-                                                            right: -15,
-                                                            bottom: -15,
-                                                            child: Transform.rotate(
-                                                              angle: -0.2,
-                                                              child: Icon(
-                                                                _getIconForAccountType(account.accountType),
-                                                                size: 80,
-                                                                color: Colors.white.withValues(alpha: 0.15),
-                                                              ),
-                                                            ),
-                                                          ),
-                                                          Padding(
-                                                            padding: EdgeInsets.all(16),
-                                                            child: Column(
-                                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                              children: [
-                                                                Container(
-                                                                  padding: EdgeInsets.all(8),
-                                                                  decoration: BoxDecoration(
-                                                                    color: isSelected
-                                                                        ? Colors.white.withValues(alpha: 0.2)
-                                                                        : color.surface,
-                                                                    shape: BoxShape.circle,
-                                                                  ),
-                                                                  child: Icon(
-                                                                    _getIconForAccountType(account.accountType),
-                                                                    color: isSelected ? Colors.white : color.onSurfaceVariant,
-                                                                    size: 20,
-                                                                  ),
-                                                                ),
-                                                                Column(
-                                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                                  children: [
-                                                                    Text(
-                                                                      account.name,
-                                                                      style: textTheme.labelMedium?.copyWith(
-                                                                        fontWeight: FontWeight.bold,
-                                                                        color: isSelected ? Colors.white : color.onSurfaceVariant,
-                                                                      ),
-                                                                      maxLines: 1,
-                                                                      overflow: TextOverflow.ellipsis,
-                                                                    ),
-                                                                    SizedBox(height: 2),
-                                                                    Text(
-                                                                      '₹${balance.toStringAsFixed(2)}',
-                                                                      style: textTheme.labelLarge?.copyWith(
-                                                                        color: isSelected
-                                                                            ? Colors.white.withValues(alpha: 0.8)
-                                                                            : color.onSurfaceVariant.withValues(alpha: 0.7),
-                                                                        fontWeight: FontWeight.w500,
-                                                                      ),
-                                                                      maxLines: 1,
-                                                                      overflow: TextOverflow.ellipsis,
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                              ],
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  ),
-                                                );
-                                              },
-                                            ),
-                                          ),
-                                      loading: () => SizedBox(height: 120),
-                                      error: (_, __) => SizedBox(),
-                                    ),
-                          ),
-                          SizedBox(height: 24),
-                          Text(
-                            'Select Category',
-                            style: textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: color.onSurfaceVariant,
-                            ),
-                          ),
-                          SizedBox(height: 16),
-                          Consumer(
-                            builder:
-                                (context, ref, _) => ref
-                                    .watch(categoryListProvider)
-                                    .when(
-                                      data:
-                                          (categories) => SizedBox(
-                                            height: 120,
-                                            child: ListView.separated(
-                                              scrollDirection: Axis.horizontal,
-                                              itemCount: categories.length + 1,
-                                              separatorBuilder: (_, __) => SizedBox(width: 12),
-                                              itemBuilder: (context, index) {
-                                                if (index < categories.length) {
-                                                  final cat = categories[index];
-                                                  final isSelected = selectedCategory?.id == cat.id;
-                                                  return GestureDetector(
-                                                    onTap: () {
-                                                      HapticFeedback.mediumImpact();
-                                                      setState(() => selectedCategory = cat);
-                                                    },
-                                                    child: AnimatedContainer(
-                                                      duration: Duration(milliseconds: 200),
-                                                      width: 120,
-                                                      margin: EdgeInsets.symmetric(vertical: 4),
-                                                      decoration: BoxDecoration(
-                                                        borderRadius: BorderRadius.circular(24),
-                                                        gradient: isSelected
-                                                            ? LinearGradient(
-                                                                begin: Alignment.topLeft,
-                                                                end: Alignment.bottomRight,
-                                                                colors: [
-                                                                  Color(cat.colorValue ?? 0xFF000000).withValues(alpha: 0.8),
-                                                                  Color(cat.colorValue ?? 0xFF000000),
-                                                                ],
-                                                              )
-                                                            : LinearGradient(
-                                                                begin: Alignment.topLeft,
-                                                                end: Alignment.bottomRight,
-                                                                colors: [
-                                                                  color.surfaceContainerHighest.withValues(alpha: 0.6),
-                                                                  color.surfaceContainerHighest.withValues(alpha: 0.3),
-                                                                ],
-                                                              ),
-                                                        boxShadow: isSelected
-                                                            ? [
-                                                                BoxShadow(
-                                                                  color: Color(cat.colorValue ?? 0xFF000000).withValues(alpha: 0.3),
-                                                                  blurRadius: 8,
-                                                                  offset: Offset(0, 4),
-                                                                ),
-                                                              ]
-                                                            : [],
-                                                        border: Border.all(
-                                                          color: Colors.white.withValues(alpha: 0.2),
-                                                          width: 1.5,
+                                                    return GestureDetector(
+                                                      onTap: () {
+                                                        HapticFeedback.mediumImpact();
+                                                        setState(
+                                                          () =>
+                                                              selectedAccount =
+                                                                  account,
+                                                        );
+                                                      },
+                                                      child: AnimatedContainer(
+                                                        duration: Duration(
+                                                          milliseconds: 200,
                                                         ),
-                                                      ),
-                                                      child: ClipRRect(
-                                                        borderRadius: BorderRadius.circular(24),
-                                                        child: Stack(
-                                                          children: [
-                                                            if (isSelected)
+                                                        width: 140,
+                                                        margin:
+                                                            EdgeInsets.symmetric(
+                                                              vertical: 4,
+                                                            ),
+                                                        decoration: BoxDecoration(
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                24,
+                                                              ),
+                                                          gradient:
+                                                              isSelected
+                                                                  ? LinearGradient(
+                                                                    begin:
+                                                                        Alignment
+                                                                            .topLeft,
+                                                                    end:
+                                                                        Alignment
+                                                                            .bottomRight,
+                                                                    colors: [
+                                                                      Color(
+                                                                        account.colorValue ??
+                                                                            0xFF000000,
+                                                                      ).withValues(
+                                                                        alpha:
+                                                                            0.8,
+                                                                      ),
+                                                                      Color(
+                                                                        account.colorValue ??
+                                                                            0xFF000000,
+                                                                      ),
+                                                                    ],
+                                                                  )
+                                                                  : LinearGradient(
+                                                                    begin:
+                                                                        Alignment
+                                                                            .topLeft,
+                                                                    end:
+                                                                        Alignment
+                                                                            .bottomRight,
+                                                                    colors: [
+                                                                      color
+                                                                          .surfaceContainerHighest
+                                                                          .withValues(
+                                                                            alpha:
+                                                                                0.6,
+                                                                          ),
+                                                                      color
+                                                                          .surfaceContainerHighest
+                                                                          .withValues(
+                                                                            alpha:
+                                                                                0.3,
+                                                                          ),
+                                                                    ],
+                                                                  ),
+                                                          boxShadow:
+                                                              isSelected
+                                                                  ? [
+                                                                    BoxShadow(
+                                                                      color: Color(
+                                                                        account.colorValue ??
+                                                                            0xFF000000,
+                                                                      ).withValues(
+                                                                        alpha:
+                                                                            0.3,
+                                                                      ),
+                                                                      blurRadius:
+                                                                          8,
+                                                                      offset:
+                                                                          Offset(
+                                                                            0,
+                                                                            4,
+                                                                          ),
+                                                                    ),
+                                                                  ]
+                                                                  : [],
+                                                          border: Border.all(
+                                                            color: Colors.white
+                                                                .withValues(
+                                                                  alpha: 0.2,
+                                                                ),
+                                                            width: 1.5,
+                                                          ),
+                                                        ),
+                                                        child: ClipRRect(
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                24,
+                                                              ),
+                                                          child: Stack(
+                                                            children: [
                                                               Positioned(
                                                                 right: -15,
                                                                 bottom: -15,
                                                                 child: Transform.rotate(
                                                                   angle: -0.2,
                                                                   child: Icon(
-                                                                    IconHelper.iconFromName(cat.iconName ?? 'category'),
-                                                                    size: 70,
-                                                                    color: Colors.white.withValues(alpha: 0.15),
+                                                                    _getIconForAccountType(
+                                                                      account
+                                                                          .accountType,
+                                                                    ),
+                                                                    size: 80,
+                                                                    color: Colors
+                                                                        .white
+                                                                        .withValues(
+                                                                          alpha:
+                                                                              0.15,
+                                                                        ),
                                                                   ),
                                                                 ),
                                                               ),
-                                                            Padding(
-                                                              padding: EdgeInsets.all(16),
-                                                              child: Column(
-                                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                                children: [
-                                                                  Container(
-                                                                    padding: EdgeInsets.all(8),
-                                                                    decoration: BoxDecoration(
-                                                                      color: isSelected
-                                                                          ? Colors.white.withValues(alpha: 0.2)
-                                                                          : color.surface,
-                                                                      shape: BoxShape.circle,
+                                                              Padding(
+                                                                padding:
+                                                                    EdgeInsets.all(
+                                                                      16,
                                                                     ),
-                                                                    child: Icon(
-                                                                      IconHelper.iconFromName(cat.iconName ?? 'category'),
-                                                                      color: isSelected ? Colors.white : color.onSurfaceVariant,
-                                                                      size: 20,
+                                                                child: Column(
+                                                                  crossAxisAlignment:
+                                                                      CrossAxisAlignment
+                                                                          .start,
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .spaceBetween,
+                                                                  children: [
+                                                                    Container(
+                                                                      padding:
+                                                                          EdgeInsets.all(
+                                                                            8,
+                                                                          ),
+                                                                      decoration: BoxDecoration(
+                                                                        color:
+                                                                            isSelected
+                                                                                ? Colors.white.withValues(
+                                                                                  alpha:
+                                                                                      0.2,
+                                                                                )
+                                                                                : color.surface,
+                                                                        shape:
+                                                                            BoxShape.circle,
+                                                                      ),
+                                                                      child: Icon(
+                                                                        _getIconForAccountType(
+                                                                          account
+                                                                              .accountType,
+                                                                        ),
+                                                                        color:
+                                                                            isSelected
+                                                                                ? Colors.white
+                                                                                : color.onSurfaceVariant,
+                                                                        size:
+                                                                            20,
+                                                                      ),
                                                                     ),
-                                                                  ),
-                                                                  Text(
-                                                                    cat.name,
-                                                                    style: textTheme.labelMedium?.copyWith(
-                                                                      fontWeight: FontWeight.bold,
-                                                                      color: isSelected ? Colors.white : color.onSurfaceVariant,
+                                                                    Column(
+                                                                      crossAxisAlignment:
+                                                                          CrossAxisAlignment
+                                                                              .start,
+                                                                      children: [
+                                                                        Text(
+                                                                          account
+                                                                              .name,
+                                                                          style: textTheme.labelMedium?.copyWith(
+                                                                            fontWeight:
+                                                                                FontWeight.bold,
+                                                                            color:
+                                                                                isSelected
+                                                                                    ? Colors.white
+                                                                                    : color.onSurfaceVariant,
+                                                                          ),
+                                                                          maxLines:
+                                                                              1,
+                                                                          overflow:
+                                                                              TextOverflow.ellipsis,
+                                                                        ),
+                                                                        SizedBox(
+                                                                          height:
+                                                                              2,
+                                                                        ),
+                                                                        Text(
+                                                                          ctxt.formatCurrencyWithSign(2, balance),
+                                                                          style: textTheme.labelLarge?.copyWith(
+                                                                            color:
+                                                                                isSelected
+                                                                                    ? Colors.white.withValues(
+                                                                                      alpha:
+                                                                                          0.8,
+                                                                                    )
+                                                                                    : color.onSurfaceVariant.withValues(
+                                                                                      alpha:
+                                                                                          0.7,
+                                                                                    ),
+                                                                            fontWeight:
+                                                                                FontWeight.w500,
+                                                                          ),
+                                                                          maxLines:
+                                                                              1,
+                                                                          overflow:
+                                                                              TextOverflow.ellipsis,
+                                                                        ),
+                                                                      ],
                                                                     ),
-                                                                    maxLines: 2,
-                                                                    overflow: TextOverflow.ellipsis,
-                                                                  ),
-                                                                ],
+                                                                  ],
+                                                                ),
                                                               ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  );
-                                                } else {
-                                                  return GestureDetector(
-                                                    onTap: () {
-                                                      HapticFeedback.mediumImpact();
-                                                      context.push('/add-category');
-                                                    },
-                                                    child: Container(
-                                                      width: 80,
-                                                      margin: EdgeInsets.symmetric(vertical: 4),
-                                                      decoration: BoxDecoration(
-                                                        borderRadius: BorderRadius.circular(24),
-                                                        color: color.surfaceContainerHighest.withValues(alpha: 0.3),
-                                                        border: Border.all(
-                                                          color: color.outline.withValues(alpha: 0.5),
-                                                          width: 1,
-                                                        ),
-                                                      ),
-                                                      child: Column(
-                                                        mainAxisAlignment: MainAxisAlignment.center,
-                                                        children: [
-                                                          Icon(Icons.add, color: color.onSurfaceVariant),
-                                                          SizedBox(height: 4),
-                                                          Text(
-                                                            'Add',
-                                                            style: textTheme.labelSmall?.copyWith(
-                                                              color: color.onSurfaceVariant,
-                                                            ),
+                                                            ],
                                                           ),
-                                                        ],
+                                                        ),
                                                       ),
-                                                    ),
-                                                  );
-                                                }
-                                              },
-                                            ),
-                                          ),
-                                      loading: () => SizedBox(height: 120),
-                                      error: (_, __) => SizedBox(),
-                                    ),
-                          ),
-                          SizedBox(height: 32),
-                          SizedBox(
-                            width: double.infinity,
-                            height: 56,
-                            child: FilledButton(
-                              style: FilledButton.styleFrom(
-                                backgroundColor: color.primary,
-                                foregroundColor: color.onPrimary,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
+                                                    );
+                                                  },
+                                                ),
+                                              ),
+                                          loading: () => SizedBox(height: 120),
+                                          error: (_, __) => SizedBox(),
+                                        ),
+                              ),
+                              SizedBox(height: 24),
+                              Text(
+                                'Select Category',
+                                style: textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: color.onSurfaceVariant,
                                 ),
                               ),
-                              onPressed: () {
-                                HapticFeedback.mediumImpact();
-                                if (selectedCategory != null &&
-                                    selectedAccount != null) {
-                                  _approveTransaction(
-                                    pendingTx,
-                                    selectedAccount!,
-                                    selectedCategory!,
-                                  );
-                                } else {
-                                  SnackbarService.warning('Select Account & Category');
-                                }
-                              },
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.check_circle, size: 24),
-                                  SizedBox(width: 12),
-                                  Text(
-                                    'APPROVE TRANSACTION',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                      letterSpacing: 0.5,
+                              SizedBox(height: 16),
+                              Consumer(
+                                builder:
+                                    (context, ref, _) => ref
+                                        .watch(categoryListProvider)
+                                        .when(
+                                          data:
+                                              (categories) => SizedBox(
+                                                height: 120,
+                                                child: ListView.separated(
+                                                  scrollDirection:
+                                                      Axis.horizontal,
+                                                  itemCount:
+                                                      categories.length + 1,
+                                                  separatorBuilder:
+                                                      (_, __) =>
+                                                          SizedBox(width: 12),
+                                                  itemBuilder: (
+                                                    context,
+                                                    index,
+                                                  ) {
+                                                    if (index <
+                                                        categories.length) {
+                                                      final cat =
+                                                          categories[index];
+                                                      final isSelected =
+                                                          selectedCategory
+                                                              ?.id ==
+                                                          cat.id;
+                                                      return GestureDetector(
+                                                        onTap: () {
+                                                          HapticFeedback.mediumImpact();
+                                                          setState(
+                                                            () =>
+                                                                selectedCategory =
+                                                                    cat,
+                                                          );
+                                                        },
+                                                        child: AnimatedContainer(
+                                                          duration: Duration(
+                                                            milliseconds: 200,
+                                                          ),
+                                                          width: 120,
+                                                          margin:
+                                                              EdgeInsets.symmetric(
+                                                                vertical: 4,
+                                                              ),
+                                                          decoration: BoxDecoration(
+                                                            borderRadius:
+                                                                BorderRadius.circular(
+                                                                  24,
+                                                                ),
+                                                            gradient:
+                                                                isSelected
+                                                                    ? LinearGradient(
+                                                                      begin:
+                                                                          Alignment
+                                                                              .topLeft,
+                                                                      end:
+                                                                          Alignment
+                                                                              .bottomRight,
+                                                                      colors: [
+                                                                        Color(
+                                                                          cat.colorValue ??
+                                                                              0xFF000000,
+                                                                        ).withValues(
+                                                                          alpha:
+                                                                              0.8,
+                                                                        ),
+                                                                        Color(
+                                                                          cat.colorValue ??
+                                                                              0xFF000000,
+                                                                        ),
+                                                                      ],
+                                                                    )
+                                                                    : LinearGradient(
+                                                                      begin:
+                                                                          Alignment
+                                                                              .topLeft,
+                                                                      end:
+                                                                          Alignment
+                                                                              .bottomRight,
+                                                                      colors: [
+                                                                        color.surfaceContainerHighest.withValues(
+                                                                          alpha:
+                                                                              0.6,
+                                                                        ),
+                                                                        color.surfaceContainerHighest.withValues(
+                                                                          alpha:
+                                                                              0.3,
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                            boxShadow:
+                                                                isSelected
+                                                                    ? [
+                                                                      BoxShadow(
+                                                                        color: Color(
+                                                                          cat.colorValue ??
+                                                                              0xFF000000,
+                                                                        ).withValues(
+                                                                          alpha:
+                                                                              0.3,
+                                                                        ),
+                                                                        blurRadius:
+                                                                            8,
+                                                                        offset:
+                                                                            Offset(
+                                                                              0,
+                                                                              4,
+                                                                            ),
+                                                                      ),
+                                                                    ]
+                                                                    : [],
+                                                            border: Border.all(
+                                                              color: Colors
+                                                                  .white
+                                                                  .withValues(
+                                                                    alpha: 0.2,
+                                                                  ),
+                                                              width: 1.5,
+                                                            ),
+                                                          ),
+                                                          child: ClipRRect(
+                                                            borderRadius:
+                                                                BorderRadius.circular(
+                                                                  24,
+                                                                ),
+                                                            child: Stack(
+                                                              children: [
+                                                                if (isSelected)
+                                                                  Positioned(
+                                                                    right: -15,
+                                                                    bottom: -15,
+                                                                    child: Transform.rotate(
+                                                                      angle:
+                                                                          -0.2,
+                                                                      child: Icon(
+                                                                        IconHelper.iconFromName(
+                                                                          cat.iconName ??
+                                                                              'category',
+                                                                        ),
+                                                                        size:
+                                                                            70,
+                                                                        color: Colors.white.withValues(
+                                                                          alpha:
+                                                                              0.15,
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                Padding(
+                                                                  padding:
+                                                                      EdgeInsets.all(
+                                                                        16,
+                                                                      ),
+                                                                  child: Column(
+                                                                    crossAxisAlignment:
+                                                                        CrossAxisAlignment
+                                                                            .start,
+                                                                    mainAxisAlignment:
+                                                                        MainAxisAlignment
+                                                                            .spaceBetween,
+                                                                    children: [
+                                                                      Container(
+                                                                        padding:
+                                                                            EdgeInsets.all(
+                                                                              8,
+                                                                            ),
+                                                                        decoration: BoxDecoration(
+                                                                          color:
+                                                                              isSelected
+                                                                                  ? Colors.white.withValues(
+                                                                                    alpha:
+                                                                                        0.2,
+                                                                                  )
+                                                                                  : color.surface,
+                                                                          shape:
+                                                                              BoxShape.circle,
+                                                                        ),
+                                                                        child: Icon(
+                                                                          IconHelper.iconFromName(
+                                                                            cat.iconName ??
+                                                                                'category',
+                                                                          ),
+                                                                          color:
+                                                                              isSelected
+                                                                                  ? Colors.white
+                                                                                  : color.onSurfaceVariant,
+                                                                          size:
+                                                                              20,
+                                                                        ),
+                                                                      ),
+                                                                      Text(
+                                                                        cat.name,
+                                                                        style: textTheme.labelMedium?.copyWith(
+                                                                          fontWeight:
+                                                                              FontWeight.bold,
+                                                                          color:
+                                                                              isSelected
+                                                                                  ? Colors.white
+                                                                                  : color.onSurfaceVariant,
+                                                                        ),
+                                                                        maxLines:
+                                                                            2,
+                                                                        overflow:
+                                                                            TextOverflow.ellipsis,
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      );
+                                                    } else {
+                                                      return GestureDetector(
+                                                        onTap: () {
+                                                          HapticFeedback.mediumImpact();
+                                                          context.push(
+                                                            '/add-category',
+                                                          );
+                                                        },
+                                                        child: Container(
+                                                          width: 80,
+                                                          margin:
+                                                              EdgeInsets.symmetric(
+                                                                vertical: 4,
+                                                              ),
+                                                          decoration: BoxDecoration(
+                                                            borderRadius:
+                                                                BorderRadius.circular(
+                                                                  24,
+                                                                ),
+                                                            color: color
+                                                                .surfaceContainerHighest
+                                                                .withValues(
+                                                                  alpha: 0.3,
+                                                                ),
+                                                            border: Border.all(
+                                                              color: color
+                                                                  .outline
+                                                                  .withValues(
+                                                                    alpha: 0.5,
+                                                                  ),
+                                                              width: 1,
+                                                            ),
+                                                          ),
+                                                          child: Column(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .center,
+                                                            children: [
+                                                              Icon(
+                                                                Icons.add,
+                                                                color:
+                                                                    color
+                                                                        .onSurfaceVariant,
+                                                              ),
+                                                              SizedBox(
+                                                                height: 4,
+                                                              ),
+                                                              Text(
+                                                                ctxt.common_addLabel,
+                                                                style: textTheme
+                                                                    .labelSmall
+                                                                    ?.copyWith(
+                                                                      color:
+                                                                          color
+                                                                              .onSurfaceVariant,
+                                                                    ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      );
+                                                    }
+                                                  },
+                                                ),
+                                              ),
+                                          loading: () => SizedBox(height: 120),
+                                          error: (_, __) => SizedBox(),
+                                        ),
+                              ),
+                              SizedBox(height: 32),
+                              SizedBox(
+                                width: double.infinity,
+                                height: 56,
+                                child: FilledButton(
+                                  style: FilledButton.styleFrom(
+                                    backgroundColor: color.primary,
+                                    foregroundColor: color.onPrimary,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
                                     ),
                                   ),
-                                ],
+                                  onPressed: () {
+                                    HapticFeedback.mediumImpact();
+                                    if (selectedCategory != null &&
+                                        selectedAccount != null) {
+                                      _approveTransaction(
+                                        pendingTx,
+                                        selectedAccount!,
+                                        selectedCategory!,
+                                        ctxt,
+                                      );
+                                    } else {
+                                      SnackbarService.warning(
+                                        'Select Account & Category',
+                                      );
+                                    }
+                                  },
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.check_circle, size: 24),
+                                      SizedBox(width: 12),
+                                      Text(
+                                        'APPROVE TRANSACTION',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                          letterSpacing: 0.5,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
-                            ),
+                              SizedBox(height: 16),
+                            ],
                           ),
-                          SizedBox(height: 16),
-                        ],
-                      ),
-                    ),
-              ),
-            ),
+                        ),
+                  ),
+                ),
           ),
     );
   }

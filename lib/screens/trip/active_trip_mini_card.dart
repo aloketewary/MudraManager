@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mudra_manager/providers/trip_provider.dart';
-import 'package:mudra_manager/theme/app_colors.dart';
 
 class ActiveTripMiniCard extends ConsumerWidget {
   final double globalPadding;
@@ -88,102 +87,107 @@ class ActiveTripMiniCard extends ConsumerWidget {
                     final trip = activeTrips[index];
                     return GestureDetector(
                       onTap: () => context.push('/trip-detail', extra: trip.id),
-                      child: Container(
-                        width: 200,
-                        margin: const EdgeInsets.only(right: 12),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: AppColors.glassGradient(AppColors.tripActive, isDark),
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: AppColors.tripActive.withValues(alpha: 0.3),
-                            width: 1.5,
-                          ),
-                          boxShadow: AppColors.glassShadow(AppColors.tripActive, isDark),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
+                      child: Card(
+                        elevation: 0,
+                        color: color.surfaceContainerHighest,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(12),
+                          onTap:
+                              () =>
+                                  context.push('/trip-detail', extra: trip.id),
+                          child: Container(
+                            width: 200,
+                            margin: const EdgeInsets.only(right: 12),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.tripActive.withValues(alpha: 0.15),
-                                      borderRadius: BorderRadius.circular(8),
+                                  Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: color.tertiary.withValues(
+                                            alpha: 0.15,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                        ),
+                                        child: Icon(
+                                          Icons.flight_takeoff,
+                                          color: color.tertiary,
+                                          size: 20,
+                                        ),
+                                      ),
+                                      const Spacer(),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 4,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: color.tertiary.withValues(
+                                            alpha: 0.15,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          'ACTIVE',
+                                          style: textTheme.labelSmall?.copyWith(
+                                            color: color.tertiary,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    trip.name,
+                                    style: textTheme.titleMedium?.copyWith(
+                                      color: color.tertiary,
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                    child: const Icon(
-                                      Icons.flight_takeoff,
-                                      color: AppColors.tripActive,
-                                      size: 20,
-                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                   const Spacer(),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.tripActive.withValues(alpha: 0.15),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Text(
-                                      'ACTIVE',
-                                      style: textTheme.labelSmall?.copyWith(
-                                        color: AppColors.tripActive,
-                                        fontWeight: FontWeight.bold,
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.people_outline,
+                                        size: 16,
+                                        color: color.tertiary,
                                       ),
-                                    ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        '${trip.participants.length}',
+                                        style: textTheme.bodySmall?.copyWith(
+                                          color: color.tertiary,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Icon(
+                                        Icons.receipt_outlined,
+                                        size: 16,
+                                        color: color.tertiary,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        '${trip.transactions.length}',
+                                        style: textTheme.bodySmall?.copyWith(
+                                          color: color.tertiary,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 12),
-                              Text(
-                                trip.name,
-                                style: textTheme.titleMedium?.copyWith(
-                                  color: AppColors.tripActive,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const Spacer(),
-                              Row(
-                                children: [
-                                  const Icon(
-                                    Icons.people_outline,
-                                    size: 16,
-                                    color: AppColors.tripActive,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    '${trip.participants.length}',
-                                    style: textTheme.bodySmall?.copyWith(
-                                      color: AppColors.tripActive,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  const Icon(
-                                    Icons.receipt_outlined,
-                                    size: 16,
-                                    color: AppColors.tripActive,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    '${trip.transactions.length}',
-                                    style: textTheme.bodySmall?.copyWith(
-                                      color: AppColors.tripActive,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                            ),
                           ),
                         ),
                       ),

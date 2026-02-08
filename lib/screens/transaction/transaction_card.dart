@@ -8,12 +8,14 @@ import 'package:mudra_manager/db/models/tag.dart';
 import 'package:mudra_manager/db/models/transaction.dart' show Transaction;
 import 'package:mudra_manager/l10n/app_localizations.dart'
     show AppLocalizations;
-import 'package:mudra_manager/theme/app_colors.dart';
+
 import 'package:mudra_manager/util/account_type_extension.dart';
 import 'package:mudra_manager/util/case_extension.dart';
 import 'package:mudra_manager/util/icon_helper.dart';
 import 'package:mudra_manager/util/localization_extension.dart';
 import 'package:mudra_manager/util/string_util.dart';
+import 'package:mudra_manager/components/adaptive_text.dart';
+import 'package:mudra_manager/components/currency_text.dart';
 
 class TransactionCard extends StatefulWidget {
   final Category? category;
@@ -61,30 +63,10 @@ class _TransactionCardState extends State<TransactionCard> {
     final ctxt = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Container(
+    return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: AppColors.glassGradient(
-            widget.isTransfer ? AppColors.transfer : (widget.isExpense ? AppColors.expense : AppColors.income),
-            isDark,
-          ),
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: (widget.isTransfer ? AppColors.transfer : (widget.isExpense ? AppColors.expense : AppColors.income)).withValues(alpha: 0.2),
-          width: 1.5,
-        ),
-        boxShadow: const [
-          BoxShadow(
-            color: AppColors.cardShadow,
-            blurRadius: 8,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
+      elevation: 0,
+      color: color.surfaceContainer,
       child: Stack(
         children: [
           if (widget.tripName != null)
@@ -92,29 +74,23 @@ class _TransactionCardState extends State<TransactionCard> {
               top: 0,
               right: 0,
               child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [AppColors.tripActive.withValues(alpha: 0.9), AppColors.tripActiveDark],
-                  ),
+                  color: color.primaryContainer,
                   borderRadius: BorderRadius.only(
                     topRight: Radius.circular(20),
-                    bottomLeft: Radius.circular(12),
+                    bottomLeft: Radius.circular(20),
                   ),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      Icons.beach_access_outlined,
-                      size: 12,
-                      color: AppColors.white,
-                    ),
+                    Icon(Icons.beach_access_outlined, size: 12, color: color.onPrimaryContainer),
                     SizedBox(width: 4),
                     Text(
                       'TRIP',
                       style: TextStyle(
-                        color: AppColors.white,
+                        color: color.onPrimaryContainer,
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                       ),
@@ -259,7 +235,7 @@ class _TransactionCardState extends State<TransactionCard> {
                                       OutlinedButton.icon(
                                         onPressed: widget.onEdit,
                                         icon: const Icon(Icons.edit, size: 18),
-                                        label: const Text("Edit"),
+                                        label: Text(ctxt.common_editLabel),
                                         style: OutlinedButton.styleFrom(
                                           foregroundColor: color.primary,
                                           side: BorderSide(
@@ -276,7 +252,7 @@ class _TransactionCardState extends State<TransactionCard> {
                                           Icons.delete,
                                           size: 18,
                                         ),
-                                        label: const Text("Delete"),
+                                        label: Text(ctxt.common_deleteLabel),
                                         style: OutlinedButton.styleFrom(
                                           foregroundColor: color.error,
                                           side: BorderSide(
@@ -311,54 +287,56 @@ class _TransactionCardState extends State<TransactionCard> {
     return Row(
       children: <Widget>[
         Container(
-          width: 48.0,
-          height: 48.0,
+          width: 40.0,
+          height: 40.0,
           decoration: BoxDecoration(
             color: categoryColor.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(
             IconHelper.getIconData(widget.category?.iconName),
             color: categoryColor,
-            size: 24.0,
+            size: 20.0,
           ),
         ),
-        const SizedBox(width: 16.0),
+        const SizedBox(width: 12.0),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Text(
+              AdaptiveText(
                 "${widget.category?.name}",
-                style: textTheme.titleMedium?.copyWith(
+                style: textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
+                maxLines: 1,
               ),
               const SizedBox(height: 2),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      '${widget.account?.name} • ${widget.account?.accountType.name.toTitleCase()}',
-                      style: textTheme.bodySmall?.copyWith(
-                        color: color.onSurfaceVariant,
-                      ),
-                    ),
+              Flexible(
+                child: AdaptiveText(
+                  '${widget.account?.name} • ${widget.account?.accountType.name.toTitleCase()}',
+                  style: textTheme.bodySmall?.copyWith(
+                    color: color.onSurfaceVariant,
                   ),
-                ],
+                  maxLines: 1,
+                ),
               ),
             ],
           ),
         ),
         Column(
           crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Text(
-              '${widget.isExpense ? '-' : '+'} ${ctxt.formatCurrencyWithSign(2, widget.amount.toDouble())}',
-              style: textTheme.titleMedium?.copyWith(
+            CurrencyText(
+              amount: widget.amount.toDouble(),
+              showSign: true,
+              style: textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: widget.isExpense ? color.error : color.primary,
               ),
+              maxLines: 1,
             ),
             const SizedBox(height: 2),
             Text(
@@ -405,18 +383,18 @@ class _TransactionCardState extends State<TransactionCard> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "From",
+                          ctxt.common_fromLabel,
                           style: textTheme.labelSmall?.copyWith(
                             color: color.onSurfaceVariant,
                             fontSize: 10,
                           ),
                         ),
-                        Text(
+                        AdaptiveText(
                           related?.account.value?.name ?? '',
                           style: textTheme.labelMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
-                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                         ),
                       ],
                     ),
@@ -445,18 +423,18 @@ class _TransactionCardState extends State<TransactionCard> {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(
-                          "To",
+                          ctxt.common_toLabel,
                           style: textTheme.labelSmall?.copyWith(
                             color: color.onSurfaceVariant,
                             fontSize: 10,
                           ),
                         ),
-                        Text(
+                        AdaptiveText(
                           widget.account?.name ?? '',
                           style: textTheme.labelMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
-                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                         ),
                       ],
                     ),
@@ -483,8 +461,8 @@ class _TransactionCardState extends State<TransactionCard> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              ctxt.formatCurrencyWithSign(2, widget.amount.toDouble()),
+            CurrencyText(
+              amount: widget.amount.toDouble(),
               style: textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: color.primary,

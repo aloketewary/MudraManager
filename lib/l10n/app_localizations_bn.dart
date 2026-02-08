@@ -108,6 +108,13 @@ class AppLocalizationsBn extends AppLocalizations {
   String get app_settings_theme_mode_system_default => 'সিস্টেম ডিফল্ট';
 
   @override
+  String get app_settings_theme_mode_amoled => 'AMOLED ডার্ক';
+
+  @override
+  String get app_settings_theme_mode_subtitle =>
+      'আপনার পছন্দের থিম নির্বাচন করুন';
+
+  @override
   String get app_settings_daily_reminder_title => 'দৈনিক ব্যয়ের অনুস্মারক';
 
   @override
@@ -257,7 +264,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get budget_dashboardMiniCardBudgetTitleText => 'বাজেট';
 
   @override
-  String get budget_dashboardMiniCardSpentTitleText => 'খরচ হয়েছে';
+  String get budget_dashboardMiniCardSpentTitleText => 'খরচ হয়েছে';
 
   @override
   String get budget_dashboardPageTitle => 'বাজেটের বিবরণ';
@@ -400,7 +407,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get transaction_selectTagLabel => 'ট্যাগ নির্বাচন করুন';
 
   @override
-  String get transaction_addNewCategoryText => 'নতুন ক্যাটাগরি\nযোগ করুন';
+  String get transaction_addNewCategoryText => 'নতুন ক্যাটাগরি\\nযোগ করুন';
 
   @override
   String get transaction_addNewTagText => 'নতুন ট্যাগ যোগ করুন';
@@ -412,7 +419,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get transaction_saveTagButtonLabel => 'ট্যাগ সংরক্ষণ করুন';
 
   @override
-  String get transaction_saveTransactionButtonLabel => 'Save Transaction';
+  String get transaction_saveTransactionButtonLabel => 'লেনদেন সংরক্ষণ করুন';
 
   @override
   String get transaction_selectOneAccountErrorText =>
@@ -430,7 +437,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get statistics_weTrimDownDecimalInfoText =>
-      'আমরা দশমিক স্থান কমিয়ে দেই, প্রয়োজনে রাউন্ড অফ করুন।';
+      'আমরা দশমিক স্থান কমিয়ে দেই, প্রয়োজনে রাউন্ড অফ করুন।';
 
   @override
   String get statistics_selectPeriodTodayText => 'আজ';
@@ -462,7 +469,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get statistics_transactionNotPresentText => 'লেনদেন বিদ্যমান নেই।';
 
   @override
-  String get statistics_byCategoryTitleText => 'ক্যাটাগরি অনুযায়ী';
+  String get statistics_byCategoryTitleText => 'ক্যাটাগরি অনুযায়ী';
 
   @override
   String get statistics_recentTransactionsTitleText => 'সাম্প্রতিক লেনদেন';
@@ -527,4 +534,349 @@ class AppLocalizationsBn extends AppLocalizations {
   @override
   String get pendingTranx_reviewPendingTransactionsScreenTitle =>
       'মুলতুবি লেনদেন';
+
+  @override
+  String get statistics_quickOverviewTitle => 'দ্রুত পরিদর্শন';
+
+  @override
+  String get statistics_insightsTitle => 'অন্তর্দৃষ্টি';
+
+  @override
+  String get statistics_detailedAnalysisTitle => 'বিস্তারিত বিশ্লেষণ';
+
+  @override
+  String get statistics_categoryBreakdownSubtitle => 'ক্যাটাগরি ভাঙ্গন দেখুন';
+
+  @override
+  String get statistics_expenseTrendsTitle => 'ব্যয়ের ধারা';
+
+  @override
+  String get statistics_expenseTrendsSubtitle => 'গত ১২ মাসের ধারা';
+
+  @override
+  String get statistics_recentTransactionsSubtitle => 'গত ৫টি লেনদেন';
+
+  @override
+  String get statistics_categoryBreakdownTitle => 'ক্যাটাগরি ভাঙ্গন';
+
+  @override
+  String get statistics_recentTransactionsModalTitle => 'সাম্প্রতিক লেনদেন';
+
+  @override
+  String get transfer_screenTitle => 'তহবিল স্থানান্তর';
+
+  @override
+  String get transfer_resetTooltip => 'রিসেট';
+
+  @override
+  String get transfer_selectAccountsLabel => 'অ্যাকাউন্ট নির্বাচন করুন';
+
+  @override
+  String get transfer_fromLabel => 'থেকে';
+
+  @override
+  String get transfer_toLabel => 'এ';
+
+  @override
+  String get transfer_detailsLabel => 'স্থানান্তরের বিবরণ';
+
+  @override
+  String get transfer_amountLabel => 'পরিমাণ';
+
+  @override
+  String get transfer_amountValidationError => 'বৈধ পরিমাণ লিখুন';
+
+  @override
+  String get transfer_dateLabel => 'তারিখ';
+
+  @override
+  String get transfer_noteLabel => 'নোট (ঐচ্ছিক)';
+
+  @override
+  String get transfer_buttonLabel => 'স্থানান্তর';
+
+  @override
+  String get transfer_updateButtonLabel => 'স্থানান্তর আপডেট করুন';
+
+  @override
+  String get transfer_errorLoadingAccounts => 'অ্যাকাউন্ট লোড করতে ত্রুটি';
+
+  @override
+  String get app_settings_themeModeModalTitle => 'থিম মোড';
+
+  @override
+  String get category_expenseLabel => 'ব্যয়';
+
+  @override
+  String get category_incomeLabel => 'আয়';
+
+  @override
+  String get category_addTitle => 'ক্যাটাগরি যোগ করুন';
+
+  @override
+  String get category_editTitle => 'ক্যাটাগরি সম্পাদনা করুন';
+
+  @override
+  String get category_tapToChangeIcon => 'আইকন পরিবর্তন করতে ট্যাপ করুন';
+
+  @override
+  String get category_nameLabel => 'ক্যাটাগরির নাম';
+
+  @override
+  String get category_nameRequired => 'আবশ্যক';
+
+  @override
+  String get category_typeLabel => 'ক্যাটাগরির ধরন';
+
+  @override
+  String get category_colorLabel => 'রঙ';
+
+  @override
+  String get category_tapToChangeColor => 'রঙ পরিবর্তন করতে ট্যাপ করুন';
+
+  @override
+  String get category_saveButton => 'ক্যাটাগরি সংরক্ষণ করুন';
+
+  @override
+  String get category_updateButton => 'ক্যাটাগরি আপডেট করুন';
+
+  @override
+  String get dashboard_incomeLabel => 'আয়';
+
+  @override
+  String get dashboard_spentLabel => 'খরচ হয়েছে';
+
+  @override
+  String get dashboard_noDataLabel => 'কোনো ডেটা নেই';
+
+  @override
+  String get dashboard_editLabel => 'সম্পাদনা';
+
+  @override
+  String get dashboard_archiveLabel => 'আর্কাইভ';
+
+  @override
+  String get currency_crore_short => 'কো';
+
+  @override
+  String get currency_lakh_short => 'ল';
+
+  @override
+  String get currency_thousand_short => 'হা';
+
+  @override
+  String common_errorText(Object error) {
+    return 'ত্রুটি: $error';
+  }
+
+  @override
+  String get statistics_expenseShort => 'ব্যয়';
+
+  @override
+  String get statistics_incomeShort => 'আয়';
+
+  @override
+  String get transaction_categoryFilter => 'ক্যাটাগরি ফিল্টার';
+
+  @override
+  String get transaction_dateFilter => 'তারিখ ফিল্টার';
+
+  @override
+  String get transaction_allCategories => 'সব ক্যাটাগরি';
+
+  @override
+  String get transaction_applyFilters => 'ফিল্টার প্রয়োগ করুন';
+
+  @override
+  String get sms_selectTransactions => 'লেনদেন নির্বাচন করুন';
+
+  @override
+  String get common_addLabel => 'যোগ করুন';
+
+  @override
+  String get dashboard_removeLabel => 'সরান';
+
+  @override
+  String get dashboard_viewAllLabel => 'সব দেখুন';
+
+  @override
+  String get common_noAccountsYet => 'অভী পর্যন্ত কোনো অ্যাকাউন্ট নেই';
+
+  @override
+  String get common_loading => 'লোড হচ্ছে';
+
+  @override
+  String get common_editLabel => 'সম্পাদনা';
+
+  @override
+  String get common_deleteLabel => 'মুছে ফেলুন';
+
+  @override
+  String get common_fromLabel => 'থেকে';
+
+  @override
+  String get common_toLabel => 'এ';
+
+  @override
+  String get theme_chooseThemeTitle => 'থিম নির্বাচন করুন';
+
+  @override
+  String get theme_applyThemeLabel => 'থিম প্রয়োগ করুন';
+
+  @override
+  String get theme_themeAppliedMessage => 'থিম প্রয়োগ করা হয়েছে!';
+
+  @override
+  String get backup_backupRestoreTitle => 'ব্যাকআপ ও রিস্টোর';
+
+  @override
+  String get backup_backupDataTitle => 'ডেটা ব্যাকআপ করুন';
+
+  @override
+  String get backup_backupDataSubtitle => 'সব ডেটাবেস ও সেটিংস এক্সপোর্ট করুন';
+
+  @override
+  String get backup_restoreBackupTitle => 'ব্যাকআপ রিস্টোর করুন';
+
+  @override
+  String get backup_restoreBackupSubtitle => 'ডেটাবেস ও সেটিংস আমদানি করুন';
+
+  @override
+  String get backup_includeAttachmentsTitle =>
+      'অ্যাটাচমেন্ট অন্তর্ভুক্ত করবেন?';
+
+  @override
+  String get backup_includeAttachmentsMessage =>
+      'ব্যাকআপে রসিদের ছবি অন্তর্ভুক্ত করবেন? এটি ফাইলের আকার বাড়়াবে।';
+
+  @override
+  String get backup_yesLabel => 'হ্যাঁ';
+
+  @override
+  String get backup_noLabel => 'না';
+
+  @override
+  String get backup_completedMessage => 'ব্যাকআপ সম্পন্ন';
+
+  @override
+  String get backup_restoreSuccessMessage => 'রিস্টোর সফল';
+
+  @override
+  String backup_lastBackupLabel(Object date) {
+    return 'শেষ ব্যাকআপ: $date';
+  }
+
+  @override
+  String get backup_noBackupFoundLabel => 'কোনো ব্যাকআপ পাওয়া যায়নি';
+
+  @override
+  String get categories_manageCategoriesTitle => 'ক্যাটাগরি পরিচালনা করুন';
+
+  @override
+  String get categories_noCategoriesFound => 'কোনো ক্যাটাগরি পাওয়া যায়নি।';
+
+  @override
+  String categories_transactionCount(Object count, Object plural) {
+    return '$countটি লেনদেন$plural';
+  }
+
+  @override
+  String get categories_addCategoryLabel => 'ক্যাটাগরি যোগ করুন';
+
+  @override
+  String get categories_deleteCategoryTitle => 'ক্যাটাগরি মুছে ফেলুন';
+
+  @override
+  String get categories_deleteCategoryMessage =>
+      'আপনি কি নিশ্চিত এই ক্যাটাগরি মুছে ফেলতে চান?\\nসব সংশ্লিষ্ট লেনদেনও সরিয়ে দেওয়া হবে।';
+
+  @override
+  String get categories_categoryDeletedMessage =>
+      'ক্যাটাগরি ও এর লেনদেন মুছে দেওয়া হয়েছে';
+
+  @override
+  String get accounts_manageAccountsTitle => 'অ্যাকাউন্ট পরিচালনা করুন';
+
+  @override
+  String get accounts_noAccountsAddedYet =>
+      'অভী পর্যন্ত কোনো অ্যাকাউন্ট যোগ করা হয়নি';
+
+  @override
+  String get accounts_addAccountLabel => 'অ্যাকাউন্ট যোগ করুন';
+
+  @override
+  String get accounts_deleteAccountTitle => 'অ্যাকাউন্ট মুছে ফেলুন';
+
+  @override
+  String accounts_deleteAccountMessage(Object accountName) {
+    return 'আপনি কি নিশ্চিত \"$accountName\" মুছে ফেলতে চান?';
+  }
+
+  @override
+  String get accounts_archiveAccountTitle => 'অ্যাকাউন্ট আর্কাইভ করুন';
+
+  @override
+  String accounts_archiveAccountMessage(Object accountName) {
+    return 'আপনি কি নিশ্চিত \"$accountName\" আর্কাইভ করতে চান?';
+  }
+
+  @override
+  String get accounts_cancelLabel => 'বাতিল করুন';
+
+  @override
+  String get accounts_archiveLabel => 'আর্কাইভ';
+
+  @override
+  String accounts_accountArchivedMessage(Object accountName) {
+    return '\"$accountName\" আর্কাইভ করা হয়েছে';
+  }
+
+  @override
+  String get accounts_atLeastOneAccountRequired =>
+      'চালু রাখতে কমপক্ষে ১টি অ্যাকাউন্ট প্রয়োজন';
+
+  @override
+  String get transaction_tripLabel => 'ভ্রমণ';
+
+  @override
+  String get transaction_tripPartOfMessage =>
+      'এই লেনদেন নিচের ভ্রমণ(গুলি)র অংশ';
+
+  @override
+  String get sms_autoAddTooltip => 'স্বয়ংক্রিয় যোগ';
+
+  @override
+  String get sms_clearAllTooltip => 'সব সাফ করুন';
+
+  @override
+  String get sms_importedFromSmsDescription => 'SMS থেকে আমদানি করা';
+
+  @override
+  String get sms_selectAtLeastOneMessage =>
+      'অনুগ্রহ করে কমপক্ষে একটি SMS নির্বাচন করুন';
+
+  @override
+  String get dashboard_allTimeLabel => 'সব সময়';
+
+  @override
+  String get transaction_editTransactionTitle => 'লেনদেন সম্পাদনা করুন';
+
+  @override
+  String get transaction_dateLabel => 'তারিখ';
+
+  @override
+  String get transaction_addNoteHint => 'একটি নোট যোগ করুন';
+
+  @override
+  String get transaction_enterValidAmountError =>
+      'অনুগ্রহ করে একটি বৈধ পরিমাণ লিখুন।';
+
+  @override
+  String get sms_noPendingTransactions => 'কোনো মুলতুবি লেনদেন নেই';
+
+  @override
+  String get sms_approveLabel => 'অনুমোদন';
+
+  @override
+  String get sms_approveTransactionTitle => 'লেনদেন অনুমোদন করুন';
 }

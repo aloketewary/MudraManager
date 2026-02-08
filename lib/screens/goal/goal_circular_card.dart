@@ -3,12 +3,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/db/models/goal.dart';
 import 'package:mudra_manager/l10n/app_localizations.dart';
-import 'package:mudra_manager/theme/app_colors.dart';
+
 import 'package:mudra_manager/util/icon_helper.dart';
 import 'package:mudra_manager/util/localization_extension.dart';
 import 'package:mudra_manager/util/dialog_utils.dart';
 import 'package:mudra_manager/providers/goal_provider.dart';
 import 'package:mudra_manager/util/app_logger.dart';
+import 'package:mudra_manager/components/adaptive_text.dart';
+import 'package:mudra_manager/components/currency_text.dart';
 
 class GoalCircularCard extends ConsumerWidget {
   final Goal goal;
@@ -36,15 +38,19 @@ class GoalCircularCard extends ConsumerWidget {
         return await DialogUtils.showDeleteConfirmation(
           context,
           title: "Delete Goal?",
-          message: "Are you sure you want to delete '${goal.name}'? This action cannot be undone.",
+          message:
+              "Are you sure you want to delete '${goal.name}'? This action cannot be undone.",
         );
       },
       onDismissed: (direction) async {
-        AppLogger.logAction('goal_deleted_circular', parameters: {
-          'goal_id': goal.id,
-          'goal_name': goal.name,
-          'progress': goal.progressPercent,
-        });
+        AppLogger.logAction(
+          'goal_deleted_circular',
+          parameters: {
+            'goal_id': goal.id,
+            'goal_name': goal.name,
+            'progress': goal.progressPercent,
+          },
+        );
         await ref.read(goalServiceProvider).deleteGoal(goal.id);
       },
       background: Container(
@@ -69,42 +75,16 @@ class GoalCircularCard extends ConsumerWidget {
           ],
         ),
       ),
-      child: Container(
-      width: 180,
-      margin: EdgeInsets.only(right: 12),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: AppColors.glassGradient(cardColor, isDark),
-        ),
-        border: Border.all(
-          color: cardColor.withValues(alpha: 0.3),
-          width: 1.5,
-        ),
-        boxShadow: AppColors.glassShadow(cardColor, isDark),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: Stack(
-          children: [
-            // Background Icon Watermark
-            Positioned(
-              right: -15,
-              top: -15,
-              child: Transform.rotate(
-                angle: 0.2,
-                child: Icon(
-                  IconHelper.getIconData(goal.iconName),
-                  size: 80,
-                  color: cardColor.withValues(alpha: 0.08),
-                ),
-              ),
-            ),
-
-            // Content
-            Padding(
+      child: Card(
+        elevation: 0,
+        color: color.surfaceContainerHighest,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            width: 180,
+            height: 260,
+            margin: EdgeInsets.only(right: 12),
+            child: Padding(
               padding: EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -174,28 +154,50 @@ class GoalCircularCard extends ConsumerWidget {
                     ),
                   ),
 
-                  SizedBox(height: 16),
+                  SizedBox(height: 8),
 
                   // Goal Name
-                  Text(
+                  AdaptiveText(
                     goal.name,
                     style: textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w700,
                       color: color.onSurface,
                     ),
                     maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
 
                   SizedBox(height: 4),
 
                   // Current / Target
-                  Text(
-                    '${ctxt.formatCurrencyWithSign(2, goal.currentAmount)} / ${ctxt.formatCurrencyWithSign(2, goal.targetAmount)}',
-                    style: textTheme.bodySmall?.copyWith(
-                      color: color.onSurfaceVariant,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  Row(
+                    children: [
+                      Flexible(
+                        child: CurrencyText(
+                          amount: goal.currentAmount,
+                          style: textTheme.bodySmall?.copyWith(
+                            color: color.onSurfaceVariant,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          maxLines: 1,
+                        ),
+                      ),
+                      Text(
+                        ' / ',
+                        style: textTheme.bodySmall?.copyWith(
+                          color: color.onSurfaceVariant,
+                        ),
+                      ),
+                      Flexible(
+                        child: CurrencyText(
+                          amount: goal.targetAmount,
+                          style: textTheme.bodySmall?.copyWith(
+                            color: color.onSurfaceVariant,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          maxLines: 1,
+                        ),
+                      ),
+                    ],
                   ),
 
                   Spacer(),
@@ -211,21 +213,23 @@ class GoalCircularCard extends ConsumerWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(
-                            Icons.trending_up,
-                            size: 12,
-                            color: cardColor,
-                          ),
+                          Icon(Icons.trending_up, size: 12, color: cardColor),
                           SizedBox(width: 4),
                           Flexible(
-                            child: Text(
-                              '${ctxt.formatCurrencyWithSign(2, remaining)} left',
+                            child: CurrencyText(
+                              amount: remaining,
                               style: textTheme.labelSmall?.copyWith(
                                 color: cardColor,
                                 fontWeight: FontWeight.w700,
                               ),
                               maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          Text(
+                            ' left',
+                            style: textTheme.labelSmall?.copyWith(
+                              color: cardColor,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         ],
@@ -241,18 +245,15 @@ class GoalCircularCard extends ConsumerWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(
-                            Icons.celebration,
-                            size: 12,
-                            color: cardColor,
-                          ),
+                          Icon(Icons.celebration, size: 12, color: cardColor),
                           SizedBox(width: 4),
-                          Text(
+                          AdaptiveText(
                             'Completed!',
                             style: textTheme.labelSmall?.copyWith(
                               color: cardColor,
                               fontWeight: FontWeight.w700,
                             ),
+                            maxLines: 1,
                           ),
                         ],
                       ),
@@ -260,9 +261,8 @@ class GoalCircularCard extends ConsumerWidget {
                 ],
               ),
             ),
-          ],
+          ),
         ),
-      ),
       ),
     );
   }

@@ -106,6 +106,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get app_settings_theme_mode_system_default => 'System Default';
 
   @override
+  String get app_settings_theme_mode_amoled => 'AMOLED Dark';
+
+  @override
+  String get app_settings_theme_mode_subtitle => 'Choose your preferred theme';
+
+  @override
   String get app_settings_daily_reminder_title => 'Daily Expense Reminder';
 
   @override
@@ -523,4 +529,346 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get pendingTranx_reviewPendingTransactionsScreenTitle =>
       'Pending Transactions';
+
+  @override
+  String get statistics_quickOverviewTitle => 'Quick Overview';
+
+  @override
+  String get statistics_insightsTitle => 'Insights';
+
+  @override
+  String get statistics_detailedAnalysisTitle => 'Detailed Analysis';
+
+  @override
+  String get statistics_categoryBreakdownSubtitle => 'View category breakdown';
+
+  @override
+  String get statistics_expenseTrendsTitle => 'Expense Trends';
+
+  @override
+  String get statistics_expenseTrendsSubtitle => 'Last 12 months trends';
+
+  @override
+  String get statistics_recentTransactionsSubtitle => 'Last 5 transactions';
+
+  @override
+  String get statistics_categoryBreakdownTitle => 'Category Breakdown';
+
+  @override
+  String get statistics_recentTransactionsModalTitle => 'Recent Transactions';
+
+  @override
+  String get transfer_screenTitle => 'Transfer Funds';
+
+  @override
+  String get transfer_resetTooltip => 'Reset';
+
+  @override
+  String get transfer_selectAccountsLabel => 'SELECT ACCOUNTS';
+
+  @override
+  String get transfer_fromLabel => 'FROM';
+
+  @override
+  String get transfer_toLabel => 'TO';
+
+  @override
+  String get transfer_detailsLabel => 'TRANSFER DETAILS';
+
+  @override
+  String get transfer_amountLabel => 'Amount';
+
+  @override
+  String get transfer_amountValidationError => 'Enter valid amount';
+
+  @override
+  String get transfer_dateLabel => 'Date';
+
+  @override
+  String get transfer_noteLabel => 'Note (optional)';
+
+  @override
+  String get transfer_buttonLabel => 'Transfer';
+
+  @override
+  String get transfer_updateButtonLabel => 'Update Transfer';
+
+  @override
+  String get transfer_errorLoadingAccounts => 'Error loading accounts';
+
+  @override
+  String get app_settings_themeModeModalTitle => 'Theme Mode';
+
+  @override
+  String get category_expenseLabel => 'EXPENSE';
+
+  @override
+  String get category_incomeLabel => 'INCOME';
+
+  @override
+  String get category_addTitle => 'Add Category';
+
+  @override
+  String get category_editTitle => 'Edit Category';
+
+  @override
+  String get category_tapToChangeIcon => 'TAP TO CHANGE ICON';
+
+  @override
+  String get category_nameLabel => 'Category Name';
+
+  @override
+  String get category_nameRequired => 'Required';
+
+  @override
+  String get category_typeLabel => 'Category Type';
+
+  @override
+  String get category_colorLabel => 'Color';
+
+  @override
+  String get category_tapToChangeColor => 'TAP TO CHANGE COLOR';
+
+  @override
+  String get category_saveButton => 'SAVE CATEGORY';
+
+  @override
+  String get category_updateButton => 'UPDATE CATEGORY';
+
+  @override
+  String get dashboard_incomeLabel => 'Income';
+
+  @override
+  String get dashboard_spentLabel => 'Spent';
+
+  @override
+  String get dashboard_noDataLabel => 'No data';
+
+  @override
+  String get dashboard_editLabel => 'Edit';
+
+  @override
+  String get dashboard_archiveLabel => 'Archive';
+
+  @override
+  String get currency_crore_short => 'Cr';
+
+  @override
+  String get currency_lakh_short => 'L';
+
+  @override
+  String get currency_thousand_short => 'K';
+
+  @override
+  String common_errorText(Object error) {
+    return 'Error: $error';
+  }
+
+  @override
+  String get statistics_expenseShort => 'Exp';
+
+  @override
+  String get statistics_incomeShort => 'Inc';
+
+  @override
+  String get transaction_categoryFilter => 'Category Filter';
+
+  @override
+  String get transaction_dateFilter => 'Date Filter';
+
+  @override
+  String get transaction_allCategories => 'All Categories';
+
+  @override
+  String get transaction_applyFilters => 'APPLY FILTERS';
+
+  @override
+  String get sms_selectTransactions => 'Select Transactions';
+
+  @override
+  String get common_addLabel => 'Add';
+
+  @override
+  String get dashboard_removeLabel => 'Remove';
+
+  @override
+  String get dashboard_viewAllLabel => 'View All';
+
+  @override
+  String get common_noAccountsYet => 'No accounts yet';
+
+  @override
+  String get common_loading => 'Loading';
+
+  @override
+  String get common_editLabel => 'Edit';
+
+  @override
+  String get common_deleteLabel => 'Delete';
+
+  @override
+  String get common_fromLabel => 'From';
+
+  @override
+  String get common_toLabel => 'To';
+
+  @override
+  String get theme_chooseThemeTitle => 'Choose Theme';
+
+  @override
+  String get theme_applyThemeLabel => 'Apply Theme';
+
+  @override
+  String get theme_themeAppliedMessage => 'Theme applied!';
+
+  @override
+  String get backup_backupRestoreTitle => 'Backup & Restore';
+
+  @override
+  String get backup_backupDataTitle => 'Backup Data';
+
+  @override
+  String get backup_backupDataSubtitle => 'Export all database and settings';
+
+  @override
+  String get backup_restoreBackupTitle => 'Restore Backup';
+
+  @override
+  String get backup_restoreBackupSubtitle => 'Import database and settings';
+
+  @override
+  String get backup_includeAttachmentsTitle => 'Include Attachments?';
+
+  @override
+  String get backup_includeAttachmentsMessage =>
+      'Include receipt images in backup? This will increase file size.';
+
+  @override
+  String get backup_yesLabel => 'Yes';
+
+  @override
+  String get backup_noLabel => 'No';
+
+  @override
+  String get backup_completedMessage => 'Backup completed';
+
+  @override
+  String get backup_restoreSuccessMessage => 'Restore successful';
+
+  @override
+  String backup_lastBackupLabel(Object date) {
+    return 'Last backup: $date';
+  }
+
+  @override
+  String get backup_noBackupFoundLabel => 'No backup found';
+
+  @override
+  String get categories_manageCategoriesTitle => 'Manage Categories';
+
+  @override
+  String get categories_noCategoriesFound => 'No categories found.';
+
+  @override
+  String categories_transactionCount(Object count, Object plural) {
+    return '$count transaction$plural';
+  }
+
+  @override
+  String get categories_addCategoryLabel => 'Add Category';
+
+  @override
+  String get categories_deleteCategoryTitle => 'Delete Category';
+
+  @override
+  String get categories_deleteCategoryMessage =>
+      'Are you sure you want to delete this category?\nAll associated transactions will also be removed.';
+
+  @override
+  String get categories_categoryDeletedMessage =>
+      'Category and its transactions deleted';
+
+  @override
+  String get accounts_manageAccountsTitle => 'Manage Accounts';
+
+  @override
+  String get accounts_noAccountsAddedYet => 'No accounts added yet';
+
+  @override
+  String get accounts_addAccountLabel => 'Add Account';
+
+  @override
+  String get accounts_deleteAccountTitle => 'Delete Account';
+
+  @override
+  String accounts_deleteAccountMessage(Object accountName) {
+    return 'Are you sure you want to delete \"$accountName\"?';
+  }
+
+  @override
+  String get accounts_archiveAccountTitle => 'Archive Account';
+
+  @override
+  String accounts_archiveAccountMessage(Object accountName) {
+    return 'Are you sure you want to archive \"$accountName\"?';
+  }
+
+  @override
+  String get accounts_cancelLabel => 'Cancel';
+
+  @override
+  String get accounts_archiveLabel => 'Archive';
+
+  @override
+  String accounts_accountArchivedMessage(Object accountName) {
+    return '\"$accountName\" archived';
+  }
+
+  @override
+  String get accounts_atLeastOneAccountRequired =>
+      'At least 1 account required to continue';
+
+  @override
+  String get transaction_tripLabel => 'TRIP';
+
+  @override
+  String get transaction_tripPartOfMessage =>
+      'This transaction is part of below trip(s)';
+
+  @override
+  String get sms_autoAddTooltip => 'Auto Add';
+
+  @override
+  String get sms_clearAllTooltip => 'Clear All';
+
+  @override
+  String get sms_importedFromSmsDescription => 'Imported from SMS';
+
+  @override
+  String get sms_selectAtLeastOneMessage => 'Please select at least one SMS';
+
+  @override
+  String get dashboard_allTimeLabel => 'All Time';
+
+  @override
+  String get transaction_editTransactionTitle => 'Edit Transaction';
+
+  @override
+  String get transaction_dateLabel => 'Date';
+
+  @override
+  String get transaction_addNoteHint => 'Add a note';
+
+  @override
+  String get transaction_enterValidAmountError =>
+      'Please enter a valid amount.';
+
+  @override
+  String get sms_noPendingTransactions => 'No pending transactions';
+
+  @override
+  String get sms_approveLabel => 'Approve';
+
+  @override
+  String get sms_approveTransactionTitle => 'Approve Transaction';
 }

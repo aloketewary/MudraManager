@@ -268,6 +268,18 @@ abstract class AppLocalizations {
   /// **'System Default'**
   String get app_settings_theme_mode_system_default;
 
+  /// This is text of Theme Mode AMOLED dark
+  ///
+  /// In en, this message translates to:
+  /// **'AMOLED Dark'**
+  String get app_settings_theme_mode_amoled;
+
+  /// This is subtitle of Theme Mode tile
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your preferred theme'**
+  String get app_settings_theme_mode_subtitle;
+
   /// This is text of Daily reminder title
   ///
   /// In en, this message translates to:
@@ -1051,6 +1063,654 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pending Transactions'**
   String get pendingTranx_reviewPendingTransactionsScreenTitle;
+
+  /// This is title of Quick Overview section
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Overview'**
+  String get statistics_quickOverviewTitle;
+
+  /// This is title of Insights section
+  ///
+  /// In en, this message translates to:
+  /// **'Insights'**
+  String get statistics_insightsTitle;
+
+  /// This is title of Detailed Analysis section
+  ///
+  /// In en, this message translates to:
+  /// **'Detailed Analysis'**
+  String get statistics_detailedAnalysisTitle;
+
+  /// This is subtitle for category breakdown
+  ///
+  /// In en, this message translates to:
+  /// **'View category breakdown'**
+  String get statistics_categoryBreakdownSubtitle;
+
+  /// This is title for expense trends
+  ///
+  /// In en, this message translates to:
+  /// **'Expense Trends'**
+  String get statistics_expenseTrendsTitle;
+
+  /// This is subtitle for expense trends
+  ///
+  /// In en, this message translates to:
+  /// **'Last 12 months trends'**
+  String get statistics_expenseTrendsSubtitle;
+
+  /// This is subtitle for recent transactions
+  ///
+  /// In en, this message translates to:
+  /// **'Last 5 transactions'**
+  String get statistics_recentTransactionsSubtitle;
+
+  /// This is title for category breakdown modal
+  ///
+  /// In en, this message translates to:
+  /// **'Category Breakdown'**
+  String get statistics_categoryBreakdownTitle;
+
+  /// This is title for recent transactions modal
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Transactions'**
+  String get statistics_recentTransactionsModalTitle;
+
+  /// This is title of Transfer screen
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer Funds'**
+  String get transfer_screenTitle;
+
+  /// This is tooltip for reset button
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get transfer_resetTooltip;
+
+  /// This is label for select accounts section
+  ///
+  /// In en, this message translates to:
+  /// **'SELECT ACCOUNTS'**
+  String get transfer_selectAccountsLabel;
+
+  /// This is label for from account
+  ///
+  /// In en, this message translates to:
+  /// **'FROM'**
+  String get transfer_fromLabel;
+
+  /// This is label for to account
+  ///
+  /// In en, this message translates to:
+  /// **'TO'**
+  String get transfer_toLabel;
+
+  /// This is label for transfer details section
+  ///
+  /// In en, this message translates to:
+  /// **'TRANSFER DETAILS'**
+  String get transfer_detailsLabel;
+
+  /// This is label for amount field
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get transfer_amountLabel;
+
+  /// This is validation error for amount field
+  ///
+  /// In en, this message translates to:
+  /// **'Enter valid amount'**
+  String get transfer_amountValidationError;
+
+  /// This is label for date field
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get transfer_dateLabel;
+
+  /// This is label for note field
+  ///
+  /// In en, this message translates to:
+  /// **'Note (optional)'**
+  String get transfer_noteLabel;
+
+  /// This is label for transfer button
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer'**
+  String get transfer_buttonLabel;
+
+  /// This is label for update transfer button
+  ///
+  /// In en, this message translates to:
+  /// **'Update Transfer'**
+  String get transfer_updateButtonLabel;
+
+  /// This is error message for loading accounts
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading accounts'**
+  String get transfer_errorLoadingAccounts;
+
+  /// This is title for theme mode modal
+  ///
+  /// In en, this message translates to:
+  /// **'Theme Mode'**
+  String get app_settings_themeModeModalTitle;
+
+  /// This is label for expense category type
+  ///
+  /// In en, this message translates to:
+  /// **'EXPENSE'**
+  String get category_expenseLabel;
+
+  /// This is label for income category type
+  ///
+  /// In en, this message translates to:
+  /// **'INCOME'**
+  String get category_incomeLabel;
+
+  /// This is title for add category screen
+  ///
+  /// In en, this message translates to:
+  /// **'Add Category'**
+  String get category_addTitle;
+
+  /// This is title for edit category screen
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Category'**
+  String get category_editTitle;
+
+  /// This is instruction to change icon
+  ///
+  /// In en, this message translates to:
+  /// **'TAP TO CHANGE ICON'**
+  String get category_tapToChangeIcon;
+
+  /// This is label for category name field
+  ///
+  /// In en, this message translates to:
+  /// **'Category Name'**
+  String get category_nameLabel;
+
+  /// This is validation message for required field
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get category_nameRequired;
+
+  /// This is label for category type
+  ///
+  /// In en, this message translates to:
+  /// **'Category Type'**
+  String get category_typeLabel;
+
+  /// This is label for color selection
+  ///
+  /// In en, this message translates to:
+  /// **'Color'**
+  String get category_colorLabel;
+
+  /// This is instruction to change color
+  ///
+  /// In en, this message translates to:
+  /// **'TAP TO CHANGE COLOR'**
+  String get category_tapToChangeColor;
+
+  /// This is label for save category button
+  ///
+  /// In en, this message translates to:
+  /// **'SAVE CATEGORY'**
+  String get category_saveButton;
+
+  /// This is label for update category button
+  ///
+  /// In en, this message translates to:
+  /// **'UPDATE CATEGORY'**
+  String get category_updateButton;
+
+  /// This is label for income in dashboard
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get dashboard_incomeLabel;
+
+  /// This is label for spent in dashboard
+  ///
+  /// In en, this message translates to:
+  /// **'Spent'**
+  String get dashboard_spentLabel;
+
+  /// This is label when no data is available
+  ///
+  /// In en, this message translates to:
+  /// **'No data'**
+  String get dashboard_noDataLabel;
+
+  /// This is label for edit action
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get dashboard_editLabel;
+
+  /// This is label for archive action
+  ///
+  /// In en, this message translates to:
+  /// **'Archive'**
+  String get dashboard_archiveLabel;
+
+  /// Short form for crore (10 million)
+  ///
+  /// In en, this message translates to:
+  /// **'Cr'**
+  String get currency_crore_short;
+
+  /// Short form for lakh (100 thousand)
+  ///
+  /// In en, this message translates to:
+  /// **'L'**
+  String get currency_lakh_short;
+
+  /// Short form for thousand
+  ///
+  /// In en, this message translates to:
+  /// **'K'**
+  String get currency_thousand_short;
+
+  /// Generic error message
+  ///
+  /// In en, this message translates to:
+  /// **'Error: {error}'**
+  String common_errorText(Object error);
+
+  /// Short form for Expense
+  ///
+  /// In en, this message translates to:
+  /// **'Exp'**
+  String get statistics_expenseShort;
+
+  /// Short form for Income
+  ///
+  /// In en, this message translates to:
+  /// **'Inc'**
+  String get statistics_incomeShort;
+
+  /// Label for category filter
+  ///
+  /// In en, this message translates to:
+  /// **'Category Filter'**
+  String get transaction_categoryFilter;
+
+  /// Label for date filter
+  ///
+  /// In en, this message translates to:
+  /// **'Date Filter'**
+  String get transaction_dateFilter;
+
+  /// Label for all categories option
+  ///
+  /// In en, this message translates to:
+  /// **'All Categories'**
+  String get transaction_allCategories;
+
+  /// Label for apply filters button
+  ///
+  /// In en, this message translates to:
+  /// **'APPLY FILTERS'**
+  String get transaction_applyFilters;
+
+  /// Title for SMS transaction selection
+  ///
+  /// In en, this message translates to:
+  /// **'Select Transactions'**
+  String get sms_selectTransactions;
+
+  /// Generic add label
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get common_addLabel;
+
+  /// Label for remove action
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get dashboard_removeLabel;
+
+  /// Label for view all action
+  ///
+  /// In en, this message translates to:
+  /// **'View All'**
+  String get dashboard_viewAllLabel;
+
+  /// Message when no accounts are available
+  ///
+  /// In en, this message translates to:
+  /// **'No accounts yet'**
+  String get common_noAccountsYet;
+
+  /// Loading text
+  ///
+  /// In en, this message translates to:
+  /// **'Loading'**
+  String get common_loading;
+
+  /// Edit button label
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get common_editLabel;
+
+  /// Delete button label
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get common_deleteLabel;
+
+  /// From label for transfers
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get common_fromLabel;
+
+  /// To label for transfers
+  ///
+  /// In en, this message translates to:
+  /// **'To'**
+  String get common_toLabel;
+
+  /// Title for theme picker screen
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Theme'**
+  String get theme_chooseThemeTitle;
+
+  /// Label for apply theme button
+  ///
+  /// In en, this message translates to:
+  /// **'Apply Theme'**
+  String get theme_applyThemeLabel;
+
+  /// Success message when theme is applied
+  ///
+  /// In en, this message translates to:
+  /// **'Theme applied!'**
+  String get theme_themeAppliedMessage;
+
+  /// Title for backup and restore screen
+  ///
+  /// In en, this message translates to:
+  /// **'Backup & Restore'**
+  String get backup_backupRestoreTitle;
+
+  /// Title for backup data option
+  ///
+  /// In en, this message translates to:
+  /// **'Backup Data'**
+  String get backup_backupDataTitle;
+
+  /// Subtitle for backup data option
+  ///
+  /// In en, this message translates to:
+  /// **'Export all database and settings'**
+  String get backup_backupDataSubtitle;
+
+  /// Title for restore backup option
+  ///
+  /// In en, this message translates to:
+  /// **'Restore Backup'**
+  String get backup_restoreBackupTitle;
+
+  /// Subtitle for restore backup option
+  ///
+  /// In en, this message translates to:
+  /// **'Import database and settings'**
+  String get backup_restoreBackupSubtitle;
+
+  /// Title for include attachments dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Include Attachments?'**
+  String get backup_includeAttachmentsTitle;
+
+  /// Message for include attachments dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Include receipt images in backup? This will increase file size.'**
+  String get backup_includeAttachmentsMessage;
+
+  /// Yes button label
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get backup_yesLabel;
+
+  /// No button label
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get backup_noLabel;
+
+  /// Success message when backup is completed
+  ///
+  /// In en, this message translates to:
+  /// **'Backup completed'**
+  String get backup_completedMessage;
+
+  /// Success message when restore is successful
+  ///
+  /// In en, this message translates to:
+  /// **'Restore successful'**
+  String get backup_restoreSuccessMessage;
+
+  /// Label showing last backup date
+  ///
+  /// In en, this message translates to:
+  /// **'Last backup: {date}'**
+  String backup_lastBackupLabel(Object date);
+
+  /// Label when no backup is found
+  ///
+  /// In en, this message translates to:
+  /// **'No backup found'**
+  String get backup_noBackupFoundLabel;
+
+  /// Title for manage categories screen
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Categories'**
+  String get categories_manageCategoriesTitle;
+
+  /// Message when no categories are found
+  ///
+  /// In en, this message translates to:
+  /// **'No categories found.'**
+  String get categories_noCategoriesFound;
+
+  /// Transaction count for category
+  ///
+  /// In en, this message translates to:
+  /// **'{count} transaction{plural}'**
+  String categories_transactionCount(Object count, Object plural);
+
+  /// Label for add category button
+  ///
+  /// In en, this message translates to:
+  /// **'Add Category'**
+  String get categories_addCategoryLabel;
+
+  /// Title for delete category dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Category'**
+  String get categories_deleteCategoryTitle;
+
+  /// Message for delete category dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this category?\nAll associated transactions will also be removed.'**
+  String get categories_deleteCategoryMessage;
+
+  /// Success message when category is deleted
+  ///
+  /// In en, this message translates to:
+  /// **'Category and its transactions deleted'**
+  String get categories_categoryDeletedMessage;
+
+  /// Title for manage accounts screen
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Accounts'**
+  String get accounts_manageAccountsTitle;
+
+  /// Message when no accounts are added
+  ///
+  /// In en, this message translates to:
+  /// **'No accounts added yet'**
+  String get accounts_noAccountsAddedYet;
+
+  /// Label for add account button
+  ///
+  /// In en, this message translates to:
+  /// **'Add Account'**
+  String get accounts_addAccountLabel;
+
+  /// Title for delete account dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Account'**
+  String get accounts_deleteAccountTitle;
+
+  /// Message for delete account dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete \"{accountName}\"?'**
+  String accounts_deleteAccountMessage(Object accountName);
+
+  /// Title for archive account dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Archive Account'**
+  String get accounts_archiveAccountTitle;
+
+  /// Message for archive account dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to archive \"{accountName}\"?'**
+  String accounts_archiveAccountMessage(Object accountName);
+
+  /// Cancel button label
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get accounts_cancelLabel;
+
+  /// Archive button label
+  ///
+  /// In en, this message translates to:
+  /// **'Archive'**
+  String get accounts_archiveLabel;
+
+  /// Success message when account is archived
+  ///
+  /// In en, this message translates to:
+  /// **'\"{accountName}\" archived'**
+  String accounts_accountArchivedMessage(Object accountName);
+
+  /// Warning message when trying to delete the last account
+  ///
+  /// In en, this message translates to:
+  /// **'At least 1 account required to continue'**
+  String get accounts_atLeastOneAccountRequired;
+
+  /// Label for trip transactions
+  ///
+  /// In en, this message translates to:
+  /// **'TRIP'**
+  String get transaction_tripLabel;
+
+  /// Message indicating transaction is part of trips
+  ///
+  /// In en, this message translates to:
+  /// **'This transaction is part of below trip(s)'**
+  String get transaction_tripPartOfMessage;
+
+  /// Tooltip for auto add button
+  ///
+  /// In en, this message translates to:
+  /// **'Auto Add'**
+  String get sms_autoAddTooltip;
+
+  /// Tooltip for clear all button
+  ///
+  /// In en, this message translates to:
+  /// **'Clear All'**
+  String get sms_clearAllTooltip;
+
+  /// Description for SMS imported transactions
+  ///
+  /// In en, this message translates to:
+  /// **'Imported from SMS'**
+  String get sms_importedFromSmsDescription;
+
+  /// Warning message to select at least one SMS
+  ///
+  /// In en, this message translates to:
+  /// **'Please select at least one SMS'**
+  String get sms_selectAtLeastOneMessage;
+
+  /// Label for all time period
+  ///
+  /// In en, this message translates to:
+  /// **'All Time'**
+  String get dashboard_allTimeLabel;
+
+  /// Title for edit transaction screen
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Transaction'**
+  String get transaction_editTransactionTitle;
+
+  /// Label for date field
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get transaction_dateLabel;
+
+  /// Hint text for note field
+  ///
+  /// In en, this message translates to:
+  /// **'Add a note'**
+  String get transaction_addNoteHint;
+
+  /// Error message for invalid amount
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid amount.'**
+  String get transaction_enterValidAmountError;
+
+  /// Message when no pending transactions
+  ///
+  /// In en, this message translates to:
+  /// **'No pending transactions'**
+  String get sms_noPendingTransactions;
+
+  /// Label for approve action
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get sms_approveLabel;
+
+  /// Title for approve transaction dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Approve Transaction'**
+  String get sms_approveTransactionTitle;
 }
 
 class _AppLocalizationsDelegate

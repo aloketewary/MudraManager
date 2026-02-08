@@ -112,6 +112,14 @@
   "@app_settings_theme_mode_system_default": {
     "description": "This is text of Theme Mode system default"
   },
+  "app_settings_theme_mode_amoled": "AMOLED Dark",
+  "@app_settings_theme_mode_amoled": {
+    "description": "This is text of Theme Mode AMOLED dark"
+  },
+  "app_settings_theme_mode_subtitle": "Choose your preferred theme",
+  "@app_settings_theme_mode_subtitle": {
+    "description": "This is subtitle of Theme Mode tile"
+  },
   "app_settings_daily_reminder_title": "Daily Expense Reminder",
   "@app_settings_daily_reminder_title": {
     "description": "This is text of Daily reminder title"
@@ -631,5 +639,437 @@
   "pendingTranx_reviewPendingTransactionsScreenTitle": "Pending Transactions",
   "@pendingTranx_reviewPendingTransactionsScreenTitle": {
     "description": "This is title of Review Pending Transactions"
+  },
+  "statistics_quickOverviewTitle": "Quick Overview",
+  "@statistics_quickOverviewTitle": {
+    "description": "This is title of Quick Overview section"
+  },
+  "statistics_insightsTitle": "Insights",
+  "@statistics_insightsTitle": {
+    "description": "This is title of Insights section"
+  },
+  "statistics_detailedAnalysisTitle": "Detailed Analysis",
+  "@statistics_detailedAnalysisTitle": {
+    "description": "This is title of Detailed Analysis section"
+  },
+  "statistics_categoryBreakdownSubtitle": "View category breakdown",
+  "@statistics_categoryBreakdownSubtitle": {
+    "description": "This is subtitle for category breakdown"
+  },
+  "statistics_expenseTrendsTitle": "Expense Trends",
+  "@statistics_expenseTrendsTitle": {
+    "description": "This is title for expense trends"
+  },
+  "statistics_expenseTrendsSubtitle": "Last 12 months trends",
+  "@statistics_expenseTrendsSubtitle": {
+    "description": "This is subtitle for expense trends"
+  },
+  "statistics_recentTransactionsSubtitle": "Last 5 transactions",
+  "@statistics_recentTransactionsSubtitle": {
+    "description": "This is subtitle for recent transactions"
+  },
+  "statistics_categoryBreakdownTitle": "Category Breakdown",
+  "@statistics_categoryBreakdownTitle": {
+    "description": "This is title for category breakdown modal"
+  },
+  "statistics_recentTransactionsModalTitle": "Recent Transactions",
+  "@statistics_recentTransactionsModalTitle": {
+    "description": "This is title for recent transactions modal"
+  },
+  "transfer_screenTitle": "Transfer Funds",
+  "@transfer_screenTitle": {
+    "description": "This is title of Transfer screen"
+  },
+  "transfer_resetTooltip": "Reset",
+  "@transfer_resetTooltip": {
+    "description": "This is tooltip for reset button"
+  },
+  "transfer_selectAccountsLabel": "SELECT ACCOUNTS",
+  "@transfer_selectAccountsLabel": {
+    "description": "This is label for select accounts section"
+  },
+  "transfer_fromLabel": "FROM",
+  "@transfer_fromLabel": {
+    "description": "This is label for from account"
+  },
+  "transfer_toLabel": "TO",
+  "@transfer_toLabel": {
+    "description": "This is label for to account"
+  },
+  "transfer_detailsLabel": "TRANSFER DETAILS",
+  "@transfer_detailsLabel": {
+    "description": "This is label for transfer details section"
+  },
+  "transfer_amountLabel": "Amount",
+  "@transfer_amountLabel": {
+    "description": "This is label for amount field"
+  },
+  "transfer_amountValidationError": "Enter valid amount",
+  "@transfer_amountValidationError": {
+    "description": "This is validation error for amount field"
+  },
+  "transfer_dateLabel": "Date",
+  "@transfer_dateLabel": {
+    "description": "This is label for date field"
+  },
+  "transfer_noteLabel": "Note (optional)",
+  "@transfer_noteLabel": {
+    "description": "This is label for note field"
+  },
+  "transfer_buttonLabel": "Transfer",
+  "@transfer_buttonLabel": {
+    "description": "This is label for transfer button"
+  },
+  "transfer_updateButtonLabel": "Update Transfer",
+  "@transfer_updateButtonLabel": {
+    "description": "This is label for update transfer button"
+  },
+  "transfer_errorLoadingAccounts": "Error loading accounts",
+  "@transfer_errorLoadingAccounts": {
+    "description": "This is error message for loading accounts"
+  },
+  "app_settings_themeModeModalTitle": "Theme Mode",
+  "@app_settings_themeModeModalTitle": {
+    "description": "This is title for theme mode modal"
+  },
+  "category_expenseLabel": "EXPENSE",
+  "@category_expenseLabel": {
+    "description": "This is label for expense category type"
+  },
+  "category_incomeLabel": "INCOME",
+  "@category_incomeLabel": {
+    "description": "This is label for income category type"
+  },
+  "category_addTitle": "Add Category",
+  "@category_addTitle": {
+    "description": "This is title for add category screen"
+  },
+  "category_editTitle": "Edit Category",
+  "@category_editTitle": {
+    "description": "This is title for edit category screen"
+  },
+  "category_tapToChangeIcon": "TAP TO CHANGE ICON",
+  "@category_tapToChangeIcon": {
+    "description": "This is instruction to change icon"
+  },
+  "category_nameLabel": "Category Name",
+  "@category_nameLabel": {
+    "description": "This is label for category name field"
+  },
+  "category_nameRequired": "Required",
+  "@category_nameRequired": {
+    "description": "This is validation message for required field"
+  },
+  "category_typeLabel": "Category Type",
+  "@category_typeLabel": {
+    "description": "This is label for category type"
+  },
+  "category_colorLabel": "Color",
+  "@category_colorLabel": {
+    "description": "This is label for color selection"
+  },
+  "category_tapToChangeColor": "TAP TO CHANGE COLOR",
+  "@category_tapToChangeColor": {
+    "description": "This is instruction to change color"
+  },
+  "category_saveButton": "SAVE CATEGORY",
+  "@category_saveButton": {
+    "description": "This is label for save category button"
+  },
+  "category_updateButton": "UPDATE CATEGORY",
+  "@category_updateButton": {
+    "description": "This is label for update category button"
+  },
+  "dashboard_incomeLabel": "Income",
+  "@dashboard_incomeLabel": {
+    "description": "This is label for income in dashboard"
+  },
+  "dashboard_spentLabel": "Spent",
+  "@dashboard_spentLabel": {
+    "description": "This is label for spent in dashboard"
+  },
+  "dashboard_noDataLabel": "No data",
+  "@dashboard_noDataLabel": {
+    "description": "This is label when no data is available"
+  },
+  "dashboard_editLabel": "Edit",
+  "@dashboard_editLabel": {
+    "description": "This is label for edit action"
+  },
+  "dashboard_archiveLabel": "Archive",
+  "@dashboard_archiveLabel": {
+    "description": "This is label for archive action"
+  },
+  "currency_crore_short": "Cr",
+  "@currency_crore_short": {
+    "description": "Short form for crore (10 million)"
+  },
+  "currency_lakh_short": "L",
+  "@currency_lakh_short": {
+    "description": "Short form for lakh (100 thousand)"
+  },
+  "currency_thousand_short": "K",
+  "@currency_thousand_short": {
+    "description": "Short form for thousand"
+  },
+  "common_errorText": "Error: {error}",
+  "@common_errorText": {
+    "description": "Generic error message"
+  },
+  "statistics_expenseShort": "Exp",
+  "@statistics_expenseShort": {
+    "description": "Short form for Expense"
+  },
+  "statistics_incomeShort": "Inc",
+  "@statistics_incomeShort": {
+    "description": "Short form for Income"
+  },
+  "transaction_categoryFilter": "Category Filter",
+  "@transaction_categoryFilter": {
+    "description": "Label for category filter"
+  },
+  "transaction_dateFilter": "Date Filter",
+  "@transaction_dateFilter": {
+    "description": "Label for date filter"
+  },
+  "transaction_allCategories": "All Categories",
+  "@transaction_allCategories": {
+    "description": "Label for all categories option"
+  },
+  "transaction_applyFilters": "APPLY FILTERS",
+  "@transaction_applyFilters": {
+    "description": "Label for apply filters button"
+  },
+  "sms_selectTransactions": "Select Transactions",
+  "@sms_selectTransactions": {
+    "description": "Title for SMS transaction selection"
+  },
+  "common_addLabel": "Add",
+  "@common_addLabel": {
+    "description": "Generic add label"
+  },
+  "dashboard_removeLabel": "Remove",
+  "@dashboard_removeLabel": {
+    "description": "Label for remove action"
+  },
+  "dashboard_viewAllLabel": "View All",
+  "@dashboard_viewAllLabel": {
+    "description": "Label for view all action"
+  },
+  "common_noAccountsYet": "No accounts yet",
+  "@common_noAccountsYet": {
+    "description": "Message when no accounts are available"
+  },
+  "common_loading": "Loading",
+  "@common_loading": {
+    "description": "Loading text"
+  },
+  "common_editLabel": "Edit",
+  "@common_editLabel": {
+    "description": "Edit button label"
+  },
+  "common_deleteLabel": "Delete",
+  "@common_deleteLabel": {
+    "description": "Delete button label"
+  },
+  "common_fromLabel": "From",
+  "@common_fromLabel": {
+    "description": "From label for transfers"
+  },
+  "common_toLabel": "To",
+  "@common_toLabel": {
+    "description": "To label for transfers"
+  },
+  "theme_chooseThemeTitle": "Choose Theme",
+  "@theme_chooseThemeTitle": {
+    "description": "Title for theme picker screen"
+  },
+  "theme_applyThemeLabel": "Apply Theme",
+  "@theme_applyThemeLabel": {
+    "description": "Label for apply theme button"
+  },
+  "theme_themeAppliedMessage": "Theme applied!",
+  "@theme_themeAppliedMessage": {
+    "description": "Success message when theme is applied"
+  },
+  "backup_backupRestoreTitle": "Backup & Restore",
+  "@backup_backupRestoreTitle": {
+    "description": "Title for backup and restore screen"
+  },
+  "backup_backupDataTitle": "Backup Data",
+  "@backup_backupDataTitle": {
+    "description": "Title for backup data option"
+  },
+  "backup_backupDataSubtitle": "Export all database and settings",
+  "@backup_backupDataSubtitle": {
+    "description": "Subtitle for backup data option"
+  },
+  "backup_restoreBackupTitle": "Restore Backup",
+  "@backup_restoreBackupTitle": {
+    "description": "Title for restore backup option"
+  },
+  "backup_restoreBackupSubtitle": "Import database and settings",
+  "@backup_restoreBackupSubtitle": {
+    "description": "Subtitle for restore backup option"
+  },
+  "backup_includeAttachmentsTitle": "Include Attachments?",
+  "@backup_includeAttachmentsTitle": {
+    "description": "Title for include attachments dialog"
+  },
+  "backup_includeAttachmentsMessage": "Include receipt images in backup? This will increase file size.",
+  "@backup_includeAttachmentsMessage": {
+    "description": "Message for include attachments dialog"
+  },
+  "backup_yesLabel": "Yes",
+  "@backup_yesLabel": {
+    "description": "Yes button label"
+  },
+  "backup_noLabel": "No",
+  "@backup_noLabel": {
+    "description": "No button label"
+  },
+  "backup_completedMessage": "Backup completed",
+  "@backup_completedMessage": {
+    "description": "Success message when backup is completed"
+  },
+  "backup_restoreSuccessMessage": "Restore successful",
+  "@backup_restoreSuccessMessage": {
+    "description": "Success message when restore is successful"
+  },
+  "backup_lastBackupLabel": "Last backup: {date}",
+  "@backup_lastBackupLabel": {
+    "description": "Label showing last backup date"
+  },
+  "backup_noBackupFoundLabel": "No backup found",
+  "@backup_noBackupFoundLabel": {
+    "description": "Label when no backup is found"
+  },
+  "categories_manageCategoriesTitle": "Manage Categories",
+  "@categories_manageCategoriesTitle": {
+    "description": "Title for manage categories screen"
+  },
+  "categories_noCategoriesFound": "No categories found.",
+  "@categories_noCategoriesFound": {
+    "description": "Message when no categories are found"
+  },
+  "categories_transactionCount": "{count} transaction{plural}",
+  "@categories_transactionCount": {
+    "description": "Transaction count for category"
+  },
+  "categories_addCategoryLabel": "Add Category",
+  "@categories_addCategoryLabel": {
+    "description": "Label for add category button"
+  },
+  "categories_deleteCategoryTitle": "Delete Category",
+  "@categories_deleteCategoryTitle": {
+    "description": "Title for delete category dialog"
+  },
+  "categories_deleteCategoryMessage": "Are you sure you want to delete this category?\nAll associated transactions will also be removed.",
+  "@categories_deleteCategoryMessage": {
+    "description": "Message for delete category dialog"
+  },
+  "categories_categoryDeletedMessage": "Category and its transactions deleted",
+  "@categories_categoryDeletedMessage": {
+    "description": "Success message when category is deleted"
+  },
+  "accounts_manageAccountsTitle": "Manage Accounts",
+  "@accounts_manageAccountsTitle": {
+    "description": "Title for manage accounts screen"
+  },
+  "accounts_noAccountsAddedYet": "No accounts added yet",
+  "@accounts_noAccountsAddedYet": {
+    "description": "Message when no accounts are added"
+  },
+  "accounts_addAccountLabel": "Add Account",
+  "@accounts_addAccountLabel": {
+    "description": "Label for add account button"
+  },
+  "accounts_deleteAccountTitle": "Delete Account",
+  "@accounts_deleteAccountTitle": {
+    "description": "Title for delete account dialog"
+  },
+  "accounts_deleteAccountMessage": "Are you sure you want to delete \"{accountName}\"?",
+  "@accounts_deleteAccountMessage": {
+    "description": "Message for delete account dialog"
+  },
+  "accounts_archiveAccountTitle": "Archive Account",
+  "@accounts_archiveAccountTitle": {
+    "description": "Title for archive account dialog"
+  },
+  "accounts_archiveAccountMessage": "Are you sure you want to archive \"{accountName}\"?",
+  "@accounts_archiveAccountMessage": {
+    "description": "Message for archive account dialog"
+  },
+  "accounts_cancelLabel": "Cancel",
+  "@accounts_cancelLabel": {
+    "description": "Cancel button label"
+  },
+  "accounts_archiveLabel": "Archive",
+  "@accounts_archiveLabel": {
+    "description": "Archive button label"
+  },
+  "accounts_accountArchivedMessage": "\"{accountName}\" archived",
+  "@accounts_accountArchivedMessage": {
+    "description": "Success message when account is archived"
+  },
+  "accounts_atLeastOneAccountRequired": "At least 1 account required to continue",
+  "@accounts_atLeastOneAccountRequired": {
+    "description": "Warning message when trying to delete the last account"
+  },
+  "transaction_tripLabel": "TRIP",
+  "@transaction_tripLabel": {
+    "description": "Label for trip transactions"
+  },
+  "transaction_tripPartOfMessage": "This transaction is part of below trip(s)",
+  "@transaction_tripPartOfMessage": {
+    "description": "Message indicating transaction is part of trips"
+  },
+  "sms_autoAddTooltip": "Auto Add",
+  "@sms_autoAddTooltip": {
+    "description": "Tooltip for auto add button"
+  },
+  "sms_clearAllTooltip": "Clear All",
+  "@sms_clearAllTooltip": {
+    "description": "Tooltip for clear all button"
+  },
+  "sms_importedFromSmsDescription": "Imported from SMS",
+  "@sms_importedFromSmsDescription": {
+    "description": "Description for SMS imported transactions"
+  },
+  "sms_selectAtLeastOneMessage": "Please select at least one SMS",
+  "@sms_selectAtLeastOneMessage": {
+    "description": "Warning message to select at least one SMS"
+  },
+  "dashboard_allTimeLabel": "All Time",
+  "@dashboard_allTimeLabel": {
+    "description": "Label for all time period"
+  },
+  "transaction_editTransactionTitle": "Edit Transaction",
+  "@transaction_editTransactionTitle": {
+    "description": "Title for edit transaction screen"
+  },
+  "transaction_dateLabel": "Date",
+  "@transaction_dateLabel": {
+    "description": "Label for date field"
+  },
+  "transaction_addNoteHint": "Add a note",
+  "@transaction_addNoteHint": {
+    "description": "Hint text for note field"
+  },
+  "transaction_enterValidAmountError": "Please enter a valid amount.",
+  "@transaction_enterValidAmountError": {
+    "description": "Error message for invalid amount"
+  },
+  "sms_noPendingTransactions": "No pending transactions",
+  "@sms_noPendingTransactions": {
+    "description": "Message when no pending transactions"
+  },
+  "sms_approveLabel": "Approve",
+  "@sms_approveLabel": {
+    "description": "Label for approve action"
+  },
+  "sms_approveTransactionTitle": "Approve Transaction",
+  "@sms_approveTransactionTitle": {
+    "description": "Title for approve transaction dialog"
   }
 }

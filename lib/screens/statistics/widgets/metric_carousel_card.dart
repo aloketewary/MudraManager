@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mudra_manager/screens/reusable/animated_balance.dart';
-import 'package:mudra_manager/theme/app_colors.dart';
+
+import 'package:mudra_manager/components/adaptive_text.dart';
 
 class MetricCarouselCard extends StatelessWidget {
   final double income;
@@ -19,6 +20,8 @@ class MetricCarouselCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final color = Theme.of(context).colorScheme;
+
     return SizedBox(
       height: 160,
       child: ListView(
@@ -30,7 +33,7 @@ class MetricCarouselCard extends StatelessWidget {
             'Income',
             income,
             Icons.arrow_upward,
-            AppColors.income,
+            color.primary,
             isDark,
             savingsRate > 0 ? savingsRate : null,
           ),
@@ -39,7 +42,7 @@ class MetricCarouselCard extends StatelessWidget {
             'Expense',
             expense,
             Icons.arrow_downward,
-            AppColors.expense,
+            color.error,
             isDark,
             null,
           ),
@@ -48,7 +51,7 @@ class MetricCarouselCard extends StatelessWidget {
             'Net',
             net,
             net >= 0 ? Icons.trending_up : Icons.trending_down,
-            net >= 0 ? AppColors.transfer : Color(0xFFFF9800),
+            net >= 0 ? color.tertiary : Color(0xFFFF9800),
             isDark,
             null,
           ),
@@ -57,7 +60,7 @@ class MetricCarouselCard extends StatelessWidget {
             'Savings',
             savingsRate,
             Icons.savings_outlined,
-            AppColors.netWorth,
+            color.secondary,
             isDark,
             null,
             isPercent: true,
@@ -78,87 +81,71 @@ class MetricCarouselCard extends StatelessWidget {
     bool isPercent = false,
   }) {
     final textTheme = Theme.of(context).textTheme;
+    final color = Theme.of(context).colorScheme;
 
-    return Container(
-      width: 160,
-      margin: EdgeInsets.only(right: 12),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: AppColors.glassGradient(baseColor, isDark),
-        ),
-        border: Border.all(
-          color: baseColor.withValues(alpha: 0.3),
-          width: 1.5,
-        ),
-        boxShadow: AppColors.glassShadow(baseColor, isDark),
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            right: -10,
-            bottom: -10,
-            child: Icon(icon, size: 80, color: baseColor.withValues(alpha: 0.08)),
-          ),
-          Padding(
-            padding: EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(icon, color: baseColor, size: 20),
-                    SizedBox(width: 6),
-                    Flexible(
-                      child: Text(
-                        title,
-                        style: textTheme.labelLarge?.copyWith(
-                          color: baseColor,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        overflow: TextOverflow.ellipsis,
+    return Card(
+      elevation: 0,
+      color: color.surfaceContainerHighest,
+      child: Container(
+        width: 160,
+        margin: EdgeInsets.only(right: 12),
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(icon, color: baseColor, size: 20),
+                  SizedBox(width: 6),
+                  Flexible(
+                    child: AdaptiveText(
+                      title,
+                      style: textTheme.labelLarge?.copyWith(
+                        color: baseColor,
+                        fontWeight: FontWeight.w600,
                       ),
+                      maxLines: 1,
                     ),
-                  ],
+                  ),
+                ],
+              ),
+              Spacer(),
+              AnimatedBalance(
+                value: isPercent ? value : value,
+                style: textTheme.headlineSmall?.copyWith(
+                  color: baseColor,
+                  fontWeight: FontWeight.bold,
                 ),
-                Spacer(),
-                AnimatedBalance(
-                  value: isPercent ? value : value,
-                  style: textTheme.headlineSmall?.copyWith(
-                    color: baseColor,
-                    fontWeight: FontWeight.bold,
+                suffix: isPercent ? '%' : null,
+                fixedStringLength: isPercent ? 1 : 0,
+                overflow: TextOverflow.ellipsis,
+              ),
+              if (progress != null)
+                SizedBox(height: 8),
+              if (progress != null)
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: progress / 100,
+                    backgroundColor: baseColor.withValues(alpha: 0.2),
+                    valueColor: AlwaysStoppedAnimation(baseColor),
+                    minHeight: 6,
                   ),
-                  suffix: isPercent ? '%' : null,
-                  fixedStringLength: isPercent ? 1 : 0,
-                  overflow: TextOverflow.ellipsis,
                 ),
-                if (progress != null)
-                  SizedBox(height: 8),
-                if (progress != null)
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: LinearProgressIndicator(
-                      value: progress / 100,
-                      backgroundColor: baseColor.withValues(alpha: 0.2),
-                      valueColor: AlwaysStoppedAnimation(baseColor),
-                      minHeight: 6,
-                    ),
+              if (progress != null)
+                SizedBox(height: 4),
+              if (progress != null)
+                AdaptiveText(
+                  'Saved ${progress.toStringAsFixed(1)}%',
+                  style: textTheme.labelSmall?.copyWith(
+                    color: baseColor.withValues(alpha: 0.8),
                   ),
-                if (progress != null)
-                  SizedBox(height: 4),
-                if (progress != null)
-                  Text(
-                    'Saved ${progress.toStringAsFixed(1)}%',
-                    style: textTheme.labelSmall?.copyWith(
-                      color: baseColor.withValues(alpha: 0.8),
-                    ),
-                  ),
-              ],
-            ),
+                  maxLines: 1,
+                ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

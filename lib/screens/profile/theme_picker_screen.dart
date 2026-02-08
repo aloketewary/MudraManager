@@ -6,6 +6,8 @@ import 'package:mudra_manager/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/theme/theme_preview_screen.dart';
 import 'package:mudra_manager/theme/theme_provider.dart';
 import 'package:mudra_manager/util/snackbar_service.dart';
+import 'package:mudra_manager/l10n/app_localizations.dart';
+import 'package:mudra_manager/components/responsive_helper.dart';
 
 class ThemePickerScreen extends ConsumerStatefulWidget {
   const ThemePickerScreen({super.key});
@@ -24,23 +26,25 @@ class _ThemePickerScreenState extends ConsumerState<ThemePickerScreen> {
   }
 
   void _applyTheme() {
+    final ctxt = context.mounted ? AppLocalizations.of(context)! : null;
     ref.read(themeNotifierProvider.notifier).setTheme(_tempSelectedTheme);
-    SnackbarService.success("Theme applied!");
+    SnackbarService.success(ctxt?.theme_themeAppliedMessage ?? "Theme applied!");
   }
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final ctxt = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Choose Theme")),
+      appBar: AppBar(title: Text(ctxt.theme_chooseThemeTitle)),
       body: GridView.builder(
         padding: const EdgeInsets.all(20),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: ResponsiveHelper.getGridCrossAxisCount(context),
           crossAxisSpacing: 20,
           mainAxisSpacing: 20,
-          childAspectRatio: 0.70, // Taller aspect ratio for "phone" look
+          childAspectRatio: ResponsiveHelper.getGridAspectRatio(context, defaultRatio: 0.70, singleColumnRatio: 1.2),
         ),
         itemCount: AppColorTheme.values.length,
         itemBuilder: (context, index) {
@@ -79,7 +83,7 @@ class _ThemePickerScreenState extends ConsumerState<ThemePickerScreen> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _applyTheme,
         icon: const Icon(Icons.check_circle_outline),
-        label: const Text("Apply Theme"),
+        label: Text(ctxt.theme_applyThemeLabel),
       ),
     );
   }

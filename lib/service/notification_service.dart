@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_native_timezone_latest/flutter_native_timezone_latest.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:isar/isar.dart';
 import 'package:mudra_manager/db/models/account.dart';
@@ -14,6 +15,11 @@ class NotificationService {
   static final FlutterLocalNotificationsPlugin _plugin =
       FlutterLocalNotificationsPlugin();
   static const _reminderTimeKey = 'daily_reminder_time_key';
+  static BuildContext? _context;
+
+  static void setContext(BuildContext context) {
+    _context = context;
+  }
 
   static Future<void> initialize() async {
     tz.initializeTimeZones();
@@ -45,7 +51,12 @@ class NotificationService {
       iOS: iosSettings,
     );
 
-    await _plugin.initialize(initializationSettings);
+    await _plugin.initialize(
+      initializationSettings,
+      onDidReceiveNotificationResponse: (details) {
+        _handleNotificationTap(details.payload);
+      },
+    );
   }
 
   static Future<void> requestNotificationPermission() async {
@@ -69,8 +80,8 @@ class NotificationService {
 
     await _plugin.zonedSchedule(
       0,
-      'Daily Expense Summary',
-      'Tap to view your spending summary',
+      'Daily Expense Reminder 💰',
+      'Track your expenses today! Tap to view statistics',
       scheduledDate,
       const NotificationDetails(
         android: AndroidNotificationDetails(
@@ -86,6 +97,7 @@ class NotificationService {
           presentSound: true,
         ),
       ),
+      payload: 'statistics',
       matchDateTimeComponents: DateTimeComponents.time,
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
     );
@@ -109,6 +121,7 @@ class NotificationService {
         id: 100,
         title: '📊 Yesterday\'s Summary',
         body: 'No transactions recorded yesterday',
+        payload: 'statistics',
       );
       return;
     }
@@ -152,6 +165,7 @@ class NotificationService {
       id: 100,
       title: '📊 Yesterday\'s Summary',
       body: body,
+      payload: 'statistics',
     );
   }
 
@@ -296,6 +310,7 @@ class NotificationService {
     required int id,
     required String title,
     required String body,
+    String? payload,
   }) async {
     const androidDetails = AndroidNotificationDetails(
       'mudra_channel_id',
@@ -314,7 +329,13 @@ class NotificationService {
       ),
     );
 
-    await _plugin.show(id, title, body, notificationDetails);
+    await _plugin.show(id, title, body, notificationDetails, payload: payload);
+  }
+
+  static void _handleNotificationTap(String? payload) {
+    if (payload == 'statistics' && _context != null) {
+      _context!.go('/statistics');
+    }
   }
 
   static Future<void> scheduleMonthlyGoalReminder(String body) async {

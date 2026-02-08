@@ -15,8 +15,8 @@ import 'package:mudra_manager/screens/statistics/statistics_screen.dart';
 import 'package:mudra_manager/screens/transaction/transaction_list_screen.dart';
 import 'package:mudra_manager/service/notification_service.dart'
     show NotificationService;
-import 'package:mudra_manager/theme/app_colors.dart';
 import 'package:mudra_manager/util/localization_extension.dart';
+import 'package:mudra_manager/components/adaptive_text.dart';
 import 'dashboard/dashboard_home.dart';
 import 'utility/utility_screen.dart';
 
@@ -34,6 +34,7 @@ class HomePageState extends ConsumerState<HomePage>
   List<Widget> _pages = [];
   final statisticsKey = GlobalKey<StatisticsScreenState>();
   final transactionListKey = GlobalKey<TransactionListScreenState>();
+  final utilityKey = GlobalKey<UtilityScreenState>();
   late AnimationController _fabController;
 
   @override
@@ -47,7 +48,7 @@ class HomePageState extends ConsumerState<HomePage>
     _pages = [
       DashboardHome(),
       TransactionListScreen(key: transactionListKey),
-      UtilityScreen(),
+      UtilityScreen(key: utilityKey),
       StatisticsScreen(key: statisticsKey),
       ProfileScreen(),
     ];
@@ -68,7 +69,6 @@ class HomePageState extends ConsumerState<HomePage>
   @override
   Widget build(BuildContext context) {
     final profileAsync = ref.watch(userProfileProvider);
-    var color = Theme.of(context).colorScheme;
     var ctxt = AppLocalizations.of(context)!;
 
     return Scaffold(
@@ -86,68 +86,57 @@ class HomePageState extends ConsumerState<HomePage>
                 icon: Icon(Icons.add),
                 label: Text(ctxt.add_edit_transaction_screen_title),
               )
+              : _selectedIndex == 2
+              ? FloatingActionButton.extended(
+                onPressed: () {
+                  HapticFeedback.mediumImpact();
+                  utilityKey.currentState?.showCustomizeSheet();
+                },
+                icon: Icon(Icons.tune),
+                label: Text('Customise'),
+              )
               : null,
-      bottomNavigationBar: SafeArea(
-        child: Container(
-          margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: const [
-              BoxShadow(
-                blurRadius: 20,
-                offset: Offset(0, 8),
-              ),
-            ],
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _selectedIndex,
+        onDestinationSelected: _onTabSelected,
+        surfaceTintColor: Theme.of(context).colorScheme.surfaceTint,
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+        destinations: [
+          NavigationDestination(
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home),
+            label: ctxt.home_screen_title,
           ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(24),
-            child: BottomNavigationBar(
-              type: BottomNavigationBarType.fixed,
-              backgroundColor: color.surface,
-              currentIndex: _selectedIndex,
-              selectedItemColor: color.primary,
-              unselectedItemColor: color.onSurfaceVariant,
-              elevation: 0,
-              onTap: _onTabSelected,
-              items: [
-                _buildBarItem(
-                  icon: Icons.home_outlined,
-                  selectedIcon: Icons.home,
-                  label: ctxt.home_screen_title,
-                  index: 0,
-                ),
-                _buildBarItem(
-                  icon: Icons.receipt_long_outlined,
-                  selectedIcon: Icons.receipt_long,
-                  label: ctxt.transaction_screen_title,
-                  index: 1,
-                ),
-                _buildBarItem(
-                  icon: Icons.widgets_outlined,
-                  selectedIcon: Icons.widgets,
-                  label: "Utilities",
-                  index: 2,
-                ),
-                _buildBarItem(
-                  icon: Icons.auto_graph_outlined,
-                  selectedIcon: Icons.auto_graph,
-                  label: ctxt.statistics_screen_title,
-                  index: 3,
-                ),
-                _buildBarItem(
-                  icon: Icons.person_outline,
-                  selectedIcon: Icons.person,
-                  label: ctxt.profile_screen_title,
-                  index: 4,
-                ),
-              ],
-            ),
+          NavigationDestination(
+            icon: Icon(Icons.receipt_long_outlined),
+            selectedIcon: Icon(Icons.receipt_long),
+            label: ctxt.transaction_screen_title,
           ),
-        ),
+          NavigationDestination(
+            icon: Icon(Icons.widgets_outlined),
+            selectedIcon: Icon(Icons.widgets),
+            label: "Utilities",
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.auto_graph_outlined),
+            selectedIcon: Icon(Icons.auto_graph),
+            label: ctxt.statistics_screen_title,
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.person_outline),
+            selectedIcon: Icon(Icons.person),
+            label: ctxt.profile_screen_title,
+          ),
+        ],
       ),
       body:
           _selectedIndex == 4
               ? _pages[_selectedIndex]
+              : _selectedIndex == 2
+              ? SafeArea(
+                bottom: false,
+                child: _pages[_selectedIndex],
+              )
               : SafeArea(
                 bottom: false,
                 child: Padding(
@@ -158,24 +147,7 @@ class HomePageState extends ConsumerState<HomePage>
     );
   }
 
-  BottomNavigationBarItem _buildBarItem({
-    required IconData icon,
-    required IconData selectedIcon,
-    required String label,
-    required int index,
-  }) {
-    final isSelected = _selectedIndex == index;
-    return BottomNavigationBarItem(
-      icon: AnimatedScale(
-        scale: isSelected ? 1.1 : 1.0,
-        duration: Duration(milliseconds: 200),
-        child: Icon(isSelected ? selectedIcon : icon, size: 24),
-      ),
-      label: label,
-    );
-  }
-
-  PreferredSizeWidget? buildTopBar(
+PreferredSizeWidget? buildTopBar(
     AsyncValue<UserProfile?> profileAsync,
     int selectedIndex,
   ) {
@@ -193,27 +165,29 @@ class HomePageState extends ConsumerState<HomePage>
             children: [
               greetingAsync.when(
                 data:
-                    (greeting) => Text(
+                    (greeting) => AdaptiveText(
                       '${ctxt.translate(greeting)},',
                       style: textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w400,
                       ),
+                      maxLines: 1,
                     ),
                 loading:
-                    () => Text(
+                    () => AdaptiveText(
                       '${ctxt.greeting_hello_text}, ',
                       style: textTheme.titleMedium,
+                      maxLines: 1,
                     ),
                 error: (e, _) => Text("Error: $e"),
               ),
               profileAsync.when(
                 data:
-                    (profile) => Text(
+                    (profile) => AdaptiveText(
                       profile?.name ?? 'Awesome User',
                       style: textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
-                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
                 loading:
                     () => SizedBox(

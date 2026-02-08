@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:mudra_manager/theme/app_colors.dart';
 
 class DetailActionCard extends StatelessWidget {
   final IconData icon;
@@ -20,25 +19,13 @@ class DetailActionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Container(
+    return Card(
       margin: EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: AppColors.glassGradient(color.primary, isDark),
-        ),
-        border: Border.all(
-          color: color.primary.withValues(alpha: 0.3),
-          width: 1.5,
-        ),
-        boxShadow: AppColors.glassShadow(color.primary, isDark),
-      ),
+      elevation: 0,
+      color: color.surfaceContainerHighest,
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         onTap: () {
           HapticFeedback.mediumImpact();
           onTap();
@@ -51,7 +38,7 @@ class DetailActionCard extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: color.primary.withValues(alpha: 0.15),
+                  color: color.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(icon, color: color.primary, size: 24),
@@ -65,7 +52,6 @@ class DetailActionCard extends StatelessWidget {
                       title,
                       style: textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: color.primary,
                       ),
                     ),
                     SizedBox(height: 2),
@@ -78,7 +64,7 @@ class DetailActionCard extends StatelessWidget {
                   ],
                 ),
               ),
-              Icon(Icons.chevron_right, color: color.primary),
+              Icon(Icons.chevron_right, color: color.onSurfaceVariant),
             ],
           ),
         ),

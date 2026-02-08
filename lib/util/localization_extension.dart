@@ -104,6 +104,17 @@ extension AppLocalizationsHelper on AppLocalizations {
     return "${compact ? "₹" : ""}${format.format(amount)}";
   }
 
+  String formatCompactCurrency(double amount) {
+    if (amount.abs() >= 10000000) {
+      return '₹${(amount / 10000000).toStringAsFixed(2)}${currency_crore_short}';
+    } else if (amount.abs() >= 100000) {
+      return '₹${(amount / 100000).toStringAsFixed(2)}${currency_lakh_short}';
+    } else if (amount.abs() >= 1000) {
+      return '₹${(amount / 1000).toStringAsFixed(2)}${currency_thousand_short}';
+    }
+    return formatCurrencyWithSign(2, amount);
+  }
+
   NumberFormat formatCompactNumber() {
     final locale = localeName == 'hi' ? 'hi_IN' : localeName;
     var format = NumberFormat.compact(locale: locale, explicitSign: false);

@@ -7,7 +7,6 @@ import 'package:mudra_manager/db/models/recurring_transaction.dart';
 import 'package:mudra_manager/db/models/frequency.dart';
 import 'package:mudra_manager/providers/recurring_transaction_provider.dart';
 import 'package:mudra_manager/util/icon_helper.dart';
-import 'package:mudra_manager/theme/app_colors.dart';
 
 class RecurringTransactionsScreen extends ConsumerWidget {
   const RecurringTransactionsScreen({super.key});
@@ -38,7 +37,7 @@ class RecurringTransactionsScreen extends ConsumerWidget {
           }
 
           return ListView.builder(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16).copyWith(bottom: 80),
             itemCount: recurring.length,
             itemBuilder: (context, index) {
               final item = recurring[index];
@@ -71,99 +70,88 @@ class _RecurringCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final color = item.isExpense ? AppColors.expense : AppColors.income;
+    final color = item.isExpense ? colorScheme.error : colorScheme.primary;
     final frequencyText = _getFrequencyText(item.frequency);
 
-    return Container(
+    return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: AppColors.glassGradient(color, isDark),
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withValues(alpha: 0.3), width: 1.5),
-        boxShadow: AppColors.glassShadow(color, isDark),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: () => context.push('/add-recurring', extra: {'recurring': item}),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: color.withValues(alpha: 0.2),
-                        blurRadius: 8,
-                        offset: Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Icon(
-                    IconHelper.iconFromName(item.category.value?.iconName ?? 'category'),
-                    color: color,
-                    size: 24,
-                  ),
+      elevation: 0,
+      color: colorScheme.surfaceContainerHighest,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () => context.push('/add-recurring', extra: {'recurring': item}),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item.category.value?.name ?? 'Unknown',
-                        style: textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: color,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '$frequencyText • Next: ${DateFormat('MMM d').format(item.nextDueDate)}',
-                        style: textTheme.bodySmall?.copyWith(
-                          color: color.withValues(alpha: 0.7),
-                        ),
-                      ),
-                      if (!item.isActive)
-                        Text(
-                          'Inactive',
-                          style: textTheme.labelSmall?.copyWith(color: Colors.orange),
-                        ),
-                    ],
-                  ),
+                child: Icon(
+                  IconHelper.iconFromName(item.category.value?.iconName ?? 'category'),
+                  color: color,
+                  size: 24,
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '${item.isExpense ? '-' : '+'}₹${item.amount.toStringAsFixed(0)}',
+                      item.category.value?.name ?? 'Unknown',
                       style: textTheme.titleMedium?.copyWith(
-                        color: color,
                         fontWeight: FontWeight.bold,
+                        color: colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      item.account.value?.name ?? '',
+                      '$frequencyText • Next: ${DateFormat('MMM d').format(item.nextDueDate)}',
                       style: textTheme.bodySmall?.copyWith(
-                        color: color.withValues(alpha: 0.6),
+                        color: colorScheme.onSurfaceVariant,
                       ),
                     ),
+                    if (!item.isActive)
+                      Container(
+                        margin: const EdgeInsets.only(top: 4),
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          'Inactive',
+                          style: textTheme.labelSmall?.copyWith(color: Colors.orange),
+                        ),
+                      ),
                   ],
                 ),
-              ],
-            ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    '${item.isExpense ? '-' : '+'}₹${item.amount.toStringAsFixed(0)}',
+                    style: textTheme.titleMedium?.copyWith(
+                      color: color,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    item.account.value?.name ?? '',
+                    style: textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),

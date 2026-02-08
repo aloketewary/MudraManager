@@ -34,6 +34,7 @@ class _BudgetDashboardState extends ConsumerState<BudgetDashboard> {
       body: Hero(
         tag: 'budgetExpandHero',
         child: Material(
+          color: Theme.of(context).colorScheme.surface,
           child: budgetsAsync.when(
             data: (list) {
               if (list.isEmpty) {
@@ -43,6 +44,7 @@ class _BudgetDashboardState extends ConsumerState<BudgetDashboard> {
                 );
               }
               return ListView(
+                padding: EdgeInsets.all(16).copyWith(bottom: 80),
                 children: list.map((data) => BudgetSummaryCard(data)).toList(),
               );
             },

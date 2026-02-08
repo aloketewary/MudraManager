@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mudra_manager/service/budget_alert_service.dart';
-import 'package:mudra_manager/theme/app_colors.dart';
+
 
 class BudgetAlertBanner extends StatelessWidget {
   final List<BudgetAlert> alerts;
@@ -21,7 +21,7 @@ class BudgetAlertBanner extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     final color = alert.threshold == 100
-        ? AppColors.expense
+        ? colorScheme.error
         : alert.threshold == 90
             ? Color(0xFFF59E0B)
             : Color(0xFFFBBF24);
@@ -36,9 +36,9 @@ class BudgetAlertBanner extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: color.withValues(alpha: 0.3), width: 2),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: AppColors.cardShadow,
+            color: colorScheme.shadow.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: Offset(0, 4),
           ),

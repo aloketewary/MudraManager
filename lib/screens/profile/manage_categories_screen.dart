@@ -3,15 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/db/models/category.dart'
-    show Category, CategoryType, GetCategoryCollection;
+    show Category;
 import 'package:mudra_manager/providers/category_provider.dart';
 import 'package:mudra_manager/providers/transaction_provider.dart';
-import 'package:mudra_manager/screens/profile/add_edit_category_screen.dart';
 import 'package:mudra_manager/screens/reusable/no_data_found.dart'
     show NoDataFound;
-import 'package:mudra_manager/theme/app_colors.dart';
 import 'package:mudra_manager/util/dialog_utils.dart';
 import 'package:mudra_manager/util/icon_helper.dart';
+import 'package:mudra_manager/l10n/app_localizations.dart';
 import 'package:mudra_manager/util/snackbar_service.dart';
 
 class ManageCategoriesScreen extends ConsumerWidget {
@@ -23,10 +22,11 @@ class ManageCategoriesScreen extends ConsumerWidget {
     final transactionCounts = ref.watch(transactionCountsProvider);
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final ctxt = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Manage Categories", style: textTheme.titleLarge),
+        title: Text(ctxt.categories_manageCategoriesTitle, style: textTheme.titleLarge),
       ),
       body: categoriesAsync.when(
         data: (categories) {
@@ -54,20 +54,11 @@ class ManageCategoriesScreen extends ConsumerWidget {
               );
 
               final categoryColor = Color(category.colorValue ?? 0xFFE0E0E0);
-              final isDark = Theme.of(context).brightness == Brightness.dark;
-              final gradientColors = AppColors.glassGradient(categoryColor, isDark);
 
-              return Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: gradientColors,
-                  ),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: categoryColor.withValues(alpha: 0.3), width: 1.5),
-                  boxShadow: AppColors.glassShadow(categoryColor, isDark),
-                ),
+              return Card(
+                margin: EdgeInsets.zero,
+                elevation: 0,
+                color: color.surfaceContainerHighest,
                 child: ListTile(
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -76,9 +67,8 @@ class ManageCategoriesScreen extends ConsumerWidget {
                   leading: Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: AppColors.white,
-                      shape: BoxShape.circle,
-                      boxShadow: [BoxShadow(color: categoryColor.withValues(alpha: 0.2), blurRadius: 8, offset: Offset(0, 2))],
+                      color: categoryColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(
                       IconHelper.getIconData(category.iconName),
@@ -89,23 +79,23 @@ class ManageCategoriesScreen extends ConsumerWidget {
                   title: Text(
                     category.name,
                     style: textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: categoryColor,
+                      fontWeight: FontWeight.w600,
+                      color: color.onSurface,
                     ),
                   ),
                   subtitle: Text(
-                    '${count} transaction${count == 1 ? '' : 's'} • ${category.categoryType.name.toUpperCase()}',
+                    '${count} ${count == 1 ? 'transaction' : 'transactions'} • ${category.categoryType.name.toUpperCase()}',
                     style: textTheme.bodySmall?.copyWith(
-                      color: categoryColor,
+                      color: color.onSurfaceVariant,
                     ),
                   ),
                   trailing: PopupMenuButton<String>(
-                    icon: Icon(Icons.more_vert, color: categoryColor),
+                    icon: Icon(Icons.more_vert, color: color.onSurfaceVariant),
                     onSelected: (value) {
                       if (value == 'edit') {
                         context.push('/add-category', extra: {'category': category});
                       } else if (value == 'delete') {
-                        _deleteCategory(context, ref, category);
+                        _deleteCategory(context, ref, category, ctxt);
                       }
                     },
                     itemBuilder:
@@ -116,7 +106,7 @@ class ManageCategoriesScreen extends ConsumerWidget {
                               children: [
                                 Icon(
                                   Icons.edit,
-                                  color: color.secondary,
+                                  color: color.primary,
                                   size: 20,
                                 ),
                                 const SizedBox(width: 12),
@@ -158,7 +148,7 @@ class ManageCategoriesScreen extends ConsumerWidget {
           context.push('/add-category');
         },
         icon: const Icon(Icons.add),
-        label: const Text("Add Category"),
+        label: Text(ctxt.categories_addCategoryLabel),
       ),
     );
   }
@@ -167,12 +157,12 @@ class ManageCategoriesScreen extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     Category category,
+    AppLocalizations ctxt,
   ) async {
     final shouldDelete = await DialogUtils.showDeleteConfirmation(
       context,
-      title: 'Delete Category',
-      message:
-          'Are you sure you want to delete this category?\nAll associated transactions will also be removed.',
+      title: ctxt.categories_deleteCategoryTitle,
+      message: ctxt.categories_deleteCategoryMessage,
     );
 
     if (shouldDelete == true) {
@@ -180,7 +170,7 @@ class ManageCategoriesScreen extends ConsumerWidget {
       categoryProvider.deleteCategoryWithTransactions(category.id);
       ref.invalidate(categoryListProvider);
       ref.invalidate(transactionProvider);
-      SnackbarService.success("Category and its transactions deleted");
+      SnackbarService.success(ctxt.categories_categoryDeletedMessage);
     }
   }
 }

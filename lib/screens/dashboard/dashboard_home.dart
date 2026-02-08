@@ -14,7 +14,7 @@ import 'package:mudra_manager/screens/dashboard/swipeable_account_card.dart';
 import 'package:mudra_manager/screens/reusable/responseive_layout_builder.dart';
 import 'package:mudra_manager/screens/reusable/budget_alert_banner.dart';
 import 'package:mudra_manager/providers/budget_alert_provider.dart';
-import 'package:mudra_manager/theme/app_colors.dart';
+
 import 'package:mudra_manager/theme/design_tokens.dart';
 import 'package:mudra_manager/screens/trip/active_trip_mini_card.dart';
 
@@ -63,64 +63,112 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                       .dismissAlert(alerts.first);
                 },
               ),
-            SizedBox(height: 16),
-            AnimatedSwipeableAccountCards(),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
+            const AnimatedSwipeableAccountCards(),
+            const SizedBox(height: 16),
             Container(
-              margin: EdgeInsets.only(
-                left: globalPadding,
-                right: globalPadding,
-              ),
+              margin: EdgeInsets.symmetric(horizontal: globalPadding),
               child: ResponsiveLayoutBuilder(
                 sizedBoxHeight: 110,
                 columnWidget: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Expanded(
-                      flex: (allBoxWidthFactor * 100).toInt(),
-                      child: SizedBox(
-                        child: GestureDetector(
-                          onTap: () {
-                            HapticFeedback.mediumImpact();
-                            context.push('/add-transaction');
-                          },
-                          child: Hero(
-                            tag: 'addTransactionHero',
-                            child: Container(
-                              padding: const EdgeInsets.all(16.0),
-                              decoration: BoxDecoration(
-                                borderRadius: DesignTokens.borderRadiusLarge,
-                                gradient: LinearGradient(
-                                  colors: AppColors.glassGradient(color.primary, isDark),
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
+                    Flexible(
+                      child: GestureDetector(
+                        onTap: () {
+                          HapticFeedback.mediumImpact();
+                          context.push('/add-transaction');
+                        },
+                        child: Hero(
+                          tag: 'addTransactionHero',
+                          child: Card(
+                            elevation: 0,
+                            color: color.primaryContainer,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(20),
+                              onTap: () {
+                                HapticFeedback.mediumImpact();
+                                context.push('/add-transaction');
+                              },
+                              child: Container(
+                                height: 50,
+                                padding: const EdgeInsets.all(16.0),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: <Widget>[
+                                    CircleAvatar(
+                                      radius: 16,
+                                      backgroundColor: color.primary.withValues(
+                                        alpha: 0.15,
+                                      ),
+                                      child: Icon(
+                                        Icons.add_circle_outline,
+                                        size: 20,
+                                        color: color.primary,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Flexible(
+                                      child: Text(
+                                        ctxt.dashboard_add_transaction_text
+                                            .toUpperCase(),
+                                        textAlign: TextAlign.center,
+                                        style: textTheme.labelMedium?.copyWith(
+                                          color: color.onPrimaryContainer,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                border: Border.all(
-                                  color: color.primary.withValues(alpha: 0.3),
-                                  width: 1.5,
-                                ),
-                                boxShadow: AppColors.glassShadow(color.primary, isDark),
                               ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Flexible(
+                      child: GestureDetector(
+                        onTap: () {
+                          HapticFeedback.mediumImpact();
+                          context.push('/transfer');
+                        },
+                        child: Card(
+                          elevation: 0,
+                          color: color.surfaceContainerHigh,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(20),
+                            onTap: () {
+                              HapticFeedback.mediumImpact();
+                              context.push('/transfer');
+                            },
+                            child: Container(
+                              height: 50,
+                              padding: const EdgeInsets.all(16.0),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: <Widget>[
                                   CircleAvatar(
-                                    radius: 20,
-                                    backgroundColor: color.primary.withValues(alpha: 0.15),
+                                    radius: 16,
+                                    backgroundColor: color.tertiary.withValues(
+                                      alpha: 0.15,
+                                    ),
                                     child: Icon(
-                                      Icons.add_circle_outline,
-                                      size: 24,
-                                      color: color.primary,
+                                      Icons.swap_horiz,
+                                      size: 20,
+                                      color: color.tertiary,
                                     ),
                                   ),
-                                  SizedBox(width: DesignTokens.spacing8),
-                                  Expanded(
+                                  const SizedBox(width: 8),
+                                  Flexible(
                                     child: Text(
-                                      ctxt.dashboard_add_transaction_text
+                                      ctxt.dashboard_add_transfer_text
                                           .toUpperCase(),
                                       textAlign: TextAlign.center,
-                                      style: textTheme.labelLarge?.copyWith(
-                                        color: color.primary,
+                                      style: textTheme.labelMedium?.copyWith(
+                                        color: color.tertiary,
                                         fontWeight: FontWeight.w600,
                                       ),
                                       overflow: TextOverflow.ellipsis,
@@ -128,61 +176,6 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                                   ),
                                 ],
                               ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: DesignTokens.spacing8),
-                    Expanded(
-                      flex: (allBoxWidthFactor * 100).toInt(),
-                      child: SizedBox(
-                        child: GestureDetector(
-                          onTap: () {
-                            HapticFeedback.mediumImpact();
-                            context.push('/transfer');
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.all(16.0),
-                            decoration: BoxDecoration(
-                              borderRadius: DesignTokens.borderRadiusLarge,
-                              gradient: LinearGradient(
-                                colors: AppColors.glassGradient(AppColors.transfer, isDark),
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              border: Border.all(
-                                color: AppColors.transfer.withValues(alpha: 0.3),
-                                width: 1.5,
-                              ),
-                              boxShadow: AppColors.glassShadow(AppColors.transfer, isDark),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                CircleAvatar(
-                                  radius: 20,
-                                  backgroundColor: AppColors.transfer.withValues(alpha: 0.15),
-                                  child: const Icon(
-                                    Icons.swap_horiz,
-                                    size: 24,
-                                    color: AppColors.transfer,
-                                  ),
-                                ),
-                                SizedBox(width: DesignTokens.spacing8),
-                                Expanded(
-                                  child: Text(
-                                    ctxt.dashboard_add_transfer_text
-                                        .toUpperCase(),
-                                    textAlign: TextAlign.center,
-                                    style: textTheme.labelLarge?.copyWith(
-                                      color: AppColors.transfer,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
                             ),
                           ),
                         ),
@@ -191,54 +184,103 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                   ],
                 ),
                 rowWidget: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Expanded(
-                      flex: (allBoxWidthFactor * 100).toInt(),
-                      child: SizedBox(
-                        child: GestureDetector(
-                          onTap: () {
-                            HapticFeedback.mediumImpact();
-                            context.push('/add-transaction');
-                          },
-                          child: Hero(
-                            tag: 'addTransactionHero',
-                            child: Container(
-                              width: 120,
-                              padding: const EdgeInsets.all(16.0),
-                              decoration: BoxDecoration(
-                                borderRadius: DesignTokens.borderRadiusLarge,
-                                gradient: LinearGradient(
-                                  colors: AppColors.glassGradient(color.primary, isDark),
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
+                      child: GestureDetector(
+                        onTap: () {
+                          HapticFeedback.mediumImpact();
+                          context.push('/add-transaction');
+                        },
+                        child: Hero(
+                          tag: 'addTransactionHero',
+                          child: Card(
+                            elevation: 0,
+                            color: color.primaryContainer,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(20),
+                              onTap: () {
+                                HapticFeedback.mediumImpact();
+                                context.push('/add-transaction');
+                              },
+                              child: Container(
+                                height: 50,
+                                padding: const EdgeInsets.all(16.0),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: <Widget>[
+                                    CircleAvatar(
+                                      radius: 16,
+                                      backgroundColor: color.primary.withValues(
+                                        alpha: 0.15,
+                                      ),
+                                      child: Icon(
+                                        Icons.add_circle_outline,
+                                        size: 20,
+                                        color: color.primary,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Flexible(
+                                      child: Text(
+                                        ctxt.dashboard_add_transaction_text
+                                            .toUpperCase(),
+                                        textAlign: TextAlign.center,
+                                        style: textTheme.labelMedium?.copyWith(
+                                          color: color.onPrimaryContainer,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                border: Border.all(
-                                  color: color.primary.withValues(alpha: 0.3),
-                                  width: 1.5,
-                                ),
-                                boxShadow: AppColors.glassShadow(color.primary, isDark),
                               ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          HapticFeedback.mediumImpact();
+                          context.push('/transfer');
+                        },
+                        child: Card(
+                          elevation: 0,
+                          color: color.surfaceContainerHigh,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(20),
+                            onTap: () {
+                              HapticFeedback.mediumImpact();
+                              context.push('/transfer');
+                            },
+                            child: Container(
+                              height: 50,
+                              padding: const EdgeInsets.all(16.0),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: <Widget>[
                                   CircleAvatar(
-                                    radius: 20,
-                                    backgroundColor: color.primary.withValues(alpha: 0.15),
+                                    radius: 16,
+                                    backgroundColor: color.tertiary.withValues(
+                                      alpha: 0.15,
+                                    ),
                                     child: Icon(
-                                      Icons.add_circle_outline,
-                                      size: 24,
-                                      color: color.primary,
+                                      Icons.swap_horiz,
+                                      size: 20,
+                                      color: color.tertiary,
                                     ),
                                   ),
-                                  SizedBox(width: DesignTokens.spacing8),
-                                  Expanded(
+                                  const SizedBox(width: 8),
+                                  Flexible(
                                     child: Text(
-                                      ctxt.dashboard_add_transaction_text
+                                      ctxt.dashboard_add_transfer_text
                                           .toUpperCase(),
                                       textAlign: TextAlign.center,
-                                      style: textTheme.labelLarge?.copyWith(
-                                        color: color.primary,
+                                      style: textTheme.labelMedium?.copyWith(
+                                        color: color.tertiary,
                                         fontWeight: FontWeight.w600,
                                       ),
                                       overflow: TextOverflow.ellipsis,
@@ -246,62 +288,6 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                                   ),
                                 ],
                               ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: DesignTokens.spacing8),
-                    Expanded(
-                      flex: (allBoxWidthFactor * 100).toInt(),
-                      child: SizedBox(
-                        child: GestureDetector(
-                          onTap: () {
-                            HapticFeedback.mediumImpact();
-                            context.push('/transfer');
-                          },
-                          child: Container(
-                            width: 120,
-                            padding: const EdgeInsets.all(16.0),
-                            decoration: BoxDecoration(
-                              borderRadius: DesignTokens.borderRadiusLarge,
-                              gradient: LinearGradient(
-                                colors: AppColors.glassGradient(AppColors.transfer, isDark),
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              border: Border.all(
-                                color: AppColors.transfer.withValues(alpha: 0.3),
-                                width: 1.5,
-                              ),
-                              boxShadow: AppColors.glassShadow(AppColors.transfer, isDark),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                CircleAvatar(
-                                  radius: 20,
-                                  backgroundColor: AppColors.transfer.withValues(alpha: 0.15),
-                                  child: const Icon(
-                                    Icons.swap_horiz,
-                                    size: 24,
-                                    color: AppColors.transfer,
-                                  ),
-                                ),
-                                SizedBox(width: DesignTokens.spacing8),
-                                Expanded(
-                                  child: Text(
-                                    ctxt.dashboard_add_transfer_text
-                                        .toUpperCase(),
-                                    textAlign: TextAlign.center,
-                                    style: textTheme.labelLarge?.copyWith(
-                                      color: AppColors.transfer,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
                             ),
                           ),
                         ),
@@ -313,21 +299,18 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
             ),
             CashFlowScreen(globalPadding: globalPadding),
             Container(
-              margin: EdgeInsets.only(
-                left: globalPadding,
-                right: globalPadding,
-              ),
-              child: FilterChips(),
+              margin: EdgeInsets.symmetric(horizontal: globalPadding),
+              child: const FilterChips(),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             NetWorthMiniCard(globalPadding: globalPadding),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             ActiveTripMiniCard(globalPadding: globalPadding),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             BudgetMiniCard(globalPadding: globalPadding),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             GoalMiniCard(globalPadding: globalPadding),
-            SizedBox(height: 80), // Extra space for bottom nav
+            const SizedBox(height: 100), // Extra space for bottom nav
           ],
         ),
       ),

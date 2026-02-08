@@ -11,8 +11,7 @@ import 'package:mudra_manager/l10n/app_localizations.dart'
 import 'package:mudra_manager/providers/filter_provider.dart';
 import 'package:mudra_manager/screens/reusable/animated_balance.dart';
 import 'package:mudra_manager/screens/reusable/responseive_layout_builder.dart';
-import 'package:mudra_manager/theme/app_colors.dart';
-import 'package:mudra_manager/theme/design_tokens.dart';
+
 import 'package:mudra_manager/util/localization_extension.dart';
 
 class CashFlowScreen extends ConsumerStatefulWidget {
@@ -181,140 +180,144 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Expanded(
-      flex: (rightBoxWidthFactor * 100).toInt(),
       child: SizedBox(
-        height: 190,
+        height: 170,
         child: GestureDetector(
           onTap: () {
             HapticFeedback.mediumImpact();
           },
-          child: Container(
-            padding: const EdgeInsets.all(16.0),
-            margin: const EdgeInsets.only(right: 8.0),
-            decoration: BoxDecoration(
-              borderRadius: DesignTokens.borderRadiusMedium,
-              gradient: LinearGradient(
-                colors: AppColors.glassGradient(
-                  isExpense ? AppColors.expense : AppColors.income,
-                  isDark,
-                ),
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              border: Border.all(
-                color: isExpense
-                    ? AppColors.expense.withValues(alpha: 0.3)
-                    : AppColors.income.withValues(alpha: 0.3),
-                width: 1.5,
-              ),
-              boxShadow: AppColors.glassShadow(
-                isExpense ? AppColors.expense : AppColors.income,
-                isDark,
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                !isExpense
-                    ? Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: AppColors.income.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Transform.rotate(
-                            angle: tiltAngleRadians,
-                            child: const Icon(Icons.arrow_downward, size: 20, color: AppColors.income),
-                          ),
-                        ),
-                        const SizedBox(width: 8.0),
-                        Expanded(
-                          child: Text(
-                            ctxt.transaction_type_income.toUpperCase(),
-                            textAlign: TextAlign.center,
-                            style: textTheme.labelLarge?.copyWith(
-                              color: AppColors.income,
-                              fontWeight: FontWeight.bold,
+          child: Card(
+            elevation: 0,
+            color: isExpense ? color.errorContainer : color.primaryContainer,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () {
+                HapticFeedback.mediumImpact();
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    !isExpense
+                        ? Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: color.primary.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Transform.rotate(
+                                angle: tiltAngleRadians,
+                                child: Icon(
+                                  Icons.arrow_downward,
+                                  size: 16,
+                                  color: color.primary,
+                                ),
+                              ),
                             ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    )
-                    : Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Expanded(
-                          child: Text(
-                            ctxt.transaction_type_expense.toUpperCase(),
-                            textAlign: TextAlign.center,
-                            style: textTheme.labelLarge?.copyWith(
-                              color: AppColors.expense,
-                              fontWeight: FontWeight.bold,
+                            const SizedBox(width: 6.0),
+                            Flexible(
+                              child: Text(
+                                ctxt.transaction_type_income.toUpperCase(),
+                                textAlign: TextAlign.center,
+                                style: textTheme.labelMedium?.copyWith(
+                                  color: color.primary,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                          ],
+                        )
+                        : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Flexible(
+                              child: Text(
+                                ctxt.transaction_type_expense.toUpperCase(),
+                                textAlign: TextAlign.center,
+                                style: textTheme.labelMedium?.copyWith(
+                                  color: color.error,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const SizedBox(width: 6.0),
+                            Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: color.error.withValues(
+                                  alpha: 0.15,
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Transform.rotate(
+                                angle: tiltExpenseAngleRadians,
+                                child:  Icon(
+                                  Icons.arrow_upward,
+                                  size: 16,
+                                  color: color.error,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 8.0),
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: AppColors.expense.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Transform.rotate(
-                            angle: tiltExpenseAngleRadians,
-                            child: const Icon(Icons.arrow_upward, size: 20, color: AppColors.expense),
-                          ),
+                    Flexible(
+                      child: Container(
+                        height: 80,
+                        alignment: Alignment.centerLeft,
+                        child: Stack(
+                          alignment: Alignment.centerLeft,
+                          children: [
+                            Text(
+                              ctxt.formatCurrencyWithSign(0, value),
+                              style: textTheme.titleLarge?.copyWith(
+                                color: (isExpense
+                                        ? color.error
+                                        : color.primary)
+                                    .withValues(alpha: 0.1),
+                                fontSize: 60,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              overflow: TextOverflow.fade,
+                            ),
+                            AnimatedBalance(
+                              value: value,
+                              style: textTheme.titleMedium?.copyWith(
+                                color:
+                                    isExpense
+                                        ? color.error
+                                        : color.primary,
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              fixedStringLength: 0,
+                              overflow: TextOverflow.fade,
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                SizedBox(
-                  height: 100,
-                  child: Stack(
-                    alignment: Alignment.centerLeft,
-                    // or whatever aligns best for you
-                    children: [
-                      Text(
-                        ctxt.formatCurrencyWithSign(0, value),
-                        style: textTheme.titleLarge?.copyWith(
-                          color: (isExpense ? AppColors.expense : AppColors.income).withAlpha(10),
-                          fontSize: 80,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        overflow: TextOverflow.fade,
                       ),
-                      AnimatedBalance(
-                        value: value,
-                        style: textTheme.titleLarge?.copyWith(
-                          color: isExpense ? AppColors.expense : AppColors.income,
-                          fontSize: 40,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        fixedStringLength: 0,
-                        overflow: TextOverflow.fade,
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: Text(
-                    FilterType.day == filter
-                        ? DateFormat(
-                          "dd MMM yy",
-                          ctxt.localeName,
-                        ).format(startDate)
-                        : "${DateFormat("dd MMM yy", ctxt.localeName).format(startDate)} - ${DateFormat("dd MMM yy", ctxt.localeName).format(endDate)}",
-                    style: textTheme.labelMedium?.copyWith(
-                      color: color.onSurfaceVariant,
                     ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                    Text(
+                      FilterType.day == filter
+                          ? DateFormat(
+                            "dd MMM yy",
+                            ctxt.localeName,
+                          ).format(startDate)
+                          : "${DateFormat("dd MMM yy", ctxt.localeName).format(startDate)} - ${DateFormat("dd MMM yy", ctxt.localeName).format(endDate)}",
+                      style: textTheme.labelSmall?.copyWith(
+                        color: color.onSurfaceVariant,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),

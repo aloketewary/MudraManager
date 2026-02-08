@@ -20,6 +20,7 @@ import 'package:mudra_manager/screens/transaction/transaction_card.dart';
 import 'package:mudra_manager/screens/transaction/transaction_group.dart';
 import 'package:mudra_manager/util/dialog_utils.dart';
 import 'package:mudra_manager/util/icon_helper.dart';
+import 'package:mudra_manager/components/adaptive_text.dart';
 
 class TransactionListScreen extends ConsumerStatefulWidget {
   final bool showAppBar;
@@ -109,7 +110,11 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
               heroTag: 'addTransactionHero',
               onPressed: _onFabPressed,
               icon: const Icon(Icons.add),
-              label: Text(ctxt.dashboard_add_transaction_text),
+              label: AdaptiveText(
+                ctxt.dashboard_add_transaction_text,
+                style: textTheme.labelLarge,
+                maxLines: 1,
+              ),
             ),
           ),
         )

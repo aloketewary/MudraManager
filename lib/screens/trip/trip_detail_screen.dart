@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:mudra_manager/providers/trip_provider.dart';
 import 'package:mudra_manager/util/dialog_utils.dart';
-import 'package:mudra_manager/theme/app_colors.dart';
 
 class TripDetailScreen extends ConsumerStatefulWidget {
   final int tripId;
@@ -33,18 +32,18 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
     return 'Active';
   }
 
-  Color _getStatusColor(String status) {
+  Color _getStatusColor(String status, ColorScheme color) {
     switch (status) {
       case 'Active':
-        return AppColors.tripActive;
+        return color.primary;
       case 'Upcoming':
-        return AppColors.tripUpcoming;
+        return Colors.blue;
       case 'Past':
-        return AppColors.tripPast;
+        return Colors.orange;
       case 'Completed':
-        return AppColors.tripCompleted;
+        return Colors.green;
       default:
-        return AppColors.tripCompleted;
+        return Colors.grey;
     }
   }
 
@@ -65,7 +64,6 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
     final tripAsync = ref.watch(tripByIdProvider(widget.tripId));
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return tripAsync.when(
       data: (trip) {
@@ -75,19 +73,12 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
 
         final participants = trip.participants.toList();
         final duration = trip.endDate.difference(trip.startDate).inDays + 1;
-        final status = _getTripStatus(
-          trip.startDate,
-          trip.endDate,
-          trip.isActive,
-        );
-        final statusColor = _getStatusColor(status);
+        final status = _getTripStatus(trip.startDate, trip.endDate, trip.isActive);
+        final statusColor = _getStatusColor(status, color);
 
         return Scaffold(
           appBar: AppBar(
-            title: Text(
-              trip.name,
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
+            title: Text(trip.name, style: TextStyle(fontWeight: FontWeight.bold)),
             actions: [
               IconButton(
                 onPressed: () {
@@ -97,9 +88,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                 icon: Icon(Icons.edit_outlined),
                 tooltip: 'Edit Trip',
                 style: IconButton.styleFrom(
-                  backgroundColor: color.primaryContainer.withValues(
-                    alpha: 0.5,
-                  ),
+                  backgroundColor: color.primaryContainer.withValues(alpha: 0.5),
                   foregroundColor: color.primary,
                 ),
               ),
@@ -120,9 +109,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                       icon: Icons.check_circle_outline,
                     );
                     if (confirm == true) {
-                      await ref
-                          .read(tripServiceProvider)
-                          .markTripInactive(widget.tripId);
+                      await ref.read(tripServiceProvider).markTripInactive(widget.tripId);
                       ref.invalidate(allTripsProvider);
                       ref.invalidate(tripByIdProvider(widget.tripId));
                     }
@@ -133,45 +120,35 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                       message: 'This will delete all trip data. Continue?',
                     );
                     if (confirm == true) {
-                      await ref
-                          .read(tripServiceProvider)
-                          .deleteTrip(widget.tripId);
+                      await ref.read(tripServiceProvider).deleteTrip(widget.tripId);
                       ref.invalidate(allTripsProvider);
                       if (mounted) context.pop();
                     }
                   }
                 },
-                itemBuilder:
-                    (ctx) => [
-                      if (trip.isActive)
-                        PopupMenuItem(
-                          value: 'end',
-                          child: Row(
-                            children: [
-                              Icon(Icons.check_circle_outline, size: 20),
-                              SizedBox(width: 8),
-                              Text('End Trip'),
-                            ],
-                          ),
-                        ),
-                      PopupMenuItem(
-                        value: 'delete',
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.delete_outline,
-                              size: 20,
-                              color: Colors.red,
-                            ),
-                            SizedBox(width: 8),
-                            Text(
-                              'Delete Trip',
-                              style: TextStyle(color: Colors.red),
-                            ),
-                          ],
-                        ),
+                itemBuilder: (ctx) => [
+                  if (trip.isActive)
+                    PopupMenuItem(
+                      value: 'end',
+                      child: Row(
+                        children: [
+                          Icon(Icons.check_circle_outline, size: 20),
+                          SizedBox(width: 8),
+                          Text('End Trip'),
+                        ],
                       ),
-                    ],
+                    ),
+                  PopupMenuItem(
+                    value: 'delete',
+                    child: Row(
+                      children: [
+                        Icon(Icons.delete_outline, size: 20, color: Colors.red),
+                        SizedBox(width: 8),
+                        Text('Delete Trip', style: TextStyle(color: Colors.red)),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ],
             bottom: TabBar(
@@ -185,28 +162,10 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
           ),
           body: Column(
             children: [
-              Container(
-                width: double.infinity,
+              Card(
                 margin: EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: AppColors.glassGradient(
-                      statusColor,
-                      Theme.of(context).brightness == Brightness.dark,
-                    ),
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: statusColor.withValues(alpha: 0.3),
-                    width: 1.5,
-                  ),
-                  boxShadow: AppColors.glassShadow(
-                    statusColor,
-                    Theme.of(context).brightness == Brightness.dark,
-                  ),
-                ),
+                elevation: 0,
+                color: color.surfaceContainerHighest,
                 child: Column(
                   children: [
                     Padding(
@@ -216,14 +175,10 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                           Container(
                             padding: EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: Colors.white24,
+                              color: statusColor.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            child: Icon(
-                              Icons.calendar_today,
-                              size: 18,
-                              color: AppColors.textColor(isDark),
-                            ),
+                            child: Icon(Icons.calendar_today, size: 18, color: statusColor),
                           ),
                           SizedBox(width: 12),
                           Expanded(
@@ -232,41 +187,30 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                               children: [
                                 Text(
                                   '${DateFormat.MMMd().format(trip.startDate)} - ${DateFormat.MMMd().format(trip.endDate)}',
-                                  style: TextStyle(
-                                    color: AppColors.textColor(isDark),
-                                    fontSize: 14,
+                                  style: textTheme.titleSmall?.copyWith(
+                                    color: color.onSurface,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
                                 SizedBox(height: 2),
                                 Text(
                                   '$duration days',
-                                  style: TextStyle(
-                                    color: AppColors.textColor(
-                                      isDark,
-                                    ).withValues(alpha: 0.8),
-                                    fontSize: 12,
-                                  ),
+                                  style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
                                 ),
                               ],
                             ),
                           ),
                           Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 4,
-                            ),
+                            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
-                              color: statusColor,
+                              color: statusColor.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: statusColor.withValues(alpha: 0.3)),
                             ),
                             child: Text(
                               status,
-                              style: TextStyle(
-                                color: AppColors.textColor(
-                                  isDark,
-                                ).withValues(alpha: 0.8),
-                                fontSize: 11,
+                              style: textTheme.labelSmall?.copyWith(
+                                color: statusColor,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -277,127 +221,76 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                     AnimatedSize(
                       duration: Duration(milliseconds: 300),
                       curve: Curves.easeInOut,
-                      child:
-                          _isExpanded
-                              ? Padding(
-                                padding: EdgeInsets.fromLTRB(20, 0, 20, 20),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    if (trip.description != null) ...[
-                                      Container(
-                                        width: double.infinity,
-                                        padding: EdgeInsets.all(12),
-                                        decoration: BoxDecoration(
-                                          color: Colors.white.withValues(
-                                            alpha: 0.15,
-                                          ),
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          trip.description!,
-                                          style: TextStyle(
-                                            color: AppColors.textColor(isDark),
-                                            fontSize: 13,
-                                          ),
-                                        ),
+                      child: _isExpanded
+                          ? Padding(
+                              padding: EdgeInsets.fromLTRB(20, 0, 20, 20),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (trip.description != null) ...[
+                                    Container(
+                                      width: double.infinity,
+                                      padding: EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        color: color.surface,
+                                        borderRadius: BorderRadius.circular(12),
                                       ),
-                                      SizedBox(height: 16),
-                                    ],
-                                    Row(
-                                      children: [
-                                        Icon(
-                                          Icons.people,
-                                          size: 16,
-                                          color: AppColors.textColor(
-                                            isDark,
-                                          ).withValues(alpha: 0.8),
-                                        ),
-                                        SizedBox(width: 8),
-                                        Text(
-                                          '${participants.length} Participants',
-                                          style: TextStyle(
-                                            color: AppColors.textColor(
-                                              isDark,
-                                            ).withValues(alpha: 0.8),
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ],
+                                      child: Text(trip.description!, style: textTheme.bodyMedium),
                                     ),
-                                    SizedBox(height: 12),
-                                    Wrap(
-                                      spacing: 8,
-                                      runSpacing: 8,
-                                      children:
-                                          participants
-                                              .map(
-                                                (p) => Container(
-                                                  padding: EdgeInsets.symmetric(
-                                                    horizontal: 12,
-                                                    vertical: 6,
-                                                  ),
-                                                  decoration: BoxDecoration(
-                                                    color: statusColor
-                                                        .withValues(alpha: 0.2),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          20,
-                                                        ),
-                                                  ),
-                                                  child: Row(
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
-                                                    children: [
-                                                      CircleAvatar(
-                                                        radius: 12,
-                                                        backgroundColor:
-                                                            statusColor
-                                                                .withValues(
-                                                                  alpha: 0.8,
-                                                                ),
-                                                        child: Text(
-                                                          p.name[0]
-                                                              .toUpperCase(),
-                                                          style: TextStyle(
-                                                            color:
-                                                                AppColors.textColor(
-                                                                  isDark,
-                                                                ).withValues(
-                                                                  alpha: 0.8,
-                                                                ),
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            fontSize: 10,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      SizedBox(width: 6),
-                                                      Text(
-                                                        p.name,
-                                                        style: TextStyle(
-                                                          color:
-                                                              AppColors.textColor(
-                                                                isDark,
-                                                              ),
-                                                          fontSize: 12,
-                                                          fontWeight:
-                                                              FontWeight.w500,
-                                                        ),
-                                                      ),
-                                                    ],
+                                    SizedBox(height: 16),
+                                  ],
+                                  Row(
+                                    children: [
+                                      Icon(Icons.people, size: 16, color: color.onSurfaceVariant),
+                                      SizedBox(width: 8),
+                                      Text(
+                                        '${participants.length} Participants',
+                                        style: textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: 12),
+                                  Wrap(
+                                    spacing: 8,
+                                    runSpacing: 8,
+                                    children: participants
+                                        .map(
+                                          (p) => Container(
+                                            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                            decoration: BoxDecoration(
+                                              color: statusColor.withValues(alpha: 0.1),
+                                              borderRadius: BorderRadius.circular(20),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                CircleAvatar(
+                                                  radius: 12,
+                                                  backgroundColor: statusColor,
+                                                  child: Text(
+                                                    p.name[0].toUpperCase(),
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontWeight: FontWeight.bold,
+                                                      fontSize: 10,
+                                                    ),
                                                   ),
                                                 ),
-                                              )
-                                              .toList(),
-                                    ),
-                                  ],
-                                ),
-                              )
-                              : SizedBox.shrink(),
+                                                SizedBox(width: 6),
+                                                Text(
+                                                  p.name,
+                                                  style: textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        )
+                                        .toList(),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : SizedBox.shrink(),
                     ),
                     InkWell(
                       onTap: () {
@@ -407,10 +300,10 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                       child: Container(
                         padding: EdgeInsets.symmetric(vertical: 12),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.1),
+                          color: color.surface,
                           borderRadius: BorderRadius.only(
-                            bottomLeft: Radius.circular(20),
-                            bottomRight: Radius.circular(20),
+                            bottomLeft: Radius.circular(12),
+                            bottomRight: Radius.circular(12),
                           ),
                         ),
                         child: Row(
@@ -418,22 +311,12 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                           children: [
                             Text(
                               _isExpanded ? 'Hide Details' : 'Show Details',
-                              style: TextStyle(
-                                color: AppColors.textColor(isDark).withValues(
-                                  alpha: 0.8,
-                                ),
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                              ),
+                              style: textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w600),
                             ),
                             SizedBox(width: 4),
                             Icon(
-                              _isExpanded
-                                  ? Icons.keyboard_arrow_up
-                                  : Icons.keyboard_arrow_down,
-                              color: AppColors.textColor(isDark).withValues(
-                                alpha: 0.8,
-                              ),
+                              _isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                              color: color.onSurfaceVariant,
                               size: 20,
                             ),
                           ],
@@ -455,20 +338,16 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
               ),
             ],
           ),
-          floatingActionButton:
-              trip.isActive
-                  ? FloatingActionButton.extended(
-                    onPressed: () {
-                      HapticFeedback.mediumImpact();
-                      context.push(
-                        '/add-trip-transaction',
-                        extra: widget.tripId,
-                      );
-                    },
-                    icon: Icon(Icons.add),
-                    label: Text('Add Expense'),
-                  )
-                  : null,
+          floatingActionButton: trip.isActive
+              ? FloatingActionButton.extended(
+                  onPressed: () {
+                    HapticFeedback.mediumImpact();
+                    context.push('/add-trip-transaction', extra: widget.tripId);
+                  },
+                  icon: Icon(Icons.add),
+                  label: Text('Add Expense'),
+                )
+              : null,
         );
       },
       loading: () => Scaffold(body: Center(child: CircularProgressIndicator())),
@@ -492,34 +371,19 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                 color: color.primaryContainer.withValues(alpha: 0.3),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                Icons.receipt_long_outlined,
-                size: 48,
-                color: color.primary,
-              ),
+              child: Icon(Icons.receipt_long_outlined, size: 48, color: color.primary),
             ),
             SizedBox(height: 20),
-            Text(
-              'No expenses yet',
-              style: textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            Text('No expenses yet', style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
             SizedBox(height: 8),
             Text(
               'Add expenses to split with participants',
-              style: textTheme.bodyMedium?.copyWith(
-                color: color.onSurfaceVariant,
-              ),
+              style: textTheme.bodyMedium?.copyWith(color: color.onSurfaceVariant),
             ),
             if (trip.isActive) ...[
               SizedBox(height: 24),
               FilledButton.icon(
-                onPressed:
-                    () => context.push(
-                      '/add-trip-transaction',
-                      extra: widget.tripId,
-                    ),
+                onPressed: () => context.push('/add-trip-transaction', extra: widget.tripId),
                 icon: Icon(Icons.add),
                 label: Text('Add Expense'),
               ),
@@ -537,41 +401,35 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
         final txn = tripTxn.transaction.value;
         final paidBy = tripTxn.paidBy.value;
 
-        return InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onLongPress: () async {
-            HapticFeedback.mediumImpact();
-            final confirm = await DialogUtils.showDeleteConfirmation(
-              context,
-              title: 'Remove Expense',
-              message: 'Remove this expense from the trip?',
-              deleteText: 'Remove',
-            );
-            if (confirm == true) {
-              await ref
-                  .read(tripServiceProvider)
-                  .removeTripTransaction(widget.tripId, tripTxn.id);
-              ref.invalidate(tripByIdProvider(widget.tripId));
-            }
-          },
-          child: Card(
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-              side: BorderSide(
-                color: color.outlineVariant.withValues(alpha: 0.5),
-              ),
-            ),
+        return Card(
+          margin: EdgeInsets.only(bottom: 12),
+          elevation: 0,
+          color: color.surfaceContainerHighest,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onLongPress: () async {
+              HapticFeedback.mediumImpact();
+              final confirm = await DialogUtils.showDeleteConfirmation(
+                context,
+                title: 'Remove Expense',
+                message: 'Remove this expense from the trip?',
+                deleteText: 'Remove',
+              );
+              if (confirm == true) {
+                await ref.read(tripServiceProvider).removeTripTransaction(widget.tripId, tripTxn.id);
+                ref.invalidate(tripByIdProvider(widget.tripId));
+              }
+            },
             child: Padding(
               padding: EdgeInsets.all(16),
               child: Row(
                 children: [
                   CircleAvatar(
                     radius: 24,
-                    backgroundColor: color.primary,
+                    backgroundColor: color.primary.withValues(alpha: 0.1),
                     child: Text(
                       paidBy?.name[0].toUpperCase() ?? '?',
-                      style: TextStyle(color: color.onPrimary),
+                      style: TextStyle(color: color.primary, fontWeight: FontWeight.bold),
                     ),
                   ),
                   SizedBox(width: 16),
@@ -579,37 +437,24 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          children: [
-                            Text(
-                              'Paid by ${paidBy?.name ?? "Unknown"}',
-                              style: textTheme.titleMedium?.copyWith(
-                                color: color.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
+                        Text(
+                          'Paid by ${paidBy?.name ?? "Unknown"}',
+                          style: textTheme.titleMedium?.copyWith(color: color.onSurfaceVariant),
                         ),
                         SizedBox(height: 4),
                         Text(
                           txn?.description ?? 'Expense',
-                          style: textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
                         ),
                       ],
                     ),
                   ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        '₹${txn?.amount.toStringAsFixed(2)}',
-                        style: textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: color.primary,
-                        ),
-                      ),
-                    ],
+                  Text(
+                    '₹${txn?.amount.toStringAsFixed(2)}',
+                    style: textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: color.primary,
+                    ),
                   ),
                 ],
               ),
@@ -627,8 +472,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
     return FutureBuilder(
       future: ref.read(tripServiceProvider).calculateSettlements(widget.tripId),
       builder: (context, snapshot) {
-        if (!snapshot.hasData)
-          return Center(child: CircularProgressIndicator());
+        if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
 
         final settlements = snapshot.data as Map<String, Map<String, double>>;
         if (settlements.isEmpty) {
@@ -642,25 +486,14 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                     color: Colors.green.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    Icons.check_circle,
-                    size: 64,
-                    color: Colors.green,
-                  ),
+                  child: Icon(Icons.check_circle, size: 64, color: Colors.green),
                 ),
                 SizedBox(height: 20),
-                Text(
-                  'All settled up!',
-                  style: textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                Text('All settled up!', style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
                 SizedBox(height: 8),
                 Text(
                   'No pending settlements',
-                  style: textTheme.bodyMedium?.copyWith(
-                    color: color.onSurfaceVariant,
-                  ),
+                  style: textTheme.bodyMedium?.copyWith(color: color.onSurfaceVariant),
                 ),
               ],
             ),
@@ -669,86 +502,66 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
 
         return ListView(
           padding: EdgeInsets.all(16),
-          children:
-              settlements.entries.map((entry) {
-                return Card(
-                  margin: EdgeInsets.only(bottom: 16),
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    side: BorderSide(
-                      color: color.outlineVariant.withValues(alpha: 0.5),
-                    ),
-                  ),
-                  child: Padding(
-                    padding: EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+          children: settlements.entries.map((entry) {
+            return Card(
+              margin: EdgeInsets.only(bottom: 16),
+              elevation: 0,
+              color: color.surfaceContainerHighest,
+              child: Padding(
+                padding: EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
                       children: [
-                        Row(
-                          children: [
-                            CircleAvatar(
-                              radius: 20,
-                              backgroundColor: color.primaryContainer,
-                              child: Text(
-                                entry.key[0].toUpperCase(),
-                                style: TextStyle(
-                                  color: color.primary,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
-                                ),
-                              ),
+                        CircleAvatar(
+                          radius: 20,
+                          backgroundColor: color.primaryContainer,
+                          child: Text(
+                            entry.key[0].toUpperCase(),
+                            style: TextStyle(
+                              color: color.primary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
                             ),
+                          ),
+                        ),
+                        SizedBox(width: 12),
+                        Text(entry.key, style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                    SizedBox(height: 16),
+                    ...entry.value.entries.map(
+                      (settlement) => Container(
+                        margin: EdgeInsets.only(bottom: 8),
+                        padding: EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: color.surface,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.arrow_forward, size: 20, color: color.primary),
                             SizedBox(width: 12),
+                            Expanded(
+                              child: Text('needs to pay ${settlement.key}', style: textTheme.bodyLarge),
+                            ),
                             Text(
-                              entry.key,
-                              style: textTheme.titleLarge?.copyWith(
+                              '₹${settlement.value.toStringAsFixed(2)}',
+                              style: textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
+                                color: color.primary,
                               ),
                             ),
                           ],
                         ),
-                        SizedBox(height: 16),
-                        ...entry.value.entries.map(
-                          (settlement) => Container(
-                            margin: EdgeInsets.only(bottom: 8),
-                            padding: EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: color.surfaceContainerHighest.withValues(
-                                alpha: 0.3,
-                              ),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.arrow_forward,
-                                  size: 20,
-                                  color: color.primary,
-                                ),
-                                SizedBox(width: 12),
-                                Expanded(
-                                  child: Text(
-                                    'needs to pay ${settlement.key}',
-                                    style: textTheme.bodyLarge,
-                                  ),
-                                ),
-                                Text(
-                                  '₹${settlement.value.toStringAsFixed(2)}',
-                                  style: textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: color.primary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
-                );
-              }).toList(),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
         );
       },
     );
@@ -773,18 +586,11 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
               child: Icon(Icons.bar_chart, size: 48, color: color.primary),
             ),
             SizedBox(height: 20),
-            Text(
-              'No data yet',
-              style: textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            Text('No data yet', style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
             SizedBox(height: 8),
             Text(
               'Add expenses to see report',
-              style: textTheme.bodyMedium?.copyWith(
-                color: color.onSurfaceVariant,
-              ),
+              style: textTheme.bodyMedium?.copyWith(color: color.onSurfaceVariant),
             ),
           ],
         ),
@@ -799,87 +605,54 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
       if (txn != null) {
         totalCost += txn.amount;
         final categoryName = txn.category.value?.name ?? 'Uncategorized';
-        categoryTotals[categoryName] =
-            (categoryTotals[categoryName] ?? 0) + txn.amount;
+        categoryTotals[categoryName] = (categoryTotals[categoryName] ?? 0) + txn.amount;
       }
     }
 
-    final sortedCategories =
-        categoryTotals.entries.toList()
-          ..sort((a, b) => b.value.compareTo(a.value));
+    final sortedCategories = categoryTotals.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
 
     return ListView(
       padding: EdgeInsets.all(16),
       children: [
         Card(
           elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-            side: BorderSide(
-              color: color.outlineVariant.withValues(alpha: 0.5),
-            ),
-          ),
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.teal.shade400, Colors.teal.shade700],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(20),
-            ),
+          color: color.primaryContainer,
+          child: Padding(
             padding: EdgeInsets.all(24),
             child: Column(
               children: [
-                Icon(
-                  Icons.account_balance_wallet,
-                  color: Colors.white,
-                  size: 40,
-                ),
+                Icon(Icons.account_balance_wallet, color: color.primary, size: 40),
                 SizedBox(height: 12),
                 Text(
                   'Total Trip Cost',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: textTheme.titleSmall?.copyWith(color: color.onPrimaryContainer),
                 ),
                 SizedBox(height: 8),
                 Text(
                   '₹${totalCost.toStringAsFixed(2)}',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 36,
+                  style: textTheme.displaySmall?.copyWith(
                     fontWeight: FontWeight.bold,
+                    color: color.onPrimaryContainer,
                   ),
                 ),
                 SizedBox(height: 8),
                 Text(
                   '${transactionsList.length} transactions',
-                  style: TextStyle(color: Colors.white70, fontSize: 12),
+                  style: textTheme.bodySmall?.copyWith(color: color.onPrimaryContainer),
                 ),
               ],
             ),
           ),
         ),
         SizedBox(height: 24),
-        Text(
-          'Category Breakdown',
-          style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-        ),
+        Text('Category Breakdown', style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
         SizedBox(height: 16),
         ...sortedCategories.map((entry) {
           final percentage = (entry.value / totalCost * 100);
           return Card(
             margin: EdgeInsets.only(bottom: 12),
             elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-              side: BorderSide(
-                color: color.outlineVariant.withValues(alpha: 0.5),
-              ),
-            ),
+            color: color.surfaceContainerHighest,
             child: Padding(
               padding: EdgeInsets.all(16),
               child: Column(
@@ -893,20 +666,11 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                           color: color.primaryContainer,
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: Icon(
-                          Icons.category,
-                          size: 20,
-                          color: color.primary,
-                        ),
+                        child: Icon(Icons.category, size: 20, color: color.primary),
                       ),
                       SizedBox(width: 12),
                       Expanded(
-                        child: Text(
-                          entry.key,
-                          style: textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                        child: Text(entry.key, style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
                       ),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
@@ -920,9 +684,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                           ),
                           Text(
                             '${percentage.toStringAsFixed(1)}%',
-                            style: textTheme.bodySmall?.copyWith(
-                              color: color.onSurfaceVariant,
-                            ),
+                            style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
                           ),
                         ],
                       ),
@@ -934,7 +696,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                     child: LinearProgressIndicator(
                       value: percentage / 100,
                       minHeight: 8,
-                      backgroundColor: color.surfaceContainerHighest,
+                      backgroundColor: color.surface,
                       valueColor: AlwaysStoppedAnimation(color.primary),
                     ),
                   ),

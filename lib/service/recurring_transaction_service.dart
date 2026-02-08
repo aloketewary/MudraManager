@@ -39,12 +39,14 @@ class RecurringTransactionService {
       description: recurring.description ?? 'Recurring: ${recurring.category.value?.name ?? ""}',
     )
       ..account.value = recurring.account.value
-      ..category.value = recurring.category.value;
+      ..category.value = recurring.category.value
+      ..recurringTransactionSource.value = recurring;
 
     await isar.writeTxn(() async {
       await isar.transactions.put(transaction);
       await transaction.account.save();
       await transaction.category.save();
+      await transaction.recurringTransactionSource.save();
     });
   }
 

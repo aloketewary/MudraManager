@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/l10n/app_localizations.dart';
 import 'package:mudra_manager/providers/account_providers.dart';
 import 'package:mudra_manager/util/localization_extension.dart';
+import 'package:mudra_manager/components/adaptive_text.dart';
 
 class AnimatedBalance extends ConsumerWidget {
   final double value;
@@ -14,6 +15,7 @@ class AnimatedBalance extends ConsumerWidget {
   final TextAlign textAlign;
   final String? suffix;
   final String? prefix;
+  final bool compact;
 
   const AnimatedBalance({
     super.key,
@@ -25,6 +27,7 @@ class AnimatedBalance extends ConsumerWidget {
     this.textAlign = TextAlign.left,
     this.suffix,
     this.prefix,
+    this.compact = true,
   });
 
   @override
@@ -36,15 +39,19 @@ class AnimatedBalance extends ConsumerWidget {
       tween: Tween<double>(begin: 0, end: value),
       duration: duration,
       builder: (context, animatedValue, _) {
-        final formattedValue = ctxt.formatCurrencyWithSign(
-          fixedStringLength,
-          animatedValue,
-        );
-        return Text(
-          '${prefix ?? ""}$formattedValue${suffix ?? ""}',
-          style: style ?? Theme.of(context).textTheme.headlineMedium,
-          overflow: overflow,
-          textAlign: textAlign,
+        final formattedValue = compact
+            ? ctxt.formatCompactCurrency(animatedValue)
+            : ctxt.formatCurrencyWithSign(fixedStringLength, animatedValue);
+        final fullValue = ctxt.formatCurrencyWithSign(fixedStringLength, animatedValue);
+        
+        return Tooltip(
+          message: fullValue,
+          child: AdaptiveText(
+            '${prefix ?? ""}$formattedValue${suffix ?? ""}',
+            style: style ?? Theme.of(context).textTheme.headlineMedium,
+            textAlign: textAlign,
+            isNumeric: true,
+          ),
         );
       },
     );

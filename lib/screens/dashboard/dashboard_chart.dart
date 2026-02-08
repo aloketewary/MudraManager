@@ -3,6 +3,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:mudra_manager/l10n/app_localizations.dart';
 import 'package:mudra_manager/providers/transaction_provider.dart'
     show filteredTransactionProvider;
 
@@ -31,7 +32,7 @@ class _ExpenseChartScreenState extends ConsumerState<ExpenseChartScreen> {
     } else if (selectedFilter == 'Year') {
       return "${selectedDate.year}";
     } else {
-      return "All Time";
+      return AppLocalizations.of(context)?.dashboard_allTimeLabel ?? "All Time";
     }
   }
 
@@ -293,7 +294,7 @@ class _ExpenseChartScreenState extends ConsumerState<ExpenseChartScreen> {
                   );
                 },
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (e, _) => Center(child: Text("Error: $e")),
+                error: (e, _) => Center(child: Text(AppLocalizations.of(context)?.common_errorText(e.toString()) ?? "Error: $e")),
               ),
             ),
             const SizedBox(height: 20),

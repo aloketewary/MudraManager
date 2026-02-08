@@ -26,6 +26,10 @@ class CategoryCard extends StatelessWidget {
     var colorTheme = Theme.of(context).colorScheme;
     var textTheme = Theme.of(context).textTheme;
     var size = MediaQuery.of(context).size;
+    
+    // Calculate proper text color for category color background
+    final categoryLuminance = color.computeLuminance();
+    final categoryTextColor = categoryLuminance > 0.5 ? Colors.black : Colors.white;
 
     return GestureDetector(
       onTap: () => callbackAction(),
@@ -35,7 +39,6 @@ class CategoryCard extends StatelessWidget {
         margin: isUnderWrap ? null : const EdgeInsets.only(right: 8.0),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16.0),
-          // color: isSelected ? colorTheme.primary : Colors.transparent,
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -47,7 +50,7 @@ class CategoryCard extends StatelessWidget {
           border: Border.all(
             color: colorTheme.primary,
             width: 2,
-          ), // Subtle border
+          ),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -57,13 +60,21 @@ class CategoryCard extends StatelessWidget {
                 label,
                 textAlign: TextAlign.center,
                 style: textTheme.labelLarge?.copyWith(
-                  color: isSelected ? colorTheme.onPrimary : colorTheme.primary,
+                  color: isSelected ? categoryTextColor : colorTheme.primary,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
             const SizedBox(width: 8.0),
-            CircleAvatar(radius: 16, child: Icon(icon, size: 16)),
+            CircleAvatar(
+              radius: 16,
+              backgroundColor: color,
+              child: Icon(
+                icon,
+                size: 16,
+                color: categoryTextColor,
+              ),
+            ),
           ],
         ),
       ),

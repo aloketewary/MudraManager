@@ -8,7 +8,6 @@ import 'package:mudra_manager/providers/category_provider.dart';
 import 'package:mudra_manager/providers/isar_provider.dart';
 import 'package:mudra_manager/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/providers/user_profile_provider.dart';
-import 'package:mudra_manager/theme/app_colors.dart';
 import 'package:mudra_manager/theme/mudra_manager_avatar_icons.dart'
     show MudraManagerAvatarIcons;
 import 'package:mudra_manager/util/snackbar_service.dart';
@@ -27,7 +26,6 @@ class ProfileScreen extends ConsumerWidget {
         .getFilterBudget(DateTime.now());
     var textTheme = Theme.of(context).textTheme;
     var color = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return profileAsync.when(
       data:
@@ -49,47 +47,38 @@ class ProfileScreen extends ConsumerWidget {
                       titlePadding: EdgeInsets.only(left: 16, bottom: 16),
                       title:
                           isCollapsed
-                              ? Row(
-                                children: [
-                                  CircleAvatar(
-                                    radius: 16,
-                                    backgroundColor:
-                                        isDark
-                                            ? AppColors.white
-                                            : AppColors.dark,
-                                    child: Icon(
-                                      iconDataList[profile?.avatarIndex ?? 0],
-                                      size: 16,
-                                      color:
-                                          isDark
-                                              ? AppColors.dark
-                                              : AppColors.white,
-                                    ),
-                                  ),
-                                  SizedBox(width: 12),
-                                  Expanded(
-                                    child: Text(
-                                      profile?.name ?? 'Unknown',
-                                      style: textTheme.titleLarge?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColors.textColor(isDark),
+                              ? Padding(
+                                  padding: EdgeInsets.only(right: 16),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      CircleAvatar(
+                                        radius: 16,
+                                        backgroundColor: color.primaryContainer,
+                                        child: Icon(
+                                          iconDataList[profile?.avatarIndex ?? 0],
+                                          size: 16,
+                                          color: color.onPrimaryContainer,
+                                        ),
                                       ),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
+                                      SizedBox(width: 12),
+                                      Flexible(
+                                        child: Text(
+                                          profile?.name ?? 'Unknown',
+                                          style: textTheme.titleLarge?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            color: color.onSurface,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              )
+                                )
                               : SizedBox.shrink(),
                       background: Container(
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              color.primary.withValues(alpha: 0.8),
-                              color.primary,
-                            ],
-                          ),
+                          color: color.primaryContainer,
                         ),
                         child: SafeArea(
                           child: Column(
@@ -101,32 +90,15 @@ class ProfileScreen extends ConsumerWidget {
                                     padding: EdgeInsets.all(4),
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
-                                      gradient: LinearGradient(
-                                        colors: [
-                                          (isDark
-                                                  ? AppColors.white
-                                                  : AppColors.dark)
-                                              .withValues(alpha: 0.3),
-                                          (isDark
-                                                  ? AppColors.white
-                                                  : AppColors.dark)
-                                              .withValues(alpha: 0.1),
-                                        ],
-                                      ),
+                                      color: color.surface,
                                     ),
                                     child: CircleAvatar(
                                       radius: 40,
-                                      backgroundColor:
-                                          isDark
-                                              ? AppColors.white
-                                              : AppColors.dark,
+                                      backgroundColor: color.primary,
                                       child: Icon(
                                         iconDataList[profile?.avatarIndex ?? 0],
                                         size: 40,
-                                        color:
-                                            isDark
-                                                ? AppColors.dark
-                                                : AppColors.white,
+                                        color: color.onPrimary,
                                       ),
                                     ),
                                   ),
@@ -141,11 +113,11 @@ class ProfileScreen extends ConsumerWidget {
                                       child: Container(
                                         padding: EdgeInsets.all(6),
                                         decoration: BoxDecoration(
-                                          color: Colors.white,
+                                          color: color.surface,
                                           shape: BoxShape.circle,
                                           boxShadow: [
                                             BoxShadow(
-                                              color: Colors.black.withValues(
+                                              color: color.shadow.withValues(
                                                 alpha: 0.2,
                                               ),
                                               blurRadius: 4,
@@ -167,7 +139,7 @@ class ProfileScreen extends ConsumerWidget {
                               Text(
                                 profile?.name ?? 'Unknown',
                                 style: textTheme.titleLarge?.copyWith(
-                                  color: AppColors.textColor(isDark),
+                                  color: color.onPrimaryContainer,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -175,7 +147,7 @@ class ProfileScreen extends ConsumerWidget {
                               Text(
                                 profile?.email ?? '',
                                 style: textTheme.bodySmall?.copyWith(
-                                  color: AppColors.textColor(isDark).withValues(alpha: 0.8),
+                                  color: color.onPrimaryContainer.withValues(alpha: 0.8),
                                 ),
                               ),
                               if (profile?.phone != null &&
@@ -184,7 +156,7 @@ class ProfileScreen extends ConsumerWidget {
                                 Text(
                                   profile.phone!,
                                   style: textTheme.bodySmall?.copyWith(
-                                    color: AppColors.textColor(isDark).withValues(alpha: 0.8),
+                                    color: color.onPrimaryContainer.withValues(alpha: 0.8),
                                   ),
                                 ),
                               ],
@@ -201,54 +173,54 @@ class ProfileScreen extends ConsumerWidget {
                 sliver: SliverList(
                   delegate: SliverChildListDelegate([
                     SizedBox(
-                      height: 110,
+                      height: 150,
                       child: Row(
-                        children: [
+                      children: [
                           Expanded(
-                            child: _buildStatCard(
-                              context,
-                              Icons.account_balance_wallet,
-                              accountsAsync.when(
-                                data: (accounts) => accounts.length.toString(),
-                                loading: () => '...',
-                                error: (_, __) => '0',
-                              ),
-                              'Accounts',
+                          child: _buildStatCard(
+                            context,
+                            Icons.account_balance_wallet,
+                            accountsAsync.when(
+                              data: (accounts) => accounts.length.toString(),
+                              loading: () => '...',
+                              error: (_, __) => '0',
                             ),
+                            'Accounts',
                           ),
+                        ),
                           SizedBox(width: 12),
                           Expanded(
-                            child: _buildStatCard(
-                              context,
-                              Icons.category,
-                              categoriesAsync.when(
-                                data:
-                                    (categories) =>
-                                        categories.length.toString(),
-                                loading: () => '...',
-                                error: (_, __) => '0',
-                              ),
-                              'Categories',
+                          child: _buildStatCard(
+                            context,
+                            Icons.category,
+                            categoriesAsync.when(
+                              data:
+                                  (categories) =>
+                                      categories.length.toString(),
+                              loading: () => '...',
+                              error: (_, __) => '0',
                             ),
+                            'Categories',
                           ),
+                        ),
                           SizedBox(width: 12),
                           Expanded(
-                            child: FutureBuilder(
-                              future: budgetsAsync,
-                              builder:
-                                  (context, snapshot) => _buildStatCard(
-                                    context,
-                                    Icons.pie_chart,
-                                    snapshot.hasData
-                                        ? (snapshot.data as List).length
-                                            .toString()
-                                        : '...',
-                                    'Budgets',
-                                  ),
-                            ),
+                          child: FutureBuilder(
+                            future: budgetsAsync,
+                            builder:
+                                (context, snapshot) => _buildStatCard(
+                                  context,
+                                  Icons.pie_chart,
+                                  snapshot.hasData
+                                      ? (snapshot.data as List).length
+                                          .toString()
+                                      : '...',
+                                  'Budgets',
+                                ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
+                    ),
                     ),
                     SizedBox(height: 24),
                     _buildSectionHeader(context, 'Management'),
@@ -405,41 +377,43 @@ class ProfileScreen extends ConsumerWidget {
   ) {
     final textTheme = Theme.of(context).textTheme;
     final color = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final gradientColors = AppColors.glassGradient(color.primary, isDark);
-    return Container(
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: gradientColors,
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: color.primary.withValues(alpha: 0.3),
-          width: 1.5,
-        ),
-        boxShadow: AppColors.glassShadow(color.primary, isDark),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: color.primary, size: 24),
-          SizedBox(height: 4),
-          Text(
-            value,
-            style: textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: color.primary,
+    return Card(
+      elevation: 0,
+      color: color.surfaceContainerLow,
+      surfaceTintColor: color.surfaceTint,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: color.primaryContainer,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: color.onPrimaryContainer, size: 24),
             ),
-          ),
-          Text(
-            label,
-            style: textTheme.labelSmall?.copyWith(color: color.primary),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
+            const SizedBox(height: 8),
+            Text(
+              value,
+              style: textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: color.onSurface,
+              ),
+            ),
+            Flexible(
+              child: Text(
+                label,
+                style: textTheme.labelSmall?.copyWith(
+                  color: color.onSurfaceVariant,
+                ),
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -470,77 +444,59 @@ class ProfileScreen extends ConsumerWidget {
   }) {
     final textTheme = Theme.of(context).textTheme;
     final color = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final iconColor = isDestructive ? color.error : color.primary;
-    final gradientColors = AppColors.glassGradient(iconColor, isDark);
 
-    return GestureDetector(
-      onTap: () {
-        HapticFeedback.mediumImpact();
-        onTap();
-      },
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: gradientColors,
-          ),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: iconColor.withValues(alpha: 0.3),
-            width: 1.5,
-          ),
-          boxShadow: AppColors.glassShadow(iconColor, isDark),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: color.surface,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: iconColor.withValues(alpha: 0.15),
-                    blurRadius: 12,
-                    offset: Offset(0, 4),
-                  ),
-                ],
+    return Card(
+      elevation: 0,
+      color: color.surfaceContainer,
+      surfaceTintColor: color.surfaceTint,
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.mediumImpact();
+          onTap();
+        },
+        borderRadius: BorderRadius.circular(20),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: iconColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: iconColor, size: 24),
               ),
-              child: Icon(icon, color: iconColor, size: 26),
-            ),
-            SizedBox(width: 18),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: iconColor,
-                      letterSpacing: -0.2,
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                        color: color.onSurface,
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: textTheme.bodyMedium?.copyWith(
-                      color: iconColor.withValues(alpha: 0.75),
-                      fontSize: 13,
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: color.onSurfaceVariant,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            Icon(
-              Icons.arrow_forward_ios_rounded,
-              color: iconColor.withValues(alpha: 0.5),
-              size: 18,
-            ),
-          ],
+              Icon(
+                Icons.chevron_right,
+                color: color.onSurfaceVariant,
+                size: 20,
+              ),
+            ],
+          ),
         ),
       ),
     );

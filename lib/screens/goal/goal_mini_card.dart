@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/providers/goal_provider.dart';
 import 'package:mudra_manager/screens/reusable/no_data_found.dart';
 import 'package:mudra_manager/screens/goal/goal_circular_card.dart';
+import 'package:mudra_manager/components/adaptive_text.dart';
 
 class GoalMiniCard extends ConsumerWidget {
   final double globalPadding;
@@ -25,12 +26,13 @@ class GoalMiniCard extends ConsumerWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
+              AdaptiveText(
                 "Goals",
                 style: textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w700,
                   color: color.primary,
                 ),
+                maxLines: 1,
               ),
               Hero(
                 tag: 'goalExpandHero',

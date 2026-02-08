@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mudra_manager/components/adaptive_text.dart';
 
 class ProfileTile extends StatelessWidget {
   final String title;
@@ -23,18 +24,20 @@ class ProfileTile extends StatelessWidget {
     var textTheme = Theme.of(context).textTheme;
     var color = Theme.of(context).colorScheme;
     return ListTile(
-      title: Text(
+      title: AdaptiveText(
         title,
         style: textTheme.titleMedium?.copyWith(
           color: isLogout ? color.error : color.onSurface,
           fontWeight: FontWeight.bold,
         ),
+        maxLines: 1,
       ),
-      subtitle: Text(
+      subtitle: AdaptiveText(
         subtitle,
         style: textTheme.bodySmall?.copyWith(
           color: isLogout ? color.error : color.onSurfaceVariant,
         ),
+        maxLines: 2,
       ),
       leading: Icon(icon, color: isLogout ? color.error : color.secondary),
       onTap: onTap,

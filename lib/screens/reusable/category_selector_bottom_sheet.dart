@@ -4,6 +4,7 @@ import 'package:mudra_manager/db/models/category.dart';
 import 'package:mudra_manager/providers/category_provider.dart';
 import 'package:mudra_manager/screens/reusable/category_card.dart';
 import 'package:mudra_manager/util/icon_helper.dart';
+import 'package:mudra_manager/components/responsive_helper.dart';
 
 class CategorySelectorBottomSheet extends ConsumerWidget {
   final Category? selectedCategory;
@@ -89,11 +90,11 @@ class CategorySelectorBottomSheet extends ConsumerWidget {
                 return GridView.builder(
                   controller: scrollController,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: ResponsiveHelper.getGridCrossAxisCount(context),
                     crossAxisSpacing: 12,
                     mainAxisSpacing: 12,
-                    childAspectRatio: 2.5,
+                    childAspectRatio: ResponsiveHelper.getGridAspectRatio(context, defaultRatio: 2.5, singleColumnRatio: 4.0),
                   ),
                   itemCount: filtered.length,
                   itemBuilder: (context, index) {

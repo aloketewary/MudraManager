@@ -28,6 +28,8 @@ import 'package:mudra_manager/util/export_excel_pdf.dart'
     show exportStatsToExcel, exportStatsToPdf;
 import 'package:mudra_manager/util/icon_helper.dart' show IconHelper;
 import 'package:mudra_manager/util/localization_extension.dart';
+import 'package:mudra_manager/components/currency_text.dart';
+import 'package:mudra_manager/components/adaptive_text.dart';
 
 class StatisticsScreen extends ConsumerStatefulWidget {
   const StatisticsScreen({super.key});
@@ -128,7 +130,7 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen>
               ),
               const SizedBox(height: 24),
               Text(
-                'Quick Overview',
+                ctxt.statistics_quickOverviewTitle,
                 style: textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: color.primary,
@@ -143,7 +145,7 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen>
               ),
               const SizedBox(height: 24),
               Text(
-                'Insights',
+                ctxt.statistics_insightsTitle,
                 style: textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: color.primary,
@@ -180,7 +182,7 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen>
               ),
               const SizedBox(height: 24),
               Text(
-                'Detailed Analysis',
+                ctxt.statistics_detailedAnalysisTitle,
                 style: textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: color.primary,
@@ -190,7 +192,7 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen>
               DetailActionCard(
                 icon: Icons.pie_chart_outline,
                 title: ctxt.statistics_byCategoryTitleText,
-                subtitle: 'View category breakdown',
+                subtitle: ctxt.statistics_categoryBreakdownSubtitle,
                 onTap: () {
                   HapticFeedback.mediumImpact();
                   _showCategoryBreakdown(context, d);
@@ -198,8 +200,8 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen>
               ),
               DetailActionCard(
                 icon: Icons.trending_up_outlined,
-                title: 'Expense Trends',
-                subtitle: 'Last 12 months trends',
+                title: ctxt.statistics_expenseTrendsTitle,
+                subtitle: ctxt.statistics_expenseTrendsSubtitle,
                 onTap: () {
                   HapticFeedback.mediumImpact();
                   _showExpenseTrends(context, d);
@@ -208,7 +210,7 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen>
               DetailActionCard(
                 icon: Icons.history_outlined,
                 title: ctxt.statistics_recentTransactionsTitleText,
-                subtitle: 'Last 5 transactions',
+                subtitle: ctxt.statistics_recentTransactionsSubtitle,
                 onTap: () {
                   HapticFeedback.mediumImpact();
                   _showRecentTransactions(context, d);
@@ -401,6 +403,7 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen>
       );
     }
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         ListView.builder(
           shrinkWrap: true,
@@ -418,97 +421,92 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen>
               position: _animations[i],
               child: FadeTransition(
                 opacity: _controllers[i],
-                child: Container(
+                child: Card(
                   margin: EdgeInsets.symmetric(horizontal: 0, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: color.surface,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: color.shadow.withOpacity(0.05),
-                        blurRadius: 10,
-                        offset: Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(20),
-                      onTap: () {
-                        HapticFeedback.mediumImpact();
-                        context.push(
-                          '/add-transaction',
-                          extra: {'transaction': t},
-                        );
-                      },
-                      child: Padding(
-                        padding: EdgeInsets.all(16),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 48,
-                              height: 48,
-                              decoration: BoxDecoration(
-                                color: categoryColor.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                              child: Icon(
-                                IconHelper.getIconData(
-                                  t.category.value?.iconName,
-                                ),
-                                color: categoryColor,
-                                size: 24,
-                              ),
+                  elevation: 0,
+                  color: color.surfaceContainerHighest,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () {
+                      HapticFeedback.mediumImpact();
+                      context.push(
+                        '/add-transaction',
+                        extra: {'transaction': t},
+                      );
+                    },
+                    child: Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 48,
+                            height: 48,
+                            decoration: BoxDecoration(
+                              color: categoryColor.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(14),
                             ),
-                            SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    t.category.value?.name ?? '',
-                                    style: textTheme.titleMedium?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                            child: Icon(
+                              IconHelper.getIconData(
+                                t.category.value?.iconName,
+                              ),
+                              color: categoryColor,
+                              size: 24,
+                            ),
+                          ),
+                          SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                AdaptiveText(
+                                  t.category.value?.name ?? '',
+                                  style: textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                  SizedBox(height: 2),
-                                  Text(
+                                  maxLines: 1,
+                                ),
+                                SizedBox(height: 2),
+                                Flexible(
+                                  child: AdaptiveText(
                                     '${t.account.value?.name} • ${t.account.value?.accountType.name.toTitleCase()}',
                                     style: textTheme.bodySmall?.copyWith(
                                       color: color.onSurfaceVariant,
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text(
-                                  '${t.isExpense ? '-' : '+'} ${ctxt.formatCurrencyWithSign(2, t.amount)}',
-                                  style: textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color:
-                                        t.isExpense
-                                            ? color.error
-                                            : color.primary,
-                                  ),
-                                ),
-                                SizedBox(height: 2),
-                                Text(
-                                  DateFormat(
-                                    'MMM dd',
-                                    ctxt.localeName,
-                                  ).format(t.date),
-                                  style: textTheme.bodySmall?.copyWith(
-                                    color: color.onSurfaceVariant,
+                                    maxLines: 1,
                                   ),
                                 ),
                               ],
                             ),
-                          ],
-                        ),
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              CurrencyText(
+                                amount: t.amount,
+                                showSign: true,
+                                style: textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color:
+                                      t.isExpense
+                                          ? color.error
+                                          : color.primary,
+                                ),
+                                maxLines: 1,
+                              ),
+                              SizedBox(height: 2),
+                              Text(
+                                DateFormat(
+                                  'MMM dd',
+                                  ctxt.localeName,
+                                ).format(t.date),
+                                style: textTheme.bodySmall?.copyWith(
+                                  color: color.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -563,6 +561,7 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen>
   }
 
   void _showCategoryBreakdown(BuildContext context, StatsData d) {
+    final ctxt = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -602,22 +601,22 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen>
                             SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                'Category Breakdown',
+                                ctxt.statistics_categoryBreakdownTitle,
                                 style: Theme.of(context).textTheme.titleLarge
                                     ?.copyWith(fontWeight: FontWeight.bold),
                               ),
                             ),
                             SizedBox(width: 8),
                             SegmentedButton<bool>(
-                              segments: const [
+                              segments: [
                                 ButtonSegment(
                                   value: false,
-                                  label: Text('Exp'),
+                                  label: Text(ctxt.statistics_expenseShort),
                                   icon: Icon(Icons.arrow_downward, size: 16),
                                 ),
                                 ButtonSegment(
                                   value: true,
-                                  label: Text('Inc'),
+                                  label: Text(ctxt.statistics_incomeShort),
                                   icon: Icon(Icons.arrow_upward, size: 16),
                                 ),
                               ],
@@ -682,6 +681,7 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen>
   }
 
   void _showExpenseTrends(BuildContext context, StatsData d) {
+    final ctxt = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -720,7 +720,7 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen>
                             ),
                             SizedBox(width: 8),
                             Text(
-                              'Expense Trends',
+                              ctxt.statistics_expenseTrendsTitle,
                               style: Theme.of(context).textTheme.titleLarge
                                   ?.copyWith(fontWeight: FontWeight.bold),
                             ),
@@ -746,6 +746,7 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen>
   }
 
   void _showRecentTransactions(BuildContext context, StatsData d) {
+    final ctxt = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -784,7 +785,7 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen>
                             ),
                             SizedBox(width: 8),
                             Text(
-                              'Recent Transactions',
+                              ctxt.statistics_recentTransactionsModalTitle,
                               style: Theme.of(context).textTheme.titleLarge
                                   ?.copyWith(fontWeight: FontWeight.bold),
                             ),

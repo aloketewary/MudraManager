@@ -5,7 +5,7 @@ import 'package:mudra_manager/db/isar_service.dart';
 import 'package:mudra_manager/db/models/transaction.dart';
 import 'package:mudra_manager/providers/isar_provider.dart';
 import 'package:mudra_manager/l10n/app_localizations.dart';
-import 'package:mudra_manager/theme/app_colors.dart';
+
 import 'package:mudra_manager/util/localization_extension.dart';
 
 class MonthlyComparisonScreen extends ConsumerWidget {
@@ -48,12 +48,12 @@ class MonthlyComparisonScreen extends ConsumerWidget {
           final balanceChange = lastBalance != 0 ? ((currentBalance - lastBalance) / lastBalance.abs() * 100) : 0.0;
 
           return ListView(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(16),
             children: [
               _ComparisonCard(
                 title: 'Income',
                 icon: Icons.trending_up,
-                color: AppColors.income,
+                color: colorScheme.primary,
                 currentAmount: currentIncome,
                 lastAmount: lastIncome,
                 percentageChange: incomeChange,
@@ -61,11 +61,11 @@ class MonthlyComparisonScreen extends ConsumerWidget {
                 textTheme: textTheme,
                 l10n: l10n,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
               _ComparisonCard(
                 title: 'Expense',
                 icon: Icons.trending_down,
-                color: AppColors.expense,
+                color: colorScheme.error,
                 currentAmount: currentExpense,
                 lastAmount: lastExpense,
                 percentageChange: expenseChange,
@@ -73,11 +73,11 @@ class MonthlyComparisonScreen extends ConsumerWidget {
                 textTheme: textTheme,
                 l10n: l10n,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
               _ComparisonCard(
                 title: 'Balance',
                 icon: Icons.account_balance_wallet,
-                color: AppColors.transfer,
+                color: colorScheme.tertiary,
                 currentAmount: currentBalance,
                 lastAmount: lastBalance,
                 percentageChange: balanceChange,
@@ -165,130 +165,117 @@ class _ComparisonCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isPositive = percentageChange >= 0;
+    final color = Theme.of(context).colorScheme;
     final changeColor = title == 'Expense' 
-        ? (isPositive ? AppColors.expense : AppColors.income)
-        : (isPositive ? AppColors.income : AppColors.expense);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+        ? (isPositive ? color.error : color.primary)
+        : (isPositive ? color.primary : color.error);
 
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: AppColors.glassGradient(color, isDark),
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withValues(alpha: 0.3), width: 1.5),
-        boxShadow: AppColors.glassShadow(color, isDark),
-      ),
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  borderRadius: BorderRadius.circular(14),
-                  boxShadow: [
-                    BoxShadow(
-                      color: color.withValues(alpha: 0.2),
-                      blurRadius: 8,
-                      offset: Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Icon(icon, color: color, size: 28),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                title,
-                style: textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textColor(isDark),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Current Month',
-                    style: textTheme.labelMedium?.copyWith(
-                      color: AppColors.textColor(isDark).withValues(alpha: 0.7),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    l10n.formatCurrencyWithSign(0, currentAmount),
-                    style: textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textColor(isDark),
-                    ),
-                  ),
-                ],
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    'Last Month',
-                    style: textTheme.labelMedium?.copyWith(
-                      color: AppColors.textColor(isDark).withValues(alpha: 0.7),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    l10n.formatCurrencyWithSign(0, lastAmount),
-                    style: textTheme.titleMedium?.copyWith(
-                      color: AppColors.textColor(isDark).withValues(alpha: 0.6),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: changeColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
+    return Card(
+      elevation: 0,
+      color: colorScheme.surfaceContainerHighest,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               children: [
-                Icon(
-                  isPositive ? Icons.arrow_upward : Icons.arrow_downward,
-                  color: changeColor,
-                  size: 16,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  '${percentageChange.abs().toStringAsFixed(1)}%',
-                  style: textTheme.labelLarge?.copyWith(
-                    color: AppColors.textColor(isDark).withValues(alpha: 0.9),
-                    fontWeight: FontWeight.bold,
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: color.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
                   ),
+                  child: Icon(icon, color: color.primary, size: 28),
                 ),
-                const SizedBox(width: 4),
+                const SizedBox(width: 12),
                 Text(
-                  'vs last month',
-                  style: textTheme.labelSmall?.copyWith(
-                    color: AppColors.textColor(isDark).withValues(alpha: 0.9),
+                  title,
+                  style: textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.onSurface,
                   ),
                 ),
               ],
             ),
-          ),
-        ],
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Current Month',
+                      style: textTheme.labelMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      l10n.formatCurrencyWithSign(0, currentAmount),
+                      style: textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.onSurface,
+                      ),
+                    ),
+                  ],
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      'Last Month',
+                      style: textTheme.labelMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      l10n.formatCurrencyWithSign(0, lastAmount),
+                      style: textTheme.titleMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: changeColor.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    isPositive ? Icons.arrow_upward : Icons.arrow_downward,
+                    color: changeColor,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    '${percentageChange.abs().toStringAsFixed(1)}%',
+                    style: textTheme.labelLarge?.copyWith(
+                      color: colorScheme.onSurface,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    'vs last month',
+                    style: textTheme.labelSmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

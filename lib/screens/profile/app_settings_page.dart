@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/l10n/app_localizations.dart';
 import 'package:mudra_manager/providers/isar_provider.dart' show reminderTimeProvider;
 import 'package:mudra_manager/service/notification_service.dart' show NotificationService;
-import 'package:mudra_manager/theme/app_colors.dart';
 import 'package:mudra_manager/theme/theme_provider.dart';
 import 'package:mudra_manager/util/snackbar_service.dart';
 
@@ -14,8 +13,8 @@ class AppSettingsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currentTheme = ref.watch(themeModeProvider);
-    final themeNotifier = ref.read(themeModeProvider.notifier);
+    final currentTheme = ref.watch(appThemeModeProvider);
+    final themeNotifier = ref.read(appThemeModeProvider.notifier);
     var textTheme = Theme.of(context).textTheme;
     var color = Theme.of(context).colorScheme;
     var ctxt = AppLocalizations.of(context)!;
@@ -30,7 +29,7 @@ class AppSettingsPage extends ConsumerWidget {
             context.push('/language');
           }),
           SizedBox(height: 8),
-          _buildSettingCard(context, color, textTheme, Icons.brightness_6_outlined, ctxt.app_settings_theme_mode_title, _getSubtitle(currentTheme, ctxt), () {
+          _buildSettingCard(context, color, textTheme, Icons.brightness_6_outlined, ctxt.app_settings_theme_mode_title, ctxt.app_settings_theme_mode_subtitle, () {
             HapticFeedback.mediumImpact();
             showModalBottomSheet(
               context: context,
@@ -42,16 +41,23 @@ class AppSettingsPage extends ConsumerWidget {
                   children: [
                     Container(width: 40, height: 4, decoration: BoxDecoration(color: color.onSurfaceVariant.withValues(alpha: 0.4), borderRadius: BorderRadius.circular(2))),
                     SizedBox(height: 16),
-                    ...ThemeMode.values.map((mode) => ListTile(
-                      title: Text(_getSubtitle(mode, ctxt)),
-                      leading: Icon(mode == ThemeMode.light ? Icons.light_mode : mode == ThemeMode.dark ? Icons.dark_mode : Icons.phone_android),
-                      selected: currentTheme == mode,
-                      onTap: () {
-                        HapticFeedback.mediumImpact();
-                        themeNotifier.setTheme(mode);
-                        context.pop();
-                      },
+                    Text(ctxt.app_settings_themeModeModalTitle, style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                    SizedBox(height: 16),
+                    ...AppThemeMode.values.map((mode) => Card(
+                      elevation: 0,
+                      color: currentTheme == mode ? color.primaryContainer : color.surfaceContainerHighest,
+                      child: ListTile(
+                        title: Text(_getSubtitle(mode, ctxt)),
+                        leading: Icon(_getThemeIcon(mode), color: currentTheme == mode ? color.onPrimaryContainer : color.onSurface),
+                        trailing: currentTheme == mode ? Icon(Icons.check, color: color.onPrimaryContainer) : null,
+                        onTap: () {
+                          HapticFeedback.mediumImpact();
+                          themeNotifier.setTheme(mode);
+                          context.pop();
+                        },
+                      ),
                     )),
+                    SizedBox(height: 16),
                   ],
                 ),
               ),
@@ -63,54 +69,65 @@ class AppSettingsPage extends ConsumerWidget {
   }
 
   Widget _buildSettingCard(BuildContext context, ColorScheme color, TextTheme textTheme, IconData icon, String title, String subtitle, VoidCallback onTap) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final gradientColors = AppColors.glassGradient(color.primary, isDark);
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: gradientColors,
-          ),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: color.primary.withValues(alpha: 0.3), width: 1.5),
-          boxShadow: AppColors.glassShadow(color.primary, isDark),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: EdgeInsets.all(12),
-              decoration: BoxDecoration(color: AppColors.white, shape: BoxShape.circle, boxShadow: [BoxShadow(color: color.primary.withValues(alpha: 0.2), blurRadius: 8, offset: Offset(0, 2))]),
-              child: Icon(icon, color: color.primary, size: 24),
-            ),
-            SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: color.primary)),
-                  SizedBox(height: 2),
-                  Text(subtitle, style: textTheme.bodySmall?.copyWith(color: color.primary)),
-                ],
+    return Card(
+      elevation: 0,
+      color: color.surfaceContainer,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: color.primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: color.primary, size: 24),
               ),
-            ),
-            Icon(Icons.chevron_right, color: color.primary),
-          ],
+              SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500, color: color.onSurface)),
+                    SizedBox(height: 2),
+                    Text(subtitle, style: textTheme.bodyMedium?.copyWith(color: color.onSurfaceVariant)),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right, color: color.onSurfaceVariant, size: 20),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  String _getSubtitle(ThemeMode mode, AppLocalizations ctxt) {
+  IconData _getThemeIcon(AppThemeMode mode) {
     switch (mode) {
-      case ThemeMode.light:
+      case AppThemeMode.light:
+        return Icons.light_mode;
+      case AppThemeMode.dark:
+        return Icons.dark_mode;
+      case AppThemeMode.amoled:
+        return Icons.smartphone;
+      case AppThemeMode.system:
+        return Icons.phone_android;
+    }
+  }
+
+  String _getSubtitle(AppThemeMode mode, AppLocalizations ctxt) {
+    switch (mode) {
+      case AppThemeMode.light:
         return ctxt.app_settings_theme_mode_light;
-      case ThemeMode.dark:
+      case AppThemeMode.dark:
         return ctxt.app_settings_theme_mode_dark;
-      default:
+      case AppThemeMode.amoled:
+        return ctxt.app_settings_theme_mode_amoled;
+      case AppThemeMode.system:
         return ctxt.app_settings_theme_mode_system_default;
     }
   }

@@ -2,6 +2,8 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:mudra_manager/db/models/account.dart' show Account;
 import 'package:mudra_manager/util/account_type_extension.dart';
+import 'package:mudra_manager/l10n/app_localizations.dart';
+import 'package:mudra_manager/util/localization_extension.dart';
 
 class AccountCardMini extends StatelessWidget {
   final Account? account;
@@ -28,6 +30,11 @@ class AccountCardMini extends StatelessWidget {
   Widget build(BuildContext ctx) {
     final color = Theme.of(ctx).colorScheme;
     final textTheme = Theme.of(ctx).textTheme;
+    
+    // Calculate proper text color based on account color
+    final accountColor = Color(account?.colorValue ?? 0xFFBDBDBD);
+    final accountLuminance = accountColor.computeLuminance();
+    final textColor = accountLuminance > 0.5 ? Colors.black : Colors.white;
 
     return Container(
       width: 120,
@@ -41,7 +48,7 @@ class AccountCardMini extends StatelessWidget {
                   : [
                     color.primary,
                     color.primaryFixed,
-                    Color(account?.colorValue ?? 0xFFBDBDBD),
+                    accountColor,
                   ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -60,7 +67,7 @@ class AccountCardMini extends StatelessWidget {
               right: 0,
               child: Icon(
                 account!.accountType.icon,
-                color: color.onPrimary.withAlpha(25),
+                color: textColor.withValues(alpha: 0.1),
                 size: 50,
               ),
             ),
@@ -72,7 +79,7 @@ class AccountCardMini extends StatelessWidget {
                   : Text(
                     account!.name,
                     style: textTheme.labelLarge?.copyWith(
-                      color: color.onPrimary,
+                      color: textColor,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -86,9 +93,9 @@ class AccountCardMini extends StatelessWidget {
                         return Text("...");
                       }
                       return Text(
-                        '₹${snapshot.data?.toStringAsFixed(2)}',
+                        AppLocalizations.of(context)!.formatCurrencyWithSign(2, snapshot.data ?? 0),
                         style: textTheme.labelLarge?.copyWith(
-                          color: color.onPrimary,
+                          color: textColor,
                         ),
                       );
                     },

@@ -83,43 +83,43 @@ class _SimpleColorPickerDialogState extends State<SimpleColorPickerDialog> {
     var textTheme = Theme.of(context).textTheme;
     
     return Dialog(
-      backgroundColor: Colors.transparent,
       child: Container(
+        constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.8),
         decoration: BoxDecoration(
           color: color.surface,
-          borderRadius: BorderRadius.circular(32),
+          borderRadius: BorderRadius.circular(28),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    _selected.withValues(alpha: 0.8),
-                    _selected,
-                  ],
-                ),
-                borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-              ),
-              child: Text(
-                'Pick a Color',
-                textAlign: TextAlign.center,
-                style: textTheme.headlineSmall?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
             Padding(
               padding: EdgeInsets.all(24),
-              child: SizedBox(
-                height: 400,
+              child: Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: _selected.withValues(alpha: 0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.palette, color: _selected, size: 24),
+                  ),
+                  SizedBox(width: 12),
+                  Text(
+                    'Pick a Color',
+                    style: textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Divider(height: 1),
+            Flexible(
+              child: Padding(
+                padding: EdgeInsets.all(24),
                 child: GridView.count(
+                  shrinkWrap: true,
                   crossAxisCount: 5,
                   mainAxisSpacing: 12,
                   crossAxisSpacing: 12,
@@ -135,19 +135,9 @@ class _SimpleColorPickerDialogState extends State<SimpleColorPickerDialog> {
                         decoration: BoxDecoration(
                           color: c,
                           shape: BoxShape.circle,
-                          border: Border.all(
-                            color: isSelected ? Colors.white : Colors.transparent,
-                            width: 3,
-                          ),
-                          boxShadow: isSelected
-                              ? [
-                                  BoxShadow(
-                                    color: c.withValues(alpha: 0.5),
-                                    blurRadius: 8,
-                                    offset: Offset(0, 4),
-                                  ),
-                                ]
-                              : [],
+                          border: isSelected
+                              ? Border.all(color: color.outline, width: 3)
+                              : null,
                         ),
                         child: isSelected
                             ? Icon(Icons.check, color: Colors.white, size: 24)
@@ -162,20 +152,16 @@ class _SimpleColorPickerDialogState extends State<SimpleColorPickerDialog> {
               padding: EdgeInsets.only(left: 24, right: 24, bottom: 24),
               child: SizedBox(
                 width: double.infinity,
-                height: 56,
+                height: 52,
                 child: FilledButton(
                   onPressed: () {
                     HapticFeedback.mediumImpact();
                     Navigator.pop(context, _selected);
                   },
                   style: FilledButton.styleFrom(
-                    backgroundColor: _selected,
-                    foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    elevation: 4,
-                    shadowColor: _selected.withValues(alpha: 0.4),
                   ),
                   child: Text(
                     'SELECT COLOR',

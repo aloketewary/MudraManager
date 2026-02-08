@@ -10,7 +10,7 @@ import 'package:mudra_manager/db/models/recurring_transaction.dart';
 import 'package:mudra_manager/providers/account_providers.dart';
 import 'package:mudra_manager/providers/category_provider.dart';
 import 'package:mudra_manager/providers/recurring_transaction_provider.dart';
-import 'package:mudra_manager/theme/app_colors.dart';
+import 'package:mudra_manager/components/adaptive_text.dart';
 import 'package:mudra_manager/util/icon_helper.dart';
 
 class AddRecurringTransactionScreen extends ConsumerStatefulWidget {
@@ -52,455 +52,316 @@ class _AddRecurringTransactionScreenState
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final headerColor = _isExpense ? AppColors.expense : AppColors.income;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: headerColor,
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.close, color: Colors.white),
+          icon: const Icon(Icons.close),
           onPressed: () {
             HapticFeedback.mediumImpact();
             context.pop();
           },
         ),
-        centerTitle: true,
-        title: Container(
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.2),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildTypeToggle('EXPENSE', true),
-              _buildTypeToggle('INCOME', false),
-            ],
-          ),
+        title: AdaptiveText(
+          widget.recurring == null ? 'Add Recurring' : 'Edit Recurring',
+          style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+          maxLines: 1,
         ),
       ),
-      body: Column(
+      body: ListView(
+        padding: const EdgeInsets.all(20),
         children: [
-          SizedBox(
-            height: MediaQuery.of(context).size.height * 0.2,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'AMOUNT',
-                  style: textTheme.labelLarge?.copyWith(
-                    color: Colors.white.withValues(alpha: 0.7),
-                    letterSpacing: 1.5,
-                  ),
-                ),
-                IntrinsicWidth(
-                  child: TextFormField(
-                    controller: _amountController,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    textAlign: TextAlign.center,
-                    style: textTheme.displayLarge?.copyWith(
-                      color: AppColors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 56,
-                    ),
-                    cursorColor: AppColors.white,
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.transparent,
-                      hintText: '0',
-                      hintStyle: textTheme.displayLarge?.copyWith(
-                        color: AppColors.white.withValues(alpha: 0.7),
-                        fontSize: 56,
-                      ),
-                      border: InputBorder.none,
-                      enabledBorder: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                      errorBorder: InputBorder.none,
-                      focusedErrorBorder: InputBorder.none,
-                      disabledBorder: InputBorder.none,
-                      
-                      prefixText: _isExpense ? '- ' : '+ ',
-                      prefixStyle: textTheme.displayLarge?.copyWith(
-                        color: AppColors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+          SegmentedButton<bool>(
+            segments: const [
+              ButtonSegment(
+                value: true,
+                label: Text('EXPENSE'),
+                icon: Icon(Icons.remove_circle_outline),
+              ),
+              ButtonSegment(
+                value: false,
+                label: Text('INCOME'),
+                icon: Icon(Icons.add_circle_outline),
+              ),
+            ],
+            selected: {_isExpense},
+            onSelectionChanged: (Set<bool> selected) {
+              HapticFeedback.mediumImpact();
+              setState(() => _isExpense = selected.first);
+            },
+            style: ButtonStyle(
+              backgroundColor: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.selected)) {
+                  return _isExpense ? colorScheme.errorContainer : colorScheme.primaryContainer;
+                }
+                return null;
+              }),
+              foregroundColor: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.selected)) {
+                  return _isExpense ? colorScheme.onErrorContainer : colorScheme.onPrimaryContainer;
+                }
+                return null;
+              }),
             ),
           ),
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: colorScheme.surface,
-                borderRadius: const BorderRadius.vertical(top: Radius.zero),
+          const SizedBox(height: 24),
+          TextFormField(
+            controller: _amountController,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            style: textTheme.displaySmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: _isExpense ? colorScheme.error : colorScheme.primary,
+            ),
+            decoration: InputDecoration(
+              labelText: 'Amount',
+              prefixText: _isExpense ? '- ₹' : '+ ₹',
+              prefixStyle: textTheme.displaySmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: _isExpense ? colorScheme.error : colorScheme.primary,
               ),
-              child: ListView(
-                padding: const EdgeInsets.all(20),
-                children: [
-                  TextFormField(
-                    controller: _descController,
-                    decoration: InputDecoration(
-                      labelText: 'Description',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      prefixIcon: const Icon(Icons.edit_note),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'Frequency',
-                    style: textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    children:
-                        Frequency.values.map((f) {
-                          final selected = _frequency == f;
-                          return ChoiceChip(
-                            label: Text(_getFrequencyLabel(f)),
-                            selected: selected,
-                            onSelected: (v) {
-                              HapticFeedback.mediumImpact();
-                              setState(() => _frequency = f);
-                            },
-                            selectedColor: headerColor.withValues(alpha: 0.2),
-                            labelStyle: TextStyle(
-                              color:
-                                  selected
-                                      ? headerColor
-                                      : colorScheme.onSurface,
-                              fontWeight:
-                                  selected
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
-                            ),
-                          );
-                        }).toList(),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'Account',
-                    style: textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Consumer(
-                    builder: (context, ref, _) {
-                      final accountsAsync = ref.watch(accountsProvider);
-                      return accountsAsync.when(
-                        data:
-                            (accounts) => SizedBox(
-                              height: 100,
-                              child: ListView.separated(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: accounts.length,
-                                separatorBuilder:
-                                    (_, __) => const SizedBox(width: 12),
-                                itemBuilder: (context, index) {
-                                  final account = accounts[index];
-                                  final isSelected =
-                                      _selectedAccount?.id == account.id;
-                                  return GestureDetector(
-                                    onTap: () {
-                                      HapticFeedback.mediumImpact();
-                                      setState(
-                                        () => _selectedAccount = account,
-                                      );
-                                    },
-                                    child: Container(
-                                      width: 120,
-                                      padding: const EdgeInsets.all(12),
-                                      decoration: BoxDecoration(
-                                        gradient:
-                                            isSelected
-                                                ? LinearGradient(
-                                                  colors: [
-                                                    Color(
-                                                      account.colorValue ??
-                                                          0xFF000000,
-                                                    ).withValues(alpha: 0.8),
-                                                    Color(
-                                                      account.colorValue ??
-                                                          0xFF000000,
-                                                    ),
-                                                  ],
-                                                )
-                                                : null,
-                                        color:
-                                            isSelected
-                                                ? null
-                                                : colorScheme
-                                                    .surfaceContainerHighest,
-                                        borderRadius: BorderRadius.circular(16),
-                                        border: Border.all(
-                                          color:
-                                              isSelected
-                                                  ? Colors.white.withValues(
-                                                    alpha: 0.3,
-                                                  )
-                                                  : colorScheme.outline
-                                                      .withValues(alpha: 0.2),
-                                        ),
-                                      ),
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Icon(
-                                            Icons.account_balance_wallet,
-                                            color:
-                                                isSelected
-                                                    ? Colors.white
-                                                    : colorScheme.onSurface,
-                                          ),
-                                          const SizedBox(height: 8),
-                                          Text(
-                                            account.name,
-                                            style: textTheme.labelMedium
-                                                ?.copyWith(
-                                                  color:
-                                                      isSelected
-                                                          ? Colors.white
-                                                          : colorScheme
-                                                              .onSurface,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                        loading: () => const CircularProgressIndicator(),
-                        error: (_, __) => const Text('Error'),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'Category',
-                    style: textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Consumer(
-                    builder: (context, ref, _) {
-                      final categoriesAsync = ref.watch(categoryListProvider);
-                      return categoriesAsync.when(
-                        data:
-                            (categories) => SizedBox(
-                              height: 100,
-                              child: ListView.separated(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: categories.length,
-                                separatorBuilder:
-                                    (_, __) => const SizedBox(width: 12),
-                                itemBuilder: (context, index) {
-                                  final category = categories[index];
-                                  final isSelected =
-                                      _selectedCategory?.id == category.id;
-                                  return GestureDetector(
-                                    onTap: () {
-                                      HapticFeedback.mediumImpact();
-                                      setState(
-                                        () => _selectedCategory = category,
-                                      );
-                                    },
-                                    child: Container(
-                                      width: 100,
-                                      padding: const EdgeInsets.all(12),
-                                      decoration: BoxDecoration(
-                                        gradient:
-                                            isSelected
-                                                ? LinearGradient(
-                                                  colors: [
-                                                    Color(
-                                                      category.colorValue ??
-                                                          0xFF000000,
-                                                    ).withValues(alpha: 0.8),
-                                                    Color(
-                                                      category.colorValue ??
-                                                          0xFF000000,
-                                                    ),
-                                                  ],
-                                                )
-                                                : null,
-                                        color:
-                                            isSelected
-                                                ? null
-                                                : colorScheme
-                                                    .surfaceContainerHighest,
-                                        borderRadius: BorderRadius.circular(16),
-                                        border: Border.all(
-                                          color:
-                                              isSelected
-                                                  ? Colors.white.withValues(
-                                                    alpha: 0.3,
-                                                  )
-                                                  : colorScheme.outline
-                                                      .withValues(alpha: 0.2),
-                                        ),
-                                      ),
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Icon(
-                                            IconHelper.iconFromName(
-                                              category.iconName ?? 'category',
-                                            ),
-                                            color:
-                                                isSelected
-                                                    ? Colors.white
-                                                    : colorScheme.onSurface,
-                                          ),
-                                          const SizedBox(height: 8),
-                                          Text(
-                                            category.name,
-                                            style: textTheme.labelSmall
-                                                ?.copyWith(
-                                                  color:
-                                                      isSelected
-                                                          ? Colors.white
-                                                          : colorScheme
-                                                              .onSurface,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                        loading: () => const CircularProgressIndicator(),
-                        error: (_, __) => const Text('Error'),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  InkWell(
-                    onTap: () async {
-                      final date = await showDatePicker(
-                        context: context,
-                        initialDate: _startDate,
-                        firstDate: DateTime(2000),
-                        lastDate: DateTime(2100),
-                      );
-                      if (date != null) setState(() => _startDate = date);
-                    },
-                    borderRadius: BorderRadius.circular(12),
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: colorScheme.surfaceContainer,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.calendar_today,
-                            color: colorScheme.primary,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          TextFormField(
+            controller: _descController,
+            decoration: InputDecoration(
+              labelText: 'Description',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              prefixIcon: const Icon(Icons.edit_note),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'Frequency',
+            style: textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            children: Frequency.values.map((f) {
+              final selected = _frequency == f;
+              return ChoiceChip(
+                label: Text(_getFrequencyLabel(f)),
+                selected: selected,
+                onSelected: (v) {
+                  HapticFeedback.mediumImpact();
+                  setState(() => _frequency = f);
+                },
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'Account',
+            style: textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Consumer(
+            builder: (context, ref, _) {
+              final accountsAsync = ref.watch(accountsProvider);
+              return accountsAsync.when(
+                data: (accounts) => SizedBox(
+                  height: 100,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: accounts.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 12),
+                    itemBuilder: (context, index) {
+                      final account = accounts[index];
+                      final isSelected = _selectedAccount?.id == account.id;
+                      final accountColor = Color(account.colorValue ?? 0xFF000000);
+                      return GestureDetector(
+                        onTap: () {
+                          HapticFeedback.mediumImpact();
+                          setState(() => _selectedAccount = account);
+                        },
+                        child: Container(
+                          width: 120,
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? accountColor.withValues(alpha: 0.15)
+                                : colorScheme.surfaceContainerHighest,
+                            borderRadius: BorderRadius.circular(16),
+                            border: isSelected
+                                ? Border.all(color: accountColor, width: 2)
+                                : null,
                           ),
-                          const SizedBox(width: 12),
-                          Text(
-                            'Start: ${DateFormat('MMM d, yyyy').format(_startDate)}',
-                            style: textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.account_balance_wallet,
+                                color: accountColor,
+                              ),
+                              const SizedBox(height: 8),
+                              AdaptiveText(
+                                account.name,
+                                style: textTheme.labelMedium?.copyWith(
+                                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                ),
+                                maxLines: 1,
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                  FilledButton(
-                    onPressed: _save,
-                    style: FilledButton.styleFrom(
-                      backgroundColor: headerColor,
-                      minimumSize: const Size(double.infinity, 52),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Text(
-                      'SAVE',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.2,
-                      ),
-                    ),
-                  ),
-                  if (widget.recurring != null) ...[
-                    const SizedBox(height: 12),
-                    OutlinedButton(
-                      onPressed: _delete,
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.red,
-                        minimumSize: const Size(double.infinity, 52),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
                         ),
-                      ),
-                      child: const Text(
-                        'DELETE',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
+                      );
+                    },
+                  ),
+                ),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (_, __) => const Text('Error loading accounts'),
+              );
+            },
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'Category',
+            style: textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Consumer(
+            builder: (context, ref, _) {
+              final categoriesAsync = ref.watch(categoryListProvider);
+              return categoriesAsync.when(
+                data: (categories) => SizedBox(
+                  height: 100,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: categories.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 12),
+                    itemBuilder: (context, index) {
+                      final category = categories[index];
+                      final isSelected = _selectedCategory?.id == category.id;
+                      final categoryColor = Color(category.colorValue ?? 0xFF000000);
+                      return GestureDetector(
+                        onTap: () {
+                          HapticFeedback.mediumImpact();
+                          setState(() => _selectedCategory = category);
+                        },
+                        child: Container(
+                          width: 100,
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? categoryColor.withValues(alpha: 0.15)
+                                : colorScheme.surfaceContainerHighest,
+                            borderRadius: BorderRadius.circular(16),
+                            border: isSelected
+                                ? Border.all(color: categoryColor, width: 2)
+                                : null,
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                IconHelper.iconFromName(
+                                  category.iconName ?? 'category',
+                                ),
+                                color: categoryColor,
+                              ),
+                              const SizedBox(height: 8),
+                              AdaptiveText(
+                                category.name,
+                                style: textTheme.labelSmall?.copyWith(
+                                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                ),
+                                maxLines: 2,
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (_, __) => const Text('Error loading categories'),
+              );
+            },
+          ),
+          const SizedBox(height: 24),
+          InkWell(
+            onTap: () async {
+              final date = await showDatePicker(
+                context: context,
+                initialDate: _startDate,
+                firstDate: DateTime(2000),
+                lastDate: DateTime(2100),
+              );
+              if (date != null) setState(() => _startDate = date);
+            },
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceContainer,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.calendar_today, color: colorScheme.primary),
+                  const SizedBox(width: 12),
+                  AdaptiveText(
+                    'Start: ${DateFormat('MMM d, yyyy').format(_startDate)}',
+                    style: textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
                     ),
-                  ],
+                    maxLines: 1,
+                  ),
                 ],
               ),
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTypeToggle(String label, bool isExpenseBtn) {
-    final isSelected = _isExpense == isExpenseBtn;
-    return GestureDetector(
-      onTap: () {
-        HapticFeedback.mediumImpact();
-        setState(() => _isExpense = isExpenseBtn);
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
-        decoration: BoxDecoration(
-          color: isSelected ? Colors.white : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color:
-                isSelected ? Colors.black : Colors.white.withValues(alpha: 0.6),
-            fontWeight: FontWeight.bold,
-            fontSize: 12,
-            letterSpacing: 1.0,
+          const SizedBox(height: 32),
+          FilledButton(
+            onPressed: _save,
+            style: FilledButton.styleFrom(
+              minimumSize: const Size(double.infinity, 52),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: const Text(
+              'SAVE',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.2,
+              ),
+            ),
           ),
-        ),
+          if (widget.recurring != null) ...[
+            const SizedBox(height: 12),
+            OutlinedButton(
+              onPressed: _delete,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: colorScheme.error,
+                minimumSize: const Size(double.infinity, 52),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text(
+                'DELETE',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

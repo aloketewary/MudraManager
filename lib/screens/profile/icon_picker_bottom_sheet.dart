@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mudra_manager/util/case_extension.dart';
 import 'package:mudra_manager/util/icon_helper.dart';
+import 'package:mudra_manager/components/adaptive_text.dart';
 
 class IconPickerBottomSheet extends StatelessWidget {
   final Color? backgroundColor;
@@ -20,45 +21,35 @@ class IconPickerBottomSheet extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: color.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
         children: [
+          SizedBox(height: 12),
           Container(
-            width: double.infinity,
-            padding: EdgeInsets.all(24),
+            width: 40,
+            height: 4,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  headerColor.withValues(alpha: 0.8),
-                  headerColor,
-                ],
-              ),
-              borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+              color: color.onSurfaceVariant.withValues(alpha: 0.4),
+              borderRadius: BorderRadius.circular(2),
             ),
-            child: Column(
+          ),
+          Padding(
+            padding: EdgeInsets.all(16),
+            child: Row(
               children: [
-                Container(
-                  width: 40,
-                  height: 4,
-                  margin: EdgeInsets.only(bottom: 16),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
+                Icon(Icons.category, color: color.primary),
+                SizedBox(width: 12),
                 Text(
                   'Pick an Icon',
-                  style: textTheme.headlineSmall?.copyWith(
-                    color: Colors.white,
+                  style: textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ],
             ),
           ),
+          Divider(height: 1),
           Expanded(
             child: Padding(
               padding: EdgeInsets.all(16),
@@ -67,15 +58,16 @@ class IconPickerBottomSheet extends StatelessWidget {
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 12,
                 children: _iconMap.entries.map((entry) {
-                  return GestureDetector(
+                  return InkWell(
                     onTap: () {
                       HapticFeedback.mediumImpact();
                       context.pop(entry.key);
                     },
+                    borderRadius: BorderRadius.circular(12),
                     child: Container(
                       decoration: BoxDecoration(
                         color: color.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -86,12 +78,11 @@ class IconPickerBottomSheet extends StatelessWidget {
                             color: headerColor,
                           ),
                           SizedBox(height: 4),
-                          Text(
+                          AdaptiveText(
                             entry.key.toTitleCase().split('_').first,
                             style: textTheme.labelSmall?.copyWith(
                               color: color.onSurfaceVariant,
                             ),
-                            overflow: TextOverflow.ellipsis,
                             maxLines: 1,
                           ),
                         ],

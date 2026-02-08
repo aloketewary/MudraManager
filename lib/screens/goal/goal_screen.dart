@@ -26,7 +26,7 @@ class GoalScreen extends ConsumerWidget {
             );
           }
           return ListView.builder(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16).copyWith(bottom: 80),
             itemCount: goals.length,
             itemBuilder: (context, index) {
               final goal = goals[index];

@@ -10,7 +10,6 @@ import 'package:mudra_manager/util/localization_extension.dart';
 import 'package:mudra_manager/util/dialog_utils.dart';
 import 'package:mudra_manager/providers/goal_provider.dart';
 import 'package:mudra_manager/util/app_logger.dart';
-import 'package:mudra_manager/theme/app_colors.dart';
 
 class GoalCard extends ConsumerWidget {
   final Goal goal;
@@ -24,8 +23,7 @@ class GoalCard extends ConsumerWidget {
     final textTheme = Theme.of(context).textTheme;
     final ctxt = AppLocalizations.of(context)!;
 
-    final goalColor =
-        goal.colorValue != null ? Color(goal.colorValue!) : color.primary;
+    final goalColor = goal.colorValue != null ? Color(goal.colorValue!) : color.primary;
     final progress = goal.progressPercent;
 
     return Dismissible(
@@ -36,8 +34,7 @@ class GoalCard extends ConsumerWidget {
         return await DialogUtils.showDeleteConfirmation(
           context,
           title: "Delete Goal?",
-          message:
-              "Are you sure you want to delete '${goal.name}'? This action cannot be undone.",
+          message: "Are you sure you want to delete '${goal.name}'? This action cannot be undone.",
         );
       },
       onDismissed: (direction) async {
@@ -61,30 +58,17 @@ class GoalCard extends ConsumerWidget {
           children: [
             Icon(Icons.delete, color: color.onError, size: 32),
             SizedBox(height: 4),
-            Text(
-              'Delete',
-              style: TextStyle(
-                color: color.onError,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            Text('Delete', style: TextStyle(color: color.onError, fontWeight: FontWeight.bold)),
           ],
         ),
       ),
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: AppColors.glassGradient(goalColor, Theme.of(context).brightness == Brightness.dark),
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: goalColor.withValues(alpha: 0.3), width: 1.5),
-          boxShadow: AppColors.glassShadow(goalColor, Theme.of(context).brightness == Brightness.dark),
-        ),
+      child: Card(
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        elevation: 0,
+        color: color.surfaceContainerHighest,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(12),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -95,21 +79,10 @@ class GoalCard extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: AppColors.white,
+                        color: goalColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: goalColor.withValues(alpha: 0.2),
-                            blurRadius: 8,
-                            offset: Offset(0, 4),
-                          ),
-                        ],
                       ),
-                      child: Icon(
-                        IconHelper.getIconData(goal.iconName),
-                        color: goalColor,
-                        size: 24,
-                      ),
+                      child: Icon(IconHelper.getIconData(goal.iconName), color: goalColor, size: 24),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -120,25 +93,30 @@ class GoalCard extends ConsumerWidget {
                             goal.name,
                             style: textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: goalColor,
+                              color: color.onSurface,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
                           if (goal.targetDate != null)
                             Text(
                               "By ${DateFormat.yMMMd(ctxt.localeName).format(goal.targetDate!)}",
-                              style: textTheme.labelSmall?.copyWith(
-                                color: goalColor.withValues(alpha: 0.7),
-                              ),
+                              style: textTheme.labelSmall?.copyWith(color: color.onSurfaceVariant),
                             ),
                         ],
                       ),
                     ),
-                    Text(
-                      "${(progress * 100).toStringAsFixed(0)}%",
-                      style: textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: goalColor,
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: goalColor.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        "${(progress * 100).toStringAsFixed(0)}%",
+                        style: textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: goalColor,
+                        ),
                       ),
                     ),
                   ],
@@ -158,12 +136,7 @@ class GoalCard extends ConsumerWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          "Saved",
-                          style: textTheme.labelSmall?.copyWith(
-                            color: goalColor.withValues(alpha: 0.7),
-                          ),
-                        ),
+                        Text("Saved", style: textTheme.labelSmall?.copyWith(color: color.onSurfaceVariant)),
                         AnimatedBalance(
                           value: goal.currentAmount,
                           style: textTheme.labelLarge?.copyWith(
@@ -177,12 +150,7 @@ class GoalCard extends ConsumerWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text(
-                          "Target",
-                          style: textTheme.labelSmall?.copyWith(
-                            color: goalColor.withValues(alpha: 0.7),
-                          ),
-                        ),
+                        Text("Target", style: textTheme.labelSmall?.copyWith(color: color.onSurfaceVariant)),
                         Text(
                           ctxt.formatCurrencyWithSign(0, goal.targetAmount),
                           style: textTheme.labelLarge?.copyWith(

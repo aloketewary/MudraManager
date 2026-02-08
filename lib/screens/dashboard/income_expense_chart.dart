@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:mudra_manager/providers/filter_provider.dart';
+import 'package:mudra_manager/l10n/app_localizations.dart';
+import 'package:mudra_manager/util/localization_extension.dart';
 
 class IncomeExpenseCard extends ConsumerWidget {
   const IncomeExpenseCard({super.key});
@@ -12,6 +14,7 @@ class IncomeExpenseCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final summary = ref.watch(filteredDashboardTransactionsProvider);
+    final ctxt = AppLocalizations.of(context)!;
 
     return summary.when(
         data: (data) {
@@ -33,15 +36,15 @@ class IncomeExpenseCard extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Income', style: Theme.of(context).textTheme.bodyLarge),
+                    Text(ctxt.dashboard_incomeLabel, style: Theme.of(context).textTheme.bodyLarge),
                     Text(
-                      '₹${income.toStringAsFixed(2)}',
+                      ctxt.formatCurrencyWithSign(2, income),
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.teal),
                     ),
                     const SizedBox(height: 12),
-                    Text('Spent', style: Theme.of(context).textTheme.bodyLarge),
+                    Text(ctxt.dashboard_spentLabel, style: Theme.of(context).textTheme.bodyLarge),
                     Text(
-                      '₹${expense.toStringAsFixed(2)}',
+                      ctxt.formatCurrencyWithSign(2, expense),
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.redAccent),
                     ),
                   ],
@@ -52,7 +55,7 @@ class IncomeExpenseCard extends ConsumerWidget {
               Expanded(
                 flex: 3,
                 child: total == 0
-                    ? const Center(child: Text('No data'))
+                    ? Center(child: Text(ctxt.dashboard_noDataLabel))
                     : SizedBox(
                   height: 120,
                   child: PieChart(

@@ -4,10 +4,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:mudra_manager/db/models/account.dart' show Account;
+import 'package:mudra_manager/l10n/app_localizations.dart';
 import 'package:mudra_manager/providers/account_providers.dart';
 import 'package:mudra_manager/providers/transaction_provider.dart';
 import 'package:mudra_manager/screens/transaction/account_card_mini.dart' show AccountCardMini;
-import 'package:mudra_manager/theme/app_colors.dart';
 
 class TransferScreen extends ConsumerStatefulWidget {
   final Account? fromAccount;
@@ -94,10 +94,11 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
     final textTheme = Theme.of(context).textTheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final service = ref.watch(accountServiceProvider);
+    final ctxt = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Transfer Funds'),
+        title: Text(ctxt.transfer_screenTitle),
         actions: [
           IconButton(
             icon: Icon(Icons.refresh),
@@ -108,7 +109,7 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
                 _toAccount = null;
               });
             },
-            tooltip: 'Reset',
+            tooltip: ctxt.transfer_resetTooltip,
           ),
         ],
       ),
@@ -125,7 +126,7 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
                     if (_toAccount?.id == null) ...[
                       Padding(
                         padding: EdgeInsets.only(left: 4, bottom: 16),
-                        child: Text('SELECT ACCOUNTS', style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700, color: color.primary, letterSpacing: 0.5, fontSize: 12)),
+                        child: Text(ctxt.transfer_selectAccountsLabel, style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700, color: color.primary, letterSpacing: 0.5, fontSize: 12)),
                       ),
                       SizedBox(
                         height: 150,
@@ -139,108 +140,103 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
                       ),
                       SizedBox(height: 24),
                     ],
-                    Container(
-                      padding: EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(colors: AppColors.glassGradient(AppColors.transfer, isDark), begin: Alignment.topLeft, end: Alignment.bottomRight),
-                        borderRadius: BorderRadius.circular(24),
-                        border: Border.all(color: AppColors.transfer.withValues(alpha: 0.3), width: 1.5),
-                        boxShadow: AppColors.glassShadow(AppColors.transfer, isDark),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              children: [
-                                Text('FROM', style: textTheme.labelSmall?.copyWith(color: AppColors.transfer.withValues(alpha: 0.7), fontWeight: FontWeight.w700, letterSpacing: 0.5)),
-                                SizedBox(height: 12),
-                                SizedBox(height: 140, child: _fromAccount != null ? AccountCardMini(account: _fromAccount!, selected: true, balance: service.getAccountBalance(_fromAccount!.id)) : AccountCardMini.skeleton()),
-                              ],
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 12),
-                            child: Container(
-                              padding: EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: AppColors.white,
-                                borderRadius: BorderRadius.circular(14),
-                                boxShadow: [BoxShadow(color: AppColors.transfer.withValues(alpha: 0.15), blurRadius: 12, offset: Offset(0, 4))],
+                    Card(
+                      elevation: 0,
+                      color: color.surfaceContainerHighest,
+                      child: Padding(
+                        padding: EdgeInsets.all(20),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  Text(ctxt.transfer_fromLabel, style: textTheme.labelSmall?.copyWith(color: color.primary, fontWeight: FontWeight.w700, letterSpacing: 0.5)),
+                                  SizedBox(height: 12),
+                                  SizedBox(height: 140, child: _fromAccount != null ? AccountCardMini(account: _fromAccount!, selected: true, balance: service.getAccountBalance(_fromAccount!.id)) : AccountCardMini.skeleton()),
+                                ],
                               ),
-                              child: Icon(Icons.arrow_forward, color: AppColors.transfer, size: 24),
                             ),
-                          ),
-                          Expanded(
-                            child: Column(
-                              children: [
-                                Text('TO', style: textTheme.labelSmall?.copyWith(color: AppColors.transfer.withValues(alpha: 0.7), fontWeight: FontWeight.w700, letterSpacing: 0.5)),
-                                SizedBox(height: 12),
-                                SizedBox(height: 140, child: _toAccount != null ? AccountCardMini(account: _toAccount!, selected: true, balance: service.getAccountBalance(_toAccount!.id)) : AccountCardMini.skeleton()),
-                              ],
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 12),
+                              child: Container(
+                                padding: EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: color.primary.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Icon(Icons.arrow_forward, color: color.primary, size: 24),
+                              ),
                             ),
-                          ),
-                        ],
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  Text(ctxt.transfer_toLabel, style: textTheme.labelSmall?.copyWith(color: color.primary, fontWeight: FontWeight.w700, letterSpacing: 0.5)),
+                                  SizedBox(height: 12),
+                                  SizedBox(height: 140, child: _toAccount != null ? AccountCardMini(account: _toAccount!, selected: true, balance: service.getAccountBalance(_toAccount!.id)) : AccountCardMini.skeleton()),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                         SizedBox(height: 24),
                         Padding(
                           padding: EdgeInsets.only(left: 4, bottom: 16),
-                          child: Text('TRANSFER DETAILS', style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700, color: color.primary, letterSpacing: 0.5, fontSize: 12)),
+                          child: Text(ctxt.transfer_detailsLabel, style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700, color: color.primary, letterSpacing: 0.5, fontSize: 12)),
                         ),
                         TextFormField(
                           controller: _amountC,
                           keyboardType: TextInputType.numberWithOptions(decimal: true),
                           style: textTheme.bodyLarge,
                           decoration: InputDecoration(
-                            labelText: 'Amount',
+                            labelText: ctxt.transfer_amountLabel,
                             prefixIcon: Icon(Icons.currency_rupee),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: color.outline, width: 1.5)),
-                            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: color.outline, width: 1.5)),
-                            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: color.primary, width: 2)),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: color.primary, width: 2)),
                           ),
                           validator: (v) {
                             final x = double.tryParse(v ?? '');
-                            return x == null || x <= 0 ? 'Enter valid amount' : null;
+                            return x == null || x <= 0 ? ctxt.transfer_amountValidationError : null;
                           },
                         ),
                         SizedBox(height: 16),
-                        GestureDetector(
-                          onTap: () async {
-                            final pick = await showDatePicker(context: context, initialDate: _date, firstDate: DateTime(2000), lastDate: DateTime.now());
-                            if (pick != null) setState(() => _date = pick);
-                          },
-                          child: Container(
-                            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(colors: AppColors.glassGradient(color.primary, isDark), begin: Alignment.topLeft, end: Alignment.bottomRight),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: color.primary.withValues(alpha: 0.3), width: 1.5),
-                              boxShadow: AppColors.glassShadow(color.primary, isDark),
-                            ),
-                            child: Row(
-                              children: [
-                                Container(
-                                  padding: EdgeInsets.all(10),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.white,
-                                    borderRadius: BorderRadius.circular(12),
-                                    boxShadow: [BoxShadow(color: color.primary.withValues(alpha: 0.15), blurRadius: 12, offset: Offset(0, 4))],
+                        Card(
+                          elevation: 0,
+                          color: color.surfaceContainerHighest,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(12),
+                            onTap: () async {
+                              final pick = await showDatePicker(context: context, initialDate: _date, firstDate: DateTime(2000), lastDate: DateTime.now());
+                              if (pick != null) setState(() => _date = pick);
+                            },
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: color.primary.withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Icon(Icons.calendar_today, color: color.primary, size: 20),
                                   ),
-                                  child: Icon(Icons.calendar_today, color: color.primary, size: 20),
-                                ),
-                                SizedBox(width: 16),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text('Date', style: textTheme.labelMedium?.copyWith(color: color.primary.withValues(alpha: 0.7))),
-                                      SizedBox(height: 2),
-                                      Text(DateFormat.yMMMd().format(_date), style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600, color: color.primary, letterSpacing: -0.2)),
-                                    ],
+                                  SizedBox(width: 16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(ctxt.transfer_dateLabel, style: textTheme.labelMedium?.copyWith(color: color.onSurfaceVariant)),
+                                        SizedBox(height: 2),
+                                        Text(DateFormat.yMMMd().format(_date), style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600, color: color.onSurface)),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                                Icon(Icons.arrow_forward_ios_rounded, color: color.primary.withValues(alpha: 0.5), size: 18),
-                              ],
+                                  Icon(Icons.arrow_forward_ios_rounded, color: color.onSurfaceVariant, size: 18),
+                                ],
+                              ),
                             ),
                           ),
                         ),
@@ -250,26 +246,23 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
                           style: textTheme.bodyLarge,
                           maxLines: 3,
                           decoration: InputDecoration(
-                            labelText: 'Note (optional)',
+                            labelText: ctxt.transfer_noteLabel,
                             prefixIcon: Icon(Icons.note_outlined),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: color.outline, width: 1.5)),
-                            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: color.outline, width: 1.5)),
-                            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: color.primary, width: 2)),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: color.primary, width: 2)),
                           ),
                         ),
                         SizedBox(height: 24),
                         SizedBox(
                           width: double.infinity,
-                          child: ElevatedButton(
+                          child: FilledButton(
                             onPressed: _submit,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.transfer,
-                              foregroundColor: Colors.white,
+                            style: FilledButton.styleFrom(
                               padding: EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                              elevation: 0,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                             ),
-                            child: Text(isUpdate ? 'Update Transfer' : 'Transfer', style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600, color: Colors.white)),
+                            child: Text(isUpdate ? ctxt.transfer_updateButtonLabel : ctxt.transfer_buttonLabel, style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
                           ),
                         ),
                         SizedBox(height: 16),
@@ -280,7 +273,7 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
           );
         },
         loading: () => Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error loading accounts')),
+        error: (e, _) => Center(child: Text(ctxt.transfer_errorLoadingAccounts)),
       ),
     );
   }

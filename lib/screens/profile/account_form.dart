@@ -6,7 +6,7 @@ import 'package:mudra_manager/db/models/account.dart'
     show Account, AccountType, GetAccountCollection;
 import 'package:mudra_manager/providers/account_providers.dart';
 import 'package:mudra_manager/providers/isar_provider.dart';
-import 'package:mudra_manager/theme/app_colors.dart';
+import 'package:mudra_manager/components/adaptive_text.dart';
 import 'package:mudra_manager/util/account_type_extension.dart';
 import 'package:mudra_manager/util/simple_color_picker.dart'
     show SimpleColorPickerDialog;
@@ -81,370 +81,221 @@ class _AccountFormState extends ConsumerState<AccountForm> {
   Widget build(BuildContext context) {
     var color = Theme.of(context).colorScheme;
     var textTheme = Theme.of(context).textTheme;
-    final headerColor = _selectedColor ?? color.primary;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final gradientColors = AppColors.glassGradient(headerColor, isDark);
+    final selectedColor = _selectedColor ?? color.primary;
 
     return Scaffold(
-      backgroundColor: headerColor,
-      resizeToAvoidBottomInset: false,
+      backgroundColor: color.surface,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: color.surface,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.close, color: Colors.white),
+          icon: const Icon(Icons.close),
           onPressed: () {
             HapticFeedback.mediumImpact();
             context.pop();
           },
         ),
-        centerTitle: true,
-        title: Text(
+        title: AdaptiveText(
           widget.account == null ? 'Add Account' : 'Edit Account',
-          style: textTheme.titleLarge?.copyWith(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
+          style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+          maxLines: 1,
         ),
       ),
-      body: Column(
-        children: [
-          SizedBox(
-            height: MediaQuery.of(context).size.height * 0.20,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  padding: EdgeInsets.all(32),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    _selectedType?.icon ?? Icons.account_balance_wallet,
-                    size: 64,
-                    color: color.surface,
-                  ),
+      body: Form(
+        key: _formKey,
+        child: ListView(
+          padding: const EdgeInsets.all(20),
+          children: [
+            Center(
+              child: Container(
+                padding: const EdgeInsets.all(32),
+                decoration: BoxDecoration(
+                  color: selectedColor.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
                 ),
-                SizedBox(height: 16),
-                Text(
-                  (_selectedType?.label ?? 'Account').toUpperCase(),
-                  style: textTheme.labelLarge?.copyWith(
-                    color: color.surface.withValues(alpha: 0.7),
-                    letterSpacing: 1.5,
-                  ),
+                child: Icon(
+                  _selectedType?.icon ?? Icons.account_balance_wallet,
+                  size: 64,
+                  color: selectedColor,
                 ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: color.surface,
-                borderRadius: BorderRadius.vertical(top: Radius.zero),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
-                    blurRadius: 10,
-                    offset: Offset(0, -5),
-                  ),
-                ],
               ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.vertical(top: Radius.zero),
-                child: Form(
-                  key: _formKey,
-                  child: ListView(
-                    padding: EdgeInsets.only(
-                      top: 32,
-                      left: 24,
-                      right: 24,
-                      bottom: 24,
+            ),
+            const SizedBox(height: 12),
+            Center(
+              child: Text(
+                (_selectedType?.label ?? 'Account').toUpperCase(),
+                style: textTheme.labelMedium?.copyWith(
+                  color: color.onSurfaceVariant,
+                  letterSpacing: 1.2,
+                ),
+              ),
+            ),
+            const SizedBox(height: 32),
+            TextFormField(
+              controller: _nameController,
+              decoration: InputDecoration(
+                labelText: 'Account Name',
+                hintText: 'Enter account name',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                prefixIcon: const Icon(Icons.account_balance_wallet_outlined),
+              ),
+              validator: (value) =>
+                  value == null || value.isEmpty ? 'Required' : null,
+            ),
+            const SizedBox(height: 20),
+            TextFormField(
+              controller: _accountNumberController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: 'Account Number',
+                hintText: 'Last 4 digits',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                prefixIcon: const Icon(Icons.numbers),
+              ),
+              validator: (value) =>
+                  value == null || value.isEmpty
+                      ? 'Required'
+                      : value.length != 4
+                          ? '4 digits required'
+                          : null,
+            ),
+            const SizedBox(height: 20),
+            TextFormField(
+              controller: _balanceController,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: InputDecoration(
+                labelText: 'Initial Balance',
+                hintText: 'Enter initial balance',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                prefixIcon: const Icon(Icons.currency_rupee),
+              ),
+              validator: (value) =>
+                  value == null || value.isEmpty ? 'Required' : null,
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Account Type',
+              style: textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 120,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: AccountType.values.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 12),
+                itemBuilder: (context, index) {
+                  final type = AccountType.values[index];
+                  final isSelected = _selectedType == type;
+                  return GestureDetector(
+                    onTap: () {
+                      HapticFeedback.mediumImpact();
+                      setState(() => _selectedType = type);
+                    },
+                    child: Container(
+                      width: 100,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? selectedColor.withValues(alpha: 0.15)
+                            : color.surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(16),
+                        border: isSelected
+                            ? Border.all(color: selectedColor, width: 2)
+                            : null,
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            type.icon,
+                            color: isSelected ? selectedColor : color.onSurfaceVariant,
+                            size: 32,
+                          ),
+                          const SizedBox(height: 8),
+                          AdaptiveText(
+                            type.label,
+                            style: textTheme.labelSmall?.copyWith(
+                              color: isSelected ? selectedColor : color.onSurfaceVariant,
+                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                            ),
+                            maxLines: 2,
+                          ),
+                        ],
+                      ),
                     ),
-                    children: [
-                      Text(
-                        'Account Name',
-                        style: textTheme.titleMedium?.copyWith(
-                          color: color.onSurfaceVariant,
-                          fontWeight: FontWeight.bold,
-                        ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Color',
+              style: textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 12),
+            InkWell(
+              onTap: () {
+                HapticFeedback.mediumImpact();
+                _pickColor();
+              },
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: selectedColor.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: selectedColor, width: 2),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.palette, color: selectedColor),
+                    const SizedBox(width: 12),
+                    Text(
+                      'TAP TO CHANGE COLOR',
+                      style: textTheme.titleSmall?.copyWith(
+                        color: selectedColor,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.0,
                       ),
-                      SizedBox(height: 12),
-                      Container(
-                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: headerColor.withValues(alpha: 0.3), width: 1.5),
-                        ),
-                        child: TextFormField(
-                          controller: _nameController,
-                          decoration: InputDecoration(
-                            hintText: 'Enter account name',
-                            border: InputBorder.none,
-                            errorBorder: InputBorder.none,
-                            focusedErrorBorder: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            disabledBorder: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            icon: Icon(
-                              Icons.account_balance_wallet_outlined,
-                              color: headerColor,
-                            ),
-                          ),
-                          validator:
-                              (value) =>
-                                  value == null || value.isEmpty
-                                      ? 'Required'
-                                      : null,
-                        ),
-                      ),
-                      SizedBox(height: 24),
-                      Text(
-                        'Account Number',
-                        style: textTheme.titleMedium?.copyWith(
-                          color: color.onSurfaceVariant,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 12),
-                      Container(
-                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: headerColor.withValues(alpha: 0.3), width: 1.5),
-                        ),
-                        child: TextFormField(
-                          controller: _accountNumberController,
-                          keyboardType: TextInputType.number,
-                          decoration: InputDecoration(
-                            hintText: 'Last 4 digits',
-                            border: InputBorder.none,
-                            errorBorder: InputBorder.none,
-                            focusedErrorBorder: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            disabledBorder: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            icon: Icon(
-                              Icons.numbers,
-                              color: headerColor,
-                            ),
-                          ),
-                          validator:
-                              (value) =>
-                                  value == null || value.isEmpty
-                                      ? 'Required'
-                                      : value.length != 4
-                                      ? '4 digits required'
-                                      : null,
-                        ),
-                      ),
-                      SizedBox(height: 24),
-                      Text(
-                        'Initial Balance',
-                        style: textTheme.titleMedium?.copyWith(
-                          color: color.onSurfaceVariant,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 12),
-                      Container(
-                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: headerColor.withValues(alpha: 0.3), width: 1.5),
-                        ),
-                        child: TextFormField(
-                          controller: _balanceController,
-                          keyboardType: TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                          decoration: InputDecoration(
-                            hintText: 'Enter initial balance',
-                            border: InputBorder.none,
-                            errorBorder: InputBorder.none,
-                            focusedErrorBorder: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            disabledBorder: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            icon: Icon(
-                              Icons.currency_rupee,
-                              color: headerColor,
-                            ),
-                          ),
-                          validator:
-                              (value) =>
-                                  value == null || value.isEmpty
-                                      ? 'Required'
-                                      : null,
-                        ),
-                      ),
-                      SizedBox(height: 24),
-                      Text(
-                        'Account Type',
-                        style: textTheme.titleMedium?.copyWith(
-                          color: color.onSurfaceVariant,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 12),
-                      SizedBox(
-                        height: 120,
-                        child: ListView.separated(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: AccountType.values.length,
-                          separatorBuilder: (_, __) => SizedBox(width: 12),
-                          itemBuilder: (context, index) {
-                            final type = AccountType.values[index];
-                            final isSelected = _selectedType == type;
-                            return GestureDetector(
-                              onTap: () {
-                                HapticFeedback.mediumImpact();
-                                setState(() => _selectedType = type);
-                              },
-                              child: AnimatedContainer(
-                                duration: Duration(milliseconds: 200),
-                                width: 100,
-                                padding: EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  gradient:
-                                      isSelected
-                                          ? LinearGradient(
-                                            begin: Alignment.topLeft,
-                                            end: Alignment.bottomRight,
-                                            colors: gradientColors,
-                                          )
-                                          : null,
-                                  borderRadius: BorderRadius.circular(20),
-                                  boxShadow:
-                                      isSelected
-                                          ? AppColors.glassShadow(headerColor, isDark)
-                                          : [],
-                                  border: Border.all(
-                                    color: isSelected ? headerColor.withValues(alpha: 0.3) : color.outlineVariant.withValues(alpha: 0.3),
-                                    width: 1.5,
-                                  ),
-                                ),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      type.icon,
-                                      color:
-                                          isSelected
-                                              ? headerColor
-                                              : color.onSurfaceVariant,
-                                      size: 32,
-                                    ),
-                                    SizedBox(height: 8),
-                                    Text(
-                                      type.label,
-                                      style: textTheme.labelSmall?.copyWith(
-                                        color:
-                                            isSelected
-                                                ? headerColor
-                                                : color.onSurfaceVariant,
-                                        fontWeight:
-                                            isSelected
-                                                ? FontWeight.bold
-                                                : FontWeight.normal,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                      SizedBox(height: 24),
-                      Text(
-                        'Color',
-                        style: textTheme.titleMedium?.copyWith(
-                          color: color.onSurfaceVariant,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 12),
-                      GestureDetector(
-                        onTap: () {
-                          HapticFeedback.mediumImpact();
-                          _pickColor();
-                        },
-                        child: Container(
-                          padding: EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: gradientColors,
-                            ),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: headerColor.withValues(alpha: 0.3), width: 1.5),
-                            boxShadow: AppColors.glassShadow(headerColor, isDark),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.palette, color: headerColor),
-                              SizedBox(width: 12),
-                              Text(
-                                'TAP TO CHANGE COLOR',
-                                style: textTheme.titleSmall?.copyWith(
-                                  color: headerColor,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 1.0,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 48),
-                      GestureDetector(
-                        onTap: () {
-                          HapticFeedback.mediumImpact();
-                          _saveAccount();
-                        },
-                        child: Container(
-                          padding: EdgeInsets.symmetric(vertical: 18),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: gradientColors,
-                            ),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: headerColor.withValues(alpha: 0.3), width: 1.5),
-                            boxShadow: AppColors.glassShadow(headerColor, isDark),
-                          ),
-                          child: Center(
-                            child: Text(
-                              (widget.account == null
-                                  ? 'SAVE ACCOUNT'
-                                  : 'UPDATE ACCOUNT'),
-                              style: textTheme.titleMedium?.copyWith(
-                                color: headerColor,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 1.2,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      SizedBox(
-                        height: MediaQuery.of(context).viewInsets.bottom,
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
-          ),
-        ],
+            const SizedBox(height: 32),
+            FilledButton(
+              onPressed: () {
+                HapticFeedback.mediumImpact();
+                _saveAccount();
+              },
+              style: FilledButton.styleFrom(
+                minimumSize: const Size(double.infinity, 52),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: Text(
+                (widget.account == null ? 'SAVE ACCOUNT' : 'UPDATE ACCOUNT'),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.2,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

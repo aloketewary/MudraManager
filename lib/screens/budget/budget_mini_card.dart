@@ -7,9 +7,11 @@ import 'package:mudra_manager/l10n/app_localizations.dart';
 import 'package:mudra_manager/providers/budget_service_provider.dart';
 import 'package:mudra_manager/db/models/budget.dart' show Budget;
 import 'package:mudra_manager/screens/reusable/no_data_found.dart';
-import 'package:mudra_manager/theme/app_colors.dart';
+
 import 'package:mudra_manager/theme/design_tokens.dart';
 import 'package:mudra_manager/util/localization_extension.dart';
+import 'package:mudra_manager/components/adaptive_text.dart';
+import 'package:mudra_manager/components/currency_text.dart';
 
 class BudgetMiniCard extends ConsumerStatefulWidget {
   final double globalPadding;
@@ -28,7 +30,6 @@ class _BudgetMiniCardState extends ConsumerState<BudgetMiniCard> {
     var textTheme = Theme.of(context).textTheme;
     final ctxt = AppLocalizations.of(context)!;
     final formatter = DateFormat('dd MMM yy', ctxt.localeName);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -38,9 +39,13 @@ class _BudgetMiniCardState extends ConsumerState<BudgetMiniCard> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
+              AdaptiveText(
                 ctxt.dashboard_mini_budget_text,
-                style: textTheme.titleLarge?.copyWith(color: color.primary),
+                style: textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: color.primary,
+                ),
+                maxLines: 1,
               ),
               Hero(
                 tag: 'budgetExpandHero',
@@ -52,227 +57,283 @@ class _BudgetMiniCardState extends ConsumerState<BudgetMiniCard> {
             ],
           ),
         ),
+        SizedBox(height: 12),
         budgetProgressProvider.when(
           data: (budgets) {
             if (budgets.isEmpty) {
-              return NoDataFound(
-                message: ctxt.dashboard_mini_budget_not_found_text,
-                iconData: Icons.pie_chart_outline,
-                action: ElevatedButton(
-                  onPressed: () {
-                    context.push('/add-budget');
-                  },
-                  child: Text(ctxt.dashboard_mini_budget_add_text),
+              return Padding(
+                padding: EdgeInsets.symmetric(horizontal: widget.globalPadding),
+                child: NoDataFound(
+                  message: ctxt.dashboard_mini_budget_not_found_text,
+                  iconData: Icons.pie_chart_outline,
+                  action: ElevatedButton(
+                    onPressed: () {
+                      context.push('/add-budget');
+                    },
+                    child: Text(ctxt.dashboard_mini_budget_add_text),
+                  ),
                 ),
               );
             }
-            return Column(
-              children:
-                  budgets.map((entry) {
-                    final (
-                      Budget budget,
-                      double spent,
-                      DateTime sDate,
-                      DateTime eDate,
-                    ) = entry;
-                    final percent = (spent / budget.amount).clamp(0.0, 1.0);
-
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
-                      child: SizedBox(
-                        height: 230,
-                        child: GestureDetector(
-                          onTap: () {
-                            HapticFeedback.mediumImpact();
-
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.all(16.0),
-                            decoration: BoxDecoration(
-                              borderRadius: DesignTokens.borderRadiusMedium,
-                              gradient: LinearGradient(
-                                colors: AppColors.glassGradient(
-                                  percent >= 1.0 ? AppColors.expense : Color(0xFFF59E0B),
-                                  isDark,
-                                ),
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              border: Border.all(
-                                color: percent >= 1.0
-                                    ? AppColors.expense.withValues(alpha: 0.3)
-                                    : Color(0xFFF59E0B).withValues(alpha: 0.3),
-                                width: 1.5,
-                              ),
-                              boxShadow: AppColors.glassShadow(
-                                percent >= 1.0 ? AppColors.expense : Color(0xFFF59E0B),
-                                isDark,
-                              ),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: <Widget>[
-                                    Container(
-                                      padding: const EdgeInsets.all(8),
-                                      decoration: BoxDecoration(
-                                        color: (percent >= 1.0 ? AppColors.expense : Color(0xFFF59E0B)).withValues(alpha: 0.15),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Icon(
-                                        percent >= 1.0
-                                            ? Icons.warning_amber
-                                            : Icons.pie_chart_outline,
-                                        size: 20,
-                                        color: percent >= 1.0 ? AppColors.expense : Color(0xFFF59E0B),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8.0),
-                                    Expanded(
-                                      child: Text(
-                                        budget.name.toUpperCase(),
-                                        style: textTheme.labelLarge?.copyWith(
-                                          color: percent >= 1.0 ? AppColors.expense : Color(0xFFF59E0B),
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 8.0,
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Expanded(
-                                        child: SizedBox(
-                                          height: 140,
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                ctxt.budget_dashboardMiniCardBudgetTitleText,
-                                                style: textTheme.labelLarge
-                                                    ?.copyWith(
-                                                      color: color.onSurfaceVariant,
-                                                    ),
-                                                overflow: TextOverflow.fade,
-                                              ),
-                                              Text(
-                                                ctxt.formatCurrencyWithSign(
-                                                  2,
-                                                  budget.amount,
-                                                ),
-                                                style: textTheme.titleLarge
-                                                    ?.copyWith(
-                                                      color: percent >= 1.0 ? AppColors.expense : Color(0xFFF59E0B),
-                                                      fontWeight:
-                                                          FontWeight.w600,
-                                                    ),
-                                                overflow: TextOverflow.fade,
-                                              ),
-                                              Text(
-                                                "${ctxt.budget_dashboardMiniCardSpentTitleText} (${ctxt.formatCompactNumber().format((spent / budget.amount) * 100)}%)",
-                                                style: textTheme.titleSmall
-                                                    ?.copyWith(
-                                                      color: color.onSurfaceVariant,
-                                                    ),
-                                                overflow: TextOverflow.fade,
-                                              ),
-                                              Text(
-                                                ctxt.formatCurrencyWithSign(
-                                                  2,
-                                                  spent,
-                                                ),
-                                                style: textTheme.titleLarge
-                                                    ?.copyWith(
-                                                      color: percent >= 1.0 ? AppColors.expense : Color(0xFFF59E0B),
-                                                      fontWeight:
-                                                          FontWeight.w600,
-                                                    ),
-                                                overflow: TextOverflow.fade,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                      Flexible(
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.end,
-                                          children: <Widget>[
-                                            // Circular progress
-                                            Stack(
-                                              alignment: Alignment.center,
-                                              children: [
-                                                SizedBox(
-                                                  width: 90,
-                                                  height: 90,
-                                                  child: CircularProgressIndicator(
-                                                    value: percent,
-                                                    strokeWidth: 12,
-                                                    backgroundColor:
-                                                        (percent >= 1.0 ? AppColors.expense : Color(0xFFF59E0B)).withValues(alpha: 0.15),
-                                                    valueColor:
-                                                        AlwaysStoppedAnimation<
-                                                          Color
-                                                        >(percent >= 1.0 ? AppColors.expense : Color(0xFFF59E0B)),
-                                                  ),
-                                                ),
-                                                Text(
-                                                  ctxt.formatPercentNumber(
-                                                    percent,
-                                                  ),
-                                                  style: textTheme.labelLarge
-                                                      ?.copyWith(
-                                                        color: percent >= 1.0 ? AppColors.expense : Color(0xFFF59E0B),
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                      ),
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Text(
-                                  "${formatter.format(sDate)} - ${formatter.format(eDate)}",
-                                  textAlign: TextAlign.center,
-                                  style: textTheme.labelMedium?.copyWith(
-                                    color: color.onSurfaceVariant,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
+            // Horizontal scrolling budget cards
+            return SizedBox(
+              height: 220,
+              child: ListView.builder(
+                padding: EdgeInsets.symmetric(horizontal: widget.globalPadding),
+                scrollDirection: Axis.horizontal,
+                itemCount: budgets.length,
+                itemBuilder: (context, index) {
+                  final (
+                    Budget budget,
+                    double spent,
+                    DateTime sDate,
+                    DateTime eDate,
+                  ) = budgets[index];
+                  return _BudgetCircularCard(
+                    budget: budget,
+                    spent: spent,
+                    startDate: sDate,
+                    endDate: eDate,
+                    formatter: formatter,
+                  );
+                },
+              ),
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (e, st) => Center(child: Text('Error: $e')),
         ),
       ],
+    );
+  }
+}
+
+class _BudgetCircularCard extends StatelessWidget {
+  final Budget budget;
+  final double spent;
+  final DateTime startDate;
+  final DateTime endDate;
+  final DateFormat formatter;
+
+  const _BudgetCircularCard({
+    required this.budget,
+    required this.spent,
+    required this.startDate,
+    required this.endDate,
+    required this.formatter,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final percent = (spent / budget.amount).clamp(0.0, 1.0);
+    final remaining = budget.amount - spent;
+    final isOverBudget = percent >= 1.0;
+    final budgetColor = isOverBudget ? color.error : Color(0xFFF59E0B);
+
+    return Card(
+      elevation: 0,
+      color: isOverBudget ? color.errorContainer : color.surfaceContainerHighest,
+      child: Container(
+        width: 180,
+        height: 200,
+        margin: EdgeInsets.only(right: 12),
+        child: InkWell(
+          onTap: () {
+            HapticFeedback.mediumImpact();
+            // Navigate to budget details if needed
+          },
+          borderRadius: BorderRadius.circular(20),
+          child: Padding(
+            padding: EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Circular Progress
+                Center(
+                  child: SizedBox(
+                    width: 80,
+                    height: 80,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // Background Circle
+                        SizedBox(
+                          width: 80,
+                          height: 80,
+                          child: CircularProgressIndicator(
+                            value: 1.0,
+                            strokeWidth: 6,
+                            backgroundColor: Colors.transparent,
+                            valueColor: AlwaysStoppedAnimation(
+                              budgetColor.withValues(alpha: 0.15),
+                            ),
+                          ),
+                        ),
+                        // Progress Circle
+                        SizedBox(
+                          width: 80,
+                          height: 80,
+                          child: TweenAnimationBuilder<double>(
+                            duration: Duration(milliseconds: 1000),
+                            curve: Curves.easeOutCubic,
+                            tween: Tween(begin: 0.0, end: percent),
+                            builder: (context, value, child) {
+                              return CircularProgressIndicator(
+                                value: value,
+                                strokeWidth: 6,
+                                backgroundColor: Colors.transparent,
+                                valueColor: AlwaysStoppedAnimation(budgetColor),
+                                strokeCap: StrokeCap.round,
+                              );
+                            },
+                          ),
+                        ),
+                        // Percentage Text
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              '${(percent * 100).toInt()}%',
+                              style: textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w900,
+                                color: budgetColor,
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                            if (isOverBudget)
+                              Icon(
+                                Icons.warning_amber,
+                                color: budgetColor,
+                                size: 12,
+                              ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                SizedBox(height: 8),
+
+                // Budget Name
+                AdaptiveText(
+                  budget.name,
+                  style: textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: color.onSurface,
+                  ),
+                  maxLines: 1,
+                ),
+
+                SizedBox(height: 4),
+
+                // Spent / Budget
+                Row(
+                  children: [
+                    Flexible(
+                      child: CurrencyText(
+                        amount: spent,
+                        style: textTheme.labelSmall?.copyWith(
+                          color: color.onSurfaceVariant,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 1,
+                      ),
+                    ),
+                    Text(
+                      ' / ',
+                      style: textTheme.labelSmall?.copyWith(
+                        color: color.onSurfaceVariant,
+                      ),
+                    ),
+                    Flexible(
+                      child: CurrencyText(
+                        amount: budget.amount,
+                        style: textTheme.labelSmall?.copyWith(
+                          color: color.onSurfaceVariant,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 1,
+                      ),
+                    ),
+                  ],
+                ),
+
+                Spacer(),
+
+                // Date Range
+                Text(
+                  "${formatter.format(startDate)} - ${formatter.format(endDate)}",
+                  style: textTheme.labelSmall?.copyWith(
+                    color: color.onSurfaceVariant,
+                  ),
+                ),
+
+                SizedBox(height: 4),
+
+                // Remaining/Over Budget
+                if (!isOverBudget)
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: budgetColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.savings, size: 10, color: budgetColor),
+                        SizedBox(width: 4),
+                        Flexible(
+                          child: CurrencyText(
+                            amount: remaining,
+                            style: textTheme.labelSmall?.copyWith(
+                              color: budgetColor,
+                              fontWeight: FontWeight.w700,
+                            ),
+                            maxLines: 1,
+                          ),
+                        ),
+                        Text(
+                          ' left',
+                          style: textTheme.labelSmall?.copyWith(
+                            color: budgetColor,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                else
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: budgetColor.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.warning_amber, size: 10, color: budgetColor),
+                        SizedBox(width: 4),
+                        AdaptiveText(
+                          'Over Budget',
+                          style: textTheme.labelSmall?.copyWith(
+                            color: budgetColor,
+                            fontWeight: FontWeight.w700,
+                          ),
+                          maxLines: 1,
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

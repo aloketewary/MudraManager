@@ -11,7 +11,7 @@ import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
 import 'package:mudra_manager/db/models/pending_transaction.dart' show PendingTransaction;
 import 'package:mudra_manager/providers/pending_transaction_prodiver.dart';
 import 'package:mudra_manager/providers/shared_preference_provider.dart';
-import 'package:mudra_manager/theme/app_colors.dart';
+
 import 'package:mudra_manager/util/string_util.dart';
 import 'package:mudra_manager/util/transaction_msg_util.dart' show TransactionInfo, TransactionType, TransactionUtil, checkForTransactionalMessage, generateSmsHash;
 import 'package:mudra_manager/main.dart' show setupSmsListener;
@@ -50,7 +50,7 @@ class _SmsImportSettingsScreenState
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final gradientColors = AppColors.glassGradient(color.primary, isDark);
+    final gradientColors = [color.primary.withValues(alpha: 0.1), color.primary.withValues(alpha: 0.05)];
 
     if (Platform.isIOS) {
       return Scaffold(
@@ -64,7 +64,7 @@ class _SmsImportSettingsScreenState
                 gradient: LinearGradient(colors: gradientColors, begin: Alignment.topLeft, end: Alignment.bottomRight),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: color.primary.withValues(alpha: 0.3), width: 1.5),
-                boxShadow: AppColors.glassShadow(color.primary, isDark),
+                boxShadow: [BoxShadow(color: color.primary.withValues(alpha: 0.15), blurRadius: 12, offset: Offset(0, 4))],
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -72,7 +72,7 @@ class _SmsImportSettingsScreenState
                   Container(
                     padding: EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: AppColors.white,
+                      color: color.onSurface,
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [BoxShadow(color: color.primary.withValues(alpha: 0.15), blurRadius: 12, offset: Offset(0, 4))],
                     ),
@@ -95,97 +95,139 @@ class _SmsImportSettingsScreenState
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: gradientColors,
-              ),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: color.primary.withValues(alpha: 0.3), width: 1.5),
-              boxShadow: AppColors.glassShadow(color.primary, isDark),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Enable SMS Import', style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600, color: color.primary, letterSpacing: -0.2)),
-                      SizedBox(height: 4),
-                      Text('Auto-detect transactions from SMS', style: textTheme.bodyMedium?.copyWith(color: color.primary.withValues(alpha: 0.75), fontSize: 13)),
-                    ],
+          Card(
+            elevation: 0,
+            color: color.surfaceContainerHighest,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: color.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(Icons.sms, color: color.primary, size: 24),
                   ),
-                ),
-                Switch(
-                  value: _smsImportEnabled,
-                  onChanged: (bool value) async {
-                    HapticFeedback.mediumImpact();
-                    if (value) {
-                      final permission = await Permission.sms.request();
-                      if (permission.isGranted) {
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Enable SMS Import',
+                          style: textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: color.onSurface,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Auto-detect transactions from SMS',
+                          style: textTheme.bodySmall?.copyWith(
+                            color: color.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Switch(
+                    value: _smsImportEnabled,
+                    onChanged: (bool value) async {
+                      HapticFeedback.mediumImpact();
+                      if (value) {
+                        final permission = await Permission.sms.request();
+                        if (permission.isGranted) {
+                          setState(() => _smsImportEnabled = value);
+                          SharedPrefsUtil.instance.setSmsImportEnabled(value);
+                          await setupSmsListener();
+                          if (!context.mounted) return;
+                          SnackbarService.success('SMS import enabled');
+                        } else {
+                          if (!context.mounted) return;
+                          SnackbarService.error('SMS permission required');
+                        }
+                      } else {
                         setState(() => _smsImportEnabled = value);
                         SharedPrefsUtil.instance.setSmsImportEnabled(value);
-                        await setupSmsListener();
                         if (!context.mounted) return;
-                        SnackbarService.success('SMS import enabled');
-                      } else {
-                        if (!context.mounted) return;
-                        SnackbarService.error('SMS permission required');
+                        SnackbarService.info('SMS import disabled');
                       }
-                    } else {
-                      setState(() => _smsImportEnabled = value);
-                      SharedPrefsUtil.instance.setSmsImportEnabled(value);
-                      if (!context.mounted) return;
-                      SnackbarService.info('SMS import disabled');
-                    }
-                  },
-                ),
-              ],
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
-          SizedBox(height: 12),
-          _buildSettingCard(context, color, textTheme, isDark, Icons.sync, 'Rescan SMS Now', 'Scan recent messages for transactions', () {
-            HapticFeedback.mediumImpact();
-            _showSmsScanOptions(context);
-          }),
-          SizedBox(height: 12),
-          _buildSettingCard(context, color, textTheme, isDark, Icons.clear_all, 'Clear Processing History', 'Reset SMS scan history', () {
-            HapticFeedback.mediumImpact();
-            SharedPrefsUtil.instance.clearProcessedHashes();
-            SnackbarService.success('Processing history cleared');
-          }),
-          SizedBox(height: 24),
-          Container(
-            padding: EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: gradientColors,
-              ),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: color.primary.withValues(alpha: 0.3), width: 1.5),
-              boxShadow: AppColors.glassShadow(color.primary, isDark),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(Icons.info_outline, color: color.primary, size: 20),
-                SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('How it Works', style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: color.primary)),
-                      SizedBox(height: 4),
-                      Text('We scan SMS from trusted sources like banks or wallets to automatically create transactions.', style: textTheme.bodySmall?.copyWith(color: color.primary)),
-                    ],
+          const SizedBox(height: 8),
+          _buildSettingCard(
+            context,
+            color,
+            textTheme,
+            Icons.sync,
+            'Rescan SMS Now',
+            'Scan recent messages for transactions',
+            () {
+              HapticFeedback.mediumImpact();
+              _showSmsScanOptions(context);
+            },
+          ),
+          const SizedBox(height: 8),
+          _buildSettingCard(
+            context,
+            color,
+            textTheme,
+            Icons.clear_all,
+            'Clear Processing History',
+            'Reset SMS scan history',
+            () {
+              HapticFeedback.mediumImpact();
+              SharedPrefsUtil.instance.clearProcessedHashes();
+              SnackbarService.success('Processing history cleared');
+            },
+          ),
+          const SizedBox(height: 24),
+          Card(
+            elevation: 0,
+            color: color.surfaceContainerHighest,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: color.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(Icons.info_outline, color: color.primary, size: 24),
                   ),
-                ),
-              ],
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'How it Works',
+                          style: textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: color.onSurface,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'We scan SMS from trusted sources like banks or wallets to automatically create transactions.',
+                          style: textTheme.bodySmall?.copyWith(
+                            color: color.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -193,46 +235,58 @@ class _SmsImportSettingsScreenState
     );
   }
 
-  Widget _buildSettingCard(BuildContext context, ColorScheme color, TextTheme textTheme, bool isDark, IconData icon, String title, String subtitle, VoidCallback onTap) {
-    final gradientColors = AppColors.glassGradient(color.primary, isDark);
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: gradientColors,
+  Widget _buildSettingCard(
+    BuildContext context,
+    ColorScheme color,
+    TextTheme textTheme,
+    IconData icon,
+    String title,
+    String subtitle,
+    VoidCallback onTap,
+  ) {
+    return Card(
+      elevation: 0,
+      color: color.surfaceContainerHighest,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: color.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: color.primary, size: 24),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: color.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: textTheme.bodySmall?.copyWith(
+                        color: color.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right, color: color.onSurfaceVariant),
+            ],
           ),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: color.primary.withValues(alpha: 0.3), width: 1.5),
-          boxShadow: AppColors.glassShadow(color.primary, isDark),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: AppColors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [BoxShadow(color: color.primary.withValues(alpha: 0.15), blurRadius: 12, offset: Offset(0, 4))],
-              ),
-              child: Icon(icon, color: color.primary, size: 26),
-            ),
-            SizedBox(width: 18),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600, color: color.primary, letterSpacing: -0.2)),
-                  SizedBox(height: 4),
-                  Text(subtitle, style: textTheme.bodyMedium?.copyWith(color: color.primary.withValues(alpha: 0.75), fontSize: 13)),
-                ],
-              ),
-            ),
-            Icon(Icons.arrow_forward_ios_rounded, color: color.primary.withValues(alpha: 0.5), size: 18),
-          ],
         ),
       ),
     );
@@ -240,6 +294,8 @@ class _SmsImportSettingsScreenState
 
   void _showSmsScanOptions(BuildContext context) async {
     final now = DateTime.now();
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     final options = {
       'This Month': DateTime(now.year, now.month, 1),
@@ -250,18 +306,73 @@ class _SmsImportSettingsScreenState
 
     await showModalBottomSheet(
       context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (context) {
-        return ListView(
-          shrinkWrap: true,
-          children:
-              options.entries.map((entry) {
-                return ListTile(
-                  title: Text(entry.key),
-                  onTap: () {
-                    context.pop(entry.value);
-                  },
+        return Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: color.onSurfaceVariant.withValues(alpha: 0.4),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Select Scan Period',
+                style: textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 16),
+              ...options.entries.map((entry) {
+                return Card(
+                  elevation: 0,
+                  color: color.surfaceContainerHighest,
+                  margin: const EdgeInsets.symmetric(vertical: 4),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () {
+                      context.pop(entry.value);
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.calendar_month,
+                            color: color.primary,
+                            size: 24,
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Text(
+                              entry.key,
+                              style: textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            color: color.onSurfaceVariant,
+                            size: 16,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 );
-              }).toList(),
+              }),
+              const SizedBox(height: 16),
+            ],
+          ),
         );
       },
     ).then((selectedStartDate) async {
@@ -283,31 +394,37 @@ class _SmsImportSettingsScreenState
       context: context,
       barrierDismissible: false,
       builder: (context) {
+        final color = Theme.of(context).colorScheme;
+        final textTheme = Theme.of(context).textTheme;
         return Dialog(
           backgroundColor: Colors.transparent,
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-            child: Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.8),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      Colors.blueAccent,
-                    ),
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: color.surface,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: color.shadow.withValues(alpha: 0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(
+                  color: color.primary,
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  "Scanning your SMS...",
+                  style: textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
                   ),
-                  const SizedBox(height: 20),
-                  Text(
-                    "Scanning your SMS...",
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         );

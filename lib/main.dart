@@ -9,12 +9,15 @@ import 'package:mudra_manager/service/bill_service.dart';
 import 'package:mudra_manager/service/notification_service.dart';
 import 'package:mudra_manager/service/recurring_transaction_scheduler.dart';
 import 'package:mudra_manager/service/summary_scheduler.dart';
+import 'package:mudra_manager/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/theme/app_theme.dart';
 import 'package:mudra_manager/theme/theme_provider.dart';
 import 'package:mudra_manager/util/sms_transaction_util.dart';
 import 'package:mudra_manager/util/snackbar_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:telephony/telephony.dart';
+import 'package:dynamic_color/dynamic_color.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
 export 'main.dart' show setupSmsListener;
 
@@ -52,28 +55,76 @@ class MudraManagerApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final themeMode = ref.watch(themeModeProvider);
+    final appThemeMode = ref.watch(appThemeModeProvider);
     var appTheme = AppTheme.instance;
     final appColorTheme = ref.watch(themeNotifierProvider);
+    final systemBrightness = MediaQuery.platformBrightnessOf(context);
 
-    return MaterialApp.router(
-      title: 'Mudra Manager',
-      theme: appTheme.buildLightTheme(appColorTheme),
-      darkTheme: appTheme.buildDarkTheme(appColorTheme),
-      themeMode: themeMode,
-      debugShowCheckedModeBanner: false,
-      scaffoldMessengerKey: SnackbarService.scaffoldMessengerKey,
-      routerConfig: AppRouter.router(showOnboarding),
-      locale: ref.watch(localeProvider),
-      supportedLocales: AppLocalizations.supportedLocales,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      localeResolutionCallback: (locale, supportedLocales) {
-        for (var supportedLocale in supportedLocales) {
-          if (supportedLocale.languageCode == locale?.languageCode) {
-            return supportedLocale;
-          }
+    return DynamicColorBuilder(
+      builder: (lightDynamic, darkDynamic) {
+        ColorScheme lightColorScheme;
+        ColorScheme darkColorScheme;
+        ColorScheme amoledColorScheme;
+
+        if (lightDynamic != null && darkDynamic != null) {
+          lightColorScheme = lightDynamic.harmonized();
+          darkColorScheme = darkDynamic.harmonized();
+          amoledColorScheme = appColorTheme.amoledColorScheme();
+        } else {
+          lightColorScheme = appColorTheme.lightColorScheme();
+          darkColorScheme = appColorTheme.darkColorScheme();
+          amoledColorScheme = appColorTheme.amoledColorScheme();
         }
-        return supportedLocales.first;
+
+        ThemeData currentTheme;
+
+        switch (appThemeMode) {
+          case AppThemeMode.light:
+            currentTheme = appTheme.buildLightThemeWithScheme(lightColorScheme);
+            break;
+          case AppThemeMode.dark:
+            currentTheme = appTheme.buildDarkThemeWithScheme(darkColorScheme);
+            break;
+          case AppThemeMode.amoled:
+            currentTheme = appTheme.buildDarkThemeWithScheme(amoledColorScheme);
+            break;
+          case AppThemeMode.system:
+            currentTheme = systemBrightness == Brightness.light
+                ? appTheme.buildLightThemeWithScheme(lightColorScheme)
+                : appTheme.buildDarkThemeWithScheme(darkColorScheme);
+            break;
+        }
+
+        return MaterialApp.router(
+          title: 'Mudra Manager',
+          theme: currentTheme,
+          debugShowCheckedModeBanner: false,
+          scaffoldMessengerKey: SnackbarService.scaffoldMessengerKey,
+          routerConfig: AppRouter.router(showOnboarding),
+          locale: ref.watch(localeProvider),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          localeResolutionCallback: (locale, supportedLocales) {
+            for (var supportedLocale in supportedLocales) {
+              if (supportedLocale.languageCode == locale?.languageCode) {
+                return supportedLocale;
+              }
+            }
+            return supportedLocales.first;
+          },
+          builder: (context, child) {
+            NotificationService.setContext(context);
+            return ResponsiveBreakpoints.builder(
+              child: child!,
+              breakpoints: [
+                const Breakpoint(start: 0, end: 450, name: MOBILE),
+                const Breakpoint(start: 451, end: 800, name: TABLET),
+                const Breakpoint(start: 801, end: 1920, name: DESKTOP),
+                const Breakpoint(start: 1921, end: double.infinity, name: '4K'),
+              ],
+            );
+          },
+        );
       },
     );
   }

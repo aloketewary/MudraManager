@@ -171,7 +171,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 Expanded(
                   child: PageView.builder(
                     controller: _controller,
-                    physics: NeverScrollableScrollPhysics(),
+                    physics: _nameController.text.trim().isEmpty 
+                        ? null 
+                        : const NeverScrollableScrollPhysics(),
                     itemCount: onboardingData.length,
                     onPageChanged: (index) {
                       setState(() => _currentPage = index);
@@ -180,9 +182,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       final data = onboardingData[index];
                       return Padding(
                         padding: const EdgeInsets.all(24),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
+                        child: SingleChildScrollView(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
                             Icon(data.icon, size: 120, color: color.onPrimary),
                             const SizedBox(height: 30),
                             Text(
@@ -222,17 +225,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             if (data.backupDialogue)
                               Text('Do you have Backup?', style: textTheme.bodyMedium?.copyWith(color: color.onPrimary), textAlign: TextAlign.center),
                             if (data.backupDialogue)
-                              ElevatedButton.icon(
+                              FilledButton.icon(
                                 onPressed: () => _onRestoreButton(context),
-                                style: ElevatedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                  backgroundColor: Colors.black,
+                                style: FilledButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                  backgroundColor: color.surface,
+                                  foregroundColor: color.onSurface,
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                 ),
-                                icon: const Icon(Icons.restore_outlined, color: Colors.white),
-                                label: const Text("Let's Restore", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                                icon: Icon(Icons.restore_outlined, color: color.onSurface),
+                                label: Text("Let's Restore", style: TextStyle(color: color.onSurface, fontWeight: FontWeight.w600)),
                               ),
-                          ],
+                            ],
+                          ),
                         ),
                       );
                     },
@@ -242,6 +247,23 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   padding: const EdgeInsets.all(24),
                   child: Row(
                     children: [
+                      if (_currentPage > 0 && _nameController.text.trim().isEmpty)
+                        FilledButton(
+                          onPressed: () {
+                            _controller.previousPage(
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                            );
+                          },
+                          style: FilledButton.styleFrom(
+                            shape: const CircleBorder(),
+                            padding: const EdgeInsets.all(20),
+                            backgroundColor: color.surface,
+                            foregroundColor: color.onSurface,
+                          ),
+                          child: Icon(Icons.arrow_back, color: color.onSurface),
+                        ),
+                      if (_currentPage > 0 && _nameController.text.trim().isEmpty) const SizedBox(width: 16),
                       ...List.generate(
                         onboardingData.length,
                         (index) => AnimatedContainer(
@@ -256,14 +278,20 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         ),
                       ),
                       const Spacer(),
-                      ElevatedButton(
+                      FilledButton(
                         onPressed: () => _onNext(context),
-                        style: ElevatedButton.styleFrom(
+                        style: FilledButton.styleFrom(
                           shape: const CircleBorder(),
-                          padding: const EdgeInsets.all(18),
-                          backgroundColor: Colors.black,
+                          padding: const EdgeInsets.all(20),
+                          backgroundColor: color.surface,
+                          foregroundColor: color.onSurface,
                         ),
-                        child: const Icon(Icons.arrow_forward, color: Colors.white),
+                        child: Icon(
+                          _currentPage == onboardingData.length - 1 
+                              ? Icons.check 
+                              : Icons.arrow_forward, 
+                          color: color.onSurface
+                        ),
                       ),
                     ],
                   ),
