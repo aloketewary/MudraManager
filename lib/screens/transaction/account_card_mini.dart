@@ -46,9 +46,8 @@ class AccountCardMini extends StatelessWidget {
               isSkeleton
                   ? [Colors.grey, Colors.grey.shade900]
                   : [
-                    color.primary,
-                    color.primaryFixed,
                     accountColor,
+                    accountColor.withValues(alpha: 0.8),
                   ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,

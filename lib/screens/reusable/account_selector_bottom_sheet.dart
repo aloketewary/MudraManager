@@ -36,6 +36,7 @@ class AccountSelectorBottomSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final accountsAsync = ref.watch(accountsProvider);
+    final accountService = ref.watch(accountServiceProvider);
     final textTheme = Theme.of(context).textTheme;
     final l10n = AppLocalizations.of(context)!;
 
@@ -87,15 +88,21 @@ class AccountSelectorBottomSheet extends ConsumerWidget {
                     final account = accounts[index];
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 12),
-                      child: AccountDisplayCard(
-                        title: account.name,
-                        amount: l10n.formatCurrencyWithSign(0, account.balance),
-                        accountType: account.accountType,
-                        startColor: Colors.blue,
-                        endColor: Colors.blue.shade100,
-                        isSelected: selectedAccount?.id == account.id,
-                        accountNumber: account.accountNumber,
-                        callbackAction: () => onAccountSelected(account),
+                      child: FutureBuilder<double>(
+                        future: accountService.getAccountBalance(account.id),
+                        builder: (context, snapshot) {
+                          final balance = snapshot.data ?? 0.0;
+                          return AccountDisplayCard(
+                            title: account.name,
+                            amount: l10n.formatCurrencyWithSign(0, balance),
+                            accountType: account.accountType,
+                            startColor: Colors.blue,
+                            endColor: Colors.blue.shade100,
+                            isSelected: selectedAccount?.id == account.id,
+                            accountNumber: account.accountNumber,
+                            callbackAction: () => onAccountSelected(account),
+                          );
+                        },
                       ),
                     );
                   },

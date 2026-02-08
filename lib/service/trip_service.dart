@@ -57,7 +57,9 @@ class TripService {
       );
       tripTxn.transaction.value = transaction;
       final paidBy = await isar.tripParticipants.get(paidById);
-      tripTxn.paidBy.value = paidBy;
+      if (paidBy != null) {
+        tripTxn.paidBy.value = paidBy;
+      }
       await isar.tripTransactions.put(tripTxn);
       await tripTxn.transaction.save();
       await tripTxn.paidBy.save();
@@ -86,8 +88,8 @@ class TripService {
 
       if (txn == null || paidBy == null) continue;
 
-      final amount = txn.amount;
-      final paidById = paidBy.id;
+      final amount = txn?.amount ?? 0.0;
+      final paidById = paidBy?.id ?? 0;
 
       balances[paidById] = (balances[paidById] ?? 0) + amount;
 

@@ -27,18 +27,29 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   var sharedPrefs = await SharedPreferences.getInstance();
   SharedPrefsUtil.init(sharedPrefs);
+  
+  // Initialize critical services first
   await NotificationService.initialize();
-  await RecurringTransactionScheduler.initialize();
-  await SummaryScheduler.checkAndShowSummaries();
-  await BillService.scheduleBillReminders();
-  await BillService.createPendingTransactionsForDueBills();
-  await HomeWidget.setAppGroupId('group.mudra_manager');
-  HomeWidget.registerInteractivityCallback(backgroundCallback);
+  
+  // Move heavy operations to background
+  _initializeBackgroundServices();
 
   final completed = SharedPrefsUtil.instance.isOnboardingComplete();
   setupSmsListener();
 
   runApp(ProviderScope(child: MudraManagerApp(showOnboarding: !completed)));
+}
+
+// Background initialization to prevent UI blocking
+Future<void> _initializeBackgroundServices() async {
+  Future.microtask(() async {
+    await RecurringTransactionScheduler.initialize();
+    await SummaryScheduler.checkAndShowSummaries();
+    await BillService.scheduleBillReminders();
+    await BillService.createPendingTransactionsForDueBills();
+    await HomeWidget.setAppGroupId('group.mudra_manager');
+    HomeWidget.registerInteractivityCallback(backgroundCallback);
+  });
 }
 
 @pragma('vm:entry-point')

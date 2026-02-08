@@ -39,7 +39,7 @@ class CategorySelectorBottomSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final categoriesAsync = ref.watch(categoriesProvider);
+    final categoriesAsync = ref.watch(categoryListProvider);
     final textTheme = Theme.of(context).textTheme;
 
     return DraggableScrollableSheet(
@@ -75,7 +75,8 @@ class CategorySelectorBottomSheet extends ConsumerWidget {
             child: categoriesAsync.when(
               data: (categories) {
                 final filtered = categories
-                    .where((c) => c.isExpense == isExpense)
+                    .where((c) => (isExpense && c.categoryType == CategoryType.expense) || 
+                                  (!isExpense && c.categoryType == CategoryType.income))
                     .toList();
 
                 if (filtered.isEmpty) {

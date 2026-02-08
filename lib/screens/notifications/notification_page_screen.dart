@@ -154,15 +154,15 @@ class NotificationPage extends ConsumerWidget {
   IconData _getIconForType(String? type) {
     switch (type) {
       case 'low_balance':
-        return Icons.account_balance_wallet_outlined;
+        return Icons.credit_card_off_rounded;
       case 'budget_overspent':
-        return Icons.warning_amber_outlined;
+        return Icons.error_outline_rounded;
       case 'budget_near_limit':
-        return Icons.track_changes_outlined;
+        return Icons.warning_amber_rounded;
       case 'reminder':
-        return Icons.notifications_active_outlined;
+        return Icons.access_time_rounded;
       default:
-        return Icons.notifications_none_outlined;
+        return Icons.notifications_rounded;
     }
   }
 }

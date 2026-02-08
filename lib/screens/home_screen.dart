@@ -99,8 +99,8 @@ class HomePageState extends ConsumerState<HomePage>
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
         onDestinationSelected: _onTabSelected,
-        surfaceTintColor: Theme.of(context).colorScheme.surfaceTint,
-        backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+        elevation: 0,
+        animationDuration: Duration(milliseconds: 300),
         destinations: [
           NavigationDestination(
             icon: Icon(Icons.home_outlined),

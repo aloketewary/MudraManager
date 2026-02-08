@@ -11,10 +11,10 @@ class SmsSelectionScreen extends StatefulWidget {
   const SmsSelectionScreen({super.key, required this.messages});
 
   @override
-  _SmsSelectionScreenState createState() => _SmsSelectionScreenState();
+  SmsSelectionScreenState createState() => SmsSelectionScreenState();
 }
 
-class _SmsSelectionScreenState extends State<SmsSelectionScreen> {
+class SmsSelectionScreenState extends State<SmsSelectionScreen> {
   final Set<SmsMessage> _selectedMessages = {};
 
   @override
@@ -28,7 +28,7 @@ class _SmsSelectionScreenState extends State<SmsSelectionScreen> {
         title: Text(ctxt.sms_selectTransactions),
         actions: [
           FilledButton.icon(
-            onPressed: _onAddSelected,
+            onPressed: () => _onAddSelected(ctxt),
             icon: const Icon(Icons.check, size: 18),
             label: Text(ctxt.common_addLabel),
             style: FilledButton.styleFrom(
@@ -145,7 +145,7 @@ class _SmsSelectionScreenState extends State<SmsSelectionScreen> {
     );
   }
 
-  void _onAddSelected() {
+  void _onAddSelected(AppLocalizations ctxt) {
     if (_selectedMessages.isEmpty) {
       SnackbarService.warning(ctxt.sms_selectAtLeastOneMessage);
       return;
