@@ -1,23 +1,10 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:isar_community/isar.dart';
-import 'package:mudra_manager/db/models/account.dart' show Account, AccountType, GetAccountCollection;
-import 'package:mudra_manager/db/models/category.dart' show Category, CategoryType, GetCategoryCollection;
-import 'package:mudra_manager/db/models/user_profile.dart' show GetUserProfileCollection, UserProfile;
 import 'package:mudra_manager/l10n/app_localizations.dart';
 import 'package:mudra_manager/models/onboarding_page_model.dart' show onboardingData;
-import 'package:mudra_manager/providers/isar_provider.dart';
 import 'package:mudra_manager/providers/l10n_provider.dart' show LanguageService;
-import 'package:mudra_manager/providers/shared_preference_provider.dart';
-import 'package:mudra_manager/screens/home_screen.dart';
-import 'package:mudra_manager/screens/onboarding/onboarding_background.dart' show OnboardingBackground;
-import 'package:mudra_manager/screens/reusable/common_text_input_field.dart';
-import 'package:mudra_manager/service/backup_restore_service.dart' show BackupService;
-import 'package:mudra_manager/util/dialog_utils.dart';
 import 'package:mudra_manager/util/localization_extension.dart';
-import 'package:mudra_manager/util/snackbar_service.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
@@ -28,283 +15,178 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final PageController _controller = PageController();
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _accountController = TextEditingController(text: 'Cash');
-  final TextEditingController _balanceController = TextEditingController();
   int _currentPage = 0;
-  final List<Category> defaultCategories = [
-    Category.create(name: 'Salary', categoryType: CategoryType.income)
-      ..iconName = 'attach_money'
-      ..colorValue = Colors.green.toARGB32(),
-    Category.create(name: 'Investment', categoryType: CategoryType.income)
-      ..iconName = 'trending_up'
-      ..colorValue = Colors.teal.toARGB32(),
-    Category.create(name: 'Savings', categoryType: CategoryType.income)
-      ..iconName = 'savings'
-      ..colorValue = Colors.yellow.toARGB32(),
-    Category.create(name: 'Food', categoryType: CategoryType.expense)
-      ..iconName = 'fastfood'
-      ..colorValue = Colors.orange.toARGB32(),
-    Category.create(name: 'Transport', categoryType: CategoryType.expense)
-      ..iconName = 'directions_car'
-      ..colorValue = Colors.purple.toARGB32(),
-    Category.create(name: 'Health', categoryType: CategoryType.expense)
-      ..iconName = 'local_hospital'
-      ..colorValue = Colors.red.toARGB32(),
-    Category.create(name: 'Shopping', categoryType: CategoryType.expense)
-      ..iconName = 'shopping_bag'
-      ..colorValue = Colors.redAccent.toARGB32(),
-    Category.create(name: 'Groceries', categoryType: CategoryType.expense)
-      ..iconName = 'local_grocery_store'
-      ..colorValue = Colors.orange.toARGB32(),
-  ];
-
-  Future<void> createDefaultCategories(Isar isar) async {
-    final existing = await isar.categorys.where().findAll(); // check if already created
-    if (existing.isNotEmpty) return;
-
-    await isar.writeTxn(() async {
-      await isar.categorys.putAll(defaultCategories);
-    });
-  }
-
-  void _onNext(BuildContext context) {
-    final ctxt = AppLocalizations.of(context)!;
-    final isNamePage = _currentPage == onboardingData.length - 3;
-    final isAccountPage = _currentPage == onboardingData.length - 2;
-
-    final currentPage = onboardingData[_currentPage];
-    if (currentPage.needsInput && isNamePage) {
-      final text = _nameController.text.trim();
-      String hintText = ctxt.translate(currentPage.inputHint ?? '').toLowerCase();
-      if (text.isEmpty) {
-        // Show error
-        SnackbarService.error(ctxt.onboard_pleaseFillThe(hintText));
-        return; // Stop here
-      }
-    }
-    if (currentPage.needsInput && isAccountPage) {
-      final text = _accountController.text.trim();
-      final balanceText = _balanceController.text.trim();
-
-      if (text.isEmpty) {
-        String hintText = ctxt.translate(currentPage.inputHint ?? '').toLowerCase();
-        // Show error
-        SnackbarService.error(ctxt.onboard_pleaseFillThe(hintText));
-        return; // Stop here
-      }
-      if (balanceText.isEmpty) {
-        // Show error
-        SnackbarService.error(ctxt.onboard_pleaseFillThe(ctxt.onboard_initialBalance.toLowerCase()));
-        return; // Stop here
-      }
-      // Try parsing as a double (allows for decimal numbers)
-      final balance = double.tryParse(balanceText.trim());
-
-      if (balance == null) {
-        String hintText = ctxt.translate(currentPage.inputHint ?? '').toLowerCase();
-        // Show error if it's not a valid number
-        SnackbarService.error(ctxt.onboard_pleaseEnterAValidNumberFor(hintText));
-        return; // Stop here
-      }
-    }
-    if (_currentPage < onboardingData.length - 1) {
-      _controller.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
-    } else {
-      _completeOnboarding();
-    }
-  }
-
-  Future<void> _completeOnboarding() async {
-    final name = _nameController.text.trim();
-    final account = _accountController.text.trim();
-    final balanceText = _balanceController.text.trim();
-
-    final isar = await ref.read(isarServiceProvider).getInstance();
-
-    await isar.writeTxn(() async {
-      await isar.userProfiles.put(UserProfile()..name = name);
-
-      await isar.accounts.put(
-        Account()
-          ..name = account
-          ..accountType = AccountType.cash
-          ..colorValue = Colors.yellowAccent.toARGB32()
-          ..accountNumber = '0000'
-          ..initialBalance = double.parse(balanceText),
-      );
-    });
-    await createDefaultCategories(isar);
-    if (context.mounted) {
-      SharedPrefsUtil.instance.setOnboardingComplete();
-      context.go('/home');
-    }
-  }
-
-  _onRestoreButton(BuildContext context) async {
-    final password = await DialogUtils.showPasswordDialog(context, isRestore: true);
-    if (password == null) return;
-    
-    final isar = await ref.read(isarServiceProvider).getInstance();
-    final data = await BackupService.restoreEncryptedBackup(context, isar, password);
-    if (data != null) {
-      SnackbarService.success("Restore successful");
-      context.go('/home');
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
-    final isNamePage = _currentPage == onboardingData.length - 3;
-    final isAccountPage = _currentPage == onboardingData.length - 2;
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final ctxt = AppLocalizations.of(context)!;
 
     return Scaffold(
-      body: Stack(
-        children: [
-          const OnboardingBackground(),
-          SafeArea(
-            child: Column(
-              children: [
-                Expanded(
-                  child: PageView.builder(
-                    controller: _controller,
-                    physics: _nameController.text.trim().isEmpty 
-                        ? null 
-                        : const NeverScrollableScrollPhysics(),
-                    itemCount: onboardingData.length,
-                    onPageChanged: (index) {
-                      setState(() => _currentPage = index);
-                    },
-                    itemBuilder: (context, index) {
-                      final data = onboardingData[index];
-                      return Padding(
-                        padding: const EdgeInsets.all(24),
-                        child: SingleChildScrollView(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                            Icon(data.icon, size: 120, color: color.onPrimary),
-                            const SizedBox(height: 30),
-                            Text(
-                              AppLocalizations.of(context)!.translate(data.title),
-                              style: textTheme.titleLarge?.copyWith(color: color.onPrimary, fontWeight: FontWeight.w700, fontSize: 30),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 15),
-                            Text(
-                              ctxt.translate(data.description),
-                              style: textTheme.titleMedium?.copyWith(color: color.onPrimary, fontWeight: FontWeight.normal),
-                              textAlign: TextAlign.center,
-                            ),
-                            if (data.needsInput) SizedBox(height: 15),
-                            if (data.needsInput)
-                              CommonTextInputField(
-                                controller: isNamePage ? _nameController : _accountController,
-                                labelText: ctxt.translate(data.inputHint ?? ''),
-                                iconData: isNamePage ? Icons.person_outline : Icons.wallet,
-                              ),
-
-                            if (isAccountPage) SizedBox(height: 15),
-                            if (isAccountPage)
-                              CommonTextInputField(
-                                controller: _balanceController,
-                                labelText: ctxt.onboard_initialBalance,
-                                iconData: Icons.account_balance_wallet,
-                                inputType: TextInputType.numberWithOptions(signed: true, decimal: true),
-                              ),
-                            if (isAccountPage)
-                              Text(
-                                ctxt.onboard_youCanUpdateOtherDetailsLaterAsWell,
-                                style: textTheme.bodyMedium?.copyWith(color: color.onPrimary),
-                                textAlign: TextAlign.center,
-                              ),
-                            if (data.backupDialogue) SizedBox(height: 50),
-                            if (data.backupDialogue)
-                              Text('Do you have Backup?', style: textTheme.bodyMedium?.copyWith(color: color.onPrimary), textAlign: TextAlign.center),
-                            if (data.backupDialogue)
-                              FilledButton.icon(
-                                onPressed: () => _onRestoreButton(context),
-                                style: FilledButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                                  backgroundColor: color.surface,
-                                  foregroundColor: color.onSurface,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                ),
-                                icon: Icon(Icons.restore_outlined, color: color.onSurface),
-                                label: Text("Let's Restore", style: TextStyle(color: color.onSurface, fontWeight: FontWeight.w600)),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              color.primary,
+              color.primary.withValues(alpha: 0.8),
+              color.secondary,
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              // Language Selector
+              Align(
+                alignment: Alignment.topRight,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: IconButton(
+                    icon: Icon(Icons.language, color: color.onPrimary),
+                    onPressed: () => LanguageService.showLanguagePicker(context, ref),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Row(
-                    children: [
-                      if (_currentPage > 0 && _nameController.text.trim().isEmpty)
-                        FilledButton(
-                          onPressed: () {
-                            _controller.previousPage(
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeInOut,
-                            );
-                          },
-                          style: FilledButton.styleFrom(
-                            shape: const CircleBorder(),
-                            padding: const EdgeInsets.all(20),
-                            backgroundColor: color.surface,
-                            foregroundColor: color.onSurface,
+              ),
+              
+              // Content
+              Expanded(
+                child: PageView.builder(
+                  controller: _controller,
+                  itemCount: onboardingData.length,
+                  onPageChanged: (index) => setState(() => _currentPage = index),
+                  itemBuilder: (context, index) {
+                    final data = onboardingData[index];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(32),
+                            decoration: BoxDecoration(
+                              color: color.surface.withValues(alpha: 0.2),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              data.icon,
+                              size: 100,
+                              color: color.onPrimary,
+                            ),
                           ),
-                          child: Icon(Icons.arrow_back, color: color.onSurface),
-                        ),
-                      if (_currentPage > 0 && _nameController.text.trim().isEmpty) const SizedBox(width: 16),
-                      ...List.generate(
+                          const SizedBox(height: 48),
+                          Text(
+                            ctxt.translate(data.title),
+                            style: textTheme.headlineMedium?.copyWith(
+                              color: color.onPrimary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            ctxt.translate(data.description),
+                            style: textTheme.bodyLarge?.copyWith(
+                              color: color.onPrimary.withValues(alpha: 0.9),
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+              
+              // Bottom Navigation
+              Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  children: [
+                    // Page Indicators
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(
                         onboardingData.length,
                         (index) => AnimatedContainer(
                           duration: const Duration(milliseconds: 300),
                           margin: const EdgeInsets.symmetric(horizontal: 4),
-                          width: _currentPage == index ? 20 : 8,
+                          width: _currentPage == index ? 32 : 8,
                           height: 8,
                           decoration: BoxDecoration(
-                            color: _currentPage == index ? color.onPrimary : color.onSecondary,
+                            color: _currentPage == index
+                                ? color.onPrimary
+                                : color.onPrimary.withValues(alpha: 0.3),
                             borderRadius: BorderRadius.circular(4),
                           ),
                         ),
                       ),
-                      const Spacer(),
-                      FilledButton(
-                        onPressed: () => _onNext(context),
-                        style: FilledButton.styleFrom(
-                          shape: const CircleBorder(),
-                          padding: const EdgeInsets.all(20),
-                          backgroundColor: color.surface,
-                          foregroundColor: color.onSurface,
+                    ),
+                    const SizedBox(height: 32),
+                    
+                    // Buttons
+                    Row(
+                      children: [
+                        if (_currentPage > 0)
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () {
+                                _controller.previousPage(
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeInOut,
+                                );
+                              },
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                side: BorderSide(color: color.onPrimary),
+                                foregroundColor: color.onPrimary,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: const Text('Back'),
+                            ),
+                          ),
+                        if (_currentPage > 0) const SizedBox(width: 16),
+                        Expanded(
+                          flex: _currentPage > 0 ? 2 : 1,
+                          child: FilledButton(
+                            onPressed: () {
+                              if (_currentPage < onboardingData.length - 1) {
+                                _controller.nextPage(
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeInOut,
+                                );
+                              } else {
+                                context.go('/account-setup');
+                              }
+                            },
+                            style: FilledButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              backgroundColor: color.surface,
+                              foregroundColor: color.primary,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: Text(
+                              _currentPage == onboardingData.length - 1
+                                  ? 'Get Started'
+                                  : 'Next',
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
                         ),
-                        child: Icon(
-                          _currentPage == onboardingData.length - 1 
-                              ? Icons.check 
-                              : Icons.arrow_forward, 
-                          color: color.onSurface
-                        ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-          Positioned(
-            top: 64,
-            right: 10,
-            child: IconButton(icon: Icon(Icons.language, color: color.onPrimary), onPressed: () => LanguageService.showLanguagePicker(context, ref)),
-          ),
-        ],
+        ),
       ),
     );
   }

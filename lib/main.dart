@@ -48,12 +48,36 @@ void main() async {
 // Background initialization to prevent UI blocking
 Future<void> _initializeBackgroundServices() async {
   Future.microtask(() async {
-    await RecurringTransactionScheduler.initialize();
-    await SummaryScheduler.checkAndShowSummaries();
-    await BillService.scheduleBillReminders();
-    await BillService.createPendingTransactionsForDueBills();
-    await HomeWidget.setAppGroupId('group.mudra_manager');
-    HomeWidget.registerInteractivityCallback(backgroundCallback);
+    try {
+      await RecurringTransactionScheduler.initialize();
+    } catch (e) {
+      // Silently handle - already logged in scheduler
+    }
+    
+    try {
+      await SummaryScheduler.checkAndShowSummaries();
+    } catch (e) {
+      debugPrint('Summary check skipped: $e');
+    }
+    
+    try {
+      await BillService.scheduleBillReminders();
+    } catch (e) {
+      debugPrint('Bill reminders skipped: $e');
+    }
+    
+    try {
+      await BillService.createPendingTransactionsForDueBills();
+    } catch (e) {
+      debugPrint('Pending bill transactions skipped: $e');
+    }
+    
+    try {
+      await HomeWidget.setAppGroupId('group.mudra_manager');
+      HomeWidget.registerInteractivityCallback(backgroundCallback);
+    } catch (e) {
+      debugPrint('Home widget skipped: $e');
+    }
   });
 }
 

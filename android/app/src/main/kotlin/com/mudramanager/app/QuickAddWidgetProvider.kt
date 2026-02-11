@@ -1,4 +1,4 @@
-package com.ghostwork.app.mudra_manager
+package com.mudramanager.app
 
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager

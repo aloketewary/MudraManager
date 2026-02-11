@@ -21,7 +21,7 @@ class AboutScreen extends StatelessWidget {
           return CustomScrollView(
             slivers: [
               SliverAppBar.large(
-                expandedHeight: 280,
+                expandedHeight: 240,
                 pinned: true,
                 flexibleSpace: FlexibleSpaceBar(
                   background: Container(
@@ -30,8 +30,9 @@ class AboutScreen extends StatelessWidget {
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [
-                          color.primaryContainer,
-                          color.secondaryContainer,
+                          color.primary,
+                          color.primary.withValues(alpha: 0.85),
+                          color.secondary,
                         ],
                       ),
                     ),
@@ -39,44 +40,40 @@ class AboutScreen extends StatelessWidget {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          SizedBox(height: 60),
-                          Hero(
-                            tag: 'app_logo',
-                            child: Container(
-                              padding: EdgeInsets.all(24),
-                              decoration: BoxDecoration(
-                                color: color.surface,
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: color.shadow.withValues(alpha: 0.15),
-                                    blurRadius: 24,
-                                    offset: Offset(0, 12),
-                                  ),
-                                ],
-                              ),
-                              child: Image.asset('assets/logo/rupee.png', width: 72, height: 72),
+                          SizedBox(height: 40),
+                          Container(
+                            padding: EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: color.surface,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.1),
+                                  blurRadius: 20,
+                                  offset: Offset(0, 8),
+                                ),
+                              ],
                             ),
+                            child: Image.asset('assets/logo/rupee.png', width: 64, height: 64),
                           ),
-                          SizedBox(height: 20),
+                          SizedBox(height: 16),
                           Text(
                             "Mudra Manager",
                             style: textTheme.headlineLarge?.copyWith(
-                              fontWeight: FontWeight.w900,
-                              color: color.onPrimaryContainer,
-                              letterSpacing: -0.5,
+                              fontWeight: FontWeight.bold,
+                              color: color.onPrimary,
                             ),
                           ),
                           SizedBox(height: 8),
                           if (info != null)
                             Container(
-                              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                               decoration: BoxDecoration(
-                                color: color.surface.withValues(alpha: 0.9),
+                                color: color.surface.withValues(alpha: 0.95),
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Text(
-                                "v${info.version}",
+                                "Version ${info.version}",
                                 style: textTheme.labelLarge?.copyWith(
                                   color: color.primary,
                                   fontWeight: FontWeight.w600,

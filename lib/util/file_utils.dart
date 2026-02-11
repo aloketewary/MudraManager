@@ -4,7 +4,6 @@ import 'dart:typed_data' show Uint8List;
 import 'package:file_picker/file_picker.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 Future<Directory> getSaveDirectory({bool askUser = false}) async {
   if (askUser) {
@@ -15,16 +14,7 @@ Future<Directory> getSaveDirectory({bool askUser = false}) async {
     }
   }
 
-  // Try public storage directory (Needs permission)
-  if (await Permission.storage.request().isGranted) {
-    final dir = Directory('/storage/emulated/0/Mudra Manager');
-    if (!await dir.exists()) {
-      await dir.create(recursive: true);
-    }
-    return dir;
-  }
-
-  // Fallback to app-specific storage
+  // Use app-specific storage (no permission needed)
   final fallbackDir = await getExternalStorageDirectory();
   return fallbackDir!;
 }

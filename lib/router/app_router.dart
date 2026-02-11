@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mudra_manager/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/screens/bills/bills_screen.dart';
 import 'package:mudra_manager/screens/budget/add_budget_screen.dart';
 import 'package:mudra_manager/screens/budget/budget_dashboard.dart';
@@ -7,6 +8,7 @@ import 'package:mudra_manager/screens/goal/add_edit_goal_screen.dart';
 import 'package:mudra_manager/screens/goal/goal_screen.dart';
 import 'package:mudra_manager/screens/home_screen.dart';
 import 'package:mudra_manager/screens/notifications/notification_page_screen.dart';
+import 'package:mudra_manager/screens/onboarding/account_setup_screen.dart';
 import 'package:mudra_manager/screens/onboarding/onboarding_screen.dart';
 import 'package:mudra_manager/screens/profile/about_app.dart';
 import 'package:mudra_manager/screens/profile/account_form.dart';
@@ -40,10 +42,31 @@ class AppRouter {
   static GoRouter router(bool showOnboarding) => GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: showOnboarding ? '/onboarding' : '/home',
+    redirect: (context, state) {
+      final isOnboardingComplete = SharedPrefsUtil.instance.isOnboardingComplete();
+      final isOnOnboardingPage = state.matchedLocation == '/onboarding';
+      final isOnAccountSetupPage = state.matchedLocation == '/account-setup';
+      
+      // If onboarding is complete and user is on onboarding/setup page, redirect to home
+      if (isOnboardingComplete && (isOnOnboardingPage || isOnAccountSetupPage)) {
+        return '/home';
+      }
+      
+      // If onboarding is not complete and user is not on onboarding/setup pages, redirect to onboarding
+      if (!isOnboardingComplete && !isOnOnboardingPage && !isOnAccountSetupPage) {
+        return '/onboarding';
+      }
+      
+      return null; // No redirect needed
+    },
     routes: [
       GoRoute(
         path: '/onboarding',
         builder: (context, state) => const OnboardingScreen(),
+      ),
+      GoRoute(
+        path: '/account-setup',
+        builder: (context, state) => const AccountSetupScreen(),
       ),
       ShellRoute(
         builder: (context, state, child) => AuthGate(child: child),

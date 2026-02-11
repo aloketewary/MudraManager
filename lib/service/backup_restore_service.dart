@@ -34,7 +34,6 @@ import 'package:mudra_manager/db/models/user_profile.dart';
 import 'package:mudra_manager/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/util/snackbar_service.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 class BackupService {
   static const _backupFileName = 'mudra_backup';
@@ -349,15 +348,7 @@ class BackupService {
     debugPrint('Restore completed successfully');
   }
 
-  static Future<bool> requestStoragePermission() async {
-    final status = await Permission.manageExternalStorage.request();
-    return status.isGranted;
-  }
-
   static Future<Directory?> pickBackupFolder() async {
-    final hasPermission = await requestStoragePermission();
-    if (!hasPermission) return null;
-
     String? selectedDir = await FilePicker.platform.getDirectoryPath();
     if (selectedDir != null) {
       return Directory(selectedDir);

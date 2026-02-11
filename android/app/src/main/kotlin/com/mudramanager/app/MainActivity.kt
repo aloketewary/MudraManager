@@ -1,4 +1,4 @@
-package com.ghostwork.app.mudra_manager
+package com.mudramanager.app
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 import android.os.Bundle

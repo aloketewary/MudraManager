@@ -120,12 +120,15 @@ class AppTheme {
       surfaceTintColor: Colors.transparent,
       titleTextStyle: textTheme.titleLarge?.copyWith(
         fontWeight: FontWeight.w600,
+        fontSize: 22,
         color: colorScheme.onSurface,
+        letterSpacing: 0,
       ),
       centerTitle: false,
       elevation: 0,
       scrolledUnderElevation: 0,
-      iconTheme: IconThemeData(color: colorScheme.onSurface),
+      iconTheme: IconThemeData(color: colorScheme.onSurface, size: 24),
+      actionsIconTheme: IconThemeData(color: colorScheme.onSurface, size: 24),
       systemOverlayStyle: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
         statusBarBrightness: brightness,

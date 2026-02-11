@@ -6,8 +6,8 @@ allprojects {
 }
 
 plugins {
-    id("com.android.application") version "8.9.1" apply false
-    id("com.android.library") version "8.9.1" apply false
+    id("com.android.application") version "8.13.2" apply false
+    id("com.android.library") version "8.13.2" apply false
     kotlin("android") version "2.1.0" apply false
 }
 
@@ -21,7 +21,7 @@ buildscript {
         // Add your buildscript dependencies here, e.g.,
         // classpath("com.android.tools.build:gradle:...")
         // classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:...")'
-        classpath ("com.android.tools.build:gradle:8.9.1")
+        classpath ("com.android.tools.build:gradle:8.13.2")
     }
 }
 

@@ -39,26 +39,6 @@ final onboardingData = [
   OnboardingPage(
     title: "onboard_GetStarted",
     description: "onboard_letsSetupYourAccount",
-    icon: Icons.settings_outlined,
-    backupDialogue: true
-  ),
-  OnboardingPage(
-    title: "onboard_howShouldWeCallYou",
-    description: "onboard_enterYourNameToPersonalizeYourExperience",
-    icon: Icons.person_outline,
-    needsInput: true,
-    inputHint: "onboard_enterYourName",
-  ),
-  OnboardingPage(
-    title: "onboard_setupYourFirstAccount",
-    description: "onboard_letsCreateYourFirstAccount",
-    icon: Icons.account_balance_wallet_outlined,
-    needsInput: true,
-    inputHint: "onboard_accountName",
-  ),
-  OnboardingPage(
-    title: "onboard_youAreAllSet",
-    description: "onboard_letsStartManagingYourMoneyWisely",
-    icon: Icons.emoji_events_outlined,
+    icon: Icons.rocket_launch_outlined,
   ),
 ];

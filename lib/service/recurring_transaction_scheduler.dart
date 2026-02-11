@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:mudra_manager/db/isar_service.dart';
@@ -11,24 +12,29 @@ class RecurringTransactionScheduler {
   }
 
   static Future<void> scheduleRecurringCheck() async {
-    // Schedule daily check at 6 AM
-    await _notifications.zonedSchedule(
-      999,
-      'Recurring Transactions',
-      'Processing recurring transactions',
-      _nextInstanceOf6AM(),
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'recurring_check',
-          'Recurring Check',
-          channelDescription: 'Background check for recurring transactions',
-          importance: Importance.low,
-          priority: Priority.low,
+    try {
+      // Schedule daily check at 6 AM using inexact timing (doesn't require special permission)
+      await _notifications.zonedSchedule(
+        999,
+        'Recurring Transactions',
+        'Processing recurring transactions',
+        _nextInstanceOf6AM(),
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'recurring_check',
+            'Recurring Check',
+            channelDescription: 'Background check for recurring transactions',
+            importance: Importance.low,
+            priority: Priority.low,
+          ),
         ),
-      ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      matchDateTimeComponents: DateTimeComponents.time,
-    );
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        matchDateTimeComponents: DateTimeComponents.time,
+      );
+      debugPrint('Recurring transaction check scheduled successfully');
+    } catch (e) {
+      debugPrint('Recurring check scheduling skipped: $e');
+    }
   }
 
   static tz.TZDateTime _nextInstanceOf6AM() {

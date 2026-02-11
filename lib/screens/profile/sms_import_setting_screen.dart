@@ -124,7 +124,7 @@ class _SmsImportSettingsScreenState
                       color: color.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Icon(Icons.sms, color: color.primary, size: 24),
+                    child: Icon(Icons.security, color: color.primary, size: 24),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -132,38 +132,37 @@ class _SmsImportSettingsScreenState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Enable SMS Import',
+                          'Enable SMS Permission',
                           style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: color.onSurface),
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          'Auto-detect transactions from SMS',
+                          'Grant access to read SMS',
                           style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
                         ),
                       ],
                     ),
                   ),
                   Switch(
-                    value: _smsImportEnabled,
+                    value: _permissionGranted,
                     onChanged: (bool value) async {
                       HapticFeedback.mediumImpact();
                       if (value) {
+                        final confirmed = await _showSmsPermissionDisclosure(context);
+                        if (confirmed != true) return;
+                        
                         final permission = await Permission.sms.request();
                         if (permission.isGranted) {
-                          setState(() => _smsImportEnabled = value);
-                          SharedPrefsUtil.instance.setSmsImportEnabled(value);
-                          await setupSmsListener();
+                          setState(() => _permissionGranted = true);
                           if (!context.mounted) return;
-                          SnackbarService.success('SMS import enabled');
+                          SnackbarService.success('SMS permission granted');
                         } else {
                           if (!context.mounted) return;
-                          SnackbarService.error('SMS permission required');
+                          SnackbarService.error('SMS permission denied');
                         }
                       } else {
-                        setState(() => _smsImportEnabled = value);
-                        SharedPrefsUtil.instance.setSmsImportEnabled(value);
                         if (!context.mounted) return;
-                        SnackbarService.info('SMS import disabled');
+                        SnackbarService.info('Please disable in system settings');
                       }
                     },
                   ),
@@ -172,31 +171,94 @@ class _SmsImportSettingsScreenState
             ),
           ),
           const SizedBox(height: 8),
-          _buildSettingCard(
-            context,
-            color,
-            textTheme,
-            Icons.sync,
-            'Rescan SMS Now',
-            'Scan recent messages for transactions',
-            () {
-              HapticFeedback.mediumImpact();
-              _showSmsScanOptions(context);
-            },
+          Opacity(
+            opacity: _permissionGranted ? 1.0 : 0.5,
+            child: Card(
+              elevation: 0,
+              color: color.surfaceContainerHighest,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: color.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(Icons.sms, color: color.primary, size: 24),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Auto Import SMS',
+                            style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: color.onSurface),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Auto-detect transactions from SMS',
+                            style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Switch(
+                      value: _smsImportEnabled && _permissionGranted,
+                      onChanged: !_permissionGranted ? null : (bool value) async {
+                        HapticFeedback.mediumImpact();
+                        setState(() => _smsImportEnabled = value);
+                        SharedPrefsUtil.instance.setSmsImportEnabled(value);
+                        if (value) {
+                          await setupSmsListener();
+                          if (!context.mounted) return;
+                          SnackbarService.success('Auto import enabled');
+                        } else {
+                          if (!context.mounted) return;
+                          SnackbarService.info('Auto import disabled');
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
           const SizedBox(height: 8),
-          _buildSettingCard(
-            context,
-            color,
-            textTheme,
-            Icons.clear_all,
-            'Clear Processing History',
-            'Reset SMS scan history',
-            () {
-              HapticFeedback.mediumImpact();
-              SharedPrefsUtil.instance.clearProcessedHashes();
-              SnackbarService.success('Processing history cleared');
-            },
+          Opacity(
+            opacity: _permissionGranted ? 1.0 : 0.5,
+            child: _buildSettingCard(
+              context,
+              color,
+              textTheme,
+              Icons.sync,
+              'Rescan SMS Now',
+              'Scan recent messages for transactions',
+              !_permissionGranted ? () {} : () {
+                HapticFeedback.mediumImpact();
+                _showSmsScanOptions(context);
+              },
+              enabled: _permissionGranted,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Opacity(
+            opacity: _permissionGranted ? 1.0 : 0.5,
+            child: _buildSettingCard(
+              context,
+              color,
+              textTheme,
+              Icons.clear_all,
+              'Clear Processing History',
+              'Reset SMS scan history',
+              !_permissionGranted ? () {} : () {
+                HapticFeedback.mediumImpact();
+                _showClearHistoryConfirmation(context);
+              },
+              enabled: _permissionGranted,
+            ),
           ),
           const SizedBox(height: 24),
           Card(
@@ -221,14 +283,14 @@ class _SmsImportSettingsScreenState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'How it Works',
+                          'How SMS Import Works',
                           style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: color.onSurface),
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'We scan SMS from trusted sources like banks or wallets to automatically create transactions.',
-                          style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
-                        ),
+                        const SizedBox(height: 8),
+                        _buildInfoPoint(context, '🏦', 'Only scans bank and wallet SMS'),
+                        _buildInfoPoint(context, '🔒', 'All data stays on your device'),
+                        _buildInfoPoint(context, '✨', 'Automatically creates transactions'),
+                        _buildInfoPoint(context, '🚫', 'No personal messages are read'),
                       ],
                     ),
                   ),
@@ -241,6 +303,247 @@ class _SmsImportSettingsScreenState
     );
   }
 
+  Widget _buildInfoPoint(BuildContext context, String emoji, String text) {
+    final textTheme = Theme.of(context).textTheme;
+    final color = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 14)),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<bool?> _showSmsPermissionDisclosure(BuildContext context) async {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    
+    return showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: color.onSurfaceVariant.withValues(alpha: 0.4),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: color.primary.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.security, color: color.primary, size: 48),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'SMS Permission Required',
+                style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Mudra Manager needs SMS permission to automatically detect transactions from your bank and wallet messages.',
+                style: textTheme.bodyMedium?.copyWith(color: color.onSurfaceVariant),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: color.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  children: [
+                    _buildDisclosurePoint(context, Icons.filter_alt, 'Only bank/wallet SMS are scanned'),
+                    const SizedBox(height: 12),
+                    _buildDisclosurePoint(context, Icons.phone_android, 'All data stays on your device'),
+                    const SizedBox(height: 12),
+                    _buildDisclosurePoint(context, Icons.block, 'Personal messages are never read'),
+                    const SizedBox(height: 12),
+                    _buildDisclosurePoint(context, Icons.cloud_off, 'No data sent to servers'),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => context.pop(false),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: const Text('Cancel'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    flex: 2,
+                    child: FilledButton(
+                      onPressed: () => context.pop(true),
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: const Text('Allow Permission'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildDisclosurePoint(BuildContext context, IconData icon, String text) {
+    final textTheme = Theme.of(context).textTheme;
+    final color = Theme.of(context).colorScheme;
+    return Row(
+      children: [
+        Icon(icon, color: color.primary, size: 20),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            text,
+            style: textTheme.bodyMedium?.copyWith(color: color.onSurface),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _showClearHistoryConfirmation(BuildContext context) async {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    
+    final confirmed = await showModalBottomSheet<bool>(
+      context: context,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: color.onSurfaceVariant.withValues(alpha: 0.4),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: color.error.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.warning_amber_rounded, color: color.error, size: 48),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'Clear Processing History?',
+                style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: color.errorContainer.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: color.error.withValues(alpha: 0.3)),
+                ),
+                child: Column(
+                  children: [
+                    Icon(Icons.info_outline, color: color.error, size: 24),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Warning: This will rescan all SMS messages',
+                      style: textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: color.error,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Clearing history means previously scanned SMS will be processed again, which may create duplicate transactions.',
+                      style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: FilledButton(
+                      onPressed: () => context.pop(false),
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: const Text('Cancel'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => context.pop(true),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        foregroundColor: color.error,
+                        side: BorderSide(color: color.error),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: const Text('Clear'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (confirmed == true) {
+      SharedPrefsUtil.instance.clearProcessedHashes();
+      if (!context.mounted) return;
+      SnackbarService.success('Processing history cleared');
+    }
+  }
+
   Widget _buildSettingCard(
     BuildContext context,
     ColorScheme color,
@@ -248,13 +551,14 @@ class _SmsImportSettingsScreenState
     IconData icon,
     String title,
     String subtitle,
-    VoidCallback onTap,
-  ) {
+    VoidCallback onTap, {
+    bool enabled = true,
+  }) {
     return Card(
       elevation: 0,
       color: color.surfaceContainerHighest,
       child: InkWell(
-        onTap: onTap,
+        onTap: enabled ? onTap : null,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16),
