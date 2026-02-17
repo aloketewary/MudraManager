@@ -23,7 +23,8 @@ class GoalCard extends ConsumerWidget {
     final textTheme = Theme.of(context).textTheme;
     final ctxt = AppLocalizations.of(context)!;
 
-    final goalColor = goal.colorValue != null ? Color(goal.colorValue!) : color.primary;
+    final goalColor =
+        goal.colorValue != null ? Color(goal.colorValue!) : color.primary;
     final progress = goal.progressPercent;
 
     return Dismissible(
@@ -34,15 +35,15 @@ class GoalCard extends ConsumerWidget {
         return await DialogUtils.showDeleteConfirmation(
           context,
           title: "Delete Goal?",
-          message: "Are you sure you want to delete '${goal.name}'? This action cannot be undone.",
+          message:
+              "Are you sure you want to delete '${goal.name}'? This action cannot be undone.",
         );
       },
       onDismissed: (direction) async {
-        AppLogger.logAction('goal_deleted', parameters: {
-          'goal_id': goal.id,
-          'goal_name': goal.name,
-          'progress': goal.progressPercent,
-        });
+        AppLogger.info(
+          'goal_deleted, goal_id: ${goal.id}, goal_name: ${goal.name}',
+          tag: 'goal',
+        );
         await ref.read(goalServiceProvider).deleteGoal(goal.id);
       },
       background: Container(
@@ -58,7 +59,13 @@ class GoalCard extends ConsumerWidget {
           children: [
             Icon(Icons.delete, color: color.onError, size: 32),
             SizedBox(height: 4),
-            Text('Delete', style: TextStyle(color: color.onError, fontWeight: FontWeight.bold)),
+            Text(
+              'Delete',
+              style: TextStyle(
+                color: color.onError,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ],
         ),
       ),
@@ -82,7 +89,11 @@ class GoalCard extends ConsumerWidget {
                         color: goalColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Icon(IconHelper.getIconData(goal.iconName), color: goalColor, size: 24),
+                      child: Icon(
+                        IconHelper.getIconData(goal.iconName),
+                        color: goalColor,
+                        size: 24,
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -100,13 +111,18 @@ class GoalCard extends ConsumerWidget {
                           if (goal.targetDate != null)
                             Text(
                               "By ${DateFormat.yMMMd(ctxt.localeName).format(goal.targetDate!)}",
-                              style: textTheme.labelSmall?.copyWith(color: color.onSurfaceVariant),
+                              style: textTheme.labelSmall?.copyWith(
+                                color: color.onSurfaceVariant,
+                              ),
                             ),
                         ],
                       ),
                     ),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: goalColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
@@ -136,7 +152,12 @@ class GoalCard extends ConsumerWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Saved", style: textTheme.labelSmall?.copyWith(color: color.onSurfaceVariant)),
+                        Text(
+                          "Saved",
+                          style: textTheme.labelSmall?.copyWith(
+                            color: color.onSurfaceVariant,
+                          ),
+                        ),
                         AnimatedBalance(
                           value: goal.currentAmount,
                           style: textTheme.labelLarge?.copyWith(
@@ -150,7 +171,12 @@ class GoalCard extends ConsumerWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text("Target", style: textTheme.labelSmall?.copyWith(color: color.onSurfaceVariant)),
+                        Text(
+                          "Target",
+                          style: textTheme.labelSmall?.copyWith(
+                            color: color.onSurfaceVariant,
+                          ),
+                        ),
                         Text(
                           ctxt.formatCurrencyWithSign(0, goal.targetAmount),
                           style: textTheme.labelLarge?.copyWith(

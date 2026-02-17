@@ -4,9 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/db/isar_service.dart';
 import 'package:mudra_manager/db/models/pending_transaction.dart'
-    show
-        GetPendingTransactionCollection,
-        PendingTransaction;
+    show GetPendingTransactionCollection, PendingTransaction;
 import 'package:mudra_manager/providers/shared_preference_provider.dart'
     show SharedPrefsUtil;
 import 'package:mudra_manager/util/string_util.dart';
@@ -18,10 +16,10 @@ class SmsProcessorService {
 
   SmsProcessorService._();
 
-  Future<void> processSmsForSaving(TransactionInfo sms) async {
+  Future<void> processSmsForSaving(TransactionInfo sms, int timestamp) async {
     final pending =
         PendingTransaction()
-          ..date = sms.transactionTime ?? DateTime.now()
+          ..date = sms.transactionTime ?? DateTime.fromMillisecondsSinceEpoch(timestamp)
           ..account = sms.account?.no
           ..amount = sms.money?.toDouble()
           ..isIncome = sms.typeOfTransaction == TransactionType.credited
@@ -30,7 +28,8 @@ class SmsProcessorService {
           ..transactionRef = sms.account?.refNo
           ..category = sms.typeOfTransaction?.name
           ..smsHash = sms.smsHash
-          ..toAccount = sms.account?.sendTo;
+          ..toAccount = sms.account?.sendTo
+          ..fromBank = sms.account?.bankName;
 
     try {
       final isar =
@@ -38,12 +37,10 @@ class SmsProcessorService {
       await isar.writeTxn(() async {
         await isar.pendingTransactions.put(pending);
       });
-      
-      AppLogger.logSMS('Transaction saved', details: {
-        'sender': sms.sender,
-        'amount': sms.money,
-        'type': sms.typeOfTransaction?.name,
-      });
+      AppLogger.info(
+        'Transaction saved, sender: ${sms.sender} amount: ${sms.money} type: ${sms.typeOfTransaction?.name}',
+        tag: 'SMS',
+      );
     } catch (e) {
       AppLogger.error('Failed to save SMS transaction', error: e);
     }
@@ -58,9 +55,10 @@ class SmsProcessorService {
   }) {
     // Check if this is a transactional message
     if (!checkForTransactionalMessage(body)) {
-      AppLogger.logSMS('SMS filtered out (not transactional)', details: {
-        'sender': address,
-      });
+      AppLogger.info(
+        'SMS filtered out (not transactional) sender: $address',
+        tag: 'SMS',
+      );
       return;
     }
 
@@ -69,10 +67,10 @@ class SmsProcessorService {
 
     // Check if already processed
     if (SharedPrefsUtil.instance.isAlreadyProcessed(smsHash)) {
-      AppLogger.logSMS('SMS already processed', details: {
-        'sender': address,
-        'hash': smsHash.substring(0, 8),
-      });
+      AppLogger.info(
+        'SMS already processed, skipping... sender: $address hash: $smsHash',
+        tag: 'SMS',
+      );
       debugPrint("Skipping already processed SMS from $address");
       return;
     }
@@ -88,15 +86,9 @@ class SmsProcessorService {
       sender,
       smsHash,
     );
-
-    AppLogger.logSMS('SMS parsed successfully', details: {
-      'sender': address,
-      'amount': transactionInfo.money,
-      'account': transactionInfo.account?.no,
-    });
-
+    AppLogger.info('SMS Parsed successfully, sender: $address', tag: 'SMS');
     // Save to pending transactions
-    processSmsForSaving(transactionInfo);
+    processSmsForSaving(transactionInfo, timestamp);
   }
 
   Future<Isar> getIsarInstance() async {

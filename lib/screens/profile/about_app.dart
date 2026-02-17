@@ -126,6 +126,10 @@ class AboutScreen extends StatelessWidget {
                       SizedBox(height: 16),
                       _buildTeamList(context, color, textTheme),
                       SizedBox(height: 32),
+                      _buildSectionHeader(context, "Special Thanks", Icons.favorite_outline),
+                      SizedBox(height: 16),
+                      _buildThanksSection(context, color, textTheme),
+                      SizedBox(height: 32),
                       _buildSectionHeader(context, "Legal & Support", Icons.info_outline),
                       SizedBox(height: 16),
                       _buildInfoCard(context, color, textTheme, Icons.privacy_tip_outlined, "Privacy Policy", "How we protect your data", () {
@@ -300,6 +304,90 @@ class AboutScreen extends StatelessWidget {
           ),
         ),
       )).toList(),
+    );
+  }
+
+  Widget _buildThanksSection(BuildContext context, ColorScheme color, TextTheme textTheme) {
+    return Card(
+      elevation: 0,
+      color: color.surfaceContainerHighest,
+      child: Padding(
+        padding: EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.volunteer_activism, color: color.primary, size: 24),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    "Beta Testers & Contributors",
+                    style: textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: color.onSurface,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 16),
+            Text(
+              "A heartfelt thank you to everyone who helped test and improve Mudra Manager:",
+              style: textTheme.bodyMedium?.copyWith(
+                color: color.onSurfaceVariant,
+                height: 1.5,
+              ),
+            ),
+            SizedBox(height: 16),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                _buildTesterChip(context, "Sayan Dey", color),
+                _buildTesterChip(context, "Abhijit A M", color),
+                _buildTesterChip(context, "Jeet Sarkar", color),
+                _buildTesterChip(context, "Souvik Paul", color),
+              ],
+            ),
+            SizedBox(height: 16),
+            Container(
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: color.primaryContainer.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.info_outline, color: color.primary, size: 18),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      "Your feedback made this app better!",
+                      style: textTheme.bodySmall?.copyWith(
+                        color: color.onSurface,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTesterChip(BuildContext context, String name, ColorScheme color) {
+    return Chip(
+      avatar: CircleAvatar(
+        backgroundColor: color.primary.withValues(alpha: 0.2),
+        child: Icon(Icons.person, size: 16, color: color.primary),
+      ),
+      label: Text(name),
+      backgroundColor: color.surfaceContainerLow,
+      side: BorderSide.none,
     );
   }
 

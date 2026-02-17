@@ -13,8 +13,10 @@ import 'package:mudra_manager/util/simple_color_picker.dart'
 
 class AccountForm extends ConsumerStatefulWidget {
   final Account? account;
+  final String? accountNumber;
+  final String? bankName;
 
-  const AccountForm({super.key, this.account});
+  const AccountForm({super.key, this.account, this.accountNumber, this.bankName});
 
   @override
   ConsumerState<AccountForm> createState() => _AccountFormState();
@@ -32,9 +34,11 @@ class _AccountFormState extends ConsumerState<AccountForm> {
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: widget.account?.name ?? '');
+    _nameController = TextEditingController(
+      text: widget.account?.name ?? widget.bankName ?? '',
+    );
     _accountNumberController = TextEditingController(
-      text: widget.account?.accountNumber ?? '',
+      text: widget.account?.accountNumber ?? widget.accountNumber ?? '',
     );
     _balanceController = TextEditingController(
       text: widget.account?.initialBalance.toString() ?? '',

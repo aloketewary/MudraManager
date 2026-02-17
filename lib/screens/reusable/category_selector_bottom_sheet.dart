@@ -6,7 +6,7 @@ import 'package:mudra_manager/screens/reusable/category_card.dart';
 import 'package:mudra_manager/util/icon_helper.dart';
 import 'package:mudra_manager/components/responsive_helper.dart';
 
-class CategorySelectorBottomSheet extends ConsumerWidget {
+class CategorySelectorBottomSheet extends ConsumerStatefulWidget {
   final Category? selectedCategory;
   final bool isExpense;
   final Function(Category) onCategorySelected;
@@ -38,9 +38,17 @@ class CategorySelectorBottomSheet extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CategorySelectorBottomSheet> createState() => _CategorySelectorBottomSheetState();
+}
+
+class _CategorySelectorBottomSheetState extends ConsumerState<CategorySelectorBottomSheet> {
+  Category? _selectedParent;
+
+  @override
+  Widget build(BuildContext context) {
     final categoriesAsync = ref.watch(categoryListProvider);
     final textTheme = Theme.of(context).textTheme;
+    final color = Theme.of(context).colorScheme;
 
     return DraggableScrollableSheet(
       initialChildSize: 0.6,
@@ -62,12 +70,31 @@ class CategorySelectorBottomSheet extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Text(
-                  'Select Category',
-                  style: textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                Row(
+                  children: [
+                    if (_selectedParent != null)
+                      IconButton(
+                        icon: Icon(Icons.arrow_back),
+                        onPressed: () => setState(() => _selectedParent = null),
+                      ),
+                    Expanded(
+                      child: Text(
+                        _selectedParent == null ? 'Select Category' : _selectedParent!.name,
+                        style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                        textAlign: _selectedParent == null ? TextAlign.center : TextAlign.start,
+                      ),
+                    ),
+                  ],
                 ),
+                if (_selectedParent == null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(
+                      'Tap to select • Long press parent to select without subcategories',
+                      style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
               ],
             ),
           ),
@@ -75,18 +102,19 @@ class CategorySelectorBottomSheet extends ConsumerWidget {
             child: categoriesAsync.when(
               data: (categories) {
                 final filtered = categories
-                    .where((c) => (isExpense && c.categoryType == CategoryType.expense) || 
-                                  (!isExpense && c.categoryType == CategoryType.income))
+                    .where((c) => (widget.isExpense && c.categoryType == CategoryType.expense) || 
+                                  (!widget.isExpense && c.categoryType == CategoryType.income))
                     .toList();
 
                 if (filtered.isEmpty) {
                   return Center(
-                    child: Text(
-                      'No categories found',
-                      style: textTheme.bodyMedium,
-                    ),
+                    child: Text('No categories found', style: textTheme.bodyMedium),
                   );
                 }
+
+                final displayCategories = _selectedParent == null
+                    ? filtered.where((c) => c.parentCategory.value == null).toList()
+                    : filtered.where((c) => c.parentCategory.value?.id == _selectedParent!.id).toList();
 
                 return GridView.builder(
                   controller: scrollController,
@@ -97,15 +125,42 @@ class CategorySelectorBottomSheet extends ConsumerWidget {
                     mainAxisSpacing: 12,
                     childAspectRatio: ResponsiveHelper.getGridAspectRatio(context, defaultRatio: 2.5, singleColumnRatio: 4.0),
                   ),
-                  itemCount: filtered.length,
+                  itemCount: displayCategories.length,
                   itemBuilder: (context, index) {
-                    final category = filtered[index];
-                    return CategoryCard(
-                      label: category.name,
-                      color: Color(category.colorValue ?? 0xFF000000),
-                      icon: IconHelper.getIconData(category.iconName),
-                      isSelected: selectedCategory?.id == category.id,
-                      callbackAction: () => onCategorySelected(category),
+                    final category = displayCategories[index];
+                    final hasSubcategories = _selectedParent == null && 
+                        filtered.any((c) => c.parentCategory.value?.id == category.id);
+                    
+                    return Stack(
+                      children: [
+                        CategoryCard(
+                          label: category.name,
+                          color: Color(category.colorValue ?? 0xFF000000),
+                          icon: IconHelper.getIconData(category.iconName),
+                          isSelected: widget.selectedCategory?.id == category.id,
+                          callbackAction: () {
+                            if (hasSubcategories) {
+                              setState(() => _selectedParent = category);
+                            } else {
+                              widget.onCategorySelected(category);
+                            }
+                          },
+                          onLongPress: hasSubcategories ? () => widget.onCategorySelected(category) : null,
+                        ),
+                        if (hasSubcategories)
+                          Positioned(
+                            top: 4,
+                            right: 4,
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: color.primary,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(Icons.chevron_right, size: 12, color: color.onPrimary),
+                            ),
+                          ),
+                      ],
                     );
                   },
                 );

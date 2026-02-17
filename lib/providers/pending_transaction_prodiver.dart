@@ -2,7 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/db/isar_service.dart' show IsarService;
 import 'package:mudra_manager/db/models/account.dart' show Account;
-import 'package:mudra_manager/db/models/category.dart' as db_category
+import 'package:mudra_manager/db/models/category.dart'
+    as db_category
     show Category;
 import 'package:mudra_manager/db/models/pending_transaction.dart';
 import 'package:mudra_manager/db/models/transaction.dart'
@@ -83,7 +84,13 @@ class PendingTransactionService {
     var isar = await isarService.getInstance();
     return await isar.writeTxn(() async {
       final transactionUtil = TransactionUtil();
-      return await _processSingleTransactionInternal(isar, pending, accounts, categories, transactionUtil);
+      return await _processSingleTransactionInternal(
+        isar,
+        pending,
+        accounts,
+        categories,
+        transactionUtil,
+      );
     });
   }
 
@@ -166,13 +173,11 @@ class PendingTransactionService {
       await txn.category.save();
 
       await isar.pendingTransactions.delete(pending.id);
+      AppLogger.info(
+        'transaction_auto_enabled, sender: ${pending.sender} amount: ${pending.amount} category: ${match.category.name} account: ${match.account.name}',
+        tag: 'transaction',
+      );
 
-      AppLogger.logAction('transaction_auto_added', parameters: {
-        'sender': pending.sender,
-        'amount': pending.amount,
-        'category': match.category.name,
-        'account': match.account.name,
-      });
       return true;
     } else {
       AppLogger.warning(

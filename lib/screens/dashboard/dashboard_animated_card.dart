@@ -7,6 +7,42 @@ import 'package:mudra_manager/theme/design_tokens.dart';
 import 'package:mudra_manager/util/account_type_extension.dart';
 import 'package:mudra_manager/util/string_util.dart';
 
+class _ChipPainter extends CustomPainter {
+  final Color color;
+  
+  _ChipPainter(this.color);
+  
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color.withValues(alpha: 0.5)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0;
+    
+    // Draw grid pattern (4x3)
+    for (int i = 1; i < 4; i++) {
+      // Vertical lines
+      canvas.drawLine(
+        Offset(size.width * i / 4, 6),
+        Offset(size.width * i / 4, size.height - 6),
+        paint,
+      );
+    }
+    
+    for (int i = 1; i < 3; i++) {
+      // Horizontal lines
+      canvas.drawLine(
+        Offset(6, size.height * i / 3),
+        Offset(size.width - 6, size.height * i / 3),
+        paint,
+      );
+    }
+  }
+  
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
 enum AnimationStyles { defaultStyle, custom, none }
 
 const List<(AnimationStyles, String)> animationStyleSegments =
@@ -61,11 +97,9 @@ class _AnimatedAccountCard extends State<AnimatedAccountCard> {
     final textTheme = Theme.of(context).textTheme;
     final color = Theme.of(context).colorScheme;
     
-    // Calculate proper text color based on accent color brightness
     final accentLuminance = widget.accentColor.computeLuminance();
     final textColor = accentLuminance > 0.5 ? Colors.black : Colors.white;
-    final textColorWithAlpha = textColor.withValues(alpha: 0.9);
-    final surfaceOverlay = textColor.withValues(alpha: 0.2);
+    final textColorWithAlpha = textColor.withValues(alpha: 0.85);
 
     return Container(
       height: 220,
@@ -73,51 +107,82 @@ class _AnimatedAccountCard extends State<AnimatedAccountCard> {
         horizontal: DesignTokens.spacing12, 
         vertical: DesignTokens.spacing8,
       ),
-      padding: EdgeInsets.all(DesignTokens.spacing24),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
             widget.accentColor,
-            widget.accentColor.withValues(alpha: 0.9),
-            widget.accentColor.withValues(alpha: 0.8),
+            widget.accentColor.withValues(alpha: 0.85),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: widget.accentColor.withValues(alpha: 0.3),
-            blurRadius: 16,
-            offset: Offset(0, 8),
+            color: widget.accentColor.withValues(alpha: 0.4),
+            blurRadius: 20,
+            offset: Offset(0, 10),
           ),
         ],
       ),
-        child: Stack(
-          children: [
-            Column(
+      child: Stack(
+        children: [
+          // Decorative circles
+          Positioned(
+            top: -40,
+            right: -40,
+            child: Container(
+              width: 150,
+              height: 150,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: textColor.withValues(alpha: 0.08),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: -30,
+            left: -30,
+            child: Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: textColor.withValues(alpha: 0.06),
+              ),
+            ),
+          ),
+          
+          // Card content
+          Padding(
+            padding: EdgeInsets.all(24),
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
+              children: [
+                // Header with chip and menu
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Flexible(
-                      child: Text(
-                        widget.accountName,
-                        style: textTheme.titleLarge?.copyWith(
-                          color: textColor,
-                          fontWeight: FontWeight.w600,
+                  children: [
+                    // Chip icon
+                    Container(
+                      width: 50,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: textColor.withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: textColor.withValues(alpha: 0.2),
+                          width: 1,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      ),
+                      child: CustomPaint(
+                        painter: _ChipPainter(textColor),
                       ),
                     ),
                     if (widget.showMenu)
                       Container(
                         decoration: BoxDecoration(
-                          color: surfaceOverlay,
+                          color: textColor.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: PopupMenuButton<Menu>(
@@ -165,62 +230,76 @@ class _AnimatedAccountCard extends State<AnimatedAccountCard> {
                 
                 Spacer(),
                 
+                // Balance
                 AnimatedBalance(
                   value: widget.totalBalance.toDouble(),
                   style: textTheme.headlineLarge?.copyWith(
                     color: textColor,
                     fontWeight: FontWeight.w700,
+                    fontSize: 32,
                     letterSpacing: -0.5,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
                 
+                SizedBox(height: 2),
+                
+                Text(
+                  'Current Balance',
+                  style: textTheme.labelSmall?.copyWith(
+                    color: textColorWithAlpha,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                
                 SizedBox(height: 16),
                 
+                // Footer with card number and type
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Flexible(
-                      child: Text(
-                        widget.accountNumber,
-                        style: textTheme.bodyLarge?.copyWith(
-                          color: textColorWithAlpha,
-                          fontWeight: FontWeight.w500,
-                          letterSpacing: 1.0,
-                        ),
-                        overflow: TextOverflow.ellipsis,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            widget.accountNumber,
+                            style: textTheme.bodyMedium?.copyWith(
+                              color: textColor,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 2.0,
+                              fontFamily: 'monospace',
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          SizedBox(height: 2),
+                          Text(
+                            widget.accountName,
+                            style: textTheme.labelMedium?.copyWith(
+                              color: textColorWithAlpha,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
                       ),
                     ),
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: surfaceOverlay,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        widget.accountType.name.toUpperCase(),
-                        style: textTheme.labelSmall?.copyWith(
-                          color: textColor,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
+                    Icon(
+                      widget.accountType.icon,
+                      color: textColor.withValues(alpha: 0.9),
+                      size: 28,
                     ),
                   ],
                 ),
               ],
             ),
-            Positioned(
-              bottom: -20,
-              right: -10,
-              child: Icon(
-                widget.accountType.icon,
-                color: textColor.withValues(alpha: 0.1),
-                size: 120.0,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
+      ),
     );
   }
 }

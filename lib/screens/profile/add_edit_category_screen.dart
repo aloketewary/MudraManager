@@ -32,6 +32,7 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
   CategoryType _selectedType = CategoryType.expense;
   String? _selectedIcon;
   Color? _selectedColor;
+  Category? _selectedParent;
 
   @override
   void initState() {
@@ -43,6 +44,16 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
         widget.existing?.colorValue != null
             ? Color(widget.existing!.colorValue!)
             : Colors.blue;
+    _loadParentCategory();
+  }
+
+  void _loadParentCategory() async {
+    if (widget.existing != null) {
+      await widget.existing!.parentCategory.load();
+      if (mounted) {
+        setState(() => _selectedParent = widget.existing!.parentCategory.value);
+      }
+    }
   }
 
   void _pickIcon() async {
@@ -71,8 +82,12 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
     category.categoryType = _selectedType;
     category.iconName = _selectedIcon;
     category.colorValue = _selectedColor?.toARGB32();
+    category.parentCategory.value = _selectedParent;
 
-    await isar.writeTxn(() => isar.categorys.put(category));
+    await isar.writeTxn(() async {
+      await isar.categorys.put(category);
+      await category.parentCategory.save();
+    });
     ref.invalidate(categoryListProvider);
   }
 
@@ -180,6 +195,64 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
             ),
             const SizedBox(height: 24),
             Text(
+              'Parent Category (Optional)',
+              style: textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 12),
+            InkWell(
+              onTap: () async {
+                HapticFeedback.mediumImpact();
+                final categories = await ref.read(categoryListProvider.future);
+                final filtered = categories
+                    .where((c) {
+                      if (c.categoryType != _selectedType) return false;
+                      if (c.id == widget.existing?.id) return false;
+                      // Exclude subcategories (only allow top-level categories as parents)
+                      c.parentCategory.loadSync();
+                      return c.parentCategory.value == null;
+                    })
+                    .toList();
+                if (!mounted) return;
+                final selected = await showModalBottomSheet<Category?>(
+                  context: context,
+                  isScrollControlled: true,
+                  builder: (_) => _ParentCategoryPicker(
+                    categories: filtered,
+                    selected: _selectedParent,
+                  ),
+                );
+                if (selected != null) setState(() => _selectedParent = selected);
+              },
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  border: Border.all(color: color.outline),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.folder_outlined, color: color.primary),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        _selectedParent?.name ?? 'None (Top-level category)',
+                        style: textTheme.bodyLarge,
+                      ),
+                    ),
+                    if (_selectedParent != null)
+                      IconButton(
+                        icon: Icon(Icons.clear, size: 20),
+                        onPressed: () => setState(() => _selectedParent = null),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
               ctxt.category_colorLabel,
               style: textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
@@ -239,6 +312,57 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+
+class _ParentCategoryPicker extends StatelessWidget {
+  final List<Category> categories;
+  final Category? selected;
+
+  const _ParentCategoryPicker({required this.categories, this.selected});
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final color = Theme.of(context).colorScheme;
+
+    return DraggableScrollableSheet(
+      initialChildSize: 0.6,
+      minChildSize: 0.4,
+      maxChildSize: 0.9,
+      expand: false,
+      builder: (context, scrollController) => Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text('Select Parent Category', style: textTheme.titleLarge),
+          ),
+          Expanded(
+            child: ListView(
+              controller: scrollController,
+              children: [
+                ListTile(
+                  leading: Icon(Icons.clear_all, color: color.primary),
+                  title: const Text('None (Top-level)'),
+                  selected: selected == null,
+                  onTap: () => Navigator.pop(context, Category()),
+                ),
+                ...categories.map((c) => ListTile(
+                  leading: Icon(
+                    IconHelper.getIconData(c.iconName),
+                    color: Color(c.colorValue ?? 0xFF000000),
+                  ),
+                  title: Text(c.name),
+                  selected: selected?.id == c.id,
+                  onTap: () => Navigator.pop(context, c),
+                )),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

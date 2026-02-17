@@ -43,9 +43,11 @@ class _BudgetDashboardState extends ConsumerState<BudgetDashboard> {
                   iconData: Icons.pie_chart_outline,
                 );
               }
-              return ListView(
+              return ListView.separated(
                 padding: EdgeInsets.all(16).copyWith(bottom: 80),
-                children: list.map((data) => BudgetSummaryCard(data)).toList(),
+                itemCount: list.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 8),
+                itemBuilder: (context, index) => BudgetSummaryCard(list[index]),
               );
             },
             loading: () => const Center(child: CircularProgressIndicator()),

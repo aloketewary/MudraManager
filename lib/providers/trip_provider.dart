@@ -22,3 +22,8 @@ final tripByIdProvider = FutureProvider.family<Trip?, int>((ref, id) async {
   final service = ref.watch(tripServiceProvider);
   return await service.getTripById(id);
 });
+
+final tripSettlementsProvider = FutureProvider.family<Map<String, Map<String, double>>, int>((ref, tripId) async {
+  final service = ref.watch(tripServiceProvider);
+  return await service.calculateSettlements(tripId);
+});

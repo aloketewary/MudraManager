@@ -10,6 +10,49 @@ void main() {
     });
 
     group('HDFC Bank SMS Tests', () {
+      test('HDFC A/c Debit UPI format (official)', () {
+        const sms =
+            'Dear Customer, INR 450.00 debited from A/c xx1234 on 15-Jan-25 14:30 via UPI to SWIGGY. Avl Bal: INR 5000.00. Call 1800-XXX-XXXX if not you.';
+        final info = util.getTransactionInfo(sms, 'HDFCBK', 'HDFCBK', 'hash1a');
+
+        expect(info.money, '450.00');
+        expect(info.account?.no, '1234');
+        expect(info.typeOfTransaction, TransactionType.debited);
+        expect(info.balance, '5000.00');
+      });
+
+      test('HDFC A/c Credit format (official)', () {
+        const sms =
+            'UPDATE: Your A/c xx5678 credited with INR 10000.00 on 15-Jan-25 by NEFT/REF123456. Avl Bal: INR 25000.00.';
+        final info = util.getTransactionInfo(sms, 'HDFCBK', 'HDFCBK', 'hash1b');
+
+        expect(info.money, '10000.00');
+        expect(info.account?.no, '5678');
+        expect(info.typeOfTransaction, TransactionType.credited);
+        expect(info.balance, '25000.00');
+      });
+
+      test('HDFC ATM Withdrawal format (official)', () {
+        const sms =
+            'INR 2000.00 withdrawn from A/c xx8765 on 15-Jan-25 at HDFC ATM BANGALORE MG ROAD. Clear Bal: INR 15000.00.';
+        final info = util.getTransactionInfo(sms, 'HDFCBK', 'HDFCBK', 'hash1c');
+
+        expect(info.money, '2000.00');
+        expect(info.account?.no, '8765');
+        expect(info.typeOfTransaction, TransactionType.debited);
+        expect(info.balance, '15000.00');
+      });
+
+      test('HDFC Card Spend format (official)', () {
+        const sms =
+            'Alert: You\'ve spent INR 3500.00 on your HDFC Bank Card ****9876 at AMAZON INDIA on 15-Jan-25 at 18:45.';
+        final info = util.getTransactionInfo(sms, 'HDFCTX', 'HDFCTX', 'hash1d');
+
+        expect(info.money, '3500.00');
+        expect(info.account?.no, '9876');
+        expect(info.account?.type, 'card');
+      });
+
       test('HDFC debit with account number', () {
         const sms =
             'Rs.450.00 debited from A/c **1234 on 15-Jan-25 at SWIGGY. Avl Bal: Rs.5000.00';
@@ -75,7 +118,62 @@ void main() {
     });
 
     group('SBI Bank SMS Tests', () {
-      test('SBI debit transaction', () {
+      test('SBI A/c Debit UPI format', () {
+        const sms =
+            'A/c XX7334 debited for INR 154.00 on 01-02-26. Info: SRI LAKSHMI VEGETABLE. Avl Bal: INR 5000.00';
+        final info = util.getTransactionInfo(sms, 'SBI-SBI', 'SBI', 'hash6a');
+
+        expect(info.money, '154.00');
+        expect(info.account?.no, '7334');
+        expect(info.typeOfTransaction, TransactionType.debited);
+        expect(info.balance, '5000.00');
+      });
+
+      test('SBI A/c Debit POS format', () {
+        const sms =
+            'A/c XX1234 debited for INR 500.00 on 15-01-25. Info: ZOMATO ONLINE. Avl Bal: INR 8000.00';
+        final info = util.getTransactionInfo(sms, 'VK-SBI', 'SBI', 'hash6b');
+
+        expect(info.money, '500.00');
+        expect(info.account?.no, '1234');
+        expect(info.typeOfTransaction, TransactionType.debited);
+        expect(info.balance, '8000.00');
+      });
+
+      test('SBI A/c Credit format', () {
+        const sms =
+            'UPDATE: Your A/c XX4321 credited with INR 10000.00 on 15-01-25 by NEFT/IMPS. Avl Bal: INR 25000.00';
+        final info = util.getTransactionInfo(sms, 'AD-SBI', 'SBI', 'hash6c');
+
+        expect(info.money, '10000.00');
+        expect(info.account?.no, '4321');
+        expect(info.typeOfTransaction, TransactionType.credited);
+        expect(info.balance, '25000.00');
+      });
+
+      test('SBI ATM Withdrawal format', () {
+        const sms =
+            'INR 2000.00 withdrawn from a/c XX8765 on 15-01-25 at SBI ATM BANGALORE. Clear Bal: INR 15000.00';
+        final info = util.getTransactionInfo(sms, 'SBI-SBI', 'SBI', 'hash6d');
+
+        expect(info.money, '2000.00');
+        expect(info.account?.no, '8765');
+        expect(info.typeOfTransaction, TransactionType.debited);
+        expect(info.balance, '15000.00');
+      });
+
+      test('SBI Credit Card Spend format', () {
+        const sms =
+            'Trxn of INR 3500.00 on SBI Card XX9876 at AMAZON INDIA on 15-01-25. Avl Limit: INR 50000.00';
+        final info = util.getTransactionInfo(sms, 'SBI-SBI', 'SBI', 'hash6e');
+
+        expect(info.money, '3500.00');
+        expect(info.account?.no, '9876');
+        expect(info.account?.type, 'card');
+        expect(info.balance, '50000.00');
+      });
+
+      test('SBI debit transaction (old format)', () {
         const sms =
             'Dear Customer, Rs.500.00 is debited from A/c **4321 on 15-Jan-25 at ZOMATO. Avl Bal: Rs.8000.00';
         final info = util.getTransactionInfo(sms, 'SBIINB', 'SBIINB', 'hash6');
@@ -93,9 +191,40 @@ void main() {
         expect(info.money, '750');
         expect(info.account?.no, '8765');
       });
+
+      test('SBI with large amount and commas', () {
+        const sms =
+            'A/c XX1234 debited for INR 1,25,000.00 on 15-01-25. Info: PROPERTY PAYMENT. Avl Bal: INR 5,00,000.00';
+        final info = util.getTransactionInfo(sms, 'SBI-SBI', 'SBI', 'hash6f');
+
+        expect(info.money, '125000.00');
+        expect(info.balance, '500000.00');
+      });
     });
 
     group('ICICI Bank SMS Tests', () {
+      test('ICICI A/c Debit format (official)', () {
+        const sms =
+            'Dear Customer, your Ac XX2468 is debited with INR 300.00 on 15-Jan-25. Info: UPI/PAYTM. Avl Bal: INR 7000.00.';
+        final info = util.getTransactionInfo(sms, 'ICICIB', 'ICICIB', 'hash8a');
+
+        expect(info.money, '300.00');
+        expect(info.account?.no, '2468');
+        expect(info.typeOfTransaction, TransactionType.debited);
+        expect(info.balance, '7000.00');
+      });
+
+      test('ICICI A/c Credit format (official)', () {
+        const sms =
+            'Ac XX5432 is credited with INR 15000.00 on 15-Jan-25. Info: NEFT/REF987654. Avl Bal: INR 35000.00.';
+        final info = util.getTransactionInfo(sms, 'ICICIB', 'ICICIB', 'hash8b');
+
+        expect(info.money, '15000.00');
+        expect(info.account?.no, '5432');
+        expect(info.typeOfTransaction, TransactionType.credited);
+        expect(info.balance, '35000.00');
+      });
+
       test('ICICI debit transaction', () {
         const sms =
             'Rs.300 debited from A/c XX2468 on 15-Jan-25 for UPI/PAYTM. Avl Bal Rs.7000';
@@ -118,6 +247,39 @@ void main() {
     });
 
     group('Axis Bank SMS Tests', () {
+      test('Axis A/c Debit format (official)', () {
+        const sms =
+            'Your A/c no. XX9753 is debited for INR 600.00 on 15-Jan-25 at 14:30. UPI/MERCHANT. Avl Bal INR 4400.00.';
+        final info = util.getTransactionInfo(sms, 'AXISBK', 'AXISBK', 'hash10a');
+
+        expect(info.money, '600.00');
+        expect(info.account?.no, '9753');
+        expect(info.typeOfTransaction, TransactionType.debited);
+        expect(info.balance, '4400.00');
+      });
+
+      test('Axis Card Purchase format (official)', () {
+        const sms =
+            'Alert: You\'ve spent INR 2500.00 on your Axis Bank card ****1357 at FLIPKART on 15-Jan-25. Avl Limit: INR 50000.00.';
+        final info = util.getTransactionInfo(sms, 'AXISTX', 'AXISTX', 'hash10b');
+
+        expect(info.money, '2500.00');
+        expect(info.account?.no, '1357');
+        expect(info.account?.type, 'card');
+        expect(info.balance, '50000.00');
+      });
+
+      test('Axis Credit format (official)', () {
+        const sms =
+            'INR 10000.00 credited to your A/c XX9753 on 15-Jan-25 by NEFT. Current Balance: INR 25000.00.';
+        final info = util.getTransactionInfo(sms, 'AXISBK', 'AXISBK', 'hash10c');
+
+        expect(info.money, '10000.00');
+        expect(info.account?.no, '9753');
+        expect(info.typeOfTransaction, TransactionType.credited);
+        expect(info.balance, '25000.00');
+      });
+
       test('Axis debit transaction', () {
         const sms =
             'Rs 600 debited from A/c no. XX9753 on 15-Jan-25. Avl bal: Rs 4400';
@@ -126,6 +288,62 @@ void main() {
 
         expect(info.money, '600');
         expect(info.account?.no, '9753');
+      });
+    });
+
+    group('PNB Bank SMS Tests', () {
+      test('PNB Debit/Withdrawal format (official)', () {
+        const sms =
+            'INR 500.00 debited from A/c XXXXXXXXXXXX1234 on 15-Jan-25 via ATM. Avl Bal: INR 8000.00.';
+        final info = util.getTransactionInfo(sms, 'PNBSMS', 'PNBSMS', 'hash11a');
+
+        expect(info.money, '500.00');
+        expect(info.account?.no, '1234');
+        expect(info.typeOfTransaction, TransactionType.debited);
+        expect(info.balance, '8000.00');
+      });
+
+      test('PNB Credit Alert format (official)', () {
+        const sms =
+            'A/c XXXXXXXXXXXX5678 credited with INR 12000.00 on 15-Jan-25 by NEFT/REF123. Avl Bal: INR 30000.00.';
+        final info = util.getTransactionInfo(sms, 'PNBSMS', 'PNBSMS', 'hash11b');
+
+        expect(info.money, '12000.00');
+        expect(info.account?.no, '5678');
+        expect(info.typeOfTransaction, TransactionType.credited);
+        expect(info.balance, '30000.00');
+      });
+
+      test('PNB Balance Enquiry (should not be transactional)', () {
+        const sms =
+            'Balance for A/c XXXXXXXXXXXX1234 is INR 8000.00 as on 15-Jan-25.';
+        final isValid = checkForTransactionalMessage(sms);
+
+        expect(isValid, false);
+      });
+    });
+
+    group('Kotak Bank SMS Tests', () {
+      test('Kotak Debit Alert format (official)', () {
+        const sms =
+            'Dear Customer, INR 750.00 debited from A/c XX3456 on 15-Jan-25 14:30. REF123456. Avl Bal: INR 9000.00.';
+        final info = util.getTransactionInfo(sms, 'KOTAKB', 'KOTAKB', 'hash12a');
+
+        expect(info.money, '750.00');
+        expect(info.account?.no, '3456');
+        expect(info.typeOfTransaction, TransactionType.debited);
+        expect(info.balance, '9000.00');
+      });
+
+      test('Kotak Credit Card format (official)', () {
+        const sms =
+            'Trxn of INR 1500.00 on Kotak Card XX7890 at AMAZON on 15-Jan-25. Avl Limit: INR 45000.00.';
+        final info = util.getTransactionInfo(sms, 'KOTAKT', 'KOTAKT', 'hash12b');
+
+        expect(info.money, '1500.00');
+        expect(info.account?.no, '7890');
+        expect(info.account?.type, 'card');
+        expect(info.balance, '45000.00');
       });
     });
 

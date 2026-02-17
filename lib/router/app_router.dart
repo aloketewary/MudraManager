@@ -4,6 +4,8 @@ import 'package:mudra_manager/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/screens/bills/bills_screen.dart';
 import 'package:mudra_manager/screens/budget/add_budget_screen.dart';
 import 'package:mudra_manager/screens/budget/budget_dashboard.dart';
+import 'package:mudra_manager/screens/budget/budget_details_screen.dart';
+import 'package:mudra_manager/providers/budget_service_provider.dart';
 import 'package:mudra_manager/screens/goal/add_edit_goal_screen.dart';
 import 'package:mudra_manager/screens/goal/goal_screen.dart';
 import 'package:mudra_manager/screens/home_screen.dart';
@@ -34,6 +36,7 @@ import 'package:mudra_manager/screens/trip/trips_screen.dart';
 import 'package:mudra_manager/screens/trip/create_trip_screen.dart';
 import 'package:mudra_manager/screens/trip/trip_detail_screen.dart';
 import 'package:mudra_manager/screens/trip/add_trip_transaction_screen.dart';
+import 'package:mudra_manager/screens/analytics/analytics_screen.dart';
 import 'package:mudra_manager/util/auth_gate.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -42,6 +45,7 @@ class AppRouter {
   static GoRouter router(bool showOnboarding) => GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: showOnboarding ? '/onboarding' : '/home',
+    debugLogDiagnostics: true,
     redirect: (context, state) {
       final isOnboardingComplete = SharedPrefsUtil.instance.isOnboardingComplete();
       final isOnOnboardingPage = state.matchedLocation == '/onboarding';
@@ -197,6 +201,13 @@ class AppRouter {
             builder: (context, state) => BudgetDashboard(),
           ),
           GoRoute(
+            path: '/budget-details',
+            builder: (context, state) {
+              final data = state.extra as BudgetWithProgress;
+              return BudgetDetailsScreen(data: data);
+            },
+          ),
+          GoRoute(
             path: '/goal-screen',
             builder: (context, state) => GoalScreen(),
           ),
@@ -204,7 +215,11 @@ class AppRouter {
             path: '/manage-accounts/add',
             builder: (context, state) {
               final extra = state.extra as Map<String, dynamic>?;
-              return AccountForm(account: extra?['account']);
+              return AccountForm(
+                account: extra?['account'],
+                accountNumber: extra?['accountNumber'],
+                bankName: extra?['bankName'],
+              );
             },
           ),
           GoRoute(
@@ -253,6 +268,10 @@ class AppRouter {
               final tripId = state.extra as int;
               return EditTripScreen(tripId: tripId);
             },
+          ),
+          GoRoute(
+            path: '/analytics',
+            builder: (context, state) => const AnalyticsScreen(),
           ),
         ],
       ),

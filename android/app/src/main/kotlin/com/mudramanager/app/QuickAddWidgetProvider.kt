@@ -22,11 +22,16 @@ class QuickAddWidgetProvider : AppWidgetProvider() {
             views.setTextViewText(R.id.widget_expense, expense)
             views.setTextViewText(R.id.widget_income, income)
             
-            val intent = Intent(context, MainActivity::class.java).apply {
-                action = "add_transaction"
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            }
-            val pendingIntent = PendingIntent.getActivity(context, appWidgetId, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+            val intent = Intent(context, MainActivity::class.java)
+            intent.putExtra("widget_action", "add_transaction")
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            
+            val pendingIntent = PendingIntent.getActivity(
+                context,
+                0,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
             views.setOnClickPendingIntent(R.id.widget_add_button, pendingIntent)
             
             appWidgetManager.updateAppWidget(appWidgetId, views)

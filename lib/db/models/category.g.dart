@@ -74,7 +74,14 @@ const CategorySchema = CollectionSchema(
       ],
     ),
   },
-  links: {},
+  links: {
+    r'parentCategory': LinkSchema(
+      id: -6874105053793480780,
+      name: r'parentCategory',
+      target: r'Category',
+      single: true,
+    ),
+  },
   embeddedSchemas: {},
 
   getId: _categoryGetId,
@@ -179,11 +186,17 @@ Id _categoryGetId(Category object) {
 }
 
 List<IsarLinkBase<dynamic>> _categoryGetLinks(Category object) {
-  return [];
+  return [object.parentCategory];
 }
 
 void _categoryAttach(IsarCollection<dynamic> col, Id id, Category object) {
   object.id = id;
+  object.parentCategory.attach(
+    col,
+    col.isar.collection<Category>(),
+    r'parentCategory',
+    id,
+  );
 }
 
 extension CategoryByIndex on IsarCollection<Category> {
@@ -1302,7 +1315,22 @@ extension CategoryQueryObject
     on QueryBuilder<Category, Category, QFilterCondition> {}
 
 extension CategoryQueryLinks
-    on QueryBuilder<Category, Category, QFilterCondition> {}
+    on QueryBuilder<Category, Category, QFilterCondition> {
+  QueryBuilder<Category, Category, QAfterFilterCondition> parentCategory(
+    FilterQuery<Category> q,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.link(q, r'parentCategory');
+    });
+  }
+
+  QueryBuilder<Category, Category, QAfterFilterCondition>
+  parentCategoryIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'parentCategory', 0, true, 0, true);
+    });
+  }
+}
 
 extension CategoryQuerySortBy on QueryBuilder<Category, Category, QSortBy> {
   QueryBuilder<Category, Category, QAfterSortBy> sortByCategoryType() {

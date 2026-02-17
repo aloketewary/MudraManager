@@ -12,6 +12,7 @@ import 'package:mudra_manager/db/models/transaction.dart'
         TransactionQuerySortBy,
         TransactionQueryWhere;
 import 'package:mudra_manager/providers/isar_provider.dart';
+import 'package:mudra_manager/util/app_logger.dart';
 
 import 'package:mudra_manager/screens/transaction/transaction_group.dart'
     show TxListEntry, TxHeader, TxItem;
@@ -51,7 +52,7 @@ final transactionsByMonthAndTypeProvider =
     ) async {
       final service = ref.watch(transactionProvider);
       final start = DateTime(arg.month.year, arg.month.month, 1);
-      final end = DateTime(arg.month.year, arg.month.month + 1, 0, 23, 59, 59);
+      final end = DateTime(arg.month.year, arg.month.month + 1, 1).subtract(Duration(microseconds: 1));
 
       if (arg.type == 'all') {
         return service.getByDateRange(start, end);
@@ -60,6 +61,23 @@ final transactionsByMonthAndTypeProvider =
           isExpense: arg.type == 'expense',
           start: start,
           end: end,
+        );
+      }
+    });
+
+final transactionsByDateRangeProvider =
+    FutureProvider.family<List<Transaction>, ({DateTime start, DateTime end, String type})>((
+      ref,
+      arg,
+    ) async {
+      final service = ref.watch(transactionProvider);
+      if (arg.type == 'all') {
+        return service.getByDateRange(arg.start, arg.end);
+      } else {
+        return service.getByTypeAndDateRange(
+          isExpense: arg.type == 'expense',
+          start: arg.start,
+          end: arg.end,
         );
       }
     });
@@ -81,6 +99,71 @@ final sectionedTransactionsProvider =
       for (var tx in transactions) {
         final txDate = DateTime(tx.date.year, tx.date.month, tx.date.day);
         if (currentDate == null || txDate != currentDate) {
+          currentDate = txDate;
+          sectioned.add(TxHeader(txDate));
+        }
+        sectioned.add(TxItem(tx));
+      }
+
+      return sectioned;
+    });
+
+final sectionedTransactionsByDateRangeProvider =
+    FutureProvider.family<List<TxListEntry>, ({DateTime start, DateTime end, String type})>((
+      ref,
+      arg,
+    ) async {
+      final startDate = DateTime(arg.start.year, arg.start.month, arg.start.day);
+      final endDate = DateTime(arg.end.year, arg.end.month, arg.end.day, 23, 59, 59);
+      
+      final transactions = await ref.watch(
+        transactionsByDateRangeProvider((start: startDate, end: endDate, type: arg.type)).future,
+      );
+
+      if (transactions.isEmpty) return [];
+
+      final List<TxListEntry> sectioned = [];
+      DateTime? currentDate;
+
+      for (var tx in transactions) {
+        final txDate = DateTime(tx.date.year, tx.date.month, tx.date.day);
+        if (currentDate == null || 
+            currentDate.year != txDate.year || 
+            currentDate.month != txDate.month || 
+            currentDate.day != txDate.day) {
+          currentDate = txDate;
+          sectioned.add(TxHeader(txDate));
+        }
+        sectioned.add(TxItem(tx));
+      }
+
+      return sectioned;
+    });
+
+final allSectionedTransactionsProvider =
+    FutureProvider.family<List<TxListEntry>, String>((ref, type) async {
+      final service = ref.watch(transactionProvider);
+      
+      List<Transaction> transactions;
+      if (type == 'income') {
+        transactions = await service.getByType(isExpense: false);
+      } else if (type == 'expense') {
+        transactions = await service.getByType(isExpense: true);
+      } else {
+        transactions = await service.getAll();
+      }
+
+      if (transactions.isEmpty) return [];
+
+      final List<TxListEntry> sectioned = [];
+      DateTime? currentDate;
+
+      for (var tx in transactions) {
+        final txDate = DateTime(tx.date.year, tx.date.month, tx.date.day);
+        if (currentDate == null || 
+            currentDate.year != txDate.year || 
+            currentDate.month != txDate.month || 
+            currentDate.day != txDate.day) {
           currentDate = txDate;
           sectioned.add(TxHeader(txDate));
         }
@@ -118,6 +201,7 @@ class TransactionService {
   TransactionService(this.isarService);
 
   Future<void> addTransaction(Transaction txn) async {
+    AppLogger.database('Adding transaction: ${txn.isExpense ? "Expense" : "Income"} of ₹${txn.amount}');
     final isar = await isarService.getInstance();
     await isar.writeTxn(() async {
       await isar.transactions.put(txn);
@@ -125,6 +209,7 @@ class TransactionService {
       await txn.account.save();
       await txn.tags.save();
     });
+    AppLogger.database('Transaction saved successfully with ID: ${txn.id}');
   }
 
   Future<List<Transaction>> getAll() async {
@@ -193,10 +278,12 @@ class TransactionService {
   }
 
   Future<void> deleteTransaction(int transactionId) async {
+    AppLogger.database('Deleting transaction ID: $transactionId');
     final isar = await isarService.getInstance();
     await isar.writeTxn(() async {
       await isar.transactions.delete(transactionId);
     });
+    AppLogger.database('Transaction deleted successfully');
   }
 
   /// Perform a transfer between two accounts
@@ -209,6 +296,7 @@ class TransactionService {
     int? fromId,
     int? toId,
   }) async {
+    AppLogger.database('Transfer: ₹$amount from ${from.name} to ${to.name}');
     final isar = await isarService.getInstance();
     final debit =
         Transaction.create(
@@ -231,7 +319,6 @@ class TransactionService {
           ..account.value = to;
     if (toId != null) credit.id = toId;
     await isar.writeTxnSync(() async {
-      // 1) Save both
       debit.related.value = credit;
       credit.related.value = debit;
       isar.transactions.putSync(debit, saveLinks: true);
@@ -241,6 +328,7 @@ class TransactionService {
       await credit.category.save();
       await credit.account.save();
     });
+    AppLogger.database('Transfer completed successfully');
   }
 
   Future<List<Transaction>> getByDateRange(DateTime start, DateTime end) async {

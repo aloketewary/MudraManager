@@ -8,23 +8,35 @@ import 'isar_provider.dart';
 
 final categoryListProvider = FutureProvider<List<Category>>((ref) async {
   final isar = await ref.watch(isarServiceProvider).getInstance();
-  return await isar.categorys.where().findAll(); // You can filter if needed
+  final categories = await isar.categorys.where().findAll();
+  for (final category in categories) {
+    await category.parentCategory.load();
+  }
+  return categories;
 });
 
 final incomeCategoriesProvider = FutureProvider<List<Category>>((ref) async {
   final isar = await ref.watch(isarServiceProvider).getInstance();
-  return await isar.categorys
+  final categories = await isar.categorys
       .filter()
       .categoryTypeEqualTo(CategoryType.income)
       .findAll();
+  for (final category in categories) {
+    await category.parentCategory.load();
+  }
+  return categories;
 });
 
 final expenseCategoriesProvider = FutureProvider<List<Category>>((ref) async {
   final isar = await ref.watch(isarServiceProvider).getInstance();
-  return await isar.categorys
+  final categories = await isar.categorys
       .filter()
       .categoryTypeEqualTo(CategoryType.expense)
       .findAll();
+  for (final category in categories) {
+    await category.parentCategory.load();
+  }
+  return categories;
 });
 
 

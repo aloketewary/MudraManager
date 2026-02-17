@@ -33,9 +33,11 @@ class BudgetCategoryMiniCard extends StatelessWidget {
       color: color.surfaceContainerHighest,
       child: Container(
         width: 140,
+        height: 140,
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Row(
               children: [
@@ -56,7 +58,7 @@ class BudgetCategoryMiniCard extends StatelessWidget {
                   Icon(Icons.warning_amber_rounded, size: 16, color: color.error),
               ],
             ),
-            const Spacer(),
+            const SizedBox(height: 8),
             Text(
               category.name,
               style: textTheme.titleSmall?.copyWith(

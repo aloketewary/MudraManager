@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/db/models/account.dart';
 import 'package:mudra_manager/l10n/app_localizations.dart';
@@ -22,6 +23,7 @@ class _AnimatedSwipeableAccountCardsState
   Offset _dragOffset = Offset.zero;
   Map<int, double> _balanceMap = {};
   bool _initialized = false;
+  AccountType? _selectedType;
 
   @override
   void initState() {
@@ -59,21 +61,12 @@ class _AnimatedSwipeableAccountCardsState
     final velocity = details.velocity.pixelsPerSecond.dy;
 
     if (_dragOffset.dy > threshold || velocity > 700) {
-      // Swipe down → next
       final nextIndex = (currentIndex + 1) % cards.length;
       setState(() {
         currentIndex = nextIndex;
         _dragOffset = Offset.zero;
       });
-    // } else if (_dragOffset.dy < -threshold || velocity < -700) {
-    //   // Swipe up → previous
-    //   final prevIndex = (currentIndex - 1 + cards.length) % cards.length;
-    //   setState(() {
-    //     currentIndex = prevIndex;
-    //     _dragOffset = Offset.zero;
-    //   });
     } else {
-      // Not enough, snap back
       setState(() {
         _dragOffset = Offset.zero;
       });
@@ -87,6 +80,7 @@ class _AnimatedSwipeableAccountCardsState
   @override
   Widget build(BuildContext context) {
     var color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     final accountsAsync = ref.watch(accountsProvider);
     var size = MediaQuery.of(context).size;
     var ctxt = AppLocalizations.of(context)!;
@@ -96,137 +90,174 @@ class _AnimatedSwipeableAccountCardsState
         if (accounts.isEmpty) {
           return Center(child: Text(ctxt.common_noAccountsYet));
         }
-        List<AccountCard> cards =
-            accounts.map((account) {
-              return AccountCard(
-                totalBalance:
-                    _balanceMap[account.id]?.toStringAsFixed(2) ?? '0.0',
-                accountNumber:
-                    'xxxx xxxx xxxx ${account.accountNumber ?? 'xxxx'}',
-                backgroundColor: color.onSecondary,
-                accentColor: Color(
-                  account.colorValue ?? Colors.redAccent.toARGB32(),
-                ),
-                accountName: account.name,
-                accountType: account.accountType,
-              );
-            }).toList();
-        final textScale = MediaQuery.textScalerOf(context).textScaleFactor;
-        final scale = textScale.clamp(1.0, 1.4);
+        
+        // Get unique account types
+        final types = accounts.map((a) => a.accountType).toSet().toList();
+        
+        // Filter accounts by selected type
+        final filteredAccounts = _selectedType == null
+            ? accounts
+            : accounts.where((a) => a.accountType == _selectedType).toList();
+        
+        if (currentIndex >= filteredAccounts.length) {
+          currentIndex = 0;
+        }
+        
+        List<AccountCard> cards = filteredAccounts.map((account) {
+          return AccountCard(
+            totalBalance: _balanceMap[account.id]?.toStringAsFixed(2) ?? '0.0',
+            accountNumber: 'xxxx xxxx xxxx ${account.accountNumber ?? 'xxxx'}',
+            backgroundColor: color.onSecondary,
+            accentColor: Color(account.colorValue ?? Colors.redAccent.toARGB32()),
+            accountName: account.name,
+            accountType: account.accountType,
+          );
+        }).toList();
 
-        // Use accounts list instead of _cards
-        return SizedBox(
-          height: 240,
-          width: size.width - 16,
-          child: Stack(
-            children: [
-              // Third card (back)
-              if (cards.length > 2)
-                Positioned(
-                  top: 8,
-                  left: 16,
-                  right: 16,
-                  child: Transform.scale(
-                    scale: 0.92,
-                    child: Container(
-                      height: 220,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            cards[_getIndex(2, cards)].accentColor.withValues(alpha: 0.7),
-                            cards[_getIndex(2, cards)].accentColor.withValues(alpha: 0.5),
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
+        return Column(
+          children: [
+            // Cards stack
+            SizedBox(
+              height: 240,
+              width: size.width - 16,
+              child: Stack(
+                children: [
+                  if (cards.length > 2)
+                    Positioned(
+                      top: 16,
+                      left: 16,
+                      right: 16,
+                      child: Transform.scale(
+                        scale: 0.92,
+                        child: Container(
+                          height: 220,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                cards[_getIndex(2, cards)].accentColor.withValues(alpha: 0.7),
+                                cards[_getIndex(2, cards)].accentColor.withValues(alpha: 0.5),
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
                         ),
-                        borderRadius: BorderRadius.circular(20),
                       ),
                     ),
-                  ),
-                ),
-
-              // Second card (middle)
-              if (cards.length > 1)
-                Positioned(
-                  top: 4,
-                  left: 8,
-                  right: 8,
-                  child: Transform.scale(
-                    scale: 0.96,
-                    child: Container(
-                      height: 230,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            cards[_getIndex(1, cards)].accentColor.withValues(alpha: 0.8),
-                            cards[_getIndex(1, cards)].accentColor.withValues(alpha: 0.6),
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
+                  if (cards.length > 1)
+                    Positioned(
+                      top: 8,
+                      left: 8,
+                      right: 8,
+                      child: Transform.scale(
+                        scale: 0.96,
+                        child: Container(
+                          height: 230,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                cards[_getIndex(1, cards)].accentColor.withValues(alpha: 0.8),
+                                cards[_getIndex(1, cards)].accentColor.withValues(alpha: 0.6),
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
                         ),
-                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: GestureDetector(
+                      onVerticalDragUpdate: _onVerticalDragUpdate,
+                      onVerticalDragEnd: (dragDetails) => _onVerticalDragEnd(dragDetails, cards),
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 300),
+                        child: Transform.translate(
+                          key: ValueKey<int>(currentIndex),
+                          offset: _dragOffset,
+                          child: AnimatedAccountCard(
+                            totalBalance: cards[currentIndex].totalBalance,
+                            accountNumber: cards[currentIndex].accountNumber,
+                            backgroundColor: color.surface,
+                            accentColor: cards[currentIndex].accentColor,
+                            accountName: cards[currentIndex].accountName,
+                            accountType: cards[currentIndex].accountType,
+                            onArchive: () {},
+                            onEdit: () {},
+                            onRemove: () {},
+                            showMenu: false,
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
-
-              // Current card (front)
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: GestureDetector(
-                  onVerticalDragUpdate: _onVerticalDragUpdate,
-                  onVerticalDragEnd:
-                      (dragDetails) => _onVerticalDragEnd(dragDetails, cards),
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    child: Transform.translate(
-                      key: ValueKey<int>(currentIndex),
-                      offset: _dragOffset,
-                      child: AnimatedAccountCard(
-                        totalBalance: cards[currentIndex].totalBalance,
-                        accountNumber: cards[currentIndex].accountNumber,
-                        backgroundColor: color.surface,
-                        accentColor: cards[currentIndex].accentColor,
-                        accountName: cards[currentIndex].accountName,
-                        accountType: cards[currentIndex].accountType,
-                        onArchive: () {},
-                        onEdit: () {},
-                        onRemove: () {},
-                        showMenu: false,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-      loading:
-          () => SizedBox(
-            height: 220,
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
-              child: Transform.translate(
-                key: ValueKey<int>(currentIndex),
-                offset: _dragOffset,
-                child: AnimatedAccountCard(
-                  totalBalance: '---',
-                  accountNumber: '---',
-                  backgroundColor: color.surfaceVariant,
-                  accentColor: color.primary,
-                  accountName: ctxt.common_loading,
-                  accountType: AccountType.cash,
-                  onArchive: () {},
-                  onEdit: () {},
-                  onRemove: () {},
-                  showMenu: false,
-                ),
+                ],
               ),
             ),
-          ),
+            
+            // Filter chips below cards
+            if (types.length > 1)
+              Container(
+                height: 40,
+                margin: EdgeInsets.only(top: 8, bottom: 8),
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  padding: EdgeInsets.symmetric(horizontal: 8),
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 4),
+                      child: FilterChip(
+                        selected: _selectedType == null,
+                        label: Text('All'),
+                        onSelected: (selected) {
+                          HapticFeedback.lightImpact();
+                          setState(() {
+                            _selectedType = null;
+                            currentIndex = 0;
+                          });
+                        },
+                      ),
+                    ),
+                    ...types.map((type) => Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 4),
+                      child: FilterChip(
+                        selected: _selectedType == type,
+                        label: Text(type.name.toUpperCase()),
+                        onSelected: (selected) {
+                          HapticFeedback.lightImpact();
+                          setState(() {
+                            _selectedType = selected ? type : null;
+                            currentIndex = 0;
+                          });
+                        },
+                      ),
+                    )),
+                  ],
+                ),
+              ),
+          ],
+        );
+      },
+      loading: () => SizedBox(
+        height: 220,
+        child: AnimatedAccountCard(
+          totalBalance: '---',
+          accountNumber: '---',
+          backgroundColor: color.surfaceVariant,
+          accentColor: color.primary,
+          accountName: ctxt.common_loading,
+          accountType: AccountType.cash,
+          onArchive: () {},
+          onEdit: () {},
+          onRemove: () {},
+          showMenu: false,
+        ),
+      ),
       error: (e, st) => Center(child: Text(ctxt.common_errorText(e.toString()))),
     );
   }

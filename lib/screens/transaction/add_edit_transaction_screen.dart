@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:mudra_manager/db/models/account.dart' show Account, AccountType;
-import 'package:mudra_manager/db/models/category.dart' show Category;
+import 'package:mudra_manager/db/models/category.dart' show Category, CategoryType;
 import 'package:mudra_manager/db/models/tag.dart' show GetTagCollection, Tag;
 import 'package:mudra_manager/db/models/transaction.dart' show Transaction;
 import 'package:mudra_manager/l10n/app_localizations.dart'
@@ -23,9 +23,10 @@ import 'package:mudra_manager/service/notification_service.dart';
 import 'package:mudra_manager/components/adaptive_text.dart';
 import 'package:mudra_manager/util/icon_helper.dart' show IconHelper;
 import 'package:mudra_manager/util/localization_extension.dart';
-import 'package:mudra_manager/util/snackbar_service.dart';
+import 'package:mudra_manager/service/widget_service.dart';
 import 'package:mudra_manager/service/budget_alert_service.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:mudra_manager/util/snackbar_service.dart';
 
 class AddEditTransactionScreen extends ConsumerStatefulWidget {
   final Transaction? transaction;
@@ -428,6 +429,7 @@ class _AddEditTransactionScreenState
       await ref.read(transactionProvider).addTransaction(txn);
       await _checkLowBalance(txn.account.value);
       await _checkBudgetAlerts(txn);
+      await WidgetService.updateWidget(ref);
       invalidateAll(ref);
 
       if (mounted) context.pop();
@@ -568,7 +570,6 @@ class _AddEditTransactionScreenState
     ColorScheme color,
   ) {
     final ctxt = AppLocalizations.of(context)!;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return ListView.separated(
       scrollDirection: Axis.horizontal,
@@ -641,21 +642,53 @@ class _AddEditTransactionScreenState
     ColorScheme color,
   ) {
     final ctxt = AppLocalizations.of(context)!;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    // Filter by expense/income type and show only parent categories
+    final filtered = categories.where((c) => 
+      (_isExpense ? c.categoryType == CategoryType.expense : c.categoryType == CategoryType.income) && 
+      c.parentCategory.value == null
+    ).toList();
 
     return ListView.separated(
       scrollDirection: Axis.horizontal,
-      itemCount: categories.length + 1,
+      itemCount: filtered.length + 1,
       separatorBuilder: (_, __) => const SizedBox(width: 12),
       itemBuilder: (context, index) {
-        if (index < categories.length) {
-          final cat = categories[index];
-          final isSelected = _selectedCategory?.id == cat.id;
+        if (index < filtered.length) {
+          final cat = filtered[index];
+          final isParentSelected = _selectedCategory?.id == cat.id;
+          final isChildSelected = _selectedCategory?.parentCategory.value?.id == cat.id;
+          final isSelected = isParentSelected || isChildSelected;
+          final hasSubcategories = categories.any((c) => c.parentCategory.value?.id == cat.id);
+          
           return GestureDetector(
-            onTap: () => setState(() => _selectedCategory = cat),
+            onTap: () async {
+              if (hasSubcategories) {
+                final subcategories = categories.where((c) => c.parentCategory.value?.id == cat.id).toList();
+                final selected = await showModalBottomSheet<Category>(
+                  context: context,
+                  builder: (_) => _SubcategoryPicker(
+                    parent: cat,
+                    subcategories: subcategories,
+                    selected: _selectedCategory,
+                  ),
+                );
+                if (selected != null) setState(() => _selectedCategory = selected);
+              } else {
+                setState(() => _selectedCategory = cat);
+              }
+            },
+            onLongPress: hasSubcategories ? () => setState(() => _selectedCategory = cat) : null,
             child: Card(
-              elevation: 0,
+              elevation: isSelected ? 4 : 0,
+              shadowColor: isSelected ? color.primary.withValues(alpha: 0.3) : null,
               color: isSelected ? color.primaryContainer : color.surfaceContainerHighest,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: isSelected 
+                    ? BorderSide(color: color.primary, width: 2)
+                    : BorderSide.none,
+              ),
               child: Container(
                 width: 120,
                 padding: const EdgeInsets.all(16),
@@ -663,25 +696,81 @@ class _AddEditTransactionScreenState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Color(cat.colorValue ?? color.primary.value).withValues(alpha: 0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        IconHelper.iconFromName(cat.iconName ?? 'category'),
-                        color: Color(cat.colorValue ?? color.primary.value),
-                        size: 20,
+                    // Icon with stacking if subcategory selected
+                    SizedBox(
+                      height: 40,
+                      child: Stack(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Color(cat.colorValue ?? color.primary.value).withValues(alpha: 0.15),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              IconHelper.iconFromName(cat.iconName ?? 'category'),
+                              color: Color(cat.colorValue ?? color.primary.value),
+                              size: 20,
+                            ),
+                          ),
+                          if (isChildSelected && _selectedCategory != null)
+                            Positioned(
+                              right: 0,
+                              bottom: 0,
+                              child: Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: Color(_selectedCategory!.colorValue ?? color.primary.value),
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: color.surface, width: 2),
+                                ),
+                                child: Icon(
+                                  IconHelper.iconFromName(_selectedCategory!.iconName ?? 'category'),
+                                  color: Colors.white,
+                                  size: 12,
+                                ),
+                              ),
+                            ),
+                          if (hasSubcategories && !isChildSelected)
+                            Positioned(
+                              right: 0,
+                              top: 0,
+                              child: Container(
+                                padding: const EdgeInsets.all(2),
+                                decoration: BoxDecoration(
+                                  color: color.primary,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(Icons.chevron_right, size: 12, color: color.onPrimary),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
-                    AdaptiveText(
-                      cat.name,
-                      style: textTheme.labelLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: isSelected ? color.onPrimaryContainer : color.onSurface,
-                      ),
-                      maxLines: 2,
+                    const SizedBox(height: 4),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AdaptiveText(
+                          isChildSelected && _selectedCategory != null
+                              ? _selectedCategory!.name
+                              : cat.name,
+                          style: textTheme.labelLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: isSelected ? color.onPrimaryContainer : color.onSurface,
+                          ),
+                          maxLines: 1,
+                        ),
+                        if (isChildSelected && _selectedCategory != null)
+                          Text(
+                            cat.name,
+                            style: textTheme.labelSmall?.copyWith(
+                              color: isSelected ? color.onPrimaryContainer.withValues(alpha: 0.7) : color.onSurfaceVariant,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                      ],
                     ),
                   ],
                 ),
@@ -715,6 +804,62 @@ class _AddEditTransactionScreenState
           );
         }
       },
+    );
+  }
+}
+
+class _SubcategoryPicker extends StatelessWidget {
+  final Category parent;
+  final List<Category> subcategories;
+  final Category? selected;
+
+  const _SubcategoryPicker({
+    required this.parent,
+    required this.subcategories,
+    this.selected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final color = Theme.of(context).colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            parent.name,
+            style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Select subcategory or tap parent',
+            style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+          ),
+          const SizedBox(height: 16),
+          ListTile(
+            leading: Icon(
+              IconHelper.iconFromName(parent.iconName ?? 'category'),
+              color: Color(parent.colorValue ?? 0xFF000000),
+            ),
+            title: Text('${parent.name} (Parent)'),
+            selected: selected?.id == parent.id,
+            onTap: () => Navigator.pop(context, parent),
+          ),
+          const Divider(),
+          ...subcategories.map((sub) => ListTile(
+            leading: Icon(
+              IconHelper.iconFromName(sub.iconName ?? 'category'),
+              color: Color(sub.colorValue ?? 0xFF000000),
+            ),
+            title: Text(sub.name),
+            selected: selected?.id == sub.id,
+            onTap: () => Navigator.pop(context, sub),
+          )),
+        ],
+      ),
     );
   }
 }

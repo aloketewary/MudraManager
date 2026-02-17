@@ -468,13 +468,10 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
   Widget _buildSettlementsTab(trip) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final settlementsAsync = ref.watch(tripSettlementsProvider(widget.tripId));
 
-    return FutureBuilder(
-      future: ref.read(tripServiceProvider).calculateSettlements(widget.tripId),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
-
-        final settlements = snapshot.data as Map<String, Map<String, double>>;
+    return settlementsAsync.when(
+      data: (settlements) {
         if (settlements.isEmpty) {
           return Center(
             child: Column(
@@ -564,6 +561,8 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
           }).toList(),
         );
       },
+      loading: () => Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(child: Text('Error calculating settlements')),
     );
   }
 

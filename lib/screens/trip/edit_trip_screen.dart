@@ -153,14 +153,6 @@ class _EditTripScreenState extends ConsumerState<EditTripScreen> {
                                   firstDate: DateTime(2020),
                                   lastDate: DateTime(2030),
                                   initialDateRange: DateTimeRange(start: _startDate!, end: _endDate!),
-                                  builder: (context, child) {
-                                    return Theme(
-                                      data: Theme.of(context).copyWith(
-                                        colorScheme: ColorScheme.light(primary: Colors.teal),
-                                      ),
-                                      child: child!,
-                                    );
-                                  },
                                 );
                                 if (range != null) {
                                   final datesChanged = !DateUtils.isSameDay(range.start, trip.startDate) || !DateUtils.isSameDay(range.end, trip.endDate);

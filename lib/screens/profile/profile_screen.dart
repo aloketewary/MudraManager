@@ -173,7 +173,6 @@ class ProfileScreen extends ConsumerWidget {
                 sliver: SliverList(
                   delegate: SliverChildListDelegate([
                     SizedBox(
-                      height: 150,
                       child: Row(
                       children: [
                           Expanded(
@@ -222,19 +221,8 @@ class ProfileScreen extends ConsumerWidget {
                       ],
                     ),
                     ),
-                    SizedBox(height: 24),
+                    SizedBox(height: 20),
                     _buildSectionHeader(context, 'Management'),
-                    SizedBox(height: 16),
-                    _buildSettingCard(
-                      context,
-                      Icons.receipt_long_outlined,
-                      'Bills',
-                      'Manage recurring bills',
-                      () {
-                        HapticFeedback.mediumImpact();
-                        context.push('/bills');
-                      },
-                    ),
                     SizedBox(height: 12),
                     _buildSettingCard(
                       context,
@@ -257,9 +245,9 @@ class ProfileScreen extends ConsumerWidget {
                         context.push('/manage-categories');
                       },
                     ),
-                    SizedBox(height: 32),
+                    SizedBox(height: 24),
                     _buildSectionHeader(context, 'Account & Data'),
-                    SizedBox(height: 16),
+                    SizedBox(height: 12),
                     _buildSettingCard(
                       context,
                       Icons.account_balance_wallet_outlined,
@@ -283,9 +271,9 @@ class ProfileScreen extends ConsumerWidget {
                         context.push('/backup-restore');
                       },
                     ),
-                    SizedBox(height: 32),
+                    SizedBox(height: 24),
                     _buildSectionHeader(context, 'Preferences'),
-                    SizedBox(height: 16),
+                    SizedBox(height: 12),
                     _buildSettingCard(
                       context,
                       Icons.notifications_outlined,
@@ -329,9 +317,9 @@ class ProfileScreen extends ConsumerWidget {
                         context.push('/sms-import');
                       },
                     ),
-                    SizedBox(height: 32),
+                    SizedBox(height: 24),
                     _buildSectionHeader(context, 'About'),
-                    SizedBox(height: 16),
+                    SizedBox(height: 12),
                     _buildSettingCard(
                       context,
                       Icons.info_outline,
@@ -342,9 +330,9 @@ class ProfileScreen extends ConsumerWidget {
                         context.push('/about');
                       },
                     ),
-                    SizedBox(height: 32),
+                    SizedBox(height: 24),
                     _buildSectionHeader(context, 'Danger Zone'),
-                    SizedBox(height: 16),
+                    SizedBox(height: 12),
                     _buildSettingCard(
                       context,
                       Icons.logout,
@@ -382,8 +370,9 @@ class ProfileScreen extends ConsumerWidget {
       color: color.surfaceContainerLow,
       surfaceTintColor: color.surfaceTint,
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(16),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
@@ -394,14 +383,15 @@ class ProfileScreen extends ConsumerWidget {
               ),
               child: Icon(icon, color: color.onPrimaryContainer, size: 24),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             Text(
               value,
-              style: textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: color.onSurface,
+              style: textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: color.primary,
               ),
             ),
+            const SizedBox(height: 4),
             Flexible(
               child: Text(
                 label,
@@ -448,7 +438,7 @@ class ProfileScreen extends ConsumerWidget {
 
     return Card(
       elevation: 0,
-      color: color.surfaceContainer,
+      color: color.surfaceContainerLow,
       surfaceTintColor: color.surfaceTint,
       child: InkWell(
         onTap: () {
@@ -693,10 +683,17 @@ class ProfileScreen extends ConsumerWidget {
                   Expanded(
                     child: FilledButton(
                       onPressed: () async {
+                        final prefs = SharedPrefsUtil.instance;
+                        final lang = prefs.getLanguage();
                         final isar =
                             await ref.read(isarServiceProvider).getInstance();
                         await isar.writeTxn(() async => await isar.clear());
-                        SharedPrefsUtil.instance.clear();
+                        prefs.clear();
+                        prefs.setLanguage(lang);
+                        ref.invalidate(userProfileProvider);
+                        ref.invalidate(accountsProvider);
+                        ref.invalidate(categoryListProvider);
+                        ref.invalidate(budgetServiceProvider);
                         if (ctx.mounted) ctx.go('/onboarding');
                       },
                       style: FilledButton.styleFrom(

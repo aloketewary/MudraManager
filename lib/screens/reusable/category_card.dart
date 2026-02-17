@@ -9,6 +9,7 @@ class CategoryCard extends StatelessWidget {
   final bool isNewCard;
   final bool isUnderWrap;
   final Function callbackAction;
+  final Function? onLongPress;
 
   const CategoryCard({
     super.key,
@@ -19,6 +20,7 @@ class CategoryCard extends StatelessWidget {
     required this.callbackAction,
     this.isNewCard = false,
     this.isUnderWrap = false,
+    this.onLongPress,
   });
 
   @override
@@ -33,6 +35,7 @@ class CategoryCard extends StatelessWidget {
 
     return GestureDetector(
       onTap: () => callbackAction(),
+      onLongPress: onLongPress != null ? () => onLongPress!() : null,
       child: Container(
         width: isUnderWrap ? size.width / 2.5 : isNewCard ? 150 : 150,
         padding: const EdgeInsets.all(8.0),

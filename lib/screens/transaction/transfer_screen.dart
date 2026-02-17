@@ -8,6 +8,7 @@ import 'package:mudra_manager/l10n/app_localizations.dart';
 import 'package:mudra_manager/providers/account_providers.dart';
 import 'package:mudra_manager/providers/transaction_provider.dart';
 import 'package:mudra_manager/screens/transaction/account_card_mini.dart' show AccountCardMini;
+import 'package:mudra_manager/service/widget_service.dart';
 
 class TransferScreen extends ConsumerStatefulWidget {
   final Account? fromAccount;
@@ -82,6 +83,7 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
       toId: widget.toId,
     );
 
+    await WidgetService.updateWidget(ref);
     ref.invalidate(transactionProvider);
 
     context.pop();

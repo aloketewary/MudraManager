@@ -61,16 +61,40 @@ class _BudgetMiniCardState extends ConsumerState<BudgetMiniCard> {
         budgetProgressProvider.when(
           data: (budgets) {
             if (budgets.isEmpty) {
-              return Padding(
-                padding: EdgeInsets.symmetric(horizontal: widget.globalPadding),
-                child: NoDataFound(
-                  message: ctxt.dashboard_mini_budget_not_found_text,
-                  iconData: Icons.pie_chart_outline,
-                  action: ElevatedButton(
-                    onPressed: () {
+              return Container(
+                margin: EdgeInsets.symmetric(horizontal: widget.globalPadding),
+                child: Card(
+                  elevation: 0,
+                  color: color.surfaceContainerLow,
+                  child: InkWell(
+                    onTap: () {
+                      HapticFeedback.mediumImpact();
                       context.push('/add-budget');
                     },
-                    child: Text(ctxt.dashboard_mini_budget_add_text),
+                    borderRadius: BorderRadius.circular(20),
+                    child: Padding(
+                      padding: EdgeInsets.all(24),
+                      child: Column(
+                        children: [
+                          Icon(Icons.pie_chart_outline, size: 48, color: color.primary.withValues(alpha: 0.5)),
+                          SizedBox(height: 12),
+                          Text(
+                            ctxt.dashboard_mini_budget_not_found_text,
+                            style: textTheme.bodyMedium?.copyWith(color: color.onSurfaceVariant),
+                            textAlign: TextAlign.center,
+                          ),
+                          SizedBox(height: 16),
+                          FilledButton.icon(
+                            onPressed: () {
+                              HapticFeedback.mediumImpact();
+                              context.push('/add-budget');
+                            },
+                            icon: Icon(Icons.add),
+                            label: Text(ctxt.dashboard_mini_budget_add_text),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               );
@@ -289,10 +313,10 @@ class _BudgetCircularCard extends StatelessWidget {
                         Flexible(
                           child: CurrencyText(
                             amount: remaining,
-                            style: textTheme.labelSmall?.copyWith(
-                              color: budgetColor,
-                              fontWeight: FontWeight.w700,
-                            ),
+                          style: textTheme.labelSmall?.copyWith(
+                            color: budgetColor,
+                            fontWeight: FontWeight.w700,
+                          ),
                             maxLines: 1,
                           ),
                         ),

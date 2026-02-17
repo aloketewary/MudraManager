@@ -48,16 +48,40 @@ class GoalMiniCard extends ConsumerWidget {
         goalsAsync.when(
           data: (goals) {
             if (goals.isEmpty) {
-              return Padding(
-                padding: EdgeInsets.symmetric(horizontal: globalPadding),
-                child: NoDataFound(
-                  message: "No goals found. Add one!",
-                  iconData: Icons.emoji_flags_outlined,
-                  action: ElevatedButton(
-                    onPressed: () {
+              return Container(
+                margin: EdgeInsets.symmetric(horizontal: globalPadding),
+                child: Card(
+                  elevation: 0,
+                  color: color.surfaceContainerLow,
+                  child: InkWell(
+                    onTap: () {
+                      HapticFeedback.mediumImpact();
                       context.push('/add-goal');
                     },
-                    child: const Text("Add Goal"),
+                    borderRadius: BorderRadius.circular(20),
+                    child: Padding(
+                      padding: EdgeInsets.all(24),
+                      child: Column(
+                        children: [
+                          Icon(Icons.emoji_flags_outlined, size: 48, color: color.primary.withValues(alpha: 0.5)),
+                          SizedBox(height: 12),
+                          Text(
+                            "No goals found. Add one!",
+                            style: textTheme.bodyMedium?.copyWith(color: color.onSurfaceVariant),
+                            textAlign: TextAlign.center,
+                          ),
+                          SizedBox(height: 16),
+                          FilledButton.icon(
+                            onPressed: () {
+                              HapticFeedback.mediumImpact();
+                              context.push('/add-goal');
+                            },
+                            icon: Icon(Icons.add),
+                            label: Text("Add Goal"),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               );

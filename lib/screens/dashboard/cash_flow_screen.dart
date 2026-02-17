@@ -10,14 +10,25 @@ import 'package:mudra_manager/l10n/app_localizations.dart'
     show AppLocalizations;
 import 'package:mudra_manager/providers/filter_provider.dart';
 import 'package:mudra_manager/screens/reusable/animated_balance.dart';
+import 'package:mudra_manager/screens/reusable/period_calendar_selector.dart';
 import 'package:mudra_manager/screens/reusable/responseive_layout_builder.dart';
+import 'package:mudra_manager/components/trend_indicator.dart';
 
 import 'package:mudra_manager/util/localization_extension.dart';
 
 class CashFlowScreen extends ConsumerStatefulWidget {
   final double globalPadding;
+  final PeriodType selectedPeriod;
+  final DateTime? customStart;
+  final DateTime? customEnd;
 
-  const CashFlowScreen({super.key, this.globalPadding = 16.0});
+  const CashFlowScreen({
+    super.key,
+    this.globalPadding = 16.0,
+    required this.selectedPeriod,
+    this.customStart,
+    this.customEnd,
+  });
 
   @override
   ConsumerState<CashFlowScreen> createState() => _CashFlowScreenState();
@@ -33,78 +44,105 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final filter = ref.watch(filterProvider);
+    final filter = widget.selectedPeriod == PeriodType.day
+        ? FilterType.day
+        : widget.selectedPeriod == PeriodType.week
+            ? FilterType.week
+            : widget.selectedPeriod == PeriodType.month
+                ? FilterType.month
+                : widget.selectedPeriod == PeriodType.year
+                    ? FilterType.year
+                    : FilterType.all;
     final now = DateTime.now();
     final ctxt = AppLocalizations.of(context)!;
 
     DateTime startDate;
     DateTime endDate;
 
-    switch (filter) {
-      case FilterType.day:
-        startDate = DateTime(now.year, now.month, now.day);
-        endDate = startDate;
-        break;
-      case FilterType.week:
-        startDate = now.subtract(Duration(days: now.weekday - 1));
-        endDate = startDate.add(const Duration(days: 6));
-        break;
-      case FilterType.month:
-        startDate = DateTime(now.year, now.month, 1);
-        endDate = DateTime(
-          now.year,
-          now.month + 1,
-          1,
-        ).subtract(const Duration(days: 1));
-        break;
-      case FilterType.year:
-        startDate = DateTime(now.year, 1, 1);
-        endDate = DateTime(
-          now.year + 1,
-          1,
-          1,
-        ).subtract(const Duration(days: 1));
-        break;
-      case FilterType.all:
-        // Fallback values, or fetch min/max from transactions if needed
-        startDate = DateTime.fromMillisecondsSinceEpoch(0);
-        endDate = now;
-        break;
+    if (widget.selectedPeriod == PeriodType.custom && widget.customStart != null && widget.customEnd != null) {
+      startDate = widget.customStart!;
+      endDate = widget.customEnd!;
+    } else {
+      switch (filter) {
+        case FilterType.day:
+          startDate = DateTime(now.year, now.month, now.day);
+          endDate = startDate;
+          break;
+        case FilterType.week:
+          startDate = now.subtract(Duration(days: now.weekday - 1));
+          endDate = startDate.add(const Duration(days: 6));
+          break;
+        case FilterType.month:
+          startDate = DateTime(now.year, now.month, 1);
+          endDate = DateTime(
+            now.year,
+            now.month + 1,
+            1,
+          ).subtract(const Duration(days: 1));
+          break;
+        case FilterType.year:
+          startDate = DateTime(now.year, 1, 1);
+          endDate = DateTime(
+            now.year + 1,
+            1,
+            1,
+          ).subtract(const Duration(days: 1));
+          break;
+        case FilterType.all:
+          startDate = DateTime.fromMillisecondsSinceEpoch(0);
+          endDate = now;
+          break;
+      }
     }
 
-    final summary = ref.watch(filteredDashboardTransactionsProvider);
+    final summary = widget.selectedPeriod == PeriodType.custom && widget.customStart != null && widget.customEnd != null
+        ? ref.watch(customDateRangeTransactionsProvider('${widget.customStart!.millisecondsSinceEpoch}_${widget.customEnd!.millisecondsSinceEpoch}'))
+        : ref.watch(periodBasedTransactionsProvider(
+            widget.selectedPeriod == PeriodType.day ? 'day' :
+            widget.selectedPeriod == PeriodType.week ? 'week' :
+            widget.selectedPeriod == PeriodType.month ? 'month' :
+            widget.selectedPeriod == PeriodType.year ? 'year' : 'month'
+          ));
+    
+    final previousPeriod = widget.selectedPeriod == PeriodType.day ? 'day' :
+                           widget.selectedPeriod == PeriodType.week ? 'week' :
+                           widget.selectedPeriod == PeriodType.month ? 'month' :
+                           widget.selectedPeriod == PeriodType.year ? 'year' : 'month';
+    final prevSummary = ref.watch(previousPeriodTransactionsProvider(previousPeriod));
     return summary.when(
       skipLoadingOnReload: true,
       data: (data) {
         final income = data['income'] ?? 0.0;
         final expense = data['expense'] ?? 0.0;
+        final prevIncome = prevSummary.value?['income'] ?? 0.0;
+        final prevExpense = prevSummary.value?['expense'] ?? 0.0;
         final total = income - expense;
         return Padding(
           padding: EdgeInsets.all(widget.globalPadding),
           child: Column(
             children: [
-              Padding(
-                padding: EdgeInsets.only(bottom: 4),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      ctxt.dashboard_cash_flow_text,
-                      style: textTheme.titleLarge?.copyWith(
-                        color: color.primary,
+              GestureDetector(
+                onTap: () {
+                  HapticFeedback.mediumImpact();
+                  context.push('/transactions');
+                },
+                child: Padding(
+                  padding: EdgeInsets.only(bottom: 12, left: 4, right: 4),
+                  child: Row(
+                    children: [
+                      Icon(Icons.account_balance_wallet, color: color.primary),
+                      SizedBox(width: 8),
+                      Text(
+                        ctxt.dashboard_cash_flow_text,
+                        style: textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: color.primary,
+                        ),
                       ),
-                    ),
-                    Hero(
-                      tag: 'cashFlowPage',
-                      child: TextButton(
-                        onPressed: () {
-                          HapticFeedback.mediumImpact();
-                          context.push('/transactions');
-                        },
-                        child: const Text('View All'),
-                      ),
-                    ),
-                  ],
+                      Spacer(),
+                      Icon(Icons.chevron_right, color: color.onSurfaceVariant),
+                    ],
+                  ),
                 ),
               ),
               ResponsiveLayoutBuilder(
@@ -119,6 +157,7 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
                       startDate,
                       endDate,
                       filter,
+                      prevIncome,
                     ),
                     SizedBox(height: 12),
                     buildCashFlowCard(
@@ -127,6 +166,7 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
                       startDate,
                       endDate,
                       filter,
+                      prevExpense,
                     ),
                   ],
                 ),
@@ -139,6 +179,7 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
                       startDate,
                       endDate,
                       filter,
+                      prevIncome,
                     ),
                     buildCashFlowCard(
                       true,
@@ -146,6 +187,7 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
                       startDate,
                       endDate,
                       filter,
+                      prevExpense,
                     ),
                   ],
                 ),
@@ -171,6 +213,7 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
     DateTime startDate,
     DateTime endDate,
     FilterType filter,
+    double previousValue,
   ) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
@@ -182,7 +225,9 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
     return Expanded(
       child: SizedBox(
         height: 170,
-        child: GestureDetector(
+        child: Semantics(
+          label: '${isExpense ? "Expense" : "Income"}: ${ctxt.formatCurrencyWithSign(0, value)}',
+          child: GestureDetector(
           onTap: () {
             HapticFeedback.mediumImpact();
           },
@@ -231,11 +276,27 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
+                            if (previousValue > 0) ...[
+                              const SizedBox(width: 6.0),
+                              TrendIndicator(
+                                current: value,
+                                previous: previousValue,
+                                isIncome: !isExpense,
+                              ),
+                            ],
                           ],
                         )
                         : Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
+                            if (previousValue > 0) ...[
+                              TrendIndicator(
+                                current: value,
+                                previous: previousValue,
+                                isIncome: !isExpense,
+                              ),
+                              const SizedBox(width: 6.0),
+                            ],
                             Flexible(
                               child: Text(
                                 ctxt.transaction_type_expense.toUpperCase(),
@@ -321,6 +382,7 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
             ),
           ),
         ),
+      ),
       ),
     );
   }

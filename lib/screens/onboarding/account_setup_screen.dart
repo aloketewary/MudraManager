@@ -8,6 +8,8 @@ import 'package:mudra_manager/db/models/user_profile.dart';
 import 'package:mudra_manager/providers/isar_provider.dart';
 import 'package:mudra_manager/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/util/snackbar_service.dart';
+import 'package:mudra_manager/service/backup_restore_service.dart';
+import 'package:mudra_manager/util/dialog_utils.dart';
 
 class AccountSetupScreen extends ConsumerStatefulWidget {
   const AccountSetupScreen({super.key});
@@ -30,6 +32,34 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
     _accountController.dispose();
     _balanceController.dispose();
     super.dispose();
+  }
+
+  Future<void> _restoreBackup() async {
+    try {
+      final password = await DialogUtils.showPasswordDialog(context, isRestore: true);
+      if (password == null) return;
+
+      setState(() => _isLoading = true);
+
+      final isar = await ref.read(isarServiceProvider).getInstance();
+      final data = await BackupService.restoreEncryptedBackup(context, isar, password);
+      
+      if (data != null) {
+        SharedPrefsUtil.instance.setOnboardingComplete();
+        if (mounted) {
+          SnackbarService.success('Backup restored successfully');
+          context.go('/home');
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        SnackbarService.error('Restore failed: $e');
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   Future<void> _completeSetup() async {
@@ -76,25 +106,98 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
     final existing = await isar.categorys.where().findAll();
     if (existing.isNotEmpty) return;
 
-    final categories = [
-      Category.create(name: 'Salary', categoryType: CategoryType.income)
-        ..iconName = 'attach_money'
-        ..colorValue = Colors.green.toARGB32(),
-      Category.create(name: 'Investment', categoryType: CategoryType.income)
-        ..iconName = 'trending_up'
-        ..colorValue = Colors.teal.toARGB32(),
-      Category.create(name: 'Food', categoryType: CategoryType.expense)
-        ..iconName = 'fastfood'
-        ..colorValue = Colors.orange.toARGB32(),
-      Category.create(name: 'Transport', categoryType: CategoryType.expense)
-        ..iconName = 'directions_car'
-        ..colorValue = Colors.purple.toARGB32(),
-      Category.create(name: 'Shopping', categoryType: CategoryType.expense)
-        ..iconName = 'shopping_bag'
-        ..colorValue = Colors.red.toARGB32(),
-    ];
+    // Income categories
+    final salary = Category.create(name: 'Salary', categoryType: CategoryType.income)
+      ..iconName = 'attach_money'
+      ..colorValue = Colors.green.toARGB32();
+    final business = Category.create(name: 'Business', categoryType: CategoryType.income)
+      ..iconName = 'business'
+      ..colorValue = Colors.teal.toARGB32();
+    final investment = Category.create(name: 'Investment', categoryType: CategoryType.income)
+      ..iconName = 'trending_up'
+      ..colorValue = Colors.blue.toARGB32();
+    final other = Category.create(name: 'Other Income', categoryType: CategoryType.income)
+      ..iconName = 'account_balance_wallet'
+      ..colorValue = Colors.lightGreen.toARGB32();
 
-    await isar.writeTxn(() => isar.categorys.putAll(categories));
+    // Expense categories with subcategories
+    final food = Category.create(name: 'Food', categoryType: CategoryType.expense)
+      ..iconName = 'restaurant'
+      ..colorValue = Colors.orange.toARGB32();
+    final groceries = Category.create(name: 'Groceries', categoryType: CategoryType.expense)
+      ..iconName = 'shopping_cart'
+      ..colorValue = Colors.deepOrange.toARGB32();
+    final restaurant = Category.create(name: 'Restaurant', categoryType: CategoryType.expense)
+      ..iconName = 'fastfood'
+      ..colorValue = Colors.orangeAccent.toARGB32();
+
+    final transport = Category.create(name: 'Transport', categoryType: CategoryType.expense)
+      ..iconName = 'directions_car'
+      ..colorValue = Colors.purple.toARGB32();
+    final fuel = Category.create(name: 'Fuel', categoryType: CategoryType.expense)
+      ..iconName = 'local_gas_station'
+      ..colorValue = Colors.deepPurple.toARGB32();
+    final publicTransport = Category.create(name: 'Public Transport', categoryType: CategoryType.expense)
+      ..iconName = 'directions_bus'
+      ..colorValue = Colors.purpleAccent.toARGB32();
+
+    final shopping = Category.create(name: 'Shopping', categoryType: CategoryType.expense)
+      ..iconName = 'shopping_bag'
+      ..colorValue = Colors.red.toARGB32();
+    final clothing = Category.create(name: 'Clothing', categoryType: CategoryType.expense)
+      ..iconName = 'checkroom'
+      ..colorValue = Colors.redAccent.toARGB32();
+    final electronics = Category.create(name: 'Electronics', categoryType: CategoryType.expense)
+      ..iconName = 'devices'
+      ..colorValue = Colors.pink.toARGB32();
+
+    final bills = Category.create(name: 'Bills', categoryType: CategoryType.expense)
+      ..iconName = 'receipt'
+      ..colorValue = Colors.brown.toARGB32();
+    final electricity = Category.create(name: 'Electricity', categoryType: CategoryType.expense)
+      ..iconName = 'bolt'
+      ..colorValue = Colors.amber.toARGB32();
+    final internet = Category.create(name: 'Internet', categoryType: CategoryType.expense)
+      ..iconName = 'wifi'
+      ..colorValue = Colors.blueGrey.toARGB32();
+
+    final entertainment = Category.create(name: 'Entertainment', categoryType: CategoryType.expense)
+      ..iconName = 'movie'
+      ..colorValue = Colors.indigo.toARGB32();
+    final healthcare = Category.create(name: 'Healthcare', categoryType: CategoryType.expense)
+      ..iconName = 'local_hospital'
+      ..colorValue = Colors.cyan.toARGB32();
+    final education = Category.create(name: 'Education', categoryType: CategoryType.expense)
+      ..iconName = 'school'
+      ..colorValue = Colors.lime.toARGB32();
+
+    await isar.writeTxn(() async {
+      // Save parent categories first
+      await isar.categorys.putAll([salary, business, investment, other, food, transport, shopping, bills, entertainment, healthcare, education]);
+      
+      // Set up subcategories
+      groceries.parentCategory.value = food;
+      restaurant.parentCategory.value = food;
+      fuel.parentCategory.value = transport;
+      publicTransport.parentCategory.value = transport;
+      clothing.parentCategory.value = shopping;
+      electronics.parentCategory.value = shopping;
+      electricity.parentCategory.value = bills;
+      internet.parentCategory.value = bills;
+      
+      // Save subcategories
+      await isar.categorys.putAll([groceries, restaurant, fuel, publicTransport, clothing, electronics, electricity, internet]);
+      
+      // Save relationships
+      await groceries.parentCategory.save();
+      await restaurant.parentCategory.save();
+      await fuel.parentCategory.save();
+      await publicTransport.parentCategory.save();
+      await clothing.parentCategory.save();
+      await electronics.parentCategory.save();
+      await electricity.parentCategory.save();
+      await internet.parentCategory.save();
+    });
   }
 
   @override
@@ -205,6 +308,19 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                             ),
                           )
                         : const Text('Get Started'),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: _isLoading ? null : _restoreBackup,
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    icon: const Icon(Icons.restore),
+                    label: const Text('Restore from Backup'),
                   ),
                 ),
               ],

@@ -2,6 +2,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:home_widget/home_widget.dart';
 import 'package:mudra_manager/db/models/user_profile.dart' show UserProfile;
 import 'package:mudra_manager/l10n/app_localizations.dart'
     show AppLocalizations;
@@ -13,12 +14,14 @@ import 'package:mudra_manager/providers/user_profile_provider.dart';
 import 'package:mudra_manager/screens/profile/profile_screen.dart';
 import 'package:mudra_manager/screens/statistics/statistics_screen.dart';
 import 'package:mudra_manager/screens/transaction/transaction_list_screen.dart';
+import 'package:mudra_manager/screens/transaction/quick_add_transaction_sheet.dart';
+import 'package:mudra_manager/screens/utility/utility_screen.dart';
 import 'package:mudra_manager/service/notification_service.dart'
     show NotificationService;
 import 'package:mudra_manager/util/localization_extension.dart';
 import 'package:mudra_manager/components/adaptive_text.dart';
 import 'dashboard/dashboard_home.dart';
-import 'utility/utility_screen.dart';
+import 'package:mudra_manager/util/app_logger.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   final int initialIndex;
@@ -53,6 +56,46 @@ class HomePageState extends ConsumerState<HomePage>
       ProfileScreen(),
     ];
     initNotification();
+    _setupWidgetClickListener();
+    _setupMethodChannel();
+  }
+
+  void _setupMethodChannel() {
+    const platform = MethodChannel('com.mudramanager.app/widget');
+    platform.setMethodCallHandler((call) async {
+      if (call.method == 'widgetAction' &&
+          call.arguments == 'add_transaction') {
+        AppLogger.widget('Widget button clicked - opening quick add sheet');
+        if (mounted) {
+          await Future.delayed(Duration(milliseconds: 300));
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            builder: (_) => QuickAddTransactionSheet(),
+          );
+        }
+      }
+    });
+  }
+
+  void _setupWidgetClickListener() {
+    HomeWidget.widgetClicked.listen((uri) {
+      if (uri?.host == 'add_transaction' && mounted) {
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          builder: (_) => QuickAddTransactionSheet(),
+        );
+      }
+    });
+  }
+
+  @override
+  void didUpdateWidget(HomePage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialIndex != oldWidget.initialIndex) {
+      _selectedIndex = widget.initialIndex;
+    }
   }
 
   @override
@@ -63,7 +106,18 @@ class HomePageState extends ConsumerState<HomePage>
 
   void _onTabSelected(int index) {
     HapticFeedback.mediumImpact();
+    AppLogger.navigation('Tab changed: $index');
     setState(() => _selectedIndex = index);
+
+    // Update route to match tab
+    final routes = [
+      '/home',
+      '/transactions',
+      '/utilities',
+      '/statistics',
+      '/profile',
+    ];
+    context.go(routes[index]);
   }
 
   @override
@@ -74,7 +128,7 @@ class HomePageState extends ConsumerState<HomePage>
     return Scaffold(
       appBar: buildTopBar(profileAsync, _selectedIndex),
       extendBody: true,
-      floatingActionButtonLocation: _selectedIndex == 1 ? FloatingActionButtonLocation.centerFloat : FloatingActionButtonLocation.endFloat,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton:
           _selectedIndex == 1
               ? FloatingActionButton.extended(
@@ -133,10 +187,7 @@ class HomePageState extends ConsumerState<HomePage>
           _selectedIndex == 4
               ? _pages[_selectedIndex]
               : _selectedIndex == 2
-              ? SafeArea(
-                bottom: false,
-                child: _pages[_selectedIndex],
-              )
+              ? SafeArea(bottom: false, child: _pages[_selectedIndex])
               : SafeArea(
                 bottom: false,
                 child: Padding(
@@ -147,7 +198,7 @@ class HomePageState extends ConsumerState<HomePage>
     );
   }
 
-PreferredSizeWidget? buildTopBar(
+  PreferredSizeWidget? buildTopBar(
     AsyncValue<UserProfile?> profileAsync,
     int selectedIndex,
   ) {
@@ -251,11 +302,18 @@ PreferredSizeWidget? buildTopBar(
           ),
           actions: [
             IconButton(
+              onPressed: () {
+                HapticFeedback.mediumImpact();
+                transactionListKey.currentState?.toggleSearch();
+              },
+              icon: Icon(Icons.search_rounded),
+            ),
+            IconButton(
               onPressed:
                   () => transactionListKey.currentState?.showFilterBottomSheet(
                     context,
                   ),
-              icon: Icon(Icons.filter_list),
+              icon: Icon(Icons.filter_list_rounded),
             ),
           ],
         );

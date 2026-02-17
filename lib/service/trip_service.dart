@@ -75,12 +75,16 @@ class TripService {
   ) async {
     final isar = await isarService.getInstance();
     final trip = await isar.trips.get(tripId);
-    await trip?.transactions.load();
+    if (trip == null) return {};
+    
+    await trip.transactions.load();
+    await trip.participants.load();
 
     final balances = <int, double>{};
+    final participantMap = {for (var p in trip.participants) p.id: p.name};
 
-    for (var tripTxn in trip?.transactions.toList() ?? []) {
-      await tripTxn.load();
+    for (var tripTxn in trip.transactions.toList()) {
+      await tripTxn.transaction.load();
       await tripTxn.paidBy.load();
 
       final txn = tripTxn.transaction.value;
@@ -88,8 +92,8 @@ class TripService {
 
       if (txn == null || paidBy == null) continue;
 
-      final amount = txn?.amount ?? 0.0;
-      final paidById = paidBy?.id ?? 0;
+      final amount = txn.amount;
+      final paidById = paidBy.id;
 
       balances[paidById] = (balances[paidById] ?? 0) + amount;
 
@@ -104,8 +108,6 @@ class TripService {
     }
 
     final settlements = <String, Map<String, double>>{};
-    final participants = await isar.tripParticipants.where().findAll();
-    final participantMap = {for (var p in participants) p.id: p.name};
 
     balances.forEach((id, balance) {
       if (balance > 0.01) {

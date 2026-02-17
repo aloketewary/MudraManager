@@ -9,6 +9,7 @@ import 'package:mudra_manager/db/models/transaction.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mudra_manager/util/app_logger.dart';
 
 class NotificationService {
   static final FlutterLocalNotificationsPlugin _plugin =
@@ -73,14 +74,12 @@ class NotificationService {
     await _saveReminderTime(time);
 
     final scheduledDate = _nextInstanceOfTime(time);
-    if (kDebugMode) {
-      print(scheduledDate);
-    }
+    AppLogger.notification('Scheduling daily reminder at ${time.hour}:${time.minute}');
 
     await _plugin.zonedSchedule(
       0,
-      'Daily Expense Reminder 💰',
-      'Track your expenses today! Tap to view statistics',
+      '📊 Daily Summary',
+      'Tap to view your spending summary and statistics',
       scheduledDate,
       const NotificationDetails(
         android: AndroidNotificationDetails(
@@ -100,6 +99,7 @@ class NotificationService {
       matchDateTimeComponents: DateTimeComponents.time,
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
     );
+    AppLogger.notification('Daily reminder scheduled successfully');
   }
 
   static Future<void> showDailySummary() async {
@@ -191,8 +191,8 @@ class NotificationService {
 
     await _plugin.zonedSchedule(
       2,
-      'Weekly Summary',
-      'Tap to view your week',
+      '📅 Weekly Summary',
+      'Tap to view your week\'s spending and statistics',
       scheduledDate,
       const NotificationDetails(
         android: AndroidNotificationDetails(
@@ -208,6 +208,7 @@ class NotificationService {
           presentSound: true,
         ),
       ),
+      payload: 'statistics',
       matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
     );
@@ -311,6 +312,7 @@ class NotificationService {
     required String body,
     String? payload,
   }) async {
+    AppLogger.notification('Showing notification: $title');
     const androidDetails = AndroidNotificationDetails(
       'mudra_channel_id',
       'Mudra Manager Notifications',

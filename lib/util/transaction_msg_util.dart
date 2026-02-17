@@ -12,13 +12,17 @@ class TransactionUtil {
     'avl bal',
     'avail bal',
     'curr bal',
+    'current balance',
     'total bal',
+    'clear bal',
+    'avl limit',
+    'available limit',
     'bal',
   ];
   static const trnKeywords = ['debited', 'credited', 'payment', 'spent'];
 
   static final creditPattern = RegExp(r'credited|credit|deposited|received');
-  static final debitPattern = RegExp(r'debited|debit|deducted|sent|paid');
+  static final debitPattern = RegExp(r'debited|debit|deducted|sent|paid|withdrawn');
   static final miscPattern = RegExp(r'payment|spent|transfer');
 
   TransactionType getTypeOfTransaction(String message) {
@@ -68,7 +72,7 @@ class TransactionUtil {
     final processedWords = processMessage(message);
     final fullProcessed = processedWords.join(' ');
 
-    info.account = getAccountFromWords(processedWords, fullProcessed);
+    info.account = getAccountFromWords(processedWords, fullProcessed, address ?? '', sender ?? '');
     info.money = getMoneySpentFromWords(processedWords);
     info.balance = getBalanceFromProcessed(fullProcessed);
 
@@ -107,8 +111,11 @@ class TransactionUtil {
     return _isNotNumeric(amount) ? '' : amount;
   }
 
-  AccountDetails getAccountFromWords(List<String> words, String fullProcessed) {
+  AccountDetails getAccountFromWords(List<String> words, String fullProcessed, String address, String sender) {
     var account = AccountDetails();
+    
+    // Extract bank name from message, sender, or address
+    account.bankName = _extractBankName(fullProcessed) ?? _extractBankName(sender) ?? _extractBankName(address);
 
     if (upiRegex.hasMatch(fullProcessed)) {
       account.type = 'UPI';
@@ -152,10 +159,10 @@ class TransactionUtil {
         }
       }
 
-      if (word.startsWith('x') ||
-          (word.length >= 2 && word.substring(0, 2) == 'ac')) {
+      // Only match if word starts with 'x' or has account-like pattern
+      if (word.startsWith('x') && word.length > 1) {
         final accountNo = _sanitizeAccountNo(word);
-        if (accountNo.isNotEmpty && _isValidAccountNumber(accountNo)) {
+        if (accountNo.isNotEmpty && accountNo.length >= 4 && _isValidAccountNumber(accountNo)) {
           account.type = 'account';
           account.no = accountNo;
           account.refNo = extractUPIRefNo(fullProcessed, false);
@@ -164,6 +171,35 @@ class TransactionUtil {
       }
     }
     return account;
+  }
+  
+  String? _extractBankName(String message) {
+    final lower = message.toLowerCase();
+    final banks = {
+      'hdfcbank': 'HDFC Bank',
+      'hdfc': 'HDFC Bank',
+      'icicibank': 'ICICI Bank',
+      'icici': 'ICICI Bank',
+      'sbibank': 'SBI',
+      'sbi': 'SBI',
+      'axisbank': 'Axis Bank',
+      'axis': 'Axis Bank',
+      'kotakbank': 'Kotak Bank',
+      'kotak': 'Kotak Bank',
+      'pnbbank': 'PNB',
+      'pnb': 'PNB',
+      'paytm': 'Paytm',
+      'phonepe': 'PhonePe',
+      'googlepay': 'Google Pay',
+      'gpay': 'Google Pay',
+    };
+    
+    for (var entry in banks.entries) {
+      if (lower.contains(entry.key)) {
+        return entry.value;
+      }
+    }
+    return null;
   }
 
   bool _isValidAccountNumber(String accountNo) {
@@ -178,10 +214,20 @@ class TransactionUtil {
     String sanitized = str.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '');
     // If it's pure obfuscation like 'xxxx', return it
     if (RegExp(r'^[xX]+$').hasMatch(sanitized)) return sanitized;
-    // Strip leading 'x', 'ac', etc. but keep digits
-    String digitsOnly = sanitized.replaceFirst(RegExp(r'^[xa-z]+'), '');
-    if (digitsOnly.isNotEmpty) return digitsOnly;
-    return sanitized;
+    
+    // Extract only the last 4+ digits for account matching
+    final digitMatch = RegExp(r'\d{4,}$').firstMatch(sanitized);
+    if (digitMatch != null) {
+      return digitMatch.group(0)!;
+    }
+    
+    // If no 4+ consecutive digits, try to get any digits
+    String digitsOnly = sanitized.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digitsOnly.length >= 4) {
+      return digitsOnly.substring(digitsOnly.length - 4);
+    }
+    
+    return '';
   }
 
   String getBalanceFromProcessed(String processedMsg) {
@@ -315,11 +361,12 @@ class AccountDetails {
   String? no;
   String? refNo;
   String? sendTo;
-  AccountDetails({this.type, this.no, this.refNo, this.sendTo});
+  String? bankName;
+  AccountDetails({this.type, this.no, this.refNo, this.sendTo, this.bankName});
 
   @override
   String toString() =>
-      'AccountDetails[type: $type, no: $no, refNo: $refNo, sendTo: $sendTo]';
+      'AccountDetails[type: $type, no: $no, refNo: $refNo, sendTo: $sendTo, bankName: $bankName]';
 }
 
 class TransactionInfo {

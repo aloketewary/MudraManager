@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mudra_manager/components/adaptive_text.dart';
 import 'package:mudra_manager/providers/auth_service.dart';
 import 'package:mudra_manager/screens/profile/pin_entry_dialog.dart'
@@ -47,7 +48,52 @@ class _AuthGateState extends ConsumerState<AuthGate> {
           ? BiometricLockScreen(onRetry: _runAuthFlow)
           : Scaffold(body: SizedBox.shrink());
     }
-    return widget.child;
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (!didPop) {
+          final location = GoRouterState.of(context).uri.toString();
+          if (location == '/home') {
+            final shouldExit = await showModalBottomSheet<bool>(
+              context: context,
+              builder: (context) => Container(
+                padding: EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.exit_to_app, size: 48, color: Theme.of(context).colorScheme.error),
+                    SizedBox(height: 16),
+                    Text('Exit Mudra Manager?', style: Theme.of(context).textTheme.titleLarge),
+                    SizedBox(height: 24),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => Navigator.pop(context, false),
+                            child: Text('Cancel'),
+                          ),
+                        ),
+                        SizedBox(width: 16),
+                        Expanded(
+                          child: FilledButton(
+                            onPressed: () => Navigator.pop(context, true),
+                            child: Text('Exit'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+            if (shouldExit == true) SystemNavigator.pop();
+          } else {
+            context.go('/home');
+          }
+        }
+      },
+      child: widget.child,
+    );
   }
 
   Future<void> _runAuthFlow() async {

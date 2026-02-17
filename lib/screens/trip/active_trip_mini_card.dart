@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:mudra_manager/providers/trip_provider.dart';
 
 class ActiveTripMiniCard extends ConsumerWidget {
@@ -14,193 +16,180 @@ class ActiveTripMiniCard extends ConsumerWidget {
     final tripsAsync = ref.watch(activeTripsProvider);
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return tripsAsync.when(
       data: (trips) {
-        if (kDebugMode) {
-          print('Total trips: ${trips.length}');
-        }
-
         final now = DateTime.now();
         final today = DateTime(now.year, now.month, now.day);
 
-        final activeTrips =
-            trips.where((trip) {
-              final start = DateTime(
-                trip.startDate.year,
-                trip.startDate.month,
-                trip.startDate.day,
-              );
-              final end = DateTime(
-                trip.endDate.year,
-                trip.endDate.month,
-                trip.endDate.day,
-              );
+        final activeTrips = trips.where((trip) {
+          final start = DateTime(trip.startDate.year, trip.startDate.month, trip.startDate.day);
+          final end = DateTime(trip.endDate.year, trip.endDate.month, trip.endDate.day);
+          return (start.isBefore(today) || start.isAtSameMomentAs(today)) &&
+              (end.isAfter(today) || end.isAtSameMomentAs(today));
+        }).toList();
 
-              if (kDebugMode) {
-                print(
-                  'Trip: ${trip.name}, Start: $start, End: $end, Today: $today, Active: ${trip.isActive}',
-                );
-              }
+        if (activeTrips.isEmpty) return const SizedBox.shrink();
 
-              return (start.isBefore(today) || start.isAtSameMomentAs(today)) &&
-                  (end.isAfter(today) || end.isAtSameMomentAs(today));
-            }).toList();
+        final trip = activeTrips.first;
+        final duration = trip.endDate.difference(trip.startDate).inDays + 1;
+        final daysLeft = trip.endDate.difference(today).inDays + 1;
 
-        if (kDebugMode) {
-          print('Active trips count: ${activeTrips.length}');
-        }
-
-        if (activeTrips.isEmpty) {
-          if (kDebugMode) {
-            print('No active trips, returning empty');
-          }
-          return const SizedBox.shrink();
-        }
-
-        return Container(
-          margin: EdgeInsets.symmetric(horizontal: globalPadding),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Active Trips',
-                    style: textTheme.titleLarge?.copyWith(color: color.primary),
-                  ),
-                  TextButton(
-                    onPressed: () => context.push('/trips'),
-                    child: const Text('View All'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              SizedBox(
-                height: 140,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: activeTrips.length,
-                  itemBuilder: (context, index) {
-                    final trip = activeTrips[index];
-                    return GestureDetector(
-                      onTap: () => context.push('/trip-detail', extra: trip.id),
-                      child: Card(
-                        elevation: 0,
-                        color: color.surfaceContainerHighest,
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(12),
-                          onTap:
-                              () =>
-                                  context.push('/trip-detail', extra: trip.id),
-                          child: Container(
-                            width: 200,
-                            margin: const EdgeInsets.only(right: 12),
-                            child: Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(8),
-                                        decoration: BoxDecoration(
-                                          color: color.tertiary.withValues(
-                                            alpha: 0.15,
-                                          ),
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                        ),
-                                        child: Icon(
-                                          Icons.flight_takeoff,
-                                          color: color.tertiary,
-                                          size: 20,
-                                        ),
-                                      ),
-                                      const Spacer(),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 4,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: color.tertiary.withValues(
-                                            alpha: 0.15,
-                                          ),
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          'ACTIVE',
-                                          style: textTheme.labelSmall?.copyWith(
-                                            color: color.tertiary,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    trip.name,
-                                    style: textTheme.titleMedium?.copyWith(
-                                      color: color.tertiary,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const Spacer(),
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        Icons.people_outline,
-                                        size: 16,
-                                        color: color.tertiary,
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        '${trip.participants.length}',
-                                        style: textTheme.bodySmall?.copyWith(
-                                          color: color.tertiary,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Icon(
-                                        Icons.receipt_outlined,
-                                        size: 16,
-                                        color: color.tertiary,
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        '${trip.transactions.length}',
-                                        style: textTheme.bodySmall?.copyWith(
-                                          color: color.tertiary,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
+        return GestureDetector(
+          onTap: () {
+            HapticFeedback.lightImpact();
+            context.push('/trip-detail', extra: trip.id);
+          },
+          child: Container(
+            margin: EdgeInsets.symmetric(horizontal: globalPadding),
+            child: Card(
+              elevation: 0,
+              color: color.surfaceContainerLow,
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: color.tertiaryContainer,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(Icons.flight_takeoff, color: color.onTertiaryContainer, size: 24),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Active Trip',
+                                style: textTheme.labelMedium?.copyWith(color: color.onSurfaceVariant),
                               ),
-                            ),
+                              const SizedBox(height: 2),
+                              Text(
+                                trip.name,
+                                style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
                           ),
                         ),
+                        Icon(Icons.chevron_right, color: color.onSurfaceVariant),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _MetricItem(
+                            icon: Icons.calendar_today,
+                            label: 'Duration',
+                            value: '$duration days',
+                            color: color,
+                            textTheme: textTheme,
+                          ),
+                        ),
+                        Expanded(
+                          child: _MetricItem(
+                            icon: Icons.hourglass_bottom,
+                            label: 'Days Left',
+                            value: '$daysLeft days',
+                            color: color,
+                            textTheme: textTheme,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _MetricItem(
+                            icon: Icons.people,
+                            label: 'Participants',
+                            value: '${trip.participants.length}',
+                            color: color,
+                            textTheme: textTheme,
+                          ),
+                        ),
+                        Expanded(
+                          child: _MetricItem(
+                            icon: Icons.receipt_long,
+                            label: 'Expenses',
+                            value: '${trip.transactions.length}',
+                            color: color,
+                            textTheme: textTheme,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: color.tertiaryContainer.withValues(alpha: 0.5),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                    );
-                  },
+                      child: Row(
+                        children: [
+                          Icon(Icons.info_outline, size: 16, color: color.onTertiaryContainer),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              '${DateFormat.MMMd().format(trip.startDate)} - ${DateFormat.MMMd().format(trip.endDate)}',
+                              style: textTheme.bodySmall?.copyWith(color: color.onTertiaryContainer),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
+            ),
           ),
         );
       },
       loading: () => const SizedBox.shrink(),
       error: (_, __) => const SizedBox.shrink(),
+    );
+  }
+}
+
+class _MetricItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  final ColorScheme color;
+  final TextTheme textTheme;
+
+  const _MetricItem({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.color,
+    required this.textTheme,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: color.onSurfaceVariant),
+        const SizedBox(width: 6),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label, style: textTheme.labelSmall?.copyWith(color: color.onSurfaceVariant)),
+            Text(value, style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600)),
+          ],
+        ),
+      ],
     );
   }
 }

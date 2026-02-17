@@ -6,12 +6,14 @@ import 'package:mudra_manager/db/models/account.dart';
 import 'package:mudra_manager/db/models/transaction.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/foundation.dart';
+import 'package:mudra_manager/util/app_logger.dart';
 
 class WidgetService {
   static const String androidWidgetName = 'QuickAddWidgetProvider';
 
   static Future<void> updateWidget(WidgetRef ref) async {
     try {
+      AppLogger.widget('Updating widget data');
       final isarService = ref.read(isarServiceProvider);
       final isar = await isarService.getInstance();
       
@@ -48,8 +50,9 @@ class WidgetService {
       await HomeWidget.saveWidgetData<String>('todayIncome', '₹${todayIncome.toStringAsFixed(0)}');
 
       await HomeWidget.updateWidget(androidName: androidWidgetName);
+      AppLogger.widget('Widget updated: Balance=₹${totalBalance.toStringAsFixed(0)}, Expense=₹${todayExpense.toStringAsFixed(0)}, Income=₹${todayIncome.toStringAsFixed(0)}');
     } catch (e) {
-      debugPrint('Error updating widget: $e');
+      AppLogger.error('Error updating widget', error: e);
     }
   }
 }

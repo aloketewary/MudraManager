@@ -8,6 +8,7 @@ import 'package:mudra_manager/db/models/tag.dart';
 import 'package:mudra_manager/db/models/transaction.dart' show Transaction;
 import 'package:mudra_manager/l10n/app_localizations.dart'
     show AppLocalizations;
+import 'package:mudra_manager/components/swipe_action_wrapper.dart';
 
 import 'package:mudra_manager/util/account_type_extension.dart';
 import 'package:mudra_manager/util/case_extension.dart';
@@ -63,10 +64,13 @@ class _TransactionCardState extends State<TransactionCard> {
     final ctxt = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+    return SwipeActionWrapper(
+      onEdit: widget.onEdit,
+      onDelete: widget.onRemove,
+      child: Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
       elevation: 0,
-      color: color.surfaceContainer,
+      color: color.surfaceContainerLow,
       child: Stack(
         children: [
           if (widget.tripName != null)
@@ -74,25 +78,26 @@ class _TransactionCardState extends State<TransactionCard> {
               top: 0,
               right: 0,
               child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                 decoration: BoxDecoration(
-                  color: color.primaryContainer,
+                  color: color.tertiaryContainer,
                   borderRadius: BorderRadius.only(
                     topRight: Radius.circular(20),
-                    bottomLeft: Radius.circular(20),
+                    bottomLeft: Radius.circular(16),
                   ),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.beach_access_outlined, size: 12, color: color.onPrimaryContainer),
+                    Icon(Icons.flight_takeoff, size: 12, color: color.onTertiaryContainer),
                     SizedBox(width: 4),
                     Text(
                       'TRIP',
                       style: TextStyle(
-                        color: color.onPrimaryContainer,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
+                        color: color.onTertiaryContainer,
+                        fontSize: 9,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.5,
                       ),
                     ),
                   ],
@@ -109,7 +114,7 @@ class _TransactionCardState extends State<TransactionCard> {
                 });
               },
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(14),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -275,6 +280,7 @@ class _TransactionCardState extends State<TransactionCard> {
           ),
         ],
       ),
+    ),
     );
   }
 
@@ -287,19 +293,19 @@ class _TransactionCardState extends State<TransactionCard> {
     return Row(
       children: <Widget>[
         Container(
-          width: 40.0,
-          height: 40.0,
+          width: 48.0,
+          height: 48.0,
           decoration: BoxDecoration(
-            color: categoryColor.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(12),
+            color: categoryColor.withValues(alpha: 0.15),
+            borderRadius: BorderRadius.circular(14),
           ),
           child: Icon(
             IconHelper.getIconData(widget.category?.iconName),
             color: categoryColor,
-            size: 20.0,
+            size: 24.0,
           ),
         ),
-        const SizedBox(width: 12.0),
+        const SizedBox(width: 14.0),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -307,12 +313,12 @@ class _TransactionCardState extends State<TransactionCard> {
             children: <Widget>[
               AdaptiveText(
                 "${widget.category?.name}",
-                style: textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
+                style: textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
                 ),
                 maxLines: 1,
               ),
-              const SizedBox(height: 2),
+              const SizedBox(height: 4),
               Flexible(
                 child: AdaptiveText(
                   '${widget.account?.name} • ${widget.account?.accountType.name.toTitleCase()}',
@@ -325,20 +331,22 @@ class _TransactionCardState extends State<TransactionCard> {
             ],
           ),
         ),
+        const SizedBox(width: 8),
         Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
+            if (widget.tripName != null) const SizedBox(height: 20),
             CurrencyText(
               amount: widget.amount.toDouble(),
               showSign: true,
-              style: textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
+              style: textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
                 color: widget.isExpense ? color.error : color.primary,
               ),
               maxLines: 1,
             ),
-            const SizedBox(height: 2),
+            const SizedBox(height: 4),
             Text(
               DateFormat('MMM dd', ctxt.localeName).format(widget.date),
               style: textTheme.bodySmall?.copyWith(

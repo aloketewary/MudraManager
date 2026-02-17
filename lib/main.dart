@@ -6,6 +6,7 @@ import 'package:mudra_manager/l10n/app_localizations.dart';
 import 'package:mudra_manager/providers/l10n_provider.dart';
 import 'package:mudra_manager/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/router/app_router.dart';
+import 'package:mudra_manager/service/app_update_service.dart';
 import 'package:mudra_manager/service/bill_service.dart';
 import 'package:mudra_manager/service/notification_service.dart';
 import 'package:mudra_manager/service/recurring_transaction_scheduler.dart';
@@ -85,6 +86,7 @@ Future<void> _initializeBackgroundServices() async {
 void backgroundCallback(Uri? uri) async {
   if (uri?.host == 'add_transaction') {
     await HomeWidget.setAppGroupId('group.mudra_manager');
+    // Navigation handled by widgetClicked listener in home screen
   }
 }
 
@@ -119,6 +121,7 @@ class MudraManagerApp extends ConsumerWidget {
           amoledScheme = appColorTheme.amoledColorScheme();
         }
 
+        final router = AppRouter.router(showOnboarding);
         return MaterialApp.router(
           title: 'Mudra Manager',
           theme: appTheme.buildTheme(lightScheme),
@@ -134,7 +137,7 @@ class MudraManagerApp extends ConsumerWidget {
           },
           debugShowCheckedModeBanner: false,
           scaffoldMessengerKey: SnackbarService.scaffoldMessengerKey,
-          routerConfig: AppRouter.router(showOnboarding),
+          routerConfig: router,
           locale: ref.watch(localeProvider),
           supportedLocales: AppLocalizations.supportedLocales,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -148,6 +151,9 @@ class MudraManagerApp extends ConsumerWidget {
           },
           builder: (context, child) {
             NotificationService.setContext(context);
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              AppUpdateService.checkForUpdate(context);
+            });
             return ResponsiveBreakpoints.builder(
               child: child!,
               breakpoints: [

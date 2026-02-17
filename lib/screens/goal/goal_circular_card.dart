@@ -4,8 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/db/models/goal.dart';
 import 'package:mudra_manager/l10n/app_localizations.dart';
 
-import 'package:mudra_manager/util/icon_helper.dart';
-import 'package:mudra_manager/util/localization_extension.dart';
 import 'package:mudra_manager/util/dialog_utils.dart';
 import 'package:mudra_manager/providers/goal_provider.dart';
 import 'package:mudra_manager/util/app_logger.dart';
@@ -43,13 +41,9 @@ class GoalCircularCard extends ConsumerWidget {
         );
       },
       onDismissed: (direction) async {
-        AppLogger.logAction(
-          'goal_deleted_circular',
-          parameters: {
-            'goal_id': goal.id,
-            'goal_name': goal.name,
-            'progress': goal.progressPercent,
-          },
+        AppLogger.info(
+          'goal_deleted_circular, goal_id: ${goal.id}, goal_name: ${goal.name}',
+          tag: 'goal',
         );
         await ref.read(goalServiceProvider).deleteGoal(goal.id);
       },
@@ -218,10 +212,10 @@ class GoalCircularCard extends ConsumerWidget {
                           Flexible(
                             child: CurrencyText(
                               amount: remaining,
-                              style: textTheme.labelSmall?.copyWith(
-                                color: cardColor,
-                                fontWeight: FontWeight.w700,
-                              ),
+                            style: textTheme.labelSmall?.copyWith(
+                              color: cardColor,
+                              fontWeight: FontWeight.w700,
+                            ),
                               maxLines: 1,
                             ),
                           ),

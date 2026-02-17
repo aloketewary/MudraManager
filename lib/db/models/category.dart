@@ -15,8 +15,8 @@ class Category {
   @enumerated
   late CategoryType categoryType; // true = Expense, false = Income
 
-  // Optional: Link to a parent category for sub-categories
-  // final parentCategory = IsarLink<Category>();
+  // Link to a parent category for sub-categories
+  final parentCategory = IsarLink<Category>();
 
   // Optional: Icon identifier or color for UI representation
   String? iconName;
