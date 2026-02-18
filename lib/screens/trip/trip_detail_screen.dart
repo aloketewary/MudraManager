@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:mudra_manager/providers/trip_provider.dart';
 import 'package:mudra_manager/util/dialog_utils.dart';
+import 'package:mudra_manager/components/settlement_card.dart';
 
 class TripDetailScreen extends ConsumerStatefulWidget {
   final int tripId;
@@ -497,68 +498,30 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
           );
         }
 
-        return ListView(
+        // Flatten settlements into list
+        List<Map<String, dynamic>> settlementList = [];
+        settlements.forEach((from, toMap) {
+          toMap.forEach((to, amount) {
+            settlementList.add({'from': from, 'to': to, 'amount': amount});
+          });
+        });
+
+        return ListView.builder(
           padding: EdgeInsets.all(16),
-          children: settlements.entries.map((entry) {
-            return Card(
-              margin: EdgeInsets.only(bottom: 16),
-              elevation: 0,
-              color: color.surfaceContainerHighest,
-              child: Padding(
-                padding: EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 20,
-                          backgroundColor: color.primaryContainer,
-                          child: Text(
-                            entry.key[0].toUpperCase(),
-                            style: TextStyle(
-                              color: color.primary,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 12),
-                        Text(entry.key, style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                    SizedBox(height: 16),
-                    ...entry.value.entries.map(
-                      (settlement) => Container(
-                        margin: EdgeInsets.only(bottom: 8),
-                        padding: EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: color.surface,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.arrow_forward, size: 20, color: color.primary),
-                            SizedBox(width: 12),
-                            Expanded(
-                              child: Text('needs to pay ${settlement.key}', style: textTheme.bodyLarge),
-                            ),
-                            Text(
-                              '₹${settlement.value.toStringAsFixed(2)}',
-                              style: textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: color.primary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+          itemCount: settlementList.length,
+          itemBuilder: (context, index) {
+            final settlement = settlementList[index];
+            return SettlementCard(
+              fromPerson: settlement['from'],
+              toPerson: settlement['to'],
+              amount: settlement['amount'],
+              isPaid: false,
+              onMarkPaid: () {
+                // TODO: Implement mark as paid functionality
+                HapticFeedback.mediumImpact();
+              },
             );
-          }).toList(),
+          },
         );
       },
       loading: () => Center(child: CircularProgressIndicator()),
