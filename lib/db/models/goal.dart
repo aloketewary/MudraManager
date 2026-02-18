@@ -36,6 +36,7 @@ class Goal {
 
   String? iconName;
   int? colorValue;
+  String? description; // Optional description for the goal
 
   // Isar requires a default constructor
   Goal();

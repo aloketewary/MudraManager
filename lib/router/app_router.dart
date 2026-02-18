@@ -8,6 +8,8 @@ import 'package:mudra_manager/screens/budget/budget_details_screen.dart';
 import 'package:mudra_manager/providers/budget_service_provider.dart';
 import 'package:mudra_manager/screens/goal/add_edit_goal_screen.dart';
 import 'package:mudra_manager/screens/goal/goal_screen.dart';
+import 'package:mudra_manager/screens/goal/goal_details_screen.dart';
+import 'package:mudra_manager/db/models/goal.dart';
 import 'package:mudra_manager/screens/home_screen.dart';
 import 'package:mudra_manager/screens/notifications/notification_page_screen.dart';
 import 'package:mudra_manager/screens/onboarding/account_setup_screen.dart';
@@ -210,6 +212,13 @@ class AppRouter {
           GoRoute(
             path: '/goal-screen',
             builder: (context, state) => GoalScreen(),
+          ),
+          GoRoute(
+            path: '/goal-details',
+            builder: (context, state) {
+              final goal = state.extra as Goal;
+              return GoalDetailsScreen(goal: goal);
+            },
           ),
           GoRoute(
             path: '/manage-accounts/add',

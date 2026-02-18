@@ -13,15 +13,19 @@ class IconHelper {
       case 'attach_money': return Icons.attach_money;
       case 'credit_card': return Icons.credit_card;
       case 'wallet': return Icons.account_balance_wallet;
+      case 'account_balance_wallet': return Icons.account_balance_wallet;
       case 'subscriptions': return Icons.subscriptions;
       case 'school': return Icons.school;
       case 'pets': return Icons.pets;
       case 'gift': return Icons.card_giftcard;
       case 'travel': return Icons.travel_explore;
       case 'entertainment': return Icons.movie;
+      case 'movie': return Icons.movie;
       case 'groceries': return Icons.local_grocery_store;
       case 'clothing': return Icons.checkroom;
+      case 'checkroom': return Icons.checkroom;
       case 'bills': return Icons.receipt;
+      case 'receipt': return Icons.receipt;
       case 'trending_up': return Icons.trending_up;
       case 'shopping_bag': return Icons.shopping_bag;
       case 'restaurant': return Icons.restaurant;
@@ -33,8 +37,10 @@ class IconHelper {
       case 'phone': return Icons.phone;
       case 'wifi': return Icons.wifi;
       case 'electric': return Icons.electric_bolt;
+      case 'bolt': return Icons.electric_bolt;
       case 'water': return Icons.water_drop;
       case 'gas': return Icons.local_gas_station;
+      case 'local_gas_station': return Icons.local_gas_station;
       case 'medical': return Icons.medical_services;
       case 'pharmacy': return Icons.local_pharmacy;
       case 'beauty': return Icons.face;
@@ -63,6 +69,7 @@ class IconHelper {
       case 'garden': return Icons.yard;
       case 'furniture': return Icons.chair;
       case 'electronics': return Icons.devices;
+      case 'devices': return Icons.devices;
       case 'computer': return Icons.computer;
       case 'phone_mobile': return Icons.smartphone;
       case 'watch': return Icons.watch;
@@ -74,6 +81,7 @@ class IconHelper {
       case 'delivery': return Icons.local_shipping;
       case 'taxi': return Icons.local_taxi;
       case 'bus': return Icons.directions_bus;
+      case 'directions_bus': return Icons.directions_bus;
       case 'train': return Icons.train;
       case 'subway': return Icons.subway;
       case 'bike': return Icons.directions_bike;
@@ -107,15 +115,19 @@ class IconHelper {
     'attach_money': Icons.attach_money,
     'credit_card': Icons.credit_card,
     'wallet': Icons.account_balance_wallet,
+    'account_balance_wallet': Icons.account_balance_wallet,
     'subscriptions': Icons.subscriptions,
     'school': Icons.school,
     'pets': Icons.pets,
     'gift': Icons.card_giftcard,
     'travel': Icons.travel_explore,
     'entertainment': Icons.movie,
+    'movie': Icons.movie,
     'groceries': Icons.local_grocery_store,
     'clothing': Icons.checkroom,
+    'checkroom': Icons.checkroom,
     'bills': Icons.receipt,
+    'receipt': Icons.receipt,
     'trending_up': Icons.trending_up,
     'shopping_bag': Icons.shopping_bag,
     'fitness': Icons.fitness_center,
@@ -125,8 +137,10 @@ class IconHelper {
     'phone': Icons.phone,
     'wifi': Icons.wifi,
     'electric': Icons.electric_bolt,
+    'bolt': Icons.electric_bolt,
     'water': Icons.water_drop,
     'gas': Icons.local_gas_station,
+    'local_gas_station': Icons.local_gas_station,
     'medical': Icons.medical_services,
     'pharmacy': Icons.local_pharmacy,
     'beauty': Icons.face,
@@ -155,6 +169,7 @@ class IconHelper {
     'garden': Icons.yard,
     'furniture': Icons.chair,
     'electronics': Icons.devices,
+    'devices': Icons.devices,
     'computer': Icons.computer,
     'phone_mobile': Icons.smartphone,
     'watch': Icons.watch,
@@ -166,6 +181,7 @@ class IconHelper {
     'delivery': Icons.local_shipping,
     'taxi': Icons.local_taxi,
     'bus': Icons.directions_bus,
+    'directions_bus': Icons.directions_bus,
     'train': Icons.train,
     'subway': Icons.subway,
     'bike': Icons.directions_bike,

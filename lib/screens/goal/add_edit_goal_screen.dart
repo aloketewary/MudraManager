@@ -6,6 +6,8 @@ import 'package:intl/intl.dart';
 import 'package:mudra_manager/db/models/goal.dart';
 import 'package:mudra_manager/l10n/app_localizations.dart';
 import 'package:mudra_manager/providers/goal_provider.dart';
+import 'package:mudra_manager/screens/profile/icon_picker_bottom_sheet.dart';
+import 'package:mudra_manager/util/simple_color_picker.dart';
 import 'package:mudra_manager/util/icon_helper.dart';
 
 
@@ -23,6 +25,7 @@ class _AddEditGoalScreenState extends ConsumerState<AddEditGoalScreen> {
   late TextEditingController _nameController;
   late TextEditingController _amountController;
   late TextEditingController _currentAmountController;
+  late TextEditingController _descriptionController;
   DateTime? _targetDate;
   String _selectedIcon = 'savings';
   Color _selectedColor = Colors.blue;
@@ -37,6 +40,7 @@ class _AddEditGoalScreenState extends ConsumerState<AddEditGoalScreen> {
     _currentAmountController = TextEditingController(
       text: widget.goal?.currentAmount.toString(),
     );
+    _descriptionController = TextEditingController(text: widget.goal?.description);
     _targetDate = widget.goal?.targetDate;
     _selectedIcon = widget.goal?.iconName ?? 'savings';
     if (widget.goal?.colorValue != null) {
@@ -49,7 +53,24 @@ class _AddEditGoalScreenState extends ConsumerState<AddEditGoalScreen> {
     _nameController.dispose();
     _amountController.dispose();
     _currentAmountController.dispose();
+    _descriptionController.dispose();
     super.dispose();
+  }
+
+  void _pickIcon() async {
+    final result = await showModalBottomSheet<String>(
+      context: context,
+      builder: (_) => IconPickerBottomSheet(backgroundColor: _selectedColor),
+    );
+    if (result != null) setState(() => _selectedIcon = result);
+  }
+
+  void _pickColor() async {
+    final color = await showDialog<Color>(
+      context: context,
+      builder: (_) => SimpleColorPickerDialog(initialColor: _selectedColor),
+    );
+    if (color != null) setState(() => _selectedColor = color);
   }
 
   Future<void> _saveGoal() async {
@@ -66,6 +87,7 @@ class _AddEditGoalScreenState extends ConsumerState<AddEditGoalScreen> {
     goal.targetDate = _targetDate;
     goal.iconName = _selectedIcon;
     goal.colorValue = _selectedColor.value;
+    goal.description = _descriptionController.text.isEmpty ? null : _descriptionController.text;
 
     final service = ref.read(goalServiceProvider);
     if (widget.goal == null) {
@@ -82,7 +104,7 @@ class _AddEditGoalScreenState extends ConsumerState<AddEditGoalScreen> {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final ctxt = AppLocalizations.of(context)!;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final selectedColor = _selectedColor;
 
     return Scaffold(
       appBar: AppBar(
@@ -97,32 +119,29 @@ class _AddEditGoalScreenState extends ConsumerState<AddEditGoalScreen> {
               onPressed: () async {
                 final confirmed = await showDialog<bool>(
                   context: context,
-                  builder:
-                      (context) => AlertDialog(
-                        title: const Text("Delete Goal?"),
-                        content: const Text("This action cannot be undone."),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-              HapticFeedback.mediumImpact();
-              context.pop(false);
-            },
-                            child: const Text("Cancel"),
-                          ),
-                          TextButton(
-                            onPressed: () {
-              HapticFeedback.mediumImpact();
-              context.pop(true);
-            },
-                            child: const Text("Delete"),
-                          ),
-                        ],
+                  builder: (context) => AlertDialog(
+                    title: const Text("Delete Goal?"),
+                    content: const Text("This action cannot be undone."),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          HapticFeedback.mediumImpact();
+                          context.pop(false);
+                        },
+                        child: const Text("Cancel"),
                       ),
+                      TextButton(
+                        onPressed: () {
+                          HapticFeedback.mediumImpact();
+                          context.pop(true);
+                        },
+                        child: const Text("Delete"),
+                      ),
+                    ],
+                  ),
                 );
                 if (confirmed == true) {
-                  await ref
-                      .read(goalServiceProvider)
-                      .deleteGoal(widget.goal!.id);
+                  await ref.read(goalServiceProvider).deleteGoal(widget.goal!.id);
                   if (mounted) context.pop();
                 }
               },
@@ -134,6 +153,37 @@ class _AddEditGoalScreenState extends ConsumerState<AddEditGoalScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            Center(
+              child: GestureDetector(
+                onTap: () {
+                  HapticFeedback.mediumImpact();
+                  _pickIcon();
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(32),
+                  decoration: BoxDecoration(
+                    color: selectedColor.withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    _selectedIcon != null ? IconHelper.getIconData(_selectedIcon!) : Icons.savings,
+                    size: 64,
+                    color: selectedColor,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Center(
+              child: Text(
+                'Tap to change icon',
+                style: textTheme.labelMedium?.copyWith(
+                  color: color.onSurfaceVariant,
+                  letterSpacing: 1.2,
+                ),
+              ),
+            ),
+            const SizedBox(height: 32),
             TextFormField(
               controller: _nameController,
               decoration: const InputDecoration(
@@ -168,6 +218,15 @@ class _AddEditGoalScreenState extends ConsumerState<AddEditGoalScreen> {
               keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 16),
+            TextFormField(
+              controller: _descriptionController,
+              decoration: const InputDecoration(
+                labelText: "Description (Optional)",
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 3,
+            ),
+            const SizedBox(height: 16),
             ListTile(
               title: const Text("Target Date"),
               subtitle: Text(
@@ -186,91 +245,40 @@ class _AddEditGoalScreenState extends ConsumerState<AddEditGoalScreen> {
                 if (picked != null) setState(() => _targetDate = picked);
               },
             ),
-            const SizedBox(height: 16),
-            const Text("Select Icon"),
-            const SizedBox(height: 8),
-            SizedBox(
-              height: 50,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children:
-                    [
-                      'savings',
-                      'home',
-                      'directions_car',
-                      'flight',
-                      'laptop',
-                      'school',
-                      'travel',
-                      'entertainment',
-                    ].map((icon) {
-                      return GestureDetector(
-                        onTap: () {
-              HapticFeedback.mediumImpact();
-              setState(() => _selectedIcon = icon);
-            },
-                        child: Container(
-                          margin: const EdgeInsets.only(right: 8),
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: _selectedIcon == icon
-                                ? color.primaryContainer
-                                : color.surfaceContainerHighest,
-                            border: Border.all(
-                              color: _selectedIcon == icon ? color.primary : color.outline,
-                              width: _selectedIcon == icon ? 2 : 1,
-                            ),
-                          ),
-                          child: Icon(
-                            IconHelper.getIconData(icon),
-                            color: _selectedIcon == icon ? color.primary : color.onSurfaceVariant,
-                          ),
-                        ),
-                      );
-                    }).toList(),
-              ),
+            const SizedBox(height: 24),
+            Text(
+              'Color',
+              style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 16),
-            const Text("Select Color"),
-            const SizedBox(height: 8),
-            SizedBox(
-              height: 50,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children:
-                    Colors.primaries.map((c) {
-                      return GestureDetector(
-                        onTap: () {
-              HapticFeedback.mediumImpact();
-              setState(() => _selectedColor = c);
-            },
-                        child: Container(
-                          width: 40,
-                          height: 40,
-                          margin: const EdgeInsets.only(right: 8),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: c,
-                            border: Border.all(
-                              color: _selectedColor == c
-                                  ? Colors.white
-                                  : Colors.transparent,
-                              width: 3,
-                            ),
-                            boxShadow: _selectedColor == c
-                                ? [
-                                    BoxShadow(
-                                      color: c.withValues(alpha: 0.4),
-                                      blurRadius: 8,
-                                      offset: Offset(0, 4),
-                                    ),
-                                  ]
-                                : null,
-                          ),
-                        ),
-                      );
-                    }).toList(),
+            const SizedBox(height: 12),
+            InkWell(
+              onTap: () {
+                HapticFeedback.mediumImpact();
+                _pickColor();
+              },
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: selectedColor.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: selectedColor, width: 2),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.palette, color: selectedColor),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Tap to change color',
+                      style: textTheme.titleSmall?.copyWith(
+                        color: selectedColor,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.0,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 32),

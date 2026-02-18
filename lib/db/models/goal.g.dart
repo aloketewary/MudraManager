@@ -32,30 +32,35 @@ const GoalSchema = CollectionSchema(
       name: r'currentAmount',
       type: IsarType.double,
     ),
-    r'iconName': PropertySchema(
+    r'description': PropertySchema(
       id: 3,
+      name: r'description',
+      type: IsarType.string,
+    ),
+    r'iconName': PropertySchema(
+      id: 4,
       name: r'iconName',
       type: IsarType.string,
     ),
-    r'isActive': PropertySchema(id: 4, name: r'isActive', type: IsarType.bool),
-    r'name': PropertySchema(id: 5, name: r'name', type: IsarType.string),
+    r'isActive': PropertySchema(id: 5, name: r'isActive', type: IsarType.bool),
+    r'name': PropertySchema(id: 6, name: r'name', type: IsarType.string),
     r'progressPercent': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'progressPercent',
       type: IsarType.double,
     ),
     r'remainingAmount': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'remainingAmount',
       type: IsarType.double,
     ),
     r'targetAmount': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'targetAmount',
       type: IsarType.double,
     ),
     r'targetDate': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'targetDate',
       type: IsarType.dateTime,
     ),
@@ -117,6 +122,12 @@ int _goalEstimateSize(
 ) {
   var bytesCount = offsets.last;
   {
+    final value = object.description;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
     final value = object.iconName;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
@@ -135,13 +146,14 @@ void _goalSerialize(
   writer.writeLong(offsets[0], object.colorValue);
   writer.writeDateTime(offsets[1], object.creationDate);
   writer.writeDouble(offsets[2], object.currentAmount);
-  writer.writeString(offsets[3], object.iconName);
-  writer.writeBool(offsets[4], object.isActive);
-  writer.writeString(offsets[5], object.name);
-  writer.writeDouble(offsets[6], object.progressPercent);
-  writer.writeDouble(offsets[7], object.remainingAmount);
-  writer.writeDouble(offsets[8], object.targetAmount);
-  writer.writeDateTime(offsets[9], object.targetDate);
+  writer.writeString(offsets[3], object.description);
+  writer.writeString(offsets[4], object.iconName);
+  writer.writeBool(offsets[5], object.isActive);
+  writer.writeString(offsets[6], object.name);
+  writer.writeDouble(offsets[7], object.progressPercent);
+  writer.writeDouble(offsets[8], object.remainingAmount);
+  writer.writeDouble(offsets[9], object.targetAmount);
+  writer.writeDateTime(offsets[10], object.targetDate);
 }
 
 Goal _goalDeserialize(
@@ -154,12 +166,13 @@ Goal _goalDeserialize(
   object.colorValue = reader.readLongOrNull(offsets[0]);
   object.creationDate = reader.readDateTime(offsets[1]);
   object.currentAmount = reader.readDouble(offsets[2]);
-  object.iconName = reader.readStringOrNull(offsets[3]);
+  object.description = reader.readStringOrNull(offsets[3]);
+  object.iconName = reader.readStringOrNull(offsets[4]);
   object.id = id;
-  object.isActive = reader.readBool(offsets[4]);
-  object.name = reader.readString(offsets[5]);
-  object.targetAmount = reader.readDouble(offsets[8]);
-  object.targetDate = reader.readDateTimeOrNull(offsets[9]);
+  object.isActive = reader.readBool(offsets[5]);
+  object.name = reader.readString(offsets[6]);
+  object.targetAmount = reader.readDouble(offsets[9]);
+  object.targetDate = reader.readDateTimeOrNull(offsets[10]);
   return object;
 }
 
@@ -179,16 +192,18 @@ P _goalDeserializeProp<P>(
     case 3:
       return (reader.readStringOrNull(offset)) as P;
     case 4:
-      return (reader.readBool(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 5:
-      return (reader.readString(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 6:
-      return (reader.readDouble(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 7:
       return (reader.readDouble(offset)) as P;
     case 8:
       return (reader.readDouble(offset)) as P;
     case 9:
+      return (reader.readDouble(offset)) as P;
+    case 10:
       return (reader.readDateTimeOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -709,6 +724,168 @@ extension GoalQueryFilter on QueryBuilder<Goal, Goal, QFilterCondition> {
 
           epsilon: epsilon,
         ),
+      );
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterFilterCondition> descriptionIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'description'),
+      );
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterFilterCondition> descriptionIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'description'),
+      );
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterFilterCondition> descriptionEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'description',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterFilterCondition> descriptionGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'description',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterFilterCondition> descriptionLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'description',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterFilterCondition> descriptionBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'description',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterFilterCondition> descriptionStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'description',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterFilterCondition> descriptionEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'description',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterFilterCondition> descriptionContains(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'description',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterFilterCondition> descriptionMatches(
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'description',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterFilterCondition> descriptionIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'description', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterFilterCondition> descriptionIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'description', value: ''),
       );
     });
   }
@@ -1439,6 +1616,18 @@ extension GoalQuerySortBy on QueryBuilder<Goal, Goal, QSortBy> {
     });
   }
 
+  QueryBuilder<Goal, Goal, QAfterSortBy> sortByDescription() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'description', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterSortBy> sortByDescriptionDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'description', Sort.desc);
+    });
+  }
+
   QueryBuilder<Goal, Goal, QAfterSortBy> sortByIconName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'iconName', Sort.asc);
@@ -1561,6 +1750,18 @@ extension GoalQuerySortThenBy on QueryBuilder<Goal, Goal, QSortThenBy> {
     });
   }
 
+  QueryBuilder<Goal, Goal, QAfterSortBy> thenByDescription() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'description', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Goal, Goal, QAfterSortBy> thenByDescriptionDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'description', Sort.desc);
+    });
+  }
+
   QueryBuilder<Goal, Goal, QAfterSortBy> thenByIconName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'iconName', Sort.asc);
@@ -1677,6 +1878,14 @@ extension GoalQueryWhereDistinct on QueryBuilder<Goal, Goal, QDistinct> {
     });
   }
 
+  QueryBuilder<Goal, Goal, QDistinct> distinctByDescription({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'description', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<Goal, Goal, QDistinct> distinctByIconName({
     bool caseSensitive = true,
   }) {
@@ -1749,6 +1958,12 @@ extension GoalQueryProperty on QueryBuilder<Goal, Goal, QQueryProperty> {
     });
   }
 
+  QueryBuilder<Goal, String?, QQueryOperations> descriptionProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'description');
+    });
+  }
+
   QueryBuilder<Goal, String?, QQueryOperations> iconNameProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'iconName');
@@ -1809,7 +2024,8 @@ Goal _$GoalFromJson(Map<String, dynamic> json) =>
       ..creationDate = DateTime.parse(json['creationDate'] as String)
       ..isActive = json['isActive'] as bool
       ..iconName = json['iconName'] as String?
-      ..colorValue = (json['colorValue'] as num?)?.toInt();
+      ..colorValue = (json['colorValue'] as num?)?.toInt()
+      ..description = json['description'] as String?;
 
 Map<String, dynamic> _$GoalToJson(Goal instance) => <String, dynamic>{
   'id': instance.id,
@@ -1821,4 +2037,5 @@ Map<String, dynamic> _$GoalToJson(Goal instance) => <String, dynamic>{
   'isActive': instance.isActive,
   'iconName': instance.iconName,
   'colorValue': instance.colorValue,
+  'description': instance.description,
 };

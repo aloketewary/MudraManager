@@ -1,12 +1,11 @@
 import 'package:workmanager/workmanager.dart';
-import 'package:mudra_manager/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/service/backup_restore_service.dart';
 
 class AutoBackupService {
   static const String taskName = 'auto_backup_task';
   
   static Future<void> initialize() async {
-    await Workmanager().initialize(callbackDispatcher, isInDebug: false);
+    await Workmanager().initialize(callbackDispatcher);
   }
   
   static Future<void> scheduleAutoBackup(BackupFrequency frequency) async {
@@ -42,8 +41,7 @@ void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
     if (task == AutoBackupService.taskName) {
       try {
-        final service = BackupRestoreService();
-        await service.createBackup();
+        await BackupService.createEncryptedBackup('default_password');
         return true;
       } catch (e) {
         return false;
