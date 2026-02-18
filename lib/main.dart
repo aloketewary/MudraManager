@@ -2,20 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_widget/home_widget.dart';
-import 'package:mudra_manager/l10n/app_localizations.dart';
-import 'package:mudra_manager/providers/l10n_provider.dart';
-import 'package:mudra_manager/providers/shared_preference_provider.dart';
-import 'package:mudra_manager/router/app_router.dart';
-import 'package:mudra_manager/service/app_update_service.dart';
-import 'package:mudra_manager/service/bill_service.dart';
-import 'package:mudra_manager/service/notification_service.dart';
-import 'package:mudra_manager/service/recurring_transaction_scheduler.dart';
-import 'package:mudra_manager/service/summary_scheduler.dart';
-import 'package:mudra_manager/theme/app_color_theme_enum.dart';
-import 'package:mudra_manager/theme/app_theme.dart';
-import 'package:mudra_manager/theme/theme_provider.dart';
-import 'package:mudra_manager/util/sms_transaction_util.dart';
-import 'package:mudra_manager/util/snackbar_service.dart';
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
+import 'package:mudra_manager/core/providers/l10n_provider.dart';
+import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
+import 'package:mudra_manager/core/router/app_router.dart';
+import 'package:mudra_manager/core/services/app_update_service.dart';
+import 'package:mudra_manager/core/services/notification_service.dart';
+import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
+import 'package:mudra_manager/core/theme/app_theme.dart';
+import 'package:mudra_manager/core/theme/theme_provider.dart';
+import 'package:mudra_manager/core/utils/error_handler.dart';
+import 'package:mudra_manager/core/utils/snackbar_service.dart';
+import 'package:mudra_manager/features/budget/data/bill_service.dart';
+import 'package:mudra_manager/features/dashboard/data/summary_scheduler.dart';
+import 'package:mudra_manager/features/sms/data/sms_cleanup_service.dart';
+import 'package:mudra_manager/features/sms/data/sms_processor_service.dart';
+import 'package:mudra_manager/features/transactions/data/recurring_transaction_scheduler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:another_telephony/telephony.dart';
 import 'package:dynamic_color/dynamic_color.dart';
@@ -49,37 +51,21 @@ void main() async {
 // Background initialization to prevent UI blocking
 Future<void> _initializeBackgroundServices() async {
   Future.microtask(() async {
-    try {
-      await RecurringTransactionScheduler.initialize();
-    } catch (e) {
-      // Silently handle - already logged in scheduler
-    }
-    
-    try {
-      await SummaryScheduler.checkAndShowSummaries();
-    } catch (e) {
-      debugPrint('Summary check skipped: $e');
-    }
-    
-    try {
-      await BillService.scheduleBillReminders();
-    } catch (e) {
-      debugPrint('Bill reminders skipped: $e');
-    }
-    
-    try {
-      await BillService.createPendingTransactionsForDueBills();
-    } catch (e) {
-      debugPrint('Pending bill transactions skipped: $e');
-    }
-    
-    try {
-      await HomeWidget.setAppGroupId('group.mudra_manager');
-      HomeWidget.registerInteractivityCallback(backgroundCallback);
-    } catch (e) {
-      debugPrint('Home widget skipped: $e');
-    }
+    // Run services in parallel with error handling
+    await Future.wait([
+      safeExecute(() => RecurringTransactionScheduler.initialize()),
+      safeExecute(() => SummaryScheduler.checkAndShowSummaries()),
+      safeExecute(() => BillService.scheduleBillReminders()),
+      safeExecute(() => BillService.createPendingTransactionsForDueBills()),
+      safeExecute(() => _initializeHomeWidget()),
+      safeExecute(() => SmsHashCleanupService.cleanupOldHashes()),
+    ].map((f) => f.catchError((e) => null)));
   });
+}
+
+Future<void> _initializeHomeWidget() async {
+  await HomeWidget.setAppGroupId('group.mudra_manager');
+  HomeWidget.registerInteractivityCallback(backgroundCallback);
 }
 
 @pragma('vm:entry-point')

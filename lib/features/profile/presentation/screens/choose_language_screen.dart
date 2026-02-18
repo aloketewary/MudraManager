@@ -1,0 +1,92 @@
+import 'package:go_router/go_router.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/core/extension/localization_extenstion.dart';
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
+import 'package:mudra_manager/core/providers/l10n_provider.dart';
+
+class ChooseLanguageScreen extends ConsumerStatefulWidget {
+  const ChooseLanguageScreen({super.key});
+
+  @override
+  ConsumerState<ChooseLanguageScreen> createState() =>
+      _ChooseLanguageScreenState();
+}
+
+class _ChooseLanguageScreenState extends ConsumerState<ChooseLanguageScreen> {
+  static final List<String> betaLanguage = ['bn', 'hi'];
+
+  @override
+  Widget build(BuildContext context) {
+    final currentLocale = ref.read(localeProvider);
+    final textTheme = Theme.of(context).textTheme;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          AppLocalizations.of(context)!.language_settings_appbar_title,
+          style: textTheme.titleLarge,
+        ),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ...AppLocalizations.supportedLocales.map(
+              (locale) => _buildLanguageTile(
+                context,
+                ref,
+                language: locale.displayName(),
+                locale: locale,
+                isSelected: currentLocale.languageCode == locale.languageCode,
+              ),
+            ),
+            const SizedBox(height: 10),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static Widget _buildLanguageTile(
+    BuildContext context,
+    WidgetRef ref, {
+    required String language,
+    required Locale locale,
+    required bool isSelected,
+  }) {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final isBeta = betaLanguage.contains(locale.languageCode);
+
+    return ListTile(
+      leading: Icon(isSelected ? Icons.language_outlined : Icons.language),
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Text(language),
+          if (isBeta) SizedBox(width: 8),
+          if (isBeta)
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+              decoration: BoxDecoration(
+                color: color.primary,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Text(
+                'beta',
+                style: textTheme.labelSmall?.copyWith(color: color.onPrimary),
+              ),
+            ),
+        ],
+      ),
+      trailing: isSelected ? Icon(Icons.check, color: color.primary) : null,
+      onTap: () {
+        HapticFeedback.mediumImpact();
+        LanguageService.changeLanguage(context, ref, locale);
+      },
+    );
+  }
+}

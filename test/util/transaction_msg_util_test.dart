@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mudra_manager/util/transaction_msg_util.dart';
+import 'package:mudra_manager/core/utils/transaction_msg_util.dart';
 
 void main() {
   group('SMS Transaction Parsing Tests', () {
@@ -228,8 +228,7 @@ void main() {
       test('ICICI debit transaction', () {
         const sms =
             'Rs.300 debited from A/c XX2468 on 15-Jan-25 for UPI/PAYTM. Avl Bal Rs.7000';
-        final info =
-            util.getTransactionInfo(sms, 'ICICIB', 'ICICIB', 'hash8');
+        final info = util.getTransactionInfo(sms, 'ICICIB', 'ICICIB', 'hash8');
 
         expect(info.money, '300');
         expect(info.account?.no, '2468');
@@ -238,8 +237,7 @@ void main() {
       test('ICICI card transaction', () {
         const sms =
             'INR 2500 spent on ICICI Card ending 1357 at FLIPKART on 15-Jan-25';
-        final info =
-            util.getTransactionInfo(sms, 'ICICIB', 'ICICIB', 'hash9');
+        final info = util.getTransactionInfo(sms, 'ICICIB', 'ICICIB', 'hash9');
 
         expect(info.money, '2500');
         expect(info.account?.no, '1357');
@@ -250,7 +248,12 @@ void main() {
       test('Axis A/c Debit format (official)', () {
         const sms =
             'Your A/c no. XX9753 is debited for INR 600.00 on 15-Jan-25 at 14:30. UPI/MERCHANT. Avl Bal INR 4400.00.';
-        final info = util.getTransactionInfo(sms, 'AXISBK', 'AXISBK', 'hash10a');
+        final info = util.getTransactionInfo(
+          sms,
+          'AXISBK',
+          'AXISBK',
+          'hash10a',
+        );
 
         expect(info.money, '600.00');
         expect(info.account?.no, '9753');
@@ -261,7 +264,12 @@ void main() {
       test('Axis Card Purchase format (official)', () {
         const sms =
             'Alert: You\'ve spent INR 2500.00 on your Axis Bank card ****1357 at FLIPKART on 15-Jan-25. Avl Limit: INR 50000.00.';
-        final info = util.getTransactionInfo(sms, 'AXISTX', 'AXISTX', 'hash10b');
+        final info = util.getTransactionInfo(
+          sms,
+          'AXISTX',
+          'AXISTX',
+          'hash10b',
+        );
 
         expect(info.money, '2500.00');
         expect(info.account?.no, '1357');
@@ -272,7 +280,12 @@ void main() {
       test('Axis Credit format (official)', () {
         const sms =
             'INR 10000.00 credited to your A/c XX9753 on 15-Jan-25 by NEFT. Current Balance: INR 25000.00.';
-        final info = util.getTransactionInfo(sms, 'AXISBK', 'AXISBK', 'hash10c');
+        final info = util.getTransactionInfo(
+          sms,
+          'AXISBK',
+          'AXISBK',
+          'hash10c',
+        );
 
         expect(info.money, '10000.00');
         expect(info.account?.no, '9753');
@@ -283,8 +296,7 @@ void main() {
       test('Axis debit transaction', () {
         const sms =
             'Rs 600 debited from A/c no. XX9753 on 15-Jan-25. Avl bal: Rs 4400';
-        final info =
-            util.getTransactionInfo(sms, 'AXISBK', 'AXISBK', 'hash10');
+        final info = util.getTransactionInfo(sms, 'AXISBK', 'AXISBK', 'hash10');
 
         expect(info.money, '600');
         expect(info.account?.no, '9753');
@@ -295,7 +307,12 @@ void main() {
       test('PNB Debit/Withdrawal format (official)', () {
         const sms =
             'INR 500.00 debited from A/c XXXXXXXXXXXX1234 on 15-Jan-25 via ATM. Avl Bal: INR 8000.00.';
-        final info = util.getTransactionInfo(sms, 'PNBSMS', 'PNBSMS', 'hash11a');
+        final info = util.getTransactionInfo(
+          sms,
+          'PNBSMS',
+          'PNBSMS',
+          'hash11a',
+        );
 
         expect(info.money, '500.00');
         expect(info.account?.no, '1234');
@@ -306,7 +323,12 @@ void main() {
       test('PNB Credit Alert format (official)', () {
         const sms =
             'A/c XXXXXXXXXXXX5678 credited with INR 12000.00 on 15-Jan-25 by NEFT/REF123. Avl Bal: INR 30000.00.';
-        final info = util.getTransactionInfo(sms, 'PNBSMS', 'PNBSMS', 'hash11b');
+        final info = util.getTransactionInfo(
+          sms,
+          'PNBSMS',
+          'PNBSMS',
+          'hash11b',
+        );
 
         expect(info.money, '12000.00');
         expect(info.account?.no, '5678');
@@ -327,7 +349,12 @@ void main() {
       test('Kotak Debit Alert format (official)', () {
         const sms =
             'Dear Customer, INR 750.00 debited from A/c XX3456 on 15-Jan-25 14:30. REF123456. Avl Bal: INR 9000.00.';
-        final info = util.getTransactionInfo(sms, 'KOTAKB', 'KOTAKB', 'hash12a');
+        final info = util.getTransactionInfo(
+          sms,
+          'KOTAKB',
+          'KOTAKB',
+          'hash12a',
+        );
 
         expect(info.money, '750.00');
         expect(info.account?.no, '3456');
@@ -338,7 +365,12 @@ void main() {
       test('Kotak Credit Card format (official)', () {
         const sms =
             'Trxn of INR 1500.00 on Kotak Card XX7890 at AMAZON on 15-Jan-25. Avl Limit: INR 45000.00.';
-        final info = util.getTransactionInfo(sms, 'KOTAKT', 'KOTAKT', 'hash12b');
+        final info = util.getTransactionInfo(
+          sms,
+          'KOTAKT',
+          'KOTAKT',
+          'hash12b',
+        );
 
         expect(info.money, '1500.00');
         expect(info.account?.no, '7890');
@@ -360,9 +392,13 @@ void main() {
       });
 
       test('UPI with phonepe format', () {
-        const sms =
-            'Rs 150 sent to merchant@phonepe via UPI. Ref: 987654321';
-        final info = util.getTransactionInfo(sms, 'PHONEPE', 'PHONEPE', 'hash12');
+        const sms = 'Rs 150 sent to merchant@phonepe via UPI. Ref: 987654321';
+        final info = util.getTransactionInfo(
+          sms,
+          'PHONEPE',
+          'PHONEPE',
+          'hash12',
+        );
 
         expect(info.money, '150');
         expect(info.account?.sendTo, 'merchant@phonepe');
@@ -379,8 +415,7 @@ void main() {
       });
 
       test('Large amount with commas', () {
-        const sms =
-            'Rs.1,50,000.00 credited to A/c **1234 on 15-Jan-25';
+        const sms = 'Rs.1,50,000.00 credited to A/c **1234 on 15-Jan-25';
         final info = util.getTransactionInfo(sms, 'BANK', 'BANK', 'hash14');
 
         expect(info.money, '150000.00');
@@ -396,8 +431,7 @@ void main() {
       });
 
       test('Date with time', () {
-        const sms =
-            'Rs 200 debited from A/c XX1234 on 15-01-2025 14:30:45';
+        const sms = 'Rs 200 debited from A/c XX1234 on 15-01-2025 14:30:45';
         final info = util.getTransactionInfo(sms, 'BANK', 'BANK', 'hash16');
 
         expect(info.transactionTime, isNotNull);
@@ -428,7 +462,8 @@ void main() {
       });
 
       test('Future insurance payment - will be debited', () {
-        const sms = 'Alert: INR 26291.46 will be debited on 08/10/2025 from HDFC Bank Card 1234 for Hdfc Life Insurance ID: sdfsdfsdf Act: http//hdfcbank.com/sdsfsf';
+        const sms =
+            'Alert: INR 26291.46 will be debited on 08/10/2025 from HDFC Bank Card 1234 for Hdfc Life Insurance ID: sdfsdfsdf Act: http//hdfcbank.com/sdsfsf';
         final isValid = checkForTransactionalMessage(sms);
 
         expect(isValid, false);
@@ -487,21 +522,36 @@ void main() {
     group('Account Number Extraction', () {
       test('Account with asterisks', () {
         final words = ['ac', '**1234'];
-        final account = util.getAccountFromWords(words, 'ac **1234');
+        final account = util.getAccountFromWords(
+          words,
+          'ac **1234',
+          '',
+          '1234',
+        );
 
         expect(account.no, '1234');
       });
 
       test('Account with XX prefix', () {
         final words = ['ac', 'xx5678'];
-        final account = util.getAccountFromWords(words, 'ac xx5678');
+        final account = util.getAccountFromWords(
+          words,
+          'ac xx5678',
+          '',
+          '5678',
+        );
 
         expect(account.no, '5678');
       });
 
       test('Card ending with', () {
         final words = ['card', 'ending', 'with', '9876'];
-        final account = util.getAccountFromWords(words, 'card ending with 9876');
+        final account = util.getAccountFromWords(
+          words,
+          'card ending with 9876',
+          '',
+          '9876',
+        );
 
         expect(account.no, '9876');
         expect(account.type, 'card');
@@ -509,7 +559,12 @@ void main() {
 
       test('Account no format', () {
         final words = ['ac', 'no', '1357'];
-        final account = util.getAccountFromWords(words, 'ac no 1357');
+        final account = util.getAccountFromWords(
+          words,
+          'ac no 1357',
+          '',
+          '1357',
+        );
 
         expect(account.no, '1357');
       });

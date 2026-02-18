@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mudra_manager/db/models/account.dart';
-import 'package:mudra_manager/db/models/category.dart';
-import 'package:mudra_manager/db/models/pending_transaction.dart';
-import 'package:mudra_manager/providers/transaction_matching_service.dart';
+import 'package:mudra_manager/core/db/models/account.dart';
+import 'package:mudra_manager/core/db/models/category.dart';
+import 'package:mudra_manager/core/db/models/pending_transaction.dart';
+import 'package:mudra_manager/features/transactions/data/transaction_matching_service.dart';
 
 void main() {
   group('TransactionMatchingService - matchTransaction', () {
@@ -22,11 +22,10 @@ void main() {
     });
 
     test('should match account with exact 4 digits', () {
-      final pending =
-          PendingTransaction()
-            ..account = '1651'
-            ..body = 'Some transaction on SBM'
-            ..isIncome = false;
+      final pending = PendingTransaction()
+        ..account = '1651'
+        ..body = 'Some transaction on SBM'
+        ..isIncome = false;
 
       final result = TransactionMatchingService.matchTransaction(
         pending: pending,
@@ -39,11 +38,10 @@ void main() {
     });
 
     test('should match account with suffix match', () {
-      final pending =
-          PendingTransaction()
-            ..account = '1234'
-            ..body = 'HDFC bank alert'
-            ..isIncome = false;
+      final pending = PendingTransaction()
+        ..account = '1234'
+        ..body = 'HDFC bank alert'
+        ..isIncome = false;
 
       final result = TransactionMatchingService.matchTransaction(
         pending: pending,
@@ -56,11 +54,10 @@ void main() {
     });
 
     test('should NOT match account if number is different', () {
-      final pending =
-          PendingTransaction()
-            ..account = '9999'
-            ..body = 'Unknown bank'
-            ..isIncome = false;
+      final pending = PendingTransaction()
+        ..account = '9999'
+        ..body = 'Unknown bank'
+        ..isIncome = false;
 
       final result = TransactionMatchingService.matchTransaction(
         pending: pending,
@@ -72,11 +69,10 @@ void main() {
     });
 
     test('should match category by keyword in body', () {
-      final pending =
-          PendingTransaction()
-            ..account = '1234'
-            ..body = 'Spent Rs. 500 on Grocery shop'
-            ..isIncome = false;
+      final pending = PendingTransaction()
+        ..account = '1234'
+        ..body = 'Spent Rs. 500 on Grocery shop'
+        ..isIncome = false;
 
       final result = TransactionMatchingService.matchTransaction(
         pending: pending,
@@ -89,11 +85,11 @@ void main() {
     });
 
     test('should match vegetable transaction to Grocery category', () {
-      final pending =
-          PendingTransaction()
-            ..account = '7334'
-            ..body = 'Sent Rs.154.00\nFrom HDFC Bank A/C *7334\nTo SRI LAKSHMI VEGETABLE AND\nOn 01/02/26'
-            ..isIncome = false;
+      final pending = PendingTransaction()
+        ..account = '7334'
+        ..body =
+            'Sent Rs.154.00\nFrom HDFC Bank A/C *7334\nTo SRI LAKSHMI VEGETABLE AND\nOn 01/02/26'
+        ..isIncome = false;
 
       final result = TransactionMatchingService.matchTransaction(
         pending: pending,
@@ -106,11 +102,10 @@ void main() {
     });
 
     test('should fallback to OTHER category if no match found', () {
-      final pending =
-          PendingTransaction()
-            ..account = '1234'
-            ..body = 'Random expense'
-            ..isIncome = false;
+      final pending = PendingTransaction()
+        ..account = '1234'
+        ..body = 'Random expense'
+        ..isIncome = false;
 
       final result = TransactionMatchingService.matchTransaction(
         pending: pending,
@@ -123,11 +118,10 @@ void main() {
     });
 
     test('should handle income matching correctly', () {
-      final pending =
-          PendingTransaction()
-            ..account = '1651'
-            ..body = 'Salary credited'
-            ..isIncome = true;
+      final pending = PendingTransaction()
+        ..account = '1651'
+        ..body = 'Salary credited'
+        ..isIncome = true;
 
       final result = TransactionMatchingService.matchTransaction(
         pending: pending,

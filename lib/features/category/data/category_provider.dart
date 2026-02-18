@@ -1,0 +1,86 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:isar_community/isar.dart';
+import 'package:mudra_manager/core/db/isar_service.dart';
+import 'package:mudra_manager/core/db/models/category.dart';
+import 'package:mudra_manager/core/db/models/transaction.dart';
+import 'package:mudra_manager/core/providers/isar_provider.dart';
+
+final categoryListProvider = FutureProvider<List<Category>>((ref) async {
+  final isar = await ref.watch(isarServiceProvider).getInstance();
+  final categories = await isar.categorys.where().findAll();
+  for (final category in categories) {
+    await category.parentCategory.load();
+  }
+  return categories;
+});
+
+final incomeCategoriesProvider = FutureProvider<List<Category>>((ref) async {
+  final isar = await ref.watch(isarServiceProvider).getInstance();
+  final categories = await isar.categorys
+      .filter()
+      .categoryTypeEqualTo(CategoryType.income)
+      .findAll();
+  for (final category in categories) {
+    await category.parentCategory.load();
+  }
+  return categories;
+});
+
+final expenseCategoriesProvider = FutureProvider<List<Category>>((ref) async {
+  final isar = await ref.watch(isarServiceProvider).getInstance();
+  final categories = await isar.categorys
+      .filter()
+      .categoryTypeEqualTo(CategoryType.expense)
+      .findAll();
+  for (final category in categories) {
+    await category.parentCategory.load();
+  }
+  return categories;
+});
+
+final categoryServiceProvider = Provider((ref) {
+  final isar = ref.watch(isarServiceProvider);
+  return CategoryService(isar);
+});
+
+class CategoryService {
+  final IsarService isarService;
+
+  CategoryService(this.isarService);
+
+  Future<void> addCategory(Category category) async {
+    final isar = await isarService.getInstance();
+    await isar.writeTxn(() async {
+      await isar.categorys.put(category);
+    });
+    // Optionally invalidate the list provider
+  }
+
+  Future<void> deleteCategory(int id) async {
+    final isar = await isarService.getInstance();
+    await isar.writeTxn(() async {
+      await isar.categorys.delete(id);
+    });
+  }
+
+  Future<List<Category>> getAllCategories() async {
+    final isar = await isarService.getInstance();
+    return await isar.categorys.where().findAll();
+  }
+
+  Future<void> deleteCategoryWithTransactions(Id categoryId) async {
+    final isar = await isarService.getInstance();
+    await isar.writeTxn(() async {
+      // Delete transactions with that category
+      final related = await isar.transactions
+          .filter()
+          .category((q) => q.idEqualTo(categoryId))
+          .findAll();
+
+      await isar.transactions.deleteAll(related.map((e) => e.id).toList());
+
+      // Then delete the category
+      await isar.categorys.delete(categoryId); // adjust to your collection name
+    });
+  }
+}
