@@ -20,6 +20,8 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool _isExpanded = false;
+  int? _filterParticipantId;
+  String? _filterCategory;
 
   String _getTripStatus(DateTime startDate, DateTime endDate, bool isActive) {
     final now = DateTime.now();
@@ -360,6 +362,25 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final transactionsList = trip.transactions.toList();
+    final participants = trip.participants.toList();
+
+    // Apply filters
+    var filteredTransactions = transactionsList.where((tripTxn) {
+      if (_filterParticipantId != null && tripTxn.paidBy.value?.id != _filterParticipantId) {
+        return false;
+      }
+      if (_filterCategory != null && tripTxn.transaction.value?.category.value?.name != _filterCategory) {
+        return false;
+      }
+      return true;
+    }).toList();
+
+    // Get unique categories
+    final categories = transactionsList
+        .map((t) => t.transaction.value?.category.value?.name)
+        .where((c) => c != null)
+        .toSet()
+        .toList();
 
     if (transactionsList.isEmpty) {
       return Center(
@@ -394,75 +415,200 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
       );
     }
 
-    return ListView.builder(
-      padding: EdgeInsets.all(16),
-      itemCount: transactionsList.length,
-      itemBuilder: (context, index) {
-        final tripTxn = transactionsList[index];
-        final txn = tripTxn.transaction.value;
-        final paidBy = tripTxn.paidBy.value;
-
-        return Card(
-          margin: EdgeInsets.only(bottom: 12),
-          elevation: 0,
-          color: color.surfaceContainerHighest,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(12),
-            onLongPress: () async {
-              HapticFeedback.mediumImpact();
-              final confirm = await DialogUtils.showDeleteConfirmation(
-                context,
-                title: 'Remove Expense',
-                message: 'Remove this expense from the trip?',
-                deleteText: 'Remove',
-              );
-              if (confirm == true) {
-                await ref.read(tripServiceProvider).removeTripTransaction(widget.tripId, tripTxn.id);
-                ref.invalidate(tripByIdProvider(widget.tripId));
-              }
-            },
-            child: Padding(
-              padding: EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    radius: 24,
-                    backgroundColor: color.primary.withValues(alpha: 0.1),
-                    child: Text(
-                      paidBy?.name[0].toUpperCase() ?? '?',
-                      style: TextStyle(color: color.primary, fontWeight: FontWeight.bold),
+    return Column(
+      children: [
+        // Filter chips
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                // Participant filter
+                PopupMenuButton<int?>(
+                  child: Chip(
+                    avatar: Icon(
+                      Icons.person,
+                      size: 18,
+                      color: _filterParticipantId != null ? color.primary : color.onSurfaceVariant,
                     ),
+                    label: Text(
+                      _filterParticipantId != null
+                          ? participants.firstWhere((p) => p.id == _filterParticipantId).name
+                          : 'All People',
+                    ),
+                    deleteIcon: _filterParticipantId != null ? Icon(Icons.close, size: 18) : null,
+                    onDeleted: _filterParticipantId != null
+                        ? () {
+                            HapticFeedback.lightImpact();
+                            setState(() => _filterParticipantId = null);
+                          }
+                        : null,
+                    backgroundColor: _filterParticipantId != null ? color.primaryContainer : color.surfaceContainerHighest,
                   ),
-                  SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Paid by ${paidBy?.name ?? "Unknown"}',
-                          style: textTheme.titleMedium?.copyWith(color: color.onSurfaceVariant),
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          txn?.description ?? 'Expense',
-                          style: textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
-                        ),
-                      ],
+                  onSelected: (id) {
+                    HapticFeedback.selectionClick();
+                    setState(() => _filterParticipantId = id);
+                  },
+                  itemBuilder: (context) => [
+                    PopupMenuItem(value: null, child: Text('All People')),
+                    ...participants.map((p) => PopupMenuItem(value: p.id, child: Text(p.name))),
+                  ],
+                ),
+                SizedBox(width: 8),
+                // Category filter
+                if (categories.isNotEmpty)
+                  PopupMenuButton<String?>(
+                    child: Chip(
+                      avatar: Icon(
+                        Icons.category,
+                        size: 18,
+                        color: _filterCategory != null ? color.secondary : color.onSurfaceVariant,
+                      ),
+                      label: Text(_filterCategory ?? 'All Categories'),
+                      deleteIcon: _filterCategory != null ? Icon(Icons.close, size: 18) : null,
+                      onDeleted: _filterCategory != null
+                          ? () {
+                              HapticFeedback.lightImpact();
+                              setState(() => _filterCategory = null);
+                            }
+                          : null,
+                      backgroundColor: _filterCategory != null ? color.secondaryContainer : color.surfaceContainerHighest,
                     ),
+                    onSelected: (cat) {
+                      HapticFeedback.selectionClick();
+                      setState(() => _filterCategory = cat);
+                    },
+                    itemBuilder: (context) => [
+                      PopupMenuItem(value: null, child: Text('All Categories')),
+                      ...categories.map((c) => PopupMenuItem(value: c, child: Text(c!))),
+                    ],
                   ),
-                  Text(
-                    '₹${txn?.amount.toStringAsFixed(2)}',
-                    style: textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: color.primary,
-                    ),
+                if (_filterParticipantId != null || _filterCategory != null) ...[
+                  SizedBox(width: 8),
+                  TextButton.icon(
+                    onPressed: () {
+                      HapticFeedback.mediumImpact();
+                      setState(() {
+                        _filterParticipantId = null;
+                        _filterCategory = null;
+                      });
+                    },
+                    icon: Icon(Icons.clear_all, size: 18),
+                    label: Text('Clear'),
+                    style: TextButton.styleFrom(foregroundColor: color.error),
                   ),
                 ],
-              ),
+              ],
             ),
           ),
-        );
-      },
+        ),
+        
+        // Transactions list
+        Expanded(
+          child: filteredTransactions.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.filter_list_off, size: 48, color: color.onSurfaceVariant),
+                      SizedBox(height: 16),
+                      Text(
+                        'No expenses match filters',
+                        style: textTheme.titleMedium?.copyWith(color: color.onSurfaceVariant),
+                      ),
+                    ],
+                  ),
+                )
+              : ListView.builder(
+                  padding: EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: filteredTransactions.length,
+                  itemBuilder: (context, index) {
+                    final tripTxn = filteredTransactions[index];
+                    final txn = tripTxn.transaction.value;
+                    final paidBy = tripTxn.paidBy.value;
+
+                    return Card(
+                      margin: EdgeInsets.only(bottom: 12),
+                      elevation: 0,
+                      color: color.surfaceContainerHighest,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(12),
+                        onLongPress: () async {
+                          HapticFeedback.mediumImpact();
+                          final confirm = await DialogUtils.showDeleteConfirmation(
+                            context,
+                            title: 'Remove Expense',
+                            message: 'Remove this expense from the trip?',
+                            deleteText: 'Remove',
+                          );
+                          if (confirm == true) {
+                            await ref.read(tripServiceProvider).removeTripTransaction(widget.tripId, tripTxn.id);
+                            ref.invalidate(tripByIdProvider(widget.tripId));
+                          }
+                        },
+                        child: Padding(
+                          padding: EdgeInsets.all(16),
+                          child: Row(
+                            children: [
+                              CircleAvatar(
+                                radius: 24,
+                                backgroundColor: color.primary.withValues(alpha: 0.1),
+                                child: Text(
+                                  paidBy?.name[0].toUpperCase() ?? '?',
+                                  style: TextStyle(color: color.primary, fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Paid by ${paidBy?.name ?? "Unknown"}',
+                                      style: textTheme.titleMedium?.copyWith(color: color.onSurfaceVariant),
+                                    ),
+                                    SizedBox(height: 4),
+                                    Text(
+                                      txn?.description ?? 'Expense',
+                                      style: textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
+                                    ),
+                                    if (txn?.category.value?.name != null) ...[
+                                      SizedBox(height: 4),
+                                      Container(
+                                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: color.secondaryContainer,
+                                          borderRadius: BorderRadius.circular(4),
+                                        ),
+                                        child: Text(
+                                          txn!.category.value!.name,
+                                          style: textTheme.labelSmall?.copyWith(
+                                            color: color.secondary,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ),
+                              Text(
+                                '₹${txn?.amount.toStringAsFixed(2)}',
+                                style: textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: color.primary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+        ),
+      ],
     );
   }
 
@@ -533,6 +679,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final transactionsList = trip.transactions.toList();
+    final participants = trip.participants.toList();
 
     if (transactionsList.isEmpty) {
       return Center(
@@ -561,6 +708,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
 
     double totalCost = 0;
     Map<String, double> categoryTotals = {};
+    Map<int, double> participantSpending = {};
 
     for (var tripTxn in transactionsList) {
       final txn = tripTxn.transaction.value;
@@ -568,14 +716,22 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
         totalCost += txn.amount;
         final categoryName = txn.category.value?.name ?? 'Uncategorized';
         categoryTotals[categoryName] = (categoryTotals[categoryName] ?? 0) + txn.amount;
+        
+        // Track spending by participant
+        final paidById = tripTxn.paidBy.value?.id;
+        if (paidById != null) {
+          participantSpending[paidById] = (participantSpending[paidById] ?? 0) + txn.amount;
+        }
       }
     }
 
     final sortedCategories = categoryTotals.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
+    final perPersonAverage = participants.isNotEmpty ? totalCost / participants.length : 0;
 
     return ListView(
       padding: EdgeInsets.all(16),
       children: [
+        // Total Cost Card
         Card(
           elevation: 0,
           color: color.primaryContainer,
@@ -606,6 +762,124 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
             ),
           ),
         ),
+        
+        SizedBox(height: 16),
+        
+        // Per Person Summary
+        Card(
+          elevation: 0,
+          color: color.surfaceContainerHighest,
+          child: Padding(
+            padding: EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.people, color: color.secondary, size: 24),
+                    SizedBox(width: 12),
+                    Text(
+                      'Per Person Summary',
+                      style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 16),
+                Container(
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: color.secondaryContainer,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Average per person',
+                        style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                      ),
+                      Text(
+                        '₹${perPersonAverage.toStringAsFixed(2)}',
+                        style: textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: color.secondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 16),
+                ...participants.map((p) {
+                  final spent = participantSpending[p.id] ?? 0;
+                  final percentage = totalCost > 0 ? (spent / totalCost * 100) : 0;
+                  return Container(
+                    margin: EdgeInsets.only(bottom: 12),
+                    padding: EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: color.surface,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 20,
+                          backgroundColor: color.primaryContainer,
+                          child: Text(
+                            p.name[0].toUpperCase(),
+                            style: TextStyle(
+                              color: color.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                p.name,
+                                style: textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+                              ),
+                              SizedBox(height: 4),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(4),
+                                child: LinearProgressIndicator(
+                                  value: percentage / 100,
+                                  minHeight: 6,
+                                  backgroundColor: color.surfaceContainerHighest,
+                                  valueColor: AlwaysStoppedAnimation(color.primary),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(width: 12),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              '₹${spent.toStringAsFixed(2)}',
+                              style: textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: color.primary,
+                              ),
+                            ),
+                            Text(
+                              '${percentage.toStringAsFixed(1)}%',
+                              style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ],
+            ),
+          ),
+        ),
+        
         SizedBox(height: 24),
         Text('Category Breakdown', style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
         SizedBox(height: 16),
