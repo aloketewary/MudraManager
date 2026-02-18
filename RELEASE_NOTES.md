@@ -1,145 +1,59 @@
 # Mudra Manager - Release Notes
 
-## Version 2.0.0 - Performance & UX Overhaul
+## Version 2.0.0 - Major UI/UX Overhaul
 
-**Release Date**: TBD
+### 🎨 Design & UI Improvements
 
-### 🚀 Major Performance Improvements
+#### Goals Module
+- **Modernized Goal Screen**: Redesigned with Hero animation and horizontal card layout matching dashboard style
+- **New Goal Details Screen**: Added comprehensive progress tracking with gradient header, circular progress indicators, and remaining days calculation
+- **Enhanced Goal Cards**: Horizontal layout with icon on left, metrics in center, and progress percentage with chevron on right
+- **Description Support**: Added optional description field for goals
 
-#### Database Optimization (50-100x faster)
-- **Statistics Screen**: Reduced load time from 2-5 seconds to 50-200ms
-- **Eliminated N+1 Query Problem**: Single query + in-memory aggregation pattern
-- **Optimized Providers**: Rewrote `statsProvider`, `chart_data_provider`, and `summary_provider`
-- **Smart Caching**: Improved Riverpod family provider caching with string-based parameters
+#### Trip & Split Expenses
+- **Settlement Visualization**: New SettlementCard component with debt/credit indicators, avatars, and visual arrow display
+- **Mark as Paid**: Settlements can now be marked as paid with settled date tracking (persisted via SharedPreferences)
+- **Settled State**: Paid settlements show with dashed border, reduced opacity, and "Settled on [date]" badge
+- **Trip Summary**: Added per-person spending breakdown with progress bars, percentages, and average calculation
+- **Expense Filters**: Filter trip expenses by participant and category with intuitive chip-based UI
+- **Modernized Trip List**: Horizontal card layout with separated items matching dashboard style
+- **Enhanced Reports**: Visual spending breakdown by person and category with progress indicators
 
-### ✨ New Features
-
-#### Period-Based Date Selection
-- **Reusable Calendar Widget**: New `PeriodCalendarSelector` component with Material Design 3 styling
-- **Quick Period Presets**: Day, Week, Month, Year, and Custom date range options
-- **Smart Query Triggering**: Custom date selection only triggers after both dates are selected
-- **Integrated Across App**: Statistics, Cash Flow, and Transaction screens
-
-#### Enhanced Budget Management
-- **Redesigned Budget Dashboard**: Clean list view with compact cards
-- **Dedicated Details Screen**: Full-screen budget details with hero header and gradient background
-- **Visual Improvements**: Large charts (200px), split metrics, percentage badges, and grid layouts
-- **Better Navigation**: Tap cards to view detailed breakdowns
-
-#### Backup & Restore in Onboarding
-- **Restore During Setup**: Import existing backup directly from account setup screen
-- **Encrypted Backups**: Password-protected restore with proper error handling
-- **Seamless Flow**: Automatic navigation to home after successful restore
-
-#### Expanded Default Categories
-- **4 Income Categories**: Salary, Business, Investment, Other Income
-- **11 Expense Parent Categories**: Food, Transport, Shopping, Bills, Entertainment, Healthcare, Education, and more
-- **8 Subcategories**: Groceries, Restaurant, Fuel, Public Transport, Clothing, Electronics, Electricity, Internet
-- **Smart Hierarchy**: Subcategories properly linked to parent categories
-
-### 🎨 UI/UX Improvements
-
-#### Modernized Calendar Interface
-- **Material Design 3**: Rounded icons, bordered surfaces, grouped navigation buttons
-- **Lighter Haptics**: Improved feedback on interactions
-- **Smart Navigation**: Disabled "Next Month" button when viewing current month
-- **Custom Year/Month Picker**: Replaced default picker with modern selector and refresh icon
-
-#### Transaction List Enhancements
-- **Fixed Overflow Issues**: Resolved "Vertical viewport was given unbounded height" error
-- **Proper Date Grouping**: Fixed duplicate headers in custom date range mode
-- **Accurate Comparisons**: Year/month/day comparison instead of DateTime equality
-
-#### Statistics Screen Updates
-- **Top Category Sorting**: Insights card now shows highest spending category first
-- **Subcategory Support**: Expense trends show parent category with subcategories
-- **Visual Differentiation**: Solid lines for parents, dashed lines for subcategories
-- **Grouped Bar Charts**: Color-coded subcategory bars with lighter shades
-
-#### Cash Flow Improvements
-- **Optimized Rendering**: Period changes don't reload account cards unnecessarily
-- **Better Layout**: Calendar selector positioned below cash flow cards
-- **Isolated State**: New `periodBasedTransactionsProvider` for independent updates
+#### Recurring Transactions
+- **Synced UI**: Updated to match add transaction screen with card-based layout
+- **Subcategory Support**: Full parent/child category selection with bottom sheet picker
+- **Visual Indicators**: Stacked icons for subcategories, chevron for expandable categories
 
 ### 🐛 Bug Fixes
+- Fixed type mismatch in PopupMenuItem for trip expense filters
+- Fixed Settlement SharedPreferences parsing for ISO date format with colons
+- Corrected icon mappings for onboarding categories (account_balance_wallet, bolt, checkroom, devices, directions_bus, local_gas_station, movie, receipt)
+- Fixed auto backup service errors by removing invalid parameters
 
-- **GlobalKey Duplicate Error**: Fixed duplicate key error in statistics screen
-- **Calendar Assertion Error**: Resolved TableCalendar navigation issues
-- **Category Parent Selection**: Prevented subcategories from being selectable as parents
-- **Budget Card Layout**: Fixed unbounded height constraint errors with fixed 140px height
-- **Date Range Provider**: Fixed parameter format for proper Riverpod caching
+### 🧹 Code Quality
+- Removed 20 unused files (3,303 lines of code)
+- Cleaned up debug print statements
+- Consistent Material 3 design patterns throughout
+- Optimized component reusability
 
-### 📚 Documentation
-
-- **Database Optimization Report**: Comprehensive guide documenting all performance improvements
-- **Updated README**: Reflects current features and tech stack
-- **Code Comments**: Improved inline documentation for complex logic
-
-### 🔧 Technical Improvements
-
-- **Provider Architecture**: Better separation of concerns with dedicated providers
-- **State Management**: Reduced unnecessary rebuilds across the app
-- **Memory Efficiency**: Single-pass aggregation for large datasets
-- **Code Quality**: Removed redundant code and improved maintainability
-
-### 📊 Performance Metrics
-
-| Operation | Before | After | Improvement |
-|-----------|--------|-------|-------------|
-| Statistics Load | 2-5s | 50-200ms | 50-100x faster |
-| Category Aggregation | 200+ queries | 2 queries | 100x fewer queries |
-| Chart Data Generation | Multiple queries | Single query | 10x faster |
-| Transaction Filtering | Per-category query | In-memory filter | 20x faster |
-
-### 🔄 Migration Notes
-
-- No database schema changes required
-- Existing data fully compatible
-- Automatic category creation for new users
-- Backup/restore maintains full compatibility
-
-### 🎯 Breaking Changes
-
-None - This release is fully backward compatible.
-
-### 📦 Dependencies
-
-- Flutter SDK: 3.7.2+
-- Riverpod: Latest
-- Isar: Latest
-- All dependencies updated to latest stable versions
-
-### 🙏 Acknowledgments
-
-Special thanks to the Flutter and Riverpod communities for their excellent documentation and support.
+### 📦 Technical Details
+- Material 3 enabled with dynamic theming
+- Local-first architecture with Isar database
+- SharedPreferences for settlement state persistence
+- Proper subcategory handling across all transaction screens
 
 ---
 
-## Installation
+## Previous Versions
 
-```bash
-# Clone the repository
-git clone <repository_url>
-cd mudra_manager
-
-# Install dependencies
-flutter pub get
-
-# Run code generation
-dart run build_runner build --delete-conflicting-outputs
-
-# Launch the app
-flutter run
-```
-
-## What's Next?
-
-- Cloud sync capabilities
-- Multi-currency support
-- Advanced analytics and predictions
-- Widget support for quick expense entry
-- Recurring transaction templates
-
----
-
-**Full Changelog**: See [CHANGELOG.md](CHANGELOG.md) for detailed commit history.
+### Version 1.0.0 - Initial Release
+- SMS transaction tracking
+- Budget management
+- Transaction history
+- Category management
+- Account management
+- Trip & split expenses
+- Recurring transactions
+- Export to Excel/PDF
+- Biometric authentication
+- Multi-language support
