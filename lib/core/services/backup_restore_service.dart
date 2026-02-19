@@ -22,6 +22,8 @@ import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/models/user_profile.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
+import 'package:mudra_manager/core/logging/app_log.dart';
+import 'package:mudra_manager/core/logging/logger_provider.dart';
 import 'package:mudra_manager/features/backup/data/account_backup.dart';
 import 'package:mudra_manager/features/backup/data/budget_backup.dart';
 import 'package:mudra_manager/features/backup/data/budget_category_allocation_backup.dart';
@@ -38,6 +40,7 @@ import 'package:path_provider/path_provider.dart';
 class BackupService {
   static const _backupFileName = 'mudra_backup';
   static const _backupFileNameExtension = '.mudra';
+  static final _log = AppLog(getLogger(), 'BackupService');
 
   /// Create encrypted backup with password
   static Future<String?> createEncryptedBackup(
@@ -88,6 +91,7 @@ class BackupService {
         recordCount,
       );
       await SharedPrefsUtil.instance.saveBackupDate(dateTime);
+      _log.i('Backup created: $filePath ($recordCount records)');
     }
 
     return filePath;
@@ -137,8 +141,10 @@ class BackupService {
         await SharedPrefsUtil.instance.importAll(data['settings']);
       }
 
+      _log.i('Backup restored successfully');
       return 'success';
     } catch (e) {
+      _log.e('Restore failed', e);
       SnackbarService.error('Invalid password or corrupted file');
       return null;
     }
@@ -279,7 +285,7 @@ class BackupService {
         .map((tx) => TransactionBackup.fromTransaction(tx).toBackupJson())
         .toList();
 
-    debugPrint('DB Backup completed successfully');
+    _log.i('DB export completed: ${backupData.values.fold<int>(0, (sum, list) => sum + list.length)} records');
     return backupData;
   }
 
@@ -480,7 +486,7 @@ class BackupService {
         }
       }
     });
-    debugPrint('Restore completed successfully');
+    _log.i('Restore completed successfully');
   }
 
   static Future<Directory?> pickBackupFolder() async {
@@ -503,9 +509,7 @@ class BackupService {
     final file = File('${directory.path}/$fileName');
     await file.create(recursive: true);
     await file.writeAsBytes(content);
-    if (kDebugMode) {
-      print('Backup saved at ${file.path}');
-    }
+    _log.d('Backup saved at ${file.path}');
     return file.path;
   }
 }

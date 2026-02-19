@@ -5,8 +5,9 @@ import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
+import 'package:mudra_manager/core/logging/app_log.dart';
+import 'package:mudra_manager/core/logging/logger_provider.dart';
 import 'package:mudra_manager/core/services/widget_service.dart';
-import 'package:mudra_manager/core/utils/app_logger.dart';
 import 'package:mudra_manager/core/utils/icon_helper.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
@@ -28,6 +29,7 @@ class _QuickAddTransactionSheetState
   bool _isExpense = true;
   Account? _selectedAccount;
   Category? _selectedCategory;
+  final AppLog _log = AppLog(getLogger(), 'QuickAddSheet');
 
   @override
   void dispose() {
@@ -38,21 +40,21 @@ class _QuickAddTransactionSheetState
 
   Future<void> _save() async {
     final ctxt = AppLocalizations.of(context)!;
-    AppLogger.transaction('Quick add: Starting transaction save');
+    _log.i('Quick add: Starting transaction save');
 
     if (_amountController.text.isEmpty ||
         double.tryParse(_amountController.text) == null) {
-      AppLogger.warning('Quick add: Invalid amount entered');
+      _log.w('Quick add: Invalid amount entered');
       SnackbarService.error(ctxt.transaction_enterValidAmountError);
       return;
     }
     if (_selectedAccount == null) {
-      AppLogger.warning('Quick add: No account selected');
+      _log.w('Quick add: No account selected');
       SnackbarService.error(ctxt.transaction_selectOneAccountErrorText);
       return;
     }
     if (_selectedCategory == null) {
-      AppLogger.warning('Quick add: No category selected');
+      _log.w('Quick add: No category selected');
       SnackbarService.error(ctxt.transaction_selectOneCategoryErrorText);
       return;
     }
@@ -67,17 +69,17 @@ class _QuickAddTransactionSheetState
     txn.account.value = _selectedAccount;
     txn.category.value = _selectedCategory;
 
-    AppLogger.transaction(
+    _log.i(
       'Quick add: Saving ${_isExpense ? "expense" : "income"} of ₹${txn.amount}',
     );
     await ref.read(transactionProvider).addTransaction(txn);
     await WidgetService.updateWidget(ref);
-    AppLogger.widget('Quick add: Widget updated after transaction');
+    _log.i('Quick add: Widget updated after transaction');
 
     if (mounted) {
       Navigator.pop(context);
       SnackbarService.success('Transaction added successfully');
-      AppLogger.transaction('Quick add: Transaction saved successfully');
+      _log.i('Quick add: Transaction saved successfully');
     }
   }
 

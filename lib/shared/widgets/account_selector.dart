@@ -32,7 +32,7 @@ class AccountSelector extends ConsumerWidget {
         final showAddButton = accountNumber != null && matchedAccount == null;
 
         return SizedBox(
-          height: 60,
+          height: 120,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: accounts.length + (showAddButton ? 1 : 0),
@@ -73,6 +73,13 @@ class AccountSelector extends ConsumerWidget {
                       const SizedBox(height: 4),
                       Text(
                         account.name,
+                        style: textTheme.labelSmall?.copyWith(
+                          color: isSelected ? color.onPrimaryContainer : color.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        account.accountNumber ?? '',
                         style: textTheme.labelSmall?.copyWith(
                           color: isSelected ? color.onPrimaryContainer : color.onSurface,
                         ),

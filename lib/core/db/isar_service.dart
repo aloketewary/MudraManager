@@ -13,15 +13,19 @@ import 'package:mudra_manager/core/db/models/tag.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/models/trip.dart';
 import 'package:mudra_manager/core/db/models/user_profile.dart';
+import 'package:mudra_manager/core/logging/app_log.dart';
+import 'package:mudra_manager/core/logging/logger_provider.dart';
 import 'package:path_provider/path_provider.dart';
 
 class IsarService {
   final Future<Isar> _db;
+  static final _log = AppLog(getLogger(), 'IsarService');
 
   IsarService() : _db = initIsar();
 
   static Future<Isar> initIsar() async {
     final dir = await getApplicationDocumentsDirectory();
+    _log.i('Initializing Isar database at ${dir.path}');
     return await Isar.open([
       AccountSchema,
       BackupMetadataSchema,

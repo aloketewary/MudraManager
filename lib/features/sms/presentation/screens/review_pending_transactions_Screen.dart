@@ -388,6 +388,7 @@ class _ReviewPendingTransactionsScreenState
     Account account,
     Category category,
     AppLocalizations ctxt,
+    BuildContext bottomSheetContext,
   ) async {
     final txn = Transaction.create(
       date: pendingTx.date,
@@ -403,7 +404,7 @@ class _ReviewPendingTransactionsScreenState
     _removePendingTransaction(pendingTx, true, ctxt);
     if (mounted) {
       SnackbarService.success('Approved ${pendingTx.sender}');
-      context.pop();
+      Navigator.of(bottomSheetContext).pop();
     }
   }
 
@@ -412,6 +413,7 @@ class _ReviewPendingTransactionsScreenState
     Account fromAccount,
     Account toAccount,
     AppLocalizations ctxt,
+    BuildContext bottomSheetContext,
   ) async {
     await ref
         .read(transactionProvider)
@@ -427,7 +429,7 @@ class _ReviewPendingTransactionsScreenState
     _removePendingTransaction(pendingTx, true, ctxt);
     if (mounted) {
       SnackbarService.success('Transfer approved: ${pendingTx.sender}');
-      context.pop();
+      Navigator.of(bottomSheetContext).pop();
     }
   }
 
@@ -1168,6 +1170,7 @@ class _ReviewPendingTransactionsScreenState
                           selectedAccount!,
                           selectedToAccount!,
                           ctxt,
+                          context,
                         );
                       } else {
                         SnackbarService.warning(
@@ -1181,6 +1184,7 @@ class _ReviewPendingTransactionsScreenState
                           selectedAccount!,
                           selectedCategory!,
                           ctxt,
+                          context,
                         );
                       } else {
                         SnackbarService.warning('Select Account & Category');

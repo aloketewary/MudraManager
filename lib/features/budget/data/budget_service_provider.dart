@@ -6,10 +6,12 @@ import 'package:mudra_manager/core/db/models/budget_category_allocation.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
+import 'package:mudra_manager/core/logging/app_log.dart';
 
 final budgetServiceProvider = Provider<BudgetService>((ref) {
   final isarService = ref.watch(isarServiceProvider);
-  return BudgetService(isarService);
+  final log = ref.getLogger('BudgetService');
+  return BudgetService(isarService, log);
 });
 
 final budgetStreamProvider = StreamProvider<List<Budget>>((ref) {
@@ -57,8 +59,9 @@ final budgetsWithProgressProvider =
 
 class BudgetService {
   final IsarService isarService;
+  final AppLog log;
 
-  BudgetService(this.isarService);
+  BudgetService(this.isarService, this.log);
 
   Stream<List<Budget>> watchAllBudgets() async* {
     final isar = await isarService.getInstance();
@@ -161,6 +164,7 @@ class BudgetService {
         isar.budgetCategoryAllocations.putSync(alloc, saveLinks: true);
       }
     });
+    log.i('Budget saved: ${bud.name}');
   }
 
   /// Delete a budget and all its allocations
@@ -178,6 +182,7 @@ class BudgetService {
       // Remove budget itself
       await isar.budgets.delete(budgetId);
     });
+    log.i('Budget deleted: $budgetId');
   }
 
   /// Fetch a single budget by ID

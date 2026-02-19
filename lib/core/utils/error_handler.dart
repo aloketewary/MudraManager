@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mudra_manager/core/logging/app_log.dart';
+import 'package:mudra_manager/core/logging/logger_provider.dart';
 
 class AppException implements Exception {
   final String code;
@@ -53,13 +55,14 @@ Future<T> withRetry<T>(
   int maxAttempts = 3,
   Duration initialDelay = const Duration(seconds: 1),
 }) async {
+  final log = AppLog(getLogger(), 'Retry');
   for (int i = 0; i < maxAttempts; i++) {
     try {
       return await operation();
     } catch (e) {
       if (i == maxAttempts - 1) rethrow;
       await Future.delayed(initialDelay * (i + 1));
-      debugPrint('Retry attempt ${i + 1} after error: $e');
+      log.w('Retry attempt ${i + 1} after error: $e');
     }
   }
   throw Exception('Max retry attempts reached');
@@ -71,11 +74,12 @@ Future<T?> safeExecute<T>(
   T? fallback,
   void Function(dynamic error)? onError,
 }) async {
+  final log = AppLog(getLogger(), 'SafeExec');
   try {
     return await operation();
   } catch (e) {
     onError?.call(e);
-    debugPrint('Safe execute caught error: $e');
+    log.e('Safe execute caught error', e);
     return fallback;
   }
 }

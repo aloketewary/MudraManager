@@ -4,6 +4,7 @@ import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
+import 'package:mudra_manager/core/logging/app_log.dart';
 
 final categoryListProvider = FutureProvider<List<Category>>((ref) async {
   final isar = await ref.watch(isarServiceProvider).getInstance();
@@ -40,20 +41,22 @@ final expenseCategoriesProvider = FutureProvider<List<Category>>((ref) async {
 
 final categoryServiceProvider = Provider((ref) {
   final isar = ref.watch(isarServiceProvider);
-  return CategoryService(isar);
+  final log = ref.getLogger('CategoryService');
+  return CategoryService(isar, log);
 });
 
 class CategoryService {
   final IsarService isarService;
+  final AppLog log;
 
-  CategoryService(this.isarService);
+  CategoryService(this.isarService, this.log);
 
   Future<void> addCategory(Category category) async {
     final isar = await isarService.getInstance();
     await isar.writeTxn(() async {
       await isar.categorys.put(category);
     });
-    // Optionally invalidate the list provider
+    log.i('Category added: ${category.name}');
   }
 
   Future<void> deleteCategory(int id) async {
@@ -61,6 +64,7 @@ class CategoryService {
     await isar.writeTxn(() async {
       await isar.categorys.delete(id);
     });
+    log.i('Category deleted: $id');
   }
 
   Future<List<Category>> getAllCategories() async {
@@ -70,17 +74,20 @@ class CategoryService {
 
   Future<void> deleteCategoryWithTransactions(Id categoryId) async {
     final isar = await isarService.getInstance();
+    int txCount = 0;
     await isar.writeTxn(() async {
       // Delete transactions with that category
       final related = await isar.transactions
           .filter()
           .category((q) => q.idEqualTo(categoryId))
           .findAll();
+      txCount = related.length;
 
       await isar.transactions.deleteAll(related.map((e) => e.id).toList());
 
       // Then delete the category
       await isar.categorys.delete(categoryId); // adjust to your collection name
     });
+    log.w('Category deleted with $txCount transactions');
   }
 }

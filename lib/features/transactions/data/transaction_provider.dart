@@ -5,12 +5,13 @@ import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
-import 'package:mudra_manager/core/utils/app_logger.dart';
+import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/features/transactions/presentation/widgets/transaction_group.dart';
 
 final transactionProvider = Provider<TransactionService>((ref) {
   final isarService = ref.watch(isarServiceProvider);
-  return TransactionService(isarService);
+  final log = ref.getLogger('TransactionService');
+  return TransactionService(isarService, log);
 });
 
 final filteredTransactionProvider =
@@ -255,21 +256,33 @@ final transactionCountsProvider = FutureProvider.autoDispose<Map<Id, int>>((
 
 class TransactionService {
   final IsarService isarService;
+  final AppLog log;
 
-  TransactionService(this.isarService);
+  TransactionService(this.isarService, this.log);
 
   Future<void> addTransaction(Transaction txn) async {
-    AppLogger.database(
-      'Adding transaction: ${txn.isExpense ? "Expense" : "Income"} of ₹${txn.amount}',
-    );
+    log.d('Adding transaction: ${txn.isExpense ? "Expense" : "Income"} of ₹${txn.amount}');
+    log.d('Transaction date: ${txn.date}');
+    log.d('Transaction account: ${txn.account.value?.name}');
+    log.d('Transaction category: ${txn.category.value?.name}');
+    
     final isar = await isarService.getInstance();
     await isar.writeTxn(() async {
-      await isar.transactions.put(txn);
+      final id = await isar.transactions.put(txn);
+      log.d('Transaction put returned ID: $id');
       await txn.category.save();
       await txn.account.save();
       await txn.tags.save();
     });
-    AppLogger.database('Transaction saved successfully with ID: ${txn.id}');
+    log.i('Transaction saved successfully with ID: ${txn.id}');
+    
+    // Verify the transaction was saved
+    final saved = await isar.transactions.get(txn.id);
+    if (saved != null) {
+      log.d('Verified: Transaction ${txn.id} exists in DB with date: ${saved.date}');
+    } else {
+      log.e('ERROR: Transaction ${txn.id} not found in DB after save!');
+    }
   }
 
   Future<List<Transaction>> getAll() async {
@@ -338,12 +351,12 @@ class TransactionService {
   }
 
   Future<void> deleteTransaction(int transactionId) async {
-    AppLogger.database('Deleting transaction ID: $transactionId');
+    log.d('Deleting transaction ID: $transactionId');
     final isar = await isarService.getInstance();
     await isar.writeTxn(() async {
       await isar.transactions.delete(transactionId);
     });
-    AppLogger.database('Transaction deleted successfully');
+    log.i('Transaction deleted successfully');
   }
 
   /// Perform a transfer between two accounts
@@ -356,7 +369,7 @@ class TransactionService {
     int? fromId,
     int? toId,
   }) async {
-    AppLogger.database('Transfer: ₹$amount from ${from.name} to ${to.name}');
+    log.d('Transfer: ₹$amount from ${from.name} to ${to.name}');
     final isar = await isarService.getInstance();
     final debit =
         Transaction.create(
@@ -388,7 +401,7 @@ class TransactionService {
       await credit.category.save();
       await credit.account.save();
     });
-    AppLogger.database('Transfer completed successfully');
+    log.i('Transfer completed successfully');
   }
 
   Future<List<Transaction>> getByDateRange(DateTime start, DateTime end) async {

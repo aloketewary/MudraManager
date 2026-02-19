@@ -5,7 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
-import 'package:mudra_manager/core/utils/app_logger.dart';
+import 'package:mudra_manager/core/logging/app_log.dart';
+import 'package:mudra_manager/core/logging/logger_provider.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -15,6 +16,7 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
   static const _reminderTimeKey = 'daily_reminder_time_key';
   static BuildContext? _context;
+  static final _log = AppLog(getLogger(), 'NotificationService');
 
   static void setContext(BuildContext context) {
     _context = context;
@@ -75,9 +77,7 @@ class NotificationService {
     await _saveReminderTime(time);
 
     final scheduledDate = _nextInstanceOfTime(time);
-    AppLogger.notification(
-      'Scheduling daily reminder at ${time.hour}:${time.minute}',
-    );
+    _log.i('Scheduling daily reminder at ${time.hour}:${time.minute}');
 
     await _plugin.zonedSchedule(
       0,
@@ -102,7 +102,7 @@ class NotificationService {
       matchDateTimeComponents: DateTimeComponents.time,
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
     );
-    AppLogger.notification('Daily reminder scheduled successfully');
+    _log.i('Daily reminder scheduled successfully');
   }
 
   static Future<void> showDailySummary() async {
@@ -337,7 +337,7 @@ class NotificationService {
     required String body,
     String? payload,
   }) async {
-    AppLogger.notification('Showing notification: $title');
+    _log.i('Showing notification: $title');
     const androidDetails = AndroidNotificationDetails(
       'mudra_channel_id',
       'Mudra Manager Notifications',

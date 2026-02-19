@@ -6,13 +6,14 @@ import 'package:mudra_manager/core/db/models/category.dart' as db_category;
 import 'package:mudra_manager/core/db/models/pending_transaction.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
-import 'package:mudra_manager/core/utils/app_logger.dart';
+import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/utils/transaction_msg_util.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_matching_service.dart';
 
 final pendingTxnServiceProvider = Provider<PendingTransactionService>((ref) {
   final isarService = ref.watch(isarServiceProvider);
-  return PendingTransactionService(isarService);
+  final log = ref.getLogger('PendingTxnService');
+  return PendingTransactionService(isarService, log);
 });
 
 final pendingTxnCountProvider = FutureProvider.autoDispose<int>((ref) async {
@@ -28,8 +29,9 @@ final pendingTxnDataProvider =
 
 class PendingTransactionService {
   final IsarService isarService;
+  final AppLog log;
 
-  PendingTransactionService(this.isarService);
+  PendingTransactionService(this.isarService, this.log);
 
   Future<int> countPendingTransaction() async {
     final isar = await isarService.getInstance();
@@ -95,11 +97,11 @@ class PendingTransactionService {
     required List<Account> accounts,
     required List<db_category.Category> categories,
   }) async {
-    AppLogger.info('Starting auto-process for pending transactions');
+    log.i('Starting auto-process for pending transactions');
     final isar = await isarService.getInstance();
     final pendingTxns = await getAllPendingTransaction();
     if (pendingTxns.isEmpty) {
-      AppLogger.info('No pending transactions to process');
+      log.i('No pending transactions to process');
       return 0;
     }
 
@@ -121,7 +123,7 @@ class PendingTransactionService {
       }
     });
 
-    AppLogger.info('Auto-processed $successCount transactions');
+    log.i('Auto-processed $successCount transactions');
     return successCount;
   }
 
@@ -170,16 +172,11 @@ class PendingTransactionService {
       await txn.category.save();
 
       await isar.pendingTransactions.delete(pending.id);
-      AppLogger.info(
-        'transaction_auto_enabled, sender: ${pending.sender} amount: ${pending.amount} category: ${match.category.name} account: ${match.account.name}',
-        tag: 'transaction',
-      );
+      log.i('Transaction auto-enabled: ${pending.sender} ₹${pending.amount} -> ${match.category.name} (${match.account.name})');
 
       return true;
     } else {
-      AppLogger.warning(
-        'No match for pending ${pending.id} (Acc: ${pending.account}, Sender: ${pending.sender})',
-      );
+      log.w('No match for pending ${pending.id} (Acc: ${pending.account}, Sender: ${pending.sender})');
       return false;
     }
   }

@@ -1,9 +1,11 @@
+import 'package:mudra_manager/core/logging/app_log.dart';
+import 'package:mudra_manager/core/logging/logger_provider.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
-import 'package:mudra_manager/core/utils/app_logger.dart';
 
 class SmsHashCleanupService {
   static const int maxHashCount = 1000;
   static const int retentionDays = 90;
+  static final AppLog _log = AppLog(getLogger(), 'SmsHashCleanupService');
 
   /// Cleanup old SMS hashes to prevent unbounded growth
   static Future<void> cleanupOldHashes() async {
@@ -15,13 +17,10 @@ class SmsHashCleanupService {
         final trimmed = hashes.sublist(hashes.length - maxHashCount);
         await prefs.setStringList('processed_sms_hashes', trimmed);
 
-        AppLogger.info(
-          'Cleaned up ${hashes.length - maxHashCount} old SMS hashes',
-          tag: 'SMS_CLEANUP',
-        );
+        _log.i('Cleaned up ${hashes.length - maxHashCount} old SMS hashes');
       }
     } catch (e) {
-      AppLogger.error('Failed to cleanup SMS hashes', error: e);
+      _log.e('Failed to cleanup SMS hashes', e);
     }
   }
 
@@ -30,9 +29,9 @@ class SmsHashCleanupService {
     try {
       final prefs = SharedPrefsUtil.instance;
       await prefs.setStringList('processed_sms_hashes', []);
-      AppLogger.info('Cleared all SMS hashes', tag: 'SMS_CLEANUP');
+      _log.i('Cleared all SMS hashes');
     } catch (e) {
-      AppLogger.error('Failed to clear SMS hashes', error: e);
+      _log.e('Failed to clear SMS hashes', e);
     }
   }
 

@@ -302,16 +302,6 @@ class AboutScreen extends StatelessWidget {
         'Automate regular income and expenses',
       ),
       (
-        Icons.receipt_long_outlined,
-        'Bill Reminders',
-        'Never miss a payment with smart alerts',
-      ),
-      (
-        Icons.card_travel,
-        'Trip Management',
-        'Split expenses and track group spending',
-      ),
-      (
         Icons.account_balance_wallet_outlined,
         'Multi-Account',
         'Manage multiple accounts in one place',

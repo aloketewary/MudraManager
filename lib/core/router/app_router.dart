@@ -7,7 +7,6 @@ import 'package:mudra_manager/core/utils/auth_gate.dart';
 import 'package:mudra_manager/features/analytics/presentation/screens/analytics_screen.dart';
 import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
 import 'package:mudra_manager/features/budget/presentation/screens/add_budget_screen.dart';
-import 'package:mudra_manager/features/budget/presentation/screens/bills_screen.dart';
 import 'package:mudra_manager/features/budget/presentation/screens/budget_dashboard.dart';
 import 'package:mudra_manager/features/budget/presentation/screens/budget_details_screen.dart';
 import 'package:mudra_manager/features/goal/presentation/screens/add_edit_goal_screen.dart';
@@ -29,7 +28,7 @@ import 'package:mudra_manager/features/profile/presentation/screens/setting_scre
 import 'package:mudra_manager/features/profile/presentation/screens/sms_import_setting_screen.dart';
 import 'package:mudra_manager/features/profile/presentation/screens/theme_picker_screen.dart';
 import 'package:mudra_manager/features/profile/presentation/widgets/account_form.dart';
-import 'package:mudra_manager/features/sms/presentation/screens/review_pending_transactions_Screen.dart';
+import 'package:mudra_manager/features/sms/presentation/screens/review_pending_transactions_screen_refactored.dart';
 import 'package:mudra_manager/features/statistics/presentation/screens/monthly_comparison_screen.dart';
 import 'package:mudra_manager/features/transactions/presentation/screens/add_edit_transaction_screen.dart';
 import 'package:mudra_manager/features/transactions/presentation/screens/add_recurring_transaction_screen.dart';
@@ -146,10 +145,6 @@ class AppRouter {
           GoRoute(
             path: '/security',
             builder: (context, state) => const SecuritySettingsScreen(),
-          ),
-          GoRoute(
-            path: '/bills',
-            builder: (context, state) => const BillsScreen(),
           ),
           GoRoute(
             path: '/notification-settings',

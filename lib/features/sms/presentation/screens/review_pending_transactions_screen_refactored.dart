@@ -7,6 +7,8 @@ import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/pending_transaction.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
+import 'package:mudra_manager/core/logging/app_log.dart';
+import 'package:mudra_manager/core/logging/logger_provider.dart';
 import 'package:mudra_manager/core/services/widget_service.dart';
 import 'package:mudra_manager/core/utils/category_matcher.dart';
 import 'package:mudra_manager/core/utils/dialog_utils.dart';
@@ -287,23 +289,66 @@ class _ReviewPendingTransactionsScreenState
     PendingTransaction pendingTx,
     Account account,
     Category category,
+    DateTime date,
+    double amount,
     AppLocalizations ctxt,
   ) async {
-    final txn = Transaction.create(
-      date: pendingTx.date,
-      amount: pendingTx.amount ?? 0.0,
-      isExpense: pendingTx.isIncome == false,
-      description: pendingTx.body,
-    );
+    final log = AppLog(ref.read(loggerProvider), 'PendingTxnApprove');
+    log.i('Starting transaction approval for ${pendingTx.sender}');
+    log.d('Date parameter received: $date');
+
+    if (!mounted) {
+      log.w('Widget not mounted, aborting');
+      return;
+    }
+
+    final transactionService = ref.read(transactionProvider);
+    final pendingService = ref.read(pendingTxnServiceProvider);
+    log.d('Services obtained');
+
+    final txn = Transaction()
+      ..date = date
+      ..amount = amount
+      ..isExpense = pendingTx.isIncome == false
+      ..description = pendingTx.body
+      ..isTransfer = false;
+    log.d('After setting date field: ${txn.date}');
     txn.account.value = account;
     txn.category.value = category;
-    await ref.read(transactionProvider).addTransaction(txn);
-    await WidgetService.updateWidget(ref);
+    log.d(
+      'Transaction object before save - date: ${txn.date}, amount: ${txn.amount}, isExpense: ${txn.isExpense}',
+    );
+
+    await transactionService.addTransaction(txn);
+    log.i('Transaction added to database');
+
+    if (!mounted) {
+      log.w('Widget disposed after addTransaction');
+      return;
+    }
+
+    await pendingService.remove(pendingTx);
+    log.i('Pending transaction removed');
+
+    if (!mounted) {
+      log.w('Widget disposed after remove');
+      return;
+    }
+
     ref.invalidate(transactionProvider);
-    _removePendingTransaction(pendingTx, true, ctxt);
+    ref.invalidate(pendingTxnServiceProvider);
+    ref.invalidate(pendingTxnDataProvider);
+    log.d('Providers invalidated');
+
+    await Future.delayed(const Duration(milliseconds: 500));
+    log.d('Waited 500ms for Isar sync');
+
+    await WidgetService.updateWidget(ref);
+    log.d('Widget updated');
+
     if (mounted) {
       SnackbarService.success('Approved ${pendingTx.sender}');
-      context.pop();
+      log.i('Approval complete');
     }
   }
 
@@ -313,21 +358,56 @@ class _ReviewPendingTransactionsScreenState
     Account toAccount,
     AppLocalizations ctxt,
   ) async {
-    await ref
-        .read(transactionProvider)
-        .transfer(
-          from: fromAccount,
-          to: toAccount,
-          amount: pendingTx.amount ?? 0.0,
-          date: pendingTx.date,
-          note: pendingTx.body,
-        );
-    await WidgetService.updateWidget(ref);
+    final log = AppLog(ref.read(loggerProvider), 'PendingTxnTransfer');
+    log.i('Starting transfer approval for ${pendingTx.sender}');
+
+    if (!mounted) {
+      log.w('Widget not mounted, aborting');
+      return;
+    }
+
+    final transactionService = ref.read(transactionProvider);
+    final pendingService = ref.read(pendingTxnServiceProvider);
+    log.d('Services obtained');
+
+    await transactionService.transfer(
+      from: fromAccount,
+      to: toAccount,
+      amount: pendingTx.amount ?? 0.0,
+      date: pendingTx.date,
+      note: pendingTx.body,
+    );
+    log.i(
+      'Transfer completed: ${fromAccount.name} -> ${toAccount.name}, amount: ${pendingTx.amount}',
+    );
+
+    if (!mounted) {
+      log.w('Widget disposed after transfer');
+      return;
+    }
+
+    await pendingService.remove(pendingTx);
+    log.i('Pending transaction removed');
+
+    if (!mounted) {
+      log.w('Widget disposed after remove');
+      return;
+    }
+
     ref.invalidate(transactionProvider);
-    _removePendingTransaction(pendingTx, true, ctxt);
+    ref.invalidate(pendingTxnServiceProvider);
+    ref.invalidate(pendingTxnDataProvider);
+    log.d('Providers invalidated');
+
+    await Future.delayed(const Duration(milliseconds: 500));
+    log.d('Waited 500ms for Isar sync');
+
+    await WidgetService.updateWidget(ref);
+    log.d('Widget updated');
+
     if (mounted) {
       SnackbarService.success('Transfer approved: ${pendingTx.sender}');
-      context.pop();
+      log.i('Transfer approval complete');
     }
   }
 
@@ -420,8 +500,14 @@ class _ReviewPendingTransactionsScreenState
         matchedAccount: matchedAccount,
         matchedToAccount: matchedToAccount,
         suggestedCategory: suggestedCategory,
-        onApprove: (account, category) =>
-            _approveTransaction(pendingTx, account, category, ctxt),
+        onApprove: (account, category, date, amount) => _approveTransaction(
+          pendingTx,
+          account,
+          category,
+          date,
+          amount,
+          ctxt,
+        ),
         onApproveTransfer: (fromAccount, toAccount) =>
             _approveTransfer(pendingTx, fromAccount, toAccount, ctxt),
       ),

@@ -4,6 +4,7 @@ import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
+import 'package:mudra_manager/core/logging/app_log.dart';
 
 final accountsProvider = FutureProvider.autoDispose((ref) async {
   final isarService = ref.watch(isarServiceProvider);
@@ -13,21 +14,26 @@ final accountsProvider = FutureProvider.autoDispose((ref) async {
 
 final accountServiceProvider = Provider((ref) {
   final isar = ref.watch(isarServiceProvider);
-  return AccountsService(isar);
+  final log = ref.getLogger('AccountService');
+  return AccountsService(isar, log);
 });
 
 final balanceVisibilityProvider = StateProvider<bool>((ref) => true);
 
 class AccountsService {
   final IsarService isarService;
+  final AppLog log;
 
-  AccountsService(this.isarService);
+  AccountsService(this.isarService, this.log);
 
   Future<double> getAccountBalance(int accountId) async {
     final isar = await isarService.getInstance();
 
     final account = await isar.accounts.get(accountId);
-    if (account == null) return 0.0;
+    if (account == null) {
+      log.w('Account not found: $accountId');
+      return 0.0;
+    }
 
     final income = await isar.transactions
         .filter()

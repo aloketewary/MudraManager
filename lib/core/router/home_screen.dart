@@ -6,10 +6,11 @@ import 'package:home_widget/home_widget.dart';
 import 'package:mudra_manager/core/db/models/user_profile.dart';
 import 'package:mudra_manager/core/extension/localization_extenstion.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
+import 'package:mudra_manager/core/logging/logger_provider.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/notification_record_service.dart';
 import 'package:mudra_manager/core/services/notification_service.dart';
-import 'package:mudra_manager/core/utils/app_logger.dart';
+import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/features/dashboard/data/greeting_provider.dart';
 import 'package:mudra_manager/features/dashboard/presentation/screens/dashboard_home.dart';
 import 'package:mudra_manager/features/profile/data/user_profile_provider.dart';
@@ -36,6 +37,7 @@ class HomePageState extends ConsumerState<HomePage>
   final transactionListKey = GlobalKey<TransactionListScreenState>();
   final utilityKey = GlobalKey<UtilityScreenState>();
   late AnimationController _fabController;
+  late AppLog log;
 
   @override
   void initState() {
@@ -57,12 +59,18 @@ class HomePageState extends ConsumerState<HomePage>
     _setupMethodChannel();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    log = AppLog(ref.read(loggerProvider), 'HomeScreen');
+  }
+
   void _setupMethodChannel() {
     const platform = MethodChannel('com.mudramanager.app/widget');
     platform.setMethodCallHandler((call) async {
       if (call.method == 'widgetAction' &&
           call.arguments == 'add_transaction') {
-        AppLogger.widget('Widget button clicked - opening quick add sheet');
+        log.i('Widget button clicked - opening quick add sheet');
         if (mounted) {
           await Future.delayed(const Duration(milliseconds: 300));
           showModalBottomSheet(
@@ -103,7 +111,7 @@ class HomePageState extends ConsumerState<HomePage>
 
   void _onTabSelected(int index) {
     HapticFeedback.mediumImpact();
-    AppLogger.navigation('Tab changed: $index');
+    log.d('Tab changed: $index');
     setState(() => _selectedIndex = index);
 
     // Update route to match tab

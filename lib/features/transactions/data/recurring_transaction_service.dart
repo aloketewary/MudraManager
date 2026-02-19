@@ -2,12 +2,17 @@ import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
+import 'package:mudra_manager/core/logging/app_log.dart';
+import 'package:mudra_manager/core/logging/logger_provider.dart';
 
 
 class RecurringTransactionService {
   final IsarService isarService;
+  late final AppLog log;
 
-  RecurringTransactionService(this.isarService);
+  RecurringTransactionService(this.isarService) {
+    log = AppLog(getLogger(), 'RecurringTxnService');
+  }
 
   Future<void> processRecurringTransactions() async {
     final isar = await isarService.getInstance();
@@ -19,6 +24,8 @@ class RecurringTransactionService {
         .nextDueDateLessThan(now.add(const Duration(days: 1)))
         .findAll();
 
+    log.i('Processing ${dueRecurring.length} recurring transactions');
+
     for (final recurring in dueRecurring) {
       await recurring.category.load();
       await recurring.account.load();
@@ -27,6 +34,7 @@ class RecurringTransactionService {
           recurring.nextDueDate.isAtSameMomentAs(now)) {
         await _createTransaction(isar, recurring);
         await _updateNextDueDate(isar, recurring);
+        log.i('Created recurring transaction: ${recurring.description}');
       }
     }
   }

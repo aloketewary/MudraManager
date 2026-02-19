@@ -3,7 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/db/models/goal.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
-import 'package:mudra_manager/core/utils/app_logger.dart';
+import 'package:mudra_manager/core/logging/app_log.dart';
+import 'package:mudra_manager/core/logging/logger_provider.dart';
 import 'package:mudra_manager/core/utils/dialog_utils.dart';
 import 'package:mudra_manager/features/goal/data/goal_provider.dart';
 import 'package:mudra_manager/shared/widgets/adaptive_text.dart';
@@ -14,12 +15,13 @@ class GoalCircularCard extends ConsumerWidget {
 
   const GoalCircularCard({super.key, required this.goal});
 
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final log = AppLog(ref.read(loggerProvider), 'GoalCircularCard');
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final ctxt = AppLocalizations.of(context)!;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+
 
     final progress = (goal.currentAmount / goal.targetAmount).clamp(0.0, 1.0);
     final remaining = goal.targetAmount - goal.currentAmount;
@@ -40,9 +42,8 @@ class GoalCircularCard extends ConsumerWidget {
         );
       },
       onDismissed: (direction) async {
-        AppLogger.info(
+        log.i(
           'goal_deleted_circular, goal_id: ${goal.id}, goal_name: ${goal.name}',
-          tag: 'goal',
         );
         await ref.read(goalServiceProvider).deleteGoal(goal.id);
       },

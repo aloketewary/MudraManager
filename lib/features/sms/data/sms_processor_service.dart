@@ -8,16 +8,27 @@ import 'package:mudra_manager/core/db/models/pending_transaction.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
+import 'package:mudra_manager/core/logging/app_log.dart';
+import 'package:mudra_manager/core/logging/logger_provider.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
-import 'package:mudra_manager/core/utils/app_logger.dart';
 import 'package:mudra_manager/core/utils/string_util.dart';
 import 'package:mudra_manager/core/utils/transaction_msg_util.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_matching_service.dart';
 
 class SmsProcessorService {
   static final SmsProcessorService instance = SmsProcessorService._();
+  static final AppLog _log = AppLog(getLogger(), 'SmsProcessorService');
+  
+  bool _autoApprovalEnabled = true;
 
   SmsProcessorService._();
+
+  void setAutoApproval(bool enabled) {
+    _autoApprovalEnabled = enabled;
+    _log.i('Auto-approval ${enabled ? "enabled" : "disabled"}');
+  }
+
+  bool get isAutoApprovalEnabled => _autoApprovalEnabled;
 
   Future<void> processSmsForSaving(TransactionInfo sms, int timestamp) async {
     final isar = await getIsarInstance();
@@ -26,9 +37,8 @@ class SmsProcessorService {
     final accounts = await isar.accounts.where().findAll();
     final categories = await isar.categorys.where().findAll();
 
-    AppLogger.info(
+    _log.i(
       'Matching attempt: ${accounts.length} accounts, ${categories.length} categories available',
-      tag: 'SMS',
     );
 
     // Use parsed date from SMS, fallback to SMS timestamp
@@ -49,48 +59,49 @@ class SmsProcessorService {
       ..fromBank = sms.account?.bankName;
 
     try {
-      // Try to match account and category
-      final matchResult = TransactionMatchingService.matchTransaction(
-        pending: pending,
-        accounts: accounts,
-        categories: categories,
-      );
-
-      if (matchResult != null) {
-        // Auto-add transaction if both account and category matched
-        final transaction = Transaction()
-          ..amount = pending.amount ?? 0
-          ..date = transactionDate
-          ..description = pending.body
-          ..isExpense = !(pending.isIncome == true)
-          ..isTransfer = false;
-
-        transaction.account.value = matchResult.account;
-        transaction.category.value = matchResult.category;
-
-        await isar.writeTxn(() async {
-          await isar.transactions.put(transaction);
-          await transaction.account.save();
-          await transaction.category.save();
-        });
-
-        AppLogger.info(
-          'Transaction auto-added: ${matchResult.category.name} - ₹${pending.amount} (${matchResult.account.name})',
-          tag: 'SMS',
+      if (_autoApprovalEnabled) {
+        // Try to match account and category for auto-approval
+        final matchResult = TransactionMatchingService.matchTransaction(
+          pending: pending,
+          accounts: accounts,
+          categories: categories,
         );
-      } else {
-        // Save to pending if no match
-        await isar.writeTxn(() async {
-          await isar.pendingTransactions.put(pending);
-        });
 
-        AppLogger.info(
-          'Transaction saved to pending (no match), account: ${pending.account}, sender: ${sms.sender}, amount: ${sms.money}',
-          tag: 'SMS',
-        );
+        if (matchResult != null) {
+          // Auto-add transaction if both account and category matched
+          final transaction = Transaction()
+            ..amount = pending.amount ?? 0
+            ..date = transactionDate
+            ..description = pending.body
+            ..isExpense = !(pending.isIncome == true)
+            ..isTransfer = false;
+
+          transaction.account.value = matchResult.account;
+          transaction.category.value = matchResult.category;
+
+          await isar.writeTxn(() async {
+            await isar.transactions.put(transaction);
+            await transaction.account.save();
+            await transaction.category.save();
+          });
+
+          _log.i(
+            'Transaction auto-added: ${matchResult.category.name} - ₹${pending.amount} (${matchResult.account.name})',
+          );
+          return;
+        }
       }
+
+      // Save to pending if auto-approval disabled or no match
+      await isar.writeTxn(() async {
+        await isar.pendingTransactions.put(pending);
+      });
+
+      _log.i(
+        'Transaction saved to pending${_autoApprovalEnabled ? " (no match)" : " (manual approval mode)"}, sender: ${sms.sender}, amount: ${sms.money}',
+      );
     } catch (e) {
-      AppLogger.error('Failed to process SMS transaction', error: e);
+      _log.e('Failed to process SMS transaction', e);
     }
   }
 
@@ -101,19 +112,15 @@ class SmsProcessorService {
     required int timestamp,
   }) {
     if (!checkForTransactionalMessage(body)) {
-      AppLogger.info(
-        'SMS filtered out (not transactional) sender: $address',
-        tag: 'SMS',
-      );
+      _log.i('SMS filtered out (not transactional) sender: $address');
       return;
     }
 
     final smsHash = generateSmsHash(address, timestamp, body);
 
     if (SharedPrefsUtil.instance.isAlreadyProcessed(smsHash)) {
-      AppLogger.info(
+      _log.i(
         'SMS already processed, skipping... sender: $address hash: $smsHash',
-        tag: 'SMS',
       );
       return;
     }
@@ -127,7 +134,7 @@ class SmsProcessorService {
       sender,
       smsHash,
     );
-    AppLogger.info('SMS Parsed successfully, sender: $address', tag: 'SMS');
+    _log.i('SMS Parsed successfully, sender: $address');
 
     processSmsForSaving(transactionInfo, timestamp);
   }

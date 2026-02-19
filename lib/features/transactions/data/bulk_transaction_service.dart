@@ -2,10 +2,13 @@ import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
-import 'package:mudra_manager/core/utils/app_logger.dart';
+import 'package:mudra_manager/core/logging/app_log.dart';
+import 'package:mudra_manager/core/logging/logger_provider.dart';
 import 'package:mudra_manager/core/utils/error_handler.dart';
 
 class BulkTransactionService {
+  static final _log = AppLog(getLogger(), 'BulkTxnService');
+
   /// Delete multiple transactions
   static Future<bool> deleteMultiple(List<int> ids) async {
     return await withRetry(() async {
@@ -14,10 +17,10 @@ class BulkTransactionService {
         await isar.writeTxn(() async {
           await isar.transactions.deleteAll(ids);
         });
-        AppLogger.info('Deleted ${ids.length} transactions', tag: 'BULK_OPS');
+        _log.i('Deleted ${ids.length} transactions');
         return true;
       } catch (e) {
-        AppLogger.error('Failed to delete transactions', error: e);
+        _log.e('Failed to delete transactions', e);
         throw DatabaseException('Failed to delete transactions', error: e);
       }
     });
@@ -38,13 +41,10 @@ class BulkTransactionService {
             }
           }
         });
-        AppLogger.info(
-          'Updated category for ${ids.length} transactions',
-          tag: 'BULK_OPS',
-        );
+        _log.i('Updated category for ${ids.length} transactions');
         return true;
       } catch (e) {
-        AppLogger.error('Failed to update category', error: e);
+        _log.e('Failed to update category', e);
         throw DatabaseException('Failed to update category', error: e);
       }
     });
@@ -65,13 +65,10 @@ class BulkTransactionService {
             }
           }
         });
-        AppLogger.info(
-          'Updated account for ${ids.length} transactions',
-          tag: 'BULK_OPS',
-        );
+        _log.i('Updated account for ${ids.length} transactions');
         return true;
       } catch (e) {
-        AppLogger.error('Failed to update account', error: e);
+        _log.e('Failed to update account', e);
         throw DatabaseException('Failed to update account', error: e);
       }
     });
@@ -94,13 +91,10 @@ class BulkTransactionService {
         );
       }
 
-      AppLogger.info(
-        'Exported ${transactions.length} transactions',
-        tag: 'BULK_OPS',
-      );
+      _log.i('Exported ${transactions.length} transactions');
       return buffer.toString();
     } catch (e) {
-      AppLogger.error('Failed to export transactions', error: e);
+      _log.e('Failed to export transactions', e);
       throw AppException(
         code: 'EXPORT_ERROR',
         message: 'Failed to export transactions',

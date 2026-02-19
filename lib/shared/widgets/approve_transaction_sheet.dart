@@ -13,7 +13,7 @@ class ApproveTransactionSheet extends StatefulWidget {
   final Account? matchedAccount;
   final Account? matchedToAccount;
   final Category? suggestedCategory;
-  final Function(Account, Category) onApprove;
+  final Function(Account, Category, DateTime, double) onApprove;
   final Function(Account, Account)? onApproveTransfer;
 
   const ApproveTransactionSheet({
@@ -36,6 +36,8 @@ class _ApproveTransactionSheetState extends State<ApproveTransactionSheet> {
   Account? _selectedToAccount;
   Category? _selectedCategory;
   bool _isTransfer = false;
+  late DateTime _selectedDate;
+  late TextEditingController _amountController;
 
   @override
   void initState() {
@@ -43,10 +45,20 @@ class _ApproveTransactionSheetState extends State<ApproveTransactionSheet> {
     _selectedAccount = widget.matchedAccount;
     _selectedToAccount = widget.matchedToAccount;
     _selectedCategory = widget.suggestedCategory;
+    _selectedDate = widget.transaction.date;
+    _amountController = TextEditingController(
+      text: widget.transaction.amount?.toStringAsFixed(0) ?? '',
+    );
     _isTransfer =
         widget.transaction.type?.toLowerCase().contains('transfer') == true ||
         (widget.transaction.fromBank != null &&
             widget.transaction.toAccount != null);
+  }
+
+  @override
+  void dispose() {
+    _amountController.dispose();
+    super.dispose();
   }
 
   @override
@@ -144,11 +156,58 @@ class _ApproveTransactionSheetState extends State<ApproveTransactionSheet> {
               ),
               const SizedBox(height: 16),
             ],
+            Text('Amount', style: textTheme.labelLarge),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _amountController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                prefixText: '₹',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text('Date', style: textTheme.labelLarge),
+            const SizedBox(height: 8),
+            InkWell(
+              onTap: () async {
+                final date = await showDatePicker(
+                  context: context,
+                  initialDate: _selectedDate,
+                  firstDate: DateTime(2020),
+                  lastDate: DateTime.now(),
+                );
+                if (date != null) {
+                  setState(() => _selectedDate = date);
+                }
+              },
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  border: Border.all(color: color.outline),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.calendar_today, size: 20, color: color.primary),
+                    const SizedBox(width: 12),
+                    Text(
+                      '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
+                      style: textTheme.bodyLarge,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
             FilledButton(
               onPressed: () {
                 HapticFeedback.mediumImpact();
                 if (_isTransfer) {
                   if (_selectedAccount != null && _selectedToAccount != null) {
+                    Navigator.pop(context);
                     widget.onApproveTransfer?.call(
                       _selectedAccount!,
                       _selectedToAccount!,
@@ -160,7 +219,13 @@ class _ApproveTransactionSheetState extends State<ApproveTransactionSheet> {
                   }
                 } else {
                   if (_selectedCategory != null && _selectedAccount != null) {
-                    widget.onApprove(_selectedAccount!, _selectedCategory!);
+                    final amount = double.tryParse(_amountController.text);
+                    if (amount == null || amount <= 0) {
+                      SnackbarService.warning('Enter valid amount');
+                      return;
+                    }
+                    Navigator.pop(context);
+                    widget.onApprove(_selectedAccount!, _selectedCategory!, _selectedDate, amount);
                   } else {
                     SnackbarService.warning('Select Account & Category');
                   }

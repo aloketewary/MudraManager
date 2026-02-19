@@ -13,6 +13,8 @@ import 'package:mudra_manager/core/theme/app_theme.dart';
 import 'package:mudra_manager/core/theme/theme_provider.dart';
 import 'package:mudra_manager/core/utils/error_handler.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
+import 'package:mudra_manager/core/logging/app_log.dart';
+import 'package:mudra_manager/core/logging/logger_provider.dart';
 import 'package:mudra_manager/features/budget/data/bill_service.dart';
 import 'package:mudra_manager/features/dashboard/data/summary_scheduler.dart';
 import 'package:mudra_manager/features/sms/data/sms_cleanup_service.dart';
@@ -28,17 +30,20 @@ export 'main.dart' show setupSmsListener;
 final Telephony telephony = Telephony.instance;
 
 void main() async {
+  final log = AppLog(getLogger(), 'Main');
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-  var sharedPrefs = await SharedPreferences.getInstance();
+  final sharedPrefs = await SharedPreferences.getInstance();
   SharedPrefsUtil.init(sharedPrefs);
-  
+
+  log.i('App starting...');
+
   // Initialize critical services first
   await NotificationService.initialize();
-  
+
   // Move heavy operations to background
   _initializeBackgroundServices();
 
@@ -52,14 +57,16 @@ void main() async {
 Future<void> _initializeBackgroundServices() async {
   Future.microtask(() async {
     // Run services in parallel with error handling
-    await Future.wait([
-      safeExecute(() => RecurringTransactionScheduler.initialize()),
-      safeExecute(() => SummaryScheduler.checkAndShowSummaries()),
-      safeExecute(() => BillService.scheduleBillReminders()),
-      safeExecute(() => BillService.createPendingTransactionsForDueBills()),
-      safeExecute(() => _initializeHomeWidget()),
-      safeExecute(() => SmsHashCleanupService.cleanupOldHashes()),
-    ].map((f) => f.catchError((e) => null)));
+    await Future.wait(
+      [
+        safeExecute(() => RecurringTransactionScheduler.initialize()),
+        safeExecute(() => SummaryScheduler.checkAndShowSummaries()),
+        safeExecute(() => BillService.scheduleBillReminders()),
+        safeExecute(() => BillService.createPendingTransactionsForDueBills()),
+        safeExecute(() => _initializeHomeWidget()),
+        safeExecute(() => SmsHashCleanupService.cleanupOldHashes()),
+      ].map((f) => f.catchError((e) => null)),
+    );
   });
 }
 
@@ -84,7 +91,7 @@ class MudraManagerApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appThemeMode = ref.watch(themeModeProvider);
-    var appTheme = AppTheme.instance;
+    final appTheme = AppTheme.instance;
     final appColorTheme = ref.watch(themeNotifierProvider);
 
     return DynamicColorBuilder(
@@ -111,10 +118,9 @@ class MudraManagerApp extends ConsumerWidget {
         return MaterialApp.router(
           title: 'Mudra Manager',
           theme: appTheme.buildTheme(lightScheme),
-          darkTheme:
-              appThemeMode == AppThemeMode.amoled
-                  ? appTheme.buildTheme(amoledScheme)
-                  : appTheme.buildTheme(darkScheme),
+          darkTheme: appThemeMode == AppThemeMode.amoled
+              ? appTheme.buildTheme(amoledScheme)
+              : appTheme.buildTheme(darkScheme),
           themeMode: switch (appThemeMode) {
             AppThemeMode.light => ThemeMode.light,
             AppThemeMode.dark => ThemeMode.dark,
@@ -159,8 +165,9 @@ class MudraManagerApp extends ConsumerWidget {
 }
 
 Future<void> setupSmsListener() async {
+  final log = AppLog(getLogger(), 'SMS');
   if (!SharedPrefsUtil.instance.getSmsImportEnabled()) {
-    debugPrint('SMS import is disabled, skipping listener setup');
+    log.i('SMS import disabled');
     return;
   }
 
@@ -169,7 +176,7 @@ Future<void> setupSmsListener() async {
       await telephony.requestPhoneAndSmsPermissions;
 
   if (permissionsGranted == true) {
-    debugPrint('Setting up SMS listener for automatic transaction detection');
+    log.i('SMS listener setup complete');
     telephony.listenIncomingSms(
       onNewMessage: (SmsMessage message) {
         SmsProcessorService.instance.parseAndSaveTransaction(
@@ -183,13 +190,14 @@ Future<void> setupSmsListener() async {
       onBackgroundMessage: backgroundMessageHandler,
     );
   } else {
-    debugPrint('SMS permissions not granted');
+    log.w('SMS permissions not granted');
   }
 }
 
 @pragma('vm:entry-point')
 void backgroundMessageHandler(SmsMessage message) {
-  debugPrint('Background SMS received from: ${message.address}');
+  final log = AppLog(getLogger(), 'SMS');
+  log.i('Background SMS received from: ${message.address}');
   SmsProcessorService.instance.parseAndSaveTransaction(
     body: message.body ?? '',
     address: message.address ?? '',

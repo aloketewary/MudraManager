@@ -3,8 +3,12 @@ import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/category.dart' as db_category;
 import 'package:mudra_manager/core/db/models/pending_transaction.dart';
 import 'package:mudra_manager/core/utils/category_matcher.dart';
+import 'package:mudra_manager/core/logging/app_log.dart';
+import 'package:mudra_manager/core/logging/logger_provider.dart';
 
 class TransactionMatchingService {
+  static final _log = AppLog(getLogger(), 'TxnMatching');
+
   /// Matches a pending transaction to an account and category using various strategies.
   static MatchingResult? matchTransaction({
     required PendingTransaction pending,
@@ -12,27 +16,26 @@ class TransactionMatchingService {
     required List<db_category.Category> categories,
   }) {
     if (pending.account == null || pending.account!.isEmpty) {
-      debugPrint('No account number in pending transaction');
+      _log.d('No account number in pending transaction');
       return null;
     }
 
     // 1. Try to find a matching account (match last 4 digits)
     Account? matchedAccount;
     final pendingAccTrimmed = pending.account!.trim();
-    debugPrint('Looking for account ending with: $pendingAccTrimmed');
+    _log.d('Looking for account ending with: $pendingAccTrimmed');
     
     for (var acc in accounts) {
       final dbAccNo = acc.accountNumber?.trim();
-      debugPrint('Checking account: ${acc.name} - $dbAccNo');
       if (dbAccNo != null && dbAccNo.endsWith(pendingAccTrimmed)) {
         matchedAccount = acc;
-        debugPrint('Account matched: ${acc.name}');
+        _log.i('Account matched: ${acc.name}');
         break;
       }
     }
 
     if (matchedAccount == null) {
-      debugPrint('No matching account found for: $pendingAccTrimmed');
+      _log.d('No matching account found for: $pendingAccTrimmed');
       return null;
     }
 
@@ -49,11 +52,9 @@ class TransactionMatchingService {
             .toList();
 
     if (relevantCategories.isEmpty) {
-      debugPrint('No relevant categories found for type: ${(pending.isIncome ?? false) ? "income" : "expense"}');
+      _log.d('No relevant categories found for type: ${(pending.isIncome ?? false) ? "income" : "expense"}');
       return null;
     }
-
-    debugPrint('Found ${relevantCategories.length} relevant categories');
 
     // 3. Try keyword-based matching
     db_category.Category? matchedCategory = CategoryMatcher.matchByKeywords(
@@ -67,14 +68,8 @@ class TransactionMatchingService {
       pending.amount,
     );
 
-    // 5. Debug logging
-    if (matchedCategory == null) {
-      debugPrint(
-        'No category match for: ${pending.body.substring(0, pending.body.length > 50 ? 50 : pending.body.length)}... '
-        '(Amount: ${pending.amount}, Sender: ${pending.sender})',
-      );
-    } else {
-      debugPrint('Category matched: ${matchedCategory.name}');
+    if (matchedCategory != null) {
+      _log.i('Category matched: ${matchedCategory.name}');
     }
 
     if (matchedCategory != null) {
