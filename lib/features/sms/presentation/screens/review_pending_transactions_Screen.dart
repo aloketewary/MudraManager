@@ -18,6 +18,7 @@ import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/category/data/category_provider.dart';
 import 'package:mudra_manager/features/transactions/data/pending_transaction_prodiver.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
+import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 
 class ReviewPendingTransactionsScreen extends ConsumerStatefulWidget {
   const ReviewPendingTransactionsScreen({super.key});
@@ -162,25 +163,9 @@ class _ReviewPendingTransactionsScreenState
           }).toList();
 
           if (filtered.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.check_circle_outline,
-                    size: 80,
-                    color: color.primary.withValues(alpha: 0.3),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    ctxt.sms_noPendingTransactions,
-                    style: textTheme.titleLarge?.copyWith(
-                      color: color.onSurfaceVariant,
-                    ),
-                    maxLines: 1,
-                  ),
-                ],
-              ),
+            return NoDataFound(
+              message: ctxt.sms_noPendingTransactions,
+              iconData: Icons.check_circle_outline,
             );
           }
 
@@ -391,6 +376,7 @@ class _ReviewPendingTransactionsScreenState
     if (confirm == true) {
       await ref.read(pendingTxnServiceProvider).remove(pendingTx);
       ref.invalidate(pendingTxnServiceProvider);
+      ref.invalidate(pendingTxnDataProvider);
       if (!isApproved && mounted) {
         SnackbarService.success('Removed ${pendingTx.sender}');
       }
@@ -453,6 +439,7 @@ class _ReviewPendingTransactionsScreenState
       final count = await ref
           .read(pendingTxnServiceProvider)
           .autoProcessAll(accounts: accounts, categories: categories);
+      ref.invalidate(pendingTxnServiceProvider);
       ref.invalidate(pendingTxnDataProvider);
       ref.invalidate(transactionProvider);
       if (mounted) {
@@ -585,7 +572,7 @@ class _ReviewPendingTransactionsScreenState
                       .watch(accountsProvider)
                       .when(
                         data: (accounts) => SizedBox(
-                          height: 60,
+                          height: 90,
                           child: ListView.separated(
                             scrollDirection: Axis.horizontal,
                             itemCount:
@@ -625,6 +612,7 @@ class _ReviewPendingTransactionsScreenState
                                       ),
                                     ),
                                     child: Column(
+                                      mainAxisSize: MainAxisSize.min,
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       children: [
@@ -676,6 +664,7 @@ class _ReviewPendingTransactionsScreenState
                                         : null,
                                   ),
                                   child: Column(
+                                    mainAxisSize: MainAxisSize.min,
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Icon(
@@ -761,6 +750,7 @@ class _ReviewPendingTransactionsScreenState
                                         ),
                                       ),
                                       child: Column(
+                                        mainAxisSize: MainAxisSize.min,
                                         mainAxisAlignment:
                                             MainAxisAlignment.center,
                                         children: [
@@ -809,6 +799,7 @@ class _ReviewPendingTransactionsScreenState
                                           : null,
                                     ),
                                     child: Column(
+                                      mainAxisSize: MainAxisSize.min,
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       children: [

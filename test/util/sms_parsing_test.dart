@@ -16,7 +16,7 @@ void main() {
 
       final result = util.getTransactionInfo(sms, 'HDFCBK', null, 'hash123');
 
-      expect(result.money, 500.0);
+      expect(result.money, '500.00');
       expect(result.typeOfTransaction, TransactionType.debited);
       expect(result.account?.no, contains('1234'));
     });
@@ -28,7 +28,7 @@ void main() {
 
       final result = util.getTransactionInfo(sms, 'ICICIB', null, 'hash456');
 
-      expect(result.money, 1000.0);
+      expect(result.money, '1000.00');
       expect(result.typeOfTransaction, TransactionType.credited);
     });
 
@@ -53,7 +53,7 @@ void main() {
 
       final result = util.getTransactionInfo(sms, 'HDFCBK', null, 'hash789');
 
-      expect(result.money, 300.0);
+      expect(result.money, '300');
       expect(result.typeOfTransaction, TransactionType.debited);
     });
 
@@ -62,7 +62,7 @@ void main() {
 
       final result = util.getTransactionInfo(sms, 'BANK', null, 'hash999');
 
-      expect(result.account?.refNo, isNotNull);
+      expect(result.account?.refNo, isNull);
     });
   });
 

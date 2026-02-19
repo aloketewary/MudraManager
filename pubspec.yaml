@@ -158,3 +158,4 @@ flutter:
     - assets/icons/512/
     - assets/logo/rupee.png
     - assets/fonts/NotoSans-Regular.ttf
+    - assets/help_content.json

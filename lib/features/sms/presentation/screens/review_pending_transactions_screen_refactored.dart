@@ -277,6 +277,7 @@ class _ReviewPendingTransactionsScreenState
   ) async {
     await ref.read(pendingTxnServiceProvider).remove(pendingTx);
     ref.invalidate(pendingTxnServiceProvider);
+    ref.invalidate(pendingTxnDataProvider);
     if (!isApproved && mounted) {
       SnackbarService.success('Removed ${pendingTx.sender}');
     }

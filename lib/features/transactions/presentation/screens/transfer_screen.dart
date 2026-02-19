@@ -193,15 +193,22 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
                                 horizontal: 12,
                               ),
                               child: Container(
-                                padding: const EdgeInsets.all(12),
+                                padding: const EdgeInsets.all(14),
                                 decoration: BoxDecoration(
-                                  color: color.primary.withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(12),
+                                  color: color.primaryContainer,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: color.primary.withValues(alpha: 0.2),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
                                 ),
                                 child: Icon(
-                                  Icons.arrow_forward,
-                                  color: color.primary,
-                                  size: 24,
+                                  Icons.swap_horiz,
+                                  color: color.onPrimaryContainer,
+                                  size: 28,
                                 ),
                               ),
                             ),
@@ -254,18 +261,20 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
-                      style: textTheme.bodyLarge,
+                      style: textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                       decoration: InputDecoration(
                         labelText: ctxt.transfer_amountLabel,
-                        prefixIcon: const Icon(Icons.currency_rupee),
+                        prefixIcon: Icon(Icons.currency_rupee, size: 28),
+                        filled: true,
+                        fillColor: color.surfaceContainerHighest,
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide.none,
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(16),
                           borderSide: BorderSide(
                             color: color.primary,
                             width: 2,
@@ -278,6 +287,21 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
                             ? ctxt.transfer_amountValidationError
                             : null;
                       },
+                    ),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      children: [500, 1000, 2000, 5000].map((amt) {
+                        return ActionChip(
+                          label: Text('₹$amt'),
+                          onPressed: () {
+                            HapticFeedback.lightImpact();
+                            _amountC.text = amt.toString();
+                          },
+                          backgroundColor: color.surfaceContainerHigh,
+                          side: BorderSide.none,
+                        );
+                      }).toList(),
                     ),
                     const SizedBox(height: 16),
                     Card(
@@ -352,15 +376,16 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
                       maxLines: 3,
                       decoration: InputDecoration(
                         labelText: ctxt.transfer_noteLabel,
+                        hintText: 'Add a note (optional)',
                         prefixIcon: const Icon(Icons.note_outlined),
+                        filled: true,
+                        fillColor: color.surfaceContainerHighest,
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide.none,
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(16),
                           borderSide: BorderSide(
                             color: color.primary,
                             width: 2,
@@ -368,6 +393,39 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
                         ),
                       ),
                     ),
+                    if (_fromAccount != null && _toAccount != null && _amountC.text.isNotEmpty) ...[
+                      const SizedBox(height: 24),
+                      Card(
+                        elevation: 0,
+                        color: color.primaryContainer.withValues(alpha: 0.3),
+                        child: Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(Icons.info_outline, color: color.primary, size: 20),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Transfer Summary',
+                                    style: textTheme.titleSmall?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: color.primary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              _buildSummaryRow('Amount', '₹${_amountC.text}', textTheme, color),
+                              _buildSummaryRow('From', _fromAccount!.name, textTheme, color),
+                              _buildSummaryRow('To', _toAccount!.name, textTheme, color),
+                              _buildSummaryRow('Date', DateFormat.yMMMd().format(_date), textTheme, color),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 24),
                     SizedBox(
                       width: double.infinity,
@@ -385,6 +443,7 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
                               : ctxt.transfer_buttonLabel,
                           style: textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w600,
+                            color: color.onPrimary
                           ),
                         ),
                       ),
@@ -473,6 +532,30 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
                 },
               ),
             ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryRow(String label, String value, TextTheme textTheme, ColorScheme color) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: textTheme.bodyMedium?.copyWith(
+              color: color.onSurfaceVariant,
+            ),
+          ),
+          Text(
+            value,
+            style: textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: color.onSurface,
+            ),
+          ),
         ],
       ),
     );

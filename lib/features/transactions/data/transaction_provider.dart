@@ -183,6 +183,56 @@ final allSectionedTransactionsProvider =
       return sectioned;
     });
 
+// OPTIMIZED: Filter at database level
+final filteredSectionedTransactionsProvider =
+    FutureProvider.family<
+      List<TxListEntry>,
+      ({String type, int? categoryId, String? searchQuery})
+    >((ref, arg) async {
+      final service = ref.watch(transactionProvider);
+
+      List<Transaction> transactions;
+      if (arg.categoryId != null) {
+        transactions = await service.getByCategoryAndType(
+          categoryId: arg.categoryId!,
+          type: arg.type,
+        );
+      } else if (arg.type == 'income') {
+        transactions = await service.getByType(isExpense: false);
+      } else if (arg.type == 'expense') {
+        transactions = await service.getByType(isExpense: true);
+      } else {
+        transactions = await service.getAll();
+      }
+
+      // Apply search filter in memory (can't index text search efficiently)
+      if (arg.searchQuery != null && arg.searchQuery!.isNotEmpty) {
+        final query = arg.searchQuery!.toLowerCase();
+        transactions = transactions
+            .where((tx) => tx.description?.toLowerCase().contains(query) ?? false)
+            .toList();
+      }
+
+      if (transactions.isEmpty) return [];
+
+      final List<TxListEntry> sectioned = [];
+      DateTime? currentDate;
+
+      for (var tx in transactions) {
+        final txDate = DateTime(tx.date.year, tx.date.month, tx.date.day);
+        if (currentDate == null ||
+            currentDate.year != txDate.year ||
+            currentDate.month != txDate.month ||
+            currentDate.day != txDate.day) {
+          currentDate = txDate;
+          sectioned.add(TxHeader(txDate));
+        }
+        sectioned.add(TxItem(tx));
+      }
+
+      return sectioned;
+    });
+
 final transactionCountsProvider = FutureProvider.autoDispose<Map<Id, int>>((
   ref,
 ) async {
@@ -374,5 +424,25 @@ class TransactionService {
         .isTransferEqualTo(false)
         .sortByDateDesc()
         .findAll();
+  }
+
+  // OPTIMIZED: Filter by category at database level
+  Future<List<Transaction>> getByCategoryAndType({
+    required int categoryId,
+    required String type,
+  }) async {
+    final isar = await isarService.getInstance();
+    
+    var query = isar.transactions
+        .filter()
+        .category((q) => q.idEqualTo(categoryId));
+    
+    if (type == 'income') {
+      query = query.isExpenseEqualTo(false).isTransferEqualTo(false);
+    } else if (type == 'expense') {
+      query = query.isExpenseEqualTo(true).isTransferEqualTo(false);
+    }
+    
+    return await query.sortByDateDesc().findAll();
   }
 }

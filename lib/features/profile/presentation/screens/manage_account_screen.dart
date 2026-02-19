@@ -9,6 +9,7 @@ import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/utils/dialog_utils.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
+import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 
 class ManageAccountScreen extends ConsumerStatefulWidget {
   const ManageAccountScreen({super.key});
@@ -54,26 +55,73 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
           ctxt.accounts_manageAccountsTitle,
           style: textTheme.titleLarge,
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.info_outline),
+            onPressed: () {
+              HapticFeedback.mediumImpact();
+              showModalBottomSheet(
+                context: context,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                ),
+                builder: (ctx) => Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: color.onSurfaceVariant.withValues(alpha: 0.3),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      Icon(Icons.account_balance_wallet, size: 64, color: color.primary),
+                      const SizedBox(height: 16),
+                      Text(
+                        'How Accounts Work',
+                        style: textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Manage all your bank accounts, wallets, and cash in one place. Track balances and transactions across multiple accounts.',
+                        style: textTheme.bodyMedium,
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 24),
+                      FilledButton(
+                        onPressed: () => ctx.pop(),
+                        style: FilledButton.styleFrom(
+                          minimumSize: const Size(double.infinity, 48),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text('Got it'),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: accountsAsync.when(
         data: (accounts) {
           if (accounts.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.account_balance_wallet_outlined,
-                    size: 64,
-                    color: color.onSurface,
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'No accounts added yet',
-                    style: TextStyle(fontSize: 18),
-                  ),
-                  const SizedBox(height: 8),
-                ],
+            return NoDataFound(
+              message: 'No accounts added yet',
+              iconData: Icons.account_balance_wallet_outlined,
+              action: ElevatedButton.icon(
+                onPressed: () => context.push('/manage-accounts/add'),
+                icon: const Icon(Icons.add),
+                label: Text(ctxt.accounts_addAccountLabel),
               ),
             );
           }

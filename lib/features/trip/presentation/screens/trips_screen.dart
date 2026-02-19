@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:mudra_manager/features/trip/data/trip_provider.dart';
+import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 
 class TripsScreen extends ConsumerWidget {
   const TripsScreen({super.key});
@@ -104,55 +105,20 @@ class TripsScreen extends ConsumerWidget {
       body: tripsAsync.when(
         data: (trips) {
           if (trips.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(32),
-                    decoration: BoxDecoration(
-                      color: color.primaryContainer.withValues(alpha: 0.3),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.card_travel,
-                      size: 64,
-                      color: color.primary,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    'No trips yet',
-                    style: textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Create your first trip to split expenses',
-                    style: textTheme.bodyMedium?.copyWith(
-                      color: color.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  FilledButton.icon(
-                    onPressed: () {
-                      HapticFeedback.mediumImpact();
-                      context.push('/create-trip');
-                    },
-                    icon: const Icon(Icons.add),
-                    label: const Text('Create Trip'),
-                    style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 16,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
-                ],
+            return NoDataFound(
+              message: 'No trips yet\nCreate your first trip to split expenses',
+              iconData: Icons.card_travel,
+              action: FilledButton.icon(
+                onPressed: () {
+                  HapticFeedback.mediumImpact();
+                  context.push('/create-trip');
+                },
+                icon: const Icon(Icons.add),
+                label: const Text('Create Trip'),
+                style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
               ),
             );
           }

@@ -7,6 +7,7 @@ class SharedPrefsUtil {
   static const _lastBackupKey = 'last_backup_date';
   static const _lowBalanceThresholdKey = 'low_balance_threshold';
   static const _setSmsImportEnabledKey = 'sms_import_enabled';
+  static const _hasSeenHelpGuideKey = 'has_seen_help_guide';
 
   final SharedPreferences _prefs;
 
@@ -117,5 +118,13 @@ class SharedPrefsUtil {
 
   Future<bool> setStringList(String key, List<String> value) {
     return _prefs.setStringList(key, value);
+  }
+
+  bool hasSeenHelpGuide() {
+    return _prefs.getBool(_hasSeenHelpGuideKey) ?? false;
+  }
+
+  Future<void> setHasSeenHelpGuide(bool value) async {
+    await _prefs.setBool(_hasSeenHelpGuideKey, value);
   }
 }

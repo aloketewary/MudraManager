@@ -11,20 +11,30 @@ class TransactionMatchingService {
     required List<Account> accounts,
     required List<db_category.Category> categories,
   }) {
-    if (pending.account == null || pending.account!.isEmpty) return null;
+    if (pending.account == null || pending.account!.isEmpty) {
+      debugPrint('No account number in pending transaction');
+      return null;
+    }
 
     // 1. Try to find a matching account (match last 4 digits)
     Account? matchedAccount;
     final pendingAccTrimmed = pending.account!.trim();
+    debugPrint('Looking for account ending with: $pendingAccTrimmed');
+    
     for (var acc in accounts) {
       final dbAccNo = acc.accountNumber?.trim();
+      debugPrint('Checking account: ${acc.name} - $dbAccNo');
       if (dbAccNo != null && dbAccNo.endsWith(pendingAccTrimmed)) {
         matchedAccount = acc;
+        debugPrint('Account matched: ${acc.name}');
         break;
       }
     }
 
-    if (matchedAccount == null) return null;
+    if (matchedAccount == null) {
+      debugPrint('No matching account found for: $pendingAccTrimmed');
+      return null;
+    }
 
     // 2. Filter categories by type (income/expense)
     final relevantCategories =
@@ -38,7 +48,12 @@ class TransactionMatchingService {
             )
             .toList();
 
-    if (relevantCategories.isEmpty) return null;
+    if (relevantCategories.isEmpty) {
+      debugPrint('No relevant categories found for type: ${(pending.isIncome ?? false) ? "income" : "expense"}');
+      return null;
+    }
+
+    debugPrint('Found ${relevantCategories.length} relevant categories');
 
     // 3. Try keyword-based matching
     db_category.Category? matchedCategory = CategoryMatcher.matchByKeywords(
@@ -58,6 +73,8 @@ class TransactionMatchingService {
         'No category match for: ${pending.body.substring(0, pending.body.length > 50 ? 50 : pending.body.length)}... '
         '(Amount: ${pending.amount}, Sender: ${pending.sender})',
       );
+    } else {
+      debugPrint('Category matched: ${matchedCategory.name}');
     }
 
     if (matchedCategory != null) {

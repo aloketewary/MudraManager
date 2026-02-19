@@ -15,6 +15,8 @@ import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/core/utils/string_util.dart';
 import 'package:mudra_manager/core/utils/transaction_msg_util.dart';
 import 'package:mudra_manager/features/transactions/data/pending_transaction_prodiver.dart';
+import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
+import 'package:mudra_manager/features/sms/data/sms_processor_service.dart';
 
 import 'package:mudra_manager/main.dart' show setupSmsListener;
 
@@ -872,39 +874,43 @@ class _SmsImportSettingsScreenState
         return smsDate.isBefore(now);
       }).toList();
 
-      const batchSize = 50;
-      for (int i = 0; i < filteredMessages.length; i += batchSize) {
-        if (!mounted) break;
+      // Process in background to prevent UI blocking
+      for (var sms in filteredMessages) {
+        scannedCount++;
+        if (!checkForTransactionalMessage(sms.body)) continue;
 
-        final batch = filteredMessages.skip(i).take(batchSize);
+        final smsHash = generateSmsHash(
+          sms.address ?? '',
+          sms.date,
+          sms.body ?? '',
+        );
+        if (SharedPrefsUtil.instance.isAlreadyProcessed(smsHash)) continue;
 
-        for (var sms in batch) {
-          scannedCount++;
-          if (!checkForTransactionalMessage(sms.body)) continue;
-
-          final smsHash = generateSmsHash(
-            sms.address ?? '',
-            sms.date,
-            sms.body ?? '',
-          );
-          if (SharedPrefsUtil.instance.isAlreadyProcessed(smsHash)) continue;
-
-          SharedPrefsUtil.instance.storeProcessedHash(smsHash);
-          final transactionInfo = transactionUtil.getTransactionInfo(
-            sms.body,
-            sms.address,
-            null,
-            smsHash,
-          );
-          processSmsForSaving(transactionInfo);
-          processedCount++;
+        SharedPrefsUtil.instance.storeProcessedHash(smsHash);
+        final transactionInfo = transactionUtil.getTransactionInfo(
+          sms.body,
+          sms.address,
+          null,
+          smsHash,
+        );
+        
+        // Process async without awaiting to prevent blocking
+        processSmsForSaving(transactionInfo);
+        processedCount++;
+        
+        // Yield to UI every 10 messages
+        if (processedCount % 10 == 0) {
+          await Future.delayed(const Duration(milliseconds: 1));
         }
-
-        await Future.delayed(const Duration(milliseconds: 50));
       }
+
+      // Wait a bit for async processing to complete
+      await Future.delayed(const Duration(milliseconds: 500));
 
       if (mounted) {
         ref.invalidate(pendingTxnServiceProvider);
+        ref.invalidate(pendingTxnDataProvider);
+        ref.invalidate(transactionProvider);
       }
     } catch (e) {
       debugPrint('Error scanning SMS: $e');
@@ -929,27 +935,12 @@ class _SmsImportSettingsScreenState
 
   void processSmsForSaving(TransactionInfo sms) async {
     if (!mounted) return;
-    final pendingTxnService = ref.read(pendingTxnServiceProvider);
-
-    final pending = PendingTransaction()
-      ..date = sms.transactionTime ?? DateTime.now()
-      ..account = sms.account?.sendTo
-      ..amount = sms.money?.toDouble()
-      ..isIncome = sms.typeOfTransaction == TransactionType.credited
-      ..body = sms.body
-      ..sender = sms.sender
-      ..transactionRef = sms.account?.refNo
-      ..category = sms.typeOfTransaction?.name
-      ..smsHash = sms.smsHash
-      ..toAccount = sms.account?.type == 'UPI' ? sms.account?.sendTo : '';
-
-    try {
-      pendingTxnService.save(pending);
-    } catch (exp) {
-      if (!mounted) return;
-      final message = 'Error saving pending transaction to database: $exp';
-      SnackbarService.error(message);
-    }
+    
+    // Use the centralized SMS processor service which has auto-matching logic
+    SmsProcessorService.instance.processSmsForSaving(
+      sms,
+      sms.transactionTime?.millisecondsSinceEpoch ?? DateTime.now().millisecondsSinceEpoch,
+    );
   }
 
   String generateSmsHash(String address, int? date, String body) {

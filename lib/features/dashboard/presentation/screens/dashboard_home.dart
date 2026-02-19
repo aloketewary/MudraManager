@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
+import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/features/budget/data/budget_alert_provider.dart';
 import 'package:mudra_manager/features/dashboard/presentation/screens/cash_flow_screen.dart';
 import 'package:mudra_manager/features/dashboard/presentation/widgets/budget_card.dart';
@@ -10,7 +11,9 @@ import 'package:mudra_manager/features/dashboard/presentation/widgets/financial_
 import 'package:mudra_manager/features/dashboard/presentation/widgets/goal_card.dart';
 import 'package:mudra_manager/features/dashboard/presentation/widgets/net_worth_card.dart';
 import 'package:mudra_manager/features/dashboard/presentation/widgets/spending_prediction_card.dart';
+import 'package:mudra_manager/features/dashboard/presentation/widgets/dashboard_action_button.dart';
 import 'package:mudra_manager/features/dashboard/presentation/widgets/swipeable_account_card.dart';
+import 'package:mudra_manager/features/profile/data/help_guide_provider.dart';
 import 'package:mudra_manager/features/statistics/presentation/widgets/period_selector.dart';
 import 'package:mudra_manager/features/trip/presentation/widgets/active_trip_mini_card.dart';
 import 'package:mudra_manager/shared/widgets/budget_alert_banner.dart';
@@ -101,6 +104,7 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
     final color = Theme.of(context).colorScheme;
     final ctxt = AppLocalizations.of(context)!;
     final alerts = ref.watch(budgetAlertsProvider);
+    final hasSeenHelp = ref.watch(hasSeenHelpGuideProvider);
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -109,6 +113,81 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            if (!hasSeenHelp)
+              Container(
+                margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                child: Card(
+                  elevation: 0,
+                  color: color.primaryContainer,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () {
+                      HapticFeedback.mediumImpact();
+                      context.push('/help');
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: color.primary,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Icon(
+                              Icons.help_outline,
+                              color: color.onPrimary,
+                              size: 24,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'New to Mudra Manager?',
+                                  style: textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: color.onPrimaryContainer,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Check out our help guide to get started',
+                                  style: textTheme.bodySmall?.copyWith(
+                                    color: color.onPrimaryContainer,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            size: 16,
+                            color: color.onPrimaryContainer,
+                          ),
+                          IconButton(
+                            icon: Icon(
+                              Icons.close,
+                              size: 20,
+                              color: color.onPrimaryContainer,
+                            ),
+                            onPressed: () async {
+                              await SharedPrefsUtil.instance
+                                  .setHasSeenHelpGuide(true);
+                              ref
+                                  .read(hasSeenHelpGuideProvider.notifier)
+                                  .state = true;
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             if (alerts.isNotEmpty)
               BudgetAlertBanner(
                 alerts: alerts,
@@ -129,108 +208,21 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Flexible(
-                      child: GestureDetector(
-                        onTap: () {
-                          HapticFeedback.mediumImpact();
-                          context.push('/add-transaction');
-                        },
-                        child: Card(
-                          elevation: 0,
-                          color: color.primaryContainer,
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(20),
-                            onTap: () {
-                              HapticFeedback.mediumImpact();
-                              context.push('/add-transaction');
-                            },
-                            child: Container(
-                              height: 50,
-                              padding: const EdgeInsets.all(16.0),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  CircleAvatar(
-                                    radius: 16,
-                                    backgroundColor: color.primary.withValues(
-                                      alpha: 0.15,
-                                    ),
-                                    child: Icon(
-                                      Icons.add_circle_outline,
-                                      size: 20,
-                                      color: color.primary,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Flexible(
-                                    child: Text(
-                                      ctxt.dashboard_add_transaction_text
-                                          .toUpperCase(),
-                                      textAlign: TextAlign.center,
-                                      style: textTheme.labelMedium?.copyWith(
-                                        color: color.onPrimaryContainer,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
+                      child: DashboardActionButton(
+                        label: ctxt.dashboard_add_transaction_text,
+                        icon: Icons.add_circle_outline,
+                        onTap: () => context.push('/add-transaction'),
                       ),
                     ),
                     const SizedBox(height: 8),
                     Flexible(
-                      child: GestureDetector(
-                        onTap: () {
-                          HapticFeedback.mediumImpact();
-                          context.push('/transfer');
-                        },
-                        child: Card(
-                          elevation: 0,
-                          color: color.surfaceContainerHigh,
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(20),
-                            onTap: () {
-                              HapticFeedback.mediumImpact();
-                              context.push('/transfer');
-                            },
-                            child: Container(
-                              height: 50,
-                              padding: const EdgeInsets.all(16.0),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  CircleAvatar(
-                                    radius: 16,
-                                    backgroundColor: color.tertiary.withValues(
-                                      alpha: 0.15,
-                                    ),
-                                    child: Icon(
-                                      Icons.swap_horiz,
-                                      size: 20,
-                                      color: color.tertiary,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Flexible(
-                                    child: Text(
-                                      ctxt.dashboard_add_transfer_text
-                                          .toUpperCase(),
-                                      textAlign: TextAlign.center,
-                                      style: textTheme.labelMedium?.copyWith(
-                                        color: color.tertiary,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
+                      child: DashboardActionButton(
+                        label: ctxt.dashboard_add_transfer_text,
+                        icon: Icons.swap_horiz,
+                        onTap: () => context.push('/transfer'),
+                        backgroundColor: color.surfaceContainerHigh,
+                        iconColor: color.tertiary,
+                        textColor: color.tertiary,
                       ),
                     ),
                   ],
@@ -238,111 +230,22 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                 rowWidget: Row(
                   children: [
                     Expanded(
-                      child: GestureDetector(
-                        onTap: () {
-                          HapticFeedback.mediumImpact();
-                          context.push('/add-transaction');
-                        },
-                        child: Hero(
-                          tag: 'addTransactionHero',
-                          child: Card(
-                            elevation: 0,
-                            color: color.primaryContainer,
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(20),
-                              onTap: () {
-                                HapticFeedback.mediumImpact();
-                                context.push('/add-transaction');
-                              },
-                              child: Container(
-                                height: 50,
-                                padding: const EdgeInsets.all(16.0),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: <Widget>[
-                                    CircleAvatar(
-                                      radius: 16,
-                                      backgroundColor: color.primary.withValues(
-                                        alpha: 0.15,
-                                      ),
-                                      child: Icon(
-                                        Icons.add_circle_outline,
-                                        size: 20,
-                                        color: color.primary,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Flexible(
-                                      child: Text(
-                                        ctxt.dashboard_add_transaction_text
-                                            .toUpperCase(),
-                                        textAlign: TextAlign.center,
-                                        style: textTheme.labelMedium?.copyWith(
-                                          color: color.onPrimaryContainer,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
+                      child: DashboardActionButton(
+                        label: ctxt.dashboard_add_transaction_text,
+                        icon: Icons.add_circle_outline,
+                        onTap: () => context.push('/add-transaction'),
+                        heroTag: 'addTransactionHero',
                       ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: GestureDetector(
-                        onTap: () {
-                          HapticFeedback.mediumImpact();
-                          context.push('/transfer');
-                        },
-                        child: Card(
-                          elevation: 0,
-                          color: color.surfaceContainerHigh,
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(20),
-                            onTap: () {
-                              HapticFeedback.mediumImpact();
-                              context.push('/transfer');
-                            },
-                            child: Container(
-                              height: 50,
-                              padding: const EdgeInsets.all(16.0),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  CircleAvatar(
-                                    radius: 16,
-                                    backgroundColor: color.tertiary.withValues(
-                                      alpha: 0.15,
-                                    ),
-                                    child: Icon(
-                                      Icons.swap_horiz,
-                                      size: 20,
-                                      color: color.tertiary,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Flexible(
-                                    child: Text(
-                                      ctxt.dashboard_add_transfer_text
-                                          .toUpperCase(),
-                                      textAlign: TextAlign.center,
-                                      style: textTheme.labelMedium?.copyWith(
-                                        color: color.tertiary,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
+                      child: DashboardActionButton(
+                        label: ctxt.dashboard_add_transfer_text,
+                        icon: Icons.swap_horiz,
+                        onTap: () => context.push('/transfer'),
+                        backgroundColor: color.surfaceContainerHigh,
+                        iconColor: color.tertiary,
+                        textColor: color.tertiary,
                       ),
                     ),
                   ],

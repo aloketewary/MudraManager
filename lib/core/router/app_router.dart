@@ -21,6 +21,7 @@ import 'package:mudra_manager/features/profile/presentation/screens/app_settings
 import 'package:mudra_manager/features/profile/presentation/screens/backup_restore_screen.dart';
 import 'package:mudra_manager/features/profile/presentation/screens/choose_language_screen.dart';
 import 'package:mudra_manager/features/profile/presentation/screens/edit_user_profile_screen.dart';
+import 'package:mudra_manager/features/profile/presentation/screens/help_screen.dart';
 import 'package:mudra_manager/features/profile/presentation/screens/manage_account_screen.dart';
 import 'package:mudra_manager/features/profile/presentation/screens/manage_categories_screen.dart';
 import 'package:mudra_manager/features/profile/presentation/screens/notification_settings_screen.dart';
@@ -173,6 +174,10 @@ class AppRouter {
           GoRoute(
             path: '/about',
             builder: (context, state) => const AboutScreen(),
+          ),
+          GoRoute(
+            path: '/help',
+            builder: (context, state) => const HelpScreen(),
           ),
           GoRoute(
             path: '/manage-accounts',

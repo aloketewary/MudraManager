@@ -3,6 +3,15 @@ import 'package:flutter/material.dart';
 class IconHelper {
   static IconData iconFromName(String name) {
     switch (name) {
+      case 'category': return Icons.category;
+      case 'pie_chart': return Icons.pie_chart;
+      case 'receipt_long': return Icons.receipt_long;
+      case 'repeat': return Icons.repeat;
+      case 'card_travel': return Icons.card_travel;
+      case 'sms': return Icons.sms;
+      case 'backup': return Icons.backup;
+      case 'auto_graph': return Icons.auto_graph;
+      case 'lock': return Icons.lock;
       case 'home': return Icons.home;
       case 'shopping_cart': return Icons.shopping_cart;
       case 'fastfood': return Icons.fastfood;
@@ -103,6 +112,15 @@ class IconHelper {
   }
 
   static final Map<String, IconData> iconMap = {
+    'category': Icons.category,
+    'pie_chart': Icons.pie_chart,
+    'receipt_long': Icons.receipt_long,
+    'repeat': Icons.repeat,
+    'card_travel': Icons.card_travel,
+    'sms': Icons.sms,
+    'backup': Icons.backup,
+    'auto_graph': Icons.auto_graph,
+    'lock': Icons.lock,
     'home': Icons.home,
     'shopping_cart': Icons.shopping_cart,
     'fastfood': Icons.fastfood,

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/models/recurring_bill.dart';
 import 'package:mudra_manager/core/utils/dialog_utils.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/budget/data/bill_service.dart';
+import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 
 final billsProvider = StreamProvider<List<RecurringBill>>((ref) {
   final isar = Isar.getInstance()!;
@@ -22,7 +24,64 @@ class BillsScreen extends ConsumerWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Bills')),
+      appBar: AppBar(
+        title: const Text('Bills'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.info_outline),
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                ),
+                builder: (ctx) => Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: color.onSurfaceVariant.withValues(alpha: 0.3),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      Icon(Icons.receipt_long, size: 64, color: color.primary),
+                      const SizedBox(height: 16),
+                      Text(
+                        'How Bills Work',
+                        style: textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Track recurring bills like rent, subscriptions, and utilities. Get reminders before due dates and mark bills as paid.',
+                        style: textTheme.bodyMedium,
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 24),
+                      FilledButton(
+                        onPressed: () => ctx.pop(),
+                        style: FilledButton.styleFrom(
+                          minimumSize: const Size(double.infinity, 48),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text('Got it'),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showAddBillSheet(context),
         icon: const Icon(Icons.add),
@@ -31,38 +90,9 @@ class BillsScreen extends ConsumerWidget {
       body: billsAsync.when(
         data: (bills) {
           if (bills.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(32),
-                    decoration: BoxDecoration(
-                      color: color.primaryContainer,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.receipt_long_outlined,
-                      size: 64,
-                      color: color.onPrimaryContainer,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    'No bills yet',
-                    style: textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Add your recurring bills to track them',
-                    style: textTheme.bodyMedium?.copyWith(
-                      color: color.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
+            return NoDataFound(
+              message: 'No bills yet\nAdd your recurring bills to track them',
+              iconData: Icons.receipt_long_outlined,
             );
           }
 

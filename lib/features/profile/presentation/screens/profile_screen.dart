@@ -33,6 +33,62 @@ class ProfileScreen extends ConsumerWidget {
             expandedHeight: 200,
             pinned: true,
             leading: const SizedBox.shrink(),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.info_outline),
+                onPressed: () {
+                  HapticFeedback.mediumImpact();
+                  showModalBottomSheet(
+                    context: context,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                    ),
+                    builder: (ctx) => Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: color.onSurfaceVariant.withValues(alpha: 0.3),
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          Icon(Icons.person, size: 64, color: color.primary),
+                          const SizedBox(height: 16),
+                          Text(
+                            'About Mudra Manager',
+                            style: textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Your personal finance companion. Track expenses, manage budgets, and gain insights into your spending habits.',
+                            style: textTheme.bodyMedium,
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 24),
+                          FilledButton(
+                            onPressed: () => ctx.pop(),
+                            style: FilledButton.styleFrom(
+                              minimumSize: const Size(double.infinity, 48),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: const Text('Got it'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
             flexibleSpace: LayoutBuilder(
               builder: (context, constraints) {
                 final isCollapsed =
@@ -308,6 +364,17 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 24),
                 _buildSectionHeader(context, 'About'),
+                const SizedBox(height: 12),
+                _buildSettingCard(
+                  context,
+                  Icons.help_outline,
+                  'Help & Support',
+                  'FAQs and feature guides',
+                  () {
+                    HapticFeedback.mediumImpact();
+                    context.push('/help');
+                  },
+                ),
                 const SizedBox(height: 12),
                 _buildSettingCard(
                   context,

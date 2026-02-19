@@ -21,7 +21,7 @@ class AboutScreen extends StatelessWidget {
           return CustomScrollView(
             slivers: [
               SliverAppBar.large(
-                expandedHeight: 240,
+                expandedHeight: 250,
                 pinned: true,
                 flexibleSpace: FlexibleSpaceBar(
                   background: Container(
@@ -44,11 +44,11 @@ class AboutScreen extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.all(20),
                             decoration: BoxDecoration(
-                              color: color.surface,
+                              color: Colors.white,
                               shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.1),
+                                  color: color.surface.withValues(alpha: 0.1),
                                   blurRadius: 20,
                                   offset: const Offset(0, 8),
                                 ),
@@ -87,6 +87,7 @@ class AboutScreen extends StatelessWidget {
                                 ),
                               ),
                             ),
+                          const SizedBox(height: 8),
                         ],
                       ),
                     ),
@@ -249,7 +250,7 @@ class AboutScreen extends StatelessWidget {
           ),
           child: Icon(icon, color: color.onPrimaryContainer, size: 20),
         ),
-      const  SizedBox(width: 12),
+        const SizedBox(width: 12),
         Text(
           title.toUpperCase(),
           style: textTheme.titleMedium?.copyWith(
@@ -276,17 +277,65 @@ class AboutScreen extends StatelessWidget {
   ) {
     final features = [
       (
+        Icons.dashboard_outlined,
+        'Smart Dashboard',
+        'Real-time financial overview with insights',
+      ),
+      (
         Icons.sms_outlined,
         'SMS Auto-Import',
-        'Automatic transaction detection',
+        'Automatic transaction detection from bank SMS',
       ),
-      (Icons.pie_chart_outline, 'Budget Tracking', 'Smart spending limits'),
+      (
+        Icons.pie_chart_outline,
+        'Budget Tracking',
+        'Set limits and track spending by category',
+      ),
       (
         Icons.analytics_outlined,
         'Insights & Reports',
-        'Detailed financial analytics',
+        'Detailed analytics with charts and trends',
       ),
-      (Icons.security, 'Secure & Private', 'Local-first data storage'),
+      (
+        Icons.repeat,
+        'Recurring Transactions',
+        'Automate regular income and expenses',
+      ),
+      (
+        Icons.receipt_long_outlined,
+        'Bill Reminders',
+        'Never miss a payment with smart alerts',
+      ),
+      (
+        Icons.card_travel,
+        'Trip Management',
+        'Split expenses and track group spending',
+      ),
+      (
+        Icons.account_balance_wallet_outlined,
+        'Multi-Account',
+        'Manage multiple accounts in one place',
+      ),
+      (
+        Icons.backup_outlined,
+        'Backup & Restore',
+        'Export and import your financial data',
+      ),
+      (
+        Icons.security,
+        'Secure & Private',
+        'Local-first storage with biometric lock',
+      ),
+      (
+        Icons.dark_mode_outlined,
+        'Beautiful Themes',
+        'Dynamic colors and dark mode support',
+      ),
+      (
+        Icons.language,
+        'Multi-Language',
+        'Support for multiple languages',
+      ),
     ];
     return GridView.builder(
       shrinkWrap: true,
@@ -295,7 +344,7 @@ class AboutScreen extends StatelessWidget {
         crossAxisCount: 2,
         crossAxisSpacing: 12,
         mainAxisSpacing: 12,
-        childAspectRatio: 1.4,
+        childAspectRatio: 1.2,
       ),
       itemCount: features.length,
       itemBuilder: (context, index) {
@@ -304,12 +353,12 @@ class AboutScreen extends StatelessWidget {
           elevation: 0,
           color: color.surfaceContainerHighest,
           child: Padding(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(16),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: color.primaryContainer,
                     borderRadius: BorderRadius.circular(12),
@@ -317,33 +366,29 @@ class AboutScreen extends StatelessWidget {
                   child: Icon(
                     feature.$1,
                     color: color.onPrimaryContainer,
-                    size: 20,
+                    size: 24,
                   ),
                 ),
-                const SizedBox(height: 8),
-                Flexible(
-                  child: Text(
-                    feature.$2,
-                    textAlign: TextAlign.center,
-                    style: textTheme.labelLarge?.copyWith(
-                      color: color.onSurface,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                const SizedBox(height: 12),
+                Text(
+                  feature.$2,
+                  textAlign: TextAlign.center,
+                  style: textTheme.titleSmall?.copyWith(
+                    color: color.onSurface,
+                    fontWeight: FontWeight.bold,
                   ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 2),
-                Flexible(
-                  child: Text(
-                    feature.$3,
-                    textAlign: TextAlign.center,
-                    style: textTheme.labelSmall?.copyWith(
-                      color: color.onSurfaceVariant,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                const SizedBox(height: 4),
+                Text(
+                  feature.$3,
+                  textAlign: TextAlign.center,
+                  style: textTheme.bodySmall?.copyWith(
+                    color: color.onSurfaceVariant,
                   ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -705,7 +750,12 @@ class LicenseScreen extends StatelessWidget {
                             horizontal: 20,
                             vertical: 8,
                           ),
-                          childrenPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                          childrenPadding: const EdgeInsets.fromLTRB(
+                            20,
+                            0,
+                            20,
+                            20,
+                          ),
                           leading: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(

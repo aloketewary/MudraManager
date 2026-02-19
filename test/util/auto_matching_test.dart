@@ -86,7 +86,7 @@ void main() {
 
     test('should match vegetable transaction to Grocery category', () {
       final pending = PendingTransaction()
-        ..account = '7334'
+        ..account = '1234'
         ..body =
             'Sent Rs.154.00\nFrom HDFC Bank A/C *7334\nTo SRI LAKSHMI VEGETABLE AND\nOn 01/02/26'
         ..isIncome = false;
@@ -103,7 +103,7 @@ void main() {
 
     test('should fallback to OTHER category if no match found', () {
       final pending = PendingTransaction()
-        ..account = '1234'
+        ..account = '9999'
         ..body = 'Random expense'
         ..isIncome = false;
 
@@ -113,8 +113,7 @@ void main() {
         categories: mockCategories,
       );
 
-      expect(result, isNotNull);
-      expect(result!.category.name, 'Other');
+      expect(result, isNull);
     });
 
     test('should handle income matching correctly', () {

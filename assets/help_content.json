@@ -1,0 +1,199 @@
+[
+  {
+    "id": "accounts",
+    "title": "Accounts",
+    "icon": "account_balance_wallet",
+    "shortDescription": "Manage all your bank accounts, wallets, and cash in one place",
+    "description": "Track balances and transactions across multiple accounts. Add bank accounts, digital wallets, credit cards, and cash.",
+    "steps": [
+      "Go to Profile → Accounts",
+      "Tap 'Add Account' button",
+      "Enter account name and initial balance",
+      "Choose account type (Bank, Wallet, Cash, etc.)",
+      "Select a color and icon",
+      "Save your account"
+    ],
+    "tips": [
+      "You can archive accounts you no longer use",
+      "Set low balance alerts in settings",
+      "Link transactions to specific accounts"
+    ]
+  },
+  {
+    "id": "categories",
+    "title": "Categories",
+    "icon": "category",
+    "shortDescription": "Organize transactions with custom categories",
+    "description": "Create income and expense categories to track where your money goes. Customize with icons and colors.",
+    "steps": [
+      "Go to Profile → Categories",
+      "Tap 'Add Category' button",
+      "Enter category name",
+      "Choose type (Income or Expense)",
+      "Select an icon and color",
+      "Save your category"
+    ],
+    "tips": [
+      "Use specific categories for better insights",
+      "Default categories can be edited",
+      "Archive unused categories"
+    ]
+  },
+  {
+    "id": "budgets",
+    "title": "Budgets",
+    "icon": "pie_chart",
+    "shortDescription": "Set monthly budgets for different categories",
+    "description": "Control spending by setting budget limits. Get alerts when you approach or exceed your budget.",
+    "steps": [
+      "Go to Budget Dashboard",
+      "Tap 'Add Budget' button",
+      "Select a category",
+      "Set monthly budget amount",
+      "Choose alert threshold (optional)",
+      "Save your budget"
+    ],
+    "tips": [
+      "Start with realistic budget amounts",
+      "Review and adjust budgets monthly",
+      "Use budget insights to improve spending"
+    ]
+  },
+  {
+    "id": "bills",
+    "title": "Bills",
+    "icon": "receipt_long",
+    "shortDescription": "Track recurring bills and subscriptions",
+    "description": "Never miss a payment. Track rent, subscriptions, utilities, and other recurring bills with reminders.",
+    "steps": [
+      "Go to Bills screen",
+      "Tap 'Add Bill' button",
+      "Enter bill name and amount",
+      "Set due date",
+      "Choose frequency (Monthly, Quarterly, Yearly)",
+      "Save your bill"
+    ],
+    "tips": [
+      "Mark bills as paid when completed",
+      "Get reminders 3 days before due date",
+      "Track overdue bills in red"
+    ]
+  },
+  {
+    "id": "recurring",
+    "title": "Recurring Transactions",
+    "icon": "repeat",
+    "shortDescription": "Automate regular income and expenses",
+    "description": "Set up recurring transactions for salary, rent, subscriptions. They'll be created automatically on schedule.",
+    "steps": [
+      "Go to Recurring Transactions",
+      "Tap 'Add' button",
+      "Select category and account",
+      "Enter amount and description",
+      "Choose frequency (Daily, Weekly, Monthly, Yearly)",
+      "Set start date and save"
+    ],
+    "tips": [
+      "Review recurring transactions monthly",
+      "Pause or delete when no longer needed",
+      "Edit amounts when they change"
+    ]
+  },
+  {
+    "id": "trips",
+    "title": "Trips & Split Expenses",
+    "icon": "card_travel",
+    "shortDescription": "Manage group trips and split expenses",
+    "description": "Create trips, add participants, link transactions, and split expenses automatically. Perfect for group travel!",
+    "steps": [
+      "Go to Trips screen",
+      "Tap 'New Trip' button",
+      "Enter trip name and dates",
+      "Add participants",
+      "Link transactions to the trip",
+      "View split expenses and settlements"
+    ],
+    "tips": [
+      "Add participants before adding expenses",
+      "Link existing transactions to trips",
+      "Export trip summary for sharing"
+    ]
+  },
+  {
+    "id": "sms",
+    "title": "SMS Import",
+    "icon": "sms",
+    "shortDescription": "Auto-import transactions from bank SMS",
+    "description": "Automatically detect and parse financial transactions from bank and wallet SMS messages. Review and import with one tap.",
+    "steps": [
+      "Go to Profile → SMS Import",
+      "Grant SMS permission",
+      "Enable auto-import",
+      "Review pending transactions",
+      "Confirm or edit before importing"
+    ],
+    "tips": [
+      "Review transactions before importing",
+      "Auto-matching links to existing accounts",
+      "Edit amounts or categories if needed"
+    ]
+  },
+  {
+    "id": "backup",
+    "title": "Backup & Restore",
+    "icon": "backup",
+    "shortDescription": "Secure your financial data",
+    "description": "Export your data to JSON format for backup. Import previously exported data to restore transactions and settings.",
+    "steps": [
+      "Go to Profile → Backup & Restore",
+      "Tap 'Export Data' for backup",
+      "Choose save location",
+      "To restore, tap 'Import Data'",
+      "Select backup file",
+      "Confirm import"
+    ],
+    "tips": [
+      "Backup regularly (weekly or monthly)",
+      "Store backups in cloud storage",
+      "Test restore on new device"
+    ]
+  },
+  {
+    "id": "statistics",
+    "title": "Statistics & Reports",
+    "icon": "auto_graph",
+    "shortDescription": "Visualize your spending patterns",
+    "description": "View detailed charts, graphs, and reports. Analyze spending by category, time period, and account.",
+    "steps": [
+      "Go to Statistics tab",
+      "View spending by category",
+      "Check monthly trends",
+      "Compare months",
+      "Export reports to PDF/Excel"
+    ],
+    "tips": [
+      "Review statistics weekly",
+      "Identify spending patterns",
+      "Use insights to adjust budgets"
+    ]
+  },
+  {
+    "id": "security",
+    "title": "Security",
+    "icon": "lock",
+    "shortDescription": "Protect your financial data",
+    "description": "Secure your app with PIN or biometric authentication. Keep your financial information private.",
+    "steps": [
+      "Go to Profile → Security",
+      "Enable app lock",
+      "Choose PIN or Biometric",
+      "Set up your security method",
+      "Test the lock"
+    ],
+    "tips": [
+      "Use biometric for quick access",
+      "Don't share your PIN",
+      "Change PIN periodically"
+    ]
+  }
+]

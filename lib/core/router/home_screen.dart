@@ -122,74 +122,79 @@ class HomePageState extends ConsumerState<HomePage>
     final profileAsync = ref.watch(userProfileProvider);
     final ctxt = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: buildTopBar(profileAsync, _selectedIndex),
-      extendBody: true,
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: _selectedIndex == 1
-          ? FloatingActionButton.extended(
-              heroTag: 'addTransactionHero',
-              onPressed: () {
-                HapticFeedback.mediumImpact();
-                context.push('/add-transaction');
-              },
-              icon: const Icon(Icons.add),
-              label: Text(ctxt.add_edit_transaction_screen_title),
-            )
-          : _selectedIndex == 2
-          ? FloatingActionButton.extended(
-              onPressed: () {
-                HapticFeedback.mediumImpact();
-                utilityKey.currentState?.showCustomizeSheet();
-              },
-              icon: const Icon(Icons.tune),
-              label: const Text('Customise'),
-            )
-          : null,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: _onTabSelected,
-        elevation: 0,
-        animationDuration: const Duration(milliseconds: 300),
-        destinations: [
-          NavigationDestination(
-            icon: const Icon(Icons.home_outlined),
-            selectedIcon: const Icon(Icons.home),
-            label: ctxt.home_screen_title,
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.receipt_long_outlined),
-            selectedIcon: const Icon(Icons.receipt_long),
-            label: ctxt.transaction_screen_title,
-          ),
-          const NavigationDestination(
-            icon: Icon(Icons.widgets_outlined),
-            selectedIcon: Icon(Icons.widgets),
-            label: 'Utilities',
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.auto_graph_outlined),
-            selectedIcon: const Icon(Icons.auto_graph),
-            label: ctxt.statistics_screen_title,
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.person_outline),
-            selectedIcon: const Icon(Icons.person),
-            label: ctxt.profile_screen_title,
-          ),
-        ],
-      ),
-      body: _selectedIndex == 4
-          ? _pages[_selectedIndex]
-          : _selectedIndex == 2
-          ? SafeArea(bottom: false, child: _pages[_selectedIndex])
-          : SafeArea(
-              bottom: false,
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 80),
-                child: _pages[_selectedIndex],
-              ),
+    return PopScope(
+      canPop: _selectedIndex == 0,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop && _selectedIndex != 0) {
+          _onTabSelected(0);
+        }
+      },
+      child: Scaffold(
+        appBar: buildTopBar(profileAsync, _selectedIndex),
+        extendBody: true,
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+        floatingActionButton: _selectedIndex == 1
+            ? FloatingActionButton.extended(
+                heroTag: 'addTransactionHero',
+                onPressed: () => context.push('/add-transaction'),
+                icon: const Icon(Icons.add),
+                label: Text(ctxt.dashboard_add_transaction_text),
+              )
+            : _selectedIndex == 2
+                ? FloatingActionButton.extended(
+                    onPressed: () {
+                      HapticFeedback.mediumImpact();
+                      utilityKey.currentState?.showCustomizeSheet();
+                    },
+                    icon: const Icon(Icons.tune),
+                    label: const Text('Customise'),
+                  )
+                : null,
+        bottomNavigationBar: NavigationBar(
+          selectedIndex: _selectedIndex,
+          onDestinationSelected: _onTabSelected,
+          elevation: 0,
+          animationDuration: const Duration(milliseconds: 300),
+          destinations: [
+            NavigationDestination(
+              icon: const Icon(Icons.home_outlined),
+              selectedIcon: const Icon(Icons.home),
+              label: ctxt.home_screen_title,
             ),
+            NavigationDestination(
+              icon: const Icon(Icons.receipt_long_outlined),
+              selectedIcon: const Icon(Icons.receipt_long),
+              label: ctxt.transaction_screen_title,
+            ),
+            const NavigationDestination(
+              icon: Icon(Icons.widgets_outlined),
+              selectedIcon: Icon(Icons.widgets),
+              label: 'Utilities',
+            ),
+            NavigationDestination(
+              icon: const Icon(Icons.auto_graph_outlined),
+              selectedIcon: const Icon(Icons.auto_graph),
+              label: ctxt.statistics_screen_title,
+            ),
+            NavigationDestination(
+              icon: const Icon(Icons.person_outline),
+              selectedIcon: const Icon(Icons.person),
+              label: ctxt.profile_screen_title,
+            ),
+          ],
+        ),
+        body: _selectedIndex == 4
+            ? _pages[_selectedIndex]
+            : _selectedIndex == 2
+            ? SafeArea(bottom: false, child: _pages[_selectedIndex])
+            : SafeArea(
+                bottom: false,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 80),
+                  child: _pages[_selectedIndex],
+                ),
+              ),
+      ),
     );
   }
 

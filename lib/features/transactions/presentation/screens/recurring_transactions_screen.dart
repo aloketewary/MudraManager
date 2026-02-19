@@ -7,6 +7,7 @@ import 'package:mudra_manager/core/db/models/frequency.dart';
 import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
 import 'package:mudra_manager/core/utils/icon_helper.dart';
 import 'package:mudra_manager/features/transactions/data/recurring_transaction_provider.dart';
+import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 
 class RecurringTransactionsScreen extends ConsumerWidget {
   const RecurringTransactionsScreen({super.key});
@@ -18,22 +19,71 @@ class RecurringTransactionsScreen extends ConsumerWidget {
     final recurringAsync = ref.watch(recurringTransactionsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Recurring Transactions')),
+      appBar: AppBar(
+        title: const Text('Recurring Transactions'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.info_outline),
+            onPressed: () {
+              HapticFeedback.mediumImpact();
+              showModalBottomSheet(
+                context: context,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                ),
+                builder: (ctx) => Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      Icon(Icons.repeat, size: 64, color: colorScheme.primary),
+                      const SizedBox(height: 16),
+                      Text(
+                        'How it works',
+                        style: textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Set up recurring transactions for regular income or expenses. They will be automatically created based on your schedule.',
+                        style: textTheme.bodyMedium,
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 24),
+                      FilledButton(
+                        onPressed: () => ctx.pop(),
+                        style: FilledButton.styleFrom(
+                          minimumSize: const Size(double.infinity, 48),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text('Got it'),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
       body: recurringAsync.when(
         data: (recurring) {
           if (recurring.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.repeat, size: 64, color: colorScheme.outline),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No recurring transactions',
-                    style: textTheme.titleMedium,
-                  ),
-                ],
-              ),
+            return const NoDataFound(
+              message: 'No recurring transactions',
+              iconData: Icons.repeat,
             );
           }
 

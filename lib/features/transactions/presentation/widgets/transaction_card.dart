@@ -48,238 +48,128 @@ class TransactionCard extends StatefulWidget {
 }
 
 class _TransactionCardState extends State<TransactionCard> {
-  bool _isExpanded = false;
-
   @override
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     widget.related?.category.load();
     widget.related?.account.load();
-    final ctxt = AppLocalizations.of(context)!;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return SwipeActionWrapper(
       onEdit: widget.onEdit,
       onDelete: widget.onRemove,
       child: Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
-      elevation: 0,
-      color: color.surfaceContainerLow,
-      child: Stack(
-        children: [
-          if (widget.tripName != null)
-            Positioned(
-              top: 0,
-              right: 0,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                decoration: BoxDecoration(
-                  color: color.tertiaryContainer,
-                  borderRadius: const BorderRadius.only(
-                    topRight: Radius.circular(20),
-                    bottomLeft: Radius.circular(16),
+        margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
+        elevation: 0,
+        color: color.surfaceContainerLow,
+        child: Stack(
+          children: [
+            if (widget.tripName != null)
+              Positioned(
+                top: 0,
+                right: 0,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: color.tertiaryContainer,
+                    borderRadius: const BorderRadius.only(
+                      topRight: Radius.circular(20),
+                      bottomLeft: Radius.circular(16),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.flight_takeoff,
+                        size: 12,
+                        color: color.onTertiaryContainer,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'TRIP',
+                        style: TextStyle(
+                          color: color.onTertiaryContainer,
+                          fontSize: 9,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.flight_takeoff, size: 12, color: color.onTertiaryContainer),
-                    const SizedBox(width: 4),
-                    Text(
-                      'TRIP',
-                      style: TextStyle(
-                        color: color.onTertiaryContainer,
-                        fontSize: 9,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ],
-                ),
               ),
-            ),
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(20),
-              onTap: () {
-                setState(() {
-                  _isExpanded = !_isExpanded;
-                });
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(14),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    widget.isTransfer
-                        ? buildTransferCard(_isExpanded)
-                        : buildNormalCard(_isExpanded),
-
-                    AnimatedSize(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                      child:
-                          _isExpanded
-                              ? Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const SizedBox(height: 16),
-                                  const Divider(height: 1),
-                                  const SizedBox(height: 16),
-                                  if (widget.description?.isNotEmpty == true)
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                        bottom: 12.0,
-                                      ),
-                                      child: Text(
-                                        widget.description!,
-                                        style: textTheme.bodyMedium?.copyWith(
-                                          color: color.onSurfaceVariant,
-                                          fontStyle: FontStyle.italic,
-                                        ),
-                                      ),
+            Padding(
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  widget.isTransfer ? buildTransferCard() : buildNormalCard(),
+                  if (widget.description?.isNotEmpty == true ||
+                      widget.tags.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    if (widget.description?.isNotEmpty == true)
+                      Text(
+                        widget.description!,
+                        style: textTheme.bodySmall?.copyWith(
+                          color: color.onSurfaceVariant,
+                          fontStyle: FontStyle.italic,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    if (widget.tags.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 6,
+                        children: widget.tags
+                            .map(
+                              (tag) => Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: color.secondaryContainer,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.tag,
+                                      size: 12,
+                                      color: color.onSecondaryContainer,
                                     ),
-                                  const SizedBox(height: 2),
-                                  if (widget.tripName != null) ...[
-                                    const SizedBox(width: 8),
+                                    const SizedBox(width: 4),
                                     Text(
-                                      'This transaction is part of below trip(s)',
-                                      style: textTheme.labelSmall?.copyWith(),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 6,
-                                        vertical: 2,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: color.primary.withValues(
-                                          alpha: 0.15,
-                                        ),
-                                        borderRadius: BorderRadius.circular(6),
-                                        border: Border.all(
-                                          color: color.primary.withValues(
-                                            alpha: 0.3,
-                                          ),
-                                        ),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(
-                                            Icons.card_travel,
-                                            size: 14,
-                                            color: color.primary,
-                                          ),
-                                          const SizedBox(width: 3),
-                                          Text(
-                                            widget.tripName!,
-                                            style: textTheme.labelSmall
-                                                ?.copyWith(
-                                                  color: color.primary,
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                          ),
-                                        ],
+                                      tag.name,
+                                      style: textTheme.labelSmall?.copyWith(
+                                        color: color.onSecondaryContainer,
                                       ),
                                     ),
                                   ],
-                                  if (widget.tags.isNotEmpty)
-                                    Wrap(
-                                      spacing: 8.0,
-                                      runSpacing: 8.0,
-                                      children:
-                                          widget.tags.map((tag) {
-                                            return Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 8,
-                                                    vertical: 4,
-                                                  ),
-                                              decoration: BoxDecoration(
-                                                color: color.secondaryContainer,
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
-                                              ),
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  Icon(
-                                                    Icons.tag,
-                                                    size: 14,
-                                                    color:
-                                                        color
-                                                            .onSecondaryContainer,
-                                                  ),
-                                                  const SizedBox(width: 4),
-                                                  Text(
-                                                    tag.name,
-                                                    style: textTheme.labelSmall
-                                                        ?.copyWith(
-                                                          color:
-                                                              color
-                                                                  .onSecondaryContainer,
-                                                        ),
-                                                  ),
-                                                ],
-                                              ),
-                                            );
-                                          }).toList(),
-                                    ),
-                                  const SizedBox(height: 16),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: [
-                                      OutlinedButton.icon(
-                                        onPressed: widget.onEdit,
-                                        icon: const Icon(Icons.edit, size: 18),
-                                        label: Text(ctxt.common_editLabel),
-                                        style: OutlinedButton.styleFrom(
-                                          foregroundColor: color.primary,
-                                          side: BorderSide(
-                                            color: color.primary.withValues(
-                                              alpha: 0.5,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      OutlinedButton.icon(
-                                        onPressed: widget.onRemove,
-                                        icon: const Icon(
-                                          Icons.delete,
-                                          size: 18,
-                                        ),
-                                        label: Text(ctxt.common_deleteLabel),
-                                        style: OutlinedButton.styleFrom(
-                                          foregroundColor: color.error,
-                                          side: BorderSide(
-                                            color: color.error.withValues(
-                                              alpha: 0.5,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              )
-                              : const SizedBox.shrink(),
-                    ),
+                                ),
+                              ),
+                            )
+                            .toList(),
+                      ),
+                    ],
                   ],
-                ),
+                ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
     );
   }
 
-  Widget buildNormalCard(bool isExpanded) {
+  Widget buildNormalCard() {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final ctxt = AppLocalizations.of(context)!;
@@ -354,7 +244,7 @@ class _TransactionCardState extends State<TransactionCard> {
     );
   }
 
-  Widget buildTransferCard(bool isExpanded) {
+  Widget buildTransferCard() {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final related = widget.related;

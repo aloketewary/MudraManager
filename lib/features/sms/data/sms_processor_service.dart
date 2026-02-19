@@ -5,10 +5,14 @@ import 'package:flutter/foundation.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/pending_transaction.dart';
+import 'package:mudra_manager/core/db/models/transaction.dart';
+import 'package:mudra_manager/core/db/models/account.dart';
+import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/core/utils/app_logger.dart';
 import 'package:mudra_manager/core/utils/string_util.dart';
 import 'package:mudra_manager/core/utils/transaction_msg_util.dart';
+import 'package:mudra_manager/features/transactions/data/transaction_matching_service.dart';
 
 class SmsProcessorService {
   static final SmsProcessorService instance = SmsProcessorService._();
@@ -16,34 +20,77 @@ class SmsProcessorService {
   SmsProcessorService._();
 
   Future<void> processSmsForSaving(TransactionInfo sms, int timestamp) async {
-    final pending =
-        PendingTransaction()
-          ..date =
-              sms.transactionTime ??
-              DateTime.fromMillisecondsSinceEpoch(timestamp)
-          ..account = sms.account?.no
-          ..amount = sms.money?.toDouble()
-          ..isIncome = sms.typeOfTransaction == TransactionType.credited
-          ..body = sms.body
-          ..sender = sms.sender
-          ..transactionRef = sms.account?.refNo
-          ..category = sms.typeOfTransaction?.name
-          ..smsHash = sms.smsHash
-          ..toAccount = sms.account?.sendTo
-          ..fromBank = sms.account?.bankName;
+    final isar = await getIsarInstance();
+
+    // Load accounts and categories for matching
+    final accounts = await isar.accounts.where().findAll();
+    final categories = await isar.categorys.where().findAll();
+
+    AppLogger.info(
+      'Matching attempt: ${accounts.length} accounts, ${categories.length} categories available',
+      tag: 'SMS',
+    );
+
+    // Use parsed date from SMS, fallback to SMS timestamp
+    final transactionDate =
+        sms.transactionTime ?? DateTime.fromMillisecondsSinceEpoch(timestamp);
+
+    final pending = PendingTransaction()
+      ..date = transactionDate
+      ..account = sms.account?.no
+      ..amount = sms.money?.toDouble()
+      ..isIncome = sms.typeOfTransaction == TransactionType.credited
+      ..body = sms.body
+      ..sender = sms.sender
+      ..transactionRef = sms.account?.refNo
+      ..category = sms.typeOfTransaction?.name
+      ..smsHash = sms.smsHash
+      ..toAccount = sms.account?.sendTo
+      ..fromBank = sms.account?.bankName;
 
     try {
-      final isar =
-          await getIsarInstance(); // Your function to return open Isar instance
-      await isar.writeTxn(() async {
-        await isar.pendingTransactions.put(pending);
-      });
-      AppLogger.info(
-        'Transaction saved, sender: ${sms.sender} amount: ${sms.money} type: ${sms.typeOfTransaction?.name}',
-        tag: 'SMS',
+      // Try to match account and category
+      final matchResult = TransactionMatchingService.matchTransaction(
+        pending: pending,
+        accounts: accounts,
+        categories: categories,
       );
+
+      if (matchResult != null) {
+        // Auto-add transaction if both account and category matched
+        final transaction = Transaction()
+          ..amount = pending.amount ?? 0
+          ..date = transactionDate
+          ..description = pending.body
+          ..isExpense = !(pending.isIncome == true)
+          ..isTransfer = false;
+
+        transaction.account.value = matchResult.account;
+        transaction.category.value = matchResult.category;
+
+        await isar.writeTxn(() async {
+          await isar.transactions.put(transaction);
+          await transaction.account.save();
+          await transaction.category.save();
+        });
+
+        AppLogger.info(
+          'Transaction auto-added: ${matchResult.category.name} - ₹${pending.amount} (${matchResult.account.name})',
+          tag: 'SMS',
+        );
+      } else {
+        // Save to pending if no match
+        await isar.writeTxn(() async {
+          await isar.pendingTransactions.put(pending);
+        });
+
+        AppLogger.info(
+          'Transaction saved to pending (no match), account: ${pending.account}, sender: ${sms.sender}, amount: ${sms.money}',
+          tag: 'SMS',
+        );
+      }
     } catch (e) {
-      AppLogger.error('Failed to save SMS transaction', error: e);
+      AppLogger.error('Failed to process SMS transaction', error: e);
     }
   }
 
