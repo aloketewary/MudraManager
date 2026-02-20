@@ -8,12 +8,14 @@ import 'package:mudra_manager/core/utils/file_utils.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:excel/excel.dart';
+import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
+import 'package:mudra_manager/features/gamification/services/gamification_service.dart';
 
 String formatCurrency(double amount) {
   return '₹${amount.toStringAsFixed(2)}';
 }
 
-Future<void> exportStatsToExcel(StatsData stats) async {
+Future<void> exportStatsToExcel(StatsData stats, [GamificationService? gamificationService]) async {
   final excel = Excel.createExcel();
   excel.delete('Sheet1');
   final now = DateTime.now();
@@ -189,6 +191,7 @@ Future<void> exportStatsToExcel(StatsData stats) async {
       fileName,
       askUser: true,
     );
+    await gamificationService?.track(GamificationEvent.reportExported);
   }
 }
 
@@ -201,6 +204,7 @@ Future<void> exportStatsToPdf(
   double? predicted,
   Map<String, CategoryTrend>? categoryTrends,
   Map<String, double>? spendingByDay,
+  GamificationService? gamificationService,
 }) async {
   final ctxt = AppLocalizations.of(context)!;
   final pdf = pw.Document(
@@ -430,4 +434,5 @@ Future<void> exportStatsToPdf(
   final fileName =
       'MudraManager_${DateFormat('yyyyMMdd_HHmmss').format(DateTime.now())}.pdf';
   await saveExportedFile(pdfBytes, fileName, askUser: true);
+  await gamificationService?.track(GamificationEvent.reportExported);
 }

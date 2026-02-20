@@ -1,12 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/db/models/trip.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
+import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
 import 'package:mudra_manager/features/trip/data/trip_service.dart';
 
 
 final tripServiceProvider = Provider<TripService>((ref) {
   final isarService = ref.watch(isarServiceProvider);
-  return TripService(isarService);
+  final gamificationService = ref.watch(gamificationServiceProvider);
+  return TripService(isarService, gamificationService);
 });
 
 final allTripsProvider = FutureProvider<List<Trip>>((ref) async {

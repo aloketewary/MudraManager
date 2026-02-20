@@ -15,7 +15,9 @@ class NotificationSettingsScreen extends ConsumerStatefulWidget {
 class _NotificationSettingsScreenState extends ConsumerState<NotificationSettingsScreen> {
   bool _dailySummaryEnabled = false;
   bool _weeklySummaryEnabled = true;
+  bool _streakReminderEnabled = true;
   TimeOfDay _reminderTime = const TimeOfDay(hour: 9, minute: 0);
+  TimeOfDay _streakReminderTime = const TimeOfDay(hour: 20, minute: 0);
   int _weeklyDay = DateTime.sunday;
 
   @override
@@ -27,11 +29,14 @@ class _NotificationSettingsScreenState extends ConsumerState<NotificationSetting
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
     final savedTime = await NotificationService.getSavedReminderTime();
+    final savedStreakTime = await NotificationService.getSavedStreakReminderTime();
     setState(() {
       _dailySummaryEnabled = prefs.getBool('daily_summary_enabled') ?? false;
       _weeklySummaryEnabled = prefs.getBool('weekly_summary_enabled') ?? true;
+      _streakReminderEnabled = prefs.getBool('streak_reminder_enabled') ?? true;
       _weeklyDay = prefs.getInt('weekly_summary_day') ?? DateTime.sunday;
       _reminderTime = savedTime ?? const TimeOfDay(hour: 9, minute: 0);
+      _streakReminderTime = savedStreakTime ?? const TimeOfDay(hour: 20, minute: 0);
     });
   }
 
@@ -66,6 +71,21 @@ class _NotificationSettingsScreenState extends ConsumerState<NotificationSetting
     setState(() => _weeklySummaryEnabled = enabled);
   }
 
+  Future<void> _toggleStreakReminder(bool enabled) async {
+    HapticFeedback.mediumImpact();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('streak_reminder_enabled', enabled);
+    
+    if (enabled) {
+      SnackbarService.success('Streak reminder enabled');
+    } else {
+      await NotificationService.cancelStreakReminder();
+      SnackbarService.success('Streak reminder disabled');
+    }
+    
+    setState(() => _streakReminderEnabled = enabled);
+  }
+
   Future<void> _selectTime() async {
     final time = await showTimePicker(
       context: context,
@@ -78,6 +98,19 @@ class _NotificationSettingsScreenState extends ConsumerState<NotificationSetting
         await NotificationService.scheduleDailyReminder(time);
         SnackbarService.success('Reminder time updated');
       }
+    }
+  }
+
+  Future<void> _selectStreakReminderTime() async {
+    final time = await showTimePicker(
+      context: context,
+      initialTime: _streakReminderTime,
+    );
+    
+    if (time != null) {
+      setState(() => _streakReminderTime = time);
+      await NotificationService.saveStreakReminderTime(time);
+      SnackbarService.success('Streak reminder time updated');
     }
   }
 
@@ -220,6 +253,64 @@ class _NotificationSettingsScreenState extends ConsumerState<NotificationSetting
                 onPressed: _testDailySummary,
                 icon: const Icon(Icons.send),
                 label: const Text('Test Daily Summary'),
+              ),
+            ),
+          ],
+          const SizedBox(height: 16),
+          Card(
+            elevation: 0,
+            color: color.surfaceContainerHighest,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: color.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(Icons.local_fire_department, color: color.primary, size: 24),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Streak Reminder', style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: color.onSurface)),
+                        const SizedBox(height: 2),
+                        Text('Daily reminder to maintain streak', style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant)),
+                      ],
+                    ),
+                  ),
+                  Switch(value: _streakReminderEnabled, onChanged: _toggleStreakReminder),
+                ],
+              ),
+            ),
+          ),
+          if (_streakReminderEnabled) ...[
+            const SizedBox(height: 8),
+            Card(
+              elevation: 0,
+              color: color.surfaceContainerHighest,
+              child: InkWell(
+                onTap: _selectStreakReminderTime,
+                borderRadius: BorderRadius.circular(12),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      Icon(Icons.access_time, color: color.primary),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Text('Reminder Time', style: textTheme.titleSmall?.copyWith(color: color.onSurface)),
+                      ),
+                      Text(_streakReminderTime.format(context), style: textTheme.titleMedium?.copyWith(color: color.primary)),
+                      const SizedBox(width: 8),
+                      Icon(Icons.chevron_right, color: color.onSurfaceVariant),
+                    ],
+                  ),
+                ),
               ),
             ),
           ],

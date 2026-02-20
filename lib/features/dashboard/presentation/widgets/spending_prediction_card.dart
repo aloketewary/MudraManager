@@ -20,93 +20,96 @@ class SpendingPredictionCard extends ConsumerWidget {
       data: (predicted) {
         if (predicted <= 0) return const SizedBox.shrink();
 
-        return Container(
-          margin: EdgeInsets.symmetric(horizontal: globalPadding),
-          child: Card(
-            elevation: 0,
-            color: color.surfaceContainerLow,
-            child: InkWell(
-              onTap: () {
-                HapticFeedback.mediumImpact();
-                context.push('/statistics');
-              },
-              borderRadius: BorderRadius.circular(20),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.trending_up, color: color.primary),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Spending Prediction',
-                          style: textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const Spacer(),
-                        Icon(
-                          Icons.chevron_right,
-                          color: color.onSurfaceVariant,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Next Month',
-                              style: textTheme.bodySmall?.copyWith(
-                                color: color.onSurfaceVariant,
-                              ),
+        return Padding(
+          padding: const EdgeInsets.only(top: 16),
+          child: Container(
+            margin: EdgeInsets.symmetric(horizontal: globalPadding),
+            child: Card(
+              elevation: 0,
+              color: color.surfaceContainerLow,
+              child: InkWell(
+                onTap: () {
+                  HapticFeedback.mediumImpact();
+                  context.push('/statistics');
+                },
+                borderRadius: BorderRadius.circular(20),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.trending_up, color: color.primary),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Spending Prediction',
+                            style: textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
                             ),
-                            const SizedBox(height: 4),
-                            TweenAnimationBuilder<double>(
-                              duration: const Duration(milliseconds: 1500),
-                              curve: Curves.easeOutCubic,
-                              tween: Tween(begin: 0.0, end: predicted),
-                              builder: (context, value, child) {
-                                return CurrencyText(
-                                  amount: value,
-                                  compact: false,
-                                  style: textTheme.headlineMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: color.primary,
-                                  ),
-                                );
-                              },
-                            ),
-                          ],
-                        ),
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: color.primaryContainer,
-                            borderRadius: BorderRadius.circular(12),
                           ),
-                          child: Icon(
-                            Icons.auto_graph,
-                            color: color.onPrimaryContainer,
-                            size: 32,
+                          const Spacer(),
+                          Icon(
+                            Icons.chevron_right,
+                            color: color.onSurfaceVariant,
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Based on last 3 months average',
-                      style: textTheme.bodySmall?.copyWith(
-                        color: color.onSurfaceVariant,
-                        fontStyle: FontStyle.italic,
+                        ],
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Next Month',
+                                style: textTheme.bodySmall?.copyWith(
+                                  color: color.onSurfaceVariant,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              TweenAnimationBuilder<double>(
+                                duration: const Duration(milliseconds: 1500),
+                                curve: Curves.easeOutCubic,
+                                tween: Tween(begin: 0.0, end: predicted),
+                                builder: (context, value, child) {
+                                  return CurrencyText(
+                                    amount: value,
+                                    compact: false,
+                                    style: textTheme.headlineMedium?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: color.primary,
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: color.primaryContainer,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Icon(
+                              Icons.auto_graph,
+                              color: color.onPrimaryContainer,
+                              size: 32,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Based on last 3 months average',
+                        style: textTheme.bodySmall?.copyWith(
+                          color: color.onSurfaceVariant,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

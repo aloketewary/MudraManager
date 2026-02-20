@@ -10,6 +10,62 @@ import 'package:mudra_manager/features/dashboard/data/status_data_provider.dart'
 import 'dart:ui' as ui;
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/shared/widgets/period_calendar_selector.dart';
+import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
+import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
+
+class _AnimatedCard extends StatefulWidget {
+  final Widget child;
+  final int delay;
+
+  const _AnimatedCard({required this.child, this.delay = 0});
+
+  @override
+  State<_AnimatedCard> createState() => _AnimatedCardState();
+}
+
+class _AnimatedCardState extends State<_AnimatedCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.1),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+
+    Future.delayed(Duration(milliseconds: widget.delay), () {
+      if (mounted) _controller.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _fadeAnimation,
+      child: SlideTransition(position: _slideAnimation, child: widget.child),
+    );
+  }
+}
 
 class StatisticsScreen extends ConsumerStatefulWidget {
   const StatisticsScreen({super.key});
@@ -25,6 +81,14 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> {
   DateTime? _customEnd;
   final Set<String> _disabledCategories = {};
   final GlobalKey _chartKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(gamificationServiceProvider).track(GamificationEvent.analyticsViewed);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +147,9 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                 const SizedBox(height: 24),
 
                 // Income/Expense Chart Card
-                Card(
+                _AnimatedCard(
+                  delay: 0,
+                  child: Card(
                   elevation: 0,
                   color: color.surfaceContainerLow,
                   child: Padding(
@@ -99,10 +165,12 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                               size: 28,
                             ),
                             const SizedBox(width: 12),
-                            Text(
-                              ctxt.statistics_quickOverviewTitle,
-                              style: textTheme.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
+                            Expanded(
+                              child: Text(
+                                ctxt.statistics_quickOverviewTitle,
+                                style: textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ],
@@ -129,8 +197,9 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                                     sideTitles: SideTitles(
                                       showTitles: true,
                                       getTitlesWidget: (value, meta) {
+                                        final day = value.toInt() + 1;
                                         return Text(
-                                          value.toInt().toString(),
+                                          day.toString(),
                                           style: textTheme.bodySmall,
                                         );
                                       },
@@ -169,12 +238,15 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                       ],
                     ),
                   ),
+                  ),
                 ),
 
                 const SizedBox(height: 16),
 
                 // Metrics Cards
-                Row(
+                _AnimatedCard(
+                  delay: 100,
+                  child: Row(
                   children: [
                     Expanded(
                       child: Card(
@@ -198,11 +270,18 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                                 ),
                               ),
                               const SizedBox(height: 4),
-                              CurrencyText(
-                                amount: d.income,
-                                style: textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                              TweenAnimationBuilder<double>(
+                                duration: const Duration(milliseconds: 1500),
+                                curve: Curves.easeOutCubic,
+                                tween: Tween(begin: 0.0, end: d.income),
+                                builder: (context, value, child) {
+                                  return CurrencyText(
+                                    amount: value,
+                                    style: textTheme.titleLarge?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  );
+                                },
                               ),
                             ],
                           ),
@@ -232,11 +311,18 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                                 ),
                               ),
                               const SizedBox(height: 4),
-                              CurrencyText(
-                                amount: d.expense,
-                                style: textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                              TweenAnimationBuilder<double>(
+                                duration: const Duration(milliseconds: 1500),
+                                curve: Curves.easeOutCubic,
+                                tween: Tween(begin: 0.0, end: d.expense),
+                                builder: (context, value, child) {
+                                  return CurrencyText(
+                                    amount: value,
+                                    style: textTheme.titleLarge?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  );
+                                },
                               ),
                             ],
                           ),
@@ -244,80 +330,226 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                       ),
                     ),
                   ],
+                  ),
                 ),
 
                 const SizedBox(height: 12),
 
-                Row(
-                  children: [
-                    Expanded(
-                      child: Card(
-                        elevation: 0,
-                        color: color.surfaceContainerLow,
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Icon(
-                                Icons.account_balance_wallet,
-                                color: color.primary,
-                                size: 20,
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Net',
-                                style: textTheme.bodySmall?.copyWith(
-                                  color: color.onSurfaceVariant,
+                _AnimatedCard(
+                  delay: 200,
+                  child: Consumer(
+                  builder: (context, ref, child) {
+                    final totalBalanceAsync = ref.watch(totalAccountBalanceProvider);
+                    return totalBalanceAsync.when(
+                      data: (totalBalance) => Row(
+                        children: [
+                          Expanded(
+                            child: Card(
+                              elevation: 0,
+                              color: color.surfaceContainerLow,
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Icon(
+                                      Icons.account_balance_wallet,
+                                      color: color.primary,
+                                      size: 20,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Net Worth',
+                                      style: textTheme.bodySmall?.copyWith(
+                                        color: color.onSurfaceVariant,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    TweenAnimationBuilder<double>(
+                                      duration: const Duration(milliseconds: 1500),
+                                      curve: Curves.easeOutCubic,
+                                      tween: Tween(begin: 0.0, end: totalBalance),
+                                      builder: (context, value, child) {
+                                        return CurrencyText(
+                                          amount: value,
+                                          style: textTheme.titleLarge?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ],
                                 ),
                               ),
-                              const SizedBox(height: 4),
-                              CurrencyText(
-                                amount: d.income - d.expense,
-                                style: textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
+                            ),
                           ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Card(
-                        elevation: 0,
-                        color: color.surfaceContainerLow,
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Icon(
-                                Icons.savings,
-                                color: color.primary,
-                                size: 20,
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Savings Rate',
-                                style: textTheme.bodySmall?.copyWith(
-                                  color: color.onSurfaceVariant,
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Card(
+                              elevation: 0,
+                              color: color.surfaceContainerLow,
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Icon(
+                                      Icons.savings,
+                                      color: color.primary,
+                                      size: 20,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Savings Rate',
+                                      style: textTheme.bodySmall?.copyWith(
+                                        color: color.onSurfaceVariant,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    TweenAnimationBuilder<double>(
+                                      duration: const Duration(milliseconds: 1500),
+                                      curve: Curves.easeOutCubic,
+                                      tween: Tween(begin: 0.0, end: d.savingsRate),
+                                      builder: (context, value, child) {
+                                        return Text(
+                                          '${value.toStringAsFixed(1)}%',
+                                          style: textTheme.titleLarge?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ],
                                 ),
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                '${d.savingsRate.toStringAsFixed(1)}%',
-                                style: textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
+                            ),
                           ),
-                        ),
+                        ],
                       ),
-                    ),
-                  ],
+                      loading: () => Row(
+                        children: [
+                          Expanded(
+                            child: Card(
+                              elevation: 0,
+                              color: color.surfaceContainerLow,
+                              child: const Padding(
+                                padding: EdgeInsets.all(16),
+                                child: Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Card(
+                              elevation: 0,
+                              color: color.surfaceContainerLow,
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Icon(
+                                      Icons.savings,
+                                      color: color.primary,
+                                      size: 20,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Savings Rate',
+                                      style: textTheme.bodySmall?.copyWith(
+                                        color: color.onSurfaceVariant,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      '${d.savingsRate.toStringAsFixed(1)}%',
+                                      style: textTheme.titleLarge?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      error: (_, __) => Row(
+                        children: [
+                          Expanded(
+                            child: Card(
+                              elevation: 0,
+                              color: color.surfaceContainerLow,
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Icon(
+                                      Icons.account_balance_wallet,
+                                      color: color.primary,
+                                      size: 20,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Net Worth',
+                                      style: textTheme.bodySmall?.copyWith(
+                                        color: color.onSurfaceVariant,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    CurrencyText(
+                                      amount: d.income - d.expense,
+                                      style: textTheme.titleLarge?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Card(
+                              elevation: 0,
+                              color: color.surfaceContainerLow,
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Icon(
+                                      Icons.savings,
+                                      color: color.primary,
+                                      size: 20,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Savings Rate',
+                                      style: textTheme.bodySmall?.copyWith(
+                                        color: color.onSurfaceVariant,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      '${d.savingsRate.toStringAsFixed(1)}%',
+                                      style: textTheme.titleLarge?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                  ),
                 ),
 
                 const SizedBox(height: 16),
@@ -329,7 +561,9 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> {
 
                 // Insights Card
                 if (d.categoryData.isNotEmpty)
-                  Card(
+                  _AnimatedCard(
+                    delay: 300,
+                    child: Card(
                     elevation: 0,
                     color: color.surfaceContainerLow,
                     child: Padding(
@@ -345,10 +579,12 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                                 size: 28,
                               ),
                               const SizedBox(width: 12),
-                              Text(
-                                ctxt.statistics_insightsTitle,
-                                style: textTheme.headlineSmall?.copyWith(
-                                  fontWeight: FontWeight.bold,
+                              Expanded(
+                                child: Text(
+                                  ctxt.statistics_insightsTitle,
+                                  style: textTheme.headlineSmall?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                             ],
@@ -373,11 +609,15 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                         ],
                       ),
                     ),
+                    ),
                   ),
 
                 const SizedBox(height: 16),
 
-                _buildCategoryTrendsCard(d),
+                _AnimatedCard(
+                  delay: 400,
+                  child: _buildCategoryTrendsCard(d),
+                ),
 
                 const SizedBox(height: 100),
               ],
@@ -433,10 +673,12 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Financial Health
-        healthAsync.when(
-          data: (health) {
-            if (health.score == 0) return const SizedBox.shrink();
-            return Card(
+        _AnimatedCard(
+          delay: 0,
+          child: healthAsync.when(
+            data: (health) {
+              if (health.score == 0) return const SizedBox.shrink();
+              return Card(
               elevation: 0,
               color: color.surfaceContainerLow,
               child: Padding(
@@ -664,16 +906,19 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                   ],
                 ),
               ),
-            );
-          },
-          loading: () => const SizedBox.shrink(),
-          error: (_, __) => const SizedBox.shrink(),
+              );
+            },
+            loading: () => const SizedBox.shrink(),
+            error: (_, __) => const SizedBox.shrink(),
+          ),
         ),
 
         const SizedBox(height: 16),
 
         // Spending Prediction
-        predictionAsync.when(
+        _AnimatedCard(
+          delay: 100,
+          child: predictionAsync.when(
           data: (predicted) {
             if (predicted <= 0) return const SizedBox.shrink();
             return Card(
@@ -688,10 +933,12 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                       children: [
                         Icon(Icons.trending_up, color: color.primary, size: 28),
                         const SizedBox(width: 12),
-                        Text(
-                          'Spending Prediction',
-                          style: textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
+                        Expanded(
+                          child: Text(
+                            'Spending Prediction',
+                            style: textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ],
@@ -732,17 +979,23 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> {
           },
           loading: () => const SizedBox.shrink(),
           error: (_, __) => const SizedBox.shrink(),
+          ),
         ),
 
         const SizedBox(height: 16),
 
         // 12-Month Expense Trends
-        _build12MonthTrendsCard(),
+        _AnimatedCard(
+          delay: 200,
+          child: _build12MonthTrendsCard(),
+        ),
 
         const SizedBox(height: 16),
 
         // Spending by Day
-        spendingByDayAsync.when(
+        _AnimatedCard(
+          delay: 300,
+          child: spendingByDayAsync.when(
           data: (byDay) {
             final maxSpending = byDay.values.reduce((a, b) => a > b ? a : b);
             if (maxSpending == 0) return const SizedBox.shrink();
@@ -762,10 +1015,12 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                           size: 28,
                         ),
                         const SizedBox(width: 12),
-                        Text(
-                          'Spending by Day',
-                          style: textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
+                        Expanded(
+                          child: Text(
+                            'Spending by Day',
+                            style: textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ],
@@ -831,6 +1086,7 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> {
           },
           loading: () => const SizedBox.shrink(),
           error: (_, __) => const SizedBox.shrink(),
+          ),
         ),
       ],
     );
@@ -880,10 +1136,12 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                   children: [
                     Icon(Icons.category, color: color.primary, size: 28),
                     const SizedBox(width: 12),
-                    Text(
-                      'Category Trends',
-                      style: textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
+                    Expanded(
+                      child: Text(
+                        'Category Trends',
+                        style: textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ],
@@ -1027,6 +1285,7 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> {
         predicted: predicted,
         categoryTrends: categoryTrends,
         spendingByDay: spendingByDay,
+        gamificationService: ref.read(gamificationServiceProvider),
       );
     } catch (e) {
       if (mounted) {
@@ -1074,10 +1333,12 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                   children: [
                     Icon(Icons.timeline, color: color.primary, size: 28),
                     const SizedBox(width: 12),
-                    Text(
-                      '12-Month Expense Trends',
-                      style: textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
+                    Expanded(
+                      child: Text(
+                        '12-Month Expense Trends',
+                        style: textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ],
@@ -1218,7 +1479,7 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> {
   }
 
   Future<void> exportStatsToExcelMethod(StatsData data) async {
-    await exportStatsToExcel(data);
+    await exportStatsToExcel(data, ref.read(gamificationServiceProvider));
   }
 
   Future<void> exportStatsToPdfMethod(StatsData data) async {

@@ -25,115 +25,118 @@ class BudgetCard extends ConsumerWidget {
         final remaining = budget.amount - spent;
         final isOverBudget = spent >= budget.amount;
 
-        return Container(
-          margin: EdgeInsets.symmetric(horizontal: globalPadding),
-          child: Card(
-            elevation: 0,
-            color: color.surfaceContainerLow,
-            child: InkWell(
-              onTap: () {
-                HapticFeedback.mediumImpact();
-                context.push('/budget-dashboard');
-              },
-              borderRadius: BorderRadius.circular(20),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.pie_chart, color: color.primary),
-                        const SizedBox(width: 8),
-                        Text(
-                          budget.name,
-                          style: textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const Spacer(),
-                        Icon(
-                          Icons.chevron_right,
-                          color: color.onSurfaceVariant,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            children: [
-                              TweenAnimationBuilder<double>(
-                                duration: const Duration(milliseconds: 1500),
-                                curve: Curves.easeOutCubic,
-                                tween: Tween(begin: 0.0, end: percent),
-                                builder: (context, value, child) {
-                                  return Text(
-                                    '${value.toInt()}%',
-                                    style: textTheme.displayMedium?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: isOverBudget
-                                          ? Colors.red
-                                          : const Color(0xFFF59E0B),
-                                    ),
-                                  );
-                                },
-                              ),
-                              Text(
-                                isOverBudget ? 'Over Budget' : 'Used',
-                                style: textTheme.titleMedium?.copyWith(
-                                  color: isOverBudget
-                                      ? Colors.red
-                                      : const Color(0xFFF59E0B),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Expanded(
-                          flex: 2,
-                          child: Column(
-                            children: [
-                              _buildMetric('Spent', spent, color, textTheme),
-                              const SizedBox(height: 8),
-                              _buildMetric(
-                                'Budget',
-                                budget.amount,
-                                color,
-                                textTheme,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    const Divider(),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Icon(
-                          isOverBudget
-                              ? Icons.warning_amber
-                              : Icons.lightbulb_outline,
-                          size: 16,
-                          color: color.primary,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            isOverBudget
-                                ? 'You exceeded your budget by ${(spent - budget.amount).toStringAsFixed(0)}'
-                                : 'You have ${remaining.toStringAsFixed(0)} left to spend',
-                            style: textTheme.bodySmall?.copyWith(
-                              color: color.onSurfaceVariant,
+        return Padding(
+          padding: const EdgeInsets.only(top: 16),
+          child: Container(
+            margin: EdgeInsets.symmetric(horizontal: globalPadding),
+            child: Card(
+              elevation: 0,
+              color: color.surfaceContainerLow,
+              child: InkWell(
+                onTap: () {
+                  HapticFeedback.mediumImpact();
+                  context.push('/budget-dashboard');
+                },
+                borderRadius: BorderRadius.circular(20),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.pie_chart, color: color.primary),
+                          const SizedBox(width: 8),
+                          Text(
+                            budget.name,
+                            style: textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
+                          const Spacer(),
+                          Icon(
+                            Icons.chevron_right,
+                            color: color.onSurfaceVariant,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              children: [
+                                TweenAnimationBuilder<double>(
+                                  duration: const Duration(milliseconds: 1500),
+                                  curve: Curves.easeOutCubic,
+                                  tween: Tween(begin: 0.0, end: percent),
+                                  builder: (context, value, child) {
+                                    return Text(
+                                      '${value.toInt()}%',
+                                      style: textTheme.displayMedium?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: isOverBudget
+                                            ? Colors.red
+                                            : const Color(0xFFF59E0B),
+                                      ),
+                                    );
+                                  },
+                                ),
+                                Text(
+                                  isOverBudget ? 'Over Budget' : 'Used',
+                                  style: textTheme.titleMedium?.copyWith(
+                                    color: isOverBudget
+                                        ? Colors.red
+                                        : const Color(0xFFF59E0B),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Expanded(
+                            flex: 2,
+                            child: Column(
+                              children: [
+                                _buildMetric('Spent', spent, color, textTheme),
+                                const SizedBox(height: 8),
+                                _buildMetric(
+                                  'Budget',
+                                  budget.amount,
+                                  color,
+                                  textTheme,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      const Divider(),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Icon(
+                            isOverBudget
+                                ? Icons.warning_amber
+                                : Icons.lightbulb_outline,
+                            size: 16,
+                            color: color.primary,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              isOverBudget
+                                  ? 'You exceeded your budget by ${(spent - budget.amount).toStringAsFixed(0)}'
+                                  : 'You have ${remaining.toStringAsFixed(0)} left to spend',
+                              style: textTheme.bodySmall?.copyWith(
+                                color: color.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

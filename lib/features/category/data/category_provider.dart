@@ -5,6 +5,8 @@ import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
+import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
+import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
 
 final categoryListProvider = FutureProvider<List<Category>>((ref) async {
   final isar = await ref.watch(isarServiceProvider).getInstance();
@@ -42,14 +44,16 @@ final expenseCategoriesProvider = FutureProvider<List<Category>>((ref) async {
 final categoryServiceProvider = Provider((ref) {
   final isar = ref.watch(isarServiceProvider);
   final log = ref.getLogger('CategoryService');
-  return CategoryService(isar, log);
+  final gamificationService = ref.watch(gamificationServiceProvider);
+  return CategoryService(isar, log, gamificationService);
 });
 
 class CategoryService {
   final IsarService isarService;
   final AppLog log;
+  final gamificationService;
 
-  CategoryService(this.isarService, this.log);
+  CategoryService(this.isarService, this.log, this.gamificationService);
 
   Future<void> addCategory(Category category) async {
     final isar = await isarService.getInstance();
@@ -57,6 +61,7 @@ class CategoryService {
       await isar.categorys.put(category);
     });
     log.i('Category added: ${category.name}');
+    await gamificationService.track(GamificationEvent.categoryCreated);
   }
 
   Future<void> deleteCategory(int id) async {

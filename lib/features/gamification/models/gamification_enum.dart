@@ -1,0 +1,16 @@
+enum GamificationEvent {
+  transactionAdded,
+  budgetCreated,
+  dailyCheckIn,
+  goalCompleted,
+  goalCreated,
+  smsTransactionApproved,
+  categoryCreated,
+  accountCreated,
+  transferCompleted,
+  recurringTransactionCreated,
+  tagUsed,
+  analyticsViewed,
+  reportExported,
+  tripCreated,
+}

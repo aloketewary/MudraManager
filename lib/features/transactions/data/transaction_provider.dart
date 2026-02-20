@@ -6,12 +6,15 @@ import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
+import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
+import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
 import 'package:mudra_manager/features/transactions/presentation/widgets/transaction_group.dart';
 
 final transactionProvider = Provider<TransactionService>((ref) {
   final isarService = ref.watch(isarServiceProvider);
   final log = ref.getLogger('TransactionService');
-  return TransactionService(isarService, log);
+  final gamificationService = ref.watch(gamificationServiceProvider);
+  return TransactionService(isarService, log, gamificationService);
 });
 
 final filteredTransactionProvider =
@@ -257,8 +260,9 @@ final transactionCountsProvider = FutureProvider.autoDispose<Map<Id, int>>((
 class TransactionService {
   final IsarService isarService;
   final AppLog log;
+  final gamificationService;
 
-  TransactionService(this.isarService, this.log);
+  TransactionService(this.isarService, this.log, this.gamificationService);
 
   Future<void> addTransaction(Transaction txn) async {
     log.d('Adding transaction: ${txn.isExpense ? "Expense" : "Income"} of ₹${txn.amount}');
@@ -282,6 +286,15 @@ class TransactionService {
       log.d('Verified: Transaction ${txn.id} exists in DB with date: ${saved.date}');
     } else {
       log.e('ERROR: Transaction ${txn.id} not found in DB after save!');
+    }
+    
+    // Track gamification
+    await gamificationService.track(GamificationEvent.transactionAdded);
+    if (txn.isTransfer) {
+      await gamificationService.track(GamificationEvent.transferCompleted);
+    }
+    if (txn.tags.isNotEmpty) {
+      await gamificationService.track(GamificationEvent.tagUsed);
     }
   }
 

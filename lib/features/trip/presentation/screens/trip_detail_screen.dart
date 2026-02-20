@@ -818,7 +818,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
         }
 
         // Flatten settlements into list
-        const List<Map<String, dynamic>> settlementList = [];
+        final List<Map<String, dynamic>> settlementList = [];
         settlements.forEach((from, toMap) {
           toMap.forEach((to, amount) {
             final key = '${from}_TO_$to';
@@ -903,8 +903,8 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
     }
 
     double totalCost = 0;
-    const Map<String, double> categoryTotals = {};
-    const Map<int, double> participantSpending = {};
+    final Map<String, double> categoryTotals = {};
+    final Map<int, double> participantSpending = {};
 
     for (var tripTxn in transactionsList) {
       final txn = tripTxn.transaction.value;

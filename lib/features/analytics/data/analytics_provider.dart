@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/features/analytics/data/advanced_analytics_service.dart';
+import 'package:mudra_manager/features/dashboard/data/status_data_provider.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 
 final analyticsServiceProvider = Provider<AdvancedAnalyticsService>((ref) {
@@ -16,7 +17,8 @@ final financialHealthProvider = FutureProvider<FinancialHealthScore>((
   ref,
 ) async {
   final service = ref.watch(analyticsServiceProvider);
-  return await service.calculateHealthScore();
+  final totalBalance = await ref.watch(totalAccountBalanceProvider.future);
+  return await service.calculateHealthScore(totalBalance);
 });
 
 final categoryTrendsProvider = FutureProvider<Map<String, CategoryTrend>>((

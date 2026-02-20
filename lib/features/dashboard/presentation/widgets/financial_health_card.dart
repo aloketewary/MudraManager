@@ -19,124 +19,129 @@ class FinancialHealthCard extends ConsumerWidget {
       data: (health) {
         if (health.score == 0) return const SizedBox.shrink();
 
-        return Container(
-          margin: EdgeInsets.symmetric(horizontal: globalPadding),
-          child: Card(
-            elevation: 0,
-            color: color.surfaceContainerLow,
-            child: InkWell(
-              onTap: () {
-                HapticFeedback.mediumImpact();
-                context.push('/statistics');
-              },
-              borderRadius: BorderRadius.circular(20),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.favorite, color: color.primary),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Financial Health',
-                          style: textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const Spacer(),
-                        Icon(
-                          Icons.chevron_right,
-                          color: color.onSurfaceVariant,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            children: [
-                              TweenAnimationBuilder<int>(
-                                duration: const Duration(milliseconds: 1500),
-                                curve: Curves.easeOutCubic,
-                                tween: IntTween(begin: 0, end: health.score),
-                                builder: (context, value, child) {
-                                  return Text(
-                                    '$value',
-                                    style: textTheme.displayMedium?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: _getScoreColor(
-                                        health.score,
-                                        color,
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                              Text(
-                                health.rating,
-                                style: textTheme.titleMedium?.copyWith(
-                                  color: _getScoreColor(health.score, color),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Expanded(
-                          flex: 2,
-                          child: Column(
-                            children: [
-                              _buildMetric(
-                                'Savings Rate',
-                                '${health.savingsRate.toStringAsFixed(1)}%',
-                                color,
-                                textTheme,
-                              ),
-                              const SizedBox(height: 8),
-                              _buildMetric(
-                                'Expense Ratio',
-                                '${health.expenseRatio.toStringAsFixed(1)}%',
-                                color,
-                                textTheme,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    if (health.insights.isNotEmpty) ...[
-                      const SizedBox(height: 16),
-                      const Divider(),
-                      const SizedBox(height: 8),
-                      ...health.insights
-                          .take(2)
-                          .map(
-                            (insight) => Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 4),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.lightbulb_outline,
-                                    size: 16,
-                                    color: color.primary,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      insight,
-                                      style: textTheme.bodySmall?.copyWith(
-                                        color: color.onSurfaceVariant,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
+        return Padding(
+          padding: const EdgeInsets.only(top: 16),
+          child: Container(
+            margin: EdgeInsets.symmetric(horizontal: globalPadding),
+            child: Card(
+              elevation: 0,
+              color: color.surfaceContainerLow,
+              child: InkWell(
+                onTap: () {
+                  HapticFeedback.mediumImpact();
+                  context.push('/statistics');
+                },
+                borderRadius: BorderRadius.circular(20),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.favorite, color: color.primary),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Financial Health',
+                            style: textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
+                          const Spacer(),
+                          Icon(
+                            Icons.chevron_right,
+                            color: color.onSurfaceVariant,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              children: [
+                                TweenAnimationBuilder<int>(
+                                  duration: const Duration(milliseconds: 1500),
+                                  curve: Curves.easeOutCubic,
+                                  tween: IntTween(begin: 0, end: health.score),
+                                  builder: (context, value, child) {
+                                    return Text(
+                                      '$value',
+                                      style: textTheme.displayMedium?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: _getScoreColor(
+                                          health.score,
+                                          color,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                                Text(
+                                  health.rating,
+                                  style: textTheme.titleMedium?.copyWith(
+                                    color: _getScoreColor(health.score, color),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Expanded(
+                            flex: 2,
+                            child: Column(
+                              children: [
+                                _buildMetric(
+                                  'Savings Rate',
+                                  '${health.savingsRate.toStringAsFixed(1)}%',
+                                  color,
+                                  textTheme,
+                                ),
+                                const SizedBox(height: 8),
+                                _buildMetric(
+                                  'Expense Ratio',
+                                  '${health.expenseRatio.toStringAsFixed(1)}%',
+                                  color,
+                                  textTheme,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (health.insights.isNotEmpty) ...[
+                        const SizedBox(height: 16),
+                        const Divider(),
+                        const SizedBox(height: 8),
+                        ...health.insights
+                            .take(2)
+                            .map(
+                              (insight) => Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 4,
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.lightbulb_outline,
+                                      size: 16,
+                                      color: color.primary,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        insight,
+                                        style: textTheme.bodySmall?.copyWith(
+                                          color: color.onSurfaceVariant,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
               ),
             ),

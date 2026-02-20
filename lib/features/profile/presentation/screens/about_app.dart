@@ -367,7 +367,7 @@ class AboutScreen extends StatelessWidget {
                     color: color.onSurface,
                     fontWeight: FontWeight.bold,
                   ),
-                  maxLines: 2,
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),

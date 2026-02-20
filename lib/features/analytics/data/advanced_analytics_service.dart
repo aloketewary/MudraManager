@@ -35,7 +35,7 @@ class AdvancedAnalyticsService {
   }
 
   // Calculate financial health score (0-100)
-  Future<FinancialHealthScore> calculateHealthScore() async {
+  Future<FinancialHealthScore> calculateHealthScore(double totalBalance) async {
     final now = DateTime.now();
     final transactions = await _transactionService.getAllForDashBoard();
 
@@ -65,7 +65,20 @@ class AdvancedAnalyticsService {
     // Score calculation (0-100)
     double score = 0;
 
-    // Savings rate (40 points)
+    // Net worth factor (20 points)
+    if (totalBalance > 0) {
+      if (totalBalance >= income * 3) {
+        score += 20;
+      } else if (totalBalance >= income) {
+        score += 15;
+      } else if (totalBalance >= income * 0.5) {
+        score += 10;
+      } else {
+        score += 5;
+      }
+    }
+
+    // Savings rate (30 points)
     if (savingsRate >= 30) {
       score += 40;
     } else if (savingsRate >= 20) {

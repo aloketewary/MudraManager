@@ -3,7 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
+import 'package:mudra_manager/core/logging/app_log.dart';
+import 'package:mudra_manager/core/logging/logger_provider.dart';
+import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
+import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/budget/data/budget_alert_provider.dart';
 import 'package:mudra_manager/features/dashboard/presentation/screens/cash_flow_screen.dart';
 import 'package:mudra_manager/features/dashboard/presentation/widgets/budget_card.dart';
@@ -13,12 +17,13 @@ import 'package:mudra_manager/features/dashboard/presentation/widgets/net_worth_
 import 'package:mudra_manager/features/dashboard/presentation/widgets/spending_prediction_card.dart';
 import 'package:mudra_manager/features/dashboard/presentation/widgets/dashboard_action_button.dart';
 import 'package:mudra_manager/features/dashboard/presentation/widgets/swipeable_account_card.dart';
+import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
 import 'package:mudra_manager/features/profile/data/help_guide_provider.dart';
-import 'package:mudra_manager/features/statistics/presentation/widgets/period_selector.dart';
 import 'package:mudra_manager/features/trip/presentation/widgets/active_trip_mini_card.dart';
 import 'package:mudra_manager/shared/widgets/budget_alert_banner.dart';
 import 'package:mudra_manager/shared/widgets/period_calendar_selector.dart';
 import 'package:mudra_manager/shared/widgets/responseive_layout_builder.dart';
+import 'package:mudra_manager/features/gamification/widgets/recent_achievement_card.dart';
 
 class _AnimatedCard extends StatefulWidget {
   final Widget child;
@@ -87,10 +92,19 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
   PeriodType _selectedPeriod = PeriodType.month;
   DateTime? _customStart;
   DateTime? _customEnd;
+  final AppLog log = AppLog(getLogger(), 'DashBoardHome');
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final service = await ref.read(gamificationServiceInitProvider.future);
+      final result = await service.updateDailyCheckIn();
+      if (result != null && mounted) {
+        SnackbarService.success('🔥 $result');
+        log.i('✅ Daily check-in completed');
+      }
+    });
   }
 
   @override
@@ -178,8 +192,9 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                               await SharedPrefsUtil.instance
                                   .setHasSeenHelpGuide(true);
                               ref
-                                  .read(hasSeenHelpGuideProvider.notifier)
-                                  .state = true;
+                                      .read(hasSeenHelpGuideProvider.notifier)
+                                      .state =
+                                  true;
                             },
                           ),
                         ],
@@ -203,7 +218,7 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
             Container(
               margin: EdgeInsets.symmetric(horizontal: globalPadding),
               child: ResponsiveLayoutBuilder(
-                sizedBoxHeight: 110,
+                // sizedBoxHeight: 110,
                 columnWidget: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -234,7 +249,7 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                         label: ctxt.dashboard_add_transaction_text,
                         icon: Icons.add_circle_outline,
                         onTap: () => context.push('/add-transaction'),
-                        heroTag: 'addTransactionHero',
+                        heroTag: 'addTransactionHeroDashboard',
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -273,32 +288,26 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                 },
               ),
             ),
-            const SizedBox(height: 16),
             _AnimatedCard(
               delay: 0,
               child: FinancialHealthCard(globalPadding: globalPadding),
             ),
-            const SizedBox(height: 16),
             _AnimatedCard(
               delay: 100,
               child: NetWorthCard(globalPadding: globalPadding),
             ),
-            const SizedBox(height: 16),
             _AnimatedCard(
               delay: 200,
               child: SpendingPredictionCard(globalPadding: globalPadding),
             ),
-            const SizedBox(height: 16),
             _AnimatedCard(
               delay: 300,
               child: ActiveTripMiniCard(globalPadding: globalPadding),
             ),
-            const SizedBox(height: 16),
             _AnimatedCard(
               delay: 400,
               child: BudgetCard(globalPadding: globalPadding),
             ),
-            const SizedBox(height: 16),
             _AnimatedCard(
               delay: 500,
               child: GoalCard(globalPadding: globalPadding),

@@ -167,10 +167,8 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
                 ),
               ),
               ResponsiveLayoutBuilder(
-                sizedBoxHeight: 350,
                 columnWidget: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     buildCashFlowCard(
                       false,
@@ -192,7 +190,6 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
                   ],
                 ),
                 rowWidget: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     buildCashFlowCard(
                       false,
@@ -202,6 +199,7 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
                       filter,
                       prevIncome,
                     ),
+                    const SizedBox(width: 12),
                     buildCashFlowCard(
                       true,
                       expense,

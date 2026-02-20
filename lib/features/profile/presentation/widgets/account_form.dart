@@ -7,6 +7,8 @@ import 'package:mudra_manager/core/extension/account_type_extenstion.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/utils/simple_color_picker.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
+import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
+import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
 import 'package:mudra_manager/shared/widgets/adaptive_text.dart';
 
 class AccountForm extends ConsumerStatefulWidget {
@@ -59,6 +61,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
     final isar = await isarService.getInstance();
 
     final account = widget.account ?? Account();
+    final isNewAccount = widget.account == null;
 
     account.name = _nameController.text.trim();
     account.initialBalance = double.tryParse(_balanceController.text) ?? 0.0;
@@ -70,6 +73,11 @@ class _AccountFormState extends ConsumerState<AccountForm> {
     await isar.writeTxn(() async {
       await isar.accounts.put(account);
     });
+
+    if (isNewAccount) {
+      final gamificationService = await ref.read(gamificationServiceInitProvider.future);
+      await gamificationService.track(GamificationEvent.accountCreated);
+    }
 
     context.pop();
     ref.invalidate(accountsProvider);

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_widget/home_widget.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/db/models/user_profile.dart';
 import 'package:mudra_manager/core/extension/localization_extenstion.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
@@ -13,6 +14,8 @@ import 'package:mudra_manager/core/services/notification_service.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/features/dashboard/data/greeting_provider.dart';
 import 'package:mudra_manager/features/dashboard/presentation/screens/dashboard_home.dart';
+import 'package:mudra_manager/features/gamification/providers/achievement_unlock_listener.dart';
+import 'package:mudra_manager/features/gamification/widgets/streak_indicator.dart';
 import 'package:mudra_manager/features/profile/data/user_profile_provider.dart';
 import 'package:mudra_manager/features/profile/presentation/screens/profile_screen.dart';
 import 'package:mudra_manager/features/statistics/presentation/screens/statistics_screen.dart';
@@ -57,6 +60,12 @@ class HomePageState extends ConsumerState<HomePage>
     initNotification();
     _setupWidgetClickListener();
     _setupMethodChannel();
+    
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        ref.read(achievementUnlockListenerProvider).initialize(context);
+      }
+    });
   }
 
   @override
@@ -143,7 +152,7 @@ class HomePageState extends ConsumerState<HomePage>
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         floatingActionButton: _selectedIndex == 1
             ? FloatingActionButton.extended(
-                heroTag: 'addTransactionHero',
+                heroTag: 'addTransactionHeroTab1',
                 onPressed: () => context.push('/add-transaction'),
                 icon: const Icon(Icons.add),
                 label: Text(ctxt.dashboard_add_transaction_text),
@@ -255,6 +264,13 @@ class HomePageState extends ConsumerState<HomePage>
             ],
           ),
           actions: [
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [StreakIndicator()],
+              ),
+            ),
             FutureBuilder(
               future: notificationService.countUnreadNotification(),
               builder: (_, snapshot) {

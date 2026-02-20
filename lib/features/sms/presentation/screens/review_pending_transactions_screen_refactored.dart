@@ -9,12 +9,15 @@ import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
+import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/services/widget_service.dart';
 import 'package:mudra_manager/core/utils/category_matcher.dart';
 import 'package:mudra_manager/core/utils/dialog_utils.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/category/data/category_provider.dart';
+import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
+import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
 import 'package:mudra_manager/features/transactions/data/pending_transaction_prodiver.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 import 'package:mudra_manager/shared/widgets/approve_transaction_sheet.dart';
@@ -321,6 +324,10 @@ class _ReviewPendingTransactionsScreenState
 
     await transactionService.addTransaction(txn);
     log.i('Transaction added to database');
+
+    // Track SMS approval
+    final gamificationService = await ref.read(gamificationServiceInitProvider.future);
+    await gamificationService.track(GamificationEvent.smsTransactionApproved);
 
     if (!mounted) {
       log.w('Widget disposed after addTransaction');

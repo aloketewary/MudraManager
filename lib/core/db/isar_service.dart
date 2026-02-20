@@ -15,6 +15,7 @@ import 'package:mudra_manager/core/db/models/trip.dart';
 import 'package:mudra_manager/core/db/models/user_profile.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
+import 'package:mudra_manager/features/gamification/models/achievement.dart';
 import 'package:path_provider/path_provider.dart';
 
 class IsarService {
@@ -44,6 +45,10 @@ class IsarService {
       TripParticipantSchema,
       TripTransactionSchema,
       SettlementSchema,
+      AchievementSchema,
+      StreakSchema,
+      ChallengeSchema,
+      UserLevelSchema,
     ], directory: dir.path);
   }
 

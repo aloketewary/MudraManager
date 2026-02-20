@@ -4,13 +4,16 @@ import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
+import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
+import 'package:mudra_manager/features/gamification/services/gamification_service.dart';
 
 
 class RecurringTransactionService {
   final IsarService isarService;
+  final GamificationService gamificationService;
   late final AppLog log;
 
-  RecurringTransactionService(this.isarService) {
+  RecurringTransactionService(this.isarService, this.gamificationService) {
     log = AppLog(getLogger(), 'RecurringTxnService');
   }
 
@@ -78,11 +81,15 @@ class RecurringTransactionService {
 
   Future<void> save(RecurringTransaction recurring) async {
     final isar = await isarService.getInstance();
+    final isNew = recurring.id == Isar.autoIncrement;
     await isar.writeTxn(() async {
       await isar.recurringTransactions.put(recurring);
       await recurring.account.save();
       await recurring.category.save();
     });
+    if (isNew) {
+      await gamificationService.track(GamificationEvent.recurringTransactionCreated);
+    }
   }
 
   Future<void> delete(int id) async {

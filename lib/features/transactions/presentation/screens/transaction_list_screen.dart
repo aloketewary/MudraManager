@@ -170,7 +170,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
               switchOutCurve: Curves.easeIn,
               child: FloatingActionButton.extended(
                 key: const ValueKey('extended'),
-                heroTag: 'addTransactionHero',
+                heroTag: 'addTransactionHeroTransactionList',
                 onPressed: _onFabPressed,
                 icon: const Icon(Icons.add),
                 label: AdaptiveText(

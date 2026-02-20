@@ -7,11 +7,15 @@ import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
+import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
+import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
+import 'package:mudra_manager/features/gamification/services/gamification_service.dart';
 
 final budgetServiceProvider = Provider<BudgetService>((ref) {
   final isarService = ref.watch(isarServiceProvider);
   final log = ref.getLogger('BudgetService');
-  return BudgetService(isarService, log);
+  final gamificationService = ref.watch(gamificationServiceProvider);
+  return BudgetService(isarService, log, gamificationService);
 });
 
 final budgetStreamProvider = StreamProvider<List<Budget>>((ref) {
@@ -60,8 +64,9 @@ final budgetsWithProgressProvider =
 class BudgetService {
   final IsarService isarService;
   final AppLog log;
+  final GamificationService gamificationService;
 
-  BudgetService(this.isarService, this.log);
+  BudgetService(this.isarService, this.log, this.gamificationService);
 
   Stream<List<Budget>> watchAllBudgets() async* {
     final isar = await isarService.getInstance();
@@ -155,6 +160,7 @@ class BudgetService {
 
   Future<void> save(Budget bud) async {
     final isar = await isarService.getInstance();
+    final isNew = bud.id == Isar.autoIncrement;
     await isar.writeTxnSync(() async {
       // 1) Put budget and save its category & allocation links in one go:
       isar.budgets.putSync(bud, saveLinks: true);
@@ -165,6 +171,9 @@ class BudgetService {
       }
     });
     log.i('Budget saved: ${bud.name}');
+    if (isNew) {
+      await gamificationService.track(GamificationEvent.budgetCreated);
+    }
   }
 
   /// Delete a budget and all its allocations

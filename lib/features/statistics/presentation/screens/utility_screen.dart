@@ -5,6 +5,60 @@ import 'package:mudra_manager/shared/widgets/responsive_helper.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+class _AnimatedCard extends StatefulWidget {
+  final Widget child;
+  final int delay;
+
+  const _AnimatedCard({required this.child, this.delay = 0});
+
+  @override
+  State<_AnimatedCard> createState() => _AnimatedCardState();
+}
+
+class _AnimatedCardState extends State<_AnimatedCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.1),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+
+    Future.delayed(Duration(milliseconds: widget.delay), () {
+      if (mounted) _controller.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _fadeAnimation,
+      child: SlideTransition(position: _slideAnimation, child: widget.child),
+    );
+  }
+}
+
 class UtilityScreen extends StatefulWidget {
   const UtilityScreen({super.key});
 
@@ -295,8 +349,10 @@ class UtilityScreenState extends State<UtilityScreen> {
                 ),
               ),
               itemCount: visibleItems.length,
-              itemBuilder: (context, index) =>
-                  _UtilityCard(item: visibleItems[index]),
+              itemBuilder: (context, index) => _AnimatedCard(
+                delay: index * 50,
+                child: _UtilityCard(item: visibleItems[index]),
+              ),
             ),
     );
   }

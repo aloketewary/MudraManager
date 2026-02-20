@@ -2,6 +2,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
+import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
@@ -312,4 +313,28 @@ final customStatsProvider = FutureProvider.family<StatsData, String>((
     recent: recent,
     categoryTrends: categoryTrends,
   );
+});
+
+// Total account balance provider
+final totalAccountBalanceProvider = FutureProvider<double>((ref) async {
+  final isar = await ref.watch(isarServiceProvider).getInstance();
+  final accounts = await isar.collection<Account>().where().findAll();
+
+  double totalBalance = 0.0;
+  for (final account in accounts) {
+    final transactions = await isar.transactions
+        .filter()
+        .account((q) => q.idEqualTo(account.id))
+        .findAll();
+
+    final balance =
+        account.initialBalance +
+        transactions.fold<double>(
+          0,
+          (sum, txn) => sum + (txn.isExpense ? -txn.amount : txn.amount),
+        );
+    totalBalance += balance;
+  }
+
+  return totalBalance;
 });

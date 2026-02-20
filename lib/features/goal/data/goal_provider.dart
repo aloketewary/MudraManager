@@ -4,10 +4,14 @@ import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/goal.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/services/notification_service.dart';
+import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
+import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
+import 'package:mudra_manager/features/gamification/services/gamification_service.dart';
 
 final goalServiceProvider = Provider<GoalService>((ref) {
   final isarService = ref.watch(isarServiceProvider);
-  return GoalService(isarService);
+  final gamificationService = ref.watch(gamificationServiceProvider);
+  return GoalService(isarService, gamificationService);
 });
 
 final goalsProvider = StreamProvider<List<Goal>>((ref) {
@@ -17,8 +21,9 @@ final goalsProvider = StreamProvider<List<Goal>>((ref) {
 
 class GoalService {
   final IsarService isarService;
+  final GamificationService gamificationService;
 
-  GoalService(this.isarService);
+  GoalService(this.isarService, this.gamificationService);
 
   Future<void> addGoal(Goal goal) async {
     final isar = await isarService.getInstance();
@@ -26,6 +31,7 @@ class GoalService {
       await isar.goals.put(goal);
     });
     await _updateGoalReminders();
+    await gamificationService.track(GamificationEvent.goalCreated);
   }
 
   Future<void> updateGoal(Goal goal) async {
@@ -46,14 +52,18 @@ class GoalService {
 
   Future<void> addContribution(int goalId, double amount) async {
     final isar = await isarService.getInstance();
+    Goal? goal;
     await isar.writeTxn(() async {
-      final goal = await isar.goals.get(goalId);
+      goal = await isar.goals.get(goalId);
       if (goal != null) {
-        goal.currentAmount += amount;
-        await isar.goals.put(goal);
+        goal!.currentAmount += amount;
+        await isar.goals.put(goal!);
       }
     });
     await _updateGoalReminders();
+    if (goal != null && goal!.currentAmount >= goal!.targetAmount) {
+      await gamificationService.track(GamificationEvent.goalCompleted);
+    }
   }
 
   Future<void> _updateGoalReminders() async {

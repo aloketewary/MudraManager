@@ -2,11 +2,14 @@ import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/models/trip.dart';
+import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
+import 'package:mudra_manager/features/gamification/services/gamification_service.dart';
 
 class TripService {
   final IsarService isarService;
+  final GamificationService gamificationService;
 
-  TripService(this.isarService);
+  TripService(this.isarService, this.gamificationService);
 
   Future<void> createTrip(Trip trip, List<TripParticipant> participants) async {
     final isar = await isarService.getInstance();
@@ -16,6 +19,7 @@ class TripService {
       await isar.trips.put(trip);
       await trip.participants.save();
     });
+    await gamificationService.track(GamificationEvent.tripCreated);
   }
 
   Future<List<Trip>> getAllTrips() async {
