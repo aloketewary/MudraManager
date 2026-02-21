@@ -149,6 +149,8 @@ class AboutScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 16),
                       _buildThanksSection(context, color, textTheme),
+                      const SizedBox(height: 16),
+                      _buildPatronSection(context, color, textTheme),
                       const SizedBox(height: 32),
                       _buildSectionHeader(
                         context,
@@ -490,6 +492,7 @@ class AboutScreen extends StatelessWidget {
               children: [
                 _buildTesterChip(context, 'Sayan Dey', color),
                 _buildTesterChip(context, 'Abhijit A M', color),
+                _buildTesterChip(context, 'Dhanesh C', color),
                 _buildTesterChip(context, 'Jeet Sarkar', color),
                 _buildTesterChip(context, 'Souvik Paul', color),
               ],
@@ -535,6 +538,96 @@ class AboutScreen extends StatelessWidget {
       ),
       label: Text(name),
       backgroundColor: color.surfaceContainerLow,
+      side: BorderSide.none,
+    );
+  }
+
+  Widget _buildPatronSection(
+    BuildContext context,
+    ColorScheme color,
+    TextTheme textTheme,
+  ) {
+    return Card(
+      elevation: 0,
+      color: color.tertiaryContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.workspace_premium, color: color.tertiary, size: 24),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Patrons & Supporters',
+                    style: textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: color.onTertiaryContainer,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Special thanks to our generous patrons who support the development of Mudra Manager:',
+              style: textTheme.bodyMedium?.copyWith(
+                color: color.onTertiaryContainer,
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                _buildPatronChip(context, 'Amrita Sarkar', color),
+                _buildPatronChip(context, 'Arnab Saha', color),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: color.surface.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.favorite, color: color.tertiary, size: 18),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Want to support? Contact us!',
+                      style: textTheme.bodySmall?.copyWith(
+                        color: color.onTertiaryContainer,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPatronChip(
+    BuildContext context,
+    String name,
+    ColorScheme color,
+  ) {
+    return Chip(
+      avatar: CircleAvatar(
+        backgroundColor: color.tertiary.withValues(alpha: 0.2),
+        child: Icon(Icons.star, size: 16, color: color.tertiary),
+      ),
+      label: Text(name),
+      backgroundColor: color.surface,
       side: BorderSide.none,
     );
   }

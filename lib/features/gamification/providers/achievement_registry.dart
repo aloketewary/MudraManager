@@ -13,7 +13,9 @@ class AchievementRegistry {
       ..progress = 0
       ..target = 1
       ..rewardXP = 10
-      ..rewardCoins = 0,
+      ..rewardCoins = 0
+      ..series = 'transactions'
+      ..seriesOrder = 1,
 
     'transaction_10': Achievement()
       ..key = 'transaction_10'
@@ -25,7 +27,9 @@ class AchievementRegistry {
       ..target = 10
       ..rewardXP = 25
       ..rewardCoins = 0
-      ..type = AchievementType.badge,
+      ..type = AchievementType.badge
+      ..series = 'transactions'
+      ..seriesOrder = 2,
 
     'transaction_50': Achievement()
       ..key = 'transaction_50'
@@ -37,7 +41,9 @@ class AchievementRegistry {
       ..target = 50
       ..rewardXP = 50
       ..rewardCoins = 0
-      ..type = AchievementType.badge,
+      ..type = AchievementType.badge
+      ..series = 'transactions'
+      ..seriesOrder = 3,
 
     'transaction_100': Achievement()
       ..key = 'transaction_100'
@@ -49,7 +55,9 @@ class AchievementRegistry {
       ..target = 100
       ..rewardXP = 100
       ..rewardCoins = 0
-      ..type = AchievementType.badge,
+      ..type = AchievementType.badge
+      ..series = 'transactions'
+      ..seriesOrder = 4,
 
     'transaction_500': Achievement()
       ..key = 'transaction_500'
@@ -61,7 +69,9 @@ class AchievementRegistry {
       ..target = 500
       ..rewardXP = 250
       ..rewardCoins = 0
-      ..type = AchievementType.badge,
+      ..type = AchievementType.badge
+      ..series = 'transactions'
+      ..seriesOrder = 5,
 
     // ==================== STREAK ACHIEVEMENTS ====================
     'streak_3_days': Achievement()
@@ -74,7 +84,9 @@ class AchievementRegistry {
       ..target = 3
       ..rewardXP = 15
       ..rewardCoins = 0
-      ..type = AchievementType.streak,
+      ..type = AchievementType.streak
+      ..series = 'streaks'
+      ..seriesOrder = 1,
 
     'streak_7_days': Achievement()
       ..key = 'streak_7_days'
@@ -86,7 +98,9 @@ class AchievementRegistry {
       ..target = 7
       ..rewardXP = 35
       ..rewardCoins = 0
-      ..type = AchievementType.streak,
+      ..type = AchievementType.streak
+      ..series = 'streaks'
+      ..seriesOrder = 2,
 
     'streak_30_days': Achievement()
       ..key = 'streak_30_days'
@@ -98,7 +112,9 @@ class AchievementRegistry {
       ..target = 30
       ..rewardXP = 150
       ..rewardCoins = 0
-      ..type = AchievementType.streak,
+      ..type = AchievementType.streak
+      ..series = 'streaks'
+      ..seriesOrder = 3,
 
     'streak_100_days': Achievement()
       ..key = 'streak_100_days'
@@ -110,7 +126,9 @@ class AchievementRegistry {
       ..target = 100
       ..rewardXP = 500
       ..rewardCoins = 0
-      ..type = AchievementType.streak,
+      ..type = AchievementType.streak
+      ..series = 'streaks'
+      ..seriesOrder = 4,
 
     // ==================== BUDGET ACHIEVEMENTS ====================
     'first_budget': Achievement()
@@ -123,7 +141,9 @@ class AchievementRegistry {
       ..target = 1
       ..rewardXP = 20
       ..rewardCoins = 0
-      ..type = AchievementType.badge,
+      ..type = AchievementType.badge
+      ..series = 'budget'
+      ..seriesOrder = 1,
 
     'budget_master': Achievement()
       ..key = 'budget_master'
@@ -135,7 +155,9 @@ class AchievementRegistry {
       ..target = 30
       ..rewardXP = 200
       ..rewardCoins = 0
-      ..type = AchievementType.badge,
+      ..type = AchievementType.badge
+      ..series = 'budget'
+      ..seriesOrder = 2,
 
     // ==================== SAVINGS ACHIEVEMENTS ====================
     'first_goal': Achievement()
@@ -148,7 +170,9 @@ class AchievementRegistry {
       ..target = 1
       ..rewardXP = 20
       ..rewardCoins = 0
-      ..type = AchievementType.badge,
+      ..type = AchievementType.badge
+      ..series = 'goal'
+      ..seriesOrder = 1,
 
     'goal_completed': Achievement()
       ..key = 'goal_completed'
@@ -160,7 +184,9 @@ class AchievementRegistry {
       ..target = 1
       ..rewardXP = 100
       ..rewardCoins = 0
-      ..type = AchievementType.badge,
+      ..type = AchievementType.badge
+      ..series = 'goal'
+      ..seriesOrder = 2,
 
     // ==================== MILESTONE ACHIEVEMENTS ====================
     'week_1': Achievement()
@@ -173,7 +199,9 @@ class AchievementRegistry {
       ..target = 7
       ..rewardXP = 30
       ..rewardCoins = 0
-      ..type = AchievementType.badge,
+      ..type = AchievementType.badge
+      ..series = 'milestone'
+      ..seriesOrder = 1,
 
     'month_1': Achievement()
       ..key = 'month_1'
@@ -185,7 +213,9 @@ class AchievementRegistry {
       ..target = 30
       ..rewardXP = 100
       ..rewardCoins = 0
-      ..type = AchievementType.badge,
+      ..type = AchievementType.badge
+      ..series = 'milestone'
+      ..seriesOrder = 2,
 
     'month_3': Achievement()
       ..key = 'month_3'
@@ -197,7 +227,9 @@ class AchievementRegistry {
       ..target = 90
       ..rewardXP = 300
       ..rewardCoins = 0
-      ..type = AchievementType.badge,
+      ..type = AchievementType.badge
+      ..series = 'milestone'
+      ..seriesOrder = 3,
 
     'year_1': Achievement()
       ..key = 'year_1'
@@ -209,7 +241,9 @@ class AchievementRegistry {
       ..target = 365
       ..rewardXP = 1000
       ..rewardCoins = 0
-      ..type = AchievementType.badge,
+      ..type = AchievementType.badge
+      ..series = 'milestone'
+      ..seriesOrder = 4,
 
     // ==================== SMS/AUTO-IMPORT ACHIEVEMENTS ====================
     'sms_10': Achievement()
@@ -222,7 +256,9 @@ class AchievementRegistry {
       ..target = 10
       ..rewardXP = 30
       ..rewardCoins = 0
-      ..type = AchievementType.badge,
+      ..type = AchievementType.badge
+      ..series = 'sms'
+      ..seriesOrder = 1,
 
     'sms_50': Achievement()
       ..key = 'sms_50'
@@ -234,7 +270,9 @@ class AchievementRegistry {
       ..target = 50
       ..rewardXP = 100
       ..rewardCoins = 0
-      ..type = AchievementType.badge,
+      ..type = AchievementType.badge
+      ..series = 'sms'
+      ..seriesOrder = 2,
 
     // ==================== CATEGORY ACHIEVEMENTS ====================
     'category_5': Achievement()
@@ -247,7 +285,9 @@ class AchievementRegistry {
       ..target = 5
       ..rewardXP = 25
       ..rewardCoins = 0
-      ..type = AchievementType.badge,
+      ..type = AchievementType.badge
+      ..series = 'categories'
+      ..seriesOrder = 1,
 
     'category_10': Achievement()
       ..key = 'category_10'
@@ -259,7 +299,9 @@ class AchievementRegistry {
       ..target = 10
       ..rewardXP = 50
       ..rewardCoins = 0
-      ..type = AchievementType.badge,
+      ..type = AchievementType.badge
+      ..series = 'categories'
+      ..seriesOrder = 2,
 
     // ==================== ACCOUNT ACHIEVEMENTS ====================
     'account_3': Achievement()
@@ -272,7 +314,9 @@ class AchievementRegistry {
       ..target = 3
       ..rewardXP = 30
       ..rewardCoins = 0
-      ..type = AchievementType.badge,
+      ..type = AchievementType.badge
+      ..series = 'accounts'
+      ..seriesOrder = 1,
 
     'account_5': Achievement()
       ..key = 'account_5'
@@ -284,7 +328,9 @@ class AchievementRegistry {
       ..target = 5
       ..rewardXP = 75
       ..rewardCoins = 0
-      ..type = AchievementType.badge,
+      ..type = AchievementType.badge
+      ..series = 'accounts'
+      ..seriesOrder = 2,
 
     // ==================== TRANSFER ACHIEVEMENTS ====================
     'transfer_10': Achievement()
@@ -297,7 +343,10 @@ class AchievementRegistry {
       ..target = 10
       ..rewardXP = 40
       ..rewardCoins = 0
-      ..type = AchievementType.badge,
+      ..type = AchievementType.badge
+      ..series = 'transfers'
+      ..seriesOrder = 1,
+
     'transfer_50': Achievement()
       ..key = 'transfer_50'
       ..title = 'Money Mover Master'
@@ -305,10 +354,12 @@ class AchievementRegistry {
       ..icon = 'money-transfer'
       ..category = AchievementCategory.tracking
       ..progress = 0
-      ..target = 10
-      ..rewardXP = 40
+      ..target = 50
+      ..rewardXP = 100
       ..rewardCoins = 0
-      ..type = AchievementType.badge,
+      ..type = AchievementType.badge
+      ..series = 'transfers'
+      ..seriesOrder = 2,
 
     // ==================== RECURRING TRANSACTION ACHIEVEMENTS ====================
     'recurring_5': Achievement()
@@ -321,7 +372,9 @@ class AchievementRegistry {
       ..target = 5
       ..rewardXP = 50
       ..rewardCoins = 0
-      ..type = AchievementType.badge,
+      ..type = AchievementType.badge
+      ..series = 'recurring'
+      ..seriesOrder = 1,
 
     'recurring_10': Achievement()
       ..key = 'recurring_10'
@@ -333,7 +386,9 @@ class AchievementRegistry {
       ..target = 10
       ..rewardXP = 100
       ..rewardCoins = 0
-      ..type = AchievementType.badge,
+      ..type = AchievementType.badge
+      ..series = 'recurring'
+      ..seriesOrder = 2,
 
     // ==================== TAG ACHIEVEMENTS ====================
     'tag_5': Achievement()
@@ -346,7 +401,10 @@ class AchievementRegistry {
       ..target = 5
       ..rewardXP = 20
       ..rewardCoins = 0
-      ..type = AchievementType.badge,
+      ..type = AchievementType.badge
+      ..series = 'tags'
+      ..seriesOrder = 1,
+
     'tag_25': Achievement()
       ..key = 'tag_25'
       ..title = 'Tag Master'
@@ -357,7 +415,9 @@ class AchievementRegistry {
       ..target = 25
       ..rewardXP = 40
       ..rewardCoins = 0
-      ..type = AchievementType.badge,
+      ..type = AchievementType.badge
+      ..series = 'tags'
+      ..seriesOrder = 2,
 
     // ==================== ANALYTICS ACHIEVEMENTS ====================
     'analytics_10': Achievement()
@@ -370,7 +430,9 @@ class AchievementRegistry {
       ..target = 10
       ..rewardXP = 30
       ..rewardCoins = 0
-      ..type = AchievementType.badge,
+      ..type = AchievementType.badge
+      ..series = 'analytics'
+      ..seriesOrder = 1,
 
     'export_first': Achievement()
       ..key = 'export_first'
@@ -382,7 +444,9 @@ class AchievementRegistry {
       ..target = 1
       ..rewardXP = 25
       ..rewardCoins = 0
-      ..type = AchievementType.badge,
+      ..type = AchievementType.badge
+      ..series = 'export'
+      ..seriesOrder = 1,
 
     // ==================== TRIP ACHIEVEMENTS ====================
     'trip_first': Achievement()
@@ -395,7 +459,9 @@ class AchievementRegistry {
       ..target = 1
       ..rewardXP = 20
       ..rewardCoins = 0
-      ..type = AchievementType.badge,
+      ..type = AchievementType.badge
+      ..series = 'trips'
+      ..seriesOrder = 1,
 
     'trip_5': Achievement()
       ..key = 'trip_5'
@@ -407,6 +473,8 @@ class AchievementRegistry {
       ..target = 5
       ..rewardXP = 75
       ..rewardCoins = 0
-      ..type = AchievementType.badge,
+      ..type = AchievementType.badge
+      ..series = 'trips'
+      ..seriesOrder = 2,
   };
 }

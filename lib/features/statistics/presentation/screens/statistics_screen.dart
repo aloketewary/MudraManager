@@ -4,6 +4,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
+import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/utils/export_excel_pdf.dart';
 import 'package:mudra_manager/features/analytics/data/analytics_provider.dart';
 import 'package:mudra_manager/features/dashboard/data/status_data_provider.dart';
@@ -85,8 +86,13 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(gamificationServiceProvider).track(GamificationEvent.analyticsViewed);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        final service = await ref.read(gamificationServiceInitProvider.future);
+        service.track(GamificationEvent.analyticsViewed);
+      } catch (e) {
+        // Ignore if service not ready
+      }
     });
   }
 
@@ -1275,6 +1281,7 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> {
       final predicted = await ref.read(predictedSpendingProvider.future);
       final categoryTrends = await ref.read(categoryTrendsProvider.future);
       final spendingByDay = await ref.read(spendingByDayProvider.future);
+      final gamificationService = await ref.read(gamificationServiceInitProvider.future);
 
       await exportStatsToPdf(
         context,
@@ -1285,7 +1292,7 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> {
         predicted: predicted,
         categoryTrends: categoryTrends,
         spendingByDay: spendingByDay,
-        gamificationService: ref.read(gamificationServiceProvider),
+        gamificationService: gamificationService,
       );
     } catch (e) {
       if (mounted) {
@@ -1479,7 +1486,8 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> {
   }
 
   Future<void> exportStatsToExcelMethod(StatsData data) async {
-    await exportStatsToExcel(data, ref.read(gamificationServiceProvider));
+    final gamificationService = await ref.read(gamificationServiceInitProvider.future);
+    await exportStatsToExcel(data, gamificationService);
   }
 
   Future<void> exportStatsToPdfMethod(StatsData data) async {

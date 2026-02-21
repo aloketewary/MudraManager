@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
+import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/l10n_provider.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/core/router/app_router.dart';
@@ -44,29 +45,73 @@ void main() async {
   // Initialize critical services first
   await NotificationService.initialize();
 
-  // Move heavy operations to background
-  _initializeBackgroundServices();
-
   final completed = SharedPrefsUtil.instance.isOnboardingComplete();
   setupSmsListener();
 
-  runApp(ProviderScope(child: MudraManagerApp(showOnboarding: !completed)));
+  final container = ProviderContainer();
+  // Move heavy operations to background
+  _initializeBackgroundServices(container);
+
+  runApp(UncontrolledProviderScope(
+    container: container,
+    child: MudraManagerApp(showOnboarding: !completed),
+  ));
 }
 
 // Background initialization to prevent UI blocking
-Future<void> _initializeBackgroundServices() async {
+Future<void> _initializeBackgroundServices(ProviderContainer container) async {
+  final log = AppLog(getLogger(), 'Init');
   Future.microtask(() async {
-    // Run services in parallel with error handling
+    // 1. Initialize Isar first
+    log.i('🔄 Initializing Isar...');
+    final isar = await safeExecute(() => container.read(isarServiceProvider).getInstance());
+    if (isar != null) {
+      log.i('✅ Isar initialized');
+    } else {
+      log.e('❌ Isar initialization failed');
+      return;
+    }
+    
+    // 2. Initialize gamification service (depends on Isar)
+    log.i('🔄 Initializing Gamification service...');
+    final gamification = await safeExecute(() => container.read(gamificationServiceInitProvider.future));
+    if (gamification != null) {
+      log.i('✅ Gamification service initialized');
+    } else {
+      log.e('❌ Gamification service initialization failed');
+    }
+
+    // 3. Run other services in parallel
+    log.i('🔄 Initializing background services...');
     await Future.wait(
       [
-        safeExecute(() => RecurringTransactionScheduler.initialize()),
-        safeExecute(() => SummaryScheduler.checkAndShowSummaries()),
-        safeExecute(() => BillService.scheduleBillReminders()),
-        safeExecute(() => BillService.createPendingTransactionsForDueBills()),
-        safeExecute(() => _initializeHomeWidget()),
-        safeExecute(() => SmsHashCleanupService.cleanupOldHashes()),
+        safeExecute(() async {
+          await RecurringTransactionScheduler.initialize();
+          log.i('✅ RecurringTransactionScheduler initialized');
+        }),
+        safeExecute(() async {
+          await SummaryScheduler.checkAndShowSummaries();
+          log.i('✅ SummaryScheduler initialized');
+        }),
+        safeExecute(() async {
+          await BillService.scheduleBillReminders();
+          log.i('✅ BillService reminders scheduled');
+        }),
+        safeExecute(() async {
+          await BillService.createPendingTransactionsForDueBills();
+          log.i('✅ BillService pending transactions created');
+        }),
+        safeExecute(() async {
+          await _initializeHomeWidget();
+          log.i('✅ HomeWidget initialized');
+        }),
+        safeExecute(() async {
+          await SmsHashCleanupService.cleanupOldHashes();
+          log.i('✅ SmsHashCleanupService initialized');
+        }),
       ].map((f) => f.catchError((e) => null)),
     );
+    log.i('✅ All background services initialized');
   });
 }
 

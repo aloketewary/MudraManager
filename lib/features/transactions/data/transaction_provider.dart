@@ -18,7 +18,7 @@ final transactionProvider = Provider<TransactionService>((ref) {
 });
 
 final filteredTransactionProvider =
-    FutureProvider.family<List<Transaction>, String>((ref, type) async {
+    FutureProvider.autoDispose.family<List<Transaction>, String>((ref, type) async {
       final service = ref.watch(transactionProvider);
 
       if (type == 'income') {
@@ -31,7 +31,7 @@ final filteredTransactionProvider =
     });
 
 final transactionsByMonthProvider =
-    FutureProvider.family<List<Transaction>, DateTime>((ref, monthDate) async {
+    FutureProvider.autoDispose.family<List<Transaction>, DateTime>((ref, monthDate) async {
       final service = ref.watch(transactionProvider);
 
       final start = DateTime(monthDate.year, monthDate.month);
@@ -41,7 +41,7 @@ final transactionsByMonthProvider =
     });
 
 final transactionsByMonthAndTypeProvider =
-    FutureProvider.family<List<Transaction>, ({DateTime month, String type})>((
+    FutureProvider.autoDispose.family<List<Transaction>, ({DateTime month, String type})>((
       ref,
       arg,
     ) async {
@@ -65,7 +65,7 @@ final transactionsByMonthAndTypeProvider =
     });
 
 final transactionsByDateRangeProvider =
-    FutureProvider.family<
+    FutureProvider.autoDispose.family<
       List<Transaction>,
       ({DateTime start, DateTime end, String type})
     >((ref, arg) async {
@@ -82,7 +82,7 @@ final transactionsByDateRangeProvider =
     });
 
 final sectionedTransactionsProvider =
-    FutureProvider.family<List<TxListEntry>, ({DateTime month, String type})>((
+    FutureProvider.autoDispose.family<List<TxListEntry>, ({DateTime month, String type})>((
       ref,
       arg,
     ) async {
@@ -108,7 +108,7 @@ final sectionedTransactionsProvider =
     });
 
 final sectionedTransactionsByDateRangeProvider =
-    FutureProvider.family<
+    FutureProvider.autoDispose.family<
       List<TxListEntry>,
       ({DateTime start, DateTime end, String type})
     >((ref, arg) async {
@@ -155,7 +155,7 @@ final sectionedTransactionsByDateRangeProvider =
     });
 
 final allSectionedTransactionsProvider =
-    FutureProvider.family<List<TxListEntry>, String>((ref, type) async {
+    FutureProvider.autoDispose.family<List<TxListEntry>, String>((ref, type) async {
       final service = ref.watch(transactionProvider);
 
       List<Transaction> transactions;
@@ -189,7 +189,7 @@ final allSectionedTransactionsProvider =
 
 // OPTIMIZED: Filter at database level
 final filteredSectionedTransactionsProvider =
-    FutureProvider.family<
+    FutureProvider.autoDispose.family<
       List<TxListEntry>,
       ({String type, int? categoryId, String? searchQuery})
     >((ref, arg) async {

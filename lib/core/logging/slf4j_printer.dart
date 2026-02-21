@@ -44,8 +44,21 @@ class Slf4jPrinter extends LogPrinter {
 
     final paddedTag = _pad(tag, 14);
     final line = '[$level] $now | $paddedTag | $message';
+    
+    final lines = [_colorize(event.level, line)];
+    
+    // Add error details if present
+    if (event.error != null) {
+      lines.add(_colorize(event.level, '  Error: ${event.error}'));
+    }
+    
+    // Add stack trace if present
+    if (event.stackTrace != null) {
+      lines.add(_colorize(event.level, '  Stack trace:'));
+      lines.addAll(event.stackTrace.toString().split('\n').map((line) => _colorize(event.level, '    $line')));
+    }
 
-    return [_colorize(event.level, line)];
+    return lines;
   }
 
   String _colorize(Level level, String text) {

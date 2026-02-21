@@ -8,6 +8,7 @@ class SharedPrefsUtil {
   static const _lowBalanceThresholdKey = 'low_balance_threshold';
   static const _setSmsImportEnabledKey = 'sms_import_enabled';
   static const _hasSeenHelpGuideKey = 'has_seen_help_guide';
+  static const _lastDailyCheckInKey = 'last_daily_check_in';
 
   final SharedPreferences _prefs;
 
@@ -126,5 +127,14 @@ class SharedPrefsUtil {
 
   Future<void> setHasSeenHelpGuide(bool value) async {
     await _prefs.setBool(_hasSeenHelpGuideKey, value);
+  }
+
+  DateTime? getLastDailyCheckIn() {
+    final date = _prefs.getString(_lastDailyCheckInKey);
+    return date != null ? DateTime.tryParse(date) : null;
+  }
+
+  Future<void> setLastDailyCheckIn(DateTime date) async {
+    await _prefs.setString(_lastDailyCheckInKey, date.toIso8601String());
   }
 }

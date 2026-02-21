@@ -13,7 +13,9 @@ final isarServiceProvider = Provider<IsarService>((ref) => IsarService());
 
 final gamificationServiceInitProvider = FutureProvider<GamificationService>((ref) async {
   final isar = await ref.watch(isarServiceProvider).getInstance();
-  return GamificationService(isar, ref.getLogger('GemificationService'));
+  final service = GamificationService(isar, ref.getLogger('GemificationService'));
+  await service.initialize();
+  return service;
 });
 
 void invalidateAll(WidgetRef ref) {

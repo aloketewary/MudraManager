@@ -16,8 +16,9 @@ class BadgeShowcase extends ConsumerWidget {
 
     return achievementsAsync.when(
       data: (achievements) {
-        final unlocked = achievements.where((a) => a.isUnlocked).toList();
-        final total = achievements.length;
+        final visible = achievements.where((a) => a.isVisible).toList();
+        final unlocked = visible.where((a) => a.isUnlocked).toList();
+        final total = visible.length;
 
         return Card(
           elevation: 0,

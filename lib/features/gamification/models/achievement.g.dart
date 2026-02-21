@@ -29,29 +29,40 @@ const AchievementSchema = CollectionSchema(
       type: IsarType.string,
     ),
     r'icon': PropertySchema(id: 2, name: r'icon', type: IsarType.string),
-    r'isUnlocked': PropertySchema(
+    r'isInProgress': PropertySchema(
       id: 3,
+      name: r'isInProgress',
+      type: IsarType.bool,
+    ),
+    r'isUnlocked': PropertySchema(
+      id: 4,
       name: r'isUnlocked',
       type: IsarType.bool,
     ),
-    r'key': PropertySchema(id: 4, name: r'key', type: IsarType.string),
-    r'progress': PropertySchema(id: 5, name: r'progress', type: IsarType.long),
+    r'key': PropertySchema(id: 5, name: r'key', type: IsarType.string),
+    r'progress': PropertySchema(id: 6, name: r'progress', type: IsarType.long),
     r'rewardCoins': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'rewardCoins',
       type: IsarType.long,
     ),
-    r'rewardXP': PropertySchema(id: 7, name: r'rewardXP', type: IsarType.long),
-    r'target': PropertySchema(id: 8, name: r'target', type: IsarType.long),
-    r'title': PropertySchema(id: 9, name: r'title', type: IsarType.string),
-    r'type': PropertySchema(
+    r'rewardXP': PropertySchema(id: 8, name: r'rewardXP', type: IsarType.long),
+    r'series': PropertySchema(id: 9, name: r'series', type: IsarType.string),
+    r'seriesOrder': PropertySchema(
       id: 10,
+      name: r'seriesOrder',
+      type: IsarType.long,
+    ),
+    r'target': PropertySchema(id: 11, name: r'target', type: IsarType.long),
+    r'title': PropertySchema(id: 12, name: r'title', type: IsarType.string),
+    r'type': PropertySchema(
+      id: 13,
       name: r'type',
       type: IsarType.byte,
       enumMap: _AchievementtypeEnumValueMap,
     ),
     r'unlockedAt': PropertySchema(
-      id: 11,
+      id: 14,
       name: r'unlockedAt',
       type: IsarType.dateTime,
     ),
@@ -95,6 +106,12 @@ int _achievementEstimateSize(
   bytesCount += 3 + object.description.length * 3;
   bytesCount += 3 + object.icon.length * 3;
   bytesCount += 3 + object.key.length * 3;
+  {
+    final value = object.series;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   bytesCount += 3 + object.title.length * 3;
   return bytesCount;
 }
@@ -108,15 +125,18 @@ void _achievementSerialize(
   writer.writeByte(offsets[0], object.category.index);
   writer.writeString(offsets[1], object.description);
   writer.writeString(offsets[2], object.icon);
-  writer.writeBool(offsets[3], object.isUnlocked);
-  writer.writeString(offsets[4], object.key);
-  writer.writeLong(offsets[5], object.progress);
-  writer.writeLong(offsets[6], object.rewardCoins);
-  writer.writeLong(offsets[7], object.rewardXP);
-  writer.writeLong(offsets[8], object.target);
-  writer.writeString(offsets[9], object.title);
-  writer.writeByte(offsets[10], object.type.index);
-  writer.writeDateTime(offsets[11], object.unlockedAt);
+  writer.writeBool(offsets[3], object.isInProgress);
+  writer.writeBool(offsets[4], object.isUnlocked);
+  writer.writeString(offsets[5], object.key);
+  writer.writeLong(offsets[6], object.progress);
+  writer.writeLong(offsets[7], object.rewardCoins);
+  writer.writeLong(offsets[8], object.rewardXP);
+  writer.writeString(offsets[9], object.series);
+  writer.writeLong(offsets[10], object.seriesOrder);
+  writer.writeLong(offsets[11], object.target);
+  writer.writeString(offsets[12], object.title);
+  writer.writeByte(offsets[13], object.type.index);
+  writer.writeDateTime(offsets[14], object.unlockedAt);
 }
 
 Achievement _achievementDeserialize(
@@ -132,16 +152,18 @@ Achievement _achievementDeserialize(
   object.description = reader.readString(offsets[1]);
   object.icon = reader.readString(offsets[2]);
   object.id = id;
-  object.key = reader.readString(offsets[4]);
-  object.progress = reader.readLong(offsets[5]);
-  object.rewardCoins = reader.readLong(offsets[6]);
-  object.rewardXP = reader.readLong(offsets[7]);
-  object.target = reader.readLong(offsets[8]);
-  object.title = reader.readString(offsets[9]);
+  object.key = reader.readString(offsets[5]);
+  object.progress = reader.readLong(offsets[6]);
+  object.rewardCoins = reader.readLong(offsets[7]);
+  object.rewardXP = reader.readLong(offsets[8]);
+  object.series = reader.readStringOrNull(offsets[9]);
+  object.seriesOrder = reader.readLongOrNull(offsets[10]);
+  object.target = reader.readLong(offsets[11]);
+  object.title = reader.readString(offsets[12]);
   object.type =
-      _AchievementtypeValueEnumMap[reader.readByteOrNull(offsets[10])] ??
+      _AchievementtypeValueEnumMap[reader.readByteOrNull(offsets[13])] ??
       AchievementType.badge;
-  object.unlockedAt = reader.readDateTimeOrNull(offsets[11]);
+  object.unlockedAt = reader.readDateTimeOrNull(offsets[14]);
   return object;
 }
 
@@ -163,9 +185,9 @@ P _achievementDeserializeProp<P>(
     case 3:
       return (reader.readBool(offset)) as P;
     case 4:
-      return (reader.readString(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 5:
-      return (reader.readLong(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 6:
       return (reader.readLong(offset)) as P;
     case 7:
@@ -173,12 +195,18 @@ P _achievementDeserializeProp<P>(
     case 8:
       return (reader.readLong(offset)) as P;
     case 9:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 10:
+      return (reader.readLongOrNull(offset)) as P;
+    case 11:
+      return (reader.readLong(offset)) as P;
+    case 12:
+      return (reader.readString(offset)) as P;
+    case 13:
       return (_AchievementtypeValueEnumMap[reader.readByteOrNull(offset)] ??
               AchievementType.badge)
           as P;
-    case 11:
+    case 14:
       return (reader.readDateTimeOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -822,6 +850,15 @@ extension AchievementQueryFilter
   }
 
   QueryBuilder<Achievement, Achievement, QAfterFilterCondition>
+  isInProgressEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'isInProgress', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<Achievement, Achievement, QAfterFilterCondition>
   isUnlockedEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
@@ -1133,6 +1170,243 @@ extension AchievementQueryFilter
       return query.addFilterCondition(
         FilterCondition.between(
           property: r'rewardXP',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Achievement, Achievement, QAfterFilterCondition> seriesIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'series'),
+      );
+    });
+  }
+
+  QueryBuilder<Achievement, Achievement, QAfterFilterCondition>
+  seriesIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'series'),
+      );
+    });
+  }
+
+  QueryBuilder<Achievement, Achievement, QAfterFilterCondition> seriesEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'series',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Achievement, Achievement, QAfterFilterCondition>
+  seriesGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'series',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Achievement, Achievement, QAfterFilterCondition> seriesLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'series',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Achievement, Achievement, QAfterFilterCondition> seriesBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'series',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Achievement, Achievement, QAfterFilterCondition>
+  seriesStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'series',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Achievement, Achievement, QAfterFilterCondition> seriesEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'series',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Achievement, Achievement, QAfterFilterCondition> seriesContains(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'series',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Achievement, Achievement, QAfterFilterCondition> seriesMatches(
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'series',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Achievement, Achievement, QAfterFilterCondition>
+  seriesIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'series', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<Achievement, Achievement, QAfterFilterCondition>
+  seriesIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'series', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<Achievement, Achievement, QAfterFilterCondition>
+  seriesOrderIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'seriesOrder'),
+      );
+    });
+  }
+
+  QueryBuilder<Achievement, Achievement, QAfterFilterCondition>
+  seriesOrderIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'seriesOrder'),
+      );
+    });
+  }
+
+  QueryBuilder<Achievement, Achievement, QAfterFilterCondition>
+  seriesOrderEqualTo(int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'seriesOrder', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<Achievement, Achievement, QAfterFilterCondition>
+  seriesOrderGreaterThan(int? value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'seriesOrder',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Achievement, Achievement, QAfterFilterCondition>
+  seriesOrderLessThan(int? value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'seriesOrder',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Achievement, Achievement, QAfterFilterCondition>
+  seriesOrderBetween(
+    int? lower,
+    int? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'seriesOrder',
           lower: lower,
           includeLower: includeLower,
           upper: upper,
@@ -1524,6 +1798,19 @@ extension AchievementQuerySortBy
     });
   }
 
+  QueryBuilder<Achievement, Achievement, QAfterSortBy> sortByIsInProgress() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isInProgress', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Achievement, Achievement, QAfterSortBy>
+  sortByIsInProgressDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isInProgress', Sort.desc);
+    });
+  }
+
   QueryBuilder<Achievement, Achievement, QAfterSortBy> sortByIsUnlocked() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isUnlocked', Sort.asc);
@@ -1581,6 +1868,30 @@ extension AchievementQuerySortBy
   QueryBuilder<Achievement, Achievement, QAfterSortBy> sortByRewardXPDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'rewardXP', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Achievement, Achievement, QAfterSortBy> sortBySeries() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'series', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Achievement, Achievement, QAfterSortBy> sortBySeriesDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'series', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Achievement, Achievement, QAfterSortBy> sortBySeriesOrder() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'seriesOrder', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Achievement, Achievement, QAfterSortBy> sortBySeriesOrderDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'seriesOrder', Sort.desc);
     });
   }
 
@@ -1683,6 +1994,19 @@ extension AchievementQuerySortThenBy
     });
   }
 
+  QueryBuilder<Achievement, Achievement, QAfterSortBy> thenByIsInProgress() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isInProgress', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Achievement, Achievement, QAfterSortBy>
+  thenByIsInProgressDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isInProgress', Sort.desc);
+    });
+  }
+
   QueryBuilder<Achievement, Achievement, QAfterSortBy> thenByIsUnlocked() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isUnlocked', Sort.asc);
@@ -1740,6 +2064,30 @@ extension AchievementQuerySortThenBy
   QueryBuilder<Achievement, Achievement, QAfterSortBy> thenByRewardXPDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'rewardXP', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Achievement, Achievement, QAfterSortBy> thenBySeries() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'series', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Achievement, Achievement, QAfterSortBy> thenBySeriesDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'series', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Achievement, Achievement, QAfterSortBy> thenBySeriesOrder() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'seriesOrder', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Achievement, Achievement, QAfterSortBy> thenBySeriesOrderDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'seriesOrder', Sort.desc);
     });
   }
 
@@ -1816,6 +2164,12 @@ extension AchievementQueryWhereDistinct
     });
   }
 
+  QueryBuilder<Achievement, Achievement, QDistinct> distinctByIsInProgress() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isInProgress');
+    });
+  }
+
   QueryBuilder<Achievement, Achievement, QDistinct> distinctByIsUnlocked() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'isUnlocked');
@@ -1845,6 +2199,20 @@ extension AchievementQueryWhereDistinct
   QueryBuilder<Achievement, Achievement, QDistinct> distinctByRewardXP() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'rewardXP');
+    });
+  }
+
+  QueryBuilder<Achievement, Achievement, QDistinct> distinctBySeries({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'series', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Achievement, Achievement, QDistinct> distinctBySeriesOrder() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'seriesOrder');
     });
   }
 
@@ -1902,6 +2270,12 @@ extension AchievementQueryProperty
     });
   }
 
+  QueryBuilder<Achievement, bool, QQueryOperations> isInProgressProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isInProgress');
+    });
+  }
+
   QueryBuilder<Achievement, bool, QQueryOperations> isUnlockedProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'isUnlocked');
@@ -1929,6 +2303,18 @@ extension AchievementQueryProperty
   QueryBuilder<Achievement, int, QQueryOperations> rewardXPProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'rewardXP');
+    });
+  }
+
+  QueryBuilder<Achievement, String?, QQueryOperations> seriesProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'series');
+    });
+  }
+
+  QueryBuilder<Achievement, int?, QQueryOperations> seriesOrderProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'seriesOrder');
     });
   }
 
@@ -6363,6 +6749,1237 @@ extension XpLogQueryProperty on QueryBuilder<XpLog, XpLog, QQueryProperty> {
   QueryBuilder<XpLog, String, QQueryOperations> reasonProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'reason');
+    });
+  }
+}
+
+// coverage:ignore-file
+// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
+
+extension GetAppConfigCollection on Isar {
+  IsarCollection<AppConfig> get appConfigs => this.collection();
+}
+
+const AppConfigSchema = CollectionSchema(
+  name: r'AppConfig',
+  id: -7085420701237142207,
+  properties: {
+    r'boolValue': PropertySchema(
+      id: 0,
+      name: r'boolValue',
+      type: IsarType.bool,
+    ),
+    r'dateValue': PropertySchema(
+      id: 1,
+      name: r'dateValue',
+      type: IsarType.dateTime,
+    ),
+    r'doubleValue': PropertySchema(
+      id: 2,
+      name: r'doubleValue',
+      type: IsarType.double,
+    ),
+    r'intValue': PropertySchema(id: 3, name: r'intValue', type: IsarType.long),
+    r'key': PropertySchema(id: 4, name: r'key', type: IsarType.string),
+    r'stringValue': PropertySchema(
+      id: 5,
+      name: r'stringValue',
+      type: IsarType.string,
+    ),
+  },
+
+  estimateSize: _appConfigEstimateSize,
+  serialize: _appConfigSerialize,
+  deserialize: _appConfigDeserialize,
+  deserializeProp: _appConfigDeserializeProp,
+  idName: r'id',
+  indexes: {
+    r'key': IndexSchema(
+      id: -4906094122524121629,
+      name: r'key',
+      unique: true,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'key',
+          type: IndexType.hash,
+          caseSensitive: true,
+        ),
+      ],
+    ),
+  },
+  links: {},
+  embeddedSchemas: {},
+
+  getId: _appConfigGetId,
+  getLinks: _appConfigGetLinks,
+  attach: _appConfigAttach,
+  version: '3.3.0',
+);
+
+int _appConfigEstimateSize(
+  AppConfig object,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  var bytesCount = offsets.last;
+  bytesCount += 3 + object.key.length * 3;
+  {
+    final value = object.stringValue;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  return bytesCount;
+}
+
+void _appConfigSerialize(
+  AppConfig object,
+  IsarWriter writer,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  writer.writeBool(offsets[0], object.boolValue);
+  writer.writeDateTime(offsets[1], object.dateValue);
+  writer.writeDouble(offsets[2], object.doubleValue);
+  writer.writeLong(offsets[3], object.intValue);
+  writer.writeString(offsets[4], object.key);
+  writer.writeString(offsets[5], object.stringValue);
+}
+
+AppConfig _appConfigDeserialize(
+  Id id,
+  IsarReader reader,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  final object = AppConfig();
+  object.boolValue = reader.readBoolOrNull(offsets[0]);
+  object.dateValue = reader.readDateTimeOrNull(offsets[1]);
+  object.doubleValue = reader.readDoubleOrNull(offsets[2]);
+  object.id = id;
+  object.intValue = reader.readLongOrNull(offsets[3]);
+  object.key = reader.readString(offsets[4]);
+  object.stringValue = reader.readStringOrNull(offsets[5]);
+  return object;
+}
+
+P _appConfigDeserializeProp<P>(
+  IsarReader reader,
+  int propertyId,
+  int offset,
+  Map<Type, List<int>> allOffsets,
+) {
+  switch (propertyId) {
+    case 0:
+      return (reader.readBoolOrNull(offset)) as P;
+    case 1:
+      return (reader.readDateTimeOrNull(offset)) as P;
+    case 2:
+      return (reader.readDoubleOrNull(offset)) as P;
+    case 3:
+      return (reader.readLongOrNull(offset)) as P;
+    case 4:
+      return (reader.readString(offset)) as P;
+    case 5:
+      return (reader.readStringOrNull(offset)) as P;
+    default:
+      throw IsarError('Unknown property with id $propertyId');
+  }
+}
+
+Id _appConfigGetId(AppConfig object) {
+  return object.id;
+}
+
+List<IsarLinkBase<dynamic>> _appConfigGetLinks(AppConfig object) {
+  return [];
+}
+
+void _appConfigAttach(IsarCollection<dynamic> col, Id id, AppConfig object) {
+  object.id = id;
+}
+
+extension AppConfigByIndex on IsarCollection<AppConfig> {
+  Future<AppConfig?> getByKey(String key) {
+    return getByIndex(r'key', [key]);
+  }
+
+  AppConfig? getByKeySync(String key) {
+    return getByIndexSync(r'key', [key]);
+  }
+
+  Future<bool> deleteByKey(String key) {
+    return deleteByIndex(r'key', [key]);
+  }
+
+  bool deleteByKeySync(String key) {
+    return deleteByIndexSync(r'key', [key]);
+  }
+
+  Future<List<AppConfig?>> getAllByKey(List<String> keyValues) {
+    final values = keyValues.map((e) => [e]).toList();
+    return getAllByIndex(r'key', values);
+  }
+
+  List<AppConfig?> getAllByKeySync(List<String> keyValues) {
+    final values = keyValues.map((e) => [e]).toList();
+    return getAllByIndexSync(r'key', values);
+  }
+
+  Future<int> deleteAllByKey(List<String> keyValues) {
+    final values = keyValues.map((e) => [e]).toList();
+    return deleteAllByIndex(r'key', values);
+  }
+
+  int deleteAllByKeySync(List<String> keyValues) {
+    final values = keyValues.map((e) => [e]).toList();
+    return deleteAllByIndexSync(r'key', values);
+  }
+
+  Future<Id> putByKey(AppConfig object) {
+    return putByIndex(r'key', object);
+  }
+
+  Id putByKeySync(AppConfig object, {bool saveLinks = true}) {
+    return putByIndexSync(r'key', object, saveLinks: saveLinks);
+  }
+
+  Future<List<Id>> putAllByKey(List<AppConfig> objects) {
+    return putAllByIndex(r'key', objects);
+  }
+
+  List<Id> putAllByKeySync(List<AppConfig> objects, {bool saveLinks = true}) {
+    return putAllByIndexSync(r'key', objects, saveLinks: saveLinks);
+  }
+}
+
+extension AppConfigQueryWhereSort
+    on QueryBuilder<AppConfig, AppConfig, QWhere> {
+  QueryBuilder<AppConfig, AppConfig, QAfterWhere> anyId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(const IdWhereClause.any());
+    });
+  }
+}
+
+extension AppConfigQueryWhere
+    on QueryBuilder<AppConfig, AppConfig, QWhereClause> {
+  QueryBuilder<AppConfig, AppConfig, QAfterWhereClause> idEqualTo(Id id) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IdWhereClause.between(lower: id, upper: id));
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterWhereClause> idNotEqualTo(Id id) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(
+              IdWhereClause.lessThan(upper: id, includeUpper: false),
+            )
+            .addWhereClause(
+              IdWhereClause.greaterThan(lower: id, includeLower: false),
+            );
+      } else {
+        return query
+            .addWhereClause(
+              IdWhereClause.greaterThan(lower: id, includeLower: false),
+            )
+            .addWhereClause(
+              IdWhereClause.lessThan(upper: id, includeUpper: false),
+            );
+      }
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterWhereClause> idGreaterThan(
+    Id id, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IdWhereClause.greaterThan(lower: id, includeLower: include),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterWhereClause> idLessThan(
+    Id id, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IdWhereClause.lessThan(upper: id, includeUpper: include),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterWhereClause> idBetween(
+    Id lowerId,
+    Id upperId, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IdWhereClause.between(
+          lower: lowerId,
+          includeLower: includeLower,
+          upper: upperId,
+          includeUpper: includeUpper,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterWhereClause> keyEqualTo(String key) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IndexWhereClause.equalTo(indexName: r'key', value: [key]),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterWhereClause> keyNotEqualTo(
+    String key,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'key',
+                lower: [],
+                upper: [key],
+                includeUpper: false,
+              ),
+            )
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'key',
+                lower: [key],
+                includeLower: false,
+                upper: [],
+              ),
+            );
+      } else {
+        return query
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'key',
+                lower: [key],
+                includeLower: false,
+                upper: [],
+              ),
+            )
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'key',
+                lower: [],
+                upper: [key],
+                includeUpper: false,
+              ),
+            );
+      }
+    });
+  }
+}
+
+extension AppConfigQueryFilter
+    on QueryBuilder<AppConfig, AppConfig, QFilterCondition> {
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition> boolValueIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'boolValue'),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition>
+  boolValueIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'boolValue'),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition> boolValueEqualTo(
+    bool? value,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'boolValue', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition> dateValueIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'dateValue'),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition>
+  dateValueIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'dateValue'),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition> dateValueEqualTo(
+    DateTime? value,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'dateValue', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition>
+  dateValueGreaterThan(DateTime? value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'dateValue',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition> dateValueLessThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'dateValue',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition> dateValueBetween(
+    DateTime? lower,
+    DateTime? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'dateValue',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition>
+  doubleValueIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'doubleValue'),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition>
+  doubleValueIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'doubleValue'),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition> doubleValueEqualTo(
+    double? value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'doubleValue',
+          value: value,
+
+          epsilon: epsilon,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition>
+  doubleValueGreaterThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'doubleValue',
+          value: value,
+
+          epsilon: epsilon,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition> doubleValueLessThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'doubleValue',
+          value: value,
+
+          epsilon: epsilon,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition> doubleValueBetween(
+    double? lower,
+    double? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'doubleValue',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+
+          epsilon: epsilon,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition> idEqualTo(
+    Id value,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'id', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition> idGreaterThan(
+    Id value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'id',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition> idLessThan(
+    Id value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'id',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition> idBetween(
+    Id lower,
+    Id upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'id',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition> intValueIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'intValue'),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition>
+  intValueIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'intValue'),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition> intValueEqualTo(
+    int? value,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'intValue', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition> intValueGreaterThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'intValue',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition> intValueLessThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'intValue',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition> intValueBetween(
+    int? lower,
+    int? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'intValue',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition> keyEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'key',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition> keyGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'key',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition> keyLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'key',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition> keyBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'key',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition> keyStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'key',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition> keyEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'key',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition> keyContains(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'key',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition> keyMatches(
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'key',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition> keyIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'key', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition> keyIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'key', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition>
+  stringValueIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'stringValue'),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition>
+  stringValueIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'stringValue'),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition> stringValueEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'stringValue',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition>
+  stringValueGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'stringValue',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition> stringValueLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'stringValue',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition> stringValueBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'stringValue',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition>
+  stringValueStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'stringValue',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition> stringValueEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'stringValue',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition> stringValueContains(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'stringValue',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition> stringValueMatches(
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'stringValue',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition>
+  stringValueIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'stringValue', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterFilterCondition>
+  stringValueIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'stringValue', value: ''),
+      );
+    });
+  }
+}
+
+extension AppConfigQueryObject
+    on QueryBuilder<AppConfig, AppConfig, QFilterCondition> {}
+
+extension AppConfigQueryLinks
+    on QueryBuilder<AppConfig, AppConfig, QFilterCondition> {}
+
+extension AppConfigQuerySortBy on QueryBuilder<AppConfig, AppConfig, QSortBy> {
+  QueryBuilder<AppConfig, AppConfig, QAfterSortBy> sortByBoolValue() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'boolValue', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterSortBy> sortByBoolValueDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'boolValue', Sort.desc);
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterSortBy> sortByDateValue() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'dateValue', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterSortBy> sortByDateValueDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'dateValue', Sort.desc);
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterSortBy> sortByDoubleValue() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'doubleValue', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterSortBy> sortByDoubleValueDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'doubleValue', Sort.desc);
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterSortBy> sortByIntValue() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'intValue', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterSortBy> sortByIntValueDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'intValue', Sort.desc);
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterSortBy> sortByKey() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'key', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterSortBy> sortByKeyDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'key', Sort.desc);
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterSortBy> sortByStringValue() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'stringValue', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterSortBy> sortByStringValueDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'stringValue', Sort.desc);
+    });
+  }
+}
+
+extension AppConfigQuerySortThenBy
+    on QueryBuilder<AppConfig, AppConfig, QSortThenBy> {
+  QueryBuilder<AppConfig, AppConfig, QAfterSortBy> thenByBoolValue() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'boolValue', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterSortBy> thenByBoolValueDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'boolValue', Sort.desc);
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterSortBy> thenByDateValue() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'dateValue', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterSortBy> thenByDateValueDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'dateValue', Sort.desc);
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterSortBy> thenByDoubleValue() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'doubleValue', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterSortBy> thenByDoubleValueDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'doubleValue', Sort.desc);
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterSortBy> thenById() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'id', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterSortBy> thenByIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'id', Sort.desc);
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterSortBy> thenByIntValue() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'intValue', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterSortBy> thenByIntValueDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'intValue', Sort.desc);
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterSortBy> thenByKey() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'key', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterSortBy> thenByKeyDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'key', Sort.desc);
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterSortBy> thenByStringValue() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'stringValue', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QAfterSortBy> thenByStringValueDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'stringValue', Sort.desc);
+    });
+  }
+}
+
+extension AppConfigQueryWhereDistinct
+    on QueryBuilder<AppConfig, AppConfig, QDistinct> {
+  QueryBuilder<AppConfig, AppConfig, QDistinct> distinctByBoolValue() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'boolValue');
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QDistinct> distinctByDateValue() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'dateValue');
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QDistinct> distinctByDoubleValue() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'doubleValue');
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QDistinct> distinctByIntValue() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'intValue');
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QDistinct> distinctByKey({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'key', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<AppConfig, AppConfig, QDistinct> distinctByStringValue({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'stringValue', caseSensitive: caseSensitive);
+    });
+  }
+}
+
+extension AppConfigQueryProperty
+    on QueryBuilder<AppConfig, AppConfig, QQueryProperty> {
+  QueryBuilder<AppConfig, int, QQueryOperations> idProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'id');
+    });
+  }
+
+  QueryBuilder<AppConfig, bool?, QQueryOperations> boolValueProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'boolValue');
+    });
+  }
+
+  QueryBuilder<AppConfig, DateTime?, QQueryOperations> dateValueProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'dateValue');
+    });
+  }
+
+  QueryBuilder<AppConfig, double?, QQueryOperations> doubleValueProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'doubleValue');
+    });
+  }
+
+  QueryBuilder<AppConfig, int?, QQueryOperations> intValueProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'intValue');
+    });
+  }
+
+  QueryBuilder<AppConfig, String, QQueryOperations> keyProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'key');
+    });
+  }
+
+  QueryBuilder<AppConfig, String?, QQueryOperations> stringValueProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'stringValue');
     });
   }
 }

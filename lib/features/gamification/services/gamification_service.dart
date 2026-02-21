@@ -1,4 +1,7 @@
 import 'package:isar_community/isar.dart';
+import 'package:mudra_manager/core/db/models/budget.dart';
+import 'package:mudra_manager/core/db/models/category.dart';
+import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/services/notification_service.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
@@ -18,7 +21,7 @@ class GamificationService {
 
   /// Call on app startup
   Future<void> initialize() async {
-    await _cleanupDuplicates();
+    await _runMigrations();
     for (final def in AchievementRegistry.all.values) {
       final exists = await isar.achievements
           .filter()
@@ -33,13 +36,23 @@ class GamificationService {
     }
   }
 
+  /// Force cleanup - for debugging
+  Future<void> forceCleanup() async {
+    await _cleanupDuplicates();
+    await _cleanupDuplicateStreaks();
+  }
+
   Future<void> _cleanupDuplicates() async {
+    log.i('🔍 Starting achievement cleanup...');
     final all = await isar.achievements.where().findAll();
+    log.i('📊 Found ${all.length} total achievements');
+
     final seen = <String>{};
     final toDelete = <int>[];
 
     for (final achievement in all) {
       if (seen.contains(achievement.key)) {
+        log.d('❌ Duplicate found: ${achievement.key} (ID: ${achievement.id})');
         toDelete.add(achievement.id);
       } else {
         seen.add(achievement.key);
@@ -47,11 +60,128 @@ class GamificationService {
     }
 
     if (toDelete.isNotEmpty) {
+      log.i(
+        '🗑️ Deleting ${toDelete.length} duplicate achievements: $toDelete',
+      );
       await isar.writeTxn(() async {
         await isar.achievements.deleteAll(toDelete);
       });
-      log.i('🧹 Cleaned up ${toDelete.length} duplicate achievements');
+      log.i('✅ Cleaned up ${toDelete.length} duplicate achievements');
+    } else {
+      log.i('✨ No duplicate achievements found');
     }
+  }
+
+  Future<void> _runMigrations() async {
+    try {
+      const currentMigrationVersion = 3;
+
+      log.i('🔄 Checking migrations...');
+      final versionConfig = await isar.appConfigs
+          .filter()
+          .keyEqualTo('migration_version')
+          .findFirst();
+
+      final lastVersion = versionConfig?.intValue ?? 0;
+      log.i(
+        '📊 Current migration version: $lastVersion, Target: $currentMigrationVersion',
+      );
+
+      if (lastVersion < 1) {
+        log.i('🚀 Running migration v1: Cleanup duplicate streaks');
+        await _cleanupDuplicateStreaks();
+      }
+
+      if (lastVersion < 2) {
+        log.i('🚀 Running migration v2: Cleanup duplicate achievements');
+        await _cleanupDuplicates();
+      }
+
+      if (lastVersion < 3) {
+        log.i('🚀 Running migration v3: Update achievement series');
+        try {
+          await _updateAchievementSeries();
+        } catch (e) {
+          log.w('Migration v3 failed (non-critical): $e');
+        }
+      }
+
+      if (lastVersion < currentMigrationVersion) {
+        try {
+          if (versionConfig != null) {
+            versionConfig.intValue = currentMigrationVersion;
+            await isar.writeTxn(() async {
+              await isar.appConfigs.put(versionConfig);
+            });
+          } else {
+            final newConfig = AppConfig()
+              ..key = 'migration_version'
+              ..intValue = currentMigrationVersion;
+            await isar.writeTxn(() async {
+              await isar.appConfigs.put(newConfig);
+            });
+          }
+          log.i(
+            '✅ Migrations complete. Updated to version $currentMigrationVersion',
+          );
+        } catch (e) {
+          log.w('Failed to update migration version: $e');
+        }
+      } else {
+        log.i('✨ All migrations already applied');
+      }
+    } catch (e, st) {
+      log.e('Migration error', e, st);
+      // Continue anyway - don't block app startup
+    }
+  }
+
+  Future<void> _cleanupDuplicateStreaks() async {
+    final allStreaks = await isar.streaks.where().findAll();
+    final seenTypes = <String>{};
+    final toDelete = <int>[];
+    final toKeep = <String, Streak>{};
+
+    for (final streak in allStreaks) {
+      if (seenTypes.contains(streak.type)) {
+        // Keep the one with higher count or more recent update
+        final existing = toKeep[streak.type]!;
+        if (streak.currentCount > existing.currentCount ||
+            (streak.currentCount == existing.currentCount &&
+                streak.lastUpdated.isAfter(existing.lastUpdated))) {
+          toDelete.add(existing.id);
+          toKeep[streak.type] = streak;
+        } else {
+          toDelete.add(streak.id);
+        }
+      } else {
+        seenTypes.add(streak.type);
+        toKeep[streak.type] = streak;
+      }
+    }
+
+    if (toDelete.isNotEmpty) {
+      await isar.writeTxn(() async {
+        await isar.streaks.deleteAll(toDelete);
+      });
+      log.i('🧹 Cleaned up ${toDelete.length} duplicate streaks');
+    }
+  }
+
+  Future<void> _updateAchievementSeries() async {
+    await isar.writeTxn(() async {
+      final allAchievements = await isar.achievements.where().findAll();
+      
+      for (final achievement in allAchievements) {
+        final def = AchievementRegistry.all[achievement.key];
+        if (def != null && (achievement.series != def.series || achievement.seriesOrder != def.seriesOrder)) {
+          achievement.series = def.series;
+          achievement.seriesOrder = def.seriesOrder;
+          await isar.achievements.put(achievement);
+        }
+      }
+    });
+    log.i('🔄 Updated achievement series');
   }
 
   /* =====================================================
@@ -142,6 +272,21 @@ class GamificationService {
       await isar.writeTxn(() => isar.achievements.put(achievement!));
     }
 
+    // Check if this achievement is locked in a series
+    if (achievement.series != null && achievement.seriesOrder != null && achievement.seriesOrder! > 1) {
+      // Check if previous in series is unlocked
+      final previous = await isar.achievements
+          .filter()
+          .seriesEqualTo(achievement.series!)
+          .seriesOrderEqualTo(achievement.seriesOrder! - 1)
+          .findFirst();
+      
+      if (previous == null || !previous.isUnlocked) {
+        // Previous not unlocked, skip this achievement
+        return;
+      }
+    }
+
     final wasUnlocked = achievement.isUnlocked;
     achievement.progress += amount;
 
@@ -159,6 +304,26 @@ class GamificationService {
         achievement.title,
         achievement.rewardXP,
       );
+
+      // Unlock next in series
+      if (achievement.series != null) {
+        await _unlockNextInSeries(
+          achievement.series!,
+          achievement.seriesOrder ?? 0,
+        );
+      }
+    }
+  }
+
+  Future<void> _unlockNextInSeries(String series, int currentOrder) async {
+    final nextAchievement = await isar.achievements
+        .filter()
+        .seriesEqualTo(series)
+        .seriesOrderEqualTo(currentOrder + 1)
+        .findFirst();
+
+    if (nextAchievement != null) {
+      log.i('🔓 Next in series now visible: ${nextAchievement.title}');
     }
   }
 
@@ -210,6 +375,8 @@ class GamificationService {
       ..target = def.target
       ..rewardXP = def.rewardXP
       ..rewardCoins = def.rewardCoins
+      ..series = def.series
+      ..seriesOrder = def.seriesOrder
       ..unlockedAt = null;
   }
 
@@ -387,6 +554,22 @@ class GamificationService {
         .map((e) => e.firstOrNull);
   }
 
+  /// Get cumulative progress for series achievements
+  Future<int> getCumulativeProgress(Achievement achievement) async {
+    if (achievement.series == null || achievement.seriesOrder == null) {
+      return achievement.progress;
+    }
+
+    // Sum progress from all previous achievements + current
+    final allInSeries = await isar.achievements
+        .filter()
+        .seriesEqualTo(achievement.series!)
+        .seriesOrderLessThan(achievement.seriesOrder! + 1)
+        .findAll();
+
+    return allInSeries.fold<int>(0, (sum, ach) => sum + ach.progress);
+  }
+
   Future<String?> updateDailyCheckIn() async {
     final now = DateTime.now();
     log.i('🔍 Daily check-in called at: $now');
@@ -454,7 +637,118 @@ class GamificationService {
     final xp = _calculateStreakXP(newStreak);
     await _addXP(xp, 'Daily Streak: $newStreak');
 
+    // -------------------------------
+    // 3. Check budget adherence (async, don't await)
+    // -------------------------------
+    _checkBudgetAdherence();
+
     log.i('🎉 Check-in complete: Day $newStreak, +$xp XP');
     return 'Day $newStreak streak! +$xp XP';
+  }
+
+  Future<void> _checkBudgetAdherence() async {
+    try {
+      final now = DateTime.now();
+      final yesterday = now.subtract(const Duration(days: 1));
+      final yesterdayStart = DateTime(
+        yesterday.year,
+        yesterday.month,
+        yesterday.day,
+      );
+      final yesterdayEnd = DateTime(
+        yesterday.year,
+        yesterday.month,
+        yesterday.day,
+        23,
+        59,
+        59,
+      );
+
+      final budgets = await isar.budgets
+          .filter()
+          .isArchivedEqualTo(false)
+          .startDateLessThan(yesterdayEnd)
+          .and()
+          .endDateGreaterThan(yesterdayStart)
+          .findAll();
+
+      if (budgets.isEmpty) {
+        log.i('💰 No active budgets to check');
+        return;
+      }
+
+      bool allWithinBudget = true;
+      for (final budget in budgets) {
+        await budget.categories.load();
+        await budget.allocations.load();
+
+        final (s, e) = budget.getCurrentPeriodRange(yesterday);
+        double totalSpent = 0;
+
+        for (final alloc in budget.allocations) {
+          await alloc.category.load();
+          final spent = await isar.transactions
+              .filter()
+              .isExpenseEqualTo(true)
+              .dateBetween(s, e)
+              .category((q) => q.idEqualTo(alloc.category.value!.id))
+              .amountProperty()
+              .sum();
+          totalSpent += spent;
+        }
+
+        if (totalSpent > budget.amount) {
+          allWithinBudget = false;
+          log.i(
+            '💰 Budget exceeded: ${budget.name} ($totalSpent/${budget.amount})',
+          );
+          break;
+        }
+      }
+
+      final streak = await isar.streaks
+          .filter()
+          .typeEqualTo('budget_adherence')
+          .findFirst();
+
+      final existing =
+          streak ??
+          (Streak()
+            ..type = 'budget_adherence'
+            ..currentCount = 0
+            ..longestCount = 0
+            ..lastChecked = null
+            ..lastUpdated = now);
+
+      final last = existing.lastChecked;
+
+      if (last != null && _isSameDay(last, now)) {
+        return;
+      }
+
+      if (allWithinBudget) {
+        if (last != null && _isConsecutiveDay(last, now)) {
+          existing.currentCount++;
+          log.i('💰 Budget adherence streak continued: ${existing.currentCount}');
+        } else {
+          existing.currentCount = 1;
+          log.i('💰 Budget adherence streak started: 1');
+        }
+
+        if (existing.currentCount > existing.longestCount) {
+          existing.longestCount = existing.currentCount;
+        }
+      } else {
+        existing.currentCount = 0;
+        log.i('💰 Budget adherence streak broken');
+      }
+
+      existing.lastChecked = now;
+      existing.lastUpdated = now;
+
+      await isar.writeTxn(() => isar.streaks.put(existing));
+    } catch (e) {
+      log.e('Error checking budget adherence', e);
+    }
   }
 }

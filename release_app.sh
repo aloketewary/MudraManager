@@ -57,7 +57,7 @@ flutter pub get
 
 # Step 5: Build APK
 echo "🏗️ Building appbundle..."
-flutter build appbundle --release
+flutter build appbundle --flavor prod --release
 
 # Step 6: Git commit (Optional)
 echo "📝 Committing version bump..."

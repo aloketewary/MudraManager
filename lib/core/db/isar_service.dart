@@ -49,6 +49,8 @@ class IsarService {
       StreakSchema,
       ChallengeSchema,
       UserLevelSchema,
+      XpLogSchema,
+      AppConfigSchema,
     ], directory: dir.path);
   }
 

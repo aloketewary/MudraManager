@@ -9,7 +9,7 @@ import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
 
 class WidgetService {
-  static const String androidWidgetName = 'QuickAddWidgetProvider';
+  static const String androidWidgetName = 'com.mudramanager.app.QuickAddWidgetProvider';
   static final _log = AppLog(getLogger(), 'WidgetService');
 
   static Future<void> updateWidget(WidgetRef ref) async {
@@ -78,7 +78,13 @@ class WidgetService {
         '₹${todayIncome.toStringAsFixed(0)}',
       );
 
-      await HomeWidget.updateWidget(androidName: androidWidgetName);
+      try {
+        await HomeWidget.updateWidget(androidName: androidWidgetName);
+      } catch (e) {
+        // Widget not found - ignore (happens in dev builds)
+        _log.d('Widget update skipped: $e');
+      }
+      
       _log.i(
         'Widget updated: Balance=₹${totalBalance.toStringAsFixed(0)}, Expense=₹${todayExpense.toStringAsFixed(0)}, Income=₹${todayIncome.toStringAsFixed(0)}',
       );

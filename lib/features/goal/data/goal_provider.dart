@@ -21,7 +21,7 @@ final goalsProvider = StreamProvider<List<Goal>>((ref) {
 
 class GoalService {
   final IsarService isarService;
-  final GamificationService gamificationService;
+  final GamificationService? gamificationService;
 
   GoalService(this.isarService, this.gamificationService);
 
@@ -31,7 +31,7 @@ class GoalService {
       await isar.goals.put(goal);
     });
     await _updateGoalReminders();
-    await gamificationService.track(GamificationEvent.goalCreated);
+    await gamificationService?.track(GamificationEvent.goalCreated);
   }
 
   Future<void> updateGoal(Goal goal) async {
@@ -62,7 +62,7 @@ class GoalService {
     });
     await _updateGoalReminders();
     if (goal != null && goal!.currentAmount >= goal!.targetAmount) {
-      await gamificationService.track(GamificationEvent.goalCompleted);
+      await gamificationService?.track(GamificationEvent.goalCompleted);
     }
   }
 

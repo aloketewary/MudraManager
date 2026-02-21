@@ -3,21 +3,19 @@ import 'package:mudra_manager/features/gamification/models/achievement.dart';
 import 'package:mudra_manager/features/gamification/services/gamification_service.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 
-final gamificationServiceProvider = Provider<GamificationService>((ref) {
-  return ref.watch(gamificationServiceInitProvider).maybeWhen(
-    data: (service) => service,
-    orElse: () => throw UnimplementedError('GamificationService not initialized'),
-  );
+final gamificationServiceProvider = Provider<GamificationService?>((ref) {
+  final asyncValue = ref.watch(gamificationServiceInitProvider);
+  return asyncValue.valueOrNull;
 });
 
-final achievementsProvider = StreamProvider<List<Achievement>>((ref) {
-  final service = ref.watch(gamificationServiceProvider);
-  return service.watchAchievements();
+final achievementsProvider = StreamProvider<List<Achievement>>((ref) async* {
+  final service = await ref.watch(gamificationServiceInitProvider.future);
+  yield* service.watchAchievements();
 });
 
-final streaksProvider = StreamProvider<List<Streak>>((ref) {
-  final service = ref.watch(gamificationServiceProvider);
-  return service.watchStreaks();
+final streaksProvider = StreamProvider<List<Streak>>((ref) async* {
+  final service = await ref.watch(gamificationServiceInitProvider.future);
+  yield* service.watchStreaks();
 });
 
 final dailyStreakProvider = Provider<Streak?>((ref) {
@@ -28,15 +26,14 @@ final dailyStreakProvider = Provider<Streak?>((ref) {
   );
 });
 
-final userLevelProvider = StreamProvider<UserLevel?>((ref) {
-  final service = ref.watch(gamificationServiceProvider);
-  return service.watchUserLevel();
+final userLevelProvider = StreamProvider<UserLevel?>((ref) async* {
+  final service = await ref.watch(gamificationServiceInitProvider.future);
+  yield* service.watchUserLevel();
 });
 
 final dailyCheckInProvider = FutureProvider<String?>((ref) async {
-  final service = ref.watch(gamificationServiceProvider);
+  final service = await ref.watch(gamificationServiceInitProvider.future);
   return await service.updateDailyCheckIn();
 });
 
 final lastSeenLevelProvider = StateProvider<int?>((ref) => null);
-

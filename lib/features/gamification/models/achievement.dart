@@ -25,9 +25,36 @@ class Achievement {
   late int rewardXP;
   late int rewardCoins;
 
+  String? series;
+  int? seriesOrder;
+
   DateTime? unlockedAt;
 
   bool get isUnlocked => unlockedAt != null;
+  bool get isInProgress => progress > 0 && !isUnlocked;
+  
+  // Display progress shows cumulative count for series achievements
+  // This needs to be calculated by summing all previous + current progress
+  // The UI should use a provider to calculate this
+  int get displayProgress => progress;
+  
+  bool get isVisible {
+    // Always show if unlocked
+    if (isUnlocked) return true;
+    
+    // Show if no series (standalone achievements)
+    if (series == null) return true;
+    
+    // Show first in series
+    if (seriesOrder == 1) return true;
+    
+    // For other series items, only show if has progress
+    // (progress is only added after previous is unlocked)
+    if (progress > 0) return true;
+    
+    // Otherwise hidden
+    return false;
+  }
 }
 
 enum AchievementCategory { budgeting, saving, tracking, milestone, engagement }
@@ -108,4 +135,18 @@ class XpLog {
   late int amount;
   late String reason;
   late DateTime createdAt;
+}
+
+@collection
+class AppConfig {
+  Id id = Isar.autoIncrement;
+
+  @Index(unique: true)
+  late String key;
+
+  String? stringValue;
+  int? intValue;
+  double? doubleValue;
+  bool? boolValue;
+  DateTime? dateValue;
 }

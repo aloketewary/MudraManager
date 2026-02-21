@@ -10,7 +10,7 @@ import 'package:mudra_manager/features/gamification/services/gamification_servic
 
 class RecurringTransactionService {
   final IsarService isarService;
-  final GamificationService gamificationService;
+  final GamificationService? gamificationService;
   late final AppLog log;
 
   RecurringTransactionService(this.isarService, this.gamificationService) {
@@ -88,7 +88,7 @@ class RecurringTransactionService {
       await recurring.category.save();
     });
     if (isNew) {
-      await gamificationService.track(GamificationEvent.recurringTransactionCreated);
+      await gamificationService?.track(GamificationEvent.recurringTransactionCreated);
     }
   }
 

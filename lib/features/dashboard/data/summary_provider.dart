@@ -3,11 +3,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 
-final incomeExpenseSummaryProvider = FutureProvider<Map<String, double>>((
+final incomeExpenseSummaryProvider = FutureProvider.autoDispose<Map<String, double>>((
   ref,
 ) async {
   final txnService = ref.watch(transactionProvider);
-  final txns = await txnService.getAll();
+  final txns = await txnService.getAllForDashBoard();
 
   double income = 0;
   double expense = 0;

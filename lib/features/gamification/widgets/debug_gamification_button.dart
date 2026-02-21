@@ -14,13 +14,13 @@ class DebugGamificationButton extends ConsumerWidget {
         final service = ref.read(gamificationServiceProvider);
 
         // Add some XP
-        await service.track(GamificationEvent.transactionAdded);
-        await service.track(GamificationEvent.transactionAdded);
-        await service.track(GamificationEvent.transactionAdded);
+        await service?.track(GamificationEvent.transactionAdded);
+        await service?.track(GamificationEvent.transactionAdded);
+        await service?.track(GamificationEvent.transactionAdded);
 
         // Trigger budget and goal achievements
-        await service.track(GamificationEvent.budgetCreated);
-        await service.track(GamificationEvent.goalCompleted);
+        await service?.track(GamificationEvent.budgetCreated);
+        await service?.track(GamificationEvent.goalCompleted);
 
         SnackbarService.success('✅ Dummy data created!');
       },

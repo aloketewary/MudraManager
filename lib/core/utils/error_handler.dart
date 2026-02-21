@@ -77,9 +77,9 @@ Future<T?> safeExecute<T>(
   final log = AppLog(getLogger(), 'SafeExec');
   try {
     return await operation();
-  } catch (e) {
+  } catch (e, st) {
     onError?.call(e);
-    log.e('Safe execute caught error', e);
+    log.e('Safe execute caught error', e, st);
     return fallback;
   }
 }

@@ -77,16 +77,18 @@ class HomePageState extends ConsumerState<HomePage>
   void _setupMethodChannel() {
     const platform = MethodChannel('com.mudramanager.app/widget');
     platform.setMethodCallHandler((call) async {
-      if (call.method == 'widgetAction' &&
-          call.arguments == 'add_transaction') {
-        log.i('Widget button clicked - opening quick add sheet');
-        if (mounted) {
-          await Future.delayed(const Duration(milliseconds: 300));
-          showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            builder: (_) => const QuickAddTransactionSheet(),
-          );
+      if (call.method == 'widgetAction') {
+        final action = call.arguments as String?;
+        log.i('Widget action received: $action');
+        if (action == 'add_transaction' || action == 'ADD_TRANSACTION') {
+          if (mounted) {
+            await Future.delayed(const Duration(milliseconds: 300));
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              builder: (_) => const QuickAddTransactionSheet(),
+            );
+          }
         }
       }
     });

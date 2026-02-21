@@ -68,8 +68,9 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
           appBar: AppBar(title: const Text('Achievements')),
           body: achievementsAsync.when(
             data: (achievements) {
-              final unlocked = achievements.where((a) => a.isUnlocked).toList();
-              final locked = achievements.where((a) => !a.isUnlocked).toList();
+              final visible = achievements.where((a) => a.isVisible).toList();
+              final unlocked = visible.where((a) => a.isUnlocked).toList();
+              final locked = visible.where((a) => !a.isUnlocked).toList();
 
               return SingleChildScrollView(
                 padding: const EdgeInsets.all(16),

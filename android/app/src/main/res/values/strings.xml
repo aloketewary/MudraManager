@@ -2,4 +2,5 @@
 <resources>
     <string name="app_name">Mudra Manager</string>
     <string name="widget_description">Quick add transactions and view balance</string>
+    <string name="simple_widget_description">Quick add transaction</string>
 </resources>

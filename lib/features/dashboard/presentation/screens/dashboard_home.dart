@@ -98,11 +98,22 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final service = await ref.read(gamificationServiceInitProvider.future);
-      final result = await service.updateDailyCheckIn();
-      if (result != null && mounted) {
-        SnackbarService.success('🔥 $result');
-        log.i('✅ Daily check-in completed');
+      final prefs = SharedPrefsUtil.instance;
+      final lastCheckIn = prefs.getLastDailyCheckIn();
+      final now = DateTime.now();
+      
+      // Only check in if not already done today
+      if (lastCheckIn == null || 
+          !(lastCheckIn.year == now.year && 
+            lastCheckIn.month == now.month && 
+            lastCheckIn.day == now.day)) {
+        final service = await ref.read(gamificationServiceInitProvider.future);
+        final result = await service.updateDailyCheckIn();
+        if (result != null && mounted) {
+          await prefs.setLastDailyCheckIn(now);
+          SnackbarService.success('🔥 $result');
+          log.i('✅ Daily check-in completed');
+        }
       }
     });
   }

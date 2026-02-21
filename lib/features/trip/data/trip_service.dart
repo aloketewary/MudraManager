@@ -7,7 +7,7 @@ import 'package:mudra_manager/features/gamification/services/gamification_servic
 
 class TripService {
   final IsarService isarService;
-  final GamificationService gamificationService;
+  final GamificationService? gamificationService;
 
   TripService(this.isarService, this.gamificationService);
 
@@ -19,7 +19,7 @@ class TripService {
       await isar.trips.put(trip);
       await trip.participants.save();
     });
-    await gamificationService.track(GamificationEvent.tripCreated);
+    await gamificationService?.track(GamificationEvent.tripCreated);
   }
 
   Future<List<Trip>> getAllTrips() async {

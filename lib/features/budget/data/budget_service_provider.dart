@@ -64,7 +64,7 @@ final budgetsWithProgressProvider =
 class BudgetService {
   final IsarService isarService;
   final AppLog log;
-  final GamificationService gamificationService;
+  final GamificationService? gamificationService;
 
   BudgetService(this.isarService, this.log, this.gamificationService);
 
@@ -172,7 +172,7 @@ class BudgetService {
     });
     log.i('Budget saved: ${bud.name}');
     if (isNew) {
-      await gamificationService.track(GamificationEvent.budgetCreated);
+      await gamificationService?.track(GamificationEvent.budgetCreated);
     }
   }
 

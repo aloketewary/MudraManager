@@ -15,7 +15,7 @@ class MainActivity: FlutterFragmentActivity() {
         methodChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
         methodChannel?.setMethodCallHandler { call, result ->
             if (call.method == "getWidgetAction") {
-                val action = intent?.getStringExtra("widget_action")
+                val action = intent?.action ?: intent?.getStringExtra("widget_action")
                 result.success(action)
             } else {
                 result.notImplemented()
@@ -23,16 +23,17 @@ class MainActivity: FlutterFragmentActivity() {
         }
         
         // Check initial intent
-        val action = intent?.getStringExtra("widget_action")
-        if (action != null) {
-            methodChannel?.invokeMethod("widgetAction", action)
-        }
+        handleIntent(intent)
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        val action = intent.getStringExtra("widget_action")
+        handleIntent(intent)
+    }
+
+    private fun handleIntent(intent: Intent?) {
+        val action = intent?.action ?: intent?.getStringExtra("widget_action")
         if (action != null) {
             methodChannel?.invokeMethod("widgetAction", action)
         }
