@@ -415,6 +415,9 @@ class TransactionService {
       await credit.account.save();
     });
     log.i('Transfer completed successfully');
+    
+    // Track gamification
+    await gamificationService.track(GamificationEvent.transferCompleted);
   }
 
   Future<List<Transaction>> getByDateRange(DateTime start, DateTime end) async {

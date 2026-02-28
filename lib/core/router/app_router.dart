@@ -55,6 +55,11 @@ class AppRouter {
       final isOnOnboardingPage = state.matchedLocation == '/onboarding';
       final isOnAccountSetupPage = state.matchedLocation == '/account-setup';
 
+      // Handle root path from deep links
+      if (state.matchedLocation == '/') {
+        return isOnboardingComplete ? '/home' : '/onboarding';
+      }
+
       // If onboarding is complete and user is on onboarding/setup page, redirect to home
       if (isOnboardingComplete &&
           (isOnOnboardingPage || isOnAccountSetupPage)) {

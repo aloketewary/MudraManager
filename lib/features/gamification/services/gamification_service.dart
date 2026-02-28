@@ -231,6 +231,7 @@ class GamificationService {
 
       case GamificationEvent.transferCompleted:
         await _increment('transfer_10');
+        await _increment('transfer_50');
         break;
 
       case GamificationEvent.recurringTransactionCreated:
@@ -239,6 +240,7 @@ class GamificationService {
         break;
 
       case GamificationEvent.tagUsed:
+        await _increment('tag_5');
         await _increment('tag_25');
         break;
 
@@ -567,6 +569,21 @@ class GamificationService {
     }
   }
 
+  Future<void> _checkMilestones(int totalDays) async {
+    if (totalDays >= 7) {
+      await _setProgress('week_1', totalDays);
+    }
+    if (totalDays >= 30) {
+      await _setProgress('month_1', totalDays);
+    }
+    if (totalDays >= 90) {
+      await _setProgress('month_3', totalDays);
+    }
+    if (totalDays >= 365) {
+      await _setProgress('year_1', totalDays);
+    }
+  }
+
   int _calculateStreakXP(int streak) {
     if (streak >= 100) return 50;
     if (streak >= 30) return 30;
@@ -693,6 +710,7 @@ class GamificationService {
     // 2. Give rewards (outside txn)
     // -------------------------------
     await _checkStreaks(newStreak);
+    await _checkMilestones(existing.longestCount);
 
     final xp = _calculateStreakXP(newStreak);
     await _addXP(xp, 'Daily Streak: $newStreak');
@@ -797,6 +815,11 @@ class GamificationService {
 
         if (existing.currentCount > existing.longestCount) {
           existing.longestCount = existing.currentCount;
+        }
+
+        // Check budget_master achievement
+        if (existing.currentCount >= 30) {
+          await _setProgress('budget_master', existing.currentCount);
         }
       } else {
         existing.currentCount = 0;
