@@ -7,9 +7,13 @@ Mudra Manager is a powerful, modern personal finance management application buil
 -   **📊 Dashboard & Insights**: A comprehensive overview of your financial health with real-time updates.
 -   **📩 SMS Transaction Tracking**: Automatically detect and parse financial transactions from bank/wallet SMS messages.
 -   **💰 Budget Management**: Set up monthly budgets and stay on top of your spending.
+-   **🎯 Goals & Savings**: Set financial goals and track your progress towards achieving them.
+-   **✈️ Travel Expenses**: Track and manage your travel expenses separately with dedicated categories.
+-   **👥 Split Bills**: Easily split expenses with friends and family, track who owes what.
+-   **🔄 Recurring Transactions**: Automate recurring bills and subscriptions for hassle-free tracking.
 -   **📈 Detailed Statistics**: Visualize your spending habits with beautiful, interactive charts and reports.
 -   **📋 Transaction History**: Search, filter, and manage your income, expenses, and transfers.
--   **🌐 Localizations**: Full support for multiple languages.
+-   **🌐 Multi-Language Support**: Full support for multiple languages to serve users across India.
 -   **🔒 Secure & Private**: Local-first architecture using a high-performance local database. Optional biometric authentication.
 -   **🎨 Premium Design**: A sleek, modern UI with support for dynamic themes and animations.
 -   **📄 Export Reports**: Export your financial data to Excel or PDF formats.

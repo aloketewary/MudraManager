@@ -54,7 +54,8 @@ jobs:
       - name: Build App Bundle
         run: |
           export JAVA_HOME=$JAVA_HOME_17_X64
-          flutter build appbundle --release --flavor prod
+          flutter build appbundle --release --flavor prod --verbose
+        continue-on-error: false
 
       - name: Upload to Play Store
         uses: r0adkll/upload-google-play@v1
