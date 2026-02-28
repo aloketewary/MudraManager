@@ -23,6 +23,7 @@ ndkVersion: 27.0.12077973
 
 environment:
   sdk: '>=3.5.0 <4.0.0'
+  flutter: 3.32.0
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions

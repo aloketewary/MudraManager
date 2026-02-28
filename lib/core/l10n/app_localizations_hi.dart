@@ -278,10 +278,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String budget_dashboardPieChartLabelText(
-    Object spentPercent,
-    Object title,
-    Object totalPercent,
-  ) {
+      Object spentPercent, Object title, Object totalPercent) {
     return '$title ($totalPercent कुल का, $spentPercent खर्च का)';
   }
 
