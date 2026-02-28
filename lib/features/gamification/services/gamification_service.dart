@@ -609,7 +609,13 @@ class GamificationService {
   }
 
   bool _withinGracePeriod(DateTime last, DateTime now) {
-    return now.difference(last).inHours <= 36;
+    final d1 = DateTime(last.year, last.month, last.day);
+    final d2 = DateTime(now.year, now.month, now.day);
+    final daysDiff = d2.difference(d1).inDays;
+    final hoursDiff = now.difference(last).inHours;
+    
+    // Must be exactly 1 day apart (next day) and within 48 hours
+    return daysDiff == 1 && hoursDiff > 24 && hoursDiff <= 48;
   }
 
   /* =====================================================
@@ -685,6 +691,9 @@ class GamificationService {
         (_isConsecutiveDay(last, now) || _withinGracePeriod(last, now))) {
       existing.currentCount++;
       log.i('🔥 Streak continued: ${existing.currentCount}');
+    } else if (last == null) {
+      existing.currentCount = 1;
+      log.i('🆕 First check-in');
     } else {
       existing.currentCount = 1;
       log.i('🆕 Streak reset to 1');

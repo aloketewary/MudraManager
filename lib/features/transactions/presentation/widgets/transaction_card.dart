@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
@@ -26,6 +27,7 @@ class TransactionCard extends StatefulWidget {
   final VoidCallback onRemove;
   final Transaction? related;
   final String? tripName;
+  final int? index;
 
   const TransactionCard({
     super.key,
@@ -41,13 +43,35 @@ class TransactionCard extends StatefulWidget {
     required this.isTransfer,
     required this.related,
     this.tripName,
+    this.index,
   });
 
   @override
   State<TransactionCard> createState() => _TransactionCardState();
 }
 
-class _TransactionCardState extends State<TransactionCard> {
+class _TransactionCardState extends State<TransactionCard> with SingleTickerProviderStateMixin {
+  late AnimationController _scaleController;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _scaleController = AnimationController(
+      duration: const Duration(milliseconds: 150),
+      vsync: this,
+    );
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
+      CurvedAnimation(parent: _scaleController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _scaleController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme;
@@ -55,13 +79,19 @@ class _TransactionCardState extends State<TransactionCard> {
     widget.related?.category.load();
     widget.related?.account.load();
 
-    return SwipeActionWrapper(
+    final card = SwipeActionWrapper(
       onEdit: widget.onEdit,
       onDelete: widget.onRemove,
-      child: Card(
-        margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
-        elevation: 0,
-        color: color.surfaceContainerLow,
+      child: GestureDetector(
+        onTapDown: (_) => _scaleController.forward(),
+        onTapUp: (_) => _scaleController.reverse(),
+        onTapCancel: () => _scaleController.reverse(),
+        child: ScaleTransition(
+          scale: _scaleAnimation,
+          child: Card(
+            margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
+            elevation: 0,
+            color: color.surfaceContainerLow,
         child: Stack(
           children: [
             if (widget.tripName != null)
@@ -165,8 +195,17 @@ class _TransactionCardState extends State<TransactionCard> {
             ),
           ],
         ),
+          ),
+        ),
       ),
     );
+
+    if (widget.index != null) {
+      return card.animate()
+          .fadeIn(delay: Duration(milliseconds: widget.index! * 30), duration: 250.ms)
+          .slideX(begin: 0.1, delay: Duration(milliseconds: widget.index! * 30), duration: 250.ms);
+    }
+    return card;
   }
 
   Widget buildNormalCard() {
