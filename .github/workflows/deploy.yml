@@ -26,8 +26,11 @@ jobs:
           channel: "stable"
           cache: true
 
-      - name: Set JAVA_HOME
-        run: echo "JAVA_HOME=$JAVA_HOME" >> $GITHUB_ENV
+      - name: Verify Java
+        run: |
+          echo "JAVA_HOME: $JAVA_HOME"
+          java -version
+          which java
 
       - name: Get dependencies
         run: flutter pub get
@@ -49,7 +52,9 @@ jobs:
           EOF
 
       - name: Build App Bundle
-        run: flutter build appbundle --release --flavor prod
+        run: |
+          export JAVA_HOME=$JAVA_HOME_17_X64
+          flutter build appbundle --release --flavor prod
 
       - name: Upload to Play Store
         uses: r0adkll/upload-google-play@v1
