@@ -51,6 +51,11 @@ class AccountsService {
         .amountProperty()
         .sum();
 
+    // For credit cards: expenses increase debt, payments decrease debt
+    if (account.accountType == AccountType.creditCard) {
+      return account.initialBalance + expense - income;
+    }
+
     return account.initialBalance + income - expense;
   }
 
@@ -88,7 +93,10 @@ class AccountsService {
           .amountProperty()
           .sum();
 
-      final balance = account.initialBalance + income - expense;
+      // For credit cards: expenses increase debt, payments decrease debt
+      final balance = account.accountType == AccountType.creditCard
+          ? account.initialBalance + expense - income
+          : account.initialBalance + income - expense;
       balanceMap[accountId] = balance;
     }
 

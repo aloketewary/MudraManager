@@ -436,23 +436,17 @@ class _AddEditTransactionScreenState
                 ctxt.transaction_addNewTagText,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.outline.withValues(alpha: 0.3),
-                    width: 1.5,
-                  ),
-                ),
-                child: TextField(
-                  controller: controller,
-                  decoration: InputDecoration(
-                    labelText: ctxt.transaction_tagNameControllerText,
-                    border: InputBorder.none,
+              const SizedBox(height: 16),
+              TextField(
+                controller: controller,
+                autofocus: true,
+                textCapitalization: TextCapitalization.words,
+                decoration: InputDecoration(
+                  labelText: ctxt.transaction_tagNameControllerText,
+                  hintText: 'e.g., Travel, Food, Shopping',
+                  prefixIcon: const Icon(Icons.label_outline),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
               ),

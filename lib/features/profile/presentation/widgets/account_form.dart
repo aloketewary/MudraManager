@@ -165,16 +165,18 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               decoration: InputDecoration(
                 labelText: 'Account Number',
                 hintText: 'Last 4 digits',
+                helperText: 'Enter last 4 digits for SMS matching',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
                 prefixIcon: const Icon(Icons.numbers),
               ),
-              validator: (value) => value == null || value.isEmpty
-                  ? 'Required'
-                  : value.length != 4
-                  ? '4 digits required'
-                  : null,
+              validator: (value) {
+                if (value == null || value.isEmpty) return 'Required';
+                if (value.length < 4) return 'At least 4 digits required';
+                if (value.length > 4) return 'Only last 4 digits needed';
+                return null;
+              },
             ),
             const SizedBox(height: 20),
             TextFormField(
@@ -183,8 +185,15 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                 decimal: true,
               ),
               decoration: InputDecoration(
-                labelText: 'Initial Balance',
-                hintText: 'Enter initial balance',
+                labelText: _selectedType == AccountType.creditCard
+                    ? 'Current Outstanding'
+                    : 'Initial Balance',
+                hintText: _selectedType == AccountType.creditCard
+                    ? 'Amount you owe (0 if paid off)'
+                    : 'Enter initial balance',
+                helperText: _selectedType == AccountType.creditCard
+                    ? 'Enter outstanding amount. Use 0 if card is paid off.'
+                    : null,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),

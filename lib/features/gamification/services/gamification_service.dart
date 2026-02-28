@@ -261,6 +261,57 @@ class GamificationService {
      ACHIEVEMENT ENGINE
   ===================================================== */
 
+  Future<void> _setProgress(String key, int progress) async {
+    var achievement = await isar.achievements
+        .filter()
+        .keyEqualTo(key)
+        .findFirst();
+
+    if (achievement == null) {
+      achievement = _clone(_getAchievementDefinition(key));
+      await isar.writeTxn(() => isar.achievements.put(achievement!));
+    }
+
+    // Check if this achievement is locked in a series
+    if (achievement.series != null && achievement.seriesOrder != null && achievement.seriesOrder! > 1) {
+      final previous = await isar.achievements
+          .filter()
+          .seriesEqualTo(achievement.series!)
+          .seriesOrderEqualTo(achievement.seriesOrder! - 1)
+          .findFirst();
+      
+      if (previous == null || !previous.isUnlocked) {
+        return;
+      }
+    }
+
+    final wasUnlocked = achievement.isUnlocked;
+    achievement.progress = progress;
+
+    await isar.writeTxn(() => isar.achievements.put(achievement!));
+
+    if (!wasUnlocked && achievement.progress >= achievement.target) {
+      achievement.unlockedAt = DateTime.now();
+      await isar.writeTxn(() => isar.achievements.put(achievement!));
+      await _addXP(achievement.rewardXP, 'Achievement: ${achievement.title}');
+      log.i('🏆 Achievement Unlocked: ${achievement.title}');
+      SnackbarService.success(
+        '🏆 ${achievement.title} unlocked! +${achievement.rewardXP} XP',
+      );
+      NotificationService.showAchievementUnlocked(
+        achievement.title,
+        achievement.rewardXP,
+      );
+
+      if (achievement.series != null) {
+        await _unlockNextInSeries(
+          achievement.series!,
+          achievement.seriesOrder ?? 0,
+        );
+      }
+    }
+  }
+
   Future<void> _increment(String key, [int amount = 1]) async {
     var achievement = await isar.achievements
         .filter()
@@ -489,21 +540,30 @@ class GamificationService {
   }
 
   Future<void> _checkStreaks(int count) async {
-    if (count == 3) {
-      await _increment('streak_3_days');
-      NotificationService.showStreakMilestone(3);
+    // Set progress directly to count for streak achievements
+    if (count >= 3) {
+      await _setProgress('streak_3_days', count);
+      if (count == 3) {
+        NotificationService.showStreakMilestone(3);
+      }
     }
-    if (count == 7) {
-      await _increment('streak_7_days');
-      NotificationService.showStreakMilestone(7);
+    if (count >= 7) {
+      await _setProgress('streak_7_days', count);
+      if (count == 7) {
+        NotificationService.showStreakMilestone(7);
+      }
     }
-    if (count == 30) {
-      await _increment('streak_30_days');
-      NotificationService.showStreakMilestone(30);
+    if (count >= 30) {
+      await _setProgress('streak_30_days', count);
+      if (count == 30) {
+        NotificationService.showStreakMilestone(30);
+      }
     }
-    if (count == 100) {
-      await _increment('streak_100_days');
-      NotificationService.showStreakMilestone(100);
+    if (count >= 100) {
+      await _setProgress('streak_100_days', count);
+      if (count == 100) {
+        NotificationService.showStreakMilestone(100);
+      }
     }
   }
 

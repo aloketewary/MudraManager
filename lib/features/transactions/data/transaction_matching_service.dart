@@ -34,6 +34,18 @@ class TransactionMatchingService {
       }
     }
 
+    // Fallback: Match by bank name for credit cards
+    if (matchedAccount == null && pending.fromBank != null) {
+      for (var acc in accounts) {
+        if (acc.accountType == AccountType.creditCard &&
+            acc.name.toLowerCase().contains(pending.fromBank!.toLowerCase())) {
+          matchedAccount = acc;
+          _log.i('Account matched by bank name: ${acc.name}');
+          break;
+        }
+      }
+    }
+
     if (matchedAccount == null) {
       _log.d('No matching account found for: $pendingAccTrimmed');
       return null;
