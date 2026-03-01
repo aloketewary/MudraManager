@@ -168,7 +168,7 @@ class AboutScreen extends StatelessWidget {
                         () {
                           HapticFeedback.mediumImpact();
                           _launchURL(
-                            'https://aloketewary.github.io/MudraManager/privacy-policy.html',
+                            'https://mudramanager.com/privacy.html',
                           );
                         },
                       ),
@@ -183,7 +183,7 @@ class AboutScreen extends StatelessWidget {
                         () {
                           HapticFeedback.mediumImpact();
                           _launchURL(
-                            'https://aloketewary.github.io/MudraManager//terms-conditions.html',
+                            'https://mudramanager.com/terms.html',
                           );
                         },
                       ),
@@ -194,10 +194,10 @@ class AboutScreen extends StatelessWidget {
                         textTheme,
                         Icons.email_outlined,
                         'Contact Support',
-                        'aloke@duck.com',
+                        'Email Support or Report a Bug',
                         () {
                           HapticFeedback.mediumImpact();
-                          _launchURL('mailto:aloke@duck.com');
+                          _launchURL('https://mudramanager.com/support.html');
                         },
                       ),
                       const SizedBox(height: 12),

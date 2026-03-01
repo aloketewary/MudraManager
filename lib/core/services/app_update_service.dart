@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:in_app_update/in_app_update.dart';
 
 class AppUpdateService {
@@ -14,6 +15,8 @@ class AppUpdateService {
           await InAppUpdate.completeFlexibleUpdate();
         }
       }
+    } on MissingPluginException {
+      // Ignore during hot reload/development
     } catch (e) {
       if (!e.toString().contains('ERROR_APP_NOT_OWNED')) {
         debugPrint('Update check failed: $e');

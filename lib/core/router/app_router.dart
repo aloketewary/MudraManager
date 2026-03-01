@@ -9,6 +9,7 @@ import 'package:mudra_manager/features/budget/data/budget_service_provider.dart'
 import 'package:mudra_manager/features/budget/presentation/screens/add_budget_screen.dart';
 import 'package:mudra_manager/features/budget/presentation/screens/budget_dashboard.dart';
 import 'package:mudra_manager/features/budget/presentation/screens/budget_details_screen.dart';
+import 'package:mudra_manager/features/dashboard/presentation/screens/dashboard_customize_screen.dart';
 import 'package:mudra_manager/features/goal/presentation/screens/add_edit_goal_screen.dart';
 import 'package:mudra_manager/features/goal/presentation/screens/goal_details_screen.dart';
 import 'package:mudra_manager/features/goal/presentation/screens/goal_screen.dart';
@@ -147,6 +148,10 @@ class AppRouter {
           GoRoute(
             path: '/app-settings',
             builder: (context, state) => const AppSettingsPage(),
+          ),
+          GoRoute(
+            path: '/dashboard-customize',
+            builder: (context, state) => const DashboardCustomizeScreen(),
           ),
           GoRoute(
             path: '/security',

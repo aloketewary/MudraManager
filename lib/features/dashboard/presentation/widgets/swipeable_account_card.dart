@@ -51,7 +51,9 @@ class _AnimatedSwipeableAccountCardsState
 
   void _onVerticalDragUpdate(DragUpdateDetails details) {
     setState(() {
-      _dragOffset += Offset(0, details.delta.dy);
+      // Limit drag to max 120 pixels down
+      final newOffset = _dragOffset.dy + details.delta.dy;
+      _dragOffset = Offset(0, newOffset.clamp(0, 120));
     });
   }
 
@@ -178,9 +180,9 @@ class _AnimatedSwipeableAccountCardsState
                     left: 0,
                     right: 0,
                     child: GestureDetector(
-                      onVerticalDragUpdate: _onVerticalDragUpdate,
-                      onVerticalDragEnd: (dragDetails) =>
-                          _onVerticalDragEnd(dragDetails, cards),
+                      onVerticalDragUpdate: cards.length > 1 ? _onVerticalDragUpdate : null,
+                      onVerticalDragEnd: cards.length > 1 ? (dragDetails) =>
+                          _onVerticalDragEnd(dragDetails, cards) : null,
                       child: AnimatedSwitcher(
                         duration: const Duration(milliseconds: 300),
                         child: Transform.translate(

@@ -723,6 +723,8 @@ class _SmsImportSettingsScreenState
     final textTheme = Theme.of(context).textTheme;
 
     final options = {
+      'Today': DateTime(now.year, now.month, now.day),
+      'Yesterday': DateTime(now.year, now.month, now.day - 1),
       'This Month': DateTime(now.year, now.month, 1),
       'Last Month': DateTime(now.year, now.month - 1, 1),
       'Last 2 Months': DateTime(now.year, now.month - 2, 1),

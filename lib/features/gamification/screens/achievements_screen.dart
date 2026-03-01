@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:confetti/confetti.dart';
 import 'package:mudra_manager/features/gamification/models/user_rank.dart';
@@ -142,7 +143,10 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
                             ),
                         itemCount: unlocked.length,
                         itemBuilder: (context, index) {
-                          return AchievementCard(achievement: unlocked[index]);
+                          return AchievementCard(achievement: unlocked[index])
+                              .animate()
+                              .fadeIn(delay: Duration(milliseconds: index * 50), duration: 300.ms)
+                              .scale(delay: Duration(milliseconds: index * 50), duration: 300.ms, begin: const Offset(0.9, 0.9));
                         },
                       ),
                       const SizedBox(height: 24),
@@ -169,7 +173,10 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
                             ),
                         itemCount: locked.length,
                         itemBuilder: (context, index) {
-                          return AchievementCard(achievement: locked[index]);
+                          return AchievementCard(achievement: locked[index])
+                              .animate()
+                              .fadeIn(delay: Duration(milliseconds: (unlocked.length + index) * 50), duration: 300.ms)
+                              .scale(delay: Duration(milliseconds: (unlocked.length + index) * 50), duration: 300.ms, begin: const Offset(0.9, 0.9));
                         },
                       ),
                     ],

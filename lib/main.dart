@@ -211,28 +211,31 @@ class MudraManagerApp extends ConsumerWidget {
 
 Future<void> setupSmsListener() async {
   final log = AppLog(getLogger(), 'SMS');
+
   if (!SharedPrefsUtil.instance.getSmsImportEnabled()) {
     log.i('SMS import disabled');
     return;
   }
 
   final telephony = Telephony.instance;
+
   final bool? permissionsGranted =
-      await telephony.requestPhoneAndSmsPermissions;
+      await telephony.requestSmsPermissions;
 
   if (permissionsGranted == true) {
     log.i('SMS listener setup complete');
+
     telephony.listenIncomingSms(
       onNewMessage: (SmsMessage message) {
         SmsProcessorService.instance.parseAndSaveTransaction(
           body: message.body ?? '',
           address: message.address ?? '',
           sender: message.address ?? '',
-          timestamp: message.date ?? DateTime.now().millisecondsSinceEpoch,
+          timestamp: message.date ??
+              DateTime.now().millisecondsSinceEpoch,
         );
       },
-      listenInBackground: true,
-      onBackgroundMessage: backgroundMessageHandler,
+      listenInBackground: false,
     );
   } else {
     log.w('SMS permissions not granted');

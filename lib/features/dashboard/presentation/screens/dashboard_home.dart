@@ -24,6 +24,7 @@ import 'package:mudra_manager/shared/widgets/budget_alert_banner.dart';
 import 'package:mudra_manager/shared/widgets/period_calendar_selector.dart';
 import 'package:mudra_manager/shared/widgets/responseive_layout_builder.dart';
 import 'package:mudra_manager/features/gamification/widgets/recent_achievement_card.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class _AnimatedCard extends StatefulWidget {
   final Widget child;
@@ -98,10 +99,14 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
   DateTime? _customStart;
   DateTime? _customEnd;
   final AppLog log = AppLog(getLogger(), 'DashBoardHome');
+  List<String> _visibleCards = [];
+  List<String> _cardOrder = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
+    _loadCardPreferences();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final prefs = SharedPrefsUtil.instance;
       final lastCheckIn = prefs.getLastDailyCheckIn();
@@ -123,6 +128,121 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
     });
   }
 
+  Future<void> _loadCardPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    final visible = prefs.getStringList('visible_dashboard_cards');
+    final order = prefs.getStringList('dashboard_cards_order');
+    setState(() {
+      _visibleCards = visible ?? ['accounts', 'action_buttons', 'cash_flow', 'financial_health', 'net_worth', 'spending_prediction', 'active_trip', 'budget', 'goal'];
+      _cardOrder = order ?? ['accounts', 'action_buttons', 'cash_flow', 'financial_health', 'net_worth', 'spending_prediction', 'active_trip', 'budget', 'goal'];
+      _isLoading = false;
+    });
+  }
+
+  bool _isCardVisible(String cardId) => _visibleCards.contains(cardId);
+
+  Widget? _buildCard(String cardId, int index) {
+    if (!_isCardVisible(cardId)) return null;
+    
+    switch (cardId) {
+      case 'accounts':
+        return const AnimatedSwipeableAccountCards();
+      case 'action_buttons':
+        return Container(
+          margin: EdgeInsets.symmetric(horizontal: globalPadding, vertical: 8),
+          child: ResponsiveLayoutBuilder(
+            columnWidget: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  child: DashboardActionButton(
+                    label: AppLocalizations.of(context)!.dashboard_add_transaction_text,
+                    icon: Icons.add_circle_outline,
+                    onTap: () => context.push('/add-transaction'),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Flexible(
+                  child: DashboardActionButton(
+                    label: AppLocalizations.of(context)!.dashboard_add_transfer_text,
+                    icon: Icons.swap_horiz,
+                    onTap: () => context.push('/transfer'),
+                    backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+                    iconColor: Theme.of(context).colorScheme.tertiary,
+                    textColor: Theme.of(context).colorScheme.tertiary,
+                  ),
+                ),
+              ],
+            ),
+            rowWidget: Row(
+              children: [
+                Expanded(
+                  child: DashboardActionButton(
+                    label: AppLocalizations.of(context)!.dashboard_add_transaction_text,
+                    icon: Icons.add_circle_outline,
+                    onTap: () => context.push('/add-transaction'),
+                    heroTag: 'addTransactionHeroDashboard',
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: DashboardActionButton(
+                    label: AppLocalizations.of(context)!.dashboard_add_transfer_text,
+                    icon: Icons.swap_horiz,
+                    onTap: () => context.push('/transfer'),
+                    backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+                    iconColor: Theme.of(context).colorScheme.tertiary,
+                    textColor: Theme.of(context).colorScheme.tertiary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      case 'cash_flow':
+        return Column(
+          children: [
+            CashFlowScreen(
+              globalPadding: globalPadding,
+              selectedPeriod: _selectedPeriod,
+              customStart: _customStart,
+              customEnd: _customEnd,
+            ),
+            const SizedBox(height: 8),
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: globalPadding),
+              child: PeriodCalendarSelector(
+                selectedPeriod: _selectedPeriod,
+                customStart: _customStart,
+                customEnd: _customEnd,
+                onChanged: (period, start, end) {
+                  setState(() {
+                    _selectedPeriod = period;
+                    _customStart = start;
+                    _customEnd = end;
+                  });
+                },
+              ),
+            ),
+          ],
+        );
+      case 'financial_health':
+        return _AnimatedCard(delay: index * 100, child: FinancialHealthCard(globalPadding: globalPadding));
+      case 'net_worth':
+        return _AnimatedCard(delay: index * 100, child: NetWorthCard(globalPadding: globalPadding));
+      case 'spending_prediction':
+        return _AnimatedCard(delay: index * 100, child: SpendingPredictionCard(globalPadding: globalPadding));
+      case 'active_trip':
+        return _AnimatedCard(delay: index * 100, child: ActiveTripMiniCard(globalPadding: globalPadding));
+      case 'budget':
+        return _AnimatedCard(delay: index * 100, child: BudgetCard(globalPadding: globalPadding));
+      case 'goal':
+        return _AnimatedCard(delay: index * 100, child: GoalCard(globalPadding: globalPadding));
+      default:
+        return null;
+    }
+  }
+
   @override
   void dispose() {
     super.dispose();
@@ -135,6 +255,27 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
     final ctxt = AppLocalizations.of(context)!;
     final alerts = ref.watch(budgetAlertsProvider);
     final hasSeenHelp = ref.watch(hasSeenHelpGuideProvider);
+    final hasAnyVisibleCards = _visibleCards.isNotEmpty;
+
+    if (_isLoading) {
+      return Scaffold(
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              const SizedBox(height: 16),
+              ...List.generate(5, (i) => Container(
+                margin: EdgeInsets.symmetric(horizontal: globalPadding, vertical: 8),
+                height: 150,
+                decoration: BoxDecoration(
+                  color: color.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              )),
+            ],
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -229,105 +370,55 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                 },
               ),
             const SizedBox(height: 16),
-            const AnimatedSwipeableAccountCards(),
-            const SizedBox(height: 16),
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: globalPadding),
-              child: ResponsiveLayoutBuilder(
-                // sizedBoxHeight: 110,
-                columnWidget: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Flexible(
-                      child: DashboardActionButton(
-                        label: ctxt.dashboard_add_transaction_text,
-                        icon: Icons.add_circle_outline,
-                        onTap: () => context.push('/add-transaction'),
-                      ),
+            ...List.generate(_cardOrder.length, (i) {
+              final widget = _buildCard(_cardOrder[i], i);
+              if (widget == null) return const SizedBox.shrink();
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: widget,
+              );
+            }),
+            if (!hasAnyVisibleCards)
+              Container(
+                margin: const EdgeInsets.all(16),
+                child: Card(
+                  elevation: 0,
+                  color: color.surfaceContainerHighest,
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.dashboard_customize,
+                          size: 64,
+                          color: color.onSurfaceVariant,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No cards enabled',
+                          style: textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Enable dashboard cards to see your financial overview',
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: color.onSurfaceVariant,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 16),
+                        FilledButton.icon(
+                          onPressed: () => context.push('/dashboard-customize'),
+                          icon: const Icon(Icons.add),
+                          label: const Text('Enable Cards'),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 8),
-                    Flexible(
-                      child: DashboardActionButton(
-                        label: ctxt.dashboard_add_transfer_text,
-                        icon: Icons.swap_horiz,
-                        onTap: () => context.push('/transfer'),
-                        backgroundColor: color.surfaceContainerHigh,
-                        iconColor: color.tertiary,
-                        textColor: color.tertiary,
-                      ),
-                    ),
-                  ],
-                ),
-                rowWidget: Row(
-                  children: [
-                    Expanded(
-                      child: DashboardActionButton(
-                        label: ctxt.dashboard_add_transaction_text,
-                        icon: Icons.add_circle_outline,
-                        onTap: () => context.push('/add-transaction'),
-                        heroTag: 'addTransactionHeroDashboard',
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: DashboardActionButton(
-                        label: ctxt.dashboard_add_transfer_text,
-                        icon: Icons.swap_horiz,
-                        onTap: () => context.push('/transfer'),
-                        backgroundColor: color.surfaceContainerHigh,
-                        iconColor: color.tertiary,
-                        textColor: color.tertiary,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
-            ),
-            CashFlowScreen(
-              globalPadding: globalPadding,
-              selectedPeriod: _selectedPeriod,
-              customStart: _customStart,
-              customEnd: _customEnd,
-            ),
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: globalPadding),
-              child: PeriodCalendarSelector(
-                selectedPeriod: _selectedPeriod,
-                customStart: _customStart,
-                customEnd: _customEnd,
-                onChanged: (period, start, end) {
-                  setState(() {
-                    _selectedPeriod = period;
-                    _customStart = start;
-                    _customEnd = end;
-                  });
-                },
-              ),
-            ),
-            _AnimatedCard(
-              delay: 0,
-              child: FinancialHealthCard(globalPadding: globalPadding),
-            ),
-            _AnimatedCard(
-              delay: 100,
-              child: NetWorthCard(globalPadding: globalPadding),
-            ),
-            _AnimatedCard(
-              delay: 200,
-              child: SpendingPredictionCard(globalPadding: globalPadding),
-            ),
-            _AnimatedCard(
-              delay: 300,
-              child: ActiveTripMiniCard(globalPadding: globalPadding),
-            ),
-            _AnimatedCard(
-              delay: 400,
-              child: BudgetCard(globalPadding: globalPadding),
-            ),
-            _AnimatedCard(
-              delay: 500,
-              child: GoalCard(globalPadding: globalPadding),
-            ),
             const SizedBox(height: 100), // Extra space for bottom nav
           ],
         ),

@@ -32,6 +32,19 @@ class AppSettingsPage extends ConsumerWidget {
             context,
             color,
             textTheme,
+            Icons.dashboard_customize,
+            'Customize Dashboard',
+            'Show/hide and reorder cards',
+            () {
+              HapticFeedback.mediumImpact();
+              context.push('/dashboard-customize');
+            },
+          ),
+          const SizedBox(height: 8),
+          _buildSettingCard(
+            context,
+            color,
+            textTheme,
             Icons.language_outlined,
             ctxt.app_settings_language_title,
             ctxt.app_settings_language_subtitle,

@@ -681,6 +681,8 @@ class GamificationService {
     // Already checked today
     if (last != null && _isSameDay(last, now)) {
       log.i('⏭️ Already checked in today. Last: $last, Now: $now');
+      // Cancel today's reminder since user already checked in
+      await NotificationService.cancelStreakReminder();
       return null;
     }
 

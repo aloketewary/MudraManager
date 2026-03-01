@@ -1,5 +1,6 @@
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
+import 'package:mudra_manager/core/db/models/frequency.dart';
 import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
@@ -43,11 +44,16 @@ class RecurringTransactionService {
   }
 
   Future<void> _createTransaction(dynamic isar, RecurringTransaction recurring) async {
+    final frequencyText = _getFrequencyText(recurring.frequency);
+    final description = recurring.description?.isNotEmpty == true 
+        ? '${recurring.description} (🔄 $frequencyText)'
+        : '🔄 $frequencyText - ${recurring.category.value?.name ?? ""}';
+    
     final transaction = Transaction.create(
       date: recurring.nextDueDate,
       amount: recurring.amount,
       isExpense: recurring.isExpense,
-      description: recurring.description ?? 'Recurring: ${recurring.category.value?.name ?? ""}',
+      description: description,
     )
       ..account.value = recurring.account.value
       ..category.value = recurring.category.value
@@ -59,6 +65,19 @@ class RecurringTransactionService {
       await transaction.category.save();
       await transaction.recurringTransactionSource.save();
     });
+  }
+
+  String _getFrequencyText(Frequency frequency) {
+    switch (frequency) {
+      case Frequency.daily:
+        return 'Daily';
+      case Frequency.weekly:
+        return 'Weekly';
+      case Frequency.monthly:
+        return 'Monthly';
+      case Frequency.yearly:
+        return 'Yearly';
+    }
   }
 
   Future<void> _updateNextDueDate(dynamic isar, RecurringTransaction recurring) async {

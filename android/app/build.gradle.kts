@@ -45,6 +45,7 @@ android {
     productFlavors {
         create("prod") {
             dimension = "version"
+            isDefault = true
         }
         create("dev") {
             dimension = "version"

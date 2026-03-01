@@ -68,6 +68,7 @@ class UtilityScreen extends StatefulWidget {
 
 class UtilityScreenState extends State<UtilityScreen> {
   List<String> _visibleUtilities = [];
+  List<String> _seenUtilities = [];
   bool _isLoading = true;
 
   final List<_UtilityItem> _allUtilities = [
@@ -117,8 +118,11 @@ class UtilityScreenState extends State<UtilityScreen> {
   Future<void> _loadPreferences() async {
     final prefs = await SharedPreferences.getInstance();
     final saved = prefs.getStringList('visible_utilities');
+    final seen = prefs.getStringList('seen_utilities') ?? [];
+    
     setState(() {
-      _visibleUtilities = saved ?? _allUtilities.map((e) => e.id).toList();
+      _visibleUtilities = saved ?? ['monthly_comparison', 'recurring'];
+      _seenUtilities = seen;
       _isLoading = false;
     });
   }
@@ -135,6 +139,15 @@ class UtilityScreenState extends State<UtilityScreen> {
   void _showCustomizeSheet() {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+
+    // Mark all utilities as seen when opening customize sheet
+    final allIds = _allUtilities.map((e) => e.id).toList();
+    SharedPreferences.getInstance().then((prefs) {
+      prefs.setStringList('seen_utilities', allIds);
+    });
+    setState(() {
+      _seenUtilities = allIds;
+    });
 
     showModalBottomSheet(
       context: context,
@@ -238,17 +251,34 @@ class UtilityScreenState extends State<UtilityScreen> {
                             horizontal: 16,
                             vertical: 8,
                           ),
-                          leading: Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: color.primary.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Icon(
-                              utility.icon,
-                              color: color.primary,
-                              size: 24,
-                            ),
+                          leading: Stack(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: color.primary.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Icon(
+                                  utility.icon,
+                                  color: color.primary,
+                                  size: 24,
+                                ),
+                              ),
+                              if (!_seenUtilities.contains(utility.id))
+                                Positioned(
+                                  right: 0,
+                                  top: 0,
+                                  child: Container(
+                                    width: 10,
+                                    height: 10,
+                                    decoration: BoxDecoration(
+                                      color: color.primary,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
                           title: Text(
                             utility.title,
