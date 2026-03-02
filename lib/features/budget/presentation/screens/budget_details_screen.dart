@@ -1,6 +1,5 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:mudra_manager/core/extension/localization_extenstion.dart';
@@ -10,7 +9,10 @@ import 'package:mudra_manager/features/budget/data/budget_service_provider.dart'
 import 'package:mudra_manager/features/budget/presentation/screens/budget_chart_screen.dart';
 import 'package:mudra_manager/features/budget/presentation/widgets/budget_category_mini_card.dart';
 import 'package:mudra_manager/features/budget/presentation/widgets/chart_legend.dart';
+import 'package:mudra_manager/features/budget/data/overspend_prediction_provider.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
+import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
+import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 
 class BudgetDetailsScreen extends ConsumerWidget {
   final BudgetWithProgress data;
@@ -20,10 +22,14 @@ class BudgetDetailsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ctxt = AppLocalizations.of(context)!;
+    final predictions = ref.watch(overspendPredictionsProvider);
+    final isGuestMode = ref.watch(guestModeProvider);
     final b = data.budget;
     final spent = data.spent;
     final total = b.amount;
-    final pct = total > 0 ? (spent / total) : 0;
+    final displaySpent = GuestModeUtil.applyGuestMode(spent, isGuestMode);
+    final displayTotal = GuestModeUtil.applyGuestMode(total, isGuestMode);
+    final pct = displayTotal > 0 ? (displaySpent / displayTotal) : 0;
     var color = Theme.of(context).colorScheme;
     var textTheme = Theme.of(context).textTheme;
     final formatter = DateFormat('dd MMM yy', ctxt.localeName);
@@ -136,7 +142,7 @@ class BudgetDetailsScreen extends ConsumerWidget {
                             ),
                             const SizedBox(height: 4),
                             CurrencyText(
-                              amount: total,
+                              amount: displayTotal,
                               style: textTheme.headlineSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: color.onSurface,
@@ -164,7 +170,7 @@ class BudgetDetailsScreen extends ConsumerWidget {
                             ),
                             const SizedBox(height: 4),
                             CurrencyText(
-                              amount: spent,
+                              amount: displaySpent,
                               style: textTheme.headlineSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: statusColor,
@@ -210,6 +216,66 @@ class BudgetDetailsScreen extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
+                  predictions.when(
+                    data: (predList) {
+                      final pred = predList.firstWhere(
+                        (p) => p.budgetId == b.id,
+                      );
+                      if (pred != null && pred.willOverspend) {
+                        return Card(
+                          color: color.errorContainer,
+                          margin: const EdgeInsets.only(bottom: 16),
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(Icons.warning_rounded,
+                                        color: color.error),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        pred.warningMessage,
+                                        style: textTheme.bodyMedium?.copyWith(
+                                          color: color.onErrorContainer,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Daily Avg: ₹${pred.dailyAverage.toStringAsFixed(0)}',
+                                      style: textTheme.labelSmall?.copyWith(
+                                        color: color.onErrorContainer,
+                                      ),
+                                    ),
+                                    Text(
+                                      'Projected: ₹${pred.projectedTotal.toStringAsFixed(0)}',
+                                      style: textTheme.labelSmall?.copyWith(
+                                        color: color.onErrorContainer,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    },
+                    loading: () => const SizedBox.shrink(),
+                    error: (_, __) => const SizedBox.shrink(),
+                  ),
                   Card(
                     elevation: 0,
                     color: color.surfaceContainerHighest,
@@ -220,11 +286,11 @@ class BudgetDetailsScreen extends ConsumerWidget {
                           SizedBox(
                             height: 200,
                             child: NestedCircularChart(
-                              total: total,
-                              spent: spent,
+                              total: displayTotal,
+                              spent: displaySpent,
                               spentCategories: {
                                 for (var cs in data.categorySpendings)
-                                  cs.category.name: cs.spent,
+                                  cs.category.name: GuestModeUtil.applyGuestMode(cs.spent, isGuestMode),
                               },
                               categories: [
                                 for (var cs in data.categorySpendings)
@@ -236,14 +302,14 @@ class BudgetDetailsScreen extends ConsumerWidget {
                           ChartLegend(
                             spentCategories: {
                               for (var cs in data.categorySpendings)
-                                cs.category.name: cs.spent,
+                                cs.category.name: GuestModeUtil.applyGuestMode(cs.spent, isGuestMode),
                             },
                             categories: [
                               for (var cs in data.categorySpendings)
                                 cs.category,
                             ],
-                            total: total,
-                            spent: spent,
+                            total: displayTotal,
+                            spent: displaySpent,
                           ),
                         ],
                       ),
@@ -273,8 +339,8 @@ class BudgetDetailsScreen extends ConsumerWidget {
                       final cat = data.categorySpendings[index];
                       return BudgetCategoryMiniCard(
                         category: cat.category,
-                        allocated: cat.allocated,
-                        spent: cat.spent,
+                        allocated: GuestModeUtil.applyGuestMode(cat.allocated, isGuestMode),
+                        spent: GuestModeUtil.applyGuestMode(cat.spent, isGuestMode),
                       );
                     },
                   ),

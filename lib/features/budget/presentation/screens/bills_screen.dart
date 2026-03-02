@@ -8,6 +8,8 @@ import 'package:mudra_manager/core/utils/dialog_utils.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/budget/data/bill_service.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
+import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
+import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 
 final billsProvider = StreamProvider<List<RecurringBill>>((ref) {
   final isar = Isar.getInstance()!;
@@ -20,6 +22,7 @@ class BillsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final billsAsync = ref.watch(billsProvider);
+    final isGuestMode = ref.watch(guestModeProvider);
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
@@ -90,7 +93,7 @@ class BillsScreen extends ConsumerWidget {
       body: billsAsync.when(
         data: (bills) {
           if (bills.isEmpty) {
-            return NoDataFound(
+            return const NoDataFound(
               message: 'No bills yet\nAdd your recurring bills to track them',
               iconData: Icons.receipt_long_outlined,
             );
@@ -101,7 +104,7 @@ class BillsScreen extends ConsumerWidget {
             itemCount: bills.length,
             itemBuilder: (context, index) {
               final bill = bills[index];
-              return _buildBillCard(context, bill, color, textTheme);
+              return _buildBillCard(context, bill, color, textTheme, isGuestMode);
             },
           );
         },
@@ -116,7 +119,9 @@ class BillsScreen extends ConsumerWidget {
     RecurringBill bill,
     ColorScheme color,
     TextTheme textTheme,
+    bool isGuestMode,
   ) {
+    final displayAmount = GuestModeUtil.applyGuestMode(bill.amount, isGuestMode);
     final daysUntilDue =
         bill.nextDueDate?.difference(DateTime.now()).inDays ?? 0;
     final isOverdue = daysUntilDue < 0;
@@ -165,7 +170,7 @@ class BillsScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '₹${bill.amount.toStringAsFixed(0)}',
+                      '₹${displayAmount.toStringAsFixed(0)}',
                       style: textTheme.titleLarge?.copyWith(
                         color: billColor,
                         fontWeight: FontWeight.bold,

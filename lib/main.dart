@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_widget/home_widget.dart';
+import 'package:mudra_manager/core/db/category_seeder.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/l10n_provider.dart';
@@ -16,8 +17,10 @@ import 'package:mudra_manager/core/utils/error_handler.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
+import 'package:mudra_manager/features/account/data/balance_history_service.dart';
 import 'package:mudra_manager/features/budget/data/bill_service.dart';
 import 'package:mudra_manager/features/dashboard/data/summary_scheduler.dart';
+import 'package:mudra_manager/features/notifications/data/smart_notification_service.dart';
 import 'package:mudra_manager/features/sms/data/sms_cleanup_service.dart';
 import 'package:mudra_manager/features/sms/data/sms_processor_service.dart';
 import 'package:mudra_manager/features/transactions/data/recurring_transaction_scheduler.dart';
@@ -67,6 +70,12 @@ Future<void> _initializeBackgroundServices(ProviderContainer container) async {
     final isar = await safeExecute(() => container.read(isarServiceProvider).getInstance());
     if (isar != null) {
       log.i('✅ Isar initialized');
+      
+      // Seed category keywords
+      await safeExecute(() async {
+        await CategorySeeder.seedDefaultKeywords(isar);
+        log.i('✅ Category keywords seeded');
+      });
     } else {
       log.e('❌ Isar initialization failed');
       return;
@@ -108,6 +117,14 @@ Future<void> _initializeBackgroundServices(ProviderContainer container) async {
         safeExecute(() async {
           await SmsHashCleanupService.cleanupOldHashes();
           log.i('✅ SmsHashCleanupService initialized');
+        }),
+        safeExecute(() async {
+          await BalanceHistoryService.instance.recordDailySnapshots();
+          log.i('✅ BalanceHistoryService initialized');
+        }),
+        safeExecute(() async {
+          await SmartNotificationService.instance.runSmartChecks();
+          log.i('✅ SmartNotificationService initialized');
         }),
       ].map((f) => f.catchError((e) => null)),
     );
@@ -235,7 +252,8 @@ Future<void> setupSmsListener() async {
               DateTime.now().millisecondsSinceEpoch,
         );
       },
-      listenInBackground: false,
+      onBackgroundMessage: backgroundMessageHandler,
+      listenInBackground: true,
     );
   } else {
     log.w('SMS permissions not granted');

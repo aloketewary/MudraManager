@@ -9,6 +9,8 @@ import 'package:mudra_manager/core/services/widget_service.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 import 'package:mudra_manager/features/transactions/presentation/widgets/account_card_mini.dart';
+import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
+import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 
 class TransferScreen extends ConsumerStatefulWidget {
   final Account? fromAccount;
@@ -97,6 +99,7 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final service = ref.watch(accountServiceProvider);
     final ctxt = AppLocalizations.of(context)!;
+    final isGuestMode = ref.watch(guestModeProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -417,7 +420,7 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
                                 ],
                               ),
                               const SizedBox(height: 12),
-                              _buildSummaryRow('Amount', '₹${_amountC.text}', textTheme, color),
+                              _buildSummaryRow('Amount', '₹${GuestModeUtil.applyGuestMode(double.parse(_amountC.text), isGuestMode).toStringAsFixed(0)}', textTheme, color),
                               _buildSummaryRow('From', _fromAccount!.name, textTheme, color),
                               _buildSummaryRow('To', _toAccount!.name, textTheme, color),
                               _buildSummaryRow('Date', DateFormat.yMMMd().format(_date), textTheme, color),

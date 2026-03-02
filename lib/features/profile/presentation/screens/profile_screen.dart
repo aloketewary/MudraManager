@@ -11,6 +11,7 @@ import 'package:mudra_manager/features/budget/data/budget_service_provider.dart'
 import 'package:mudra_manager/features/category/data/category_provider.dart';
 import 'package:mudra_manager/features/profile/data/user_profile_provider.dart';
 import 'package:mudra_manager/features/gamification/widgets/badge_showcase.dart';
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 
 class _AnimatedCard extends StatefulWidget {
   final Widget child;
@@ -251,7 +252,7 @@ class ProfileScreen extends ConsumerWidget {
                             ),
                           ),
                           if (profile?.phone != null &&
-                              profile!.phone!.isNotEmpty) ...[
+                              profile!.phone!.isNotEmpty) ...{
                             const SizedBox(height: 2),
                             Text(
                               profile.phone!,
@@ -261,7 +262,7 @@ class ProfileScreen extends ConsumerWidget {
                                 ),
                               ),
                             ),
-                          ],
+                          },
                         ],
                       ),
                     ),
@@ -428,7 +429,7 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 12),
                 _AnimatedCard(
-                  delay: 650,
+                  delay: 700,
                   child: _buildSettingCard(
                     context,
                     Icons.lock,
@@ -442,7 +443,7 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 12),
                 _AnimatedCard(
-                  delay: 700,
+                  delay: 750,
                   child: _buildSettingCard(
                     context,
                     Icons.sms,
@@ -456,12 +457,12 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 24),
                 _AnimatedCard(
-                  delay: 750,
+                  delay: 800,
                   child: _buildSectionHeader(context, 'About'),
                 ),
                 const SizedBox(height: 12),
                 _AnimatedCard(
-                  delay: 800,
+                  delay: 850,
                   child: _buildSettingCard(
                     context,
                     Icons.help_outline,
@@ -475,7 +476,7 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 12),
                 _AnimatedCard(
-                  delay: 850,
+                  delay: 900,
                   child: _buildSettingCard(
                     context,
                     Icons.info_outline,
@@ -489,12 +490,12 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 24),
                 _AnimatedCard(
-                  delay: 900,
+                  delay: 950,
                   child: _buildSectionHeader(context, 'Danger Zone'),
                 ),
                 const SizedBox(height: 12),
                 _AnimatedCard(
-                  delay: 950,
+                  delay: 1000,
                   child: _buildSettingCard(
                     context,
                     Icons.logout,
@@ -511,7 +512,30 @@ class ProfileScreen extends ConsumerWidget {
           ),
         ],
       ),
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => Center(
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            SkeletonLoader(
+              width: double.infinity,
+              height: 220,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            const SizedBox(height: 16),
+            ...List.generate(
+              8,
+              (i) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: SkeletonLoader(
+                  width: double.infinity,
+                  height: 70,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
       error: (e, _) => Center(child: Text('Error: $e')),
     );
   }

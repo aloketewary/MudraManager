@@ -12,9 +12,12 @@ import 'package:mudra_manager/core/utils/icon_helper.dart';
 import 'package:mudra_manager/core/utils/string_util.dart';
 import 'package:mudra_manager/shared/widgets/adaptive_text.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
+import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 import 'package:mudra_manager/shared/widgets/swipe_action_wrapper.dart';
 
-class TransactionCard extends StatefulWidget {
+class TransactionCard extends ConsumerStatefulWidget {
   final Category? category;
   final String? description;
   final Account? account;
@@ -28,6 +31,7 @@ class TransactionCard extends StatefulWidget {
   final Transaction? related;
   final String? tripName;
   final int? index;
+  final bool isRecurring;
 
   const TransactionCard({
     super.key,
@@ -44,15 +48,18 @@ class TransactionCard extends StatefulWidget {
     required this.related,
     this.tripName,
     this.index,
+    this.isRecurring = false,
   });
 
   @override
-  State<TransactionCard> createState() => _TransactionCardState();
+  ConsumerState<TransactionCard> createState() => _TransactionCardState();
 }
 
-class _TransactionCardState extends State<TransactionCard> with SingleTickerProviderStateMixin {
+class _TransactionCardState extends ConsumerState<TransactionCard>
+    with SingleTickerProviderStateMixin {
   late AnimationController _scaleController;
   late Animation<double> _scaleAnimation;
+  late double displayAmount;
 
   @override
   void initState() {
@@ -76,6 +83,8 @@ class _TransactionCardState extends State<TransactionCard> with SingleTickerProv
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final isGuestMode = ref.watch(guestModeProvider);
+    displayAmount = GuestModeUtil.applyGuestMode(widget.amount.toDouble(), isGuestMode);
     widget.related?.category.load();
     widget.related?.account.load();
 
@@ -123,6 +132,44 @@ class _TransactionCardState extends State<TransactionCard> with SingleTickerProv
                         'TRIP',
                         style: TextStyle(
                           color: color.onTertiaryContainer,
+                          fontSize: 9,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            if (widget.isRecurring)
+              Positioned(
+                top: 0,
+                left: 0,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: color.errorContainer,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      bottomRight: Radius.circular(16),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.repeat,
+                        size: 12,
+                        color: color.error,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'SUBSCRIPTION',
+                        style: TextStyle(
+                          color: color.error,
                           fontSize: 9,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 0.5,
@@ -262,8 +309,9 @@ class _TransactionCardState extends State<TransactionCard> with SingleTickerProv
           children: <Widget>[
             if (widget.tripName != null) const SizedBox(height: 20),
             CurrencyText(
-              amount: widget.amount.toDouble(),
+              amount: displayAmount,
               showSign: true,
+              isExpense: widget.isExpense,
               style: textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w700,
                 color: widget.isExpense ? color.error : color.primary,
@@ -394,7 +442,7 @@ class _TransactionCardState extends State<TransactionCard> with SingleTickerProv
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             CurrencyText(
-              amount: widget.amount.toDouble(),
+              amount: displayAmount,
               style: textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: color.primary,

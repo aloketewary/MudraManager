@@ -169,11 +169,29 @@ class _CategoryTileState extends State<_CategoryTile> {
                 color: color.onSurface,
               ),
             ),
-            subtitle: Text(
-              '$count ${count == 1 ? 'transaction' : 'transactions'} • ${widget.category.categoryType.name.toUpperCase()}',
-              style: textTheme.bodySmall?.copyWith(
-                color: color.onSurfaceVariant,
-              ),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '$count ${count == 1 ? 'transaction' : 'transactions'} • ${widget.category.categoryType.name.toUpperCase()}',
+                  style: textTheme.bodySmall?.copyWith(
+                    color: color.onSurfaceVariant,
+                  ),
+                ),
+                if (widget.category.keywords != null && widget.category.keywords!.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      widget.category.keywords!.join(', '),
+                      style: textTheme.bodySmall?.copyWith(
+                        color: color.primary,
+                        fontStyle: FontStyle.italic,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+              ],
             ),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,

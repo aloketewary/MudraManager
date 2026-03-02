@@ -30,7 +30,7 @@ class TransactionListScreenRefactored extends ConsumerStatefulWidget {
 
 class TransactionListScreenRefactoredState
     extends ConsumerState<TransactionListScreenRefactored> {
-  String _filter = 'all';
+  final String _filter = 'all';
   DateTime _selectedDate = DateTime.now();
   String _searchQuery = '';
   int? _selectedCategoryId;
@@ -102,7 +102,6 @@ class TransactionListScreenRefactoredState
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final color = Theme.of(context).colorScheme;
     final ctxt = AppLocalizations.of(context)!;
 
     return widget.showAppBar
@@ -154,7 +153,7 @@ class TransactionListScreenRefactoredState
             type: _filter,
             categoryId: _selectedCategoryId,
             searchQuery: _searchQuery.isEmpty ? null : _searchQuery,
-          )))
+          ),),)
         : _useInfiniteScroll && _filterStartDate == null && _filterEndDate == null
             ? ref.watch(allSectionedTransactionsProvider(_filter))
             : _filterStartDate != null && _filterEndDate != null
@@ -162,11 +161,11 @@ class TransactionListScreenRefactoredState
                     start: _filterStartDate!,
                     end: _filterEndDate!,
                     type: _filter,
-                  )))
+                  ),),)
                 : ref.watch(sectionedTransactionsProvider((
                     month: _selectedDate,
                     type: _filter,
-                  )));
+                  ),),);
 
     return Column(
       children: [

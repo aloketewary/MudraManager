@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/db/models/notification_record.dart';
 import 'package:mudra_manager/core/providers/notification_record_service.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
@@ -21,12 +22,20 @@ class NotificationPage extends ConsumerWidget {
         title: Text('Notifications', style: textTheme.titleLarge),
         actions: [
           IconButton(
-            icon: const Icon(Icons.done_all),
+            icon: Icon(LucideIcons.checkCheck),
+            onPressed: () async {
+              HapticFeedback.mediumImpact();
+              await notificationService.markAllAsRead();
+            },
+            tooltip: 'Mark all as read',
+          ),
+          IconButton(
+            icon: Icon(LucideIcons.trash2),
             onPressed: () {
               HapticFeedback.mediumImpact();
               notificationService.clearAllNotifications();
             },
-            tooltip: 'Clear all',
+            tooltip: 'Delete all',
           ),
         ],
       ),
@@ -53,70 +62,86 @@ class NotificationPage extends ConsumerWidget {
                       final notifColor = _getColorForType(n.type, color);
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 12),
-                        child: Card(
-                          elevation: 0,
-                          color: color.surfaceContainerHighest,
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(12),
-                            onTap: () {
-                              HapticFeedback.lightImpact();
-                              notificationService.readNotification(record: n);
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(12),
-                                    decoration: BoxDecoration(
-                                      color: notifColor.withValues(alpha: 0.1),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Icon(
-                                      _getIconForType(n.type),
-                                      color: notifColor,
-                                      size: 24,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          n.title,
-                                          style: textTheme.titleMedium?.copyWith(
-                                            fontWeight: n.isRead ? FontWeight.w500 : FontWeight.w600,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          n.body,
-                                          style: textTheme.bodyMedium?.copyWith(
-                                            color: color.onSurfaceVariant,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 6),
-                                        Text(
-                                          DateFormat('MMM dd, yyyy • hh:mm a').format(n.timestamp),
-                                          style: textTheme.bodySmall?.copyWith(
-                                            color: color.onSurfaceVariant,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  if (!n.isRead)
+                        child: Dismissible(
+                          key: Key(n.id.toString()),
+                          background: Container(
+                            decoration: BoxDecoration(
+                              color: color.error,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            alignment: Alignment.centerRight,
+                            padding: const EdgeInsets.only(right: 20),
+                            child: Icon(LucideIcons.trash2, color: color.onError),
+                          ),
+                          direction: DismissDirection.endToStart,
+                          onDismissed: (_) {
+                            notificationService.deleteNotification(n);
+                          },
+                          child: Card(
+                            elevation: 0,
+                            color: n.isRead ? color.surfaceContainerLow : color.surfaceContainerHighest,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(12),
+                              onTap: () {
+                                HapticFeedback.lightImpact();
+                                notificationService.readNotification(record: n);
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
                                     Container(
-                                      width: 8,
-                                      height: 8,
+                                      padding: const EdgeInsets.all(12),
                                       decoration: BoxDecoration(
+                                        color: notifColor.withValues(alpha: 0.1),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Icon(
+                                        _getIconForType(n.type),
                                         color: notifColor,
-                                        shape: BoxShape.circle,
+                                        size: 24,
                                       ),
                                     ),
-                                ],
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            n.title,
+                                            style: textTheme.titleMedium?.copyWith(
+                                              fontWeight: n.isRead ? FontWeight.w500 : FontWeight.w600,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            n.body,
+                                            style: textTheme.bodyMedium?.copyWith(
+                                              color: color.onSurfaceVariant,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 6),
+                                          Text(
+                                            DateFormat('MMM dd, yyyy • hh:mm a').format(n.timestamp),
+                                            style: textTheme.bodySmall?.copyWith(
+                                              color: color.onSurfaceVariant,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    if (!n.isRead)
+                                      Container(
+                                        width: 8,
+                                        height: 8,
+                                        decoration: BoxDecoration(
+                                          color: notifColor,
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
@@ -150,15 +175,21 @@ class NotificationPage extends ConsumerWidget {
   IconData _getIconForType(String? type) {
     switch (type) {
       case 'low_balance':
-        return Icons.credit_card_off_rounded;
+        return LucideIcons.creditCard;
       case 'budget_overspent':
-        return Icons.error_outline_rounded;
+        return LucideIcons.circleAlert;
       case 'budget_near_limit':
-        return Icons.warning_amber_rounded;
+        return LucideIcons.triangleAlert;
       case 'reminder':
-        return Icons.access_time_rounded;
+        return LucideIcons.clock;
+      case 'achievement':
+        return LucideIcons.trophy;
+      case 'level_up':
+        return LucideIcons.zap;
+      case 'streak':
+        return LucideIcons.flame;
       default:
-        return Icons.notifications_rounded;
+        return LucideIcons.bell;
     }
   }
 }

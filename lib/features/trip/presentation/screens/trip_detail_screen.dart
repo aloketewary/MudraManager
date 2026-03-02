@@ -6,6 +6,8 @@ import 'package:intl/intl.dart';
 import 'package:mudra_manager/core/utils/dialog_utils.dart';
 import 'package:mudra_manager/features/trip/data/trip_provider.dart';
 import 'package:mudra_manager/shared/widgets/settlement_card.dart';
+import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
+import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class TripDetailScreen extends ConsumerStatefulWidget {
@@ -106,6 +108,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
   @override
   Widget build(BuildContext context) {
     final tripAsync = ref.watch(tripByIdProvider(widget.tripId));
+    final isGuestMode = ref.watch(guestModeProvider);
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
@@ -427,9 +430,9 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                 child: TabBarView(
                   controller: _tabController,
                   children: [
-                    _buildTransactionsTab(trip),
-                    _buildSettlementsTab(trip),
-                    _buildReportTab(trip),
+                    _buildTransactionsTab(trip, isGuestMode),
+                    _buildSettlementsTab(trip, isGuestMode),
+                    _buildReportTab(trip, isGuestMode),
                   ],
                 ),
               ),
@@ -453,7 +456,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
     );
   }
 
-  Widget _buildTransactionsTab(trip) {
+  Widget _buildTransactionsTab(trip, bool isGuestMode) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final transactionsList = trip.transactions.toList();
@@ -756,7 +759,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                                 ),
                               ),
                               Text(
-                                '₹${txn?.amount.toStringAsFixed(2)}',
+                                '₹${GuestModeUtil.applyGuestMode(txn?.amount ?? 0, isGuestMode).toStringAsFixed(2)}',
                                 style: textTheme.titleLarge?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: color.primary,
@@ -774,7 +777,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
     );
   }
 
-  Widget _buildSettlementsTab(trip) {
+  Widget _buildSettlementsTab(trip, bool isGuestMode) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final settlementsAsync = ref.watch(tripSettlementsProvider(widget.tripId));
@@ -864,7 +867,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
     );
   }
 
-  Widget _buildReportTab(trip) {
+  Widget _buildReportTab(trip, bool isGuestMode) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final transactionsList = trip.transactions.toList();
@@ -928,6 +931,16 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
     final perPersonAverage = participants.isNotEmpty
         ? totalCost / participants.length
         : 0;
+    final displayTotalCost = GuestModeUtil.applyGuestMode(totalCost, isGuestMode);
+    final displayPerPersonAverage = GuestModeUtil.applyGuestMode(perPersonAverage.toDouble(), isGuestMode);
+    final displayCategoryValues = <String, double>{};
+    for (var entry in sortedCategories) {
+      displayCategoryValues[entry.key] = GuestModeUtil.applyGuestMode(entry.value, isGuestMode);
+    }
+    final displayParticipantSpending = <int, double>{};
+    for (var entry in participantSpending.entries) {
+      displayParticipantSpending[entry.key] = GuestModeUtil.applyGuestMode(entry.value, isGuestMode);
+    }
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -954,7 +967,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '₹${totalCost.toStringAsFixed(2)}',
+                  '₹${displayTotalCost.toStringAsFixed(2)}',
                   style: textTheme.displaySmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: color.onPrimaryContainer,
@@ -1012,7 +1025,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                         ),
                       ),
                       Text(
-                        '₹${perPersonAverage.toStringAsFixed(2)}',
+                        '₹${displayPerPersonAverage.toStringAsFixed(2)}',
                         style: textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: color.secondary,
@@ -1079,7 +1092,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Text(
-                              '₹${spent.toStringAsFixed(2)}',
+                              '₹${displayParticipantSpending[p.id]?.toStringAsFixed(2) ?? "0.00"}',
                               style: textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: color.primary,
@@ -1146,7 +1159,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            '₹${entry.value.toStringAsFixed(2)}',
+                            '₹${displayCategoryValues[entry.key]?.toStringAsFixed(2) ?? "0.00"}',
                             style: textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: color.primary,

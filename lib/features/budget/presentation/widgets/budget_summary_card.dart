@@ -7,6 +7,8 @@ import 'package:mudra_manager/core/extension/localization_extenstion.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
+import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
+import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 
 class BudgetSummaryCard extends ConsumerWidget {
   final BudgetWithProgress data;
@@ -19,12 +21,14 @@ class BudgetSummaryCard extends ConsumerWidget {
     final b = data.budget;
     final spent = data.spent;
     final total = b.amount;
-    final pct = total > 0 ? (spent / total) : 0;
+    final isGuestMode = ref.watch(guestModeProvider);
+    final displaySpent = GuestModeUtil.applyGuestMode(spent, isGuestMode);
+    final displayTotal = GuestModeUtil.applyGuestMode(total, isGuestMode);
+    final pct = displayTotal > 0 ? (displaySpent / displayTotal) : 0;
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final formatter = DateFormat('dd MMM yy', ctxt.localeName);
 
-    // Status color logic
     final statusColor = pct >= 1.0
         ? color.error
         : pct >= 0.8
@@ -92,7 +96,7 @@ class BudgetSummaryCard extends ConsumerWidget {
                                 ),
                               ),
                               CurrencyText(
-                                amount: spent,
+                                amount: displaySpent,
                                 style: textTheme.titleSmall?.copyWith(
                                   fontWeight: FontWeight.w600,
                                   color: statusColor,

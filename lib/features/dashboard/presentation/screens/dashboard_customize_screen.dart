@@ -35,6 +35,11 @@ class _DashboardCustomizeScreenState extends State<DashboardCustomizeScreen> {
         icon: Icons.touch_app,
       ),
       _DashboardCard(
+        id: 'spending_personality',
+        title: 'Spending Personality',
+        icon: Icons.psychology,
+      ),
+      _DashboardCard(
         id: 'cash_flow',
         title: 'Cash Flow',
         icon: Icons.trending_up,
@@ -53,6 +58,11 @@ class _DashboardCustomizeScreenState extends State<DashboardCustomizeScreen> {
         id: 'spending_prediction',
         title: 'Spending Prediction',
         icon: Icons.insights,
+      ),
+      _DashboardCard(
+        id: 'recurring_expenses',
+        title: 'Fixed Expenses',
+        icon: Icons.repeat,
       ),
       _DashboardCard(
         id: 'active_trip',

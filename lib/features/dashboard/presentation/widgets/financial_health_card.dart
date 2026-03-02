@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/features/analytics/data/analytics_provider.dart';
 
 class FinancialHealthCard extends ConsumerWidget {
@@ -39,7 +40,7 @@ class FinancialHealthCard extends ConsumerWidget {
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.favorite, color: color.primary),
+                          Icon(LucideIcons.heart, color: color.primary),
                           const SizedBox(width: 8),
                           Text(
                             'Financial Health',
@@ -49,7 +50,7 @@ class FinancialHealthCard extends ConsumerWidget {
                           ),
                           const Spacer(),
                           Icon(
-                            Icons.chevron_right,
+                            LucideIcons.chevronRight,
                             color: color.onSurfaceVariant,
                           ),
                         ],
@@ -122,7 +123,7 @@ class FinancialHealthCard extends ConsumerWidget {
                                 child: Row(
                                   children: [
                                     Icon(
-                                      Icons.lightbulb_outline,
+                                      LucideIcons.lightbulb,
                                       size: 16,
                                       color: color.primary,
                                     ),

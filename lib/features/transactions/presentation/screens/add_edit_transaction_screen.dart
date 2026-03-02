@@ -8,6 +8,7 @@ import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/tag.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
+import 'package:mudra_manager/core/db/models/sms_activity.dart';
 import 'package:mudra_manager/core/extension/localization_extenstion.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
@@ -21,6 +22,8 @@ import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/budget/data/budget_alert_provider.dart';
 import 'package:mudra_manager/features/budget/data/budget_alert_service.dart';
 import 'package:mudra_manager/features/category/data/category_provider.dart';
+import 'package:mudra_manager/features/sms/data/recurring_detector_service.dart';
+import 'package:mudra_manager/features/sms/data/sms_activity_service.dart';
 import 'package:mudra_manager/features/transactions/data/tag_provider.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 import 'package:mudra_manager/shared/widgets/adaptive_text.dart';
@@ -28,8 +31,10 @@ import 'package:mudra_manager/shared/widgets/simple_calculator.dart';
 
 class AddEditTransactionScreen extends ConsumerStatefulWidget {
   final Transaction? transaction;
+  final SmsActivity? smsActivity;
 
-  const AddEditTransactionScreen({super.key, this.transaction});
+  const AddEditTransactionScreen(
+      {super.key, this.transaction, this.smsActivity});
 
   @override
   ConsumerState<AddEditTransactionScreen> createState() =>
@@ -401,12 +406,51 @@ class _AddEditTransactionScreenState
       txn.tags.addAll(selectedTags);
 
       await ref.read(transactionProvider).addTransaction(txn);
+
+      // If from SMS activity, approve it (don't create duplicate transaction)
+      if (widget.smsActivity != null) {
+        final isar = await ref.read(isarServiceProvider).getInstance();
+        await isar.writeTxn(() async {
+          widget.smsActivity!.status = ActivityStatus.approved;
+          widget.smsActivity!.transactionId = txn.id;
+          await isar.smsActivitys.put(widget.smsActivity!);
+        });
+
+        // Learn keywords from SMS
+        final bodyLower = widget.smsActivity!.body.toLowerCase();
+        final words = bodyLower.split(RegExp(r'\s+'));
+        final potentialKeywords = words
+            .where((w) =>
+                w.length >= 3 &&
+                w.length <= 15 &&
+                RegExp(r'^[a-z]+$').hasMatch(w))
+            .toList();
+
+        if (potentialKeywords.isNotEmpty) {
+          final existingKeywords = _selectedCategory!.keywords ?? [];
+          final newKeywords = potentialKeywords
+              .where((k) => !existingKeywords.contains(k))
+              .take(3)
+              .toList();
+
+          if (newKeywords.isNotEmpty) {
+            _selectedCategory!.keywords = [...existingKeywords, ...newKeywords];
+            await isar.writeTxn(() async {
+              await isar.categorys.put(_selectedCategory!);
+            });
+          }
+        }
+
+        // Detect recurring patterns
+        await RecurringDetectorService.detectAndTagRecurring(txn);
+      }
+
       await _checkLowBalance(txn.account.value);
       await _checkBudgetAlerts(txn);
       await WidgetService.updateWidget(ref);
       invalidateAll(ref);
 
-      if (mounted) context.pop();
+      if (mounted) context.pop(true);
     }
   }
 
@@ -672,9 +716,8 @@ class _AddEditTransactionScreenState
                 : null,
             child: Card(
               elevation: isSelected ? 4 : 0,
-              shadowColor: isSelected
-                  ? color.primary.withValues(alpha: 0.3)
-                  : null,
+              shadowColor:
+                  isSelected ? color.primary.withValues(alpha: 0.3) : null,
               color: isSelected
                   ? color.primaryContainer
                   : color.surfaceContainerHighest,

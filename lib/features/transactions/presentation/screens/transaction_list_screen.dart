@@ -12,6 +12,7 @@ import 'package:mudra_manager/core/utils/icon_helper.dart';
 import 'package:mudra_manager/features/transactions/data/pending_transaction_prodiver.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 import 'package:mudra_manager/features/transactions/presentation/widgets/transaction_card.dart';
+import 'package:mudra_manager/features/transactions/presentation/widgets/sms_activity_card.dart';
 import 'package:mudra_manager/features/transactions/presentation/widgets/transaction_group.dart';
 import 'package:mudra_manager/features/trip/data/trip_provider.dart';
 import 'package:mudra_manager/shared/widgets/adaptive_text.dart';
@@ -190,8 +191,9 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
     final color = Theme.of(context).colorScheme;
     final ctxt = AppLocalizations.of(context)!;
 
-    final sectionedAsync =
-        _useInfiniteScroll && _filterStartDate == null && _filterEndDate == null
+    final sectionedAsync = _filter == 'needsReview'
+        ? ref.watch(allSectionedTransactionsProvider(_filter))
+        : _useInfiniteScroll && _filterStartDate == null && _filterEndDate == null
         ? ref.watch(allSectionedTransactionsProvider(_filter))
         : _filterStartDate != null && _filterEndDate != null
         ? ref.watch(
@@ -304,38 +306,9 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
             ),
           ),
         pendingTxnCountService.when(
-          data: (count) {
-            if (count > 0) {
-              return MaterialBanner(
-                backgroundColor: color.primaryContainer,
-                content: Text(
-                  ctxt.transaction_list_pending_transaction_message_text,
-                  style: textTheme.bodyMedium?.copyWith(
-                    color: color.onPrimaryContainer,
-                  ),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      HapticFeedback.mediumImpact();
-                      context.push('/pending-transactions');
-                    },
-                    child: Text(
-                      ctxt.transaction_listPendingTransactionMessageActionLabel
-                          .toUpperCase(),
-                      style: textTheme.labelLarge?.copyWith(
-                        color: color.onPrimaryContainer,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            }
-            return Container();
-          },
+          data: (count) => const SizedBox.shrink(),
           loading: () => const SizedBox.shrink(),
-          error: (e, _) => Center(child: Text('Error: $e')),
+          error: (e, _) => const SizedBox.shrink(),
         ),
         Container(
           decoration: BoxDecoration(
@@ -915,10 +888,16 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                     );
                   }
 
+                  if (entry is SmsActivityItem) {
+                    return SmsActivityCard(activity: entry.activity);
+                  }
+
                   final transaction = (entry as TxItem).txn;
                   transaction.tags.load();
                   transaction.related.load();
+                  transaction.recurringTransactionSource.load();
                   final tags = transaction.tags.toList();
+                  final isRecurring = transaction.recurringTransactionSource.value != null;
 
                   return FutureBuilder<String?>(
                     future: ref
@@ -936,6 +915,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                         tags: tags,
                         related: transaction.related.value,
                         tripName: snapshot.data,
+                        isRecurring: isRecurring,
                         onEdit: () {
                           transaction.isTransfer
                               ? context.push(
@@ -1018,6 +998,24 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
     for (var entry in sectioned) {
       if (entry is TxHeader) {
         currentDate = entry.group;
+        continue;
+      }
+
+      if (entry is SmsActivityItem) {
+        // SMS activities always pass through filters (they're pending)
+        if (currentDate != null) {
+          if (filtered.isEmpty || filtered.last is! TxHeader) {
+            filtered.add(TxHeader(currentDate));
+          } else {
+            final lastHeader = filtered.last as TxHeader;
+            if (lastHeader.group.year != currentDate.year ||
+                lastHeader.group.month != currentDate.month ||
+                lastHeader.group.day != currentDate.day) {
+              filtered.add(TxHeader(currentDate));
+            }
+          }
+          filtered.add(entry);
+        }
         continue;
       }
 
@@ -1141,6 +1139,16 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                           title: Text(
                             ctxt.transaction_list_filter_expense.toUpperCase(),
                           ),
+                          onChanged: (value) {
+                            HapticFeedback.mediumImpact();
+                            setState(() => _filter = value!);
+                            setModalState(() {});
+                          },
+                        ),
+                        RadioListTile<String>(
+                          value: 'needsReview',
+                          groupValue: _filter,
+                          title: const Text('NEEDS REVIEW'),
                           onChanged: (value) {
                             HapticFeedback.mediumImpact();
                             setState(() => _filter = value!);

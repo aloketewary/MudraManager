@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mudra_manager/features/dashboard/data/status_data_provider.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
+import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
+import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 
 class NetWorthCard extends ConsumerWidget {
   final double globalPadding;
@@ -16,13 +18,20 @@ class NetWorthCard extends ConsumerWidget {
     final totalBalanceAsync = ref.watch(totalAccountBalanceProvider);
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final isGuestMode = ref.watch(guestModeProvider);
 
     return totalBalanceAsync.when(
       data: (netWorth) {
         if (netWorth == 0) return const SizedBox.shrink();
+        
+        final displayNetWorth = GuestModeUtil.applyGuestMode(netWorth, isGuestMode);
 
         return statsAsync.when(
           data: (stats) {
+            final displayIncome = GuestModeUtil.applyGuestMode(stats.income, isGuestMode);
+            final displayExpense = GuestModeUtil.applyGuestMode(stats.expense, isGuestMode);
+            final displaySavingsRate = GuestModeUtil.applyGuestMode(stats.savingsRate, isGuestMode);
+
             return Padding(
               padding: const EdgeInsets.only(top: 16),
               child: Container(
@@ -68,21 +77,16 @@ class NetWorthCard extends ConsumerWidget {
                                 child: Column(
                                   children: [
                                     TweenAnimationBuilder<double>(
-                                      duration: const Duration(
-                                        milliseconds: 1500,
-                                      ),
+                                      duration: const Duration(milliseconds: 1500),
                                       curve: Curves.easeOutCubic,
-                                      tween: Tween(begin: 0.0, end: netWorth),
+                                      tween: Tween(begin: 0.0, end: displayNetWorth),
                                       builder: (context, value, child) {
                                         return CurrencyText(
                                           amount: value,
-                                          style: textTheme.displaySmall
-                                              ?.copyWith(
-                                                fontWeight: FontWeight.bold,
-                                                color: netWorth >= 0
-                                                    ? Colors.green
-                                                    : Colors.red,
-                                              ),
+                                          style: textTheme.displaySmall?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            color: displayNetWorth >= 0 ? Colors.green : Colors.red,
+                                          ),
                                           showSign: true,
                                         );
                                       },
@@ -99,19 +103,9 @@ class NetWorthCard extends ConsumerWidget {
                               Expanded(
                                 child: Column(
                                   children: [
-                                    _buildMetric(
-                                      'Income',
-                                      stats.income,
-                                      color,
-                                      textTheme,
-                                    ),
+                                    _buildMetric('Income', displayIncome, color, textTheme),
                                     const SizedBox(height: 8),
-                                    _buildMetric(
-                                      'Expense',
-                                      stats.expense,
-                                      color,
-                                      textTheme,
-                                    ),
+                                    _buildMetric('Expense', displayExpense, color, textTheme),
                                   ],
                                 ),
                               ),
@@ -130,8 +124,8 @@ class NetWorthCard extends ConsumerWidget {
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
-                                  netWorth >= 0
-                                      ? 'Great! You saved ${stats.savingsRate.toStringAsFixed(1)}% this month'
+                                  displayNetWorth >= 0
+                                      ? 'Great! You saved ${displaySavingsRate.toStringAsFixed(1)}% this month'
                                       : 'Spending exceeded income this month',
                                   style: textTheme.bodySmall?.copyWith(
                                     color: color.onSurfaceVariant,
@@ -159,7 +153,7 @@ class NetWorthCard extends ConsumerWidget {
 
   Widget _buildMetric(
     String label,
-    double value,
+    double displayValue,
     ColorScheme color,
     TextTheme textTheme,
   ) {
@@ -171,7 +165,7 @@ class NetWorthCard extends ConsumerWidget {
           style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
         ),
         CurrencyText(
-          amount: value,
+          amount: displayValue,
           style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
       ],

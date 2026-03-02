@@ -9,6 +9,8 @@ import 'package:mudra_manager/core/utils/dialog_utils.dart';
 import 'package:mudra_manager/core/utils/icon_helper.dart';
 import 'package:mudra_manager/features/goal/data/goal_provider.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
+import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
+import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 
 class GoalDetailsScreen extends ConsumerWidget {
   final Goal goal;
@@ -23,6 +25,7 @@ class GoalDetailsScreen extends ConsumerWidget {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final formatter = DateFormat('dd MMM yy', ctxt.localeName);
+    final isGuestMode = ref.watch(guestModeProvider);
 
     final goalColor = goal.colorValue != null
         ? Color(goal.colorValue!)
@@ -127,7 +130,7 @@ class GoalDetailsScreen extends ConsumerWidget {
                             ),
                             const SizedBox(height: 4),
                             CurrencyText(
-                              amount: goal.targetAmount,
+                              amount: GuestModeUtil.applyGuestMode(goal.targetAmount, isGuestMode),
                               style: textTheme.headlineSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: color.onSurface,
@@ -154,7 +157,7 @@ class GoalDetailsScreen extends ConsumerWidget {
                             ),
                             const SizedBox(height: 4),
                             CurrencyText(
-                              amount: goal.currentAmount,
+                              amount: GuestModeUtil.applyGuestMode(goal.currentAmount, isGuestMode),
                               style: textTheme.headlineSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: goalColor,
@@ -231,7 +234,7 @@ class GoalDetailsScreen extends ConsumerWidget {
                                   ),
                                   const SizedBox(height: 4),
                                   CurrencyText(
-                                    amount: remaining > 0 ? remaining : 0,
+                                    amount: GuestModeUtil.applyGuestMode(remaining > 0 ? remaining : 0, isGuestMode),
                                     style: textTheme.titleLarge?.copyWith(
                                       fontWeight: FontWeight.bold,
                                       color: color.onSurface,

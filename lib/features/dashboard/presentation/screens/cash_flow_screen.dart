@@ -13,6 +13,8 @@ import 'package:mudra_manager/shared/widgets/animated_balance.dart';
 import 'package:mudra_manager/shared/widgets/period_calendar_selector.dart';
 import 'package:mudra_manager/shared/widgets/responseive_layout_builder.dart';
 import 'package:mudra_manager/shared/widgets/trend_indicator.dart';
+import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
+import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 
 class CashFlowScreen extends ConsumerStatefulWidget {
   final double globalPadding;
@@ -40,6 +42,7 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isGuestMode = ref.watch(guestModeProvider);
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final filter = widget.selectedPeriod == PeriodType.day
@@ -133,10 +136,14 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
     return summary.when(
       skipLoadingOnReload: true,
       data: (data) {
-        final income = data['income'] ?? 0.0;
-        final expense = data['expense'] ?? 0.0;
-        final prevIncome = prevSummary.value?['income'] ?? 0.0;
-        final prevExpense = prevSummary.value?['expense'] ?? 0.0;
+        final rawIncome = data['income'] ?? 0.0;
+        final rawExpense = data['expense'] ?? 0.0;
+        final rawPrevIncome = prevSummary.value?['income'] ?? 0.0;
+        final rawPrevExpense = prevSummary.value?['expense'] ?? 0.0;
+        final income = GuestModeUtil.applyGuestMode(rawIncome, isGuestMode);
+        final expense = GuestModeUtil.applyGuestMode(rawExpense, isGuestMode);
+        final prevIncome = GuestModeUtil.applyGuestMode(rawPrevIncome, isGuestMode);
+        final prevExpense = GuestModeUtil.applyGuestMode(rawPrevExpense, isGuestMode);
         final total = income - expense;
         return Padding(
           padding: EdgeInsets.all(widget.globalPadding),

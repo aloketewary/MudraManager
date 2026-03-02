@@ -6,6 +6,9 @@ import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/extension/localization_extenstion.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
+import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
+import 'package:mudra_manager/core/utils/guest_mode_util.dart';
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 
 class MonthlyComparisonScreen extends ConsumerWidget {
   const MonthlyComparisonScreen({super.key});
@@ -15,6 +18,7 @@ class MonthlyComparisonScreen extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final isar = ref.watch(isarServiceProvider);
+    final isGuestMode = ref.watch(guestModeProvider);
     final l10n = AppLocalizations.of(context)!;
 
     final now = DateTime.now();
@@ -35,14 +39,27 @@ class MonthlyComparisonScreen extends ConsumerWidget {
         ),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
+            return ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                _buildComparisonCardSkeleton(context),
+                const SizedBox(height: 12),
+                _buildComparisonCardSkeleton(context),
+                const SizedBox(height: 12),
+                _buildComparisonCardSkeleton(context),
+              ],
+            );
           }
 
           final data = snapshot.data!;
-          final currentIncome = data['currentIncome']!;
-          final currentExpense = data['currentExpense']!;
-          final lastIncome = data['lastIncome']!;
-          final lastExpense = data['lastExpense']!;
+          final rawCurrentIncome = data['currentIncome']!;
+          final rawCurrentExpense = data['currentExpense']!;
+          final rawLastIncome = data['lastIncome']!;
+          final rawLastExpense = data['lastExpense']!;
+          final currentIncome = GuestModeUtil.applyGuestMode(rawCurrentIncome, isGuestMode);
+          final currentExpense = GuestModeUtil.applyGuestMode(rawCurrentExpense, isGuestMode);
+          final lastIncome = GuestModeUtil.applyGuestMode(rawLastIncome, isGuestMode);
+          final lastExpense = GuestModeUtil.applyGuestMode(rawLastExpense, isGuestMode);
 
           final incomeChange = lastIncome > 0
               ? ((currentIncome - lastIncome) / lastIncome * 100)
@@ -145,6 +162,64 @@ class MonthlyComparisonScreen extends ConsumerWidget {
       'lastIncome': lastIncome,
       'lastExpense': lastExpense,
     };
+  }
+
+  static Widget _buildComparisonCardSkeleton(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Card(
+      elevation: 0,
+      color: colorScheme.surfaceContainerHighest,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                SkeletonLoader(
+                  width: 52,
+                  height: 52,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                const SizedBox(width: 12),
+                SkeletonLoader(
+                  width: 100,
+                  height: 24,
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SkeletonLoader(width: 100, height: 14),
+                    const SizedBox(height: 8),
+                    SkeletonLoader(width: 120, height: 24),
+                  ],
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    SkeletonLoader(width: 100, height: 14),
+                    const SizedBox(height: 8),
+                    SkeletonLoader(width: 100, height: 18),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            SkeletonLoader(
+              width: 150,
+              height: 32,
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

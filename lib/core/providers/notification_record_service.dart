@@ -35,6 +35,22 @@ class NotificationRecordService {
     await isar.writeTxn(() => isar.notificationRecords.put(record));
   }
 
+  Future<void> deleteNotification(NotificationRecord record) async {
+    final isar = await isarService.getInstance();
+    await isar.writeTxn(() => isar.notificationRecords.delete(record.id));
+  }
+
+  Future<void> markAllAsRead() async {
+    final isar = await isarService.getInstance();
+    final unread = await isar.notificationRecords.where().filter().isReadEqualTo(false).findAll();
+    await isar.writeTxn(() async {
+      for (final record in unread) {
+        record.isRead = true;
+        await isar.notificationRecords.put(record);
+      }
+    });
+  }
+
   Stream<List<NotificationRecord>> watchNotifications() async* {
     final isar = await isarService.getInstance();
     yield* isar.notificationRecords.where().sortByTimestampDesc().watch(

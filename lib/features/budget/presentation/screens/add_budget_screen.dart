@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:mudra_manager/core/db/models/budget.dart';
 import 'package:mudra_manager/core/db/models/budget_category_allocation.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
+import 'package:mudra_manager/core/db/models/budget_type.dart';
 import 'package:mudra_manager/core/extension/case_extention.dart';
 import 'package:mudra_manager/core/extension/localization_extenstion.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
@@ -33,11 +34,11 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
   DateTime? _startDate;
   DateTime? _endDate;
 
-  // category allocations in progress
   final Map<int, TextEditingController> _allocCtrls = {};
   final List<Category> _selectedCats = [];
   final List<int> selectedCategories = [];
   BudgetRecurrence _recurrence = BudgetRecurrence.none;
+  BudgetType _budgetType = BudgetType.categoryWise;
 
   @override
   void initState() {
@@ -50,7 +51,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
     if (widget.existing != null) {
       _startDate = widget.existing!.startDate;
       _endDate = widget.existing!.endDate;
-      // load existing allocations
+      _budgetType = widget.existing!.budgetType;
       widget.existing!.allocations.load().then((_) {
         for (final alloc in widget.existing!.allocations) {
           alloc.category.load().then((_) {
@@ -105,7 +106,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
       SnackbarService.error(ctxt.budget_pickBothDatesErrorText);
       return;
     }
-    if (_selectedCats.isEmpty) {
+    if (_budgetType == BudgetType.categoryWise && _selectedCats.isEmpty) {
       SnackbarService.error(ctxt.budget_selectAtLeastOneCategoryErrorText);
       return;
     }
@@ -113,35 +114,6 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
     final service = ref.read(budgetServiceProvider);
     final isEditing = widget.existing != null;
     final totalAmount = double.parse(_amountC.text.trim());
-
-    // Parse entered allocations
-    final Map<Category, double?> enteredAllocations = {};
-    for (final categoryId in selectedCategories) {
-      final cat = _selectedCats.firstWhere((c) => c.id == categoryId);
-      final raw = _allocCtrls[categoryId]?.text.trim() ?? '0';
-      final value = raw.isNotEmpty ? double.tryParse(raw) : null;
-      enteredAllocations[cat] = value;
-    }
-
-    // Compute how to distribute unentered allocations
-    final allocated = enteredAllocations.values.whereType<double>().toList();
-    final remaining = totalAmount - allocated.fold(0.0, (a, b) => a + b);
-    final unenteredCats = enteredAllocations.entries
-        .where((e) => e.value == null)
-        .map((e) => e.key)
-        .toList();
-    final distributeAmount = unenteredCats.isNotEmpty
-        ? (remaining / unenteredCats.length)
-        : 0.0;
-
-    // Validate manually entered allocations
-    final totalAllocated = allocated.fold(0.0, (a, b) => a + b);
-    final remainingBudget = totalAmount - totalAllocated;
-
-    if (remainingBudget < 0) {
-      SnackbarService.error(ctxt.budget_allocatedAmountExceedsTotalBudgetText);
-      return;
-    }
 
     final bud =
         widget.existing ??
@@ -158,33 +130,58 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
       ..amount = totalAmount
       ..startDate = _startDate!
       ..endDate = _endDate!
-      ..recurrence = _recurrence;
+      ..recurrence = _recurrence
+      ..budgetType = _budgetType;
 
     if (isEditing) {
       await bud.categories.load();
       await bud.allocations.load();
-      // ⚠️ Clear existing allocations from DB
       await service.deleteAllocation(bud.allocations.toList());
-
       bud.categories.clear();
       bud.allocations.clear();
     }
 
-    // Link selected categories and apply allocations
-    for (final categoryId in selectedCategories) {
-      final cat = _selectedCats.firstWhere((c) => c.id == categoryId);
-      bud.categories.add(cat);
+    if (_budgetType == BudgetType.categoryWise) {
+      final Map<Category, double?> enteredAllocations = {};
+      for (final categoryId in selectedCategories) {
+        final cat = _selectedCats.firstWhere((c) => c.id == categoryId);
+        final raw = _allocCtrls[categoryId]?.text.trim() ?? '0';
+        final value = raw.isNotEmpty ? double.tryParse(raw) : null;
+        enteredAllocations[cat] = value;
+      }
 
-      final alloc = BudgetCategoryAllocation()
-        ..amount = enteredAllocations[cat] ?? distributeAmount;
-      alloc.category.value = cat;
-      alloc.budget.value = bud;
+      final allocated = enteredAllocations.values.whereType<double>().toList();
+      final remaining = totalAmount - allocated.fold(0.0, (a, b) => a + b);
+      final unenteredCats = enteredAllocations.entries
+          .where((e) => e.value == null)
+          .map((e) => e.key)
+          .toList();
+      final distributeAmount = unenteredCats.isNotEmpty
+          ? (remaining / unenteredCats.length)
+          : 0.0;
 
-      bud.allocations.add(alloc);
+      final totalAllocated = allocated.fold(0.0, (a, b) => a + b);
+      final remainingBudget = totalAmount - totalAllocated;
+
+      if (remainingBudget < 0) {
+        SnackbarService.error(ctxt.budget_allocatedAmountExceedsTotalBudgetText);
+        return;
+      }
+
+      for (final categoryId in selectedCategories) {
+        final cat = _selectedCats.firstWhere((c) => c.id == categoryId);
+        bud.categories.add(cat);
+
+        final alloc = BudgetCategoryAllocation()
+          ..amount = enteredAllocations[cat] ?? distributeAmount;
+        alloc.category.value = cat;
+        alloc.budget.value = bud;
+
+        bud.allocations.add(alloc);
+      }
     }
 
     await service.save(bud);
-
     context.pop();
   }
 
@@ -243,8 +240,6 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
                               : null,
                         ),
                         const SizedBox(height: 16),
-
-                        // Date pickers
                         Row(
                           children: [
                             Expanded(
@@ -252,9 +247,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
                                 style: OutlinedButton.styleFrom(
                                   backgroundColor: color.primary,
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(
-                                      16,
-                                    ), // Adjust the radius for more or less rounding
+                                    borderRadius: BorderRadius.circular(16),
                                   ),
                                   padding: const EdgeInsets.symmetric(
                                     vertical: 16,
@@ -309,122 +302,129 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
                           ],
                         ),
                         const SizedBox(height: 16),
-                        Text(
-                          ctxt.budget_categoryTitle,
-                          style: textTheme.titleMedium?.copyWith(
-                            color: color.primary,
-                          ),
+                        CommonDropdownField(
+                          value: _budgetType,
+                          items: BudgetType.values,
+                          onChanged: (val) {
+                            if (val != null) setState(() => _budgetType = val);
+                          },
+                          labelText: 'Budget Type',
+                          itemBuilder: (BudgetType type) =>
+                              Text(type.displayName),
                         ),
-                        const SizedBox(height: 8),
-                        ListTile(
-                          leading: Icon(
-                            Icons.info_outline,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                          title: Text(
-                            ctxt.budget_categoryMessageInfoText,
-                            style: textTheme.labelMedium,
-                            textAlign: TextAlign.justify,
-                          ),
-                          tileColor: color.primaryContainer,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          contentPadding: const EdgeInsets.all(12),
-                        ),
-                        ...cats.map((cat) {
-                          final isSelected = selectedCategories.contains(
-                            cat.id,
-                          );
-
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 2),
-                            child: Card(
-                              elevation: 2,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 10,
-                                ),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    Checkbox(
-                                      value: isSelected,
-                                      onChanged: (_) {
-                                        setState(() {
-                                          if (isSelected) {
-                                            _selectedCats.remove(cat);
-                                            _allocCtrls.remove(cat.id);
-                                            selectedCategories.remove(cat.id);
-                                          } else {
-                                            _selectedCats.add(cat);
-                                            _allocCtrls[cat
-                                                .id] = TextEditingController(
-                                              text:
-                                                  _allocCtrls[cat.id]?.text ??
-                                                  '',
-                                            );
-                                            selectedCategories.add(cat.id);
-                                          }
-                                        });
-                                      },
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        mainAxisSize: MainAxisSize.min,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            cat.name,
-                                            style: textTheme.titleMedium,
-                                          ),
-                                          if (isSelected)
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                top: 8.0,
-                                              ),
-                                              child: CommonTextInputField(
-                                                controller: _allocCtrls[cat.id],
-                                                labelText: ctxt
-                                                    .budget_allocateAmountText,
-                                                iconData: Icons.numbers,
-                                                inputType:
-                                                    const TextInputType.numberWithOptions(
-                                                      decimal: true,
-                                                    ),
-                                              ),
-                                            ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          );
-                        }),
                         const SizedBox(height: 16),
-                        Text(
-                          ctxt.budget_totalAllocatedBudgetText(
-                            ctxt.formatCurrencyWithSign(0, totalAlloc),
+                        if (_budgetType == BudgetType.categoryWise) ...[
+                          const SizedBox(height: 8),
+                          ListTile(
+                            leading: Icon(
+                              Icons.info_outline,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            title: Text(
+                              ctxt.budget_categoryMessageInfoText,
+                              style: textTheme.labelMedium,
+                              textAlign: TextAlign.justify,
+                            ),
+                            tileColor: color.primaryContainer,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            contentPadding: const EdgeInsets.all(12),
                           ),
-                          style: textTheme.titleMedium?.copyWith(
-                            color: color.secondary,
+                          ...cats.map((cat) {
+                            final isSelected =
+                                selectedCategories.contains(cat.id);
+
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 2),
+                              child: Card(
+                                elevation: 2,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 10,
+                                  ),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      Checkbox(
+                                        value: isSelected,
+                                        onChanged: (_) {
+                                          setState(() {
+                                            if (isSelected) {
+                                              _selectedCats.remove(cat);
+                                              _allocCtrls.remove(cat.id);
+                                              selectedCategories.remove(cat.id);
+                                            } else {
+                                              _selectedCats.add(cat);
+                                              _allocCtrls[cat.id] =
+                                                  TextEditingController(
+                                                text: _allocCtrls[cat.id]
+                                                        ?.text ??
+                                                    '',
+                                              );
+                                              selectedCategories.add(cat.id);
+                                            }
+                                          });
+                                        },
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisSize: MainAxisSize.min,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              cat.name,
+                                              style: textTheme.titleMedium,
+                                            ),
+                                            if (isSelected)
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                  top: 8.0,
+                                                ),
+                                                child: CommonTextInputField(
+                                                  controller:
+                                                      _allocCtrls[cat.id],
+                                                  labelText: ctxt
+                                                      .budget_allocateAmountText,
+                                                  iconData: Icons.numbers,
+                                                  inputType: const TextInputType
+                                                      .numberWithOptions(
+                                                    decimal: true,
+                                                  ),
+                                                ),
+                                              ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          }),
+                          const SizedBox(height: 16),
+                          Text(
+                            ctxt.budget_totalAllocatedBudgetText(
+                              ctxt.formatCurrencyWithSign(0, totalAlloc),
+                            ),
+                            style: textTheme.titleMedium?.copyWith(
+                              color: color.secondary,
+                            ),
                           ),
-                        ),
+                        ],
                         const SizedBox(height: 16),
                         CommonDropdownField(
-                          value:
-                              widget.existing?.recurrence ??
+                          value: widget.existing?.recurrence ??
                               BudgetRecurrence.none,
                           items: BudgetRecurrence.values,
                           onChanged: (val) {

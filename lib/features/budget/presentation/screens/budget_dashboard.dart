@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
 import 'package:mudra_manager/features/budget/presentation/widgets/budget_summary_card.dart';
+import 'package:mudra_manager/features/budget/presentation/widgets/overspend_warning_widget.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 
 class BudgetDashboard extends ConsumerStatefulWidget {
@@ -42,9 +43,14 @@ class _BudgetDashboardState extends ConsumerState<BudgetDashboard> {
               }
               return ListView.separated(
                 padding: const EdgeInsets.all(16).copyWith(bottom: 80),
-                itemCount: list.length,
+                itemCount: list.length + 1,
                 separatorBuilder: (_, __) => const SizedBox(height: 8),
-                itemBuilder: (context, index) => BudgetSummaryCard(list[index]),
+                itemBuilder: (context, index) {
+                  if (index == 0) {
+                    return const OverspendWarningWidget();
+                  }
+                  return BudgetSummaryCard(list[index - 1]);
+                },
               );
             },
             loading: () => const Center(child: CircularProgressIndicator()),

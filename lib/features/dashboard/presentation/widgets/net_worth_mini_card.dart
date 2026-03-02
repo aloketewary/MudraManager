@@ -5,6 +5,8 @@ import 'package:mudra_manager/core/extension/localization_extenstion.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/shared/widgets/animated_balance.dart';
+import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
+import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 
 class NetWorthMiniCard extends ConsumerStatefulWidget {
   final double globalPadding;
@@ -49,6 +51,8 @@ class _NetWorthMiniCardState extends ConsumerState<NetWorthMiniCard> {
       (sum, value) => sum + value,
     );
     final color = Theme.of(context).colorScheme;
+    final isGuestMode = ref.watch(guestModeProvider);
+    final displayTotalBalance = GuestModeUtil.applyGuestMode(totalBalance, isGuestMode);
 
     return Padding(
       padding: EdgeInsets.all(widget.globalPadding),
@@ -106,18 +110,16 @@ class _NetWorthMiniCardState extends ConsumerState<NetWorthMiniCard> {
                         alignment: Alignment.centerLeft,
                         children: [
                           Text(
-                            ctxt.formatCurrencyWithSign(0, totalBalance),
+                            ctxt.formatCurrencyWithSign(0, displayTotalBalance),
                             style: textTheme.titleLarge?.copyWith(
-                              color: color.onSurfaceVariant.withValues(
-                                alpha: 0.1,
-                              ),
+                              color: color.onSurfaceVariant.withValues(alpha: 0.1),
                               fontSize: 80,
                               fontWeight: FontWeight.bold,
                             ),
                             overflow: TextOverflow.fade,
                           ),
                           AnimatedBalance(
-                            value: totalBalance,
+                            value: displayTotalBalance,
                             style: textTheme.titleLarge?.copyWith(
                               color: color.secondary,
                               fontSize: 40,

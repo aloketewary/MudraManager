@@ -9,6 +9,9 @@ import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/utils/dialog_utils.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
+import 'package:mudra_manager/features/account/presentation/screens/balance_history_screen.dart';
+import 'package:mudra_manager/features/account/presentation/screens/reconciliation_screen.dart';
+import 'package:mudra_manager/features/account/presentation/screens/investment_portfolio_screen.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 
 class ManageAccountScreen extends ConsumerStatefulWidget {
@@ -151,6 +154,30 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
                   },
                   onRemove: () =>
                       showDeleteConfirmation(context, ref, account, ctxt),
+                  onViewHistory: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (ctx) => BalanceHistoryScreen(account: account),
+                      ),
+                    );
+                  },
+                  onReconcile: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (ctx) => ReconciliationScreen(account: account),
+                      ),
+                    );
+                  },
+                  onViewPortfolio: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (ctx) => InvestmentPortfolioScreen(account: account),
+                      ),
+                    );
+                  },
                 );
               } else {
                 return const Padding(padding: EdgeInsets.only(bottom: 80.0));
@@ -256,6 +283,9 @@ class _AccountListCard extends StatelessWidget {
   final VoidCallback onEdit;
   final VoidCallback onArchive;
   final VoidCallback onRemove;
+  final VoidCallback onViewHistory;
+  final VoidCallback onReconcile;
+  final VoidCallback onViewPortfolio;
 
   const _AccountListCard({
     required this.account,
@@ -263,6 +293,9 @@ class _AccountListCard extends StatelessWidget {
     required this.onEdit,
     required this.onArchive,
     required this.onRemove,
+    required this.onViewHistory,
+    required this.onReconcile,
+    required this.onViewPortfolio,
   });
 
   @override
@@ -338,6 +371,9 @@ class _AccountListCard extends StatelessWidget {
                       padding: EdgeInsets.zero,
                       onSelected: (value) {
                         if (value == 'edit') onEdit();
+                        if (value == 'history') onViewHistory();
+                        if (value == 'reconcile') onReconcile();
+                        if (value == 'portfolio') onViewPortfolio();
                         if (value == 'archive') onArchive();
                         if (value == 'delete') onRemove();
                       },
@@ -352,6 +388,37 @@ class _AccountListCard extends StatelessWidget {
                             ],
                           ),
                         ),
+                        PopupMenuItem(
+                          value: 'history',
+                          child: Row(
+                            children: [
+                              Icon(Icons.history, color: color.primary),
+                              const SizedBox(width: 8),
+                              const Text('History'),
+                            ],
+                          ),
+                        ),
+                        PopupMenuItem(
+                          value: 'reconcile',
+                          child: Row(
+                            children: [
+                              Icon(Icons.verified_user, color: color.primary),
+                              const SizedBox(width: 8),
+                              const Text('Reconcile'),
+                            ],
+                          ),
+                        ),
+                        if (account.accountType.name == 'investment')
+                          PopupMenuItem(
+                            value: 'portfolio',
+                            child: Row(
+                              children: [
+                                Icon(Icons.trending_up, color: color.primary),
+                                const SizedBox(width: 8),
+                                const Text('Portfolio'),
+                              ],
+                            ),
+                          ),
                         PopupMenuItem(
                           value: 'archive',
                           child: Row(

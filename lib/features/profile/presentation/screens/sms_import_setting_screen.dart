@@ -17,6 +17,7 @@ import 'package:mudra_manager/core/utils/transaction_msg_util.dart';
 import 'package:mudra_manager/features/transactions/data/pending_transaction_prodiver.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 import 'package:mudra_manager/features/sms/data/sms_processor_service.dart';
+import 'package:mudra_manager/features/sms/presentation/screens/sms_activity_screen.dart';
 
 import 'package:mudra_manager/main.dart' show setupSmsListener;
 
@@ -267,6 +268,21 @@ class _SmsImportSettingsScreenState
                 ),
               ),
             ),
+          ),
+          const SizedBox(height: 8),
+          _buildSettingCard(
+            context,
+            color,
+            textTheme,
+            Icons.history,
+            'SMS Activity',
+            'View all SMS transactions',
+            () {
+              HapticFeedback.mediumImpact();
+              context.push('/sms-activity');
+            },
+            enabled: true,
+            badge: ref.watch(pendingCountProvider).whenData((count) => count).value,
           ),
           const SizedBox(height: 8),
           Opacity(
@@ -668,6 +684,7 @@ class _SmsImportSettingsScreenState
     String subtitle,
     VoidCallback onTap, {
     bool enabled = true,
+    int? badge,
   }) {
     return Card(
       elevation: 0,
@@ -709,6 +726,23 @@ class _SmsImportSettingsScreenState
                   ],
                 ),
               ),
+              if (badge != null && badge > 0)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: color.error,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '$badge',
+                    style: TextStyle(
+                      color: color.onError,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              const SizedBox(width: 8),
               Icon(Icons.chevron_right, color: color.onSurfaceVariant),
             ],
           ),

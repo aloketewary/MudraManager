@@ -2,6 +2,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mudra_manager/shared/widgets/responsive_helper.dart';
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -334,7 +335,49 @@ class UtilityScreenState extends State<UtilityScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) return const Center(child: CircularProgressIndicator());
+    if (_isLoading) {
+      return GridView.builder(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 110),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: ResponsiveHelper.getGridCrossAxisCount(context),
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: ResponsiveHelper.getGridAspectRatio(
+            context,
+            defaultRatio: 1.0,
+            singleColumnRatio: 2.6,
+          ),
+        ),
+        itemCount: 5,
+        itemBuilder: (context, index) => Card(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SkeletonLoader(
+                  width: 48,
+                  height: 48,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                const SizedBox(height: 16),
+                SkeletonLoader(
+                  width: double.infinity,
+                  height: 20,
+                ),
+                const SizedBox(height: 8),
+                SkeletonLoader(
+                  width: 150,
+                  height: 14,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
 
     final visibleItems = _allUtilities
         .where((u) => _visibleUtilities.contains(u.id))

@@ -6,6 +6,8 @@ import 'package:mudra_manager/core/db/models/goal.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/utils/icon_helper.dart';
 import 'package:mudra_manager/shared/widgets/animated_balance.dart';
+import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
+import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 
 class GoalCard extends ConsumerWidget {
   final Goal goal;
@@ -18,6 +20,7 @@ class GoalCard extends ConsumerWidget {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final ctxt = AppLocalizations.of(context)!;
+    final isGuestMode = ref.watch(guestModeProvider);
 
     final goalColor = goal.colorValue != null
         ? Color(goal.colorValue!)
@@ -86,7 +89,7 @@ class GoalCard extends ConsumerWidget {
                                 ),
                               ),
                               AnimatedBalance(
-                                value: goal.currentAmount,
+                                value: GuestModeUtil.applyGuestMode(goal.currentAmount, isGuestMode),
                                 style: textTheme.titleSmall?.copyWith(
                                   fontWeight: FontWeight.w600,
                                   color: goalColor,

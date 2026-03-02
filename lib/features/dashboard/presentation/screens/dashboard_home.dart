@@ -15,15 +15,16 @@ import 'package:mudra_manager/features/dashboard/presentation/widgets/financial_
 import 'package:mudra_manager/features/dashboard/presentation/widgets/goal_card.dart';
 import 'package:mudra_manager/features/dashboard/presentation/widgets/net_worth_card.dart';
 import 'package:mudra_manager/features/dashboard/presentation/widgets/spending_prediction_card.dart';
+import 'package:mudra_manager/features/dashboard/presentation/widgets/recurring_expenses_card.dart';
+import 'package:mudra_manager/features/dashboard/presentation/widgets/spending_personality_card.dart';
 import 'package:mudra_manager/features/dashboard/presentation/widgets/dashboard_action_button.dart';
 import 'package:mudra_manager/features/dashboard/presentation/widgets/swipeable_account_card.dart';
-import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
 import 'package:mudra_manager/features/profile/data/help_guide_provider.dart';
 import 'package:mudra_manager/features/trip/presentation/widgets/active_trip_mini_card.dart';
 import 'package:mudra_manager/shared/widgets/budget_alert_banner.dart';
 import 'package:mudra_manager/shared/widgets/period_calendar_selector.dart';
 import 'package:mudra_manager/shared/widgets/responseive_layout_builder.dart';
-import 'package:mudra_manager/features/gamification/widgets/recent_achievement_card.dart';
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class _AnimatedCard extends StatefulWidget {
@@ -36,7 +37,8 @@ class _AnimatedCard extends StatefulWidget {
   State<_AnimatedCard> createState() => _AnimatedCardState();
 }
 
-class _AnimatedCardState extends State<_AnimatedCard> with SingleTickerProviderStateMixin {
+class _AnimatedCardState extends State<_AnimatedCard>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
@@ -53,11 +55,12 @@ class _AnimatedCardState extends State<_AnimatedCard> with SingleTickerProviderS
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0)
         .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
-    _slideAnimation = Tween<Offset>(begin: const Offset(0, 0.15), end: Offset.zero)
-        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.15), end: Offset.zero).animate(
+            CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
 
-    _scaleAnimation = Tween<double>(begin: 0.95, end: 1.0)
-        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
+    _scaleAnimation = Tween<double>(begin: 0.95, end: 1.0).animate(
+        CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
 
     Future.delayed(Duration(milliseconds: widget.delay), () {
       if (mounted) _controller.forward();
@@ -111,12 +114,12 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
       final prefs = SharedPrefsUtil.instance;
       final lastCheckIn = prefs.getLastDailyCheckIn();
       final now = DateTime.now();
-      
+
       // Only check in if not already done today
-      if (lastCheckIn == null || 
-          !(lastCheckIn.year == now.year && 
-            lastCheckIn.month == now.month && 
-            lastCheckIn.day == now.day)) {
+      if (lastCheckIn == null ||
+          !(lastCheckIn.year == now.year &&
+              lastCheckIn.month == now.month &&
+              lastCheckIn.day == now.day)) {
         final service = await ref.read(gamificationServiceInitProvider.future);
         final result = await service.updateDailyCheckIn();
         if (result != null && mounted) {
@@ -133,8 +136,34 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
     final visible = prefs.getStringList('visible_dashboard_cards');
     final order = prefs.getStringList('dashboard_cards_order');
     setState(() {
-      _visibleCards = visible ?? ['accounts', 'action_buttons', 'cash_flow', 'financial_health', 'net_worth', 'spending_prediction', 'active_trip', 'budget', 'goal'];
-      _cardOrder = order ?? ['accounts', 'action_buttons', 'cash_flow', 'financial_health', 'net_worth', 'spending_prediction', 'active_trip', 'budget', 'goal'];
+      _visibleCards = visible ??
+          [
+            'accounts',
+            'action_buttons',
+            'spending_personality',
+            'cash_flow',
+            'financial_health',
+            'net_worth',
+            'spending_prediction',
+            'recurring_expenses',
+            'active_trip',
+            'budget',
+            'goal'
+          ];
+      _cardOrder = order ??
+          [
+            'accounts',
+            'action_buttons',
+            'spending_personality',
+            'cash_flow',
+            'financial_health',
+            'net_worth',
+            'spending_prediction',
+            'recurring_expenses',
+            'active_trip',
+            'budget',
+            'goal'
+          ];
       _isLoading = false;
     });
   }
@@ -143,20 +172,21 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
 
   Widget? _buildCard(String cardId, int index) {
     if (!_isCardVisible(cardId)) return null;
-    
+
     switch (cardId) {
       case 'accounts':
         return const AnimatedSwipeableAccountCards();
       case 'action_buttons':
         return Container(
-          margin: EdgeInsets.symmetric(horizontal: globalPadding, vertical: 8),
+          margin: EdgeInsets.symmetric(horizontal: globalPadding),
           child: ResponsiveLayoutBuilder(
             columnWidget: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Flexible(
                   child: DashboardActionButton(
-                    label: AppLocalizations.of(context)!.dashboard_add_transaction_text,
+                    label: AppLocalizations.of(context)!
+                        .dashboard_add_transaction_text,
                     icon: Icons.add_circle_outline,
                     onTap: () => context.push('/add-transaction'),
                   ),
@@ -164,10 +194,12 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                 const SizedBox(height: 8),
                 Flexible(
                   child: DashboardActionButton(
-                    label: AppLocalizations.of(context)!.dashboard_add_transfer_text,
+                    label: AppLocalizations.of(context)!
+                        .dashboard_add_transfer_text,
                     icon: Icons.swap_horiz,
                     onTap: () => context.push('/transfer'),
-                    backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+                    backgroundColor:
+                        Theme.of(context).colorScheme.surfaceContainerHigh,
                     iconColor: Theme.of(context).colorScheme.tertiary,
                     textColor: Theme.of(context).colorScheme.tertiary,
                   ),
@@ -178,7 +210,8 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
               children: [
                 Expanded(
                   child: DashboardActionButton(
-                    label: AppLocalizations.of(context)!.dashboard_add_transaction_text,
+                    label: AppLocalizations.of(context)!
+                        .dashboard_add_transaction_text,
                     icon: Icons.add_circle_outline,
                     onTap: () => context.push('/add-transaction'),
                     heroTag: 'addTransactionHeroDashboard',
@@ -187,10 +220,12 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: DashboardActionButton(
-                    label: AppLocalizations.of(context)!.dashboard_add_transfer_text,
+                    label: AppLocalizations.of(context)!
+                        .dashboard_add_transfer_text,
                     icon: Icons.swap_horiz,
                     onTap: () => context.push('/transfer'),
-                    backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+                    backgroundColor:
+                        Theme.of(context).colorScheme.surfaceContainerHigh,
                     iconColor: Theme.of(context).colorScheme.tertiary,
                     textColor: Theme.of(context).colorScheme.tertiary,
                   ),
@@ -199,6 +234,8 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
             ),
           ),
         );
+      case 'spending_personality':
+        return SpendingPersonalityCard(globalPadding: globalPadding);
       case 'cash_flow':
         return Column(
           children: [
@@ -227,17 +264,30 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
           ],
         );
       case 'financial_health':
-        return _AnimatedCard(delay: index * 100, child: FinancialHealthCard(globalPadding: globalPadding));
+        return _AnimatedCard(
+            delay: index * 100,
+            child: FinancialHealthCard(globalPadding: globalPadding));
       case 'net_worth':
-        return _AnimatedCard(delay: index * 100, child: NetWorthCard(globalPadding: globalPadding));
+        return _AnimatedCard(
+            delay: index * 100,
+            child: NetWorthCard(globalPadding: globalPadding));
       case 'spending_prediction':
-        return _AnimatedCard(delay: index * 100, child: SpendingPredictionCard(globalPadding: globalPadding));
+        return _AnimatedCard(
+            delay: index * 100,
+            child: SpendingPredictionCard(globalPadding: globalPadding));
+      case 'recurring_expenses':
+        return RecurringExpensesCard(globalPadding: globalPadding);
       case 'active_trip':
-        return _AnimatedCard(delay: index * 100, child: ActiveTripMiniCard(globalPadding: globalPadding));
+        return _AnimatedCard(
+            delay: index * 100,
+            child: ActiveTripMiniCard(globalPadding: globalPadding));
       case 'budget':
-        return _AnimatedCard(delay: index * 100, child: BudgetCard(globalPadding: globalPadding));
+        return _AnimatedCard(
+            delay: index * 100,
+            child: BudgetCard(globalPadding: globalPadding));
       case 'goal':
-        return _AnimatedCard(delay: index * 100, child: GoalCard(globalPadding: globalPadding));
+        return _AnimatedCard(
+            delay: index * 100, child: GoalCard(globalPadding: globalPadding));
       default:
         return null;
     }
@@ -263,14 +313,62 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
           child: Column(
             children: [
               const SizedBox(height: 16),
-              ...List.generate(5, (i) => Container(
-                margin: EdgeInsets.symmetric(horizontal: globalPadding, vertical: 8),
-                height: 150,
-                decoration: BoxDecoration(
-                  color: color.surfaceContainerHighest,
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: globalPadding,
+                  vertical: 8,
+                ),
+                child: SkeletonLoader(
+                  width: double.infinity,
+                  height: 180,
                   borderRadius: BorderRadius.circular(12),
                 ),
-              )),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: globalPadding,
+                  vertical: 8,
+                ),
+                child: SkeletonLoader(
+                  width: double.infinity,
+                  height: 100,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: globalPadding,
+                  vertical: 8,
+                ),
+                child: SkeletonLoader(
+                  width: double.infinity,
+                  height: 120,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: globalPadding,
+                  vertical: 8,
+                ),
+                child: SkeletonLoader(
+                  width: double.infinity,
+                  height: 140,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: globalPadding,
+                  vertical: 8,
+                ),
+                child: SkeletonLoader(
+                  width: double.infinity,
+                  height: 160,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              const SizedBox(height: 100),
             ],
           ),
         ),
@@ -349,9 +447,8 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                               await SharedPrefsUtil.instance
                                   .setHasSeenHelpGuide(true);
                               ref
-                                      .read(hasSeenHelpGuideProvider.notifier)
-                                      .state =
-                                  true;
+                                  .read(hasSeenHelpGuideProvider.notifier)
+                                  .state = true;
                             },
                           ),
                         ],
@@ -370,14 +467,16 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                 },
               ),
             const SizedBox(height: 16),
-            ...List.generate(_cardOrder.length, (i) {
-              final widget = _buildCard(_cardOrder[i], i);
-              if (widget == null) return const SizedBox.shrink();
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: widget,
-              );
-            }),
+            ...() {
+              final widgets = <Widget>[];
+              for (int i = 0; i < _cardOrder.length; i++) {
+                final widget = _buildCard(_cardOrder[i], i);
+                if (widget != null && widget is! SizedBox) {
+                  widgets.add(widget);
+                }
+              }
+              return widgets;
+            }(),
             if (!hasAnyVisibleCards)
               Container(
                 margin: const EdgeInsets.all(16),

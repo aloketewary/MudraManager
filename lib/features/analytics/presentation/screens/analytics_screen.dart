@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:mudra_manager/features/analytics/data/analytics_provider.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
+import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
+import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 
 class AnalyticsScreen extends ConsumerWidget {
   const AnalyticsScreen({super.key});
@@ -13,6 +15,7 @@ class AnalyticsScreen extends ConsumerWidget {
     final predictionAsync = ref.watch(predictedSpendingProvider);
     final categoryTrendsAsync = ref.watch(categoryTrendsProvider);
     final spendingByDayAsync = ref.watch(spendingByDayProvider);
+    final isGuestMode = ref.watch(guestModeProvider);
 
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
@@ -69,14 +72,14 @@ class AnalyticsScreen extends ConsumerWidget {
                       const SizedBox(height: 24),
                       _buildMetricRow(
                         'Savings Rate',
-                        '${health.savingsRate.toStringAsFixed(1)}%',
+                        '${GuestModeUtil.applyGuestMode(health.savingsRate, isGuestMode).toStringAsFixed(1)}%',
                         color,
                         textTheme,
                       ),
                       const SizedBox(height: 12),
                       _buildMetricRow(
                         'Expense Ratio',
-                        '${health.expenseRatio.toStringAsFixed(1)}%',
+                        '${GuestModeUtil.applyGuestMode(health.expenseRatio, isGuestMode).toStringAsFixed(1)}%',
                         color,
                         textTheme,
                       ),
@@ -163,7 +166,7 @@ class AnalyticsScreen extends ConsumerWidget {
                             ),
                             const SizedBox(height: 8),
                             CurrencyText(
-                              amount: predicted,
+                              amount: GuestModeUtil.applyGuestMode(predicted, isGuestMode),
                               style: textTheme.displayMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: color.primary,
@@ -247,7 +250,7 @@ class AnalyticsScreen extends ConsumerWidget {
                                         Row(
                                           children: [
                                             CurrencyText(
-                                              amount: trend.thisMonth,
+                                              amount: GuestModeUtil.applyGuestMode(trend.thisMonth, isGuestMode),
                                               style: textTheme.titleSmall,
                                             ),
                                             if (trend.changePercent != 0) ...[

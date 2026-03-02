@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/category.dart' as db_category;
-import 'package:mudra_manager/core/db/models/pending_transaction.dart';
 import 'package:mudra_manager/core/utils/category_matcher.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
@@ -11,18 +10,24 @@ class TransactionMatchingService {
 
   /// Matches a pending transaction to an account and category using various strategies.
   static MatchingResult? matchTransaction({
-    required PendingTransaction pending,
+    required dynamic pending,
     required List<Account> accounts,
     required List<db_category.Category> categories,
   }) {
-    if (pending.account == null || pending.account!.isEmpty) {
+    final account = pending.account as String?;
+    final isIncome = pending.isIncome as bool?;
+    final body = pending.body as String;
+    final amount = pending.amount as double?;
+    final fromBank = pending.fromBank as String?;
+    
+    if (account == null || account.isEmpty) {
       _log.d('No account number in pending transaction');
       return null;
     }
 
     // 1. Try to find a matching account (match last 4 digits)
     Account? matchedAccount;
-    final pendingAccTrimmed = pending.account!.trim();
+    final pendingAccTrimmed = account.trim();
     _log.d('Looking for account ending with: $pendingAccTrimmed');
     
     for (var acc in accounts) {
@@ -35,10 +40,10 @@ class TransactionMatchingService {
     }
 
     // Fallback: Match by bank name for credit cards
-    if (matchedAccount == null && pending.fromBank != null) {
+    if (matchedAccount == null && fromBank != null) {
       for (var acc in accounts) {
         if (acc.accountType == AccountType.creditCard &&
-            acc.name.toLowerCase().contains(pending.fromBank!.toLowerCase())) {
+            acc.name.toLowerCase().contains(fromBank.toLowerCase())) {
           matchedAccount = acc;
           _log.i('Account matched by bank name: ${acc.name}');
           break;
@@ -56,28 +61,28 @@ class TransactionMatchingService {
         categories
             .where(
               (c) =>
-                  (pending.isIncome == true &&
+                  (isIncome == true &&
                       c.categoryType == db_category.CategoryType.income) ||
-                  (pending.isIncome == false &&
+                  (isIncome == false &&
                       c.categoryType == db_category.CategoryType.expense),
             )
             .toList();
 
     if (relevantCategories.isEmpty) {
-      _log.d('No relevant categories found for type: ${(pending.isIncome ?? false) ? "income" : "expense"}');
+      _log.d('No relevant categories found for type: ${(isIncome ?? false) ? "income" : "expense"}');
       return null;
     }
 
     // 3. Try keyword-based matching
     db_category.Category? matchedCategory = CategoryMatcher.matchByKeywords(
-      pending.body,
+      body,
       relevantCategories,
     );
 
     // 4. Fallback with smart logic based on amount
     matchedCategory ??= CategoryMatcher.getFallbackCategory(
       relevantCategories,
-      pending.amount,
+      amount,
     );
 
     if (matchedCategory != null) {

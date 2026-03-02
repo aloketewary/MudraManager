@@ -10,6 +10,7 @@ import 'package:mudra_manager/features/budget/presentation/screens/add_budget_sc
 import 'package:mudra_manager/features/budget/presentation/screens/budget_dashboard.dart';
 import 'package:mudra_manager/features/budget/presentation/screens/budget_details_screen.dart';
 import 'package:mudra_manager/features/dashboard/presentation/screens/dashboard_customize_screen.dart';
+import 'package:mudra_manager/features/dashboard/presentation/screens/recurring_expenses_screen.dart';
 import 'package:mudra_manager/features/goal/presentation/screens/add_edit_goal_screen.dart';
 import 'package:mudra_manager/features/goal/presentation/screens/goal_details_screen.dart';
 import 'package:mudra_manager/features/goal/presentation/screens/goal_screen.dart';
@@ -29,7 +30,7 @@ import 'package:mudra_manager/features/profile/presentation/screens/setting_scre
 import 'package:mudra_manager/features/profile/presentation/screens/sms_import_setting_screen.dart';
 import 'package:mudra_manager/features/profile/presentation/screens/theme_picker_screen.dart';
 import 'package:mudra_manager/features/profile/presentation/widgets/account_form.dart';
-import 'package:mudra_manager/features/sms/presentation/screens/review_pending_transactions_screen_refactored.dart';
+import 'package:mudra_manager/features/sms/presentation/screens/sms_activity_screen.dart';
 import 'package:mudra_manager/features/statistics/presentation/screens/monthly_comparison_screen.dart';
 import 'package:mudra_manager/features/transactions/presentation/screens/add_edit_transaction_screen.dart';
 import 'package:mudra_manager/features/transactions/presentation/screens/add_recurring_transaction_screen.dart';
@@ -114,6 +115,7 @@ class AppRouter {
               final extra = state.extra as Map<String, dynamic>?;
               return AddEditTransactionScreen(
                 transaction: extra?['transaction'],
+                smsActivity: extra?['smsActivity'],
               );
             },
           ),
@@ -133,9 +135,8 @@ class AppRouter {
             },
           ),
           GoRoute(
-            path: '/pending-transactions',
-            builder: (context, state) =>
-                const ReviewPendingTransactionsScreen(),
+            path: '/sms-activity',
+            builder: (context, state) => const SmsActivityScreen(),
           ),
           GoRoute(
             path: '/notifications',
@@ -152,6 +153,10 @@ class AppRouter {
           GoRoute(
             path: '/dashboard-customize',
             builder: (context, state) => const DashboardCustomizeScreen(),
+          ),
+          GoRoute(
+            path: '/recurring-expenses',
+            builder: (context, state) => const RecurringExpensesScreen(),
           ),
           GoRoute(
             path: '/security',

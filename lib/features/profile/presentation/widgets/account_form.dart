@@ -2,13 +2,14 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/extension/account_type_extenstion.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/utils/simple_color_picker.dart';
+import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
-import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
 import 'package:mudra_manager/shared/widgets/adaptive_text.dart';
 
 class AccountForm extends ConsumerStatefulWidget {
@@ -54,19 +55,45 @@ class _AccountFormState extends ConsumerState<AccountForm> {
         : Color(Colors.blue.toARGB32());
   }
 
-  Future<void> _saveAccount() async {
+  Future<void> _saveAccount(Id? id) async {
     if (!_formKey.currentState!.validate()) return;
 
     final isarService = ref.read(isarServiceProvider);
     final isar = await isarService.getInstance();
 
+    final accountName = _nameController.text.trim();
+    final accountNumber = _accountNumberController.text.trim();
+
+    // Check for duplicate account name
+    final existingNameAccount = await isar.accounts
+        .filter()
+        .nameEqualTo(accountName)
+        .findFirst();
+
+    if (existingNameAccount != null && existingNameAccount.id != id) {
+      SnackbarService.warning('Account with name "$accountName" already exists');
+      return;
+    }
+
+    if (accountNumber.isNotEmpty) {
+      final existingAccount = await isar.accounts
+          .filter()
+          .accountNumberEqualTo(accountNumber)
+          .findFirst();
+
+      if (existingAccount != null && existingAccount.id != id) {
+        SnackbarService.warning('Account with number "$accountNumber" already exists');
+        return;
+      }
+    }
+
     final account = widget.account ?? Account();
     final isNewAccount = widget.account == null;
 
-    account.name = _nameController.text.trim();
+    account.name = accountName;
     account.initialBalance = double.tryParse(_balanceController.text) ?? 0.0;
     account.accountType = _selectedType!;
-    account.accountNumber = _accountNumberController.text;
+    account.accountNumber = accountNumber.isEmpty ? null : accountNumber;
     account.colorValue = _selectedColor?.toARGB32();
     account.isActive = true;
 
@@ -75,12 +102,13 @@ class _AccountFormState extends ConsumerState<AccountForm> {
     });
 
     if (isNewAccount) {
-      final gamificationService = await ref.read(gamificationServiceInitProvider.future);
+      final gamificationService =
+          await ref.read(gamificationServiceInitProvider.future);
       await gamificationService.track(GamificationEvent.accountCreated);
     }
 
-    context.pop();
     ref.invalidate(accountsProvider);
+    context.pop(true);
   }
 
   void _pickColor() async {
@@ -308,7 +336,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
             FilledButton(
               onPressed: () {
                 HapticFeedback.mediumImpact();
-                _saveAccount();
+                _saveAccount(widget.account?.id ?? null);
               },
               style: FilledButton.styleFrom(
                 minimumSize: const Size(double.infinity, 52),

@@ -43,6 +43,12 @@ class Transaction {
 
   String? description; // Optional user notes
 
+  /// Indicates if this transaction was created from SMS auto-import
+  bool? isFromSms;
+  
+  /// Link to SMS activity if created from SMS
+  int? smsActivityId;
+
   /// Indicates whether this transaction is part of a transfer between accounts.
   ///
   /// - `true`: This transaction is part of an account transfer.

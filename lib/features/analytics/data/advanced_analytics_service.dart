@@ -54,56 +54,69 @@ class AdvancedAnalyticsService {
       return FinancialHealthScore(
         score: 0,
         rating: 'Poor',
-        insights: ['No income recorded'],
+        insights: ['Add income to calculate health score'],
       );
     }
 
-    // Calculate metrics
     final savingsRate = ((income - expense) / income * 100).clamp(0, 100);
     final expenseRatio = (expense / income * 100).clamp(0, 100);
 
-    // Score calculation (0-100)
     double score = 0;
+    final insights = <String>[];
 
-    // Net worth factor (20 points)
-    if (totalBalance > 0) {
-      if (totalBalance >= income * 3) {
-        score += 20;
-      } else if (totalBalance >= income) {
-        score += 15;
-      } else if (totalBalance >= income * 0.5) {
-        score += 10;
-      } else {
-        score += 5;
-      }
-    }
-
-    // Savings rate (30 points)
+    // 1. Savings Rate (30 points)
     if (savingsRate >= 30) {
-      score += 40;
-    } else if (savingsRate >= 20) {
       score += 30;
+      insights.add('Excellent savings rate!');
+    } else if (savingsRate >= 20) {
+      score += 25;
+      insights.add('Good savings habit');
     } else if (savingsRate >= 10) {
-      score += 20;
+      score += 15;
+      insights.add('Try to save 20% of income');
     } else {
-      score += 10;
+      score += 5;
+      insights.add('Aim to save at least 10% monthly');
     }
 
-    // Expense ratio (30 points)
+    // 2. Budget Discipline (30 points) - based on expense ratio
     if (expenseRatio <= 50) {
       score += 30;
     } else if (expenseRatio <= 70) {
       score += 20;
+      insights.add('Keep expenses under 70%');
     } else if (expenseRatio <= 90) {
       score += 10;
+      insights.add('Expenses are high, review spending');
+    } else {
+      insights.add('Critical: Expenses exceed income');
     }
 
-    // Transaction consistency (30 points)
-    final daysWithTxns = thisMonth.map((tx) => tx.date.day).toSet().length;
-    score += (daysWithTxns / DateTime(now.year, now.month + 1, 0).day * 30)
-        .clamp(0, 30);
+    // 3. Debt Factor (20 points) - negative balance indicates debt
+    if (totalBalance >= 0) {
+      score += 20;
+    } else if (totalBalance >= -income) {
+      score += 10;
+      insights.add('Work on clearing debt');
+    } else {
+      insights.add('High debt level detected');
+    }
 
-    // Rating
+    // 4. Emergency Fund (20 points) - 3-6 months of expenses
+    final monthlyExpense = expense;
+    if (totalBalance >= monthlyExpense * 6) {
+      score += 20;
+      insights.add('Strong emergency fund!');
+    } else if (totalBalance >= monthlyExpense * 3) {
+      score += 15;
+    } else if (totalBalance >= monthlyExpense) {
+      score += 10;
+      insights.add('Build 3-6 months emergency fund');
+    } else if (totalBalance > 0) {
+      score += 5;
+      insights.add('Start building emergency fund');
+    }
+
     final rating =
         score >= 80
             ? 'Excellent'
@@ -112,21 +125,6 @@ class AdvancedAnalyticsService {
             : score >= 40
             ? 'Fair'
             : 'Poor';
-
-    // Insights
-    final insights = <String>[];
-    if (savingsRate < 10) {
-      insights.add('Try to save at least 10% of income');
-    }
-    if (expenseRatio > 90) {
-      insights.add('Expenses are too high');
-    }
-    if (savingsRate >= 20) {
-      insights.add('Great savings rate!');
-    }
-    if (daysWithTxns < 5) {
-      insights.add('Track expenses more regularly');
-    }
 
     return FinancialHealthScore(
       score: score.round(),

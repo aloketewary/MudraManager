@@ -10,6 +10,7 @@ class CurrencyText extends StatelessWidget {
   final TextAlign? textAlign;
   final bool showSign;
   final bool compact;
+  final bool? isExpense;
 
   const CurrencyText({
     super.key,
@@ -19,14 +20,15 @@ class CurrencyText extends StatelessWidget {
     this.textAlign,
     this.showSign = false,
     this.compact = true,
+    this.isExpense = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final ctxt = AppLocalizations.of(context)!;
     final displayText = compact
-        ? '${showSign ? (amount >= 0 ? '+' : '-') : ''}${ctxt.formatCompactCurrency(amount.abs())}'
-        : '${showSign ? (amount >= 0 ? '+' : '-') : ''}${ctxt.formatCurrencyWithSign(2, amount.abs())}';
+        ? '${showSign ? ((amount >= 0 && isExpense == false) ? '+' : '-') : ''}${ctxt.formatCompactCurrency(amount.abs())}'
+        : '${showSign ? ((amount >= 0 && isExpense == false) ? '+' : '-') : ''}${ctxt.formatCurrencyWithSign(2, amount.abs())}';
     final fullText =
         '${showSign ? (amount >= 0 ? '+' : '-') : ''}${ctxt.formatCurrencyWithSign(2, amount.abs())}';
 

@@ -25,6 +25,7 @@ class AddEditCategoryScreen extends ConsumerStatefulWidget {
 
 class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
   late TextEditingController _nameController;
+  late TextEditingController _keywordsController;
   CategoryType _selectedType = CategoryType.expense;
   String? _selectedIcon;
   Color? _selectedColor;
@@ -34,6 +35,9 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.existing?.name ?? '');
+    _keywordsController = TextEditingController(
+      text: widget.existing?.keywords?.join(', ') ?? '',
+    );
     _selectedType = widget.existing?.categoryType ?? CategoryType.expense;
     _selectedIcon = widget.existing?.iconName;
     _selectedColor = widget.existing?.colorValue != null
@@ -78,6 +82,18 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
     category.iconName = _selectedIcon;
     category.colorValue = _selectedColor?.toARGB32();
     category.parentCategory.value = _selectedParent;
+    
+    // Parse keywords from comma-separated string
+    final keywordsText = _keywordsController.text.trim();
+    if (keywordsText.isNotEmpty) {
+      category.keywords = keywordsText
+          .split(',')
+          .map((k) => k.trim().toLowerCase())
+          .where((k) => k.isNotEmpty)
+          .toList();
+    } else {
+      category.keywords = null;
+    }
 
     await isar.writeTxn(() async {
       await isar.categorys.put(category);
@@ -163,6 +179,20 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
               validator: (val) => val == null || val.trim().isEmpty
                   ? ctxt.category_nameRequired
                   : null,
+            ),
+            const SizedBox(height: 20),
+            TextFormField(
+              controller: _keywordsController,
+              decoration: InputDecoration(
+                labelText: 'Keywords (comma-separated)',
+                hintText: 'swiggy, zomato, food',
+                helperText: 'Add keywords to auto-detect from SMS',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                prefixIcon: const Icon(Icons.label_outline),
+              ),
+              maxLines: 2,
             ),
             const SizedBox(height: 24),
             Text(

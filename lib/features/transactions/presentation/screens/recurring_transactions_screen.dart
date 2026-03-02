@@ -8,6 +8,8 @@ import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
 import 'package:mudra_manager/core/utils/icon_helper.dart';
 import 'package:mudra_manager/features/transactions/data/recurring_transaction_provider.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
+import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
+import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 
 class RecurringTransactionsScreen extends ConsumerWidget {
   const RecurringTransactionsScreen({super.key});
@@ -122,6 +124,7 @@ class _RecurringCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final isGuestMode = ref.watch(guestModeProvider);
 
     final color = item.isExpense ? colorScheme.error : colorScheme.primary;
     final frequencyText = _getFrequencyText(item.frequency);
@@ -195,7 +198,7 @@ class _RecurringCard extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    '${item.isExpense ? '-' : '+'}₹${item.amount.toStringAsFixed(0)}',
+                    '${item.isExpense ? '-' : '+'}₹${GuestModeUtil.applyGuestMode(item.amount, isGuestMode).toStringAsFixed(0)}',
                     style: textTheme.titleMedium?.copyWith(
                       color: color,
                       fontWeight: FontWeight.bold,

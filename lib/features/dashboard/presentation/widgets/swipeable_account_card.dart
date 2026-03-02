@@ -6,6 +6,8 @@ import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/dashboard/presentation/widgets/dashboard_account_card.dart';
 import 'package:mudra_manager/features/dashboard/presentation/widgets/dashboard_animated_card.dart';
+import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
+import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 
 class AnimatedSwipeableAccountCards extends ConsumerStatefulWidget {
   const AnimatedSwipeableAccountCards({super.key});
@@ -83,6 +85,7 @@ class _AnimatedSwipeableAccountCardsState
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final accountsAsync = ref.watch(accountsProvider);
+    final isGuestMode = ref.watch(guestModeProvider);
     final size = MediaQuery.of(context).size;
     final ctxt = AppLocalizations.of(context)!;
 
@@ -105,8 +108,10 @@ class _AnimatedSwipeableAccountCardsState
         }
 
         final List<AccountCard> cards = filteredAccounts.map((account) {
+          final balance = _balanceMap[account.id] ?? 0.0;
+          final displayBalance = GuestModeUtil.applyGuestMode(balance, isGuestMode);
           return AccountCard(
-            totalBalance: _balanceMap[account.id]?.toStringAsFixed(2) ?? '0.0',
+            totalBalance: displayBalance.toStringAsFixed(2),
             accountNumber: 'xxxx xxxx xxxx ${account.accountNumber ?? 'xxxx'}',
             backgroundColor: color.onSecondary,
             accentColor: Color(

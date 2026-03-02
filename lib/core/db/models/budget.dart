@@ -1,6 +1,7 @@
 import 'package:isar_community/isar.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:mudra_manager/core/db/models/budget_category_allocation.dart';
+import 'package:mudra_manager/core/db/models/budget_type.dart';
 
 import 'category.dart';
 
@@ -13,6 +14,9 @@ class Budget {
 
   @Index()
   bool isArchived = false;
+
+  @enumerated
+  late BudgetType budgetType; // categoryWise, dayWise, festival, travel
 
   late String name; // e.g., "Monthly Food Budget", "Entertainment Q1"
 
@@ -32,6 +36,10 @@ class Budget {
   // Optional: Add a field for recurrence (e.g., 'monthly', 'yearly', 'none')
   @enumerated
   late BudgetRecurrence recurrence;
+
+  bool notifiedAt80 = false;
+  bool notifiedAt90 = false;
+  bool notifiedAt100 = false;
 
   final allocations = IsarLinks<BudgetCategoryAllocation>();
 

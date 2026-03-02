@@ -1,4 +1,5 @@
 import 'package:mudra_manager/core/db/models/transaction.dart';
+import 'package:mudra_manager/core/db/models/sms_activity.dart';
 
 
 /// A union type for either a header or a transaction item
@@ -14,6 +15,12 @@ class TxItem implements TxListEntry {
   final Transaction txn;
 
   TxItem(this.txn);
+}
+
+class SmsActivityItem implements TxListEntry {
+  final SmsActivity activity;
+
+  SmsActivityItem(this.activity);
 }
 
 List<TxListEntry> buildSectionedList(List<Transaction> allTxns) {
