@@ -18,7 +18,7 @@ final accountServiceProvider = Provider((ref) {
   return AccountsService(isar, log);
 });
 
-final balanceVisibilityProvider = StateProvider<bool>((ref) => true);
+final balanceVisibilityProvider = StateProvider.autoDispose<bool>((ref) => true);
 
 class AccountsService {
   final IsarService isarService;

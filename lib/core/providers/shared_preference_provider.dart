@@ -137,4 +137,15 @@ class SharedPrefsUtil {
   Future<void> setLastDailyCheckIn(DateTime date) async {
     await _prefs.setString(_lastDailyCheckInKey, date.toIso8601String());
   }
+
+  Future<void> setString(
+    String configKey,
+    String jsonEncode,
+  ) async {
+    await _prefs.setString(configKey, jsonEncode);
+  }
+
+  String? getString(String configKey) {
+    return _prefs.getString(configKey);
+  }
 }

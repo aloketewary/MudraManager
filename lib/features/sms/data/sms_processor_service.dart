@@ -1,19 +1,16 @@
+import 'package:mudra_manager/core/services/plugin_service.dart';
+import 'package:mudra_manager/plugins/sms_parser_manager.dart';
+import 'package:mudra_manager/plugins/sms_parser_plugin.dart';
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
-import 'package:flutter/foundation.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
-import 'package:mudra_manager/core/db/models/pending_transaction.dart';
-import 'package:mudra_manager/core/db/models/transaction.dart';
-import 'package:mudra_manager/core/db/models/account.dart';
-import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/core/utils/string_util.dart';
 import 'package:mudra_manager/core/utils/transaction_msg_util.dart';
-import 'package:mudra_manager/features/transactions/data/transaction_matching_service.dart';
 import 'package:mudra_manager/features/sms/data/sms_activity_service.dart';
 
 class SmsProcessorService {
@@ -51,6 +48,9 @@ class SmsProcessorService {
         category: sms.typeOfTransaction?.name,
       );
 
+      // Emit SMS event to plugins
+      PluginService().emitSms(sms.sender, sms.body);
+
       _log.i('SMS processed and added to activity, sender: ${sms.sender}');
     } catch (e) {
       _log.e('Failed to process SMS transaction', e);
@@ -62,7 +62,7 @@ class SmsProcessorService {
     required String address,
     String? sender,
     required int timestamp,
-  }) {
+  }) async {
     if (!checkForTransactionalMessage(body)) {
       _log.i('SMS filtered out (not transactional) sender: $address');
       return;
@@ -79,6 +79,15 @@ class SmsProcessorService {
 
     SharedPrefsUtil.instance.storeProcessedHash(smsHash);
 
+    // Try plugin-based parsing first
+    final parsedSms = await SmsParserManager.instance.parseSms(address, body);
+    if (parsedSms != null) {
+      _log.i('SMS parsed by plugin, sender: $address');
+      _processPluginParsedSms(parsedSms, address, timestamp, smsHash);
+      return;
+    }
+
+    // Fallback to legacy parsing
     final transactionUtil = TransactionUtil();
     final transactionInfo = transactionUtil.getTransactionInfo(
       body,
@@ -86,9 +95,39 @@ class SmsProcessorService {
       sender,
       smsHash,
     );
-    _log.i('SMS Parsed successfully, sender: $address');
+    _log.i('SMS Parsed by legacy parser, sender: $address');
 
     processSmsForSaving(transactionInfo, timestamp);
+  }
+
+  Future<void> _processPluginParsedSms(
+    ParsedSms parsedSms,
+    String sender,
+    int timestamp,
+    String smsHash,
+  ) async {
+    final transactionDate = DateTime.fromMillisecondsSinceEpoch(timestamp);
+
+    try {
+      await SmsActivityService.instance.addActivity(
+        sender: sender,
+        body: '',
+        date: transactionDate,
+        smsHash: smsHash,
+        amount: parsedSms.amount,
+        isIncome: parsedSms.isIncome,
+        account: parsedSms.account,
+        fromBank: await SmsParserManager.instance.getBankFromSender(sender),
+        toAccount: parsedSms.merchant,
+        transactionRef: null,
+        category: parsedSms.transactionType,
+      );
+
+      PluginService().emitSms(sender, '');
+      _log.i('Plugin-parsed SMS processed, sender: $sender');
+    } catch (e) {
+      _log.e('Failed to process plugin-parsed SMS', e);
+    }
   }
 
   String generateSmsHash(String address, int timestamp, String body) {

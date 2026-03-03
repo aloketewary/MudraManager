@@ -84,6 +84,13 @@ dependencies:
   logger: ^2.6.2
   lucide_icons_flutter: ^3.1.9
   confetti: ^0.8.0
+  flutter_svg: ^2.0.10+1
+  mudra_plugin_sdk:
+    path: ./mudra_plugin_sdk
+  # Cloud providers for backup sync
+  google_sign_in: ^6.2.1
+  googleapis: ^13.2.0
+  http: ^1.2.2
 
 
 
@@ -163,6 +170,9 @@ flutter:
     - assets/icons/100/
     - assets/icons/20/
     - assets/icons/medals/
+    - assets/logo/banks/
+    - assets/logo/file/
     - assets/logo/rupee.png
     - assets/fonts/NotoSans-Regular.ttf
     - assets/help_content.json
+    - assets/plugins/manifest.json

@@ -9,7 +9,7 @@ import 'package:mudra_manager/features/gamification/models/gamification_enum.dar
 import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
 import 'package:mudra_manager/features/gamification/services/gamification_service.dart';
 
-final categoryListProvider = FutureProvider<List<Category>>((ref) async {
+final categoryListProvider = FutureProvider.autoDispose<List<Category>>((ref) async {
   final isar = await ref.watch(isarServiceProvider).getInstance();
   final categories = await isar.categorys.where().findAll();
   for (final category in categories) {
@@ -18,7 +18,7 @@ final categoryListProvider = FutureProvider<List<Category>>((ref) async {
   return categories;
 });
 
-final incomeCategoriesProvider = FutureProvider<List<Category>>((ref) async {
+final incomeCategoriesProvider = FutureProvider.autoDispose<List<Category>>((ref) async {
   final isar = await ref.watch(isarServiceProvider).getInstance();
   final categories = await isar.categorys
       .filter()
@@ -30,7 +30,7 @@ final incomeCategoriesProvider = FutureProvider<List<Category>>((ref) async {
   return categories;
 });
 
-final expenseCategoriesProvider = FutureProvider<List<Category>>((ref) async {
+final expenseCategoriesProvider = FutureProvider.autoDispose<List<Category>>((ref) async {
   final isar = await ref.watch(isarServiceProvider).getInstance();
   final categories = await isar.categorys
       .filter()

@@ -21,6 +21,7 @@ import 'package:mudra_manager/features/dashboard/presentation/widgets/dashboard_
 import 'package:mudra_manager/features/dashboard/presentation/widgets/swipeable_account_card.dart';
 import 'package:mudra_manager/features/profile/data/help_guide_provider.dart';
 import 'package:mudra_manager/features/trip/presentation/widgets/active_trip_mini_card.dart';
+import 'package:mudra_manager/features/marketplace/services/marketplace_service.dart';
 import 'package:mudra_manager/shared/widgets/budget_alert_banner.dart';
 import 'package:mudra_manager/shared/widgets/period_calendar_selector.dart';
 import 'package:mudra_manager/shared/widgets/responseive_layout_builder.dart';
@@ -135,6 +136,11 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
     final prefs = await SharedPreferences.getInstance();
     final visible = prefs.getStringList('visible_dashboard_cards');
     final order = prefs.getStringList('dashboard_cards_order');
+    
+    // Check if travel plugin is enabled
+    final marketplace = MarketplaceService();
+    final isTravelEnabled = await marketplace.isPluginEnabled('com.mudra.travel_expenses');
+    
     setState(() {
       _visibleCards = visible ??
           [
@@ -146,7 +152,7 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
             'net_worth',
             'spending_prediction',
             'recurring_expenses',
-            'active_trip',
+            if (isTravelEnabled) 'active_trip',
             'budget',
             'goal'
           ];
@@ -160,7 +166,7 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
             'net_worth',
             'spending_prediction',
             'recurring_expenses',
-            'active_trip',
+            if (isTravelEnabled) 'active_trip',
             'budget',
             'goal'
           ];

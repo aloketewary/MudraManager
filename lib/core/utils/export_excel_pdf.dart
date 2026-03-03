@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/features/dashboard/data/status_data_provider.dart';
 import 'package:mudra_manager/features/analytics/data/advanced_analytics_service.dart';
 import 'package:mudra_manager/core/utils/file_utils.dart';
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
-import 'package:excel/excel.dart';
+import 'package:mudra_manager/plugins/export_plugin_manager.dart';
+import 'package:mudra_manager/plugins/export_plugin.dart';
+import 'package:mudra_manager/features/statistics/presentation/screens/export_options_screen.dart';
 import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
 import 'package:mudra_manager/features/gamification/services/gamification_service.dart';
 
@@ -16,183 +15,48 @@ String formatCurrency(double amount) {
 }
 
 Future<void> exportStatsToExcel(StatsData stats, [GamificationService? gamificationService]) async {
-  final excel = Excel.createExcel();
-  excel.delete('Sheet1');
-  final now = DateTime.now();
-
-  final summary = excel['Summary'];
-  summary.merge(CellIndex.indexByString('A1'), CellIndex.indexByString('D1'));
-  summary.cell(CellIndex.indexByString('A1')).value =
-      'MUDRA MANAGER - FINANCIAL REPORT';
-  summary.cell(CellIndex.indexByString('A1')).cellStyle = CellStyle(
-    bold: true,
-    fontSize: 18,
-    horizontalAlign: HorizontalAlign.Center,
-    backgroundColorHex: '#1976D2',
-    fontColorHex: '#FFFFFF',
-  );
-  summary.appendRow([]);
-  summary.appendRow([
-    'Generated:',
-    DateFormat('MMM dd, yyyy hh:mm a').format(now),
-  ]);
-  summary.appendRow([]);
-
-  summary.appendRow(['FINANCIAL OVERVIEW']);
-  summary.cell(CellIndex.indexByString('A5')).cellStyle = CellStyle(
-    bold: true,
-    fontSize: 14,
-  );
-  summary.appendRow(['Metric', 'Amount', '', 'Details']);
-  summary.cell(CellIndex.indexByString('A6')).cellStyle = CellStyle(
-    bold: true,
-    backgroundColorHex: '#E3F2FD',
-  );
-  summary.cell(CellIndex.indexByString('B6')).cellStyle = CellStyle(
-    bold: true,
-    backgroundColorHex: '#E3F2FD',
-  );
-  summary.cell(CellIndex.indexByString('D6')).cellStyle = CellStyle(
-    bold: true,
-    backgroundColorHex: '#E3F2FD',
+  final exportData = ExportData(
+    income: stats.income,
+    expense: stats.expense,
+    savingsRate: stats.savingsRate,
+    avgDailySpend: stats.avgDailySpend,
+    transactions: stats.recent,
+    categoryData: stats.categoryData,
+    categoryDataMap: stats.categoryDataMap,
+    startDate: DateTime.now().subtract(const Duration(days: 30)),
+    endDate: DateTime.now(),
   );
 
-  summary.appendRow(['Total Income', stats.income, '', 'Money received']);
-  summary.appendRow(['Total Expense', stats.expense, '', 'Money spent']);
-  summary.appendRow([
-    'Net Savings',
-    stats.income - stats.expense,
-    '',
-    'Income - Expense',
-  ]);
-  summary.appendRow([
-    'Savings Rate',
-    '${stats.savingsRate.toStringAsFixed(1)}%',
-    '',
-    'Percentage saved',
-  ]);
-  summary.appendRow([
-    'Avg Daily Spend',
-    stats.avgDailySpend,
-    '',
-    'Average per day',
-  ]);
-  summary.appendRow([
-    'Transaction Count',
-    stats.recent.length,
-    '',
-    'Total transactions',
-  ]);
+  final plugin = await ExportPluginManager.instance.getPlugin('Excel', 'Standard');
+  if (plugin == null) return;
 
-  final categorySheet = excel['Categories'];
-  categorySheet.merge(
-    CellIndex.indexByString('A1'),
-    CellIndex.indexByString('D1'),
+  final excelBytes = await plugin.generateExport(exportData);
+  final fileName = 'MudraManager_${DateFormat('yyyyMMdd_HHmmss').format(DateTime.now())}.xlsx';
+  
+  await saveExportedFile(excelBytes, fileName, askUser: true);
+  await gamificationService?.track(GamificationEvent.reportExported);
+}
+
+// New function to show export options
+Future<void> showExportOptions(BuildContext context, StatsData stats) async {
+  final exportData = ExportData(
+    income: stats.income,
+    expense: stats.expense,
+    savingsRate: stats.savingsRate,
+    avgDailySpend: stats.avgDailySpend,
+    transactions: stats.recent,
+    categoryData: stats.categoryData,
+    categoryDataMap: stats.categoryDataMap,
+    startDate: DateTime.now().subtract(const Duration(days: 30)),
+    endDate: DateTime.now(),
   );
-  categorySheet.cell(CellIndex.indexByString('A1')).value =
-      'EXPENSE BY CATEGORY';
-  categorySheet.cell(CellIndex.indexByString('A1')).cellStyle = CellStyle(
-    bold: true,
-    fontSize: 16,
-    horizontalAlign: HorizontalAlign.Center,
-    backgroundColorHex: '#1976D2',
-    fontColorHex: '#FFFFFF',
+
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => ExportOptionsScreen(exportData: exportData),
+    ),
   );
-  categorySheet.appendRow([]);
-  categorySheet.appendRow(['Rank', 'Category', 'Amount', 'Percentage']);
-  for (int i = 0; i < 4; i++) {
-    categorySheet
-        .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: 2))
-        .cellStyle = CellStyle(
-      bold: true,
-      backgroundColorHex: '#E3F2FD',
-    );
-  }
-
-  final sortedCategories = stats.categoryData.entries.toList()
-    ..sort((a, b) => b.value.compareTo(a.value));
-
-  int rank = 1;
-  for (var entry in sortedCategories) {
-    final categoryName = stats.categoryDataMap[entry.key]?.name ?? 'Unknown';
-    final percentage = stats.expense > 0
-        ? (entry.value / stats.expense * 100).toStringAsFixed(1)
-        : '0.0';
-    categorySheet.appendRow([
-      rank++,
-      categoryName,
-      entry.value,
-      '$percentage%',
-    ]);
-  }
-
-  categorySheet.appendRow([]);
-  categorySheet.appendRow(['TOTAL', '', stats.expense, '100%']);
-  final totalRow = categorySheet.maxRows;
-  for (int i = 0; i < 4; i++) {
-    categorySheet
-        .cell(
-          CellIndex.indexByColumnRow(columnIndex: i, rowIndex: totalRow - 1),
-        )
-        .cellStyle = CellStyle(
-      bold: true,
-      backgroundColorHex: '#FFF3E0',
-    );
-  }
-
-  final txnSheet = excel['Transactions'];
-  txnSheet.merge(CellIndex.indexByString('A1'), CellIndex.indexByString('F1'));
-  txnSheet.cell(CellIndex.indexByString('A1')).value = 'ALL TRANSACTIONS';
-  txnSheet.cell(CellIndex.indexByString('A1')).cellStyle = CellStyle(
-    bold: true,
-    fontSize: 16,
-    horizontalAlign: HorizontalAlign.Center,
-    backgroundColorHex: '#1976D2',
-    fontColorHex: '#FFFFFF',
-  );
-  txnSheet.appendRow([]);
-  txnSheet.appendRow([
-    '#',
-    'Date',
-    'Category',
-    'Description',
-    'Amount',
-    'Type',
-  ]);
-  for (int i = 0; i < 6; i++) {
-    txnSheet
-        .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: 2))
-        .cellStyle = CellStyle(
-      bold: true,
-      backgroundColorHex: '#E3F2FD',
-    );
-  }
-
-  int txnNum = 1;
-  for (var txn in stats.recent) {
-    txn.category.loadSync();
-    final dateStr = DateFormat('MMM dd, yyyy').format(txn.date);
-    txnSheet.appendRow([
-      txnNum++,
-      dateStr,
-      txn.category.value?.name ?? 'N/A',
-      txn.description ?? '-',
-      txn.amount,
-      txn.isExpense ? 'Expense' : 'Income',
-    ]);
-  }
-
-  final excelBytes = excel.encode();
-  if (excelBytes != null) {
-    final fileName =
-        'MudraManager_${DateFormat('yyyyMMdd_HHmmss').format(now)}.xlsx';
-    await saveExportedFile(
-      Uint8List.fromList(excelBytes),
-      fileName,
-      askUser: true,
-    );
-    await gamificationService?.track(GamificationEvent.reportExported);
-  }
 }
 
 Future<void> exportStatsToPdf(
@@ -206,233 +70,24 @@ Future<void> exportStatsToPdf(
   Map<String, double>? spendingByDay,
   GamificationService? gamificationService,
 }) async {
-  final ctxt = AppLocalizations.of(context)!;
-  final pdf = pw.Document(
-    title: 'Mudra Manager Financial Report',
-    author: 'Mudra Manager',
-    subject: 'Financial Statistics Report',
-    pageMode: PdfPageMode.outlines,
-  );
-  final pdfImageLine = pw.MemoryImage(lineImage);
-  final file = await rootBundle.load('assets/fonts/NotoSans-Regular.ttf');
-  final ttf = pw.Font.ttf(file.buffer.asByteData());
-  final theme = pw.ThemeData.withFont(base: ttf, bold: ttf);
-
-  pdf.addPage(
-    pw.MultiPage(
-      theme: theme,
-      pageFormat: PdfPageFormat.a4,
-      margin: const pw.EdgeInsets.all(32),
-      build: (context) => [
-        pw.Header(
-          level: 0,
-          child: pw.Row(
-            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-            children: [
-              pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: [
-                  pw.Text(
-                    'MUDRA MANAGER',
-                    style: pw.TextStyle(
-                      fontSize: 24,
-                      fontWeight: pw.FontWeight.bold,
-                    ),
-                  ),
-                  pw.Text(
-                    'Financial Report',
-                    style: const pw.TextStyle(
-                      fontSize: 14,
-                      color: PdfColors.grey700,
-                    ),
-                  ),
-                ],
-              ),
-              pw.Text(
-                DateFormat('MMM dd, yyyy').format(DateTime.now()),
-                style: const pw.TextStyle(
-                  fontSize: 10,
-                  color: PdfColors.grey600,
-                ),
-              ),
-            ],
-          ),
-        ),
-        pw.Divider(thickness: 2),
-        pw.SizedBox(height: 20),
-
-        pw.Text(
-          'FINANCIAL SUMMARY',
-          style: pw.TextStyle(
-            fontSize: 18,
-            fontWeight: pw.FontWeight.bold,
-            color: PdfColors.blue900,
-          ),
-        ),
-        pw.SizedBox(height: 10),
-        pw.Container(
-          padding: const pw.EdgeInsets.all(16),
-          decoration: const pw.BoxDecoration(
-            color: PdfColors.grey100,
-            borderRadius: pw.BorderRadius.all(pw.Radius.circular(8)),
-          ),
-          child: pw.Column(
-            children: [
-              pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                children: [
-                  pw.Text(
-                    'Total Income:',
-                    style: const pw.TextStyle(fontSize: 12),
-                  ),
-                  pw.Text(
-                    formatCurrency(stats.income),
-                    style: pw.TextStyle(
-                      fontSize: 12,
-                      fontWeight: pw.FontWeight.bold,
-                      color: PdfColors.green700,
-                    ),
-                  ),
-                ],
-              ),
-              pw.SizedBox(height: 8),
-              pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                children: [
-                  pw.Text(
-                    'Total Expense:',
-                    style: const pw.TextStyle(fontSize: 12),
-                  ),
-                  pw.Text(
-                    formatCurrency(stats.expense),
-                    style: pw.TextStyle(
-                      fontSize: 12,
-                      fontWeight: pw.FontWeight.bold,
-                      color: PdfColors.red700,
-                    ),
-                  ),
-                ],
-              ),
-              pw.SizedBox(height: 8),
-              pw.Divider(),
-              pw.SizedBox(height: 8),
-              pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                children: [
-                  pw.Text(
-                    'Net Savings:',
-                    style: pw.TextStyle(
-                      fontSize: 14,
-                      fontWeight: pw.FontWeight.bold,
-                    ),
-                  ),
-                  pw.Text(
-                    formatCurrency(stats.income - stats.expense),
-                    style: pw.TextStyle(
-                      fontSize: 14,
-                      fontWeight: pw.FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-              pw.SizedBox(height: 8),
-              pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                children: [
-                  pw.Text(
-                    'Savings Rate:',
-                    style: const pw.TextStyle(fontSize: 12),
-                  ),
-                  pw.Text(
-                    '${stats.savingsRate.toStringAsFixed(1)}%',
-                    style: pw.TextStyle(
-                      fontSize: 12,
-                      fontWeight: pw.FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        pw.SizedBox(height: 30),
-
-        pw.Text(
-          'INCOME & EXPENSE TRENDS',
-          style: pw.TextStyle(
-            fontSize: 18,
-            fontWeight: pw.FontWeight.bold,
-            color: PdfColors.blue900,
-          ),
-        ),
-        pw.SizedBox(height: 10),
-        pw.Container(
-          decoration: pw.BoxDecoration(
-            border: pw.Border.all(color: PdfColors.grey300),
-            borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
-          ),
-          child: pw.ClipRRect(
-            horizontalRadius: 8,
-            verticalRadius: 8,
-            child: pw.Image(pdfImageLine, height: 220),
-          ),
-        ),
-        pw.SizedBox(height: 30),
-
-        pw.Text(
-          'EXPENSE BREAKDOWN BY CATEGORY',
-          style: pw.TextStyle(
-            fontSize: 18,
-            fontWeight: pw.FontWeight.bold,
-            color: PdfColors.blue900,
-          ),
-        ),
-        pw.SizedBox(height: 10),
-        pw.TableHelper.fromTextArray(
-          headerStyle: pw.TextStyle(
-            fontWeight: pw.FontWeight.bold,
-            color: PdfColors.white,
-          ),
-          headerDecoration: const pw.BoxDecoration(color: PdfColors.blue900),
-          cellAlignment: pw.Alignment.centerLeft,
-          cellPadding: const pw.EdgeInsets.all(8),
-          border: pw.TableBorder.all(color: PdfColors.grey300),
-          oddRowDecoration: const pw.BoxDecoration(color: PdfColors.grey100),
-          data: [
-            ['Rank', 'Category', 'Amount', '%'],
-            ...(stats.categoryData.entries.toList()
-                  ..sort((a, b) => b.value.compareTo(a.value)))
-                .asMap()
-                .entries
-                .map((entry) {
-                  final percentage = stats.expense > 0
-                      ? (entry.value.value / stats.expense * 100)
-                            .toStringAsFixed(1)
-                      : '0.0';
-                  return [
-                    '${entry.key + 1}',
-                    stats.categoryDataMap[entry.value.key]?.name ?? 'Unknown',
-                    formatCurrency(entry.value.value),
-                    '$percentage%',
-                  ];
-                }),
-          ],
-        ),
-        pw.SizedBox(height: 20),
-        pw.Divider(),
-        pw.SizedBox(height: 10),
-        pw.Text(
-          'Generated by Mudra Manager on ${DateFormat('MMMM dd, yyyy \\\\\\\\at hh:mm a').format(DateTime.now())}',
-          style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey600),
-          textAlign: pw.TextAlign.center,
-        ),
-      ],
-    ),
+  final exportData = ExportData(
+    income: stats.income,
+    expense: stats.expense,
+    savingsRate: stats.savingsRate,
+    avgDailySpend: stats.avgDailySpend,
+    transactions: stats.recent,
+    categoryData: stats.categoryData,
+    categoryDataMap: stats.categoryDataMap,
+    startDate: DateTime.now().subtract(const Duration(days: 30)),
+    endDate: DateTime.now(),
   );
 
-  final pdfBytes = await pdf.save();
-  final fileName =
-      'MudraManager_${DateFormat('yyyyMMdd_HHmmss').format(DateTime.now())}.pdf';
+  final plugin = await ExportPluginManager.instance.getPlugin('PDF', 'Standard');
+  if (plugin == null) return;
+
+  final pdfBytes = await plugin.generateExport(exportData);
+  final fileName = 'MudraManager_${DateFormat('yyyyMMdd_HHmmss').format(DateTime.now())}.pdf';
+  
   await saveExportedFile(pdfBytes, fileName, askUser: true);
   await gamificationService?.track(GamificationEvent.reportExported);
 }

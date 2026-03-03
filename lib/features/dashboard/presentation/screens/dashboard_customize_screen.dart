@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mudra_manager/features/marketplace/services/marketplace_service.dart';
 
 class DashboardCustomizeScreen extends StatefulWidget {
   const DashboardCustomizeScreen({super.key});
@@ -68,6 +69,7 @@ class _DashboardCustomizeScreenState extends State<DashboardCustomizeScreen> {
         id: 'active_trip',
         title: 'Active Trip',
         icon: Icons.card_travel,
+        pluginId: 'com.mudra.travel_expenses',
       ),
       _DashboardCard(
         id: 'budget',
@@ -87,8 +89,17 @@ class _DashboardCustomizeScreenState extends State<DashboardCustomizeScreen> {
     final saved = prefs.getStringList('visible_dashboard_cards');
     final order = prefs.getStringList('dashboard_cards_order');
 
+    // Filter cards based on plugin status
+    final marketplace = MarketplaceService();
+    final filteredCards = <_DashboardCard>[];
+    for (final card in _allCards) {
+      if (card.pluginId == null || await marketplace.isPluginEnabled(card.pluginId!)) {
+        filteredCards.add(card);
+      }
+    }
+
     if (order != null) {
-      _allCards.sort((a, b) {
+      filteredCards.sort((a, b) {
         final aIndex = order.indexOf(a.id);
         final bIndex = order.indexOf(b.id);
         if (aIndex == -1) return 1;
@@ -98,6 +109,7 @@ class _DashboardCustomizeScreenState extends State<DashboardCustomizeScreen> {
     }
 
     setState(() {
+      _allCards = filteredCards;
       _visibleCards = saved ?? _allCards.map((e) => e.id).toList();
       _isLoading = false;
     });
@@ -218,10 +230,12 @@ class _DashboardCard {
   final String id;
   final String title;
   final IconData icon;
+  final String? pluginId;
 
   _DashboardCard({
     required this.id,
     required this.title,
     required this.icon,
+    this.pluginId,
   });
 }

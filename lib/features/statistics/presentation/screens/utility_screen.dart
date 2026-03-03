@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mudra_manager/shared/widgets/responsive_helper.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
-
+import 'package:mudra_manager/features/marketplace/services/marketplace_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class _AnimatedCard extends StatefulWidget {
@@ -79,6 +79,7 @@ class UtilityScreenState extends State<UtilityScreen> {
       subtitle: 'Group expenses & settlements',
       icon: Icons.card_travel,
       route: '/trips',
+      pluginId: 'com.mudra.split_bills',
     ),
     _UtilityItem(
       id: 'monthly_comparison',
@@ -121,7 +122,18 @@ class UtilityScreenState extends State<UtilityScreen> {
     final saved = prefs.getStringList('visible_utilities');
     final seen = prefs.getStringList('seen_utilities') ?? [];
     
+    // Filter utilities based on plugin status
+    final marketplace = MarketplaceService();
+    final filteredUtilities = <_UtilityItem>[];
+    for (final utility in _allUtilities) {
+      if (utility.pluginId == null || await marketplace.isPluginEnabled(utility.pluginId!)) {
+        filteredUtilities.add(utility);
+      }
+    }
+    
     setState(() {
+      _allUtilities.clear();
+      _allUtilities.addAll(filteredUtilities);
       _visibleUtilities = saved ?? ['monthly_comparison', 'recurring'];
       _seenUtilities = seen;
       _isLoading = false;
@@ -363,12 +375,12 @@ class UtilityScreenState extends State<UtilityScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 const SizedBox(height: 16),
-                SkeletonLoader(
+                const SkeletonLoader(
                   width: double.infinity,
                   height: 20,
                 ),
                 const SizedBox(height: 8),
-                SkeletonLoader(
+                const SkeletonLoader(
                   width: 150,
                   height: 14,
                 ),
@@ -437,6 +449,7 @@ class _UtilityItem {
   final String subtitle;
   final IconData icon;
   final String route;
+  final String? pluginId;
 
   _UtilityItem({
     required this.id,
@@ -444,6 +457,7 @@ class _UtilityItem {
     required this.subtitle,
     required this.icon,
     required this.route,
+    this.pluginId,
   });
 }
 

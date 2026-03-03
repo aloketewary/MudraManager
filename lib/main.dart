@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/services/plugin_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -44,6 +45,9 @@ void main() async {
   SharedPrefsUtil.init(sharedPrefs);
 
   log.i('App starting...');
+
+  // Initialize plugin system
+  await PluginService().initialize();
 
   // Initialize critical services first
   await NotificationService.initialize();

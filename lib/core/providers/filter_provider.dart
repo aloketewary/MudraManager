@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/db/filter_type.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 
-final filterProvider = StateProvider<FilterType>((ref) => FilterType.day);
+final filterProvider = StateProvider.autoDispose<FilterType>((ref) => FilterType.day);
 
 // filtered_transactions_provider.dart
-final filteredDashboardTransactionsProvider = FutureProvider<Map<String, double>>((ref) async {
+final filteredDashboardTransactionsProvider = FutureProvider.autoDispose<Map<String, double>>((ref) async {
   final filter = ref.watch(filterProvider);
   final txnService = ref.watch(transactionProvider);
   final allTxns = await txnService.getAllForDashBoard();
@@ -39,7 +39,7 @@ final filteredDashboardTransactionsProvider = FutureProvider<Map<String, double>
 });
 
 // Custom date range provider
-final customDateRangeTransactionsProvider = FutureProvider.family<Map<String, double>, String>((ref, dateKey) async {
+final customDateRangeTransactionsProvider = FutureProvider.autoDispose.family<Map<String, double>, String>((ref, dateKey) async {
   final parts = dateKey.split('_');
   if (parts.length != 2) return {'income': 0, 'expense': 0};
   
@@ -72,7 +72,7 @@ final customDateRangeTransactionsProvider = FutureProvider.family<Map<String, do
 });
 
 // Period-based provider for cash flow
-final periodBasedTransactionsProvider = FutureProvider.family<Map<String, double>, String>((ref, period) async {
+final periodBasedTransactionsProvider = FutureProvider.autoDispose.family<Map<String, double>, String>((ref, period) async {
   final txnService = ref.watch(transactionProvider);
   final allTxns = await txnService.getAllForDashBoard();
   final now = DateTime.now();
@@ -103,7 +103,7 @@ final periodBasedTransactionsProvider = FutureProvider.family<Map<String, double
 });
 
 // Previous period provider for trend comparison
-final previousPeriodTransactionsProvider = FutureProvider.family<Map<String, double>, String>((ref, period) async {
+final previousPeriodTransactionsProvider = FutureProvider.autoDispose.family<Map<String, double>, String>((ref, period) async {
   final txnService = ref.watch(transactionProvider);
   final allTxns = await txnService.getAllForDashBoard();
   final now = DateTime.now();

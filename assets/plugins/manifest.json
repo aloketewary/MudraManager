@@ -1,0 +1,75 @@
+[
+  {
+    "id": "com.mudra.sms_alert",
+    "name": "SMS Alert",
+    "version": "1.0.0",
+    "description": "Get notified when money is credited",
+    "author": "Mudra Team",
+    "iconUrl": "assets/plugins/sms_alert/icon.png",
+    "downloads": 0,
+    "rating": 5.0,
+    "packageUrl": "bundled",
+    "group": "notification",
+    "enabled": true
+  },
+  {
+    "id": "com.mudra.budget_guard",
+    "name": "Budget Guard",
+    "version": "1.0.0",
+    "description": "Alert when budget is exceeded",
+    "author": "Mudra Team",
+    "iconUrl": "assets/plugins/budget_guard/icon.png",
+    "downloads": 0,
+    "rating": 5.0,
+    "packageUrl": "bundled",
+    "group": "budget",
+    "enabled": true
+  },
+  {
+    "id": "com.mudra.goal_tracker",
+    "name": "Goal Tracker",
+    "version": "1.0.0",
+    "description": "Track your financial goals",
+    "author": "Mudra Team",
+    "iconUrl": "assets/plugins/goal_tracker/icon.png",
+    "downloads": 0,
+    "rating": 5.0,
+    "packageUrl": "bundled",
+    "group": "goals",
+    "enabled": true
+  },
+  {
+    "id": "com.mudra.credit_card_reminder",
+    "name": "Credit Card Reminder",
+    "version": "1.0.0",
+    "description": "Get notified before credit card bill due dates",
+    "author": "Mudra Team",
+    "iconUrl": "assets/plugins/credit_card/icon.png",
+    "downloads": 0,
+    "rating": 5.0,
+    "packageUrl": "bundled",
+    "group": "notification",
+    "enabled": true,
+    "configOptions": [
+      {
+        "key": "reminder_days",
+        "label": "Remind me before (days)",
+        "type": "number",
+        "defaultValue": 1
+      }
+    ]
+  },
+  {
+    "id": "com.mudra.backup_sync",
+    "name": "Backup & Sync",
+    "version": "1.0.0",
+    "description": "Backup data locally and share to cloud",
+    "author": "Mudra Team",
+    "iconUrl": "assets/icons/100/download.png",
+    "downloads": 0,
+    "rating": 5.0,
+    "packageUrl": "bundled",
+    "group": "utility",
+    "enabled": true
+  }
+]

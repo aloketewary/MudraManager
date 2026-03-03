@@ -6,6 +6,9 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/utils/export_excel_pdf.dart';
+import 'package:mudra_manager/features/statistics/presentation/screens/export_options_screen.dart';
+import 'package:mudra_manager/plugins/export_plugin.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mudra_manager/features/analytics/data/analytics_provider.dart';
 import 'package:mudra_manager/features/dashboard/data/status_data_provider.dart';
 import 'dart:ui' as ui;
@@ -1414,31 +1417,22 @@ class StatisticsScreenState extends ConsumerState<StatisticsScreen> {
         : ref.read(statsProvider(_period));
 
     stats.whenData((data) {
-      final ctxt = AppLocalizations.of(context)!;
-      showModalBottomSheet(
+      showDialog(
         context: context,
-        builder: (_) => Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.picture_as_pdf),
-              title: Text(ctxt.statistics_exportToPdfButtonText),
-              onTap: () async {
-                HapticFeedback.mediumImpact();
-                Navigator.pop(context);
-                await _exportToPdf(data);
-              },
+        builder: (_) => Dialog.fullscreen(
+          child: ExportOptionsScreen(
+            exportData: ExportData(
+              income: data.income,
+              expense: data.expense,
+              savingsRate: data.savingsRate,
+              avgDailySpend: data.avgDailySpend,
+              transactions: data.recent,
+              categoryData: data.categoryData,
+              categoryDataMap: data.categoryDataMap,
+              startDate: _customStart ?? DateTime.now().subtract(const Duration(days: 30)),
+              endDate: _customEnd ?? DateTime.now(),
             ),
-            ListTile(
-              leading: const Icon(Icons.table_chart),
-              title: Text(ctxt.statistics_exportToExcelButtonText),
-              onTap: () async {
-                HapticFeedback.mediumImpact();
-                Navigator.pop(context);
-                await exportStatsToExcelMethod(data);
-              },
-            ),
-          ],
+          ),
         ),
       );
     });

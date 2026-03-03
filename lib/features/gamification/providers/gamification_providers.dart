@@ -8,12 +8,12 @@ final gamificationServiceProvider = Provider<GamificationService?>((ref) {
   return asyncValue.valueOrNull;
 });
 
-final achievementsProvider = StreamProvider<List<Achievement>>((ref) async* {
+final achievementsProvider = StreamProvider.autoDispose<List<Achievement>>((ref) async* {
   final service = await ref.watch(gamificationServiceInitProvider.future);
   yield* service.watchAchievements();
 });
 
-final streaksProvider = StreamProvider<List<Streak>>((ref) async* {
+final streaksProvider = StreamProvider.autoDispose<List<Streak>>((ref) async* {
   final service = await ref.watch(gamificationServiceInitProvider.future);
   yield* service.watchStreaks();
 });
@@ -26,14 +26,14 @@ final dailyStreakProvider = Provider<Streak?>((ref) {
   );
 });
 
-final userLevelProvider = StreamProvider<UserLevel?>((ref) async* {
+final userLevelProvider = StreamProvider.autoDispose<UserLevel?>((ref) async* {
   final service = await ref.watch(gamificationServiceInitProvider.future);
   yield* service.watchUserLevel();
 });
 
-final dailyCheckInProvider = FutureProvider<String?>((ref) async {
+final dailyCheckInProvider = FutureProvider.autoDispose<String?>((ref) async {
   final service = await ref.watch(gamificationServiceInitProvider.future);
   return await service.updateDailyCheckIn();
 });
 
-final lastSeenLevelProvider = StateProvider<int?>((ref) => null);
+final lastSeenLevelProvider = StateProvider.autoDispose<int?>((ref) => null);

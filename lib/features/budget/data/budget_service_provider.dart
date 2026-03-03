@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/services/plugin_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
@@ -18,13 +19,13 @@ final budgetServiceProvider = Provider<BudgetService>((ref) {
   return BudgetService(isarService, log, gamificationService);
 });
 
-final budgetStreamProvider = StreamProvider<List<Budget>>((ref) {
+final budgetStreamProvider = StreamProvider.autoDispose<List<Budget>>((ref) {
   final service = ref.watch(budgetServiceProvider);
   return service.watchAllBudgets();
 });
 
 final budgetWithProgressProvider =
-    StreamProvider<List<(Budget, double, DateTime, DateTime)>>((ref) async* {
+    StreamProvider.autoDispose<List<(Budget, double, DateTime, DateTime)>>((ref) async* {
       final budgetService = ref.watch(budgetServiceProvider);
       final isar = await ref.read(isarServiceProvider).getInstance();
 
@@ -142,6 +143,11 @@ class BudgetService {
               spent: spent,
             ),
           );
+        }
+
+        // Emit budget event if exceeded
+        if (totalSpent > budget.amount) {
+          PluginService().emitBudget(totalSpent, budget.amount);
         }
 
         list.add(

@@ -416,30 +416,8 @@ class _AddEditTransactionScreenState
           await isar.smsActivitys.put(widget.smsActivity!);
         });
 
-        // Learn keywords from SMS
-        final bodyLower = widget.smsActivity!.body.toLowerCase();
-        final words = bodyLower.split(RegExp(r'\s+'));
-        final potentialKeywords = words
-            .where((w) =>
-                w.length >= 3 &&
-                w.length <= 15 &&
-                RegExp(r'^[a-z]+$').hasMatch(w))
-            .toList();
-
-        if (potentialKeywords.isNotEmpty) {
-          final existingKeywords = _selectedCategory!.keywords ?? [];
-          final newKeywords = potentialKeywords
-              .where((k) => !existingKeywords.contains(k))
-              .take(3)
-              .toList();
-
-          if (newKeywords.isNotEmpty) {
-            _selectedCategory!.keywords = [...existingKeywords, ...newKeywords];
-            await isar.writeTxn(() async {
-              await isar.categorys.put(_selectedCategory!);
-            });
-          }
-        }
+        // Learn keywords from SMS - DISABLED to prevent unwanted keywords
+        // Use default keywords from CategorySeeder instead
 
         // Detect recurring patterns
         await RecurringDetectorService.detectAndTagRecurring(txn);

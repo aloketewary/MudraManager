@@ -43,6 +43,7 @@ import 'package:mudra_manager/features/trip/presentation/screens/trip_detail_scr
 import 'package:mudra_manager/features/trip/presentation/screens/trips_screen.dart';
 import 'package:mudra_manager/shared/screens/notification_page_screen.dart';
 import 'package:mudra_manager/features/gamification/screens/achievements_screen.dart';
+import 'package:mudra_manager/features/marketplace/screens/plugin_groups_screen.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -306,6 +307,10 @@ class AppRouter {
           GoRoute(
             path: '/achievements',
             builder: (context, state) => const AchievementsScreen(),
+          ),
+          GoRoute(
+            path: '/plugins',
+            builder: (context, state) => const PluginGroupsScreen(),
           ),
         ],
       ),

@@ -1,0 +1,88 @@
+{
+  "sms_parsers": [
+    {
+      "id": "hdfc_sms_parser",
+      "name": "HDFC Bank SMS Parser",
+      "version": "1.0.0",
+      "bank": "HDFC",
+      "enabled": true
+    },
+    {
+      "id": "icici_sms_parser",
+      "name": "ICICI Bank SMS Parser",
+      "version": "1.0.0",
+      "bank": "ICICI",
+      "enabled": true
+    },
+    {
+      "id": "sbi_sms_parser",
+      "name": "SBI SMS Parser",
+      "version": "1.0.0",
+      "bank": "SBI",
+      "enabled": true
+    },
+    {
+      "id": "axis_sms_parser",
+      "name": "Axis Bank SMS Parser",
+      "version": "1.0.0",
+      "bank": "AXIS",
+      "enabled": true
+    },
+    {
+      "id": "kotak_sms_parser",
+      "name": "Kotak Bank SMS Parser",
+      "version": "1.0.0",
+      "bank": "KOTAK",
+      "enabled": true
+    },
+    {
+      "id": "paytm_sms_parser",
+      "name": "Paytm SMS Parser",
+      "version": "1.0.0",
+      "bank": "PAYTM",
+      "enabled": true
+    },
+    {
+      "id": "phonepe_sms_parser",
+      "name": "PhonePe SMS Parser",
+      "version": "1.0.0",
+      "bank": "PHONEPE",
+      "enabled": true
+    },
+    {
+      "id": "gpay_sms_parser",
+      "name": "Google Pay SMS Parser",
+      "version": "1.0.0",
+      "bank": "GPAY",
+      "enabled": true
+    },
+    {
+      "id": "yesbank_sms_parser",
+      "name": "Yes Bank SMS Parser",
+      "version": "1.0.0",
+      "bank": "YES",
+      "enabled": true
+    },
+    {
+      "id": "indusind_sms_parser",
+      "name": "IndusInd Bank SMS Parser",
+      "version": "1.0.0",
+      "bank": "INDUSIND",
+      "enabled": true
+    },
+    {
+      "id": "idfc_sms_parser",
+      "name": "IDFC Bank SMS Parser",
+      "version": "1.0.0",
+      "bank": "IDFC",
+      "enabled": true
+    },
+    {
+      "id": "aubank_sms_parser",
+      "name": "AU Bank SMS Parser",
+      "version": "1.0.0",
+      "bank": "AU",
+      "enabled": true
+    }
+  ]
+}

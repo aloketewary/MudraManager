@@ -7,11 +7,11 @@ import 'package:mudra_manager/core/db/models/sms_activity.dart';
 import 'package:mudra_manager/features/sms/data/sms_activity_service.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 
-final smsActivityProvider = FutureProvider<List<SmsActivity>>((ref) async {
+final smsActivityProvider = FutureProvider.autoDispose<List<SmsActivity>>((ref) async {
   return await SmsActivityService.instance.getAllActivities();
 });
 
-final pendingCountProvider = FutureProvider<int>((ref) async {
+final pendingCountProvider = FutureProvider.autoDispose<int>((ref) async {
   return await SmsActivityService.instance.getPendingCount();
 });
 

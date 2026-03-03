@@ -6,6 +6,7 @@ import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/theme/theme_provider.dart';
 import 'package:mudra_manager/shared/widgets/adaptive_text.dart';
 import 'package:mudra_manager/features/profile/presentation/widgets/guest_mode_toggle.dart';
+import 'package:mudra_manager/features/marketplace/services/marketplace_service.dart';
 
 class AppSettingsPage extends ConsumerWidget {
   const AppSettingsPage({super.key});
@@ -33,6 +34,19 @@ class AppSettingsPage extends ConsumerWidget {
             context,
             color,
             textTheme,
+            Icons.extension,
+            'Plugins',
+            'Manage plugins by category',
+            () {
+              HapticFeedback.mediumImpact();
+              context.push('/plugins');
+            },
+          ),
+          const SizedBox(height: 8),
+          _buildSettingCard(
+            context,
+            color,
+            textTheme,
             Icons.dashboard_customize,
             'Customize Dashboard',
             'Show/hide and reorder cards',
@@ -55,7 +69,14 @@ class AppSettingsPage extends ConsumerWidget {
             },
           ),
           const SizedBox(height: 8),
-          const GuestModeToggle(),
+          FutureBuilder<bool>(
+            future: MarketplaceService().isPluginEnabled('com.mudra.guest_mode'),
+            builder: (context, snapshot) {
+              final isPluginEnabled = snapshot.data ?? false;
+              if (!isPluginEnabled) return const SizedBox.shrink();
+              return const GuestModeToggle();
+            },
+          ),
           _buildSettingCard(
             context,
             color,

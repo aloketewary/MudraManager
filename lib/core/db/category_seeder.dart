@@ -6,17 +6,23 @@ class CategorySeeder {
     final categories = await isar.categorys.where().findAll();
     
     final keywordMap = {
-      'Food & Dining': ['swiggy', 'zomato', 'restaurant', 'food', 'dining', 'cafe', 'pizza', 'burger'],
-      'Groceries': ['bigbasket', 'blinkit', 'zepto', 'grocery', 'supermarket', 'dmart'],
-      'Transportation': ['uber', 'ola', 'rapido', 'taxi', 'cab', 'metro', 'bus', 'petrol', 'fuel'],
-      'Shopping': ['amazon', 'flipkart', 'myntra', 'shopping', 'mall', 'store'],
-      'Entertainment': ['netflix', 'prime', 'hotstar', 'spotify', 'bookmyshow', 'movie', 'cinema'],
-      'Utilities': ['electricity', 'water', 'gas', 'internet', 'broadband', 'mobile', 'recharge'],
-      'Healthcare': ['hospital', 'doctor', 'pharmacy', 'medicine', 'clinic', 'apollo', 'medplus'],
-      'Education': ['school', 'college', 'university', 'course', 'tuition', 'books'],
-      'Travel': ['flight', 'hotel', 'booking', 'makemytrip', 'goibibo', 'airbnb'],
-      'Salary': ['salary', 'wages', 'income', 'payment received'],
-      'Investment': ['mutual fund', 'stock', 'sip', 'dividend', 'interest'],
+      'Food & Dining': ['swiggy', 'zomato', 'restaurant', 'food', 'dining', 'cafe', 'pizza', 'burger', 'kfc', 'mcdonalds', 'dominos', 'subway', 'starbucks', 'ccd', 'dunkin', 'bakery', 'canteen', 'mess', 'tiffin', 'biryani', 'chinese', 'italian', 'fastfood'],
+      'Groceries': ['bigbasket', 'blinkit', 'zepto', 'grocery', 'supermarket', 'dmart', 'reliance', 'fresh', 'more', 'easyday', 'spencer', 'nature', 'basket', 'vegetables', 'fruits', 'milk', 'bread', 'rice', 'dal', 'oil', 'sugar', 'flour'],
+      'Transportation': ['uber', 'ola', 'rapido', 'taxi', 'cab', 'metro', 'bus', 'petrol', 'fuel', 'auto', 'rickshaw', 'train', 'flight', 'parking', 'toll', 'diesel', 'cng', 'bike', 'car', 'transport', 'travel', 'commute'],
+      'Shopping': ['amazon', 'flipkart', 'myntra', 'shopping', 'mall', 'store', 'ajio', 'nykaa', 'jabong', 'snapdeal', 'paytm mall', 'clothes', 'shoes', 'electronics', 'mobile', 'laptop', 'fashion', 'accessories', 'jewellery'],
+      'Entertainment': ['netflix', 'prime', 'hotstar', 'spotify', 'bookmyshow', 'movie', 'cinema', 'youtube', 'disney', 'zee5', 'sonyliv', 'voot', 'jiocinema', 'games', 'concert', 'show', 'theatre', 'music', 'streaming'],
+      'Utilities': ['electricity', 'water', 'gas', 'internet', 'broadband', 'mobile', 'recharge', 'airtel', 'jio', 'vi', 'bsnl', 'wifi', 'postpaid', 'prepaid', 'bill', 'maintenance', 'society', 'apartment'],
+      'Healthcare': ['hospital', 'doctor', 'pharmacy', 'medicine', 'clinic', 'apollo', 'medplus', 'netmeds', '1mg', 'pharmeasy', 'dental', 'eye', 'checkup', 'consultation', 'lab', 'test', 'surgery', 'treatment'],
+      'Education': ['school', 'college', 'university', 'course', 'tuition', 'books', 'fees', 'exam', 'coaching', 'online', 'udemy', 'coursera', 'byju', 'unacademy', 'vedantu', 'library', 'stationery'],
+      'Travel': ['flight', 'hotel', 'booking', 'makemytrip', 'goibibo', 'airbnb', 'oyo', 'treebo', 'fab', 'yatra', 'cleartrip', 'ixigo', 'vacation', 'trip', 'tour', 'visa', 'passport'],
+      'Salary': ['salary', 'wages', 'income', 'payment received', 'bonus', 'incentive', 'commission', 'freelance', 'consulting', 'part time', 'overtime', 'allowance'],
+      'Investment': ['mutual fund', 'stock', 'sip', 'dividend', 'interest', 'zerodha', 'groww', 'upstox', 'angel', 'icicidirect', 'hdfc sec', 'kotak sec', 'shares', 'equity', 'debt', 'gold', 'fd', 'rd'],
+      'Insurance': ['lic', 'hdfc life', 'icici pru', 'sbi life', 'bajaj', 'star health', 'care', 'religare', 'premium', 'policy', 'claim', 'health', 'life', 'motor', 'term'],
+      'Personal Care': ['salon', 'spa', 'parlour', 'haircut', 'facial', 'massage', 'gym', 'fitness', 'yoga', 'beauty', 'cosmetics', 'skincare', 'grooming'],
+      'Home & Garden': ['furniture', 'decor', 'appliances', 'repair', 'maintenance', 'cleaning', 'gardening', 'plants', 'tools', 'paint', 'renovation', 'interior'],
+      'Gifts & Donations': ['gift', 'present', 'donation', 'charity', 'temple', 'church', 'mosque', 'gurudwara', 'festival', 'birthday', 'anniversary', 'wedding'],
+      'Business': ['office', 'supplies', 'equipment', 'software', 'license', 'subscription', 'marketing', 'advertising', 'printing', 'courier', 'legal', 'accounting'],
+      'Miscellaneous': ['other', 'misc', 'general', 'cash', 'atm', 'withdrawal', 'transfer', 'fees', 'charges', 'penalty', 'fine', 'tax', 'gst']
     };
     
     await isar.writeTxn(() async {

@@ -64,7 +64,7 @@ class IsarService {
     return _instance!;
   }
 
-  Future<Isar> getInstance() async {
+ Future<Isar> getInstance() async {
     return _instance ?? await initIsar();
   }
 }

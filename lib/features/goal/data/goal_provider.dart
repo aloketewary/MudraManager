@@ -14,7 +14,7 @@ final goalServiceProvider = Provider<GoalService>((ref) {
   return GoalService(isarService, gamificationService);
 });
 
-final goalsProvider = StreamProvider<List<Goal>>((ref) {
+final goalsProvider = StreamProvider.autoDispose<List<Goal>>((ref) {
   final service = ref.watch(goalServiceProvider);
   return service.watchAll();
 });

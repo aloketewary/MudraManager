@@ -91,7 +91,7 @@ class SmsActivityService {
     final categories = await isar.categorys.where().findAll();
 
     // Use bank parser for better extraction
-    final parsed = BankSmsParser.parse(sender, body);
+    final parsed = await BankSmsParser.parse(sender, body);
 
     final activity = SmsActivity()
       ..sender = sender

@@ -12,6 +12,11 @@ import 'package:mudra_manager/features/category/data/category_provider.dart';
 import 'package:mudra_manager/features/profile/data/user_profile_provider.dart';
 import 'package:mudra_manager/features/gamification/widgets/badge_showcase.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
+import 'package:mudra_manager/features/marketplace/services/marketplace_service.dart';
+
+final lowBalancePluginProvider = FutureProvider.autoDispose((ref) async {
+  return await MarketplaceService().isPluginEnabled('com.mudra.low_balance_alert');
+});
 
 class _AnimatedCard extends StatefulWidget {
   final Widget child;
@@ -33,7 +38,7 @@ class _AnimatedCardState extends State<_AnimatedCard>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 600),
+      duration: const Duration(milliseconds: 300),
       vsync: this,
     );
 
@@ -43,11 +48,11 @@ class _AnimatedCardState extends State<_AnimatedCard>
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
     _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.1),
+      begin: const Offset(0, 0.05),
       end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
-    Future.delayed(Duration(milliseconds: widget.delay), () {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _controller.forward();
     });
   }
@@ -328,12 +333,10 @@ class ProfileScreen extends ConsumerWidget {
                 const _AnimatedCard(delay: 100, child: BadgeShowcase()),
                 const SizedBox(height: 20),
                 _AnimatedCard(
-                  delay: 200,
                   child: _buildSectionHeader(context, 'Management'),
                 ),
                 const SizedBox(height: 12),
                 _AnimatedCard(
-                  delay: 250,
                   child: _buildSettingCard(
                     context,
                     Icons.account_balance_wallet_outlined,
@@ -347,7 +350,6 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 12),
                 _AnimatedCard(
-                  delay: 300,
                   child: _buildSettingCard(
                     context,
                     Icons.category_outlined,
@@ -365,22 +367,36 @@ class ProfileScreen extends ConsumerWidget {
                   child: _buildSectionHeader(context, 'Account & Data'),
                 ),
                 const SizedBox(height: 12),
-                _AnimatedCard(
-                  delay: 400,
-                  child: _buildSettingCard(
-                    context,
-                    Icons.account_balance_wallet_outlined,
-                    'Low Balance Threshold',
-                    '₹${SharedPrefsUtil.instance.getLowBalanceThreshold().toStringAsFixed(0)}',
-                    () => _showThresholdBottomSheet(
-                      context,
-                      ref,
-                      color,
-                      textTheme,
-                    ),
-                  ),
+                FutureBuilder<bool>(
+                  future: MarketplaceService().isPluginEnabled('com.mudra.low_balance_alert'),
+                  builder: (context, snapshot) {
+                    final isPluginEnabled = snapshot.data ?? false;
+                    if (!isPluginEnabled) return const SizedBox.shrink();
+                    
+                    return _AnimatedCard(
+                      delay: 400,
+                      child: _buildSettingCard(
+                        context,
+                        Icons.account_balance_wallet_outlined,
+                        'Low Balance Threshold',
+                        '₹${SharedPrefsUtil.instance.getLowBalanceThreshold().toStringAsFixed(0)}',
+                        () => _showThresholdBottomSheet(
+                          context,
+                          ref,
+                          color,
+                          textTheme,
+                        ),
+                      ),
+                    );
+                  },
                 ),
-                const SizedBox(height: 12),
+                FutureBuilder<bool>(
+                  future: MarketplaceService().isPluginEnabled('com.mudra.low_balance_alert'),
+                  builder: (context, snapshot) {
+                    final isPluginEnabled = snapshot.data ?? false;
+                    return isPluginEnabled ? const SizedBox(height: 12) : const SizedBox.shrink();
+                  },
+                ),
                 _AnimatedCard(
                   delay: 450,
                   child: _buildSettingCard(
@@ -457,12 +473,12 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 24),
                 _AnimatedCard(
-                  delay: 800,
+                  delay: 750,
                   child: _buildSectionHeader(context, 'About'),
                 ),
                 const SizedBox(height: 12),
                 _AnimatedCard(
-                  delay: 850,
+                  delay: 800,
                   child: _buildSettingCard(
                     context,
                     Icons.help_outline,
@@ -476,7 +492,7 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 12),
                 _AnimatedCard(
-                  delay: 900,
+                  delay: 850,
                   child: _buildSettingCard(
                     context,
                     Icons.info_outline,
@@ -490,12 +506,12 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 24),
                 _AnimatedCard(
-                  delay: 950,
+                  delay: 900,
                   child: _buildSectionHeader(context, 'Danger Zone'),
                 ),
                 const SizedBox(height: 12),
                 _AnimatedCard(
-                  delay: 1000,
+                  delay: 950,
                   child: _buildSettingCard(
                     context,
                     Icons.logout,

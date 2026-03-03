@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/services/plugin_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
@@ -412,6 +413,23 @@ class TransactionService {
     });
     log.i('Transaction saved successfully with ID: ${txn.id}');
     
+    // Emit transaction event to plugins
+    if (!txn.isTransfer) {
+      if (txn.isExpense) {
+        PluginService().emitExpense(
+          txn.category.value?.name ?? 'Uncategorized',
+          txn.amount,
+          txn.date,
+        );
+      } else {
+        PluginService().emitIncome(
+          txn.category.value?.name ?? 'Income',
+          txn.amount,
+          txn.date,
+        );
+      }
+    }
+    
     // Verify the transaction was saved
     final saved = await isar.transactions.get(txn.id);
     if (saved != null) {
@@ -550,6 +568,14 @@ class TransactionService {
     
     // Track gamification
     await gamificationService.track(GamificationEvent.transferCompleted);
+    
+    // Emit transfer event to plugins
+    PluginService().emitTransfer(
+      from.name,
+      to.name,
+      amount,
+      date,
+    );
   }
 
   Future<List<Transaction>> getByDateRange(DateTime start, DateTime end) async {

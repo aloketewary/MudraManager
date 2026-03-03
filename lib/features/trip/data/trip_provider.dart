@@ -11,22 +11,22 @@ final tripServiceProvider = Provider<TripService>((ref) {
   return TripService(isarService, gamificationService);
 });
 
-final allTripsProvider = FutureProvider<List<Trip>>((ref) async {
+final allTripsProvider = FutureProvider.autoDispose<List<Trip>>((ref) async {
   final service = ref.watch(tripServiceProvider);
   return await service.getAllTrips();
 });
 
-final activeTripsProvider = FutureProvider<List<Trip>>((ref) async {
+final activeTripsProvider = FutureProvider.autoDispose<List<Trip>>((ref) async {
   final service = ref.watch(tripServiceProvider);
   return await service.getActiveTrips();
 });
 
-final tripByIdProvider = FutureProvider.family<Trip?, int>((ref, id) async {
+final tripByIdProvider = FutureProvider.autoDispose.family<Trip?, int>((ref, id) async {
   final service = ref.watch(tripServiceProvider);
   return await service.getTripById(id);
 });
 
-final tripSettlementsProvider = FutureProvider.family<Map<String, Map<String, double>>, int>((ref, tripId) async {
+final tripSettlementsProvider = FutureProvider.autoDispose.family<Map<String, Map<String, double>>, int>((ref, tripId) async {
   final service = ref.watch(tripServiceProvider);
   return await service.calculateSettlements(tripId);
 });
