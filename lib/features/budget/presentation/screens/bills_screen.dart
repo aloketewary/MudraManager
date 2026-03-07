@@ -10,6 +10,7 @@ import 'package:mudra_manager/features/budget/data/bill_service.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
+import 'package:mudra_manager/core/widgets/skeleton_loader.dart';
 
 final billsProvider = StreamProvider<List<RecurringBill>>((ref) {
   final isar = Isar.getInstance()!;
@@ -108,7 +109,11 @@ class BillsScreen extends ConsumerWidget {
             },
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: 4,
+          itemBuilder: (context, index) => const SkeletonListTile(),
+        ),
         error: (e, _) => Center(child: Text('Error: $e')),
       ),
     );

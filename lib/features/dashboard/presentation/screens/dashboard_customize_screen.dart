@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mudra_manager/features/marketplace/services/marketplace_service.dart';
 
@@ -28,58 +29,58 @@ class _DashboardCustomizeScreenState extends State<DashboardCustomizeScreen> {
       _DashboardCard(
         id: 'accounts',
         title: 'Account Balances',
-        icon: Icons.account_balance_wallet,
+        icon: LucideIcons.wallet,
       ),
       _DashboardCard(
         id: 'action_buttons',
         title: 'Quick Actions',
-        icon: Icons.touch_app,
+        icon: LucideIcons.touchpad,
       ),
       _DashboardCard(
         id: 'spending_personality',
         title: 'Spending Personality',
-        icon: Icons.psychology,
+        icon: LucideIcons.brain,
       ),
       _DashboardCard(
         id: 'cash_flow',
         title: 'Cash Flow',
-        icon: Icons.trending_up,
+        icon: LucideIcons.trendingUp,
       ),
       _DashboardCard(
         id: 'financial_health',
         title: 'Financial Health',
-        icon: Icons.favorite,
+        icon: LucideIcons.heart,
       ),
       _DashboardCard(
         id: 'net_worth',
         title: 'Net Worth',
-        icon: Icons.account_balance,
+        icon: LucideIcons.wallet,
       ),
       _DashboardCard(
         id: 'spending_prediction',
         title: 'Spending Prediction',
-        icon: Icons.insights,
+        icon: LucideIcons.chartSpline,
       ),
       _DashboardCard(
         id: 'recurring_expenses',
         title: 'Fixed Expenses',
-        icon: Icons.repeat,
+        icon: LucideIcons.repeat,
       ),
       _DashboardCard(
         id: 'active_trip',
         title: 'Active Trip',
-        icon: Icons.card_travel,
+        icon: LucideIcons.plane,
         pluginId: 'com.mudra.travel_expenses',
       ),
       _DashboardCard(
         id: 'budget',
         title: 'Budget Overview',
-        icon: Icons.pie_chart_outline,
+        icon: LucideIcons.chartPie,
       ),
       _DashboardCard(
         id: 'goal',
         title: 'Goals Progress',
-        icon: Icons.emoji_flags_outlined,
+        icon: LucideIcons.goal,
       ),
     ];
   }

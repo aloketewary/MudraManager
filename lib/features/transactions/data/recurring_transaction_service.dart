@@ -8,7 +8,6 @@ import 'package:mudra_manager/core/logging/logger_provider.dart';
 import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
 import 'package:mudra_manager/features/gamification/services/gamification_service.dart';
 
-
 class RecurringTransactionService {
   final IsarService isarService;
   final GamificationService? gamificationService;
@@ -21,34 +20,72 @@ class RecurringTransactionService {
   Future<void> processRecurringTransactions() async {
     final isar = await isarService.getInstance();
     final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
 
     final dueRecurring = await isar.recurringTransactions
         .filter()
         .isActiveEqualTo(true)
-        .nextDueDateLessThan(now.add(const Duration(days: 1)))
         .findAll();
 
-    log.i('Processing ${dueRecurring.length} recurring transactions');
+    log.i('Checking ${dueRecurring.length} recurring transactions');
 
+    int processed = 0;
+    int skipped = 0;
     for (final recurring in dueRecurring) {
       await recurring.category.load();
       await recurring.account.load();
 
-      if (recurring.nextDueDate.isBefore(now) || 
-          recurring.nextDueDate.isAtSameMomentAs(now)) {
+      final dueDate = DateTime(
+        recurring.nextDueDate.year,
+        recurring.nextDueDate.month,
+        recurring.nextDueDate.day,
+      );
+
+      // Process if due date is today or in the past
+      if (dueDate.isBefore(today) || dueDate.isAtSameMomentAs(today)) {
+        // Check for duplicate
+        final exists =
+            await _transactionExists(isar, recurring, recurring.nextDueDate);
+        if (exists) {
+          log.i(
+              'Skipping duplicate: ${recurring.description} for ${recurring.nextDueDate}');
+          skipped++;
+          continue;
+        }
+
         await _createTransaction(isar, recurring);
         await _updateNextDueDate(isar, recurring);
         log.i('Created recurring transaction: ${recurring.description}');
+        processed++;
       }
     }
+
+    log.i(
+        'Processed $processed recurring transactions, skipped $skipped duplicates');
   }
 
-  Future<void> _createTransaction(dynamic isar, RecurringTransaction recurring) async {
+  Future<bool> _transactionExists(
+      Isar isar, RecurringTransaction recurring, DateTime dueDate) async {
+    final startOfDay = DateTime(dueDate.year, dueDate.month, dueDate.day);
+    final endOfDay =
+        DateTime(dueDate.year, dueDate.month, dueDate.day, 23, 59, 59);
+
+    final existing = await isar.transactions
+        .filter()
+        .recurringTransactionSource((q) => q.idEqualTo(recurring.id))
+        .dateBetween(startOfDay, endOfDay)
+        .findFirst();
+
+    return existing != null;
+  }
+
+  Future<void> _createTransaction(
+      Isar isar, RecurringTransaction recurring) async {
     final frequencyText = _getFrequencyText(recurring.frequency);
-    final description = recurring.description?.isNotEmpty == true 
+    final description = recurring.description?.isNotEmpty == true
         ? '${recurring.description} (🔄 $frequencyText)'
         : '🔄 $frequencyText - ${recurring.category.value?.name ?? ""}';
-    
+
     final transaction = Transaction.create(
       date: recurring.nextDueDate,
       amount: recurring.amount,
@@ -80,7 +117,8 @@ class RecurringTransactionService {
     }
   }
 
-  Future<void> _updateNextDueDate(dynamic isar, RecurringTransaction recurring) async {
+  Future<void> _updateNextDueDate(
+      Isar isar, RecurringTransaction recurring) async {
     final nextDate = calculateNextDueDate(
       recurring.nextDueDate,
       recurring.frequency,
@@ -106,8 +144,9 @@ class RecurringTransactionService {
       await recurring.account.save();
       await recurring.category.save();
     });
-    if (isNew) {
-      await gamificationService?.track(GamificationEvent.recurringTransactionCreated);
+    if (isNew && gamificationService != null) {
+      await gamificationService!
+          .track(GamificationEvent.recurringTransactionCreated);
     }
   }
 
@@ -130,7 +169,8 @@ class RecurringTransactionService {
 
   Stream<List<RecurringTransaction>> watchAll() async* {
     final isar = await isarService.getInstance();
-    await for (final list in isar.recurringTransactions.where().watch(fireImmediately: true)) {
+    await for (final list
+        in isar.recurringTransactions.where().watch(fireImmediately: true)) {
       for (var r in list) {
         await r.category.load();
         await r.account.load();

@@ -468,26 +468,52 @@ class _AddRecurringTransactionScreenState
   }
 
   Future<void> _save() async {
-    if (_amountController.text.isEmpty) return;
-    if (_selectedAccount == null || _selectedCategory == null) return;
+    if (_amountController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter an amount')),
+      );
+      return;
+    }
+    if (_selectedAccount == null || _selectedCategory == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select account and category')),
+      );
+      return;
+    }
 
-    final recurring = widget.recurring ?? RecurringTransaction();
-    recurring.amount = double.parse(_amountController.text);
-    recurring.description = _descController.text;
-    recurring.isExpense = _isExpense;
-    recurring.frequency = _frequency;
-    recurring.startDate = _startDate;
-    recurring.nextDueDate = calculateNextDueDate(
-      _startDate,
-      _frequency,
-      _startDate,
-    );
-    recurring.isActive = true;
-    recurring.account.value = _selectedAccount;
-    recurring.category.value = _selectedCategory;
+    try {
+      final recurring = widget.recurring ?? RecurringTransaction();
+      recurring.amount = double.parse(_amountController.text);
+      recurring.description = _descController.text;
+      recurring.isExpense = _isExpense;
+      recurring.frequency = _frequency;
+      recurring.startDate = _startDate;
+      // For new recurring transactions, nextDueDate should be the start date
+      // For existing ones being edited, keep the existing nextDueDate
+      if (widget.recurring == null) {
+        recurring.nextDueDate = _startDate;
+      } else {
+        recurring.nextDueDate = widget.recurring!.nextDueDate;
+      }
+      recurring.isActive = true;
+      recurring.account.value = _selectedAccount;
+      recurring.category.value = _selectedCategory;
 
-    await ref.read(recurringTransactionServiceProvider).save(recurring);
-    if (mounted) context.pop();
+      await ref.read(recurringTransactionServiceProvider).save(recurring);
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Recurring transaction saved')),
+        );
+        context.pop();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error saving: $e')),
+        );
+      }
+    }
   }
 
   Future<void> _delete() async {

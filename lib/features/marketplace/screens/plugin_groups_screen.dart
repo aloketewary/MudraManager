@@ -9,32 +9,35 @@ import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import '../models/plugin_metadata.dart';
 import '../services/marketplace_service.dart';
+import 'package:mudra_manager/core/widgets/skeleton_loader.dart';
 
 final pluginGroupsProvider = FutureProvider((ref) async {
-  final service = MarketplaceService();
+  final service = ref.watch(marketplaceServiceProvider);
   return service.fetchPluginsByGroup();
 });
 
+final marketplaceServiceProvider = Provider((ref) => MarketplaceService());
+
 final pluginStatesProvider =
     StateNotifierProvider<PluginStatesNotifier, Map<String, bool>>((ref) {
-  return PluginStatesNotifier();
+  return PluginStatesNotifier(ref.watch(marketplaceServiceProvider));
 });
 
 class PluginStatesNotifier extends StateNotifier<Map<String, bool>> {
-  PluginStatesNotifier() : super({});
+  final MarketplaceService _service;
+  
+  PluginStatesNotifier(this._service) : super({});
 
   Future<void> loadStates(List<PluginMetadata> plugins) async {
-    final service = MarketplaceService();
     final states = <String, bool>{};
     for (final plugin in plugins) {
-      states[plugin.id] = await service.isPluginEnabled(plugin.id);
+      states[plugin.id] = await _service.isPluginEnabled(plugin.id);
     }
     state = states;
   }
 
   Future<void> togglePlugin(String pluginId, bool enabled) async {
-    final service = MarketplaceService();
-    await service.togglePlugin(pluginId, enabled);
+    await _service.togglePlugin(pluginId, enabled);
     state = {...state, pluginId: enabled};
   }
 }
@@ -78,7 +81,7 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen>
   void _showCreditCardConfigDialog(PluginMetadata plugin) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final service = MarketplaceService();
+    final service = ref.read(marketplaceServiceProvider);
     final reminderController = TextEditingController(text: '1');
     final cardConfigs = <Map<String, dynamic>>[];
 
@@ -334,7 +337,7 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen>
 
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final service = MarketplaceService();
+    final service = ref.read(marketplaceServiceProvider);
 
     showModalBottomSheet(
       context: context,
@@ -471,8 +474,16 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen>
     final textTheme = Theme.of(context).textTheme;
 
     return groupedAsync.when(
-      loading: () => const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+      loading: () => Scaffold(
+        appBar: AppBar(
+          title: const Text('Plugins'),
+          elevation: 0,
+        ),
+        body: ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: 6,
+          itemBuilder: (context, index) => const SkeletonListTile(),
+        ),
       ),
       error: (err, stack) => Scaffold(
         body: Center(child: Text('Error: $err')),

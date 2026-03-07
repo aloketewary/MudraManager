@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/db/filter_type.dart';
 import 'package:mudra_manager/core/extension/localization_extenstion.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
@@ -158,7 +159,7 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
                   padding: const EdgeInsets.only(bottom: 12, left: 4, right: 4),
                   child: Row(
                     children: [
-                      Icon(Icons.account_balance_wallet, color: color.primary),
+                      Icon(LucideIcons.wallet, color: color.primary),
                       const SizedBox(width: 8),
                       Text(
                         ctxt.dashboard_cash_flow_text,
@@ -168,7 +169,7 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
                         ),
                       ),
                       const Spacer(),
-                      Icon(Icons.chevron_right, color: color.onSurfaceVariant),
+                      Icon(LucideIcons.chevronRight, color: color.onSurfaceVariant),
                     ],
                   ),
                 ),
@@ -285,7 +286,7 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
                                   child: Transform.rotate(
                                     angle: tiltAngleRadians,
                                     child: Icon(
-                                      Icons.arrow_downward,
+                                      LucideIcons.arrowDown,
                                       size: 16,
                                       color: color.primary,
                                     ),
@@ -345,7 +346,7 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
                                   child: Transform.rotate(
                                     angle: tiltExpenseAngleRadians,
                                     child: Icon(
-                                      Icons.arrow_upward,
+                                      LucideIcons.arrowUp,
                                       size: 16,
                                       color: color.error,
                                     ),

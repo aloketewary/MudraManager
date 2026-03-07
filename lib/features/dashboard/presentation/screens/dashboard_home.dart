@@ -2,6 +2,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
@@ -58,10 +59,10 @@ class _AnimatedCardState extends State<_AnimatedCard>
 
     _slideAnimation =
         Tween<Offset>(begin: const Offset(0, 0.15), end: Offset.zero).animate(
-            CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+            CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),);
 
     _scaleAnimation = Tween<double>(begin: 0.95, end: 1.0).animate(
-        CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
+        CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),);
 
     Future.delayed(Duration(milliseconds: widget.delay), () {
       if (mounted) _controller.forward();
@@ -154,7 +155,7 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
             'recurring_expenses',
             if (isTravelEnabled) 'active_trip',
             'budget',
-            'goal'
+            'goal',
           ];
       _cardOrder = order ??
           [
@@ -168,7 +169,7 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
             'recurring_expenses',
             if (isTravelEnabled) 'active_trip',
             'budget',
-            'goal'
+            'goal',
           ];
       _isLoading = false;
     });
@@ -178,6 +179,7 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
 
   Widget? _buildCard(String cardId, int index) {
     if (!_isCardVisible(cardId)) return null;
+    final ctxt = AppLocalizations.of(context)!;
 
     switch (cardId) {
       case 'accounts':
@@ -191,18 +193,16 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
               children: [
                 Flexible(
                   child: DashboardActionButton(
-                    label: AppLocalizations.of(context)!
-                        .dashboard_add_transaction_text,
-                    icon: Icons.add_circle_outline,
+                    label: ctxt.dashboard_add_transaction_text,
+                    icon: LucideIcons.circlePlus,
                     onTap: () => context.push('/add-transaction'),
                   ),
                 ),
                 const SizedBox(height: 8),
                 Flexible(
                   child: DashboardActionButton(
-                    label: AppLocalizations.of(context)!
-                        .dashboard_add_transfer_text,
-                    icon: Icons.swap_horiz,
+                    label: ctxt.dashboard_add_transfer_text,
+                    icon: LucideIcons.arrowLeftRight,
                     onTap: () => context.push('/transfer'),
                     backgroundColor:
                         Theme.of(context).colorScheme.surfaceContainerHigh,
@@ -216,9 +216,8 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
               children: [
                 Expanded(
                   child: DashboardActionButton(
-                    label: AppLocalizations.of(context)!
-                        .dashboard_add_transaction_text,
-                    icon: Icons.add_circle_outline,
+                    label: ctxt.dashboard_add_transaction_text,
+                    icon: LucideIcons.circlePlus,
                     onTap: () => context.push('/add-transaction'),
                     heroTag: 'addTransactionHeroDashboard',
                   ),
@@ -226,9 +225,8 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: DashboardActionButton(
-                    label: AppLocalizations.of(context)!
-                        .dashboard_add_transfer_text,
-                    icon: Icons.swap_horiz,
+                    label: ctxt.dashboard_add_transfer_text,
+                    icon: LucideIcons.arrowLeftRight,
                     onTap: () => context.push('/transfer'),
                     backgroundColor:
                         Theme.of(context).colorScheme.surfaceContainerHigh,
@@ -272,28 +270,28 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
       case 'financial_health':
         return _AnimatedCard(
             delay: index * 100,
-            child: FinancialHealthCard(globalPadding: globalPadding));
+            child: FinancialHealthCard(globalPadding: globalPadding),);
       case 'net_worth':
         return _AnimatedCard(
             delay: index * 100,
-            child: NetWorthCard(globalPadding: globalPadding));
+            child: NetWorthCard(globalPadding: globalPadding),);
       case 'spending_prediction':
         return _AnimatedCard(
             delay: index * 100,
-            child: SpendingPredictionCard(globalPadding: globalPadding));
+            child: SpendingPredictionCard(globalPadding: globalPadding),);
       case 'recurring_expenses':
         return RecurringExpensesCard(globalPadding: globalPadding);
       case 'active_trip':
         return _AnimatedCard(
             delay: index * 100,
-            child: ActiveTripMiniCard(globalPadding: globalPadding));
+            child: ActiveTripMiniCard(globalPadding: globalPadding),);
       case 'budget':
         return _AnimatedCard(
             delay: index * 100,
-            child: BudgetCard(globalPadding: globalPadding));
+            child: BudgetCard(globalPadding: globalPadding),);
       case 'goal':
         return _AnimatedCard(
-            delay: index * 100, child: GoalCard(globalPadding: globalPadding));
+            delay: index * 100, child: GoalCard(globalPadding: globalPadding),);
       default:
         return null;
     }

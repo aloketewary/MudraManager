@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/features/analytics/data/analytics_provider.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 
@@ -40,7 +41,7 @@ class SpendingPredictionCard extends ConsumerWidget {
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.trending_up, color: color.primary),
+                          Icon(LucideIcons.chartSpline, color: color.primary),
                           const SizedBox(width: 8),
                           Text(
                             'Spending Prediction',
@@ -50,7 +51,7 @@ class SpendingPredictionCard extends ConsumerWidget {
                           ),
                           const Spacer(),
                           Icon(
-                            Icons.chevron_right,
+                            LucideIcons.chevronRight,
                             color: color.onSurfaceVariant,
                           ),
                         ],

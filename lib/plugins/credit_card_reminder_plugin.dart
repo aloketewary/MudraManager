@@ -1,8 +1,12 @@
 import 'package:mudra_plugin_sdk/mudra_plugin_sdk.dart';
-import 'package:mudra_manager/core/services/notification_service.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 class CreditCardReminderPlugin extends MudraPlugin {
+  static const _baseNotificationId = 5000;
+  static final _plugin = FlutterLocalNotificationsPlugin();
+
   @override
   String get id => 'com.mudra.credit_card_reminder';
 
@@ -28,7 +32,6 @@ class CreditCardReminderPlugin extends MudraPlugin {
 
   @override
   void onExpense(ExpenseEvent event) {
-    // Check if expense is from credit card account
     if (event.category.toLowerCase().contains('credit') || 
         event.category.toLowerCase().contains('card')) {
       _scheduleReminders();
@@ -40,52 +43,73 @@ class CreditCardReminderPlugin extends MudraPlugin {
     final reminderDays = prefs.getInt('credit_card_reminder_days') ?? 1;
     final billDates = prefs.getStringList('credit_card_bill_dates') ?? [];
 
-    for (final dateStr in billDates) {
-      final parts = dateStr.split('|'); // Format: "CardName|15" (15th of month)
+    // Cancel only necessary notifications
+    final cancelFutures = List.generate(
+      billDates.length.clamp(0, 10),
+      (i) => _plugin.cancel(_baseNotificationId + i),
+    );
+    await Future.wait(cancelFutures);
+
+    // Schedule in parallel
+    final scheduleFutures = <Future>[];
+    for (int i = 0; i < billDates.length; i++) {
+      final parts = billDates[i].split('|');
       if (parts.length == 2) {
         final cardName = parts[0];
         final billDay = int.tryParse(parts[1]) ?? 15;
-        
-        await _scheduleReminderForCard(cardName, billDay, reminderDays);
+        scheduleFutures.add(_scheduleReminderForCard(cardName, billDay, reminderDays, i));
       }
     }
+    await Future.wait(scheduleFutures);
   }
 
-  Future<void> _scheduleReminderForCard(String cardName, int billDay, int reminderDays) async {
-    final now = DateTime.now();
-    final currentMonth = DateTime(now.year, now.month, billDay);
-    final nextMonth = DateTime(now.year, now.month + 1, billDay);
-    
-    // Determine next bill date
-    final nextBillDate = currentMonth.isAfter(now) ? currentMonth : nextMonth;
-    final reminderDate = nextBillDate.subtract(Duration(days: reminderDays));
-    
-    // Only schedule if reminder date is in future
-    if (reminderDate.isAfter(now)) {
-      await NotificationService.showLocalNotification(
-        id: cardName.hashCode,
-        title: '💳 Credit Card Bill Reminder',
-        body: '$cardName bill due on ${billDay}th. Pay now to avoid late fees!',
-      );
+  Future<void> _scheduleReminderForCard(
+    String cardName,
+    int billDay,
+    int reminderDays,
+    int index,
+  ) async {
+    try {
+      final now = tz.TZDateTime.now(tz.local);
+      final currentMonth = tz.TZDateTime(tz.local, now.year, now.month, billDay, 9, 0);
+      final nextMonth = tz.TZDateTime(tz.local, now.year, now.month + 1, billDay, 9, 0);
+      
+      final nextBillDate = currentMonth.isAfter(now) ? currentMonth : nextMonth;
+      final reminderDate = nextBillDate.subtract(Duration(days: reminderDays));
+      
+      if (reminderDate.isAfter(now)) {
+        await _plugin.zonedSchedule(
+          _baseNotificationId + index,
+          '💳 Credit Card Bill Reminder',
+          '$cardName bill due on ${billDay}th. Pay now to avoid late fees!',
+          reminderDate,
+          const NotificationDetails(
+            android: AndroidNotificationDetails(
+              'credit_card_reminder_channel',
+              'Credit Card Reminders',
+              channelDescription: 'Reminders for credit card bill payments',
+              importance: Importance.high,
+              priority: Priority.high,
+            ),
+            iOS: DarwinNotificationDetails(
+              presentAlert: true,
+              presentBadge: true,
+              presentSound: true,
+            ),
+          ),
+          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        );
+      }
+    } catch (e) {
+      // Silently fail - notification scheduling is non-critical
     }
   }
 
   @override
   Map<String, dynamic>? getConfig() {
     return {
-      'reminder_days': {
-        'type': 'number',
-        'label': 'Remind me before (days)',
-        'default': 1,
-        'min': 1,
-        'max': 7,
-      },
-      'bill_dates': {
-        'type': 'list',
-        'label': 'Credit Card Bill Dates',
-        'default': [],
-        'item_format': 'Card Name|Bill Day (1-31)',
-      },
+      'ui_screen': 'CreditCardReminderSettings',
+      'description': 'Manage your credit card bill reminders',
     };
   }
 }

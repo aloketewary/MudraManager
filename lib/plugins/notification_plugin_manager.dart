@@ -6,6 +6,7 @@ import 'notification_plugins/bill_reminder_plugin.dart';
 import 'notification_plugins/low_balance_plugin.dart';
 import 'package:mudra_manager/features/marketplace/services/marketplace_service.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class NotificationPluginManager {
   static final NotificationPluginManager _instance = NotificationPluginManager._();
@@ -13,6 +14,7 @@ class NotificationPluginManager {
 
   final Map<String, NotificationPlugin> _allPlugins = {};
   final _marketplaceService = MarketplaceService();
+  final _container = ProviderContainer();
 
   NotificationPluginManager._() {
     _registerAllPlugins();
@@ -24,7 +26,7 @@ class NotificationPluginManager {
       LargeExpensePlugin(),
       DailySummaryPlugin(),
       BillReminderPlugin(),
-      LowBalancePlugin(),
+      LowBalancePlugin(_container),
     ];
 
     for (final plugin in plugins) {
@@ -55,7 +57,7 @@ class NotificationPluginManager {
           body: plugin.getBody(transaction),
           priority: plugin.getPriority(),
           pluginId: plugin.id,
-        ));
+        ),);
       }
     }
 

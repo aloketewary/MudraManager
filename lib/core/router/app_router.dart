@@ -41,6 +41,7 @@ import 'package:mudra_manager/features/trip/presentation/screens/create_trip_scr
 import 'package:mudra_manager/features/trip/presentation/screens/edit_trip_screen.dart';
 import 'package:mudra_manager/features/trip/presentation/screens/trip_detail_screen.dart';
 import 'package:mudra_manager/features/trip/presentation/screens/trips_screen.dart';
+import 'package:mudra_manager/plugins/credit_card_reminder_settings.dart';
 import 'package:mudra_manager/shared/screens/notification_page_screen.dart';
 import 'package:mudra_manager/features/gamification/screens/achievements_screen.dart';
 import 'package:mudra_manager/features/marketplace/screens/plugin_groups_screen.dart';
@@ -49,271 +50,277 @@ final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 
 class AppRouter {
   static GoRouter router(bool showOnboarding) => GoRouter(
-    navigatorKey: _rootNavigatorKey,
-    initialLocation: showOnboarding ? '/onboarding' : '/home',
-    debugLogDiagnostics: true,
-    redirect: (context, state) {
-      final isOnboardingComplete = SharedPrefsUtil.instance
-          .isOnboardingComplete();
-      final isOnOnboardingPage = state.matchedLocation == '/onboarding';
-      final isOnAccountSetupPage = state.matchedLocation == '/account-setup';
+        navigatorKey: _rootNavigatorKey,
+        initialLocation: showOnboarding ? '/onboarding' : '/home',
+        debugLogDiagnostics: true,
+        redirect: (context, state) {
+          final isOnboardingComplete =
+              SharedPrefsUtil.instance.isOnboardingComplete();
+          final isOnOnboardingPage = state.matchedLocation == '/onboarding';
+          final isOnAccountSetupPage =
+              state.matchedLocation == '/account-setup';
 
-      // Handle root path from deep links
-      if (state.matchedLocation == '/') {
-        return isOnboardingComplete ? '/home' : '/onboarding';
-      }
+          // Handle root path from deep links
+          if (state.matchedLocation == '/') {
+            return isOnboardingComplete ? '/home' : '/onboarding';
+          }
 
-      // If onboarding is complete and user is on onboarding/setup page, redirect to home
-      if (isOnboardingComplete &&
-          (isOnOnboardingPage || isOnAccountSetupPage)) {
-        return '/home';
-      }
+          // If onboarding is complete and user is on onboarding/setup page, redirect to home
+          if (isOnboardingComplete &&
+              (isOnOnboardingPage || isOnAccountSetupPage)) {
+            return '/home';
+          }
 
-      // If onboarding is not complete and user is not on onboarding/setup pages, redirect to onboarding
-      if (!isOnboardingComplete &&
-          !isOnOnboardingPage &&
-          !isOnAccountSetupPage) {
-        return '/onboarding';
-      }
+          // If onboarding is not complete and user is not on onboarding/setup pages, redirect to onboarding
+          if (!isOnboardingComplete &&
+              !isOnOnboardingPage &&
+              !isOnAccountSetupPage) {
+            return '/onboarding';
+          }
 
-      return null; // No redirect needed
-    },
-    routes: [
-      GoRoute(
-        path: '/onboarding',
-        builder: (context, state) => const OnboardingScreen(),
-      ),
-      GoRoute(
-        path: '/account-setup',
-        builder: (context, state) => const AccountSetupScreen(),
-      ),
-      ShellRoute(
-        builder: (context, state, child) => AuthGate(child: child),
+          return null; // No redirect needed
+        },
         routes: [
           GoRoute(
-            path: '/home',
-            builder: (context, state) => const HomePage(initialIndex: 0),
+            path: '/onboarding',
+            builder: (context, state) => const OnboardingScreen(),
           ),
           GoRoute(
-            path: '/transactions',
-            builder: (context, state) => const HomePage(initialIndex: 1),
+            path: '/account-setup',
+            builder: (context, state) => const AccountSetupScreen(),
           ),
-          GoRoute(
-            path: '/utilities',
-            builder: (context, state) => const HomePage(initialIndex: 2),
-          ),
-          GoRoute(
-            path: '/statistics',
-            builder: (context, state) => const HomePage(initialIndex: 3),
-          ),
-          GoRoute(
-            path: '/profile',
-            builder: (context, state) => const HomePage(initialIndex: 4),
-          ),
-          GoRoute(
-            path: '/add-transaction',
-            builder: (context, state) {
-              final extra = state.extra as Map<String, dynamic>?;
-              return AddEditTransactionScreen(
-                transaction: extra?['transaction'],
-                smsActivity: extra?['smsActivity'],
-              );
-            },
-          ),
-          GoRoute(
-            path: '/transfer',
-            builder: (context, state) {
-              final extra = state.extra as Map<String, dynamic>?;
-              return TransferScreen(
-                amount: extra?['amount'],
-                note: extra?['note'],
-                date: extra?['date'],
-                fromAccount: extra?['fromAccount'],
-                toAccount: extra?['toAccount'],
-                fromId: extra?['fromId'],
-                toId: extra?['toId'],
-              );
-            },
-          ),
-          GoRoute(
-            path: '/sms-activity',
-            builder: (context, state) => const SmsActivityScreen(),
-          ),
-          GoRoute(
-            path: '/notifications',
-            builder: (context, state) => const NotificationPage(),
-          ),
-          GoRoute(
-            path: '/edit-profile',
-            builder: (context, state) => const EditUserProfileScreen(),
-          ),
-          GoRoute(
-            path: '/app-settings',
-            builder: (context, state) => const AppSettingsPage(),
-          ),
-          GoRoute(
-            path: '/dashboard-customize',
-            builder: (context, state) => const DashboardCustomizeScreen(),
-          ),
-          GoRoute(
-            path: '/recurring-expenses',
-            builder: (context, state) => const RecurringExpensesScreen(),
-          ),
-          GoRoute(
-            path: '/security',
-            builder: (context, state) => const SecuritySettingsScreen(),
-          ),
-          GoRoute(
-            path: '/notification-settings',
-            builder: (context, state) => const NotificationSettingsScreen(),
-          ),
-          GoRoute(
-            path: '/sms-import',
-            builder: (context, state) => const SmsImportSettingsScreen(),
-          ),
-          GoRoute(
-            path: '/language',
-            builder: (context, state) => const ChooseLanguageScreen(),
-          ),
-          GoRoute(
-            path: '/theme',
-            builder: (context, state) => const ThemePickerScreen(),
-          ),
-          GoRoute(
-            path: '/backup-restore',
-            builder: (context, state) => const BackupRestoreScreen(),
-          ),
-          GoRoute(
-            path: '/about',
-            builder: (context, state) => const AboutScreen(),
-          ),
-          GoRoute(
-            path: '/help',
-            builder: (context, state) => const HelpScreen(),
-          ),
-          GoRoute(
-            path: '/manage-accounts',
-            builder: (context, state) => const ManageAccountScreen(),
-          ),
-          GoRoute(
-            path: '/manage-categories',
-            builder: (context, state) => const ManageCategoriesScreen(),
-          ),
-          GoRoute(
-            path: '/add-budget',
-            builder: (context, state) {
-              final extra = state.extra as Map<String, dynamic>?;
-              return AddBudgetScreen(existing: extra?['budget']);
-            },
-          ),
-          GoRoute(
-            path: '/add-goal',
-            builder: (context, state) {
-              final extra = state.extra as Map<String, dynamic>?;
-              return AddEditGoalScreen(goal: extra?['goal']);
-            },
-          ),
-          GoRoute(
-            path: '/add-category',
-            builder: (context, state) {
-              final extra = state.extra as Map<String, dynamic>?;
-              return AddEditCategoryScreen(existing: extra?['category']);
-            },
-          ),
-          GoRoute(
-            path: '/budget-dashboard',
-            builder: (context, state) => const BudgetDashboard(),
-          ),
-          GoRoute(
-            path: '/budget-details',
-            builder: (context, state) {
-              final data = state.extra as BudgetWithProgress;
-              return BudgetDetailsScreen(data: data);
-            },
-          ),
-          GoRoute(
-            path: '/goal-screen',
-            builder: (context, state) => const GoalScreen(),
-          ),
-          GoRoute(
-            path: '/goal-details',
-            builder: (context, state) {
-              final goal = state.extra as Goal;
-              return GoalDetailsScreen(goal: goal);
-            },
-          ),
-          GoRoute(
-            path: '/manage-accounts/add',
-            builder: (context, state) {
-              final extra = state.extra as Map<String, dynamic>?;
-              return AccountForm(
-                account: extra?['account'],
-                accountNumber: extra?['accountNumber'],
-                bankName: extra?['bankName'],
-              );
-            },
-          ),
-          GoRoute(
-            path: '/monthly-comparison',
-            builder: (context, state) => const MonthlyComparisonScreen(),
-          ),
-          GoRoute(
-            path: '/recurring-transactions',
-            builder: (context, state) => const RecurringTransactionsScreen(),
-          ),
-          GoRoute(
-            path: '/add-recurring',
-            builder: (context, state) {
-              final extra = state.extra as Map<String, dynamic>?;
-              return AddRecurringTransactionScreen(
-                recurring: extra?['recurring'],
-              );
-            },
-          ),
-          GoRoute(
-            path: '/trips',
-            builder: (context, state) => const TripsScreen(),
-          ),
-          GoRoute(
-            path: '/create-trip',
-            builder: (context, state) => const CreateTripScreen(),
-          ),
-          GoRoute(
-            path: '/trip-detail',
-            builder: (context, state) {
-              final tripId = state.extra as int;
-              return TripDetailScreen(tripId: tripId);
-            },
-          ),
-          GoRoute(
-            path: '/add-trip-transaction',
-            builder: (context, state) {
-              final tripId = state.extra as int;
-              return AddTripTransactionScreen(tripId: tripId);
-            },
-          ),
-          GoRoute(
-            path: '/edit-trip',
-            builder: (context, state) {
-              // Retrieve the tripId passed via 'extra'
-              final tripId = state.extra as int;
-              return EditTripScreen(tripId: tripId);
-            },
-          ),
-          GoRoute(
-            path: '/analytics',
-            builder: (context, state) => const AnalyticsScreen(),
-          ),
-          GoRoute(
-            path: '/achievements',
-            builder: (context, state) => const AchievementsScreen(),
-          ),
-          GoRoute(
-            path: '/plugins',
-            builder: (context, state) => const PluginGroupsScreen(),
+          ShellRoute(
+            builder: (context, state, child) => AuthGate(child: child),
+            routes: [
+              GoRoute(
+                path: '/home',
+                builder: (context, state) => const HomePage(initialIndex: 0),
+              ),
+              GoRoute(
+                path: '/transactions',
+                builder: (context, state) => const HomePage(initialIndex: 1),
+              ),
+              GoRoute(
+                path: '/utilities',
+                builder: (context, state) => const HomePage(initialIndex: 2),
+              ),
+              GoRoute(
+                path: '/statistics',
+                builder: (context, state) => const HomePage(initialIndex: 3),
+              ),
+              GoRoute(
+                path: '/profile',
+                builder: (context, state) => const HomePage(initialIndex: 4),
+              ),
+              GoRoute(
+                path: '/add-transaction',
+                builder: (context, state) {
+                  final extra = state.extra as Map<String, dynamic>?;
+                  return AddEditTransactionScreen(
+                    transaction: extra?['transaction'],
+                    smsActivity: extra?['smsActivity'],
+                  );
+                },
+              ),
+              GoRoute(
+                path: '/transfer',
+                builder: (context, state) {
+                  final extra = state.extra as Map<String, dynamic>?;
+                  return TransferScreen(
+                    amount: extra?['amount'],
+                    note: extra?['note'],
+                    date: extra?['date'],
+                    fromAccount: extra?['fromAccount'],
+                    toAccount: extra?['toAccount'],
+                    fromId: extra?['fromId'],
+                    toId: extra?['toId'],
+                  );
+                },
+              ),
+              GoRoute(
+                path: '/sms-activity',
+                builder: (context, state) => const SmsActivityScreen(),
+              ),
+              GoRoute(
+                path: '/notifications',
+                builder: (context, state) => const NotificationPage(),
+              ),
+              GoRoute(
+                path: '/edit-profile',
+                builder: (context, state) => const EditUserProfileScreen(),
+              ),
+              GoRoute(
+                path: '/app-settings',
+                builder: (context, state) => const AppSettingsPage(),
+              ),
+              GoRoute(
+                path: '/dashboard-customize',
+                builder: (context, state) => const DashboardCustomizeScreen(),
+              ),
+              GoRoute(
+                path: '/recurring-expenses',
+                builder: (context, state) => const RecurringExpensesScreen(),
+              ),
+              GoRoute(
+                path: '/security',
+                builder: (context, state) => const SecuritySettingsScreen(),
+              ),
+              GoRoute(
+                path: '/notification-settings',
+                builder: (context, state) => const NotificationSettingsScreen(),
+              ),
+              GoRoute(
+                path: '/sms-import',
+                builder: (context, state) => const SmsImportSettingsScreen(),
+              ),
+              GoRoute(
+                path: '/language',
+                builder: (context, state) => const ChooseLanguageScreen(),
+              ),
+              GoRoute(
+                path: '/theme',
+                builder: (context, state) => const ThemePickerScreen(),
+              ),
+              GoRoute(
+                path: '/backup-restore',
+                builder: (context, state) => const BackupRestoreScreen(),
+              ),
+              GoRoute(
+                path: '/about',
+                builder: (context, state) => const AboutScreen(),
+              ),
+              GoRoute(
+                path: '/help',
+                builder: (context, state) => const HelpScreen(),
+              ),
+              GoRoute(
+                path: '/manage-accounts',
+                builder: (context, state) => const ManageAccountScreen(),
+              ),
+              GoRoute(
+                path: '/manage-categories',
+                builder: (context, state) => const ManageCategoriesScreen(),
+              ),
+              GoRoute(
+                path: '/add-budget',
+                builder: (context, state) {
+                  final extra = state.extra as Map<String, dynamic>?;
+                  return AddBudgetScreen(existing: extra?['budget']);
+                },
+              ),
+              GoRoute(
+                path: '/add-goal',
+                builder: (context, state) {
+                  final extra = state.extra as Map<String, dynamic>?;
+                  return AddEditGoalScreen(goal: extra?['goal']);
+                },
+              ),
+              GoRoute(
+                path: '/add-category',
+                builder: (context, state) {
+                  final extra = state.extra as Map<String, dynamic>?;
+                  return AddEditCategoryScreen(existing: extra?['category']);
+                },
+              ),
+              GoRoute(
+                path: '/budget-dashboard',
+                builder: (context, state) => const BudgetDashboard(),
+              ),
+              GoRoute(
+                path: '/budget-details',
+                builder: (context, state) {
+                  final data = state.extra as BudgetWithProgress;
+                  return BudgetDetailsScreen(data: data);
+                },
+              ),
+              GoRoute(
+                path: '/goal-screen',
+                builder: (context, state) => const GoalScreen(),
+              ),
+              GoRoute(
+                path: '/goal-details',
+                builder: (context, state) {
+                  final goal = state.extra as Goal;
+                  return GoalDetailsScreen(goal: goal);
+                },
+              ),
+              GoRoute(
+                path: '/manage-accounts/add',
+                builder: (context, state) {
+                  final extra = state.extra as Map<String, dynamic>?;
+                  return AccountForm(
+                    account: extra?['account'],
+                    accountNumber: extra?['accountNumber'],
+                    bankName: extra?['bankName'],
+                  );
+                },
+              ),
+              GoRoute(
+                path: '/monthly-comparison',
+                builder: (context, state) => const MonthlyComparisonScreen(),
+              ),
+              GoRoute(
+                path: '/recurring-transactions',
+                builder: (context, state) =>
+                    const RecurringTransactionsScreen(),
+              ),
+              GoRoute(
+                path: '/add-recurring',
+                builder: (context, state) {
+                  final extra = state.extra as Map<String, dynamic>?;
+                  return AddRecurringTransactionScreen(
+                    recurring: extra?['recurring'],
+                  );
+                },
+              ),
+              GoRoute(
+                path: '/trips',
+                builder: (context, state) => const TripsScreen(),
+              ),
+              GoRoute(
+                path: '/create-trip',
+                builder: (context, state) => const CreateTripScreen(),
+              ),
+              GoRoute(
+                path: '/trip-detail',
+                builder: (context, state) {
+                  final tripId = state.extra as int;
+                  return TripDetailScreen(tripId: tripId);
+                },
+              ),
+              GoRoute(
+                path: '/add-trip-transaction',
+                builder: (context, state) {
+                  final tripId = state.extra as int;
+                  return AddTripTransactionScreen(tripId: tripId);
+                },
+              ),
+              GoRoute(
+                path: '/edit-trip',
+                builder: (context, state) {
+                  // Retrieve the tripId passed via 'extra'
+                  final tripId = state.extra as int;
+                  return EditTripScreen(tripId: tripId);
+                },
+              ),
+              GoRoute(
+                path: '/analytics',
+                builder: (context, state) => const AnalyticsScreen(),
+              ),
+              GoRoute(
+                path: '/achievements',
+                builder: (context, state) => const AchievementsScreen(),
+              ),
+              GoRoute(
+                path: '/plugins',
+                builder: (context, state) => const PluginGroupsScreen(),
+              ),
+              GoRoute(
+                path: '/credit-card-reminders',
+                builder: (context, state) => const CreditCardReminderSettings(),
+              ),
+            ],
           ),
         ],
-      ),
-    ],
-  );
+      );
 }

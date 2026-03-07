@@ -10,6 +10,7 @@ import 'package:mudra_manager/core/providers/l10n_provider.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/core/router/app_router.dart';
 import 'package:mudra_manager/core/services/app_update_service.dart';
+import 'package:mudra_manager/core/services/background_task_manager.dart';
 import 'package:mudra_manager/core/services/notification_service.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/theme/app_theme.dart';
@@ -18,13 +19,7 @@ import 'package:mudra_manager/core/utils/error_handler.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
-import 'package:mudra_manager/features/account/data/balance_history_service.dart';
-import 'package:mudra_manager/features/budget/data/bill_service.dart';
-import 'package:mudra_manager/features/dashboard/data/summary_scheduler.dart';
-import 'package:mudra_manager/features/notifications/data/smart_notification_service.dart';
-import 'package:mudra_manager/features/sms/data/sms_cleanup_service.dart';
 import 'package:mudra_manager/features/sms/data/sms_processor_service.dart';
-import 'package:mudra_manager/features/transactions/data/recurring_transaction_scheduler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:another_telephony/telephony.dart';
 import 'package:dynamic_color/dynamic_color.dart';
@@ -62,7 +57,7 @@ void main() async {
   runApp(UncontrolledProviderScope(
     container: container,
     child: MudraManagerApp(showOnboarding: !completed),
-  ));
+  ),);
 }
 
 // Background initialization to prevent UI blocking
@@ -71,10 +66,11 @@ Future<void> _initializeBackgroundServices(ProviderContainer container) async {
   Future.microtask(() async {
     // 1. Initialize Isar first
     log.i('🔄 Initializing Isar...');
-    final isar = await safeExecute(() => container.read(isarServiceProvider).getInstance());
+    final isar = await safeExecute(
+        () => container.read(isarServiceProvider).getInstance(),);
     if (isar != null) {
       log.i('✅ Isar initialized');
-      
+
       // Seed category keywords
       await safeExecute(() async {
         await CategorySeeder.seedDefaultKeywords(isar);
@@ -84,55 +80,30 @@ Future<void> _initializeBackgroundServices(ProviderContainer container) async {
       log.e('❌ Isar initialization failed');
       return;
     }
-    
+
     // 2. Initialize gamification service (depends on Isar)
     log.i('🔄 Initializing Gamification service...');
-    final gamification = await safeExecute(() => container.read(gamificationServiceInitProvider.future));
+    final gamification = await safeExecute(
+        () => container.read(gamificationServiceInitProvider.future),);
     if (gamification != null) {
       log.i('✅ Gamification service initialized');
     } else {
       log.e('❌ Gamification service initialization failed');
     }
 
-    // 3. Run other services in parallel
-    log.i('🔄 Initializing background services...');
-    await Future.wait(
-      [
-        safeExecute(() async {
-          await RecurringTransactionScheduler.initialize();
-          log.i('✅ RecurringTransactionScheduler initialized');
-        }),
-        safeExecute(() async {
-          await SummaryScheduler.checkAndShowSummaries();
-          log.i('✅ SummaryScheduler initialized');
-        }),
-        safeExecute(() async {
-          await BillService.scheduleBillReminders();
-          log.i('✅ BillService reminders scheduled');
-        }),
-        safeExecute(() async {
-          await BillService.createPendingTransactionsForDueBills();
-          log.i('✅ BillService pending transactions created');
-        }),
-        safeExecute(() async {
-          await _initializeHomeWidget();
-          log.i('✅ HomeWidget initialized');
-        }),
-        safeExecute(() async {
-          await SmsHashCleanupService.cleanupOldHashes();
-          log.i('✅ SmsHashCleanupService initialized');
-        }),
-        safeExecute(() async {
-          await BalanceHistoryService.instance.recordDailySnapshots();
-          log.i('✅ BalanceHistoryService initialized');
-        }),
-        safeExecute(() async {
-          await SmartNotificationService.instance.runSmartChecks();
-          log.i('✅ SmartNotificationService initialized');
-        }),
-      ].map((f) => f.catchError((e) => null)),
-    );
-    log.i('✅ All background services initialized');
+    // 3. Initialize background task manager
+    log.i('🔄 Initializing background tasks...');
+    await safeExecute(() async {
+      await BackgroundTaskManager.initialize();
+      log.i('✅ Background tasks initialized');
+    });
+
+    // 4. Initialize home widget
+    log.i('🔄 Initializing home widget...');
+    await safeExecute(() async {
+      await _initializeHomeWidget();
+      log.i('✅ HomeWidget initialized');
+    });
   });
 }
 
@@ -172,8 +143,8 @@ class MudraManagerApp extends ConsumerWidget {
           lightScheme = lightDynamic.harmonized();
           darkScheme = darkDynamic.harmonized();
           amoledScheme = darkDynamic.harmonized().copyWith(
-            surface: Colors.black,
-          ); // Using black for amoled
+                surface: Colors.black,
+              ); // Using black for amoled
         } else {
           lightScheme = appColorTheme.lightColorScheme();
           darkScheme = appColorTheme.darkColorScheme();
@@ -240,8 +211,7 @@ Future<void> setupSmsListener() async {
 
   final telephony = Telephony.instance;
 
-  final bool? permissionsGranted =
-      await telephony.requestSmsPermissions;
+  final bool? permissionsGranted = await telephony.requestSmsPermissions;
 
   if (permissionsGranted == true) {
     log.i('SMS listener setup complete');
@@ -252,8 +222,7 @@ Future<void> setupSmsListener() async {
           body: message.body ?? '',
           address: message.address ?? '',
           sender: message.address ?? '',
-          timestamp: message.date ??
-              DateTime.now().millisecondsSinceEpoch,
+          timestamp: message.date ?? DateTime.now().millisecondsSinceEpoch,
         );
       },
       onBackgroundMessage: backgroundMessageHandler,

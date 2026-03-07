@@ -6,9 +6,10 @@ import 'package:mudra_manager/features/transactions/data/recurring_transaction_s
 
 
 final recurringTransactionServiceProvider = Provider<RecurringTransactionService>((ref) {
+  final gamificationService = ref.watch(gamificationServiceProvider);
   return RecurringTransactionService(
     ref.watch(isarServiceProvider),
-    ref.watch(gamificationServiceProvider),
+    gamificationService,
   );
 });
 

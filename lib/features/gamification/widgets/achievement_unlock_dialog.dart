@@ -250,13 +250,14 @@ class _ConfettiParticle extends StatelessWidget {
     final random = math.Random();
     final size = 6.0 + random.nextDouble() * 8;
 
+    final isCircle = random.nextBool();
     return Container(
           width: size,
           height: size,
           decoration: BoxDecoration(
             color: color,
-            shape: random.nextBool() ? BoxShape.circle : BoxShape.rectangle,
-            borderRadius: random.nextBool() ? BorderRadius.circular(2) : null,
+            shape: isCircle ? BoxShape.circle : BoxShape.rectangle,
+            borderRadius: !isCircle && random.nextBool() ? BorderRadius.circular(2) : null,
           ),
         )
         .animate(onPlay: (controller) => controller.repeat())

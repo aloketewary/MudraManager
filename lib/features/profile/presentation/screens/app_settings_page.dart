@@ -8,11 +8,24 @@ import 'package:mudra_manager/shared/widgets/adaptive_text.dart';
 import 'package:mudra_manager/features/profile/presentation/widgets/guest_mode_toggle.dart';
 import 'package:mudra_manager/features/marketplace/services/marketplace_service.dart';
 
-class AppSettingsPage extends ConsumerWidget {
+class AppSettingsPage extends ConsumerStatefulWidget {
   const AppSettingsPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AppSettingsPage> createState() => _AppSettingsPageState();
+}
+
+class _AppSettingsPageState extends ConsumerState<AppSettingsPage> {
+  late final MarketplaceService _marketplaceService;
+
+  @override
+  void initState() {
+    super.initState();
+    _marketplaceService = MarketplaceService();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final currentTheme = ref.watch(themeModeProvider);
     final themeNotifier = ref.read(themeModeProvider.notifier);
     final textTheme = Theme.of(context).textTheme;
@@ -70,7 +83,7 @@ class AppSettingsPage extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           FutureBuilder<bool>(
-            future: MarketplaceService().isPluginEnabled('com.mudra.guest_mode'),
+            future: _marketplaceService.isPluginEnabled('com.mudra.guest_mode'),
             builder: (context, snapshot) {
               final isPluginEnabled = snapshot.data ?? false;
               if (!isPluginEnabled) return const SizedBox.shrink();

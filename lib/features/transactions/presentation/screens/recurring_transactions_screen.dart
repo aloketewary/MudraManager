@@ -10,6 +10,8 @@ import 'package:mudra_manager/features/transactions/data/recurring_transaction_p
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
+import 'package:mudra_manager/core/widgets/skeleton_loader.dart';
+import 'package:mudra_manager/core/utils/snackbar_service.dart';
 
 class RecurringTransactionsScreen extends ConsumerWidget {
   const RecurringTransactionsScreen({super.key});
@@ -24,6 +26,23 @@ class RecurringTransactionsScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Recurring Transactions'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.play_arrow),
+            tooltip: 'Process Now',
+            onPressed: () async {
+              HapticFeedback.mediumImpact();
+              try {
+                await ref.read(recurringTransactionServiceProvider).processRecurringTransactions();
+                if (context.mounted) {
+                  SnackbarService.success('Recurring transactions processed! Check your transactions list.');
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  SnackbarService.error('Error: $e');
+                }
+              }
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.info_outline),
             onPressed: () {
@@ -98,7 +117,11 @@ class RecurringTransactionsScreen extends ConsumerWidget {
             },
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => ListView.builder(
+          padding: const EdgeInsets.all(16).copyWith(bottom: 80),
+          itemCount: 4,
+          itemBuilder: (context, index) => const SkeletonListTile(),
+        ),
         error: (_, __) =>
             const Center(child: Text('Error loading recurring transactions')),
       ),

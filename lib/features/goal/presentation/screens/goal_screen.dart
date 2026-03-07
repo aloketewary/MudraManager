@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/features/goal/presentation/widgets/goal_card.dart';
 import 'package:mudra_manager/features/goal/data/goal_provider.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
+import 'package:mudra_manager/core/widgets/skeleton_loader.dart';
 
 
 class GoalScreen extends ConsumerWidget {
@@ -46,7 +47,11 @@ class GoalScreen extends ConsumerWidget {
                 },
               );
             },
-            loading: () => const Center(child: CircularProgressIndicator()),
+            loading: () => ListView.builder(
+              padding: const EdgeInsets.all(16).copyWith(bottom: 80),
+              itemCount: 3,
+              itemBuilder: (context, index) => const SkeletonCard(),
+            ),
             error: (e, st) => Center(child: Text('Error: $e')),
           ),
         ),

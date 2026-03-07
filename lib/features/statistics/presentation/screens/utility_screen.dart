@@ -131,13 +131,15 @@ class UtilityScreenState extends State<UtilityScreen> {
       }
     }
     
-    setState(() {
-      _allUtilities.clear();
-      _allUtilities.addAll(filteredUtilities);
-      _visibleUtilities = saved ?? ['monthly_comparison', 'recurring'];
-      _seenUtilities = seen;
-      _isLoading = false;
-    });
+    if (mounted) {
+      setState(() {
+        _allUtilities.clear();
+        _allUtilities.addAll(filteredUtilities);
+        _visibleUtilities = saved ?? ['monthly_comparison', 'recurring'];
+        _seenUtilities = seen;
+        _isLoading = false;
+      });
+    }
   }
 
   Future<void> _savePreferences() async {

@@ -103,9 +103,9 @@ class _TransactionCardState extends ConsumerState<TransactionCard>
             color: color.surfaceContainerLow,
         child: Stack(
           children: [
-            if (widget.tripName != null)
+            if (widget.isRecurring)
               Positioned(
-                top: 0,
+                bottom: 0,
                 right: 0,
                 child: Container(
                   padding: const EdgeInsets.symmetric(
@@ -113,45 +113,7 @@ class _TransactionCardState extends ConsumerState<TransactionCard>
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: color.tertiaryContainer,
-                    borderRadius: const BorderRadius.only(
-                      topRight: Radius.circular(20),
-                      bottomLeft: Radius.circular(16),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.flight_takeoff,
-                        size: 12,
-                        color: color.onTertiaryContainer,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'TRIP',
-                        style: TextStyle(
-                          color: color.onTertiaryContainer,
-                          fontSize: 9,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            if (widget.isRecurring)
-              Positioned(
-                top: 0,
-                left: 0,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: color.errorContainer,
+                    color: color.errorContainer.withValues(alpha: 0.3),
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(20),
                       bottomRight: Radius.circular(16),
@@ -168,10 +130,44 @@ class _TransactionCardState extends ConsumerState<TransactionCard>
                       const SizedBox(width: 4),
                       Text(
                         'SUBSCRIPTION',
-                        style: TextStyle(
+                        style: textTheme.labelSmall?.copyWith(
                           color: color.error,
-                          fontSize: 9,
-                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            if (widget.tripName != null)
+              Positioned(
+                bottom: 0,
+                right: 0,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: color.primaryContainer.withValues(alpha: 0.3),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      bottomRight: Radius.circular(16),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.flight_takeoff,
+                        size: 12,
+                        color: color.primary,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'TRIP',
+                        style: textTheme.labelSmall?.copyWith(
+                          color: color.primary,
                           letterSpacing: 0.5,
                         ),
                       ),
@@ -190,7 +186,9 @@ class _TransactionCardState extends ConsumerState<TransactionCard>
                     const SizedBox(height: 12),
                     if (widget.description?.isNotEmpty == true)
                       Text(
-                        widget.description!,
+                        widget.description!.length > 80
+                            ? '${widget.description!.substring(0, 80)}...'
+                            : widget.description!,
                         style: textTheme.bodySmall?.copyWith(
                           color: color.onSurfaceVariant,
                           fontStyle: FontStyle.italic,

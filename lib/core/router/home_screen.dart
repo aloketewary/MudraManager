@@ -1,3 +1,5 @@
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -60,7 +62,7 @@ class HomePageState extends ConsumerState<HomePage>
     initNotification();
     _setupWidgetClickListener();
     _setupMethodChannel();
-    
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         ref.read(achievementUnlockListenerProvider).initialize(context);
@@ -140,6 +142,7 @@ class HomePageState extends ConsumerState<HomePage>
   Widget build(BuildContext context) {
     final profileAsync = ref.watch(userProfileProvider);
     final ctxt = AppLocalizations.of(context)!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return PopScope(
       canPop: _selectedIndex == 0,
@@ -156,7 +159,7 @@ class HomePageState extends ConsumerState<HomePage>
             ? FloatingActionButton.extended(
                 heroTag: 'addTransactionHeroTab1',
                 onPressed: () => context.push('/add-transaction'),
-                icon: const Icon(Icons.add),
+                icon: const Icon(LucideIcons.plus),
                 label: Text(ctxt.dashboard_add_transaction_text),
               )
             : _selectedIndex == 2
@@ -165,7 +168,7 @@ class HomePageState extends ConsumerState<HomePage>
                       HapticFeedback.mediumImpact();
                       utilityKey.currentState?.showCustomizeSheet();
                     },
-                    icon: const Icon(Icons.tune),
+                    icon: const Icon(LucideIcons.settings2),
                     label: const Text('Customise'),
                   )
                 : null,
@@ -176,43 +179,64 @@ class HomePageState extends ConsumerState<HomePage>
           animationDuration: const Duration(milliseconds: 300),
           destinations: [
             NavigationDestination(
-              icon: const Icon(Icons.home_outlined),
-              selectedIcon: const Icon(Icons.home),
+              icon: SvgPicture.asset('assets/logo/nav/outline/home.svg',
+                  colorFilter: ColorFilter.mode(
+                      isDark ? Colors.white : Colors.black, BlendMode.srcIn,),),
+              selectedIcon: SvgPicture.asset('assets/logo/nav/solid/home.svg',
+                  colorFilter: ColorFilter.mode(
+                      isDark ? Colors.white : Colors.black, BlendMode.srcIn,),)
+                  .animate(target: _selectedIndex == 0 ? 1 : 0)
+                  .scale(begin: const Offset(0.9, 0.9), end: const Offset(1, 1), curve: Curves.easeOutCubic, duration: 250.ms),
               label: ctxt.home_screen_title,
             ),
             NavigationDestination(
-              icon: const Icon(Icons.receipt_long_outlined),
-              selectedIcon: const Icon(Icons.receipt_long),
+              icon: SvgPicture.asset('assets/logo/nav/outline/activity.svg',
+                  colorFilter: ColorFilter.mode(
+                      isDark ? Colors.white : Colors.black, BlendMode.srcIn,),),
+              selectedIcon: SvgPicture.asset('assets/logo/nav/solid/activity.svg',
+                  colorFilter: ColorFilter.mode(
+                      isDark ? Colors.white : Colors.black, BlendMode.srcIn,),)
+                  .animate(target: _selectedIndex == 1 ? 1 : 0)
+                  .scale(begin: const Offset(0.9, 0.9), end: const Offset(1, 1), curve: Curves.easeOutCubic, duration: 250.ms),
               label: ctxt.transaction_screen_title,
             ),
-            const NavigationDestination(
-              icon: Icon(Icons.widgets_outlined),
-              selectedIcon: Icon(Icons.widgets),
+            NavigationDestination(
+              icon: SvgPicture.asset('assets/logo/nav/outline/utility.svg',
+                  colorFilter: ColorFilter.mode(
+                      isDark ? Colors.white : Colors.black, BlendMode.srcIn,),),
+              selectedIcon: SvgPicture.asset('assets/logo/nav/solid/utility.svg',
+                  colorFilter: ColorFilter.mode(
+                      isDark ? Colors.white : Colors.black, BlendMode.srcIn,),)
+                  .animate(target: _selectedIndex == 2 ? 1 : 0)
+                  .scale(begin: const Offset(0.9, 0.9), end: const Offset(1, 1), curve: Curves.easeOutCubic, duration: 250.ms),
               label: 'Utilities',
             ),
             NavigationDestination(
-              icon: const Icon(Icons.auto_graph_outlined),
-              selectedIcon: const Icon(Icons.auto_graph),
+              icon: SvgPicture.asset('assets/logo/nav/outline/statistics.svg',
+                  colorFilter: ColorFilter.mode(
+                      isDark ? Colors.white : Colors.black, BlendMode.srcIn,),),
+              selectedIcon: SvgPicture.asset('assets/logo/nav/solid/statistics.svg',
+                  colorFilter: ColorFilter.mode(
+                      isDark ? Colors.white : Colors.black, BlendMode.srcIn,),)
+                  .animate(target: _selectedIndex == 3 ? 1 : 0)
+                  .scale(begin: const Offset(0.9, 0.9), end: const Offset(1, 1), curve: Curves.easeOutCubic, duration: 250.ms),
               label: ctxt.statistics_screen_title,
             ),
             NavigationDestination(
-              icon: const Icon(Icons.person_outline),
-              selectedIcon: const Icon(Icons.person),
+              icon: SvgPicture.asset('assets/logo/nav/outline/profile.svg',
+                  colorFilter: ColorFilter.mode(
+                      isDark ? Colors.white : Colors.black, BlendMode.srcIn,),),
+              selectedIcon: SvgPicture.asset(
+                  'assets/logo/nav/solid/profile.svg',
+                  colorFilter: ColorFilter.mode(
+                      isDark ? Colors.white : Colors.black, BlendMode.srcIn,),)
+                  .animate(target: _selectedIndex == 4 ? 1 : 0)
+                  .scale(begin: const Offset(0.9, 0.9), end: const Offset(1, 1), curve: Curves.easeOutCubic, duration: 250.ms),
               label: ctxt.profile_screen_title,
             ),
           ],
         ),
-        body: _selectedIndex == 4
-            ? _pages[_selectedIndex]
-            : _selectedIndex == 2
-            ? SafeArea(bottom: false, child: _pages[_selectedIndex])
-            : SafeArea(
-                bottom: false,
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 80),
-                  child: _pages[_selectedIndex],
-                ),
-              ),
+        body: _pages[_selectedIndex],
       ),
     );
   }

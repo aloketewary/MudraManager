@@ -68,36 +68,35 @@ class AccountsService {
         .findAll();
     if (accounts.isEmpty) return <int, double>{};
 
+    // Fetch all transactions once and group by account in memory
+    final allTransactions = await isar.transactions.where().findAll();
+    final transactionsByAccount = <int, List<Transaction>>{};
+    
+    for (final tx in allTransactions) {
+      final accountId = tx.account.value?.id;
+      if (accountId != null) {
+        transactionsByAccount.putIfAbsent(accountId, () => []).add(tx);
+      }
+    }
+
     final balanceMap = <int, double>{};
-
-    // Optimization: Fetch all transactions grouped by account in memory if feasible,
-    // or use a more efficient summation.
     for (final account in accounts) {
-      final accountId = account.id;
+      final transactions = transactionsByAccount[account.id] ?? [];
+      
+      var income = 0.0;
+      var expense = 0.0;
+      for (final tx in transactions) {
+        if (tx.isExpense) {
+          expense += tx.amount;
+        } else {
+          income += tx.amount;
+        }
+      }
 
-      // Using property().sum() is already quite fast in Isar as it's a native operation.
-      // But we can ensure we only query transactions that AREN'T transfers (or handle them correctly).
-      final income = await isar.transactions
-          .filter()
-          .account((q) => q.idEqualTo(accountId))
-          .and()
-          .isExpenseEqualTo(false)
-          .amountProperty()
-          .sum();
-
-      final expense = await isar.transactions
-          .filter()
-          .account((q) => q.idEqualTo(accountId))
-          .and()
-          .isExpenseEqualTo(true)
-          .amountProperty()
-          .sum();
-
-      // For credit cards: expenses increase debt, payments decrease debt
       final balance = account.accountType == AccountType.creditCard
           ? account.initialBalance + expense - income
           : account.initialBalance + income - expense;
-      balanceMap[accountId] = balance;
+      balanceMap[account.id] = balance;
     }
 
     return balanceMap;

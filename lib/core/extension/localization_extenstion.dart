@@ -80,9 +80,9 @@ extension AppLocalizationsHelper on AppLocalizations {
 
   NumberFormat formatLocalizedCurrency(int fixedStringLength) {
     final locale = localeName == 'hi' ? 'hi_IN' : localeName;
-    var format = NumberFormat.currency(
+    final format = NumberFormat.currency(
       locale: locale,
-      symbol: "₹", // Or separate sign and symbol if needed
+      symbol: '₹', // Or separate sign and symbol if needed
       decimalDigits: fixedStringLength,
       customPattern: '¤#,##,##0.00',
     );

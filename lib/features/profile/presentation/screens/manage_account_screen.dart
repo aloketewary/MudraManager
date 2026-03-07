@@ -2,6 +2,8 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:googleapis/keep/v1.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/extension/account_type_extenstion.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
@@ -13,6 +15,7 @@ import 'package:mudra_manager/features/account/presentation/screens/balance_hist
 import 'package:mudra_manager/features/account/presentation/screens/reconciliation_screen.dart';
 import 'package:mudra_manager/features/account/presentation/screens/investment_portfolio_screen.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
+import 'package:mudra_manager/core/widgets/skeleton_loader.dart';
 
 class ManageAccountScreen extends ConsumerStatefulWidget {
   const ManageAccountScreen({super.key});
@@ -30,17 +33,12 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_initialized) {
-      final balanceMap = ref
-          .watch(accountServiceProvider)
-          .getAccountBalanceMap();
-      balanceMap.then(
-        (val) => {
-          setState(() {
-            _balanceMap = val;
-          }),
-        },
-      );
       _initialized = true;
+      ref.read(accountServiceProvider).getAccountBalanceMap().then((val) {
+        if (mounted) {
+          setState(() => _balanceMap = val);
+        }
+      });
     }
   }
 
@@ -63,54 +61,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
             icon: const Icon(Icons.info_outline),
             onPressed: () {
               HapticFeedback.mediumImpact();
-              showModalBottomSheet(
-                context: context,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                ),
-                builder: (ctx) => Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 40,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: color.onSurfaceVariant.withValues(alpha: 0.3),
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Icon(Icons.account_balance_wallet, size: 64, color: color.primary),
-                      const SizedBox(height: 16),
-                      Text(
-                        'How Accounts Work',
-                        style: textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Manage all your bank accounts, wallets, and cash in one place. Track balances and transactions across multiple accounts.',
-                        style: textTheme.bodyMedium,
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 24),
-                      FilledButton(
-                        onPressed: () => ctx.pop(),
-                        style: FilledButton.styleFrom(
-                          minimumSize: const Size(double.infinity, 48),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: const Text('Got it'),
-                      ),
-                    ],
-                  ),
-                ),
-              );
+              _showInfoBottomSheet(context, color, textTheme);
             },
           ),
         ],
@@ -129,63 +80,66 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
             );
           }
           return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: accounts.length + 1,
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+            itemCount: accounts.length,
             itemBuilder: (context, index) {
-              if (accounts.length != index) {
-                final account = accounts[index];
-                return _AccountListCard(
-                  account: account,
-                  balance: _balanceMap[account.id]?.toStringAsFixed(2) ?? '0.0',
-                  onArchive: () {
-                    if (accounts.length == 1) {
-                      SnackbarService.warning(
-                        ctxt.accounts_atLeastOneAccountRequired,
-                      );
-                    } else {
-                      showArchiveConfirmation(context, ref, account);
-                    }
-                  },
-                  onEdit: () {
-                    context.push(
-                      '/manage-accounts/add',
-                      extra: {'account': account},
+              final account = accounts[index];
+              return _AccountListCard(
+                account: account,
+                balance: _balanceMap[account.id]?.toStringAsFixed(2) ?? '0.0',
+                onArchive: () {
+                  if (accounts.length == 1) {
+                    SnackbarService.warning(
+                      ctxt.accounts_atLeastOneAccountRequired,
                     );
-                  },
-                  onRemove: () =>
-                      showDeleteConfirmation(context, ref, account, ctxt),
-                  onViewHistory: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (ctx) => BalanceHistoryScreen(account: account),
-                      ),
-                    );
-                  },
-                  onReconcile: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (ctx) => ReconciliationScreen(account: account),
-                      ),
-                    );
-                  },
-                  onViewPortfolio: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (ctx) => InvestmentPortfolioScreen(account: account),
-                      ),
-                    );
-                  },
-                );
-              } else {
-                return const Padding(padding: EdgeInsets.only(bottom: 80.0));
-              }
+                  } else {
+                    showArchiveConfirmation(context, ref, account, ctxt);
+                  }
+                },
+                onEdit: () {
+                  context.push(
+                    '/manage-accounts/add',
+                    extra: {'account': account},
+                  );
+                },
+                onRemove: () =>
+                    showDeleteConfirmation(context, ref, account, ctxt),
+                onViewHistory: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (ctx) =>
+                          BalanceHistoryScreen(account: account),
+                    ),
+                  );
+                },
+                onReconcile: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (ctx) =>
+                          ReconciliationScreen(account: account),
+                    ),
+                  );
+                },
+                onViewPortfolio: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (ctx) =>
+                          InvestmentPortfolioScreen(account: account),
+                    ),
+                  );
+                },
+              );
             },
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => ListView.builder(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+          itemCount: 5,
+          itemBuilder: (context, index) => const SkeletonListTile(),
+        ),
         error: (err, stack) => Center(child: Text('Error: $err')),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
@@ -193,7 +147,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
         onPressed: () {
           context.push('/manage-accounts/add');
         },
-        icon: const Icon(Icons.add),
+        icon: const Icon(LucideIcons.plus),
         label: Text(ctxt.accounts_addAccountLabel),
       ),
     );
@@ -225,55 +179,90 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
     BuildContext context,
     WidgetRef ref,
     Account account,
+    AppLocalizations ctxt,
   ) async {
-    final isarService = ref.read(isarServiceProvider);
-    final isar = await isarService.getInstance();
-    final textTheme = Theme.of(context).textTheme;
-    final color = Theme.of(context).colorScheme;
-    final ctxt = AppLocalizations.of(context)!;
-
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(ctxt.accounts_archiveAccountTitle),
-        content: Text(ctxt.accounts_archiveAccountMessage(account.name)),
-        actions: [
-          OutlinedButton(
-            onPressed: () {
-              HapticFeedback.mediumImpact();
-              context.pop(false);
-            },
-            child: Text(
-              ctxt.accounts_cancelLabel,
-              style: textTheme.titleMedium?.copyWith(color: color.onSurface),
-            ),
-          ),
-          OutlinedButton(
-            onPressed: () {
-              HapticFeedback.mediumImpact();
-              context.pop(true);
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: color.secondary),
-            child: Text(
-              ctxt.accounts_archiveLabel,
-              style: textTheme.titleMedium?.copyWith(color: color.onPrimary),
-            ),
-          ),
-        ],
-      ),
+    final confirmed = await DialogUtils.showConfirmation(
+      context,
+      title: ctxt.accounts_archiveAccountTitle,
+      message: ctxt.accounts_archiveAccountMessage(account.name),
+      icon: LucideIcons.archive,
     );
 
     if (confirmed == true) {
+      final isarService = ref.read(isarServiceProvider);
+      final isar = await isarService.getInstance();
       await isar.writeTxn(() async {
         account.isActive = false;
         await isar.accounts.put(account);
       });
       ref.invalidate(accountsProvider);
 
-      SnackbarService.success(
-        ctxt.accounts_accountArchivedMessage(account.name),
-      );
+      if (mounted) {
+        SnackbarService.success(
+          ctxt.accounts_accountArchivedMessage(account.name),
+        );
+      }
     }
+  }
+
+  void _showInfoBottomSheet(
+    BuildContext context,
+    ColorScheme color,
+    TextTheme textTheme,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: color.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: color.onSurfaceVariant.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Icon(Icons.account_balance_wallet, size: 64, color: color.primary),
+                const SizedBox(height: 16),
+                Text(
+                  'How Accounts Work',
+                  style: textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Manage all your bank accounts, wallets, and cash in one place. Track balances and transactions across multiple accounts.',
+                  style: textTheme.bodyMedium,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                FilledButton(
+                  onPressed: () => ctx.pop(),
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 48),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text('Got it'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -310,21 +299,27 @@ class _AccountListCard extends StatelessWidget {
       color: color.surfaceContainerHighest,
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        onTap: onEdit,
+        onTap: () {
+          HapticFeedback.lightImpact();
+          _showContextOptions(context);
+        },
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: accountColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  account.accountType.icon,
-                  color: accountColor,
-                  size: 24,
+              Hero(
+                tag: 'account_${account.id}',
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: accountColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    account.accountType.icon,
+                    color: accountColor,
+                    size: 24,
+                  ),
                 ),
               ),
               const SizedBox(width: 16),
@@ -361,92 +356,142 @@ class _AccountListCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  SizedBox(
-                    height: 24,
-                    child: PopupMenuButton<String>(
-                      icon: Icon(
-                        Icons.more_vert,
-                        color: color.onSurfaceVariant,
-                      ),
-                      padding: EdgeInsets.zero,
-                      onSelected: (value) {
-                        if (value == 'edit') onEdit();
-                        if (value == 'history') onViewHistory();
-                        if (value == 'reconcile') onReconcile();
-                        if (value == 'portfolio') onViewPortfolio();
-                        if (value == 'archive') onArchive();
-                        if (value == 'delete') onRemove();
-                      },
-                      itemBuilder: (context) => [
-                        PopupMenuItem(
-                          value: 'edit',
-                          child: Row(
-                            children: [
-                              Icon(Icons.edit, color: color.primary),
-                              const SizedBox(width: 8),
-                              const Text('Edit'),
-                            ],
-                          ),
-                        ),
-                        PopupMenuItem(
-                          value: 'history',
-                          child: Row(
-                            children: [
-                              Icon(Icons.history, color: color.primary),
-                              const SizedBox(width: 8),
-                              const Text('History'),
-                            ],
-                          ),
-                        ),
-                        PopupMenuItem(
-                          value: 'reconcile',
-                          child: Row(
-                            children: [
-                              Icon(Icons.verified_user, color: color.primary),
-                              const SizedBox(width: 8),
-                              const Text('Reconcile'),
-                            ],
-                          ),
-                        ),
-                        if (account.accountType.name == 'investment')
-                          PopupMenuItem(
-                            value: 'portfolio',
-                            child: Row(
-                              children: [
-                                Icon(Icons.trending_up, color: color.primary),
-                                const SizedBox(width: 8),
-                                const Text('Portfolio'),
-                              ],
-                            ),
-                          ),
-                        PopupMenuItem(
-                          value: 'archive',
-                          child: Row(
-                            children: [
-                              Icon(Icons.archive, color: color.primary),
-                              const SizedBox(width: 8),
-                              const Text('Archive'),
-                            ],
-                          ),
-                        ),
-                        PopupMenuItem(
-                          value: 'delete',
-                          child: Row(
-                            children: [
-                              Icon(Icons.delete, color: color.error),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Delete',
-                                style: TextStyle(color: color.error),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+                  Icon(
+                    LucideIcons.chevronRight,
+                    color: color.onSurfaceVariant,
+                    size: 20,
                   ),
                 ],
               ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showContextOptions(BuildContext context) {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final accountColor = Color(account.colorValue ?? Colors.blue.toARGB32());
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: color.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 12),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: color.onSurfaceVariant.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: accountColor.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        account.accountType.icon,
+                        color: accountColor,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            account.name,
+                            style: textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            '₹$balance',
+                            style: textTheme.bodyMedium?.copyWith(
+                              color: accountColor,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Divider(height: 1),
+              ListTile(
+                leading: Icon(Icons.edit_outlined, color: color.primary),
+                title: const Text('Edit Account'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  onEdit();
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.history, color: color.primary),
+                title: const Text('Balance History'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  onViewHistory();
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.verified_user_outlined, color: color.primary),
+                title: const Text('Reconcile'),
+                subtitle: const Text('Match with bank statement'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  onReconcile();
+                },
+              ),
+              if (account.accountType.name == 'investment')
+                ListTile(
+                  leading: Icon(Icons.trending_up, color: color.primary),
+                  title: const Text('View Portfolio'),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    onViewPortfolio();
+                  },
+                ),
+              const Divider(height: 1),
+              ListTile(
+                leading: Icon(Icons.archive_outlined, color: color.onSurfaceVariant),
+                title: const Text('Archive'),
+                subtitle: const Text('Hide from active accounts'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  onArchive();
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.delete_outline, color: color.error),
+                title: Text('Delete', style: TextStyle(color: color.error)),
+                subtitle: const Text('Permanently remove account'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  onRemove();
+                },
+              ),
+              const SizedBox(height: 8),
             ],
           ),
         ),
