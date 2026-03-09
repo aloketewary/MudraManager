@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/extension/localization_extenstion.dart';
@@ -10,11 +12,16 @@ import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 
-class MonthlyComparisonScreen extends ConsumerWidget {
+class MonthlyComparisonScreen extends ConsumerStatefulWidget {
   const MonthlyComparisonScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MonthlyComparisonScreen> createState() => _MonthlyComparisonScreenState();
+}
+
+class _MonthlyComparisonScreenState extends ConsumerState<MonthlyComparisonScreen> {
+  @override
+  Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final isar = ref.watch(isarServiceProvider);
@@ -28,7 +35,9 @@ class MonthlyComparisonScreen extends ConsumerWidget {
     final lastMonthEnd = DateTime(now.year, now.month, 0, 23, 59, 59);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Monthly Comparison')),
+      appBar: AppBar(
+        title: const Text('Monthly Comparison'),
+      ),
       body: FutureBuilder<Map<String, double>>(
         future: _getComparisonData(
           isar,
@@ -72,45 +81,72 @@ class MonthlyComparisonScreen extends ConsumerWidget {
           final balanceChange = lastBalance != 0
               ? ((currentBalance - lastBalance) / lastBalance.abs() * 100)
               : 0.0;
+          final variance = currentExpense - lastExpense;
+          final variancePercent = lastExpense > 0 ? (variance / lastExpense * 100) : 0.0;
 
-          return ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              _ComparisonCard(
-                title: 'Income',
-                icon: Icons.trending_up,
-                color: colorScheme.primary,
-                currentAmount: currentIncome,
-                lastAmount: lastIncome,
-                percentageChange: incomeChange,
-                colorScheme: colorScheme,
-                textTheme: textTheme,
-                l10n: l10n,
+          return CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: _buildHeroDelta(variance, variancePercent, colorScheme, textTheme),
               ),
-              const SizedBox(height: 12),
-              _ComparisonCard(
-                title: 'Expense',
-                icon: Icons.trending_down,
-                color: colorScheme.error,
-                currentAmount: currentExpense,
-                lastAmount: lastExpense,
-                percentageChange: expenseChange,
-                colorScheme: colorScheme,
-                textTheme: textTheme,
-                l10n: l10n,
+              SliverToBoxAdapter(
+                child: _buildSpendingVelocity(colorScheme, textTheme),
               ),
-              const SizedBox(height: 12),
-              _ComparisonCard(
-                title: 'Balance',
-                icon: Icons.account_balance_wallet,
-                color: colorScheme.tertiary,
-                currentAmount: currentBalance,
-                lastAmount: lastBalance,
-                percentageChange: balanceChange,
-                colorScheme: colorScheme,
-                textTheme: textTheme,
-                l10n: l10n,
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                  child: Text(
+                    'Overview',
+                    style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                ),
               ),
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    _ComparisonCard(
+                      title: 'Income',
+                      icon: Icons.trending_up,
+                      color: colorScheme.primary,
+                      currentAmount: currentIncome,
+                      lastAmount: lastIncome,
+                      percentageChange: incomeChange,
+                      colorScheme: colorScheme,
+                      textTheme: textTheme,
+                      l10n: l10n,
+                    ),
+                    const SizedBox(height: 12),
+                    _ComparisonCard(
+                      title: 'Expense',
+                      icon: Icons.trending_down,
+                      color: colorScheme.error,
+                      currentAmount: currentExpense,
+                      lastAmount: lastExpense,
+                      percentageChange: expenseChange,
+                      colorScheme: colorScheme,
+                      textTheme: textTheme,
+                      l10n: l10n,
+                    ),
+                    const SizedBox(height: 12),
+                    _ComparisonCard(
+                      title: 'Balance',
+                      icon: Icons.account_balance_wallet,
+                      color: colorScheme.tertiary,
+                      currentAmount: currentBalance,
+                      lastAmount: lastBalance,
+                      percentageChange: balanceChange,
+                      colorScheme: colorScheme,
+                      textTheme: textTheme,
+                      l10n: l10n,
+                    ),
+                  ]),
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: _buildInsightFooter(colorScheme, textTheme, variance < 0),
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 100)),
             ],
           );
         },
@@ -164,6 +200,200 @@ class MonthlyComparisonScreen extends ConsumerWidget {
     };
   }
 
+  Widget _buildHeroDelta(double variance, double variancePercent, ColorScheme color, TextTheme textTheme) {
+    final isPositive = variance < 0;
+    final deltaColor = isPositive ? const Color(0xFFA8E6CF) : const Color(0xFFFFAB91);
+
+    return Container(
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: color.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: deltaColor.withValues(alpha: 0.3),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              isPositive ? LucideIcons.trendingDown : LucideIcons.trendingUp,
+              color: deltaColor,
+              size: 40,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            '${isPositive ? '' : '+'}₹${variance.abs().toStringAsFixed(0)}',
+            style: textTheme.displayMedium?.copyWith(
+              fontWeight: FontWeight.w900,
+              color: deltaColor,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'vs last month',
+            style: textTheme.bodyMedium?.copyWith(color: color.onSurfaceVariant),
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: deltaColor.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  isPositive ? LucideIcons.arrowDown : LucideIcons.arrowUp,
+                  color: deltaColor,
+                  size: 16,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  '${variancePercent.abs().toStringAsFixed(1)}% ${isPositive ? 'decrease' : 'increase'}',
+                  style: textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: deltaColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSpendingVelocity(ColorScheme color, TextTheme textTheme) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: color.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(LucideIcons.activity, color: color.primary, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                'Spending Velocity',
+                style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            height: 100,
+            child: LineChart(
+              LineChartData(
+                gridData: const FlGridData(show: false),
+                titlesData: const FlTitlesData(show: false),
+                borderData: FlBorderData(show: false),
+                lineBarsData: [
+                  LineChartBarData(
+                    spots: const [
+                      FlSpot(0, 0),
+                      FlSpot(5, 12),
+                      FlSpot(10, 20),
+                      FlSpot(15, 28),
+                      FlSpot(20, 35),
+                      FlSpot(25, 42),
+                      FlSpot(30, 48),
+                    ],
+                    isCurved: true,
+                    color: color.tertiary.withValues(alpha: 0.5),
+                    barWidth: 3,
+                    dotData: const FlDotData(show: false),
+                  ),
+                  LineChartBarData(
+                    spots: const [
+                      FlSpot(0, 0),
+                      FlSpot(5, 10),
+                      FlSpot(10, 18),
+                      FlSpot(15, 24),
+                      FlSpot(20, 30),
+                      FlSpot(25, 38),
+                      FlSpot(30, 45),
+                    ],
+                    isCurved: true,
+                    color: color.primary,
+                    barWidth: 3,
+                    dotData: const FlDotData(show: false),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildLegendItem('This month', color.primary, textTheme),
+              const SizedBox(width: 20),
+              _buildLegendItem('Last month', color.tertiary.withValues(alpha: 0.5), textTheme),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLegendItem(String label, Color color, TextTheme textTheme) {
+    return Row(
+      children: [
+        Container(
+          width: 16,
+          height: 3,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(width: 6),
+        Text(label, style: textTheme.bodySmall),
+      ],
+    );
+  }
+
+  Widget _buildInsightFooter(ColorScheme color, TextTheme textTheme, bool isPositive) {
+    return Container(
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [color.primaryContainer, color.tertiaryContainer],
+        ),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          Icon(LucideIcons.sparkles, color: color.primary, size: 24),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              isPositive
+                  ? 'Great job! You\'ve been more mindful with your spending this month. Keep it up!'
+                  : 'Your spending increased this month. Review your expenses to identify areas for improvement.',
+              style: textTheme.bodyMedium?.copyWith(
+                color: color.onPrimaryContainer,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   static Widget _buildComparisonCardSkeleton(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return Card(
@@ -182,21 +412,21 @@ class MonthlyComparisonScreen extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 const SizedBox(width: 12),
-                SkeletonLoader(
+                const SkeletonLoader(
                   width: 100,
                   height: 24,
                 ),
               ],
             ),
             const SizedBox(height: 20),
-            Row(
+            const Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SkeletonLoader(width: 100, height: 14),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8),
                     SkeletonLoader(width: 120, height: 24),
                   ],
                 ),
@@ -204,7 +434,7 @@ class MonthlyComparisonScreen extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     SkeletonLoader(width: 100, height: 14),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8),
                     SkeletonLoader(width: 100, height: 18),
                   ],
                 ),
@@ -251,8 +481,8 @@ class _ComparisonCard extends StatelessWidget {
     final isPositive = percentageChange >= 0;
     final color = Theme.of(context).colorScheme;
     final changeColor = title == 'Expense'
-        ? (isPositive ? color.error : color.primary)
-        : (isPositive ? color.primary : color.error);
+        ? (isPositive ? const Color(0xFFFFAB91) : const Color(0xFFA8E6CF))
+        : (isPositive ? const Color(0xFFA8E6CF) : const Color(0xFFFFAB91));
 
     return Card(
       elevation: 0,

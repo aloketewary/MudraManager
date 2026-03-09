@@ -9,6 +9,8 @@ import 'package:mudra_manager/core/services/backup_restore_service.dart';
 import 'package:mudra_manager/core/utils/dialog_utils.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 
+final _dateFormatter = DateFormat.yMd().add_jm();
+
 class BackupRestoreScreen extends ConsumerWidget {
   const BackupRestoreScreen({super.key});
 
@@ -181,9 +183,7 @@ class BackupRestoreScreen extends ConsumerWidget {
                       builder: (_, snapshot) => Text(
                         snapshot.hasData
                             ? ctxt.backup_lastBackupLabel(
-                                DateFormat.yMd().add_jm().format(
-                                  snapshot.data!,
-                                ),
+                                _dateFormatter.format(snapshot.data!),
                               )
                             : ctxt.backup_noBackupFoundLabel,
                         style: textTheme.bodySmall?.copyWith(

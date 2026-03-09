@@ -17,6 +17,7 @@ class CreateTripScreen extends ConsumerStatefulWidget {
 class _CreateTripScreenState extends ConsumerState<CreateTripScreen> {
   final _nameController = TextEditingController();
   final _descController = TextEditingController();
+  final _budgetController = TextEditingController();
   DateTime _startDate = DateTime.now();
   DateTime _endDate = DateTime.now().add(const Duration(days: 3));
   final List<TripParticipant> _participants = [];
@@ -26,6 +27,7 @@ class _CreateTripScreenState extends ConsumerState<CreateTripScreen> {
   void dispose() {
     _nameController.dispose();
     _descController.dispose();
+    _budgetController.dispose();
     super.dispose();
   }
 
@@ -132,6 +134,10 @@ class _CreateTripScreenState extends ConsumerState<CreateTripScreen> {
       return;
     }
 
+    final budget = _budgetController.text.trim().isEmpty
+        ? null
+        : double.tryParse(_budgetController.text.trim());
+
     final trip = Trip.create(
       name: _nameController.text.trim(),
       description: _descController.text.trim().isEmpty
@@ -139,6 +145,7 @@ class _CreateTripScreenState extends ConsumerState<CreateTripScreen> {
           : _descController.text.trim(),
       startDate: _startDate,
       endDate: _endDate,
+      budget: budget,
     );
 
     await ref.read(tripServiceProvider).createTrip(trip, _participants);
@@ -230,6 +237,21 @@ class _CreateTripScreenState extends ConsumerState<CreateTripScreen> {
                             prefixIcon: const Icon(Icons.description),
                           ),
                           maxLines: 2,
+                        ),
+                        const SizedBox(height: 16),
+                        TextField(
+                          controller: _budgetController,
+                          decoration: InputDecoration(
+                            labelText: 'Budget (Optional)',
+                            hintText: 'e.g., 50000',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            filled: true,
+                            fillColor: color.surface,
+                            prefixIcon: const Icon(Icons.currency_rupee),
+                          ),
+                          keyboardType: TextInputType.number,
                         ),
                       ],
                     ),

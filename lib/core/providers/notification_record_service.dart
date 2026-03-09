@@ -24,7 +24,9 @@ class NotificationRecordService {
       ..body = body
       ..timestamp = DateTime.now()
       ..isRead = false
-      ..type = type;
+      ..type = type
+      ..priority = NotificationPriority.normal
+      ..category = NotificationCategory.financial;
     final isar = await isarService.getInstance();
     await isar.writeTxn(() => isar.notificationRecords.put(record));
   }

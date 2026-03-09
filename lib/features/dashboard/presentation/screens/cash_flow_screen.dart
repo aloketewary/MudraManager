@@ -6,16 +6,19 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:mudra_manager/core/db/filter_type.dart';
 import 'package:mudra_manager/core/extension/localization_extenstion.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/filter_provider.dart';
+import 'package:mudra_manager/features/dashboard/data/historical_data_provider.dart';
 import 'package:mudra_manager/shared/widgets/animated_balance.dart';
 import 'package:mudra_manager/shared/widgets/period_calendar_selector.dart';
 import 'package:mudra_manager/shared/widgets/responseive_layout_builder.dart';
 import 'package:mudra_manager/shared/widgets/trend_indicator.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 
 class CashFlowScreen extends ConsumerStatefulWidget {
   final double globalPadding;
@@ -223,11 +226,38 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
           ),
         );
       },
-      loading: () => Container(
-        width: 120,
-        height: 170,
-        margin: const EdgeInsets.only(right: 8.0),
-        child: const Center(child: CircularProgressIndicator(value: 25)),
+      loading: () => Padding(
+        padding: EdgeInsets.all(widget.globalPadding),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12, left: 4, right: 4),
+              child: Row(
+                children: [
+                  SkeletonLoader(width: 24, height: 24, borderRadius: BorderRadius.circular(4)),
+                  const SizedBox(width: 8),
+                  SkeletonLoader(width: 120, height: 20, borderRadius: BorderRadius.circular(4)),
+                ],
+              ),
+            ),
+            ResponsiveLayoutBuilder(
+              columnWidget: Column(
+                children: [
+                  SkeletonLoader(width: double.infinity, height: 170, borderRadius: BorderRadius.circular(12)),
+                  const SizedBox(height: 12),
+                  SkeletonLoader(width: double.infinity, height: 170, borderRadius: BorderRadius.circular(12)),
+                ],
+              ),
+              rowWidget: Row(
+                children: [
+                  Expanded(child: SkeletonLoader(width: double.infinity, height: 170, borderRadius: BorderRadius.circular(12))),
+                  const SizedBox(width: 12),
+                  Expanded(child: SkeletonLoader(width: double.infinity, height: 170, borderRadius: BorderRadius.circular(12))),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
       error: (e, _) => Center(child: Text('Error: $e')),
     );
@@ -359,30 +389,92 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
                           height: 80,
                           alignment: Alignment.centerLeft,
                           child: Stack(
-                            alignment: Alignment.centerLeft,
                             children: [
-                              Text(
-                                ctxt.formatCurrencyWithSign(0, value),
-                                style: textTheme.titleLarge?.copyWith(
-                                  color:
-                                      (isExpense ? color.error : color.primary)
-                                          .withValues(alpha: 0.1),
-                                  fontSize: 60,
-                                  fontWeight: FontWeight.bold,
+                              Positioned.fill(
+                                child: Consumer(
+                                  builder: (context, ref, child) {
+                                    final historyAsync = ref.watch(
+                                      isExpense ? historicalExpenseProvider : historicalIncomeProvider,
+                                    );
+                                    return historyAsync.when(
+                                      data: (history) {
+                                        if (history.isEmpty) {
+                                          return const SizedBox();
+                                        }
+                                        // If all values are zero, show a flat line at bottom
+                                        if (history.every((v) => v == 0)) {
+                                          final spots = history.asMap().entries.map((e) {
+                                            return FlSpot(e.key.toDouble(), 10.0);
+                                          }).toList();
+                                          return LineChart(
+                                            LineChartData(
+                                              gridData: const FlGridData(show: false),
+                                              titlesData: const FlTitlesData(show: false),
+                                              borderData: FlBorderData(show: false),
+                                              lineTouchData: const LineTouchData(enabled: false),
+                                              lineBarsData: [
+                                                LineChartBarData(
+                                                  spots: spots,
+                                                  isCurved: true,
+                                                  color: (isExpense ? color.error : color.primary).withValues(alpha: 0.15),
+                                                  barWidth: 2,
+                                                  dotData: const FlDotData(show: false),
+                                                  belowBarData: BarAreaData(
+                                                    show: true,
+                                                    color: (isExpense ? color.error : color.primary).withValues(alpha: 0.05),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        }
+                                        final maxVal = history.reduce((a, b) => a > b ? a : b);
+                                        final minVal = history.reduce((a, b) => a < b ? a : b);
+                                        final range = maxVal - minVal;
+                                        final spots = history.asMap().entries.map((e) {
+                                          final normalized = range > 0 ? ((e.value - minVal) / range) * 40 + 10 : 25;
+                                          return FlSpot(e.key.toDouble(), normalized.toDouble());
+                                        }).toList();
+                                        return LineChart(
+                                          LineChartData(
+                                            gridData: const FlGridData(show: false),
+                                            titlesData: const FlTitlesData(show: false),
+                                            borderData: FlBorderData(show: false),
+                                            lineTouchData: const LineTouchData(enabled: false),
+                                            lineBarsData: [
+                                              LineChartBarData(
+                                                spots: spots,
+                                                isCurved: true,
+                                                color: (isExpense ? color.error : color.primary).withValues(alpha: 0.15),
+                                                barWidth: 2,
+                                                dotData: const FlDotData(show: false),
+                                                belowBarData: BarAreaData(
+                                                  show: true,
+                                                  color: (isExpense ? color.error : color.primary).withValues(alpha: 0.05),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                      loading: () => const SizedBox(),
+                                      error: (_, __) => const SizedBox(),
+                                    );
+                                  },
                                 ),
-                                overflow: TextOverflow.fade,
                               ),
-                              AnimatedBalance(
-                                value: value,
-                                style: textTheme.titleMedium?.copyWith(
-                                  color: isExpense
-                                      ? color.error
-                                      : color.primary,
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.bold,
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: AnimatedBalance(
+                                  value: value,
+                                  style: textTheme.titleMedium?.copyWith(
+                                    color: isExpense ? color.error : color.primary,
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  fixedStringLength: 0,
+                                  overflow: TextOverflow.fade,
                                 ),
-                                fixedStringLength: 0,
-                                overflow: TextOverflow.fade,
                               ),
                             ],
                           ),

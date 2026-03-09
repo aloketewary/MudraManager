@@ -9,6 +9,7 @@ import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/utils/dialog_utils.dart';
 import 'package:mudra_manager/core/utils/icon_helper.dart';
+import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/transactions/data/pending_transaction_prodiver.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 import 'package:mudra_manager/features/transactions/presentation/widgets/transaction_card.dart';
@@ -19,6 +20,8 @@ import 'package:mudra_manager/shared/widgets/adaptive_text.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:table_calendar/table_calendar.dart';
+
+final _dateHeaderFormatter = DateFormat.yMMMMd();
 
 class TransactionListScreen extends ConsumerStatefulWidget {
   final bool showAppBar;
@@ -52,8 +55,9 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
   final ScrollController _scrollController = ScrollController();
   int _displayLimit = 50;
   bool _isLoadingMore = false;
-  bool _useInfiniteScroll =
-      true; // New: toggle between infinite scroll and month view
+  bool _useInfiniteScroll = true;
+  List<TxListEntry>? _cachedFiltered;
+  String _lastFilterKey = '';
 
   @override
   void initState() {
@@ -111,7 +115,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
       return ctxt.transaction_listViewGroupYesterdayLabel;
     }
 
-    return DateFormat.yMMMMd(locale).format(date); // e.g., May 14, 2025
+    return _dateHeaderFormatter.format(date);
   }
 
   bool isSameMonth(DateTime a, DateTime b) {
@@ -856,11 +860,30 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
 
               final displayItems = filtered.take(_displayLimit).toList();
               final hasMore = filtered.length > _displayLimit;
+              
+              final transactionIds = displayItems
+                  .whereType<TxItem>()
+                  .map((e) => e.txn.id)
+                  .toList();
+              
+              final visibleTransactions = displayItems.whereType<TxItem>().map((e) => e.txn).toList();
+              for (var tx in visibleTransactions) {
+                tx.category.load();
+                tx.account.load();
+                tx.tags.load();
+                tx.related.load();
+                tx.recurringTransactionSource.load();
+              }
+              
+              return FutureBuilder<Map<int, String>>(
+                future: ref.read(tripServiceProvider).getTripNamesByTransactionIds(transactionIds),
+                builder: (context, tripNamesSnapshot) {
+                  final tripNames = tripNamesSnapshot.data ?? {};
 
-              return ListView.builder(
-                controller: _scrollController,
-                itemCount: displayItems.length + (hasMore ? 1 : 0),
-                itemBuilder: (context, index) {
+                  return ListView.builder(
+                    controller: _scrollController,
+                    itemCount: displayItems.length + (hasMore ? 1 : 0),
+                    itemBuilder: (context, index) {
                   if (index == displayItems.length) {
                     return const Padding(
                       padding: EdgeInsets.all(16),
@@ -893,32 +916,25 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                   }
 
                   final transaction = (entry as TxItem).txn;
-                  transaction.tags.load();
-                  transaction.related.load();
-                  transaction.recurringTransactionSource.load();
                   final tags = transaction.tags.toList();
                   final isRecurring = transaction.recurringTransactionSource.value != null;
+                  final tripName = tripNames[transaction.id];
 
-                  return FutureBuilder<String?>(
-                    future: ref
-                        .read(tripServiceProvider)
-                        .getTripNameByTransactionId(transaction.id),
-                    builder: (context, snapshot) {
-                      return TransactionCard(
-                        category: transaction.category.value,
-                        description: transaction.description,
-                        account: transaction.account.value,
-                        amount: transaction.amount.toStringAsFixed(2),
-                        date: transaction.date,
-                        isExpense: transaction.isExpense,
-                        isTransfer: transaction.isTransfer,
-                        tags: tags,
-                        related: transaction.related.value,
-                        tripName: snapshot.data,
-                        isRecurring: isRecurring,
-                        onEdit: () {
-                          transaction.isTransfer
-                              ? context.push(
+                  return TransactionCard(
+                    category: transaction.category.value,
+                    description: transaction.description,
+                    account: transaction.account.value,
+                    amount: transaction.amount.toStringAsFixed(2),
+                    date: transaction.date,
+                    isExpense: transaction.isExpense,
+                    isTransfer: transaction.isTransfer,
+                    tags: tags,
+                    related: transaction.related.value,
+                    tripName: tripName,
+                    isRecurring: isRecurring,
+                    onEdit: () async {
+                          final result = transaction.isTransfer
+                              ? await context.push(
                                   '/transfer',
                                   extra: {
                                     'amount': transaction.amount
@@ -935,10 +951,18 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                                     'toId': transaction.id,
                                   },
                                 )
-                              : context.push(
+                              : await context.push(
                                   '/add-transaction',
                                   extra: {'transaction': transaction},
                                 );
+                          
+                          // Clear cache when returning from edit
+                          if (result == true && mounted) {
+                            setState(() {
+                              _cachedFiltered = null;
+                              _lastFilterKey = '';
+                            });
+                          }
                         },
                         onRemove: () async {
                           final confirm =
@@ -966,8 +990,21 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                             await ref
                                 .read(transactionProvider)
                                 .deleteTransaction(transaction.id);
+                            
+                            // Clear cache before invalidating
+                            setState(() {
+                              _cachedFiltered = null;
+                              _lastFilterKey = '';
+                            });
+                            
+                            // Only invalidate specific providers, not all
+                            ref.invalidate(allSectionedTransactionsProvider(_filter));
                             ref.invalidate(transactionProvider);
                             ref.invalidate(allTripsProvider);
+                            
+                            if (context.mounted) {
+                              SnackbarService.success('Transaction deleted successfully');
+                            }
                           }
                         },
                       );
@@ -988,7 +1025,14 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
   }
 
   List<TxListEntry> _filterTransactions(List<TxListEntry> sectioned) {
+    final filterKey = '$_searchQuery|$_selectedCategoryId';
+    if (_cachedFiltered != null && _lastFilterKey == filterKey) {
+      return _cachedFiltered!;
+    }
+    
     if (_searchQuery.isEmpty && _selectedCategoryId == null) {
+      _cachedFiltered = sectioned;
+      _lastFilterKey = filterKey;
       return sectioned;
     }
 
@@ -1002,7 +1046,6 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
       }
 
       if (entry is SmsActivityItem) {
-        // SMS activities always pass through filters (they're pending)
         if (currentDate != null) {
           if (filtered.isEmpty || filtered.last is! TxHeader) {
             filtered.add(TxHeader(currentDate));
@@ -1048,6 +1091,8 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
       }
     }
 
+    _cachedFiltered = filtered;
+    _lastFilterKey = filterKey;
     return filtered;
   }
 

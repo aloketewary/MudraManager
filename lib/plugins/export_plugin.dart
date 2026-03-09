@@ -19,6 +19,7 @@ class ExportData {
   final DateTime startDate;
   final DateTime endDate;
   final String currency;
+  final String? userName;
 
   ExportData({
     required this.income,
@@ -31,5 +32,6 @@ class ExportData {
     required this.startDate,
     required this.endDate,
     this.currency = '₹',
+    this.userName,
   });
 }

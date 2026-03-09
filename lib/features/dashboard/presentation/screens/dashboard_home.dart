@@ -29,66 +29,7 @@ import 'package:mudra_manager/shared/widgets/responseive_layout_builder.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class _AnimatedCard extends StatefulWidget {
-  final Widget child;
-  final int delay;
 
-  const _AnimatedCard({required this.child, this.delay = 0});
-
-  @override
-  State<_AnimatedCard> createState() => _AnimatedCardState();
-}
-
-class _AnimatedCardState extends State<_AnimatedCard>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _fadeAnimation;
-  late Animation<Offset> _slideAnimation;
-  late Animation<double> _scaleAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 500),
-      vsync: this,
-    );
-
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0)
-        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
-
-    _slideAnimation =
-        Tween<Offset>(begin: const Offset(0, 0.15), end: Offset.zero).animate(
-            CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),);
-
-    _scaleAnimation = Tween<double>(begin: 0.95, end: 1.0).animate(
-        CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),);
-
-    Future.delayed(Duration(milliseconds: widget.delay), () {
-      if (mounted) _controller.forward();
-    });
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: _fadeAnimation,
-      child: SlideTransition(
-        position: _slideAnimation,
-        child: ScaleTransition(
-          scale: _scaleAnimation,
-          child: widget.child,
-        ),
-      ),
-    );
-  }
-}
 
 class DashboardHome extends ConsumerStatefulWidget {
   const DashboardHome({super.key});
@@ -112,25 +53,27 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
   void initState() {
     super.initState();
     _loadCardPreferences();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final prefs = SharedPrefsUtil.instance;
-      final lastCheckIn = prefs.getLastDailyCheckIn();
-      final now = DateTime.now();
+    Future.delayed(const Duration(milliseconds: 500), _performDailyCheckIn);
+  }
 
-      // Only check in if not already done today
-      if (lastCheckIn == null ||
-          !(lastCheckIn.year == now.year &&
-              lastCheckIn.month == now.month &&
-              lastCheckIn.day == now.day)) {
-        final service = await ref.read(gamificationServiceInitProvider.future);
-        final result = await service.updateDailyCheckIn();
-        if (result != null && mounted) {
-          await prefs.setLastDailyCheckIn(now);
-          SnackbarService.success('🔥 $result');
-          log.i('✅ Daily check-in completed');
-        }
+  Future<void> _performDailyCheckIn() async {
+    if (!mounted) return;
+    final prefs = SharedPrefsUtil.instance;
+    final lastCheckIn = prefs.getLastDailyCheckIn();
+    final now = DateTime.now();
+
+    if (lastCheckIn == null ||
+        !(lastCheckIn.year == now.year &&
+            lastCheckIn.month == now.month &&
+            lastCheckIn.day == now.day)) {
+      final service = await ref.read(gamificationServiceInitProvider.future);
+      final result = await service.updateDailyCheckIn();
+      if (result != null && mounted) {
+        await prefs.setLastDailyCheckIn(now);
+        SnackbarService.success('🔥 $result');
+        log.i('✅ Daily check-in completed');
       }
-    });
+    }
   }
 
   Future<void> _loadCardPreferences() async {
@@ -186,8 +129,8 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
         return const AnimatedSwipeableAccountCards();
       case 'action_buttons':
         return Container(
-          margin: EdgeInsets.symmetric(horizontal: globalPadding),
-          child: ResponsiveLayoutBuilder(
+            margin: EdgeInsets.symmetric(horizontal: globalPadding),
+            child: ResponsiveLayoutBuilder(
             columnWidget: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -242,7 +185,7 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
         return SpendingPersonalityCard(globalPadding: globalPadding);
       case 'cash_flow':
         return Column(
-          children: [
+            children: [
             CashFlowScreen(
               globalPadding: globalPadding,
               selectedPeriod: _selectedPeriod,
@@ -268,30 +211,19 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
           ],
         );
       case 'financial_health':
-        return _AnimatedCard(
-            delay: index * 100,
-            child: FinancialHealthCard(globalPadding: globalPadding),);
+        return FinancialHealthCard(globalPadding: globalPadding);
       case 'net_worth':
-        return _AnimatedCard(
-            delay: index * 100,
-            child: NetWorthCard(globalPadding: globalPadding),);
+        return NetWorthCard(globalPadding: globalPadding);
       case 'spending_prediction':
-        return _AnimatedCard(
-            delay: index * 100,
-            child: SpendingPredictionCard(globalPadding: globalPadding),);
+        return SpendingPredictionCard(globalPadding: globalPadding);
       case 'recurring_expenses':
         return RecurringExpensesCard(globalPadding: globalPadding);
       case 'active_trip':
-        return _AnimatedCard(
-            delay: index * 100,
-            child: ActiveTripMiniCard(globalPadding: globalPadding),);
+        return ActiveTripMiniCard(globalPadding: globalPadding);
       case 'budget':
-        return _AnimatedCard(
-            delay: index * 100,
-            child: BudgetCard(globalPadding: globalPadding),);
+        return BudgetCard(globalPadding: globalPadding);
       case 'goal':
-        return _AnimatedCard(
-            delay: index * 100, child: GoalCard(globalPadding: globalPadding),);
+        return GoalCard(globalPadding: globalPadding);
       default:
         return null;
     }
@@ -381,7 +313,6 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
 
     return Scaffold(
       body: SingleChildScrollView(
-        key: GlobalKey(debugLabel: 'dashboard_home'),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisAlignment: MainAxisAlignment.center,

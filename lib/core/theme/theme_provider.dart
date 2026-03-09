@@ -1,8 +1,27 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 
 enum AppThemeMode { system, light, dark, amoled }
+
+final highContrastModeProvider = StateNotifierProvider<HighContrastNotifier, bool>((ref) => HighContrastNotifier());
+
+class HighContrastNotifier extends StateNotifier<bool> {
+  HighContrastNotifier() : super(false) {
+    state = SharedPrefsUtil.instance.getHighContrastMode();
+  }
+
+  void toggle() {
+    state = !state;
+    SharedPrefsUtil.instance.setHighContrastMode(state);
+  }
+
+  void set(bool value) {
+    state = value;
+    SharedPrefsUtil.instance.setHighContrastMode(value);
+  }
+}
 
 final themeModeProvider =
     StateNotifierProvider<ThemeModeNotifier, AppThemeMode>(

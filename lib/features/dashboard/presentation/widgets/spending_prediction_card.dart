@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/features/analytics/data/analytics_provider.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 
 class SpendingPredictionCard extends ConsumerWidget {
   final double globalPadding;
@@ -23,51 +24,46 @@ class SpendingPredictionCard extends ConsumerWidget {
 
         return Padding(
           padding: const EdgeInsets.only(top: 16),
-          child: Container(
-            margin: EdgeInsets.symmetric(horizontal: globalPadding),
-            child: Card(
-              elevation: 0,
-              color: color.surfaceContainerLow,
-              child: InkWell(
-                onTap: () {
-                  HapticFeedback.mediumImpact();
-                  context.push('/statistics');
-                },
-                borderRadius: BorderRadius.circular(20),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(LucideIcons.chartSpline, color: color.primary),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Spending Prediction',
-                            style: textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+          child: SizedBox(
+            width: double.infinity,
+            child: Container(
+              margin: EdgeInsets.symmetric(horizontal: globalPadding),
+              child: Card(
+                elevation: 0,
+                color: color.surfaceContainerLow,
+                child: InkWell(
+                  onTap: () {
+                    HapticFeedback.mediumImpact();
+                    context.push('/statistics');
+                  },
+                  borderRadius: BorderRadius.circular(20),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: color.primary.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                          const Spacer(),
-                          Icon(
-                            LucideIcons.chevronRight,
-                            color: color.onSurfaceVariant,
+                          child: Icon(
+                            LucideIcons.trendingUp,
+                            color: color.primary,
+                            size: 24,
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Next Month',
-                                style: textTheme.bodySmall?.copyWith(
-                                  color: color.onSurfaceVariant,
+                                'Next Month Forecast',
+                                style: textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
                                 ),
+                                overflow: TextOverflow.ellipsis,
                               ),
                               const SizedBox(height: 4),
                               TweenAnimationBuilder<double>(
@@ -78,8 +74,8 @@ class SpendingPredictionCard extends ConsumerWidget {
                                   return CurrencyText(
                                     amount: value,
                                     compact: false,
-                                    style: textTheme.headlineMedium?.copyWith(
-                                      fontWeight: FontWeight.bold,
+                                    style: textTheme.headlineSmall?.copyWith(
+                                      fontWeight: FontWeight.w900,
                                       color: color.primary,
                                     ),
                                   );
@@ -87,29 +83,14 @@ class SpendingPredictionCard extends ConsumerWidget {
                               ),
                             ],
                           ),
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: color.primaryContainer,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Icon(
-                              Icons.auto_graph,
-                              color: color.onPrimaryContainer,
-                              size: 32,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Based on last 3 months average',
-                        style: textTheme.bodySmall?.copyWith(
-                          color: color.onSurfaceVariant,
-                          fontStyle: FontStyle.italic,
                         ),
-                      ),
-                    ],
+                        Icon(
+                          LucideIcons.chevronRight,
+                          color: color.onSurfaceVariant,
+                          size: 20,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -117,7 +98,13 @@ class SpendingPredictionCard extends ConsumerWidget {
           ),
         );
       },
-      loading: () => const SizedBox.shrink(),
+      loading: () => Padding(
+        padding: const EdgeInsets.only(top: 16),
+        child: Container(
+          margin: EdgeInsets.symmetric(horizontal: globalPadding),
+          child: const DashboardCardSkeleton(),
+        ),
+      ),
       error: (_, __) => const SizedBox.shrink(),
     );
   }

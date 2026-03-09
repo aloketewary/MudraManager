@@ -6,6 +6,9 @@ import 'package:mudra_manager/features/dashboard/data/status_data_provider.dart'
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
+import 'package:mudra_manager/features/analytics/data/net_worth_service.dart';
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 class NetWorthCard extends ConsumerWidget {
   final double globalPadding;
@@ -16,6 +19,7 @@ class NetWorthCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final statsAsync = ref.watch(statsProvider('Month'));
     final totalBalanceAsync = ref.watch(totalAccountBalanceProvider);
+    final historyAsync = ref.watch(netWorthHistoryProvider);
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final isGuestMode = ref.watch(guestModeProvider);
@@ -38,116 +42,137 @@ class NetWorthCard extends ConsumerWidget {
                 margin: EdgeInsets.symmetric(horizontal: globalPadding),
                 child: Card(
                   elevation: 0,
-                  color: color.surfaceContainerLow,
+                  color: color.primaryContainer,
                   child: InkWell(
                     onTap: () {
                       HapticFeedback.mediumImpact();
-                      context.push('/statistics');
+                      context.push('/net-worth');
                     },
                     borderRadius: BorderRadius.circular(20),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.account_balance_wallet,
-                                color: color.primary,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Net Worth',
-                                style: textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const Spacer(),
-                              Icon(
-                                Icons.chevron_right,
-                                color: color.onSurfaceVariant,
-                              ),
-                            ],
+                    child: Stack(
+                      children: [
+                        Positioned.fill(
+                          child: historyAsync.when(
+                            data: (history) => _buildMiniChart(history, color),
+                            loading: () => const SizedBox.shrink(),
+                            error: (_, __) => const SizedBox.shrink(),
                           ),
-                          const SizedBox(height: 16),
-                          Row(
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Expanded(
-                                child: Column(
-                                  children: [
-                                    TweenAnimationBuilder<double>(
-                                      duration: const Duration(milliseconds: 1500),
-                                      curve: Curves.easeOutCubic,
-                                      tween: Tween(begin: 0.0, end: displayNetWorth),
-                                      builder: (context, value, child) {
-                                        return CurrencyText(
-                                          amount: value,
-                                          style: textTheme.displaySmall?.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                            color: displayNetWorth >= 0 ? Colors.green : Colors.red,
-                                          ),
-                                          showSign: true,
-                                        );
-                                      },
+                              Row(
+                                children: [
+                                  Text(
+                                    'Net Worth',
+                                    style: textTheme.titleSmall?.copyWith(
+                                      color: color.onPrimaryContainer.withValues(alpha: 0.8),
+                                      fontWeight: FontWeight.w500,
                                     ),
-                                    Text(
-                                      'This Month',
-                                      style: textTheme.titleSmall?.copyWith(
-                                        color: color.onSurfaceVariant,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Expanded(
-                                child: Column(
-                                  children: [
-                                    _buildMetric('Income', displayIncome, color, textTheme),
-                                    const SizedBox(height: 8),
-                                    _buildMetric('Expense', displayExpense, color, textTheme),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          const Divider(),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.lightbulb_outline,
-                                size: 16,
-                                color: color.primary,
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  displayNetWorth >= 0
-                                      ? 'Great! You saved ${displaySavingsRate.toStringAsFixed(1)}% this month'
-                                      : 'Spending exceeded income this month',
-                                  style: textTheme.bodySmall?.copyWith(
-                                    color: color.onSurfaceVariant,
                                   ),
-                                ),
+                                  const Spacer(),
+                                  Icon(
+                                    Icons.chevron_right,
+                                    color: color.onPrimaryContainer.withValues(alpha: 0.6),
+                                    size: 20,
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              TweenAnimationBuilder<double>(
+                                duration: const Duration(milliseconds: 1500),
+                                curve: Curves.easeOutCubic,
+                                tween: Tween(begin: 0.0, end: displayNetWorth),
+                                builder: (context, value, child) {
+                                  return CurrencyText(
+                                    amount: value,
+                                    style: textTheme.displaySmall?.copyWith(
+                                      fontWeight: FontWeight.w900,
+                                      color: color.onPrimaryContainer,
+                                      fontSize: 32,
+                                    ),
+                                    showSign: false,
+                                  );
+                                },
+                              ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  Icon(
+                                    displayNetWorth >= 0 ? Icons.trending_up : Icons.trending_down,
+                                    size: 14,
+                                    color: displayNetWorth >= 0 ? const Color(0xFF4CAF50) : const Color(0xFFF44336),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '${displaySavingsRate.toStringAsFixed(1)}% savings rate',
+                                    style: textTheme.bodySmall?.copyWith(
+                                      color: color.onPrimaryContainer.withValues(alpha: 0.7),
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
               ),
             );
           },
-          loading: () => const SizedBox.shrink(),
+          loading: () => const DashboardCardSkeleton(),
           error: (_, __) => const SizedBox.shrink(),
         );
       },
-      loading: () => const SizedBox.shrink(),
+      loading: () => const DashboardCardSkeleton(),
       error: (_, __) => const SizedBox.shrink(),
+    );
+  }
+
+  Widget _buildMiniChart(List<NetWorthHistoryPoint> history, ColorScheme color) {
+    if (history.isEmpty) return const SizedBox.shrink();
+    final spots = history.asMap().entries.map((e) => FlSpot(e.key.toDouble(), e.value.netWorth)).toList();
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: SizedBox(
+        height: 140,
+        child: LineChart(
+          LineChartData(
+            gridData: const FlGridData(show: false),
+            titlesData: const FlTitlesData(show: false),
+            borderData: FlBorderData(show: false),
+            lineTouchData: const LineTouchData(enabled: false),
+            lineBarsData: [
+              LineChartBarData(
+                spots: spots,
+                isCurved: true,
+                curveSmoothness: 0.4,
+                preventCurveOverShooting: true,
+                color: color.onPrimaryContainer.withValues(alpha: 0.3),
+                barWidth: 2,
+                dotData: const FlDotData(show: false),
+                belowBarData: BarAreaData(
+                  show: true,
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      color.onPrimaryContainer.withValues(alpha: 0.1),
+                      color.onPrimaryContainer.withValues(alpha: 0.02),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 

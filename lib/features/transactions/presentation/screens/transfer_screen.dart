@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
+import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/services/widget_service.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
@@ -86,9 +87,11 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
     );
 
     await WidgetService.updateWidget(ref);
-    ref.invalidate(transactionProvider);
-
-    context.pop();
+    
+    if (mounted) {
+      invalidateAll(ref);
+      context.pop();
+    }
   }
 
   @override

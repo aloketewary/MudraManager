@@ -21,6 +21,9 @@ import 'package:mudra_manager/features/gamification/widgets/streak_indicator.dar
 import 'package:mudra_manager/features/profile/data/user_profile_provider.dart';
 import 'package:mudra_manager/features/profile/presentation/screens/profile_screen.dart';
 import 'package:mudra_manager/features/statistics/presentation/screens/statistics_screen.dart';
+import 'package:mudra_manager/features/statistics/presentation/screens/export_options_screen.dart';
+import 'package:mudra_manager/features/dashboard/data/status_data_provider.dart';
+import 'package:mudra_manager/plugins/export_plugin.dart';
 import 'package:mudra_manager/features/statistics/presentation/screens/utility_screen.dart';
 import 'package:mudra_manager/features/transactions/presentation/widgets/quick_add_transaction_sheet.dart';
 import 'package:mudra_manager/features/transactions/presentation/screens/transaction_list_screen.dart';
@@ -38,7 +41,6 @@ class HomePageState extends ConsumerState<HomePage>
     with TickerProviderStateMixin {
   late int _selectedIndex;
   List<Widget> _pages = [];
-  final statisticsKey = GlobalKey<StatisticsScreenState>();
   final transactionListKey = GlobalKey<TransactionListScreenState>();
   final utilityKey = GlobalKey<UtilityScreenState>();
   late AnimationController _fabController;
@@ -56,7 +58,7 @@ class HomePageState extends ConsumerState<HomePage>
       const DashboardHome(),
       TransactionListScreen(key: transactionListKey),
       UtilityScreen(key: utilityKey),
-      StatisticsScreen(key: statisticsKey),
+      const StatisticsScreen(),
       const ProfileScreen(),
     ];
     initNotification();
@@ -198,7 +200,7 @@ class HomePageState extends ConsumerState<HomePage>
                       isDark ? Colors.white : Colors.black, BlendMode.srcIn,),)
                   .animate(target: _selectedIndex == 1 ? 1 : 0)
                   .scale(begin: const Offset(0.9, 0.9), end: const Offset(1, 1), curve: Curves.easeOutCubic, duration: 250.ms),
-              label: ctxt.transaction_screen_title,
+              label: 'Transactions',
             ),
             NavigationDestination(
               icon: SvgPicture.asset('assets/logo/nav/outline/utility.svg',
@@ -209,7 +211,7 @@ class HomePageState extends ConsumerState<HomePage>
                       isDark ? Colors.white : Colors.black, BlendMode.srcIn,),)
                   .animate(target: _selectedIndex == 2 ? 1 : 0)
                   .scale(begin: const Offset(0.9, 0.9), end: const Offset(1, 1), curve: Curves.easeOutCubic, duration: 250.ms),
-              label: 'Utilities',
+              label: 'Manage',
             ),
             NavigationDestination(
               icon: SvgPicture.asset('assets/logo/nav/outline/statistics.svg',
@@ -220,7 +222,7 @@ class HomePageState extends ConsumerState<HomePage>
                       isDark ? Colors.white : Colors.black, BlendMode.srcIn,),)
                   .animate(target: _selectedIndex == 3 ? 1 : 0)
                   .scale(begin: const Offset(0.9, 0.9), end: const Offset(1, 1), curve: Curves.easeOutCubic, duration: 250.ms),
-              label: ctxt.statistics_screen_title,
+              label: 'Insights',
             ),
             NavigationDestination(
               icon: SvgPicture.asset('assets/logo/nav/outline/profile.svg',
@@ -362,18 +364,17 @@ class HomePageState extends ConsumerState<HomePage>
           ],
         );
       case 2:
-        return AppBar(title: Text('Utilities', style: textTheme.titleLarge));
+        return AppBar(title: Text('Manage', style: textTheme.titleLarge));
       case 3:
         return AppBar(
           title: Text(
-            ctxt.statistics_screen_title,
+            'Insights',
             style: textTheme.titleLarge,
           ),
           actions: [
             IconButton(
               icon: const Icon(Icons.save_alt_outlined),
-              onPressed: () =>
-                  statisticsKey.currentState?.showExportOptions(context),
+              onPressed: () => _showExportDialog(context),
             ),
           ],
         );
@@ -386,5 +387,32 @@ class HomePageState extends ConsumerState<HomePage>
   void initNotification() async {
     final savedTime = await NotificationService.getSavedReminderTime();
     ref.read(reminderTimeProvider.notifier).state = savedTime;
+  }
+
+  void _showExportDialog(BuildContext context) {
+    final stats = ref.read(statsProvider('Month'));
+    final profile = ref.read(userProfileProvider).value;
+    
+    stats.whenData((data) {
+      showDialog(
+        context: context,
+        builder: (_) => Dialog.fullscreen(
+          child: ExportOptionsScreen(
+            exportData: ExportData(
+              income: data.income,
+              expense: data.expense,
+              savingsRate: data.savingsRate,
+              avgDailySpend: data.avgDailySpend,
+              transactions: data.recent,
+              categoryData: data.categoryData,
+              categoryDataMap: data.categoryDataMap,
+              startDate: DateTime.now().subtract(const Duration(days: 30)),
+              endDate: DateTime.now(),
+              userName: profile?.name,
+            ),
+          ),
+        ),
+      );
+    });
   }
 }

@@ -12,6 +12,7 @@ class StatsData {
   final double expense;
   final List<FlSpot> incomeSpots;
   final List<FlSpot> expenseSpots;
+  final List<FlSpot> savingsSpots;
   final Map<String, double> categoryData;
   final Map<String, Category> categoryDataMap;
   final Map<String, double> incomeCategoryData;
@@ -26,6 +27,7 @@ class StatsData {
     required this.expense,
     required this.incomeSpots,
     required this.expenseSpots,
+    required this.savingsSpots,
     required this.categoryData,
     required this.categoryDataMap,
     required this.incomeCategoryData,
@@ -130,26 +132,32 @@ final statsProvider = FutureProvider.family<StatsData, String>((
   // Build spots
   final List<FlSpot> incomeSpots = [];
   final List<FlSpot> expenseSpots = [];
+  final List<FlSpot> savingsSpots = [];
 
   if (period == 'Year') {
     for (int month = 1; month <= 12; month++) {
-      incomeSpots.add(
-        FlSpot((month - 1).toDouble(), dailyIncome[month]?[0] ?? 0),
-      );
-      expenseSpots.add(
-        FlSpot((month - 1).toDouble(), dailyExpense[month]?[0] ?? 0),
-      );
+      final monthIncome = dailyIncome[month]?[0] ?? 0;
+      final monthExpense = dailyExpense[month]?[0] ?? 0;
+      incomeSpots.add(FlSpot((month - 1).toDouble(), monthIncome));
+      expenseSpots.add(FlSpot((month - 1).toDouble(), monthExpense));
+      savingsSpots.add(FlSpot((month - 1).toDouble(), monthIncome - monthExpense));
     }
   } else if (period == 'Today') {
     for (int hour = 0; hour < 24; hour++) {
-      incomeSpots.add(FlSpot(hour.toDouble(), dailyIncome[hour]?[0] ?? 0));
-      expenseSpots.add(FlSpot(hour.toDouble(), dailyExpense[hour]?[0] ?? 0));
+      final hourIncome = dailyIncome[hour]?[0] ?? 0;
+      final hourExpense = dailyExpense[hour]?[0] ?? 0;
+      incomeSpots.add(FlSpot(hour.toDouble(), hourIncome));
+      expenseSpots.add(FlSpot(hour.toDouble(), hourExpense));
+      savingsSpots.add(FlSpot(hour.toDouble(), hourIncome - hourExpense));
     }
   } else {
     final days = end.difference(start).inDays + 1;
     for (int i = 0; i < days; i++) {
-      incomeSpots.add(FlSpot(i.toDouble(), dailyIncome[i]?[0] ?? 0));
-      expenseSpots.add(FlSpot(i.toDouble(), dailyExpense[i]?[0] ?? 0));
+      final dayIncome = dailyIncome[i]?[0] ?? 0;
+      final dayExpense = dailyExpense[i]?[0] ?? 0;
+      incomeSpots.add(FlSpot(i.toDouble(), dayIncome));
+      expenseSpots.add(FlSpot(i.toDouble(), dayExpense));
+      savingsSpots.add(FlSpot(i.toDouble(), dayIncome - dayExpense));
     }
   }
 
@@ -193,6 +201,7 @@ final statsProvider = FutureProvider.family<StatsData, String>((
     expense: expense,
     incomeSpots: incomeSpots,
     expenseSpots: expenseSpots,
+    savingsSpots: savingsSpots,
     categoryData: categoryData,
     categoryDataMap: categoryMapData,
     incomeCategoryData: incomeCategoryData,
@@ -264,6 +273,10 @@ final customStatsProvider = FutureProvider.family<StatsData, String>((
     days,
     (i) => FlSpot(i.toDouble(), dailyExpense[i] ?? 0),
   );
+  final List<FlSpot> savingsSpots = List.generate(
+    days,
+    (i) => FlSpot(i.toDouble(), (dailyIncome[i] ?? 0) - (dailyExpense[i] ?? 0)),
+  );
   final Map<String, Category> categoryMapData = {for (var c in cats) c.name: c};
   final Map<String, Category> incomeCategoryMapData = {
     for (var c in cats) c.name: c,
@@ -304,6 +317,7 @@ final customStatsProvider = FutureProvider.family<StatsData, String>((
     expense: expense,
     incomeSpots: incomeSpots,
     expenseSpots: expenseSpots,
+    savingsSpots: savingsSpots,
     categoryData: categoryData,
     categoryDataMap: categoryMapData,
     incomeCategoryData: incomeCategoryData,

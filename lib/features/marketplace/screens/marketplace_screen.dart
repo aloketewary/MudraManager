@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mudra_manager/core/utils/utils.dart';
+import 'package:mudra_manager/core/widgets/skeleton_loader.dart';
 import '../models/plugin_metadata.dart';
 import '../services/marketplace_service.dart';
 
@@ -57,7 +58,11 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
         ),
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: 4,
+              itemBuilder: (context, index) => const SkeletonCard(),
+            )
           : ListView.builder(
               padding: const EdgeInsets.all(16),
               itemCount: _plugins.length,

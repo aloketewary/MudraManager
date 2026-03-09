@@ -195,6 +195,45 @@ class TripService {
     return trip?.name;
   }
 
+  Future<Map<int, String>> getTripNamesByTransactionIds(List<int> transactionIds) async {
+    if (transactionIds.isEmpty) return {};
+    
+    final isar = await isarService.getInstance();
+    final tripTxns = await isar.tripTransactions
+        .filter()
+        .anyOf(transactionIds, (q, id) => q.transaction((tq) => tq.idEqualTo(id)))
+        .findAll();
+
+    final tripTxnMap = <int, int>{};
+    for (var tripTxn in tripTxns) {
+      await tripTxn.transaction.load();
+      final txnId = tripTxn.transaction.value?.id;
+      if (txnId != null) {
+        tripTxnMap[txnId] = tripTxn.id;
+      }
+    }
+
+    final tripTxnIds = tripTxnMap.values.toSet().toList();
+    final trips = await isar.trips
+        .filter()
+        .anyOf(tripTxnIds, (q, id) => q.transactions((tq) => tq.idEqualTo(id)))
+        .findAll();
+
+    final tripMap = <int, String>{};
+    for (var trip in trips) {
+      await trip.transactions.load();
+      for (var tripTxn in trip.transactions) {
+        await tripTxn.transaction.load();
+        final txnId = tripTxn.transaction.value?.id;
+        if (txnId != null) {
+          tripMap[txnId] = trip.name;
+        }
+      }
+    }
+
+    return tripMap;
+  }
+
   Future<void> removeTransactionFromTrip(int transactionId) async {
     final isar = await isarService.getInstance();
     await isar.writeTxn(() async {

@@ -15,7 +15,7 @@ import 'package:mudra_manager/core/db/models/budget_category_allocation.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/goal.dart';
 import 'package:mudra_manager/core/db/models/notification_record.dart';
-import 'package:mudra_manager/core/db/models/pending_transaction.dart';
+
 import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
 import 'package:mudra_manager/core/db/models/tag.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
@@ -30,11 +30,13 @@ import 'package:mudra_manager/features/backup/data/budget_category_allocation_ba
 import 'package:mudra_manager/features/backup/data/category_backup.dart';
 import 'package:mudra_manager/features/backup/data/goal_backup.dart';
 import 'package:mudra_manager/features/backup/data/notification_backup.dart';
-import 'package:mudra_manager/features/backup/data/pending_transaction_backup.dart';
+
 import 'package:mudra_manager/features/backup/data/recurring_transaction_backup.dart';
 import 'package:mudra_manager/features/backup/data/tag_backup.dart';
 import 'package:mudra_manager/features/backup/data/transaction_backup.dart';
+import 'package:mudra_manager/features/backup/data/gamification_backup.dart';
 import 'package:mudra_manager/features/backup/data/user_profile_backup.dart';
+import 'package:mudra_manager/features/gamification/models/achievement.dart';
 import 'package:path_provider/path_provider.dart';
 
 class BackupService {
@@ -47,8 +49,13 @@ class BackupService {
     String password, {
     bool includeAttachments = true,
   }) async {
-    final isar = Isar.getInstance();
-    if (isar == null) return null;
+    try {
+      final isar = Isar.getInstance();
+      if (isar == null) {
+        _log.e('Isar instance not available');
+        SnackbarService.error('Database not initialized');
+        return null;
+      }
 
     final dbData = await exportAll(isar);
     final settings = await SharedPrefsUtil.instance.exportAll();
@@ -95,6 +102,11 @@ class BackupService {
     }
 
     return filePath;
+    } catch (e, stackTrace) {
+      _log.e('Backup creation failed', e, stackTrace);
+      SnackbarService.error('Backup failed: ${e.toString()}');
+      return null;
+    }
   }
 
   /// Restore backup with password
@@ -103,20 +115,24 @@ class BackupService {
     Isar isar,
     String password,
   ) async {
-    await FilePicker.platform.clearTemporaryFiles();
-    final result = await FilePicker.platform.pickFiles(
-      allowMultiple: false,
-      type: FileType.any,
-      dialogTitle: 'Select Backup File',
-    );
-
-    if (result == null || result.files.single.path == null) return null;
-    if (result.files.first.extension != 'mudra') {
-      SnackbarService.error('Invalid file type, select `.mudra` file');
-      return null;
-    }
-
     try {
+      await FilePicker.platform.clearTemporaryFiles();
+      final result = await FilePicker.platform.pickFiles(
+        allowMultiple: false,
+        type: FileType.any,
+        dialogTitle: 'Select Backup File',
+      );
+
+      if (result == null || result.files.single.path == null) {
+        _log.w('No file selected');
+        return null;
+      }
+
+      if (result.files.first.extension != 'mudra') {
+        SnackbarService.error('Invalid file type, select `.mudra` file');
+        return null;
+      }
+
       final selectedFile = File(result.files.single.path!);
       final fileContent = await selectedFile.readAsString();
       final backupData = jsonDecode(fileContent);
@@ -143,9 +159,9 @@ class BackupService {
 
       _log.i('Backup restored successfully');
       return 'success';
-    } catch (e) {
-      _log.e('Restore failed', e);
-      SnackbarService.error('Invalid password or corrupted file');
+    } catch (e, stackTrace) {
+      _log.e('Restore failed', e, stackTrace);
+      SnackbarService.error('Restore failed: Invalid password or corrupted file');
       return null;
     }
   }
@@ -237,17 +253,7 @@ class BackupService {
         )
         .toList();
 
-    // Backup Pending Transactions
-    final pendingTransactions = await isar.pendingTransactions
-        .where()
-        .findAll();
-    backupData['PendingTransaction'] = pendingTransactions
-        .map(
-          (pt) => PendingTransactionBackup.fromPendingTransaction(
-            pt,
-          ).toBackupJson(),
-        )
-        .toList();
+
 
     // Backup User Profiles (assuming you have this collection)
     final userProfiles = await isar.userProfiles.where().findAll();
@@ -283,6 +289,24 @@ class BackupService {
     final transactions = await isar.transactions.where().findAll();
     backupData['Transaction'] = transactions
         .map((tx) => TransactionBackup.fromTransaction(tx).toBackupJson())
+        .toList();
+
+    // Backup Achievements
+    final achievements = await isar.achievements.where().findAll();
+    backupData['Achievement'] = achievements
+        .map((a) => AchievementBackup.fromAchievement(a).toBackupJson())
+        .toList();
+
+    // Backup Streaks
+    final streaks = await isar.streaks.where().findAll();
+    backupData['Streak'] = streaks
+        .map((s) => StreakBackup.fromStreak(s).toBackupJson())
+        .toList();
+
+    // Backup User Levels
+    final userLevels = await isar.userLevels.where().findAll();
+    backupData['UserLevel'] = userLevels
+        .map((ul) => UserLevelBackup.fromUserLevel(ul).toBackupJson())
         .toList();
 
     _log.i('DB export completed: ${backupData.values.fold<int>(0, (sum, list) => sum + list.length)} records');
@@ -332,12 +356,7 @@ class BackupService {
               {},
             );
             break;
-          case 'PendingTransaction':
-            model = PendingTransactionBackup().fromBackupJson(
-              Map<String, dynamic>.from(itemJson),
-              {},
-            );
-            break;
+
           case 'UserProfile':
             model = UserProfileBackup().fromBackupJson(
               Map<String, dynamic>.from(itemJson),
@@ -364,6 +383,24 @@ class BackupService {
             break;
           case 'Transaction':
             model = TransactionBackup().fromBackupJson(
+              Map<String, dynamic>.from(itemJson),
+              {},
+            );
+            break;
+          case 'Achievement':
+            model = AchievementBackup().fromBackupJson(
+              Map<String, dynamic>.from(itemJson),
+              {},
+            );
+            break;
+          case 'Streak':
+            model = StreakBackup().fromBackupJson(
+              Map<String, dynamic>.from(itemJson),
+              {},
+            );
+            break;
+          case 'UserLevel':
+            model = UserLevelBackup().fromBackupJson(
               Map<String, dynamic>.from(itemJson),
               {},
             );
@@ -425,13 +462,7 @@ class BackupService {
                 );
                 await isar.notificationRecords.put(fullyLinkedModel);
                 break;
-              case 'PendingTransaction':
-                fullyLinkedModel = PendingTransactionBackup().fromBackupJson(
-                  Map<String, dynamic>.from(itemJson),
-                  restoredObjects,
-                );
-                await isar.pendingTransactions.put(fullyLinkedModel);
-                break;
+
               case 'UserProfile':
                 fullyLinkedModel = UserProfileBackup().fromBackupJson(
                   Map<String, dynamic>.from(itemJson),
@@ -480,6 +511,27 @@ class BackupService {
                 await tx.related.save();
                 await tx.tags.save();
                 fullyLinkedModel = tx;
+                break;
+              case 'Achievement':
+                fullyLinkedModel = AchievementBackup().fromBackupJson(
+                  Map<String, dynamic>.from(itemJson),
+                  restoredObjects,
+                );
+                await isar.achievements.put(fullyLinkedModel);
+                break;
+              case 'Streak':
+                fullyLinkedModel = StreakBackup().fromBackupJson(
+                  Map<String, dynamic>.from(itemJson),
+                  restoredObjects,
+                );
+                await isar.streaks.put(fullyLinkedModel);
+                break;
+              case 'UserLevel':
+                fullyLinkedModel = UserLevelBackup().fromBackupJson(
+                  Map<String, dynamic>.from(itemJson),
+                  restoredObjects,
+                );
+                await isar.userLevels.put(fullyLinkedModel);
                 break;
             }
           }

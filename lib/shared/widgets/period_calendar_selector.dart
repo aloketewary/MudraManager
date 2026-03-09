@@ -73,98 +73,96 @@ class _PeriodCalendarSelectorState extends State<PeriodCalendarSelector> {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: color.surfaceContainerHighest,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.mediumImpact();
+          _showPeriodSelector(context);
+        },
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: color.outlineVariant.withValues(alpha: 0.5),
-          width: 1,
-        ),
-      ),
-      child: Column(
-        children: [
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () {
-                HapticFeedback.mediumImpact();
-                setState(() => _showCalendar = !_showCalendar);
-              },
-              borderRadius: BorderRadius.circular(20),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: color.primaryContainer,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(
-                        Icons.calendar_today_rounded,
-                        color: color.primary,
-                        size: 20,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        _getPeriodText(),
-                        style: textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: color.onSurface,
-                        ),
-                      ),
-                    ),
-                    Icon(
-                      _showCalendar
-                          ? Icons.keyboard_arrow_up_rounded
-                          : Icons.keyboard_arrow_down_rounded,
-                      color: color.onSurfaceVariant,
-                    ),
-                  ],
-                ),
-              ),
+        child: Container(
+          decoration: BoxDecoration(
+            color: color.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: color.outlineVariant.withValues(alpha: 0.5),
+              width: 1,
             ),
           ),
-          if (_showCalendar) ...[
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-              child: Wrap(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.primaryContainer,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.calendar_today_rounded,
+                  color: color.primary,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  _getPeriodText(),
+                  style: textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: color.onSurface,
+                  ),
+                ),
+              ),
+              Icon(
+                Icons.keyboard_arrow_down_rounded,
+                color: color.onSurfaceVariant,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showPeriodSelector(BuildContext context) {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) => Container(
+          decoration: BoxDecoration(
+            color: color.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Select Period',
+                style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 20),
+              Wrap(
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  _buildPeriodChip(PeriodType.day, 'Day', Icons.today_rounded),
-                  _buildPeriodChip(
-                    PeriodType.week,
-                    'Week',
-                    Icons.view_week_rounded,
-                  ),
-                  _buildPeriodChip(
-                    PeriodType.month,
-                    'Month',
-                    Icons.calendar_view_month_rounded,
-                  ),
-                  _buildPeriodChip(
-                    PeriodType.year,
-                    'Year',
-                    Icons.calendar_view_day_rounded,
-                  ),
-                  _buildPeriodChip(
-                    PeriodType.custom,
-                    'Custom',
-                    Icons.date_range_rounded,
-                  ),
+                  _buildPeriodChipModal(PeriodType.day, 'Day', Icons.today_rounded, context, setModalState),
+                  _buildPeriodChipModal(PeriodType.week, 'Week', Icons.view_week_rounded, context, setModalState),
+                  _buildPeriodChipModal(PeriodType.month, 'Month', Icons.calendar_view_month_rounded, context, setModalState),
+                  _buildPeriodChipModal(PeriodType.year, 'Year', Icons.calendar_view_day_rounded, context, setModalState),
+                  _buildPeriodChipModal(PeriodType.custom, 'Custom', Icons.date_range_rounded, context, setModalState),
                 ],
               ),
-            ),
-            if (widget.selectedPeriod == PeriodType.custom ||
-                _isSelectingCustom)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
-                child: TableCalendar(
+              if (_isSelectingCustom) ...[
+                const SizedBox(height: 20),
+                TableCalendar(
                   firstDay: DateTime(2020),
                   lastDay: DateTime.now(),
                   focusedDay: _focusedDay,
@@ -182,7 +180,8 @@ class _PeriodCalendarSelectorState extends State<PeriodCalendarSelector> {
                     if (start != null && end != null) {
                       HapticFeedback.lightImpact();
                       widget.onChanged(PeriodType.custom, start, end);
-                      setState(() => _showCalendar = false);
+                      Navigator.pop(context);
+                      setState(() => _isSelectingCustom = false);
                     }
                   },
                   onPageChanged: (focusedDay) {
@@ -202,29 +201,79 @@ class _PeriodCalendarSelectorState extends State<PeriodCalendarSelector> {
                       color: color.primary,
                       shape: BoxShape.circle,
                     ),
-                    rangeHighlightColor: color.primaryContainer.withValues(
-                      alpha: 0.3,
-                    ),
+                    rangeHighlightColor: color.primaryContainer.withValues(alpha: 0.3),
                     todayTextStyle: TextStyle(color: color.onSurface),
                     rangeStartTextStyle: TextStyle(color: color.onPrimary),
                     rangeEndTextStyle: TextStyle(color: color.onPrimary),
-                    disabledTextStyle: TextStyle(
-                      color: color.onSurface.withValues(alpha: 0.3),
-                    ),
+                    disabledTextStyle: TextStyle(color: color.onSurface.withValues(alpha: 0.3)),
                     weekendTextStyle: TextStyle(color: color.onSurface),
                     outsideDaysVisible: false,
                   ),
                   headerStyle: HeaderStyle(
                     formatButtonVisible: false,
                     titleCentered: true,
-                    titleTextStyle: textTheme.titleMedium!.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                    titleTextStyle: textTheme.titleMedium!.copyWith(fontWeight: FontWeight.bold),
                   ),
                 ),
+              ],
+              const SizedBox(height: 20),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPeriodChipModal(PeriodType period, String label, IconData icon, BuildContext context, StateSetter setModalState) {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final isSelected = widget.selectedPeriod == period;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.lightImpact();
+          if (period == PeriodType.custom) {
+            setModalState(() => _isSelectingCustom = true);
+          } else {
+            widget.onChanged(period, null, null);
+            Navigator.pop(context);
+            setState(() => _isSelectingCustom = false);
+          }
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? color.primaryContainer
+                : color.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSelected ? color.primary : Colors.transparent,
+              width: 2,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 18,
+                color: isSelected ? color.primary : color.onSurface,
               ),
-          ],
-        ],
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: textTheme.labelLarge?.copyWith(
+                  color: isSelected ? color.primary : color.onSurface,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -232,9 +281,7 @@ class _PeriodCalendarSelectorState extends State<PeriodCalendarSelector> {
   Widget _buildPeriodChip(PeriodType period, String label, IconData icon) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final isSelected =
-        widget.selectedPeriod == period ||
-        (period == PeriodType.custom && _isSelectingCustom);
+    final isSelected = widget.selectedPeriod == period;
 
     return Material(
       color: Colors.transparent,
@@ -244,9 +291,9 @@ class _PeriodCalendarSelectorState extends State<PeriodCalendarSelector> {
           if (period == PeriodType.custom) {
             setState(() => _isSelectingCustom = true);
           } else {
-            setState(() => _isSelectingCustom = false);
             widget.onChanged(period, null, null);
-            setState(() => _showCalendar = false);
+            Navigator.pop(context);
+            setState(() => _isSelectingCustom = false);
           }
         },
         borderRadius: BorderRadius.circular(12),

@@ -21,24 +21,28 @@ class _EditTripScreenState extends ConsumerState<EditTripScreen> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nameController;
   late TextEditingController _descController;
+  late TextEditingController _budgetController;
 
   DateTime? _startDate;
   DateTime? _endDate;
   List<TripParticipant> _participants = [];
   bool _isInitialized = false;
   String? _ownerName;
+  bool _isActive = false;
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController();
     _descController = TextEditingController();
+    _budgetController = TextEditingController();
   }
 
   @override
   void dispose() {
     _nameController.dispose();
     _descController.dispose();
+    _budgetController.dispose();
     super.dispose();
   }
 
@@ -46,9 +50,11 @@ class _EditTripScreenState extends ConsumerState<EditTripScreen> {
     if (_isInitialized) return;
     _nameController.text = trip.name;
     _descController.text = trip.description ?? '';
+    _budgetController.text = trip.budget?.toString() ?? '';
     _startDate = trip.startDate;
     _endDate = trip.endDate;
     _participants = trip.participants.toList();
+    _isActive = trip.isActive;
 
     final userProfileAsync = ref.read(userProfileProvider);
     userProfileAsync.whenData((profile) {
@@ -135,6 +141,21 @@ class _EditTripScreenState extends ConsumerState<EditTripScreen> {
                                 prefixIcon: const Icon(Icons.description),
                               ),
                               maxLines: 2,
+                            ),
+                            const SizedBox(height: 16),
+                            TextField(
+                              controller: _budgetController,
+                              decoration: InputDecoration(
+                                labelText: 'Budget (Optional)',
+                                hintText: 'e.g., 50000',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                filled: true,
+                                fillColor: color.surface,
+                                prefixIcon: const Icon(Icons.currency_rupee),
+                              ),
+                              keyboardType: TextInputType.number,
                             ),
                           ],
                         ),
@@ -258,6 +279,48 @@ class _EditTripScreenState extends ConsumerState<EditTripScreen> {
                                   ],
                                 ),
                               ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Card(
+                      elevation: 0,
+                      color: color.surfaceContainerHighest,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(Icons.toggle_on, color: color.primary),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Active Trip',
+                                  style: textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Mark as active to track expenses in real-time',
+                              style: textTheme.bodySmall?.copyWith(
+                                color: color.onSurfaceVariant,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            SwitchListTile(
+                              value: _isActive,
+                              onChanged: (val) => setState(() => _isActive = val),
+                              title: Text(_isActive ? 'Active' : 'Inactive'),
+                              contentPadding: EdgeInsets.zero,
                             ),
                           ],
                         ),
@@ -444,6 +507,58 @@ class _EditTripScreenState extends ConsumerState<EditTripScreen> {
                         ),
                       ),
                     ),
+                    const SizedBox(height: 16),
+                    Card(
+                      elevation: 0,
+                      color: color.errorContainer.withValues(alpha: 0.3),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        side: BorderSide(color: color.error.withValues(alpha: 0.3)),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(Icons.warning_amber, color: color.error),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Danger Zone',
+                                  style: textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: color.error,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            OutlinedButton.icon(
+                              onPressed: () => _finalizeTrip(trip),
+                              icon: const Icon(Icons.check_circle_outline),
+                              label: const Text('Finalize Trip'),
+                              style: OutlinedButton.styleFrom(
+                                minimumSize: const Size(double.infinity, 48),
+                                side: BorderSide(color: color.error),
+                                foregroundColor: color.error,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            OutlinedButton.icon(
+                              onPressed: () => _deleteTrip(trip),
+                              icon: const Icon(Icons.delete_forever),
+                              label: const Text('Delete Trip'),
+                              style: OutlinedButton.styleFrom(
+                                minimumSize: const Size(double.infinity, 48),
+                                side: BorderSide(color: color.error),
+                                foregroundColor: color.error,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                     const SizedBox(height: 24),
                     FilledButton(
                       onPressed: () => _saveTrip(trip),
@@ -573,6 +688,43 @@ class _EditTripScreenState extends ConsumerState<EditTripScreen> {
     );
   }
 
+  Future<void> _finalizeTrip(Trip trip) async {
+    final confirm = await DialogUtils.showConfirmation(
+      context,
+      title: 'Finalize Trip',
+      message: 'This will mark the trip as ended. You can\'t add expenses after this.',
+      confirmText: 'Finalize',
+      icon: Icons.check_circle,
+    );
+    if (confirm != true) return;
+
+    trip.isActive = false;
+    await ref.read(tripServiceProvider).updateTrip(
+      trip,
+      newParticipants: _participants,
+      clearTransactions: false,
+    );
+    ref.invalidate(allTripsProvider);
+    SnackbarService.success('Trip finalized');
+    if (mounted) context.pop();
+  }
+
+  Future<void> _deleteTrip(Trip trip) async {
+    final confirm = await DialogUtils.showConfirmation(
+      context,
+      title: 'Delete Trip',
+      message: 'This will permanently delete the trip and all expenses. Continue?',
+      confirmText: 'Delete',
+      icon: Icons.delete_forever,
+    );
+    if (confirm != true) return;
+
+    await ref.read(tripServiceProvider).deleteTrip(trip.id);
+    ref.invalidate(allTripsProvider);
+    SnackbarService.success('Trip deleted');
+    if (mounted) context.pop();
+  }
+
   Future<void> _saveTrip(Trip originalTrip) async {
     if (_nameController.text.trim().isEmpty) {
       SnackbarService.error('Please enter trip name');
@@ -589,12 +741,18 @@ class _EditTripScreenState extends ConsumerState<EditTripScreen> {
         !DateUtils.isSameDay(_startDate, originalTrip.startDate) ||
         !DateUtils.isSameDay(_endDate, originalTrip.endDate);
 
+    final budget = _budgetController.text.trim().isEmpty
+        ? null
+        : double.tryParse(_budgetController.text.trim());
+
     originalTrip.name = _nameController.text.trim();
     originalTrip.description = _descController.text.trim().isEmpty
         ? null
         : _descController.text.trim();
     originalTrip.startDate = _startDate!;
     originalTrip.endDate = _endDate!;
+    originalTrip.budget = budget;
+    originalTrip.isActive = _isActive;
 
     await ref
         .read(tripServiceProvider)

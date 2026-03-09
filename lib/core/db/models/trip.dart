@@ -19,6 +19,8 @@ class Trip {
   @Index()
   late bool isActive;
 
+  double? budget;
+
   late DateTime createdAt;
 
   final participants = IsarLinks<TripParticipant>();
@@ -32,6 +34,7 @@ class Trip {
     required this.startDate,
     required this.endDate,
     this.isActive = true,
+    this.budget,
   }) : createdAt = DateTime.now();
 }
 

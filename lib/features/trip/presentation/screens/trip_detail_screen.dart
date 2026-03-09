@@ -5,7 +5,11 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:mudra_manager/core/utils/dialog_utils.dart';
 import 'package:mudra_manager/features/trip/data/trip_provider.dart';
+import 'package:mudra_manager/features/trip/data/trip_services_provider.dart';
 import 'package:mudra_manager/shared/widgets/settlement_card.dart';
+import 'package:mudra_manager/shared/widgets/live_balance_card.dart';
+import 'package:mudra_manager/shared/widgets/pending_splits_section.dart';
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -58,8 +62,20 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 2, vsync: this);
     _loadSettledData();
+  }
+
+  void _updateTabController(bool isActive) {
+    final newLength = isActive ? 2 : 3;
+    if (_tabController.length != newLength) {
+      final oldIndex = _tabController.index;
+      _tabController.dispose();
+      _tabController = TabController(length: newLength, vsync: this);
+      if (oldIndex < newLength) {
+        _tabController.index = oldIndex;
+      }
+    }
   }
 
   Future<void> _loadSettledData() async {
@@ -127,36 +143,29 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
         );
         final statusColor = _getStatusColor(status, color);
 
+        // Update tab controller based on trip status
+        _updateTabController(trip.isActive);
+
+        // Calculate budget metrics
+        final transactionsList = trip.transactions.toList();
+        double totalSpent = 0;
+        for (var tripTxn in transactionsList) {
+          final txn = tripTxn.transaction.value;
+          if (txn != null) totalSpent += txn.amount;
+        }
+        final budget = trip.budget ?? (totalSpent > 0 ? totalSpent * 1.2 : 10000);
+        final budgetUsed = totalSpent / budget;
+
         return Scaffold(
           appBar: AppBar(
-            title: Text(
-              trip.name,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
+            title: Text(trip.name),
             actions: [
-              IconButton(
-                onPressed: () {
-                  HapticFeedback.mediumImpact();
-                  context.push('/edit-trip', extra: trip.id);
-                },
-                icon: const Icon(Icons.edit_outlined),
-                tooltip: 'Edit Trip',
-                style: IconButton.styleFrom(
-                  backgroundColor: color.primaryContainer.withValues(
-                    alpha: 0.5,
-                  ),
-                  foregroundColor: color.primary,
-                ),
-              ),
-              const SizedBox(width: 4),
               PopupMenuButton(
-                icon: const Icon(Icons.more_vert),
-                style: IconButton.styleFrom(
-                  backgroundColor: color.surfaceContainerHighest,
-                ),
                 onSelected: (value) async {
                   HapticFeedback.mediumImpact();
-                  if (value == 'end') {
+                  if (value == 'edit') {
+                    context.push('/edit-trip', extra: trip.id);
+                  } else if (value == 'end') {
                     final confirm = await DialogUtils.showConfirmation(
                       context,
                       title: 'End Trip',
@@ -189,6 +198,16 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                   }
                 },
                 itemBuilder: (ctx) => [
+                  const PopupMenuItem(
+                    value: 'edit',
+                    child: Row(
+                      children: [
+                        Icon(Icons.edit_outlined, size: 20),
+                        SizedBox(width: 8),
+                        Text('Edit Trip'),
+                      ],
+                    ),
+                  ),
                   if (trip.isActive)
                     const PopupMenuItem(
                       value: 'end',
@@ -216,215 +235,163 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                 ],
               ),
             ],
-            bottom: TabBar(
-              controller: _tabController,
-              tabs: const [
-                Tab(text: 'Expenses'),
-                Tab(text: 'Settlements'),
-                Tab(text: 'Report'),
-              ],
-            ),
           ),
           body: Column(
             children: [
-              Card(
-                margin: const EdgeInsets.all(16),
-                elevation: 0,
-                color: color.surfaceContainerHighest,
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: statusColor.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Icon(
-                              Icons.calendar_today,
-                              size: 18,
-                              color: statusColor,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '${DateFormat.MMMd().format(trip.startDate)} - ${DateFormat.MMMd().format(trip.endDate)}',
-                                  style: textTheme.titleSmall?.copyWith(
-                                    color: color.onSurface,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  '$duration days',
-                                  style: textTheme.bodySmall?.copyWith(
-                                    color: color.onSurfaceVariant,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: statusColor.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: statusColor.withValues(alpha: 0.3),
+              // Hero Header Card
+              Container(
+                width: double.infinity,
+                color: color.surfaceContainerLowest,
+                child: SafeArea(
+                  bottom: false,
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      children: [
+                        // Trip dates and status
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              '${DateFormat.MMMd().format(trip.startDate)} - ${DateFormat.MMMd().format(trip.endDate)}',
+                              style: textTheme.bodyMedium?.copyWith(
+                                color: color.onSurfaceVariant,
                               ),
                             ),
-                            child: Text(
-                              status,
-                              style: textTheme.labelSmall?.copyWith(
-                                color: statusColor,
-                                fontWeight: FontWeight.bold,
+                            if (trip.isActive)
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: color.errorContainer,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      width: 6,
+                                      height: 6,
+                                      decoration: BoxDecoration(
+                                        color: color.error,
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      'LIVE',
+                                      style: textTheme.labelSmall?.copyWith(
+                                        color: color.onErrorContainer,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    AnimatedSize(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                      child: _isExpanded
-                          ? Padding(
-                              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                        // Budget summary
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  if (trip.description != null) ...[
-                                    Container(
-                                      width: double.infinity,
-                                      padding: const EdgeInsets.all(12),
-                                      decoration: BoxDecoration(
-                                        color: color.surface,
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Text(
-                                        trip.description!,
-                                        style: textTheme.bodyMedium,
-                                      ),
+                                  Text(
+                                    'Total spent',
+                                    style: textTheme.labelMedium?.copyWith(
+                                      color: color.onSurfaceVariant,
                                     ),
-                                    const SizedBox(height: 16),
-                                  ],
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        Icons.people,
-                                        size: 16,
-                                        color: color.onSurfaceVariant,
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        '${participants.length} Participants',
-                                        style: textTheme.bodySmall?.copyWith(
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ],
                                   ),
-                                  const SizedBox(height: 12),
-                                  Wrap(
-                                    spacing: 8,
-                                    runSpacing: 8,
-                                    children: participants
-                                        .map(
-                                          (p) => Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 12,
-                                              vertical: 6,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: statusColor.withValues(
-                                                alpha: 0.1,
-                                              ),
-                                              borderRadius:
-                                                  BorderRadius.circular(20),
-                                            ),
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                CircleAvatar(
-                                                  radius: 12,
-                                                  backgroundColor: statusColor,
-                                                  child: Text(
-                                                    p.name[0].toUpperCase(),
-                                                    style: const TextStyle(
-                                                      color: Colors.white,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize: 10,
-                                                    ),
-                                                  ),
-                                                ),
-                                                const SizedBox(width: 6),
-                                                Text(
-                                                  p.name,
-                                                  style: textTheme.bodySmall
-                                                      ?.copyWith(
-                                                        fontWeight:
-                                                            FontWeight.w500,
-                                                      ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        )
-                                        .toList(),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    '₹${(totalSpent / 1000).toStringAsFixed(1)}k',
+                                    style: textTheme.displaySmall?.copyWith(
+                                      color: color.onSurface,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                 ],
                               ),
-                            )
-                          : const SizedBox.shrink(),
-                    ),
-                    InkWell(
-                      onTap: () {
-                        HapticFeedback.lightImpact();
-                        setState(() => _isExpanded = !_isExpanded);
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        decoration: BoxDecoration(
-                          color: color.surface,
-                          borderRadius: const BorderRadius.only(
-                            bottomLeft: Radius.circular(12),
-                            bottomRight: Radius.circular(12),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              _isExpanded ? 'Hide Details' : 'Show Details',
-                              style: textTheme.labelMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
                             ),
-                            const SizedBox(width: 4),
-                            Icon(
-                              _isExpanded
-                                  ? Icons.keyboard_arrow_up
-                                  : Icons.keyboard_arrow_down,
-                              color: color.onSurfaceVariant,
-                              size: 20,
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: budgetUsed > 0.9
+                                    ? color.errorContainer
+                                    : color.tertiaryContainer,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    '${(budgetUsed * 100).toStringAsFixed(0)}%',
+                                    style: textTheme.titleLarge?.copyWith(
+                                      color: budgetUsed > 0.9
+                                          ? color.onErrorContainer
+                                          : color.onTertiaryContainer,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    'of budget',
+                                    style: textTheme.labelSmall?.copyWith(
+                                      color: budgetUsed > 0.9
+                                          ? color.onErrorContainer
+                                          : color.onTertiaryContainer,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),
-                      ),
+                        const SizedBox(height: 16),
+                        // Progress indicator
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: LinearProgressIndicator(
+                            value: budgetUsed.clamp(0.0, 1.0),
+                            minHeight: 8,
+                            backgroundColor: color.surfaceContainerHighest,
+                            valueColor: AlwaysStoppedAnimation(
+                              budgetUsed > 0.9 ? color.error : color.tertiary,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              '₹0',
+                              style: textTheme.labelSmall?.copyWith(
+                                color: color.onSurfaceVariant,
+                              ),
+                            ),
+                            Text(
+                              '₹${(budget / 1000).toStringAsFixed(1)}k',
+                              style: textTheme.labelSmall?.copyWith(
+                                color: color.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
+              ),
+              // Tabs
+              TabBar(
+                controller: _tabController,
+                tabs: [
+                  const Tab(text: 'Expenses'),
+                  const Tab(text: 'Settlements'),
+                  if (!trip.isActive) const Tab(text: 'Report'),
+                ],
               ),
               Expanded(
                 child: TabBarView(
@@ -432,26 +399,28 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                   children: [
                     _buildTransactionsTab(trip, isGuestMode),
                     _buildSettlementsTab(trip, isGuestMode),
-                    _buildReportTab(trip, isGuestMode),
+                    if (!trip.isActive) _buildReportTab(trip, isGuestMode),
                   ],
                 ),
               ),
             ],
           ),
-          floatingActionButton: trip.isActive
-              ? FloatingActionButton.extended(
-                  onPressed: () {
-                    HapticFeedback.mediumImpact();
-                    context.push('/add-trip-transaction', extra: widget.tripId);
-                  },
-                  icon: const Icon(Icons.add),
-                  label: const Text('Add Expense'),
-                )
-              : null,
+
         );
       },
-      loading: () =>
-          const Scaffold(body: Center(child: CircularProgressIndicator())),
+      loading: () => Scaffold(
+        body: Column(
+          children: [
+            const SizedBox(height: 200),
+            Expanded(
+              child: ListView.builder(
+                itemCount: 5,
+                itemBuilder: (context, index) => const TransactionCardSkeleton(),
+              ),
+            ),
+          ],
+        ),
+      ),
       error: (e, _) => Scaffold(body: Center(child: Text('Error: $e'))),
     );
   }
@@ -461,6 +430,10 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
     final textTheme = Theme.of(context).textTheme;
     final transactionsList = trip.transactions.toList();
     final participants = trip.participants.toList();
+
+    // Get live balances and pending transactions
+    final liveBalancesAsync = ref.watch(liveBalancesProvider(widget.tripId));
+    final pendingTxnsAsync = ref.watch(pendingTransactionsProvider(widget.tripId));
 
     // Apply filters
     final filteredTransactions = transactionsList.where((tripTxn) {
@@ -513,22 +486,120 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                 color: color.onSurfaceVariant,
               ),
             ),
-            if (trip.isActive) ...[
-              const SizedBox(height: 24),
-              FilledButton.icon(
-                onPressed: () =>
-                    context.push('/add-trip-transaction', extra: widget.tripId),
-                icon: const Icon(Icons.add),
-                label: const Text('Add Expense'),
-              ),
-            ],
+
           ],
         ),
       );
     }
 
-    return Column(
-      children: [
+    return ListView(
+      children: <Widget>[
+        // Settlement Summary Bar (Single line status)
+        liveBalancesAsync.when(
+          data: (balances) {
+            if (balances.isEmpty) return const SizedBox.shrink();
+            final myBalance = balances.firstWhere(
+              (b) => b.isOwed,
+              orElse: () => balances.firstOrNull ?? balances.first,
+            );
+            return Container(
+              margin: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: myBalance.owes
+                    ? Colors.red.withValues(alpha: 0.1)
+                    : myBalance.isOwed
+                        ? Colors.green.withValues(alpha: 0.1)
+                        : color.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: myBalance.owes
+                      ? Colors.red
+                      : myBalance.isOwed
+                          ? Colors.green
+                          : color.outline,
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    myBalance.owes
+                        ? Icons.arrow_upward
+                        : myBalance.isOwed
+                            ? Icons.arrow_downward
+                            : Icons.check_circle,
+                    color: myBalance.owes
+                        ? Colors.red
+                        : myBalance.isOwed
+                            ? Colors.green
+                            : Colors.grey,
+                    size: 28,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          myBalance.isOwed
+                              ? 'You are owed'
+                              : myBalance.owes
+                                  ? 'You owe'
+                                  : 'All settled up',
+                          style: textTheme.bodySmall?.copyWith(
+                            color: color.onSurfaceVariant,
+                          ),
+                        ),
+                        if (myBalance.owes || myBalance.isOwed)
+                          Text(
+                            '₹${myBalance.amount.toStringAsFixed(0)}',
+                            style: textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: myBalance.owes ? Colors.red : Colors.green,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  if (myBalance.owes || myBalance.isOwed)
+                    FilledButton(
+                      onPressed: () => _tabController.animateTo(1),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: myBalance.owes ? Colors.red : Colors.green,
+                      ),
+                      child: const Text('Settle Up'),
+                    ),
+                ],
+              ),
+            );
+          },
+          loading: () => const SizedBox.shrink(),
+          error: (_, __) => const SizedBox.shrink(),
+        ),
+
+        // Expense History Header
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+          child: Row(
+            children: [
+              Text(
+                'Expenses',
+                style: textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                '${transactionsList.length} items',
+                style: textTheme.bodySmall?.copyWith(
+                  color: color.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+
         // Filter chips
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -578,7 +649,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                     ...participants.map(
                       (p) =>
                           PopupMenuItem<int?>(value: p.id, child: Text(p.name)),
-                    ),
+                    ).toList(),
                   ],
                 ),
                 const SizedBox(width: 8),
@@ -619,7 +690,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                       ...categories.map(
                         (c) =>
                             PopupMenuItem<String?>(value: c, child: Text(c!)),
-                      ),
+                      ).toList(),
                     ],
                   ),
                 if (_filterParticipantId != null ||
@@ -644,9 +715,10 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
         ),
 
         // Transactions list
-        Expanded(
-          child: filteredTransactions.isEmpty
-              ? Center(
+        ...filteredTransactions.isEmpty
+            ? [
+                const SizedBox(height: 100),
+                Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -665,114 +737,93 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                     ],
                   ),
                 )
-              : ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: filteredTransactions.length,
-                  itemBuilder: (context, index) {
-                    final tripTxn = filteredTransactions[index];
+            ]
+            : filteredTransactions.map((tripTxn) {
                     final txn = tripTxn.transaction.value;
                     final paidBy = tripTxn.paidBy.value;
 
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      elevation: 0,
-                      color: color.surfaceContainerHighest,
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(12),
-                        onLongPress: () async {
-                          HapticFeedback.mediumImpact();
-                          final confirm =
-                              await DialogUtils.showDeleteConfirmation(
-                                context,
-                                title: 'Remove Expense',
-                                message: 'Remove this expense from the trip?',
-                                deleteText: 'Remove',
-                              );
-                          if (confirm == true) {
-                            await ref
-                                .read(tripServiceProvider)
-                                .removeTripTransaction(
-                                  widget.tripId,
-                                  tripTxn.id,
-                                );
-                            ref.invalidate(tripByIdProvider(widget.tripId));
-                          }
+                    return Dismissible(
+                      key: Key('trip_txn_${tripTxn.id}'),
+                      direction: DismissDirection.endToStart,
+                      background: Container(
+                        alignment: Alignment.centerRight,
+                        padding: const EdgeInsets.only(right: 20),
+                        color: Colors.red,
+                        child: const Icon(Icons.delete, color: Colors.white),
+                      ),
+                      confirmDismiss: (direction) async {
+                        HapticFeedback.mediumImpact();
+                        return await DialogUtils.showDeleteConfirmation(
+                          context,
+                          title: 'Remove Expense',
+                          message: 'Remove this expense from the trip?',
+                          deleteText: 'Remove',
+                        );
+                      },
+                      onDismissed: (direction) async {
+                        await ref
+                            .read(tripServiceProvider)
+                            .removeTripTransaction(
+                              widget.tripId,
+                              tripTxn.id,
+                            );
+                        ref.invalidate(tripByIdProvider(widget.tripId));
+                      },
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          context.push('/expense-detail', extra: {
+                            'expenseId': tripTxn.id,
+                            'tripId': widget.tripId,
+                          });
                         },
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Row(
-                            children: [
-                              CircleAvatar(
-                                radius: 24,
-                                backgroundColor: color.primary.withValues(
-                                  alpha: 0.1,
-                                ),
-                                child: Text(
-                                  paidBy?.name[0].toUpperCase() ?? '?',
-                                  style: TextStyle(
-                                    color: color.primary,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
+                        leading: CircleAvatar(
+                          backgroundColor: color.primaryContainer,
+                          child: Text(
+                            paidBy?.name[0].toUpperCase() ?? '?',
+                            style: TextStyle(
+                              color: color.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        title: Text(
+                          txn?.category.value?.name ?? 'Uncategorized',
+                          style: textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Paid by ${paidBy?.name ?? "Unknown"}',
+                              style: textTheme.bodySmall?.copyWith(
+                                color: color.onSurfaceVariant,
                               ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Paid by ${paidBy?.name ?? "Unknown"}',
-                                      style: textTheme.titleMedium?.copyWith(
-                                        color: color.onSurfaceVariant,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      txn?.description ?? 'Expense',
-                                      style: textTheme.bodySmall?.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    if (txn?.category.value?.name != null) ...[
-                                      const SizedBox(height: 4),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 2,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: color.secondaryContainer,
-                                          borderRadius: BorderRadius.circular(
-                                            4,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          txn!.category.value!.name,
-                                          style: textTheme.labelSmall?.copyWith(
-                                            color: color.secondary,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ],
-                                ),
-                              ),
+                            ),
+                            if (txn?.description != null && txn!.description!.isNotEmpty)
                               Text(
-                                '₹${GuestModeUtil.applyGuestMode(txn?.amount ?? 0, isGuestMode).toStringAsFixed(2)}',
-                                style: textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: color.primary,
+                                txn.description!,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: textTheme.bodySmall?.copyWith(
+                                  color: color.onSurfaceVariant.withValues(alpha: 0.7),
                                 ),
                               ),
-                            ],
+                          ],
+                        ),
+                        trailing: Text(
+                          '₹${GuestModeUtil.applyGuestMode(txn?.amount ?? 0, isGuestMode).toStringAsFixed(0)}',
+                          style: textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: color.primary,
                           ),
                         ),
                       ),
                     );
-                  },
-                ),
-        ),
+              }).toList(),
       ],
     );
   }

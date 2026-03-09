@@ -88,16 +88,22 @@ class IndusIndSmsParserPlugin extends SmsParserPlugin {
   ParsedSms? parseSms(String sender, String body) {
     if (!_hasTransactionKeywords(body)) return null;
 
+    // Updated regex to handle formats like "Rs 10000.00" and "Rs. 10000.00"
     final amountRegex = RegExp(r'Rs\.?\s*(\d+(?:,\d+)*(?:\.\d{2})?)');
+    // Updated to handle *XX6988 format
     final accountRegex = RegExp(r'A/C?\s*\*?[xX]*([xX]*\d{4})', caseSensitive: false);
     final typeRegex = RegExp(r'(debited|credited)', caseSensitive: false);
+    // Extract UPI ID from "from 891223@jupiteraxis" format
+    final upiRegex = RegExp(r'from\s+([\w.-]+@[\w.-]+)');
     final merchantRegex = RegExp(r'at\s+(.+?)\s+on');
-    final balanceRegex = RegExp(r'Avl\s*(?:Bal|Lmt)[:\s]*Rs\.?\s*(\d+(?:,\d+)*(?:\.\d{2})?)');
+    // Updated to handle "Avl bal:676767.27" format
+    final balanceRegex = RegExp(r'Avl\s*(?:bal|Bal|Lmt)[:\s]*Rs?\.?\s*(\d+(?:,\d+)*(?:\.\d{2})?)', caseSensitive: false);
 
     final amount = _extractAmount(amountRegex, body);
     final account = accountRegex.firstMatch(body)?.group(1);
     final type = typeRegex.firstMatch(body)?.group(1)?.toLowerCase();
-    final merchant = _cleanMerchantName(merchantRegex.firstMatch(body)?.group(1));
+    final upiId = upiRegex.firstMatch(body)?.group(1);
+    final merchant = _cleanMerchantName(merchantRegex.firstMatch(body)?.group(1)) ?? upiId;
     final balance = _extractAmount(balanceRegex, body);
 
     if (amount == null) return null;
@@ -108,6 +114,7 @@ class IndusIndSmsParserPlugin extends SmsParserPlugin {
       account: account,
       merchant: merchant,
       balance: balance,
+      transactionType: type == 'credited' ? 'Income' : 'Expense',
     );
   }
 

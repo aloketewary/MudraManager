@@ -182,7 +182,11 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
     }
 
     await service.save(bud);
-    context.pop();
+    
+    if (mounted) {
+      ref.invalidate(budgetServiceProvider);
+      context.pop();
+    }
   }
 
   @override

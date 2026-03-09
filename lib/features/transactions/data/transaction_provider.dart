@@ -457,7 +457,6 @@ class TransactionService {
 
     final filteredTransactions = allTransactions.where((tx) {
       if (tx.isTransfer) {
-        // Only show the 'source' transaction, not the linked one
         return !tx.isExpense;
       }
       return true;

@@ -1,73 +1,22 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/shared/widgets/responsive_helper.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/features/marketplace/services/marketplace_service.dart';
+import 'package:mudra_manager/features/dashboard/data/priority_alert_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class _AnimatedCard extends StatefulWidget {
-  final Widget child;
-  final int delay;
-
-  const _AnimatedCard({required this.child, this.delay = 0});
-
-  @override
-  State<_AnimatedCard> createState() => _AnimatedCardState();
-}
-
-class _AnimatedCardState extends State<_AnimatedCard>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _fadeAnimation;
-  late Animation<Offset> _slideAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 600),
-      vsync: this,
-    );
-
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
-
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.1),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
-
-    Future.delayed(Duration(milliseconds: widget.delay), () {
-      if (mounted) _controller.forward();
-    });
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: _fadeAnimation,
-      child: SlideTransition(position: _slideAnimation, child: widget.child),
-    );
-  }
-}
-
-class UtilityScreen extends StatefulWidget {
+class UtilityScreen extends ConsumerStatefulWidget {
   const UtilityScreen({super.key});
 
   @override
-  State<UtilityScreen> createState() => UtilityScreenState();
+  ConsumerState<UtilityScreen> createState() => UtilityScreenState();
 }
 
-class UtilityScreenState extends State<UtilityScreen> {
+class UtilityScreenState extends ConsumerState<UtilityScreen> {
   List<String> _visibleUtilities = [];
   List<String> _seenUtilities = [];
   bool _isLoading = true;
@@ -77,7 +26,7 @@ class UtilityScreenState extends State<UtilityScreen> {
       id: 'trips',
       title: 'Trips & Split',
       subtitle: 'Group expenses & settlements',
-      icon: Icons.card_travel,
+      icon: LucideIcons.plane,
       route: '/trips',
       pluginId: 'com.mudra.split_bills',
     ),
@@ -85,28 +34,28 @@ class UtilityScreenState extends State<UtilityScreen> {
       id: 'monthly_comparison',
       title: 'Monthly Comparison',
       subtitle: 'Current vs last month',
-      icon: Icons.compare_arrows,
+      icon: LucideIcons.arrowLeftRight,
       route: '/monthly-comparison',
     ),
     _UtilityItem(
       id: 'recurring',
-      title: 'Recurring Transactions',
+      title: 'Bill Control Center',
       subtitle: 'Auto-create transactions',
-      icon: Icons.repeat,
+      icon: LucideIcons.repeat,
       route: '/recurring-transactions',
     ),
     _UtilityItem(
       id: 'budgets',
       title: 'Budgets',
       subtitle: 'Manage spending limits',
-      icon: Icons.pie_chart_outline,
+      icon: LucideIcons.chartPie,
       route: '/budget-dashboard',
     ),
     _UtilityItem(
       id: 'goals',
       title: 'Goals',
       subtitle: 'Track savings progress',
-      icon: Icons.emoji_flags_outlined,
+      icon: LucideIcons.target,
       route: '/goal-screen',
     ),
   ];
@@ -121,16 +70,17 @@ class UtilityScreenState extends State<UtilityScreen> {
     final prefs = await SharedPreferences.getInstance();
     final saved = prefs.getStringList('visible_utilities');
     final seen = prefs.getStringList('seen_utilities') ?? [];
-    
+
     // Filter utilities based on plugin status
     final marketplace = MarketplaceService();
     final filteredUtilities = <_UtilityItem>[];
     for (final utility in _allUtilities) {
-      if (utility.pluginId == null || await marketplace.isPluginEnabled(utility.pluginId!)) {
+      if (utility.pluginId == null ||
+          await marketplace.isPluginEnabled(utility.pluginId!)) {
         filteredUtilities.add(utility);
       }
     }
-    
+
     if (mounted) {
       setState(() {
         _allUtilities.clear();
@@ -145,6 +95,15 @@ class UtilityScreenState extends State<UtilityScreen> {
   Future<void> _savePreferences() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList('visible_utilities', _visibleUtilities);
+  }
+
+  Future<void> _restoreDefaults() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('visible_utilities');
+    setState(() {
+      _visibleUtilities = ['monthly_comparison', 'recurring'];
+    });
+    await _savePreferences();
   }
 
   void showCustomizeSheet() {
@@ -204,7 +163,7 @@ class UtilityScreenState extends State<UtilityScreen> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Icon(
-                              Icons.tune,
+                              LucideIcons.settings2,
                               color: color.onPrimaryContainer,
                               size: 24,
                             ),
@@ -229,6 +188,21 @@ class UtilityScreenState extends State<UtilityScreen> {
                                 ),
                               ],
                             ),
+                          ),
+                          IconButton(
+                            onPressed: () async {
+                              await _restoreDefaults();
+                              Navigator.pop(context);
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text('Restored to defaults')),
+                                );
+                              }
+                            },
+                            icon: Icon(LucideIcons.rotateCcw,
+                                color: color.primary),
+                            tooltip: 'Reset',
                           ),
                         ],
                       ),
@@ -328,7 +302,7 @@ class UtilityScreenState extends State<UtilityScreen> {
                               ),
                               const SizedBox(width: 8),
                               Icon(
-                                Icons.drag_handle,
+                                LucideIcons.gripVertical,
                                 color: color.onSurfaceVariant,
                               ),
                             ],
@@ -393,9 +367,10 @@ class UtilityScreenState extends State<UtilityScreen> {
       );
     }
 
-    final visibleItems = _allUtilities
-        .where((u) => _visibleUtilities.contains(u.id))
-        .toList();
+    final visibleItems =
+        _allUtilities.where((u) => _visibleUtilities.contains(u.id)).toList();
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
@@ -404,42 +379,175 @@ class UtilityScreenState extends State<UtilityScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
-                    Icons.widgets_outlined,
+                  Icon(
+                    LucideIcons.package,
                     size: 64,
-                    color: Colors.grey,
+                    color: color.onSurfaceVariant.withValues(alpha: 0.5),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'No utilities enabled',
-                    style: Theme.of(context).textTheme.titleMedium,
+                    style: textTheme.titleMedium,
                   ),
                   const SizedBox(height: 8),
                   TextButton.icon(
                     onPressed: _showCustomizeSheet,
-                    icon: const Icon(Icons.add),
+                    icon: const Icon(LucideIcons.plus),
                     label: const Text('Add Utilities'),
                   ),
                 ],
               ),
             )
-          : GridView.builder(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 110),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: ResponsiveHelper.getGridCrossAxisCount(context),
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: ResponsiveHelper.getGridAspectRatio(
-                  context,
-                  defaultRatio: 1.0,
-                  singleColumnRatio: 2.6,
+          : CustomScrollView(
+              slivers: [
+                // Priority Alert Zone
+                SliverToBoxAdapter(
+                  child: Consumer(
+                    builder: (context, ref, child) {
+                      final alertAsync = ref.watch(priorityAlertProvider);
+                      return alertAsync.when(
+                        data: (alert) {
+                          if (alert == null) return const SizedBox();
+
+                          final alertColor = alert.type == AlertType.urgent
+                              ? const Color(0xFFFFAB91)
+                              : alert.type == AlertType.warning
+                                  ? const Color(0xFFFFD54F)
+                                  : color.primary;
+
+                          return InkWell(
+                            onTap: () {
+                              HapticFeedback.mediumImpact();
+                              context.push(alert.route);
+                            },
+                            borderRadius: BorderRadius.circular(20),
+                            child: Container(
+                              margin: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                              padding: const EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    alertColor.withValues(alpha: 0.2),
+                                    alertColor.withValues(alpha: 0.05),
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: alertColor.withValues(alpha: 0.3),
+                                  width: 2,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: alertColor.withValues(alpha: 0.3),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      alert.type == AlertType.urgent
+                                          ? LucideIcons.circleAlert
+                                          : alert.type == AlertType.warning
+                                              ? LucideIcons.triangleAlert
+                                              : LucideIcons.info,
+                                      color: alertColor,
+                                      size: 24,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          alert.title,
+                                          style: textTheme.titleSmall?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            color: alertColor,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          alert.message,
+                                          style: textTheme.bodyMedium?.copyWith(
+                                            color: color.onSurfaceVariant,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Icon(
+                                    LucideIcons.chevronRight,
+                                    color: color.onSurfaceVariant,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                        loading: () => Container(
+                          margin: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                          child: SkeletonLoader(
+                            width: double.infinity,
+                            height: 100,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                        error: (_, __) => const SizedBox(),
+                      );
+                    },
+                  ),
                 ),
-              ),
-              itemCount: visibleItems.length,
-              itemBuilder: (context, index) => _AnimatedCard(
-                delay: index * 50,
-                child: _UtilityCard(item: visibleItems[index]),
-              ),
+
+                // Core Tools Grid (2x2)
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  sliver: SliverGrid(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                      childAspectRatio: 1.0,
+                    ),
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) =>
+                          _UtilityCard(item: visibleItems[index]),
+                      childCount:
+                          visibleItems.length > 4 ? 4 : visibleItems.length,
+                    ),
+                  ),
+                ),
+
+                // Quick Actions Section
+                if (visibleItems.length > 4)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
+                      child: Text(
+                        'More Tools',
+                        style: textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                if (visibleItems.length > 4)
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) => Container(
+                        margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                        child: _UtilityListCard(item: visibleItems[index + 4]),
+                      ),
+                      childCount: visibleItems.length - 4,
+                    ),
+                  ),
+
+                const SliverToBoxAdapter(child: SizedBox(height: 100)),
+              ],
             ),
     );
   }
@@ -536,6 +644,74 @@ class _UtilityCard extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _UtilityListCard extends StatelessWidget {
+  final _UtilityItem item;
+
+  const _UtilityListCard({required this.item});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Card(
+      color: colorScheme.surfaceContainerHighest,
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.mediumImpact();
+          context.push(item.route);
+        },
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: colorScheme.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  item.icon,
+                  color: colorScheme.primary,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.title,
+                      style: textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      item.subtitle,
+                      style: textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                LucideIcons.chevronRight,
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ),
         ),
       ),
     );

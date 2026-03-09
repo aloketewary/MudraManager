@@ -12,26 +12,25 @@ class AdvancedAnalyticsService {
     final now = DateTime.now();
     final transactions = await _transactionService.getAllForDashBoard();
 
-    final last3Months = <double>[];
+    double total = 0;
+    int count = 0;
+
     for (int i = 1; i <= 3; i++) {
       final month = DateTime(now.year, now.month - i);
-      final monthTxns = transactions.where(
-        (tx) =>
-            tx.isExpense &&
-            tx.date.year == month.year &&
-            tx.date.month == month.month,
-      );
-      final total = monthTxns.fold(0.0, (sum, tx) => sum + tx.amount);
-      last3Months.add(total);
+      final monthTotal = transactions
+          .where((tx) =>
+              tx.isExpense &&
+              tx.date.year == month.year &&
+              tx.date.month == month.month)
+          .fold(0.0, (sum, tx) => sum + tx.amount);
+      
+      if (monthTotal > 0) {
+        total += monthTotal;
+        count++;
+      }
     }
 
-    if (last3Months.isEmpty) return 0;
-
-    // Simple average with trend
-    final avg = last3Months.reduce((a, b) => a + b) / last3Months.length;
-    final trend = (last3Months.first - last3Months.last) / 3;
-
-    return avg + trend;
+    return count > 0 ? total / count : 0;
   }
 
   // Calculate financial health score (0-100)

@@ -11,72 +11,28 @@ import 'package:mudra_manager/features/budget/data/budget_service_provider.dart'
 import 'package:mudra_manager/features/category/data/category_provider.dart';
 import 'package:mudra_manager/features/profile/data/user_profile_provider.dart';
 import 'package:mudra_manager/features/gamification/widgets/badge_showcase.dart';
+import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/features/marketplace/services/marketplace_service.dart';
+import 'package:mudra_manager/core/theme/theme_provider.dart';
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 
 final lowBalancePluginProvider = FutureProvider.autoDispose((ref) async {
   return await MarketplaceService().isPluginEnabled('com.mudra.low_balance_alert');
 });
 
-class _AnimatedCard extends StatefulWidget {
-  final Widget child;
-  final int delay;
-
-  const _AnimatedCard({required this.child, this.delay = 0});
-
-  @override
-  State<_AnimatedCard> createState() => _AnimatedCardState();
-}
-
-class _AnimatedCardState extends State<_AnimatedCard>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _fadeAnimation;
-  late Animation<Offset> _slideAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
-
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
-
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.05),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _controller.forward();
-    });
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: _fadeAnimation,
-      child: SlideTransition(position: _slideAnimation, child: widget.child),
-    );
-  }
-}
-
-class ProfileScreen extends ConsumerWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  bool _achievementsExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
     final iconDataList = MudraManagerAvatarIcons.iconDataList;
     final profileAsync = ref.watch(userProfileProvider);
     final accountsAsync = ref.watch(accountsProvider);
@@ -91,7 +47,7 @@ class ProfileScreen extends ConsumerWidget {
       data: (profile) => CustomScrollView(
         slivers: [
           SliverAppBar(
-            expandedHeight: 200,
+            expandedHeight: 140,
             pinned: true,
             leading: const SizedBox.shrink(),
             actions: [
@@ -155,120 +111,85 @@ class ProfileScreen extends ConsumerWidget {
                   title: isCollapsed
                       ? Padding(
                           padding: const EdgeInsets.only(right: 16),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              CircleAvatar(
-                                radius: 16,
-                                backgroundColor: color.primaryContainer,
-                                child: Icon(
-                                  iconDataList[profile?.avatarIndex ?? 0],
-                                  size: 16,
-                                  color: color.onPrimaryContainer,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Flexible(
-                                child: Text(
-                                  profile?.name ?? 'Unknown',
-                                  style: textTheme.titleLarge?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: color.onSurface,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
+                          child: Text(
+                            profile?.name ?? 'Unknown',
+                            style: textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: color.onSurface,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         )
                       : const SizedBox.shrink(),
                   background: Container(
                     decoration: BoxDecoration(color: color.primaryContainer),
                     child: SafeArea(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Stack(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(4),
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: color.surface,
-                                ),
-                                child: CircleAvatar(
-                                  radius: 40,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Row(
+                          children: [
+                            Stack(
+                              children: [
+                                CircleAvatar(
+                                  radius: 32,
                                   backgroundColor: color.primary,
                                   child: Icon(
                                     iconDataList[profile?.avatarIndex ?? 0],
-                                    size: 40,
+                                    size: 32,
                                     color: color.onPrimary,
                                   ),
                                 ),
-                              ),
-                              Positioned(
-                                right: 0,
-                                bottom: 0,
-                                child: GestureDetector(
-                                  onTap: () {
-                                    HapticFeedback.mediumImpact();
-                                    context.push('/edit-profile');
-                                  },
-                                  child: Container(
-                                    padding: const EdgeInsets.all(6),
-                                    decoration: BoxDecoration(
-                                      color: color.surface,
-                                      shape: BoxShape.circle,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: color.shadow.withValues(
-                                            alpha: 0.2,
-                                          ),
-                                          blurRadius: 4,
-                                          offset: const Offset(0, 2),
-                                        ),
-                                      ],
-                                    ),
-                                    child: Icon(
-                                      Icons.edit,
-                                      size: 14,
-                                      color: color.primary,
+                                Positioned(
+                                  right: 0,
+                                  bottom: 0,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      HapticFeedback.mediumImpact();
+                                      context.push('/edit-profile');
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: BoxDecoration(
+                                        color: color.surface,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        Icons.edit,
+                                        size: 12,
+                                        color: color.primary,
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            profile?.name ?? 'Unknown',
-                            style: textTheme.titleLarge?.copyWith(
-                              color: color.onPrimaryContainer,
-                              fontWeight: FontWeight.bold,
+                              ],
                             ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            profile?.email ?? '',
-                            style: textTheme.bodySmall?.copyWith(
-                              color: color.onPrimaryContainer.withValues(
-                                alpha: 0.8,
-                              ),
-                            ),
-                          ),
-                          if (profile?.phone != null &&
-                              profile!.phone!.isNotEmpty) ...{
-                            const SizedBox(height: 2),
-                            Text(
-                              profile.phone!,
-                              style: textTheme.bodySmall?.copyWith(
-                                color: color.onPrimaryContainer.withValues(
-                                  alpha: 0.8,
-                                ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    profile?.name ?? 'Unknown',
+                                    style: textTheme.titleLarge?.copyWith(
+                                      color: color.onPrimaryContainer,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  if (profile?.email != null && profile!.email!.isNotEmpty)
+                                    Text(
+                                      profile.email!,
+                                      style: textTheme.bodySmall?.copyWith(
+                                        color: color.onPrimaryContainer.withValues(alpha: 0.8),
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                ],
                               ),
                             ),
-                          },
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -280,246 +201,120 @@ class ProfileScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(16),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
-                _AnimatedCard(
-                  delay: 0,
-                  child: SizedBox(
+                Card(
+                  elevation: 0,
+                  color: color.surfaceContainerLow,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
                     child: Row(
                       children: [
-                        Expanded(
-                          child: _buildStatCard(
-                            context,
-                            Icons.account_balance_wallet,
-                            accountsAsync.when(
-                              data: (accounts) => accounts.length.toString(),
-                              loading: () => '...',
-                              error: (_, __) => '0',
-                            ),
-                            'Accounts',
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _buildStatCard(
-                            context,
-                            Icons.category,
-                            categoriesAsync.when(
-                              data: (categories) =>
-                                  categories.length.toString(),
-                              loading: () => '...',
-                              error: (_, __) => '0',
-                            ),
-                            'Categories',
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: FutureBuilder(
-                            future: budgetsAsync,
-                            builder: (context, snapshot) => _buildStatCard(
-                              context,
-                              Icons.pie_chart,
-                              snapshot.hasData
-                                  ? (snapshot.data as List).length.toString()
-                                  : '...',
-                              'Budgets',
-                            ),
-                          ),
-                        ),
+                        Expanded(child: _buildQuickStat(context, Icons.account_balance_wallet, accountsAsync.when(data: (a) => a.length.toString(), loading: () => '...', error: (_, __) => '0'), 'Accounts')),
+                        Container(width: 1, height: 40, color: color.outlineVariant),
+                        Expanded(child: _buildQuickStat(context, Icons.category, categoriesAsync.when(data: (c) => c.length.toString(), loading: () => '...', error: (_, __) => '0'), 'Categories')),
+                        Container(width: 1, height: 40, color: color.outlineVariant),
+                        Expanded(child: FutureBuilder(future: budgetsAsync, builder: (context, snapshot) => _buildQuickStat(context, Icons.pie_chart, snapshot.hasData ? (snapshot.data as List).length.toString() : '...', 'Budgets'))),
                       ],
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
-                const _AnimatedCard(delay: 100, child: BadgeShowcase()),
-                const SizedBox(height: 20),
-                _AnimatedCard(
-                  child: _buildSectionHeader(context, 'Management'),
-                ),
-                const SizedBox(height: 12),
-                _AnimatedCard(
-                  child: _buildSettingCard(
-                    context,
-                    Icons.account_balance_wallet_outlined,
-                    'Accounts',
-                    'Manage your accounts',
-                    () {
-                      HapticFeedback.mediumImpact();
-                      context.push('/manage-accounts');
-                    },
-                  ),
-                ),
-                const SizedBox(height: 12),
-                _AnimatedCard(
-                  child: _buildSettingCard(
-                    context,
-                    Icons.category_outlined,
-                    'Categories',
-                    'Manage your categories',
-                    () {
-                      HapticFeedback.mediumImpact();
-                      context.push('/manage-categories');
-                    },
-                  ),
-                ),
-                const SizedBox(height: 24),
-                _AnimatedCard(
-                  delay: 350,
-                  child: _buildSectionHeader(context, 'Account & Data'),
-                ),
-                const SizedBox(height: 12),
-                FutureBuilder<bool>(
-                  future: MarketplaceService().isPluginEnabled('com.mudra.low_balance_alert'),
-                  builder: (context, snapshot) {
-                    final isPluginEnabled = snapshot.data ?? false;
-                    if (!isPluginEnabled) return const SizedBox.shrink();
-                    
-                    return _AnimatedCard(
-                      delay: 400,
-                      child: _buildSettingCard(
-                        context,
-                        Icons.account_balance_wallet_outlined,
-                        'Low Balance Threshold',
-                        '₹${SharedPrefsUtil.instance.getLowBalanceThreshold().toStringAsFixed(0)}',
-                        () => _showThresholdBottomSheet(
-                          context,
-                          ref,
-                          color,
-                          textTheme,
+                const SizedBox(height: 16),
+                Consumer(
+                  builder: (context, ref, _) {
+                    final achievementsAsync = ref.watch(achievementsProvider);
+                    return achievementsAsync.when(
+                      data: (achievements) {
+                        final visible = achievements.where((a) => a.isVisible).toList();
+                        final unlocked = visible.where((a) => a.isUnlocked).toList();
+                        return Card(
+                          elevation: 0,
+                          color: color.surfaceContainerLow,
+                          child: InkWell(
+                            onTap: () => setState(() => _achievementsExpanded = !_achievementsExpanded),
+                            borderRadius: BorderRadius.circular(12),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(Icons.emoji_events, color: color.primary, size: 24),
+                                      const SizedBox(width: 12),
+                                      Text('Your Achievements', style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
+                                      const Spacer(),
+                                      Text('${unlocked.length}/${visible.length}', style: textTheme.bodyMedium?.copyWith(color: color.primary, fontWeight: FontWeight.bold)),
+                                      const SizedBox(width: 8),
+                                      Icon(_achievementsExpanded ? Icons.expand_less : Icons.expand_more, color: color.onSurfaceVariant),
+                                    ],
+                                  ),
+                                  if (_achievementsExpanded) ...[const SizedBox(height: 16), const BadgeShowcase()],
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                      loading: () => Card(
+                        elevation: 0,
+                        color: color.surfaceContainerLow,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Row(
+                            children: [
+                              Icon(Icons.emoji_events, color: color.primary, size: 24),
+                              const SizedBox(width: 12),
+                              Text('Your Achievements', style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
+                            ],
+                          ),
                         ),
                       ),
+                      error: (_, __) => const SizedBox.shrink(),
                     );
                   },
                 ),
-                FutureBuilder<bool>(
-                  future: MarketplaceService().isPluginEnabled('com.mudra.low_balance_alert'),
-                  builder: (context, snapshot) {
-                    final isPluginEnabled = snapshot.data ?? false;
-                    return isPluginEnabled ? const SizedBox(height: 12) : const SizedBox.shrink();
-                  },
-                ),
-                _AnimatedCard(
-                  delay: 450,
-                  child: _buildSettingCard(
-                    context,
-                    Icons.backup,
-                    'Backup & Restore',
-                    'Manage your data',
-                    () {
-                      HapticFeedback.mediumImpact();
-                      context.push('/backup-restore');
-                    },
-                  ),
-                ),
-                const SizedBox(height: 24),
-                _AnimatedCard(
-                  delay: 500,
-                  child: _buildSectionHeader(context, 'Preferences'),
-                ),
+                const SizedBox(height: 20),
+                _buildSectionHeader(context, 'Core Settings'),
                 const SizedBox(height: 12),
-                _AnimatedCard(
-                  delay: 550,
-                  child: _buildSettingCard(
-                    context,
-                    Icons.notifications_outlined,
-                    'Notifications',
-                    'Daily & weekly summaries',
-                    () {
-                      HapticFeedback.mediumImpact();
-                      context.push('/notification-settings');
-                    },
-                  ),
-                ),
+                _buildSettingCard(context, Icons.account_balance_wallet_outlined, 'Accounts', 'Manage your accounts', () { HapticFeedback.mediumImpact(); context.push('/manage-accounts'); }),
                 const SizedBox(height: 12),
-                _AnimatedCard(
-                  delay: 600,
-                  child: _buildSettingCard(
-                    context,
-                    Icons.settings,
-                    'App Settings',
-                    'Customize your experience',
-                    () {
-                      HapticFeedback.mediumImpact();
-                      context.push('/app-settings');
-                    },
-                  ),
-                ),
+                _buildSettingCard(context, Icons.category_outlined, 'Categories', 'Manage your categories', () { HapticFeedback.mediumImpact(); context.push('/manage-categories'); }),
                 const SizedBox(height: 12),
-                _AnimatedCard(
-                  delay: 700,
-                  child: _buildSettingCard(
-                    context,
-                    Icons.lock,
-                    'Security',
-                    'PIN or Fingerprint',
-                    () {
-                      HapticFeedback.mediumImpact();
-                      context.push('/security');
-                    },
-                  ),
-                ),
+                _buildSettingCard(context, Icons.lock, 'Security', 'PIN or Fingerprint', () { HapticFeedback.mediumImpact(); context.push('/security'); }),
+                const SizedBox(height: 20),
+                _buildSectionHeader(context, 'App & Data'),
                 const SizedBox(height: 12),
-                _AnimatedCard(
-                  delay: 750,
-                  child: _buildSettingCard(
-                    context,
-                    Icons.sms,
-                    'SMS Import',
-                    'Auto-import transactions',
-                    () {
-                      HapticFeedback.mediumImpact();
-                      context.push('/sms-import');
-                    },
-                  ),
-                ),
-                const SizedBox(height: 24),
-                _AnimatedCard(
-                  delay: 750,
-                  child: _buildSectionHeader(context, 'About'),
-                ),
+                _buildSettingCard(context, Icons.notifications_outlined, 'Notifications', 'Daily & weekly summaries', () { HapticFeedback.mediumImpact(); context.push('/notification-settings'); }),
                 const SizedBox(height: 12),
-                _AnimatedCard(
-                  delay: 800,
-                  child: _buildSettingCard(
-                    context,
-                    Icons.help_outline,
-                    'Help & Support',
-                    'FAQs and feature guides',
-                    () {
-                      HapticFeedback.mediumImpact();
-                      context.push('/help');
-                    },
-                  ),
-                ),
+                _buildSettingCard(context, Icons.sms, 'SMS Import', 'Auto-import transactions', () { HapticFeedback.mediumImpact(); context.push('/sms-import'); }),
                 const SizedBox(height: 12),
-                _AnimatedCard(
-                  delay: 850,
-                  child: _buildSettingCard(
-                    context,
-                    Icons.info_outline,
-                    'About App',
-                    'Version & Info',
-                    () {
-                      HapticFeedback.mediumImpact();
-                      context.push('/about');
-                    },
-                  ),
-                ),
-                const SizedBox(height: 24),
-                _AnimatedCard(
-                  delay: 900,
-                  child: _buildSectionHeader(context, 'Danger Zone'),
-                ),
+                _buildSettingCard(context, Icons.backup, 'Backup & Restore', 'Manage your data', () { HapticFeedback.mediumImpact(); context.push('/backup-restore'); }),
+                FutureBuilder<bool>(future: MarketplaceService().isPluginEnabled('com.mudra.low_balance_alert'), builder: (context, snapshot) { if (!(snapshot.data ?? false)) return const SizedBox.shrink(); return Column(children: [const SizedBox(height: 12), _buildSettingCard(context, Icons.account_balance_wallet_outlined, 'Low Balance Threshold', '₹${SharedPrefsUtil.instance.getLowBalanceThreshold().toStringAsFixed(0)}', () => _showThresholdBottomSheet(context, ref, color, textTheme))]); }),
+                const SizedBox(height: 20),
+                _buildSectionHeader(context, 'Appearance'),
                 const SizedBox(height: 12),
-                _AnimatedCard(
-                  delay: 950,
-                  child: _buildSettingCard(
-                    context,
-                    Icons.logout,
-                    'Logout',
-                    'Clear all data',
-                    () =>
-                        _showLogoutBottomSheet(context, ref, color, textTheme),
-                    isDestructive: true,
+                _buildThemeModeCard(context, ref, color, textTheme),
+                const SizedBox(height: 12),
+                _buildAccessibilityCard(context, ref, color, textTheme),
+                const SizedBox(height: 12),
+                _buildSettingCard(context, Icons.language, 'Language', 'Change app language', () { HapticFeedback.mediumImpact(); context.push('/choose-language'); }),
+                const SizedBox(height: 20),
+                _buildSectionHeader(context, 'Advanced'),
+                const SizedBox(height: 12),
+                _buildSettingCard(context, Icons.dashboard_customize_outlined, 'Dashboard Layout', 'Customize widgets & cards', () { HapticFeedback.mediumImpact(); context.push('/dashboard-customize'); }),
+                const SizedBox(height: 12),
+                _buildSettingCard(context, Icons.extension_outlined, 'Plugins', 'Manage extensions', () { HapticFeedback.mediumImpact(); context.push('/marketplace'); }),
+                const SizedBox(height: 20),
+                _buildSectionHeader(context, 'Support & Legal'),
+                const SizedBox(height: 12),
+                _buildSettingCard(context, Icons.help_outline, 'Help & Support', 'FAQs and feature guides', () { HapticFeedback.mediumImpact(); context.push('/help'); }),
+                const SizedBox(height: 12),
+                _buildSettingCard(context, Icons.info_outline, 'About App', 'Version & Info', () { HapticFeedback.mediumImpact(); context.push('/about'); }),
+                const SizedBox(height: 32),
+                Center(
+                  child: TextButton.icon(
+                    onPressed: () => _showLogoutBottomSheet(context, ref, color, textTheme),
+                    icon: Icon(Icons.logout, size: 18, color: color.error),
+                    label: Text('Logout', style: textTheme.bodyMedium?.copyWith(color: color.error)),
+                    style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12)),
                   ),
                 ),
                 const SizedBox(height: 80),
@@ -554,6 +349,119 @@ class ProfileScreen extends ConsumerWidget {
       ),
       error: (e, _) => Center(child: Text('Error: $e')),
     );
+  }
+
+  Widget _buildQuickStat(BuildContext context, IconData icon, String value, String label) {
+    final textTheme = Theme.of(context).textTheme;
+    final color = Theme.of(context).colorScheme;
+    return Column(
+      children: [
+        Icon(icon, color: color.primary, size: 20),
+        const SizedBox(height: 8),
+        Text(value, style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: color.primary)),
+        const SizedBox(height: 2),
+        Text(label, style: textTheme.labelSmall?.copyWith(color: color.onSurfaceVariant), textAlign: TextAlign.center),
+      ],
+    );
+  }
+
+  Widget _buildThemeModeCard(BuildContext context, WidgetRef ref, ColorScheme color, TextTheme textTheme) {
+    final currentTheme = ref.watch(themeModeProvider);
+    final ctxt = AppLocalizations.of(context)!;
+    String modeText;
+    switch (currentTheme) {
+      case AppThemeMode.light: modeText = ctxt.app_settings_theme_mode_light; break;
+      case AppThemeMode.dark: modeText = ctxt.app_settings_theme_mode_dark; break;
+      case AppThemeMode.amoled: modeText = ctxt.app_settings_theme_mode_amoled; break;
+      case AppThemeMode.system: modeText = ctxt.app_settings_theme_mode_system_default; break;
+    }
+    return _buildSettingCard(context, Icons.brightness_6_outlined, 'Theme Mode', modeText, () {
+      HapticFeedback.mediumImpact();
+      showModalBottomSheet(
+        context: context,
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+        builder: (_) => Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(width: 40, height: 4, decoration: BoxDecoration(color: color.onSurfaceVariant.withValues(alpha: 0.4), borderRadius: BorderRadius.circular(2))),
+              const SizedBox(height: 16),
+              Text('Select Theme Mode', style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 16),
+              ...AppThemeMode.values.map((mode) {
+                final isSelected = currentTheme == mode;
+                String label;
+                IconData icon;
+                switch (mode) {
+                  case AppThemeMode.light: label = ctxt.app_settings_theme_mode_light; icon = Icons.light_mode; break;
+                  case AppThemeMode.dark: label = ctxt.app_settings_theme_mode_dark; icon = Icons.dark_mode; break;
+                  case AppThemeMode.amoled: label = ctxt.app_settings_theme_mode_amoled; icon = Icons.circle; break;
+                  case AppThemeMode.system: label = ctxt.app_settings_theme_mode_system_default; icon = Icons.phone_android; break;
+                }
+                return Card(
+                  elevation: 0,
+                  color: isSelected ? color.primaryContainer : color.surfaceContainerHighest,
+                  child: ListTile(
+                    title: Text(label),
+                    leading: Icon(icon, color: isSelected ? color.onPrimaryContainer : color.onSurface),
+                    trailing: isSelected ? Icon(Icons.check, color: color.onPrimaryContainer) : null,
+                    onTap: () { HapticFeedback.mediumImpact(); ref.read(themeModeProvider.notifier).setTheme(mode); context.pop(); },
+                  ),
+                );
+              }),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+      );
+    });
+  }
+
+  Widget _buildAccessibilityCard(BuildContext context, WidgetRef ref, ColorScheme color, TextTheme textTheme) {
+    final prefs = SharedPrefsUtil.instance;
+    final isHighContrast = prefs.getHighContrastMode();
+    return _buildSettingCard(context, Icons.accessibility_new, 'Accessibility', isHighContrast ? 'High Contrast Enabled' : 'Standard', () {
+      HapticFeedback.mediumImpact();
+      showModalBottomSheet(
+        context: context,
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+        builder: (_) => StatefulBuilder(
+          builder: (context, setModalState) {
+            final currentHighContrast = prefs.getHighContrastMode();
+            return Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(width: 40, height: 4, decoration: BoxDecoration(color: color.onSurfaceVariant.withValues(alpha: 0.4), borderRadius: BorderRadius.circular(2))),
+                  const SizedBox(height: 16),
+                  Text('Accessibility Options', style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 16),
+                  Card(
+                    elevation: 0,
+                    color: color.surfaceContainerHighest,
+                    child: SwitchListTile(
+                      title: const Text('High Contrast Mode'),
+                      subtitle: const Text('Improves readability for low vision'),
+                      value: currentHighContrast,
+                      onChanged: (val) {
+                        HapticFeedback.mediumImpact();
+                        prefs.setHighContrastMode(val);
+                        ref.read(highContrastModeProvider.notifier).set(val);
+                        setModalState(() {});
+                        setState(() {});
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+              ),
+            );
+          },
+        ),
+      );
+    });
   }
 
   Widget _buildStatCard(

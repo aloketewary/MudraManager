@@ -7,6 +7,8 @@ import 'package:mudra_manager/features/trip/data/trip_provider.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 import 'package:mudra_manager/core/widgets/skeleton_loader.dart';
 
+final _dateFormatter = DateFormat.MMMd();
+
 class TripsScreen extends ConsumerWidget {
   const TripsScreen({super.key});
 
@@ -80,7 +82,7 @@ class TripsScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'Create trips, add participants, link transactions, and split expenses automatically. Perfect for group trips!',
+                        'Create trips, add participants, link transactions, and split expenses automatically. Only one trip can be active at a time.',
                         style: textTheme.bodyMedium,
                         textAlign: TextAlign.center,
                       ),
@@ -124,104 +126,56 @@ class TripsScreen extends ConsumerWidget {
             );
           }
 
-          return ListView.separated(
-            padding: const EdgeInsets.all(16).copyWith(bottom: 80),
-            itemCount: trips.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 8),
-            itemBuilder: (context, index) {
-              final trip = trips[index];
-              final duration =
-                  trip.endDate.difference(trip.startDate).inDays + 1;
-              final status = _getTripStatus(
-                trip.startDate,
-                trip.endDate,
-                trip.isActive,
-              );
-              final statusColor = _getStatusColor(status, color);
+          // Separate active and archived trips
+          final activeTrip = trips.where((t) => t.isActive).firstOrNull;
+          final archivedTrips = trips.where((t) => !t.isActive).toList();
 
-              return Card(
-                margin: EdgeInsets.zero,
-                elevation: 0,
-                color: color.surfaceContainerHighest,
-                child: InkWell(
-                  onTap: () {
-                    HapticFeedback.mediumImpact();
-                    context.push('/trip-detail', extra: trip.id);
-                  },
-                  borderRadius: BorderRadius.circular(12),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: statusColor.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Icon(
-                            trip.isActive
-                                ? Icons.flight_takeoff
-                                : Icons.check_circle,
-                            color: statusColor,
-                            size: 24,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                trip.name,
-                                style: textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                '${DateFormat.MMMd().format(trip.startDate)} - ${DateFormat.MMMd().format(trip.endDate)} • $duration days',
-                                style: textTheme.bodySmall?.copyWith(
-                                  color: color.onSurfaceVariant,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: statusColor.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: statusColor.withValues(alpha: 0.3),
-                            ),
-                          ),
-                          child: Text(
-                            status,
-                            style: textTheme.labelSmall?.copyWith(
-                              color: statusColor,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Icon(
-                          Icons.chevron_right,
-                          color: color.onSurfaceVariant,
-                        ),
-                      ],
+          return ListView(
+            padding: const EdgeInsets.all(16).copyWith(bottom: 80),
+            children: [
+              // Active Trip Section
+              if (activeTrip != null) ...[
+                Row(
+                  children: [
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: color.error,
+                        shape: BoxShape.circle,
+                      ),
                     ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'ACTIVE TRIP',
+                      style: textTheme.labelMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: color.error,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                _buildTripCard(context, ref, activeTrip, color, textTheme, isActive: true),
+                const SizedBox(height: 32),
+              ],
+
+              // Archived Trips Section
+              if (archivedTrips.isNotEmpty) ...[
+                Text(
+                  'TRIP ARCHIVE',
+                  style: textTheme.labelMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: color.onSurfaceVariant,
                   ),
                 ),
-              );
-            },
+                const SizedBox(height: 12),
+                ...archivedTrips.map((trip) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: _buildTripCard(context, ref, trip, color, textTheme),
+                    )),
+              ],
+            ],
           );
         },
         loading: () => ListView.builder(
@@ -256,6 +210,92 @@ class TripsScreen extends ConsumerWidget {
         label: const Text('New Trip'),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+    );
+  }
+
+  Widget _buildTripCard(
+    BuildContext context,
+    WidgetRef ref,
+    trip,
+    ColorScheme color,
+    TextTheme textTheme, {
+    bool isActive = false,
+  }) {
+    final duration = trip.endDate.difference(trip.startDate).inDays + 1;
+    final status = _getTripStatus(trip.startDate, trip.endDate, trip.isActive);
+    final statusColor = _getStatusColor(status, color);
+
+    return Card(
+      margin: EdgeInsets.zero,
+      elevation: isActive ? 4 : 0,
+      color: isActive ? color.primaryContainer : color.surfaceContainerHighest,
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.mediumImpact();
+          context.push('/trip-detail', extra: trip.id);
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  trip.isActive ? Icons.flight_takeoff : Icons.check_circle,
+                  color: statusColor,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      trip.name,
+                      style: textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${_dateFormatter.format(trip.startDate)} - ${_dateFormatter.format(trip.endDate)} • $duration days',
+                      style: textTheme.bodySmall?.copyWith(
+                        color: color.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: statusColor.withValues(alpha: 0.3)),
+                ),
+                child: Text(
+                  status,
+                  style: textTheme.labelSmall?.copyWith(
+                    color: statusColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Icon(Icons.chevron_right, color: color.onSurfaceVariant),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

@@ -107,8 +107,10 @@ class _AccountFormState extends ConsumerState<AccountForm> {
       await gamificationService.track(GamificationEvent.accountCreated);
     }
 
-    ref.invalidate(accountsProvider);
-    context.pop(true);
+    if (mounted) {
+      invalidateAll(ref);
+      context.pop(true);
+    }
   }
 
   void _pickColor() async {

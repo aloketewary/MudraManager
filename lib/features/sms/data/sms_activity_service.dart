@@ -93,10 +93,14 @@ class SmsActivityService {
     // Use bank parser for better extraction
     final parsed = await BankSmsParser.parse(sender, body);
 
+    // Clamp date to now if it's in the future (SMS parsing error)
+    final now = DateTime.now();
+    final safeDate = date.isAfter(now) ? now : date;
+
     final activity = SmsActivity()
       ..sender = sender
       ..body = body
-      ..date = date
+      ..date = safeDate
       ..createdAt = DateTime.now()
       ..smsHash = smsHash
       ..amount = parsed?.amount ?? amount
@@ -115,7 +119,7 @@ class SmsActivityService {
     // Calculate confidence
     activity.confidence = _calculateConfidence(activity);
 
-    // Check for duplicates (within 5 minutes)
+    // Check for duplicates (within 5 minutes) - use safeDate for comparison
     final duplicates = await _findPotentialDuplicates(
       activity,
       const Duration(minutes: 5),
@@ -148,7 +152,7 @@ class SmsActivityService {
         // Auto-approve and create transaction
         final transaction = Transaction()
           ..amount = activity.amount ?? 0
-          ..date = activity.date
+          ..date = safeDate
           ..description = activity.body
           ..isExpense = !(activity.isIncome == true)
           ..isTransfer = false;
@@ -196,9 +200,13 @@ class SmsActivityService {
   ) async {
     final isar = await _getIsar();
 
+    // Clamp date to now if it's in the future
+    final now = DateTime.now();
+    final safeDate = activity.date.isAfter(now) ? now : activity.date;
+
     final transaction = Transaction()
       ..amount = activity.amount ?? 0
-      ..date = activity.date
+      ..date = safeDate
       ..description = activity.body
       ..isExpense = !(activity.isIncome == true)
       ..isTransfer = false;

@@ -6,6 +6,7 @@ import 'package:mudra_manager/core/db/models/balance_snapshot.dart';
 import 'package:mudra_manager/core/db/models/budget.dart';
 import 'package:mudra_manager/core/db/models/budget_category_allocation.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
+import 'package:mudra_manager/core/db/models/category_rule.dart';
 import 'package:mudra_manager/core/db/models/goal.dart';
 import 'package:mudra_manager/core/db/models/notification_record.dart';
 import 'package:mudra_manager/core/db/models/reconciliation_status.dart';
@@ -36,6 +37,7 @@ class IsarService {
         BackupMetadataSchema,
         BudgetSchema,
         CategorySchema,
+        CategoryRuleSchema,
         GoalSchema,
         RecurringBillSchema,
         RecurringTransactionSchema,

@@ -54,22 +54,29 @@ class CategoryMatcherService {
     // Filter by type
     final validCategories = categories.where((c) => c.categoryType == type).toList();
     
-    // Keyword matching with scoring
+    // Keyword matching with scoring (prioritize longer, more specific keywords)
     Category? bestMatch;
-    int maxMatches = 0;
+    int maxScore = 0;
     
     for (final category in validCategories) {
       if (category.keywords == null || category.keywords!.isEmpty) continue;
       
-      int matches = 0;
+      int score = 0;
       for (final keyword in category.keywords!) {
-        if (bodyLower.contains(keyword.toLowerCase())) {
-          matches++;
+        final keywordLower = keyword.toLowerCase();
+        if (bodyLower.contains(keywordLower)) {
+          // Longer keywords = more specific = higher score
+          score += keywordLower.length * 2;
+          
+          // Bonus for exact word match (not just substring)
+          if (RegExp(r'\b' + RegExp.escape(keywordLower) + r'\b').hasMatch(bodyLower)) {
+            score += 10;
+          }
         }
       }
       
-      if (matches > maxMatches) {
-        maxMatches = matches;
+      if (score > maxScore) {
+        maxScore = score;
         bestMatch = category;
       }
     }

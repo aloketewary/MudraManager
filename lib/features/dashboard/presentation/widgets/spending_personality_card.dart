@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/features/analytics/data/spending_analyzer.dart';
+import 'package:mudra_manager/features/analytics/data/personality_archetype.dart';
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 
 final spendingPersonalityProvider = FutureProvider<SpendingPersonality?>((ref) async {
   return await SpendingAnalyzer.analyzePersonality();
@@ -21,92 +26,81 @@ class SpendingPersonalityCard extends ConsumerWidget {
     return personality.when(
       data: (data) {
         if (data == null) return const SizedBox.shrink();
+        
+        final archetype = PersonalityArchetype.fromSpendingPersonality(data);
 
-        return Container(
-          margin: EdgeInsets.symmetric(horizontal: globalPadding, vertical: 16),
-          child: Card(
-            elevation: 0,
-            color: color.primaryContainer,
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: color.primary,
-                          borderRadius: BorderRadius.circular(8),
+        return Padding(
+          padding: const EdgeInsets.only(top: 16),
+          child: SizedBox(
+            width: double.infinity,
+            child: Container(
+              margin: EdgeInsets.symmetric(horizontal: globalPadding),
+              child: Card(
+                elevation: 0,
+                color: color.surfaceContainerLow,
+                child: InkWell(
+                  onTap: () {
+                    HapticFeedback.mediumImpact();
+                    context.push('/spending-personality');
+                  },
+                  borderRadius: BorderRadius.circular(20),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: 64,
+                          height: 64,
+                          child: SvgPicture.asset(
+                            archetype.svgAsset,
+                            width: 100,
+                            height: 100,
+                            fit: BoxFit.contain,
+                            placeholderBuilder: (context) => const SizedBox(),
+                          ),
                         ),
-                        child: Icon(LucideIcons.brain, color: color.onPrimary, size: 20),
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        'Your Spending Personality',
-                        style: textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: color.onPrimaryContainer,
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                archetype.name,
+                                style: textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                archetype.description,
+                                style: textTheme.bodySmall?.copyWith(
+                                  color: color.onSurfaceVariant,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                        Icon(
+                          LucideIcons.chevronRight,
+                          color: color.onSurfaceVariant,
+                          size: 20,
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 16),
-                  _buildInsight(
-                    context,
-                    'You spend most on ${data.topCategory}',
-                    data.topCategoryEmoji,
-                  ),
-                  const SizedBox(height: 8),
-                  _buildInsight(context, data.spendingPattern, 'calendar'),
-                  const SizedBox(height: 8),
-                  _buildInsight(context, data.behaviorType, 'shopping-bag'),
-                  const SizedBox(height: 8),
-                  _buildInsight(context, data.spendingTrend, 'trending-up'),
-                ],
+                ),
               ),
             ),
           ),
         );
       },
-      loading: () => const SizedBox.shrink(),
+      loading: () => const PersonalityCardSkeleton(),
       error: (_, __) => const SizedBox.shrink(),
     );
   }
 
-  Widget _buildInsight(BuildContext context, String text, String iconName) {
-    final color = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
 
-    final iconMap = {
-      'utensils': LucideIcons.utensils,
-      'car': LucideIcons.car,
-      'shopping-bag': LucideIcons.shoppingBag,
-      'film': LucideIcons.film,
-      'heart-pulse': LucideIcons.heartPulse,
-      'book-open': LucideIcons.bookOpen,
-      'zap': LucideIcons.zap,
-      'shopping-cart': LucideIcons.shoppingCart,
-      'wallet': LucideIcons.wallet,
-      'calendar': LucideIcons.calendar,
-      'trending-up': LucideIcons.trendingUp,
-    };
-
-    return Row(
-      children: [
-        Icon(iconMap[iconName] ?? LucideIcons.wallet, size: 16, color: color.primary),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            text,
-            style: textTheme.bodyMedium?.copyWith(
-              color: color.onPrimaryContainer,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 }

@@ -148,4 +148,12 @@ class SharedPrefsUtil {
   String? getString(String configKey) {
     return _prefs.getString(configKey);
   }
+
+  bool getHighContrastMode() {
+    return _prefs.getBool('high_contrast_mode') ?? false;
+  }
+
+  Future<void> setHighContrastMode(bool enabled) async {
+    await _prefs.setBool('high_contrast_mode', enabled);
+  }
 }

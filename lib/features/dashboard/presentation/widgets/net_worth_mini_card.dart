@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mudra_manager/core/extension/localization_extenstion.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
+import 'package:mudra_manager/features/dashboard/data/historical_data_provider.dart';
 import 'package:mudra_manager/shared/widgets/animated_balance.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
@@ -107,26 +108,63 @@ class _NetWorthMiniCardState extends ConsumerState<NetWorthMiniCard> {
                     SizedBox(
                       height: 100,
                       child: Stack(
-                        alignment: Alignment.centerLeft,
                         children: [
-                          Text(
-                            ctxt.formatCurrencyWithSign(0, displayTotalBalance),
-                            style: textTheme.titleLarge?.copyWith(
-                              color: color.onSurfaceVariant.withValues(alpha: 0.1),
-                              fontSize: 80,
-                              fontWeight: FontWeight.bold,
+                          Positioned.fill(
+                            child: Consumer(
+                              builder: (context, ref, child) {
+                                final historyAsync = ref.watch(historicalBalanceProvider);
+                                return historyAsync.when(
+                                  data: (history) {
+                                    if (history.isEmpty || history.every((v) => v == 0)) {
+                                      return const SizedBox();
+                                    }
+                                    final maxVal = history.reduce((a, b) => a > b ? a : b);
+                                    final minVal = history.reduce((a, b) => a < b ? a : b);
+                                    final range = maxVal - minVal;
+                                    final spots = history.asMap().entries.map((e) {
+                                      final normalized = range > 0 ? ((e.value - minVal) / range) * 50 + 10 : 30;
+                                      return FlSpot(e.key.toDouble(), normalized.toDouble());
+                                    }).toList();
+                                    return LineChart(
+                                      LineChartData(
+                                        gridData: const FlGridData(show: false),
+                                        titlesData: const FlTitlesData(show: false),
+                                        borderData: FlBorderData(show: false),
+                                        lineTouchData: const LineTouchData(enabled: false),
+                                        lineBarsData: [
+                                          LineChartBarData(
+                                            spots: spots,
+                                            isCurved: true,
+                                            color: color.secondary.withValues(alpha: 0.15),
+                                            barWidth: 3,
+                                            dotData: const FlDotData(show: false),
+                                            belowBarData: BarAreaData(
+                                              show: true,
+                                              color: color.secondary.withValues(alpha: 0.05),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                  loading: () => const SizedBox(),
+                                  error: (_, __) => const SizedBox(),
+                                );
+                              },
                             ),
-                            overflow: TextOverflow.fade,
                           ),
-                          AnimatedBalance(
-                            value: displayTotalBalance,
-                            style: textTheme.titleLarge?.copyWith(
-                              color: color.secondary,
-                              fontSize: 40,
-                              fontWeight: FontWeight.bold,
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: AnimatedBalance(
+                              value: displayTotalBalance,
+                              style: textTheme.titleLarge?.copyWith(
+                                color: color.secondary,
+                                fontSize: 40,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              fixedStringLength: 0,
+                              overflow: TextOverflow.fade,
                             ),
-                            fixedStringLength: 0,
-                            overflow: TextOverflow.fade,
                           ),
                         ],
                       ),

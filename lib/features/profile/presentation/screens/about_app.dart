@@ -1,12 +1,55 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:in_app_review/in_app_review.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/shared/widgets/made_with_love_footer.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class AboutScreen extends StatelessWidget {
+class AboutScreen extends StatefulWidget {
   const AboutScreen({super.key});
+
+  @override
+  State<AboutScreen> createState() => _AboutScreenState();
+}
+
+class _AboutScreenState extends State<AboutScreen> {
+  int _versionTapCount = 0;
+  bool _devModeEnabled = false;
+  final InAppReview _inAppReview = InAppReview.instance;
+
+  void _onVersionTap() {
+    setState(() {
+      _versionTapCount++;
+      if (_versionTapCount >= 5 && !_devModeEnabled) {
+        _devModeEnabled = true;
+        HapticFeedback.heavyImpact();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(LucideIcons.code, color: Theme.of(context).colorScheme.onInverseSurface),
+                const SizedBox(width: 12),
+                const Text('Developer Mode Activated! 🚀'),
+              ],
+            ),
+            backgroundColor: Theme.of(context).colorScheme.inverseSurface,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    });
+  }
+
+  Future<void> _requestReview() async {
+    HapticFeedback.mediumImpact();
+    if (await _inAppReview.isAvailable()) {
+      await _inAppReview.requestReview();
+    } else {
+      await _inAppReview.openStoreListing();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,105 +63,144 @@ class AboutScreen extends StatelessWidget {
           final info = snapshot.data;
           return CustomScrollView(
             slivers: [
-              SliverAppBar.large(
-                expandedHeight: 250,
-                pinned: true,
-                flexibleSpace: FlexibleSpaceBar(
-                  background: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          color.primary,
-                          color.primary.withValues(alpha: 0.85),
-                          color.secondary,
-                        ],
-                      ),
+              // Hero Brand Identity
+              SliverToBoxAdapter(
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        color.primary.withValues(alpha: 0.15),
+                        color.secondary.withValues(alpha: 0.05),
+                      ],
                     ),
-                    child: SafeArea(
+                  ),
+                  child: SafeArea(
+                    bottom: false,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 40, 24, 40),
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const SizedBox(height: 40),
+                          // App Icon with glassmorphism
                           Container(
-                            padding: const EdgeInsets.all(20),
+                            padding: const EdgeInsets.all(24),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: color.surface.withValues(alpha: 0.8),
                               shape: BoxShape.circle,
+                              border: Border.all(
+                                color: color.primary.withValues(alpha: 0.2),
+                                width: 2,
+                              ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: color.surface.withValues(alpha: 0.1),
-                                  blurRadius: 20,
-                                  offset: const Offset(0, 8),
+                                  color: color.primary.withValues(alpha: 0.1),
+                                  blurRadius: 30,
+                                  spreadRadius: 5,
                                 ),
                               ],
                             ),
                             child: Image.asset(
                               'assets/logo/rupee.png',
-                              width: 64,
-                              height: 64,
+                              width: 80,
+                              height: 80,
                             ),
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 24),
+                          // App Name
                           Text(
                             'Mudra Manager',
                             style: textTheme.headlineLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: color.onPrimary,
+                              fontWeight: FontWeight.w800,
+                              color: color.onSurface,
+                              letterSpacing: -0.5,
                             ),
                           ),
                           const SizedBox(height: 8),
-                          if (info != null)
-                            Container(
+                          // Tagline
+                          Text(
+                            'Secure Financial Command',
+                            style: textTheme.titleMedium?.copyWith(
+                              color: color.onSurfaceVariant,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          // Version Badge (tappable for easter egg)
+                          GestureDetector(
+                            onTap: _onVersionTap,
+                            child: Container(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 6,
+                                horizontal: 20,
+                                vertical: 10,
                               ),
                               decoration: BoxDecoration(
-                                color: color.surface.withValues(alpha: 0.95),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                'Version ${info.version}',
-                                style: textTheme.labelLarge?.copyWith(
-                                  color: color.primary,
-                                  fontWeight: FontWeight.w600,
+                                color: color.primaryContainer,
+                                borderRadius: BorderRadius.circular(24),
+                                border: Border.all(
+                                  color: color.primary.withValues(alpha: 0.3),
                                 ),
                               ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    LucideIcons.shield,
+                                    size: 16,
+                                    color: color.onPrimaryContainer,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Version ${info?.version ?? '1.0.0'} (Stable Build)',
+                                    style: textTheme.labelLarge?.copyWith(
+                                      color: color.onPrimaryContainer,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  if (_devModeEnabled) ...[
+                                    const SizedBox(width: 8),
+                                    Icon(
+                                      LucideIcons.code,
+                                      size: 16,
+                                      color: color.onPrimaryContainer,
+                                    ),
+                                  ],
+                                ],
+                              ),
                             ),
-                          const SizedBox(height: 8),
+                          ),
                         ],
                       ),
                     ),
                   ),
                 ),
               ),
+              // Content
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Data Ethics Statement
                       Card(
-                        elevation: 0,
-                        color: color.surfaceContainerLow,
                         child: Padding(
-                          padding: const EdgeInsets.all(24),
-                          child: Column(
+                          padding: const EdgeInsets.all(20),
+                          child: Row(
                             children: [
                               Icon(
-                                Icons.auto_awesome,
-                                color: color.primary,
-                                size: 32,
+                                LucideIcons.shieldCheck,
+                                color: color.onSecondaryContainer,
+                                size: 28,
                               ),
-                              const SizedBox(height: 16),
-                              Text(
-                                'Smart personal finance app that helps you track expenses, manage budgets, and organize transactions effortlessly with AI-powered SMS parsing.',
-                                textAlign: TextAlign.center,
-                                style: textTheme.bodyLarge?.copyWith(
-                                  color: color.onSurface,
-                                  height: 1.6,
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Text(
+                                  'Your data is encrypted locally. We never sell your financial information.',
+                                  style: textTheme.bodyMedium?.copyWith(
+                                    height: 1.5,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
                               ),
                             ],
@@ -126,88 +208,43 @@ class AboutScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 32),
-                      _buildSectionHeader(
-                        context,
-                        'Features',
-                        Icons.star_outline,
-                      ),
+                      
+                      // Legal & Transparency Block
+                      _buildSectionHeader(context, 'Legal & Transparency', LucideIcons.scale),
                       const SizedBox(height: 16),
-                      _buildFeatureGrid(context, color, textTheme),
-                      const SizedBox(height: 32),
-                      _buildSectionHeader(
-                        context,
-                        'Development Team',
-                        Icons.group_outlined,
-                      ),
-                      const SizedBox(height: 16),
-                      _buildTeamList(context, color, textTheme),
-                      const SizedBox(height: 32),
-                      _buildSectionHeader(
-                        context,
-                        'Special Thanks',
-                        Icons.favorite_outline,
-                      ),
-                      const SizedBox(height: 16),
-                      _buildThanksSection(context, color, textTheme),
-                      const SizedBox(height: 16),
-                      _buildPatronSection(context, color, textTheme),
-                      const SizedBox(height: 32),
-                      _buildSectionHeader(
-                        context,
-                        'Legal & Support',
-                        Icons.info_outline,
-                      ),
-                      const SizedBox(height: 16),
-                      _buildInfoCard(
+                      _buildGlassCard(
                         context,
                         color,
                         textTheme,
-                        Icons.privacy_tip_outlined,
+                        LucideIcons.fileText,
                         'Privacy Policy',
                         'How we protect your data',
                         () {
                           HapticFeedback.mediumImpact();
-                          _launchURL(
-                            'https://mudramanager.com/privacy.html',
-                          );
+                          _launchURL('https://mudramanager.com/privacy.html');
                         },
                       ),
                       const SizedBox(height: 12),
-                      _buildInfoCard(
+                      _buildGlassCard(
                         context,
                         color,
                         textTheme,
-                        Icons.description_outlined,
-                        'Terms & Conditions',
+                        LucideIcons.fileCheck,
+                        'Terms of Service',
                         'App usage terms and conditions',
                         () {
                           HapticFeedback.mediumImpact();
-                          _launchURL(
-                            'https://mudramanager.com/terms.html',
-                          );
+                          _launchURL('https://mudramanager.com/terms.html');
                         },
                       ),
                       const SizedBox(height: 12),
-                      _buildInfoCard(
+                      _buildGlassCard(
                         context,
                         color,
                         textTheme,
-                        Icons.email_outlined,
-                        'Contact Support',
-                        'Email Support or Report a Bug',
-                        () {
-                          HapticFeedback.mediumImpact();
-                          _launchURL('https://mudramanager.com/support.html');
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                      _buildInfoCard(
-                        context,
-                        color,
-                        textTheme,
-                        Icons.verified_user_outlined,
+                        LucideIcons.package,
                         'Open Source Licenses',
-                        'View third-party licenses',
+                        'Third-party libraries we use',
                         () {
                           HapticFeedback.mediumImpact();
                           Navigator.push(
@@ -221,6 +258,103 @@ class AboutScreen extends StatelessWidget {
                           );
                         },
                       ),
+                      const SizedBox(height: 32),
+                      
+                      // Support & Social Block
+                      _buildSectionHeader(context, 'Support & Connect', LucideIcons.headphones),
+                      const SizedBox(height: 16),
+                      _buildGlassCard(
+                        context,
+                        color,
+                        textTheme,
+                        LucideIcons.refreshCw,
+                        'Check for Updates',
+                        'Manually check app version',
+                        () {
+                          HapticFeedback.mediumImpact();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('You\'re on the latest version ${info?.version ?? '1.0.0'}'),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      _buildGlassCard(
+                        context,
+                        color,
+                        textTheme,
+                        LucideIcons.globe,
+                        'Official Website',
+                        'Visit mudramanager.com',
+                        () {
+                          HapticFeedback.mediumImpact();
+                          _launchURL('https://mudramanager.com');
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      _buildGlassCard(
+                        context,
+                        color,
+                        textTheme,
+                        LucideIcons.mail,
+                        'Contact Support',
+                        'Get help or report issues',
+                        () {
+                          HapticFeedback.mediumImpact();
+                          _launchURL('https://mudramanager.com/support.html');
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      _buildGlassCard(
+                        context,
+                        color,
+                        textTheme,
+                        LucideIcons.star,
+                        'Rate the App',
+                        'Share your experience on the store',
+                        _requestReview,
+                      ),
+                      
+                      if (_devModeEnabled) ...[
+                        const SizedBox(height: 32),
+                        _buildSectionHeader(context, 'Developer Mode', LucideIcons.code),
+                        const SizedBox(height: 16),
+                        Card.filled(
+                          color: color.errorContainer,
+                          child: Padding(
+                            padding: const EdgeInsets.all(20),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(LucideIcons.terminal, color: color.onErrorContainer, size: 20),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Debug Info',
+                                      style: textTheme.titleSmall?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: color.onErrorContainer,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  'Build: ${info?.buildNumber ?? 'N/A'}\nPackage: ${info?.packageName ?? 'N/A'}',
+                                  style: textTheme.bodySmall?.copyWith(
+                                    fontFamily: 'monospace',
+                                    color: color.onErrorContainer,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                      
                       const SizedBox(height: 40),
                       MadeWithLoveFooter(appName: info?.appName),
                     ],
@@ -244,395 +378,19 @@ class AboutScreen extends StatelessWidget {
 
     return Row(
       children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: color.primaryContainer,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(icon, color: color.onPrimaryContainer, size: 20),
-        ),
+        Icon(icon, color: color.primary, size: 24),
         const SizedBox(width: 12),
         Text(
-          title.toUpperCase(),
-          style: textTheme.titleMedium?.copyWith(
+          title,
+          style: textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w700,
-            color: color.primary,
-            letterSpacing: 0.5,
           ),
         ),
       ],
     );
   }
 
-  void _launchURL(String url) async {
-    final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
-  }
-
-  Widget _buildFeatureGrid(
-    BuildContext context,
-    ColorScheme color,
-    TextTheme textTheme,
-  ) {
-    final features = [
-      (
-        Icons.dashboard_outlined,
-        'Smart Dashboard',
-        'Real-time financial overview with insights',
-      ),
-      (
-        Icons.sms_outlined,
-        'SMS Auto-Import',
-        'Automatic transaction detection from bank SMS',
-      ),
-      (
-        Icons.pie_chart_outline,
-        'Budget Tracking',
-        'Set limits and track spending by category',
-      ),
-      (
-        Icons.analytics_outlined,
-        'Insights & Reports',
-        'Detailed analytics with charts and trends',
-      ),
-      (
-        Icons.repeat,
-        'Recurring Transactions',
-        'Automate regular income and expenses',
-      ),
-      (
-        Icons.account_balance_wallet_outlined,
-        'Multi-Account',
-        'Manage multiple accounts in one place',
-      ),
-      (
-        Icons.backup_outlined,
-        'Backup & Restore',
-        'Export and import your financial data',
-      ),
-      (
-        Icons.security,
-        'Secure & Private',
-        'Local-first storage with biometric lock',
-      ),
-      (
-        Icons.dark_mode_outlined,
-        'Beautiful Themes',
-        'Dynamic colors and dark mode support',
-      ),
-      (
-        Icons.language,
-        'Multi-Language',
-        'Support for multiple languages',
-      ),
-    ];
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 1.2,
-      ),
-      itemCount: features.length,
-      itemBuilder: (context, index) {
-        final feature = features[index];
-        return Card(
-          elevation: 0,
-          color: color.surfaceContainerHighest,
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: color.primaryContainer,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    feature.$1,
-                    color: color.onPrimaryContainer,
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  feature.$2,
-                  textAlign: TextAlign.center,
-                  style: textTheme.titleSmall?.copyWith(
-                    color: color.onSurface,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  feature.$3,
-                  textAlign: TextAlign.center,
-                  style: textTheme.bodySmall?.copyWith(
-                    color: color.onSurfaceVariant,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildTeamList(
-    BuildContext context,
-    ColorScheme color,
-    TextTheme textTheme,
-  ) {
-    final team = [
-      (
-        'Aloke Tewary',
-        'Product Designer & Developer',
-        Icons.design_services,
-        color.primary,
-      ),
-      (
-        'Sougata Chakraborty',
-        'Backend & Quality Assurance',
-        Icons.engineering,
-        color.secondary,
-      ),
-    ];
-    return Column(
-      children: team
-          .map(
-            (member) => Card(
-              margin: const EdgeInsets.only(bottom: 12),
-              elevation: 0,
-              color: color.surfaceContainerHighest,
-              child: ListTile(
-                contentPadding: const EdgeInsets.all(16),
-                leading: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: member.$4.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Icon(member.$3, color: member.$4, size: 24),
-                ),
-                title: Text(
-                  member.$1,
-                  style: textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: color.onSurface,
-                  ),
-                ),
-                subtitle: Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Text(
-                    member.$2,
-                    style: textTheme.bodyMedium?.copyWith(
-                      color: color.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          )
-          .toList(),
-    );
-  }
-
-  Widget _buildThanksSection(
-    BuildContext context,
-    ColorScheme color,
-    TextTheme textTheme,
-  ) {
-    return Card(
-      elevation: 0,
-      color: color.surfaceContainerHighest,
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.volunteer_activism, color: color.primary, size: 24),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'Beta Testers & Contributors',
-                    style: textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: color.onSurface,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'A heartfelt thank you to everyone who helped test and improve Mudra Manager:',
-              style: textTheme.bodyMedium?.copyWith(
-                color: color.onSurfaceVariant,
-                height: 1.5,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                _buildTesterChip(context, 'Sayan Dey', color),
-                _buildTesterChip(context, 'Abhijit A M', color),
-                _buildTesterChip(context, 'Dhanesh C', color),
-                _buildTesterChip(context, 'Jeet Sarkar', color),
-                _buildTesterChip(context, 'Souvik Paul', color),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: color.primaryContainer.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.info_outline, color: color.primary, size: 18),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Your feedback made this app better!',
-                      style: textTheme.bodySmall?.copyWith(
-                        color: color.onSurface,
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTesterChip(
-    BuildContext context,
-    String name,
-    ColorScheme color,
-  ) {
-    return Chip(
-      avatar: CircleAvatar(
-        backgroundColor: color.primary.withValues(alpha: 0.2),
-        child: Icon(Icons.person, size: 16, color: color.primary),
-      ),
-      label: Text(name),
-      backgroundColor: color.surfaceContainerLow,
-      side: BorderSide.none,
-    );
-  }
-
-  Widget _buildPatronSection(
-    BuildContext context,
-    ColorScheme color,
-    TextTheme textTheme,
-  ) {
-    return Card(
-      elevation: 0,
-      color: color.tertiaryContainer,
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.workspace_premium, color: color.tertiary, size: 24),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'Patrons & Supporters',
-                    style: textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: color.onTertiaryContainer,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Special thanks to our generous patrons who support the development of Mudra Manager:',
-              style: textTheme.bodyMedium?.copyWith(
-                color: color.onTertiaryContainer,
-                height: 1.5,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                _buildPatronChip(context, 'Amrita Sarkar', color),
-                _buildPatronChip(context, 'Arnab Saha', color),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: color.surface.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.favorite, color: color.tertiary, size: 18),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Want to support? Contact us!',
-                      style: textTheme.bodySmall?.copyWith(
-                        color: color.onTertiaryContainer,
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPatronChip(
-    BuildContext context,
-    String name,
-    ColorScheme color,
-  ) {
-    return Chip(
-      avatar: CircleAvatar(
-        backgroundColor: color.tertiary.withValues(alpha: 0.2),
-        child: Icon(Icons.star, size: 16, color: color.tertiary),
-      ),
-      label: Text(name),
-      backgroundColor: color.surface,
-      side: BorderSide.none,
-    );
-  }
-
-  Widget _buildInfoCard(
+  Widget _buildGlassCard(
     BuildContext context,
     ColorScheme color,
     TextTheme textTheme,
@@ -641,24 +399,15 @@ class AboutScreen extends StatelessWidget {
     String subtitle,
     VoidCallback onTap,
   ) {
-    return Card(
-      elevation: 0,
-      color: color.surfaceContainerHighest,
+    return Card.outlined(
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: color.primaryContainer,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Icon(icon, color: color.onPrimaryContainer, size: 24),
-              ),
+              Icon(icon, color: color.primary, size: 24),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
@@ -668,13 +417,12 @@ class AboutScreen extends StatelessWidget {
                       title,
                       style: textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: color.onSurface,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       subtitle,
-                      style: textTheme.bodyMedium?.copyWith(
+                      style: textTheme.bodySmall?.copyWith(
                         color: color.onSurfaceVariant,
                       ),
                     ),
@@ -682,7 +430,7 @@ class AboutScreen extends StatelessWidget {
                 ),
               ),
               Icon(
-                Icons.chevron_right,
+                LucideIcons.chevronRight,
                 color: color.onSurfaceVariant,
                 size: 20,
               ),
@@ -691,6 +439,13 @@ class AboutScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _launchURL(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
   }
 }
 

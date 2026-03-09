@@ -85,6 +85,16 @@ class _DashboardCustomizeScreenState extends State<DashboardCustomizeScreen> {
     ];
   }
 
+  List<String> get _defaultVisibleCards => _allCards.map((e) => e.id).toList();
+
+  Future<void> _restoreDefaults() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('visible_dashboard_cards');
+    await prefs.remove('dashboard_cards_order');
+    _initializeCards();
+    await _loadPreferences();
+  }
+
   Future<void> _loadPreferences() async {
     final prefs = await SharedPreferences.getInstance();
     final saved = prefs.getStringList('visible_dashboard_cards');
@@ -136,6 +146,20 @@ class _DashboardCustomizeScreenState extends State<DashboardCustomizeScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
         ),
+        actions: [
+          TextButton.icon(
+            onPressed: () async {
+              await _restoreDefaults();
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Restored to defaults')),
+                );
+              }
+            },
+            icon: const Icon(LucideIcons.rotateCcw, size: 18),
+            label: const Text('Reset'),
+          ),
+        ],
       ),
       body: Column(
         children: [

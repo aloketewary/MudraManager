@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/db/models/frequency.dart';
 import 'package:mudra_manager/features/dashboard/presentation/widgets/recurring_expenses_card.dart';
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 
 class RecurringExpensesScreen extends ConsumerWidget {
   const RecurringExpensesScreen({super.key});
@@ -99,7 +100,34 @@ class RecurringExpensesScreen extends ConsumerWidget {
             },
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: 5,
+          itemBuilder: (context, index) => Card(
+            margin: const EdgeInsets.only(bottom: 12),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  SkeletonLoader(width: 48, height: 48, borderRadius: BorderRadius.circular(8)),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SkeletonLoader(width: double.infinity, height: 16, borderRadius: BorderRadius.circular(4)),
+                        const SizedBox(height: 8),
+                        SkeletonLoader(width: 100, height: 14, borderRadius: BorderRadius.circular(4)),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  SkeletonLoader(width: 60, height: 20, borderRadius: BorderRadius.circular(4)),
+                ],
+              ),
+            ),
+          ),
+        ),
         error: (_, __) => const Center(child: Text('Error loading expenses')),
       ),
     );
