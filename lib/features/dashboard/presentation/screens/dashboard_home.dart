@@ -29,8 +29,6 @@ import 'package:mudra_manager/shared/widgets/responseive_layout_builder.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
-
 class DashboardHome extends ConsumerStatefulWidget {
   const DashboardHome({super.key});
 
@@ -80,11 +78,12 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
     final prefs = await SharedPreferences.getInstance();
     final visible = prefs.getStringList('visible_dashboard_cards');
     final order = prefs.getStringList('dashboard_cards_order');
-    
+
     // Check if travel plugin is enabled
     final marketplace = MarketplaceService();
-    final isTravelEnabled = await marketplace.isPluginEnabled('com.mudra.travel_expenses');
-    
+    final isTravelEnabled =
+        await marketplace.isPluginEnabled('com.mudra.travel_expenses');
+
     setState(() {
       _visibleCards = visible ??
           [
@@ -129,8 +128,8 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
         return const AnimatedSwipeableAccountCards();
       case 'action_buttons':
         return Container(
-            margin: EdgeInsets.symmetric(horizontal: globalPadding),
-            child: ResponsiveLayoutBuilder(
+          margin: EdgeInsets.symmetric(horizontal: globalPadding),
+          child: ResponsiveLayoutBuilder(
             columnWidget: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -185,7 +184,7 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
         return SpendingPersonalityCard(globalPadding: globalPadding);
       case 'cash_flow':
         return Column(
-            children: [
+          children: [
             CashFlowScreen(
               globalPadding: globalPadding,
               selectedPeriod: _selectedPeriod,

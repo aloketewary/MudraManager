@@ -8,7 +8,6 @@ import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
-import 'package:mudra_manager/shared/widgets/widgets.dart';
 import 'package:mudra_manager/shared/widgets/animated_balance.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 
@@ -59,7 +58,7 @@ class _AnimatedSwipeableAccountCardsState
           builder: (context, transactionsSnapshot) {
             if (!transactionsSnapshot.hasData) {
               return const SizedBox(
-                height: 320,
+                height: 250,
                 child: AccountCardSkeleton(),
               );
             }
@@ -91,15 +90,15 @@ class _AnimatedSwipeableAccountCardsState
                 );
 
                 return SizedBox(
-                  height: 320,
+                  height: 250,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Current Account Name
+                      // Totale Balance
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: Text(
-                          currentAccount.name,
+                          'Total Balance',
                           style: textTheme.titleMedium?.copyWith(
                             color: color.onSurface,
                             letterSpacing: 0.8,
@@ -108,13 +107,10 @@ class _AnimatedSwipeableAccountCardsState
                         ),
                       ),
                       const SizedBox(height: 8),
-
-                      // Animated Current Account Balance
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: AnimatedBalance(
-                          key: ValueKey(_currentPage),
-                          value: currentBalance,
+                          value: totalBalance,
                           style: textTheme.displayMedium?.copyWith(
                             fontWeight: FontWeight.w900,
                             color: color.onSurface,
@@ -124,50 +120,6 @@ class _AnimatedSwipeableAccountCardsState
                         ),
                       ),
                       const SizedBox(height: 12),
-
-                      // Total Balance Chip (Material 3)
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: color.secondaryContainer,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.account_balance_wallet,
-                                  size: 16,
-                                  color: color.onSecondaryContainer,
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  'Total: ',
-                                  style: textTheme.labelLarge?.copyWith(
-                                    color: color.onSecondaryContainer,
-                                  ),
-                                ),
-                                CurrencyText(
-                                  amount: totalBalance,
-                                  style: textTheme.labelLarge?.copyWith(
-                                    color: color.onSecondaryContainer,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-
                       // Horizontal Scrolling Cards with Peek Effect
                       SizedBox(
                         height: 100,
@@ -213,59 +165,84 @@ class _AnimatedSwipeableAccountCardsState
                                 vertical: 16,
                               ),
                               child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          account.name,
-                                          style:
-                                              textTheme.titleMedium?.copyWith(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Text(
+                                        account.name,
+                                        style: textTheme.titleMedium?.copyWith(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w500,
                                         ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          '**** ${account.accountNumber?.substring(account.accountNumber!.length >= 4 ? account.accountNumber!.length - 4 : 0) ?? "0000"}',
-                                          style: textTheme.titleLarge?.copyWith(
-                                            color: Colors.white,
-                                            letterSpacing: 2,
-                                            fontWeight: FontWeight.w700,
-                                            fontFamily: 'monospace',
-                                          ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      Text(
+                                        ' - ${account.accountType.label.toUpperCase()}',
+                                        style: textTheme.labelSmall?.copyWith(
+                                          color: Colors.white.withValues(alpha: 0.7),
+                                          fontWeight: FontWeight.w500,
                                         ),
-                                      ],
-                                    ),
-                                    Column(
-                                      children: [
-                                        Icon(
-                                          account.accountType.icon,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 4),
+                                      AnimatedBalance(
+                                        value: currentBalance,
+                                        compact: false,
+                                        fixedStringLength: 0,
+                                        duration: const Duration(milliseconds: 300),
+                                        style: textTheme.titleLarge?.copyWith(
+                                          color: Colors.white,
+                                          letterSpacing: 2,
+                                          fontWeight: FontWeight.w700,
+                                          fontFamily: 'monospace',
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        account.accountNumber?.substring(
+                                                account.accountNumber!.length >=
+                                                        4
+                                                    ? account.accountNumber!
+                                                            .length -
+                                                        4
+                                                    : 0,) ??
+                                            '0000',
+                                        style: textTheme.titleSmall?.copyWith(
                                           color: Colors.white
                                               .withValues(alpha: 0.5),
-                                          size: 48,
+                                          fontWeight: FontWeight.w500,
                                         ),
-                                        Text(
-                                          account.accountType.label,
-                                          style: textTheme.titleSmall?.copyWith(
-                                            color: Colors.white
-                                                .withValues(alpha: 0.5),
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ],
-                                    )
-                                  ]),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      Icon(
+                                        account.accountType.icon,
+                                        color:
+                                            Colors.white.withValues(alpha: 0.5),
+                                        size: 40,
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             );
                           },
                         ),
@@ -299,7 +276,7 @@ class _AnimatedSwipeableAccountCardsState
         );
       },
       loading: () => const SizedBox(
-        height: 320,
+        height: 250,
         child: AccountCardSkeleton(),
       ),
       error: (e, st) =>
