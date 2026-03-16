@@ -3,166 +3,157 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:mudra_manager/features/goal/data/goal_provider.dart';
-import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
 import 'dart:math' as math;
 
 class GoalCard extends ConsumerWidget {
-  final double globalPadding;
-
-  const GoalCard({super.key, required this.globalPadding});
+  const GoalCard({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final goalsAsync = ref.watch(goalsProvider);
+    final spacing = ref.watch(spacingProvider);
+    final goals = ref.watch(dashboardGoalsProvider);
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    return goalsAsync.when(
-      data: (goals) {
-        if (goals.isEmpty) return const SizedBox.shrink();
+    if (goals.isEmpty) return const SizedBox.shrink();
 
-        final activeGoals = goals.where((g) => g.isActive).toList();
-        if (activeGoals.isEmpty) return const SizedBox.shrink();
+    final activeGoals = goals.where((g) => g.isActive).toList();
+    if (activeGoals.isEmpty) return const SizedBox.shrink();
 
-        final totalTarget = activeGoals.fold(0.0, (sum, g) => sum + g.targetAmount);
-        final totalSaved = activeGoals.fold(0.0, (sum, g) => sum + g.currentAmount);
-        final progress = totalTarget > 0 ? totalSaved / totalTarget : 0.0;
+    final totalTarget = activeGoals.fold(0.0, (sum, g) => sum + g.targetAmount);
+    final totalSaved = activeGoals.fold(0.0, (sum, g) => sum + g.currentAmount);
+    final progress = totalTarget > 0 ? totalSaved / totalTarget : 0.0;
 
-        return Padding(
-          padding: const EdgeInsets.only(top: 16),
-          child: SizedBox(
-            width: double.infinity,
-            child: Container(
-              margin: EdgeInsets.symmetric(horizontal: globalPadding),
-              child: Card(
-                elevation: 0,
-                color: color.surfaceContainerLow,
-                child: InkWell(
-                  onTap: () {
-                    HapticFeedback.mediumImpact();
-                    context.push('/goal-screen');
-                  },
-                  borderRadius: BorderRadius.circular(20),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
+    return Container(
+      margin: EdgeInsets.symmetric(
+        horizontal: spacing.cardHorizontal,
+        vertical: spacing.cardVertical,
+      ),
+      child: Card(
+        elevation: 0,
+        margin: EdgeInsets.zero,
+        color: color.surfaceContainerLow,
+        child: InkWell(
+          onTap: () {
+            HapticFeedback.mediumImpact();
+            context.push('/goal-screen');
+          },
+          borderRadius: BorderRadius.circular(spacing.radiusLarge),
+          child: Padding(
+            padding: EdgeInsets.all(spacing.cardInner),
+            child: Row(
+              children: [
+                TweenAnimationBuilder<double>(
+                  duration: const Duration(milliseconds: 1500),
+                  curve: Curves.easeOutCubic,
+                  tween: Tween(begin: 0.0, end: progress),
+                  builder: (context, value, child) {
+                    return Stack(
+                      alignment: Alignment.center,
                       children: [
-                        TweenAnimationBuilder<double>(
-                          duration: const Duration(milliseconds: 1500),
-                          curve: Curves.easeOutCubic,
-                          tween: Tween(begin: 0.0, end: progress),
-                          builder: (context, value, child) {
-                            return Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                SizedBox(
-                                  width: 60,
-                                  height: 60,
-                                  child: CustomPaint(
-                                    painter: _CompactRingPainter(
-                                      progress: value,
-                                      color: color.primary,
-                                    ),
-                                  ),
-                                ),
-                                Text(
-                                  '${(value * 100).toInt()}%',
-                                  style: textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w900,
-                                    color: color.primary,
-                                  ),
-                                ),
-                              ],
-                            );
-                          },
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Savings Goals',
-                                style: textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 12),
-                              Container(
-                                height: 10,
-                                decoration: BoxDecoration(
-                                  color: color.surfaceContainerHighest,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: TweenAnimationBuilder<double>(
-                                    duration: const Duration(milliseconds: 1500),
-                                    curve: Curves.easeOutCubic,
-                                    tween: Tween(begin: 0.0, end: progress),
-                                    builder: (context, value, child) {
-                                      return FractionallySizedBox(
-                                        widthFactor: value,
-                                        alignment: Alignment.centerLeft,
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            gradient: LinearGradient(
-                                              colors: [color.primary, color.tertiary],
-                                            ),
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: _buildMetricItem(
-                                      '${activeGoals.length} active',
-                                      '₹${totalSaved.toStringAsFixed(0)}',
-                                      LucideIcons.target,
-                                      color.primary,
-                                      color,
-                                      textTheme,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: _buildMetricItem(
-                                      'Remaining',
-                                      '₹${(totalTarget - totalSaved).toStringAsFixed(0)}',
-                                      LucideIcons.trendingUp,
-                                      color.tertiary,
-                                      color,
-                                      textTheme,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                        SizedBox(
+                          width: 60,
+                          height: 60,
+                          child: CustomPaint(
+                            painter: _CompactRingPainter(
+                              progress: value,
+                              color: color.primary,
+                            ),
                           ),
                         ),
-                        Icon(
-                          LucideIcons.chevronRight,
-                          color: color.onSurfaceVariant,
-                          size: 20,
+                        Text(
+                          '${(value * 100).toInt()}%',
+                          style: textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w900,
+                            color: color.primary,
+                          ),
                         ),
                       ],
-                    ),
+                    );
+                  },
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Savings Goals',
+                        style: textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 12),
+                      Container(
+                        height: 10,
+                        decoration: BoxDecoration(
+                          color: color.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: TweenAnimationBuilder<double>(
+                            duration: const Duration(milliseconds: 1500),
+                            curve: Curves.easeOutCubic,
+                            tween: Tween(begin: 0.0, end: progress),
+                            builder: (context, value, child) {
+                              return FractionallySizedBox(
+                                widthFactor: value,
+                                alignment: Alignment.centerLeft,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [color.primary, color.tertiary],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildMetricItem(
+                              '${activeGoals.length} active',
+                              '₹${totalSaved.toStringAsFixed(0)}',
+                              LucideIcons.target,
+                              color.primary,
+                              color,
+                              textTheme,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _buildMetricItem(
+                              'Remaining',
+                              '₹${(totalTarget - totalSaved).toStringAsFixed(0)}',
+                              LucideIcons.trendingUp,
+                              color.tertiary,
+                              color,
+                              textTheme,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-              ),
+                Icon(
+                  LucideIcons.chevronRight,
+                  color: color.onSurfaceVariant,
+                  size: 20,
+                ),
+              ],
             ),
           ),
-        );
-      },
-      loading: () => const DashboardCardSkeleton(),
-      error: (_, __) => const SizedBox.shrink(),
+        ),
+      ),
     );
   }
 
@@ -248,6 +239,6 @@ class _CompactRingPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_CompactRingPainter oldDelegate) => 
-    oldDelegate.progress != progress || oldDelegate.color != color;
+  bool shouldRepaint(_CompactRingPainter oldDelegate) =>
+      oldDelegate.progress != progress || oldDelegate.color != color;
 }

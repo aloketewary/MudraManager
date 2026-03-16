@@ -52,12 +52,12 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
     final filter = widget.selectedPeriod == PeriodType.day
         ? FilterType.day
         : widget.selectedPeriod == PeriodType.week
-        ? FilterType.week
-        : widget.selectedPeriod == PeriodType.month
-        ? FilterType.month
-        : widget.selectedPeriod == PeriodType.year
-        ? FilterType.year
-        : FilterType.all;
+            ? FilterType.week
+            : widget.selectedPeriod == PeriodType.month
+                ? FilterType.month
+                : widget.selectedPeriod == PeriodType.year
+                    ? FilterType.year
+                    : FilterType.all;
     final now = DateTime.now();
     final ctxt = AppLocalizations.of(context)!;
 
@@ -102,8 +102,7 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
       }
     }
 
-    final summary =
-        widget.selectedPeriod == PeriodType.custom &&
+    final summary = widget.selectedPeriod == PeriodType.custom &&
             widget.customStart != null &&
             widget.customEnd != null
         ? ref.watch(
@@ -116,24 +115,24 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
               widget.selectedPeriod == PeriodType.day
                   ? 'day'
                   : widget.selectedPeriod == PeriodType.week
-                  ? 'week'
-                  : widget.selectedPeriod == PeriodType.month
-                  ? 'month'
-                  : widget.selectedPeriod == PeriodType.year
-                  ? 'year'
-                  : 'month',
+                      ? 'week'
+                      : widget.selectedPeriod == PeriodType.month
+                          ? 'month'
+                          : widget.selectedPeriod == PeriodType.year
+                              ? 'year'
+                              : 'month',
             ),
           );
 
     final previousPeriod = widget.selectedPeriod == PeriodType.day
         ? 'day'
         : widget.selectedPeriod == PeriodType.week
-        ? 'week'
-        : widget.selectedPeriod == PeriodType.month
-        ? 'month'
-        : widget.selectedPeriod == PeriodType.year
-        ? 'year'
-        : 'month';
+            ? 'week'
+            : widget.selectedPeriod == PeriodType.month
+                ? 'month'
+                : widget.selectedPeriod == PeriodType.year
+                    ? 'year'
+                    : 'month';
     final prevSummary = ref.watch(
       previousPeriodTransactionsProvider(previousPeriod),
     );
@@ -146,9 +145,10 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
         final rawPrevExpense = prevSummary.value?['expense'] ?? 0.0;
         final income = GuestModeUtil.applyGuestMode(rawIncome, isGuestMode);
         final expense = GuestModeUtil.applyGuestMode(rawExpense, isGuestMode);
-        final prevIncome = GuestModeUtil.applyGuestMode(rawPrevIncome, isGuestMode);
-        final prevExpense = GuestModeUtil.applyGuestMode(rawPrevExpense, isGuestMode);
-        final total = income - expense;
+        final prevIncome =
+            GuestModeUtil.applyGuestMode(rawPrevIncome, isGuestMode);
+        final prevExpense =
+            GuestModeUtil.applyGuestMode(rawPrevExpense, isGuestMode);
         return Padding(
           padding: EdgeInsets.all(widget.globalPadding),
           child: Column(
@@ -172,7 +172,8 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
                         ),
                       ),
                       const Spacer(),
-                      Icon(LucideIcons.chevronRight, color: color.onSurfaceVariant),
+                      Icon(LucideIcons.chevronRight,
+                          color: color.onSurfaceVariant),
                     ],
                   ),
                 ),
@@ -234,25 +235,45 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
               padding: const EdgeInsets.only(bottom: 12, left: 4, right: 4),
               child: Row(
                 children: [
-                  SkeletonLoader(width: 24, height: 24, borderRadius: BorderRadius.circular(4)),
+                  SkeletonLoader(
+                      width: 24,
+                      height: 24,
+                      borderRadius: BorderRadius.circular(4)),
                   const SizedBox(width: 8),
-                  SkeletonLoader(width: 120, height: 20, borderRadius: BorderRadius.circular(4)),
+                  SkeletonLoader(
+                      width: 120,
+                      height: 20,
+                      borderRadius: BorderRadius.circular(4)),
                 ],
               ),
             ),
             ResponsiveLayoutBuilder(
               columnWidget: Column(
                 children: [
-                  SkeletonLoader(width: double.infinity, height: 170, borderRadius: BorderRadius.circular(12)),
+                  SkeletonLoader(
+                      width: double.infinity,
+                      height: 170,
+                      borderRadius: BorderRadius.circular(12)),
                   const SizedBox(height: 12),
-                  SkeletonLoader(width: double.infinity, height: 170, borderRadius: BorderRadius.circular(12)),
+                  SkeletonLoader(
+                      width: double.infinity,
+                      height: 170,
+                      borderRadius: BorderRadius.circular(12)),
                 ],
               ),
               rowWidget: Row(
                 children: [
-                  Expanded(child: SkeletonLoader(width: double.infinity, height: 170, borderRadius: BorderRadius.circular(12))),
+                  Expanded(
+                      child: SkeletonLoader(
+                          width: double.infinity,
+                          height: 170,
+                          borderRadius: BorderRadius.circular(12))),
                   const SizedBox(width: 12),
-                  Expanded(child: SkeletonLoader(width: double.infinity, height: 170, borderRadius: BorderRadius.circular(12))),
+                  Expanded(
+                      child: SkeletonLoader(
+                          width: double.infinity,
+                          height: 170,
+                          borderRadius: BorderRadius.circular(12))),
                 ],
               ),
             ),
@@ -394,7 +415,9 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
                                 child: Consumer(
                                   builder: (context, ref, child) {
                                     final historyAsync = ref.watch(
-                                      isExpense ? historicalExpenseProvider : historicalIncomeProvider,
+                                      isExpense
+                                          ? historicalExpenseProvider
+                                          : historicalIncomeProvider,
                                     );
                                     return historyAsync.when(
                                       data: (history) {
@@ -403,54 +426,88 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
                                         }
                                         // If all values are zero, show a flat line at bottom
                                         if (history.every((v) => v == 0)) {
-                                          final spots = history.asMap().entries.map((e) {
-                                            return FlSpot(e.key.toDouble(), 10.0);
+                                          final spots =
+                                              history.asMap().entries.map((e) {
+                                            return FlSpot(
+                                                e.key.toDouble(), 10.0);
                                           }).toList();
                                           return LineChart(
                                             LineChartData(
-                                              gridData: const FlGridData(show: false),
-                                              titlesData: const FlTitlesData(show: false),
-                                              borderData: FlBorderData(show: false),
-                                              lineTouchData: const LineTouchData(enabled: false),
+                                              gridData:
+                                                  const FlGridData(show: false),
+                                              titlesData: const FlTitlesData(
+                                                  show: false),
+                                              borderData:
+                                                  FlBorderData(show: false),
+                                              lineTouchData:
+                                                  const LineTouchData(
+                                                      enabled: false),
                                               lineBarsData: [
                                                 LineChartBarData(
                                                   spots: spots,
                                                   isCurved: true,
-                                                  color: (isExpense ? color.error : color.primary).withValues(alpha: 0.15),
+                                                  color: (isExpense
+                                                          ? color.error
+                                                          : color.primary)
+                                                      .withValues(alpha: 0.15),
                                                   barWidth: 2,
-                                                  dotData: const FlDotData(show: false),
+                                                  dotData: const FlDotData(
+                                                      show: false),
                                                   belowBarData: BarAreaData(
                                                     show: true,
-                                                    color: (isExpense ? color.error : color.primary).withValues(alpha: 0.05),
+                                                    color: (isExpense
+                                                            ? color.error
+                                                            : color.primary)
+                                                        .withValues(
+                                                            alpha: 0.05),
                                                   ),
                                                 ),
                                               ],
                                             ),
                                           );
                                         }
-                                        final maxVal = history.reduce((a, b) => a > b ? a : b);
-                                        final minVal = history.reduce((a, b) => a < b ? a : b);
+                                        final maxVal = history
+                                            .reduce((a, b) => a > b ? a : b);
+                                        final minVal = history
+                                            .reduce((a, b) => a < b ? a : b);
                                         final range = maxVal - minVal;
-                                        final spots = history.asMap().entries.map((e) {
-                                          final normalized = range > 0 ? ((e.value - minVal) / range) * 40 + 10 : 25;
-                                          return FlSpot(e.key.toDouble(), normalized.toDouble());
+                                        final spots =
+                                            history.asMap().entries.map((e) {
+                                          final normalized = range > 0
+                                              ? ((e.value - minVal) / range) *
+                                                      40 +
+                                                  10
+                                              : 25;
+                                          return FlSpot(e.key.toDouble(),
+                                              normalized.toDouble());
                                         }).toList();
                                         return LineChart(
                                           LineChartData(
-                                            gridData: const FlGridData(show: false),
-                                            titlesData: const FlTitlesData(show: false),
-                                            borderData: FlBorderData(show: false),
-                                            lineTouchData: const LineTouchData(enabled: false),
+                                            gridData:
+                                                const FlGridData(show: false),
+                                            titlesData:
+                                                const FlTitlesData(show: false),
+                                            borderData:
+                                                FlBorderData(show: false),
+                                            lineTouchData: const LineTouchData(
+                                                enabled: false),
                                             lineBarsData: [
                                               LineChartBarData(
                                                 spots: spots,
                                                 isCurved: true,
-                                                color: (isExpense ? color.error : color.primary).withValues(alpha: 0.15),
+                                                color: (isExpense
+                                                        ? color.error
+                                                        : color.primary)
+                                                    .withValues(alpha: 0.15),
                                                 barWidth: 2,
-                                                dotData: const FlDotData(show: false),
+                                                dotData: const FlDotData(
+                                                    show: false),
                                                 belowBarData: BarAreaData(
                                                   show: true,
-                                                  color: (isExpense ? color.error : color.primary).withValues(alpha: 0.05),
+                                                  color: (isExpense
+                                                          ? color.error
+                                                          : color.primary)
+                                                      .withValues(alpha: 0.05),
                                                 ),
                                               ),
                                             ],
@@ -468,7 +525,8 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
                                 child: AnimatedBalance(
                                   value: value,
                                   style: textTheme.titleMedium?.copyWith(
-                                    color: isExpense ? color.error : color.primary,
+                                    color:
+                                        isExpense ? color.error : color.primary,
                                     fontSize: 28,
                                     fontWeight: FontWeight.bold,
                                   ),

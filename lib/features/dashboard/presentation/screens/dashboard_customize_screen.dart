@@ -1,266 +1,360 @@
+// lib/features/dashboard/presentation/screens/dashboard_customize_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:mudra_manager/features/marketplace/services/marketplace_service.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/core/widgets/dashboard_widget_plugin.dart';
+import 'package:mudra_manager/core/widgets/dashboard_widget_registry.dart';
+import 'package:mudra_manager/core/db/models/dashboard_widget_preference.dart';
+import 'package:mudra_manager/features/dashboard/presentation/providers/widget_preferences_provider.dart';
 
-class DashboardCustomizeScreen extends StatefulWidget {
+class DashboardCustomizeScreen extends ConsumerStatefulWidget {
   const DashboardCustomizeScreen({super.key});
 
   @override
-  State<DashboardCustomizeScreen> createState() => _DashboardCustomizeScreenState();
+  ConsumerState<DashboardCustomizeScreen> createState() =>
+      _DashboardCustomizeScreenState();
 }
 
-class _DashboardCustomizeScreenState extends State<DashboardCustomizeScreen> {
-  List<_DashboardCard> _allCards = [];
-  List<String> _visibleCards = [];
-  bool _isLoading = true;
+class _DashboardCustomizeScreenState
+    extends ConsumerState<DashboardCustomizeScreen> {
+  /// Local ordered list for drag reorder — synced from provider on first load.
+  List<_WidgetEntry> _entries = [];
+  bool _initialized = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _initializeCards();
-    _loadPreferences();
+  void _syncFromPreferences(List<DashboardWidgetPreference> prefs) {
+    final prefMap = {for (var p in prefs) p.widgetId: p};
+    final plugins = DashboardWidgetRegistry.widgets;
+
+    final entries = <_WidgetEntry>[];
+    for (final plugin in plugins) {
+      final pref = prefMap[plugin.id];
+      entries.add(
+        _WidgetEntry(
+          plugin: plugin,
+          visible: pref?.visible ?? plugin.defaultVisible,
+          pinned: pref?.pinned ?? false,
+          order: pref?.order ?? plugin.defaultOrder,
+        ),
+      );
+    }
+
+    // Sort: pinned first, then by order
+    entries.sort((a, b) {
+      if (a.pinned && !b.pinned) return -1;
+      if (!a.pinned && b.pinned) return 1;
+      return a.order.compareTo(b.order);
+    });
+
+    _entries = entries;
   }
 
-  void _initializeCards() {
-    _allCards = [
-      _DashboardCard(
-        id: 'accounts',
-        title: 'Account Balances',
-        icon: LucideIcons.wallet,
-      ),
-      _DashboardCard(
-        id: 'action_buttons',
-        title: 'Quick Actions',
-        icon: LucideIcons.touchpad,
-      ),
-      _DashboardCard(
-        id: 'spending_personality',
-        title: 'Spending Personality',
-        icon: LucideIcons.brain,
-      ),
-      _DashboardCard(
-        id: 'cash_flow',
-        title: 'Cash Flow',
-        icon: LucideIcons.trendingUp,
-      ),
-      _DashboardCard(
-        id: 'financial_health',
-        title: 'Financial Health',
-        icon: LucideIcons.heart,
-      ),
-      _DashboardCard(
-        id: 'net_worth',
-        title: 'Net Worth',
-        icon: LucideIcons.wallet,
-      ),
-      _DashboardCard(
-        id: 'spending_prediction',
-        title: 'Spending Prediction',
-        icon: LucideIcons.chartSpline,
-      ),
-      _DashboardCard(
-        id: 'recurring_expenses',
-        title: 'Fixed Expenses',
-        icon: LucideIcons.repeat,
-      ),
-      _DashboardCard(
-        id: 'active_trip',
-        title: 'Active Trip',
-        icon: LucideIcons.plane,
-        pluginId: 'com.mudra.travel_expenses',
-      ),
-      _DashboardCard(
-        id: 'budget',
-        title: 'Budget Overview',
-        icon: LucideIcons.chartPie,
-      ),
-      _DashboardCard(
-        id: 'goal',
-        title: 'Goals Progress',
-        icon: LucideIcons.goal,
-      ),
-    ];
+  Future<void> _toggleVisibility(_WidgetEntry entry) async {
+    HapticFeedback.mediumImpact();
+    final service = ref.read(widgetPreferencesServiceProvider);
+    await service.toggleVisibility(entry.plugin.id);
+    setState(() => entry.visible = !entry.visible);
   }
 
-  List<String> get _defaultVisibleCards => _allCards.map((e) => e.id).toList();
+  Future<void> _onReorder(int oldIndex, int newIndex) async {
+    if (newIndex > oldIndex) newIndex--;
+    setState(() {
+      final item = _entries.removeAt(oldIndex);
+      _entries.insert(newIndex, item);
+    });
+
+    final service = ref.read(widgetPreferencesServiceProvider);
+    for (var i = 0; i < _entries.length; i++) {
+      _entries[i].order = i;
+      await service.updateOrder(_entries[i].plugin.id, i);
+    }
+  }
 
   Future<void> _restoreDefaults() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('visible_dashboard_cards');
-    await prefs.remove('dashboard_cards_order');
-    _initializeCards();
-    await _loadPreferences();
-  }
+  HapticFeedback.mediumImpact();
+  final service = ref.read(widgetPreferencesServiceProvider);
+  await service.resetToDefaults();
+  ref.invalidate(widgetPreferencesProvider);
+  setState(() => _initialized = false);
+}
 
-  Future<void> _loadPreferences() async {
-    final prefs = await SharedPreferences.getInstance();
-    final saved = prefs.getStringList('visible_dashboard_cards');
-    final order = prefs.getStringList('dashboard_cards_order');
-
-    // Filter cards based on plugin status
-    final marketplace = MarketplaceService();
-    final filteredCards = <_DashboardCard>[];
-    for (final card in _allCards) {
-      if (card.pluginId == null || await marketplace.isPluginEnabled(card.pluginId!)) {
-        filteredCards.add(card);
-      }
-    }
-
-    if (order != null) {
-      filteredCards.sort((a, b) {
-        final aIndex = order.indexOf(a.id);
-        final bIndex = order.indexOf(b.id);
-        if (aIndex == -1) return 1;
-        if (bIndex == -1) return -1;
-        return aIndex.compareTo(bIndex);
-      });
-    }
-
-    setState(() {
-      _allCards = filteredCards;
-      _visibleCards = saved ?? _allCards.map((e) => e.id).toList();
-      _isLoading = false;
-    });
-  }
-
-  Future<void> _savePreferences() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList('visible_dashboard_cards', _visibleCards);
-    await prefs.setStringList('dashboard_cards_order', _allCards.map((e) => e.id).toList());
-  }
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) return const Scaffold(body: Center(child: CircularProgressIndicator()));
-
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final prefsAsync = ref.watch(widgetPreferencesProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Customize Dashboard'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
-        ),
+        title: const Text('Dashboard Layout'),
         actions: [
           TextButton.icon(
-            onPressed: () async {
-              await _restoreDefaults();
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Restored to defaults')),
-                );
-              }
-            },
-            icon: const Icon(LucideIcons.rotateCcw, size: 18),
+            onPressed: _restoreDefaults,
+            icon: const Icon(LucideIcons.rotateCcw, size: 16),
             label: const Text('Reset'),
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Card(
-              color: color.primaryContainer.withValues(alpha: 0.3),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    Icon(Icons.info_outline, color: color.primary),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'Drag to reorder, toggle to show/hide cards',
-                        style: textTheme.bodySmall?.copyWith(color: color.onSurface),
-                      ),
-                    ),
-                  ],
+      body: prefsAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, _) => Center(child: Text('Error: $e')),
+        data: (prefs) {
+          if (!_initialized) {
+            _syncFromPreferences(prefs);
+            _initialized = true;
+          }
+
+          final visibleCount = _entries.where((e) => e.visible).length;
+
+          return Column(
+            children: [
+              // ── HERO STATUS CARD ──
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: spacing.cardHorizontal,
+                  vertical: spacing.cardVertical,
                 ),
+                child: _buildHeroCard(
+                  color,
+                  textTheme,
+                  spacing,
+                  isDark,
+                  visibleCount,
+                ),
+              ),
+
+              // ── REORDERABLE LIST ──
+              Expanded(
+                child: ReorderableListView.builder(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: spacing.cardHorizontal,
+                  ),
+                  proxyDecorator: (child, index, animation) {
+                    return AnimatedBuilder(
+                      animation: animation,
+                      builder: (context, child) => Material(
+                        elevation: 4,
+                        borderRadius:
+                            BorderRadius.circular(spacing.radiusMedium),
+                        color: Colors.transparent,
+                        child: child,
+                      ),
+                      child: child,
+                    );
+                  },
+                  itemCount: _entries.length,
+                  onReorder: _onReorder,
+                  itemBuilder: (context, index) {
+                    final entry = _entries[index];
+                    return _buildWidgetTile(
+                      key: ValueKey(entry.plugin.id),
+                      entry: entry,
+                      color: color,
+                      textTheme: textTheme,
+                      spacing: spacing,
+                      isLast: index == _entries.length - 1,
+                    );
+                  },
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildHeroCard(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    bool isDark,
+    int visibleCount,
+  ) {
+    final accent = color.primary;
+    return Container(
+      padding: EdgeInsets.all(spacing.cardInner),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            accent.withValues(alpha: isDark ? 0.2 : 0.12),
+            accent.withValues(alpha: isDark ? 0.08 : 0.04),
+          ],
+        ),
+        border: Border.all(color: accent.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        children: [
+          TweenAnimationBuilder<double>(
+            duration: const Duration(milliseconds: 800),
+            curve: Curves.easeOutBack,
+            tween: Tween(begin: 0.0, end: 1.0),
+            builder: (context, value, child) =>
+                Transform.scale(scale: value, child: child),
+            child: Container(
+              padding: EdgeInsets.all(spacing.cardInner),
+              decoration: BoxDecoration(
+                color: accent.withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                LucideIcons.layoutDashboard,
+                color: accent,
+                size: 28,
               ),
             ),
           ),
+          const SizedBox(width: 16),
           Expanded(
-            child: ReorderableListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: _allCards.length,
-              onReorder: (oldIndex, newIndex) {
-                setState(() {
-                  if (newIndex > oldIndex) newIndex--;
-                  final item = _allCards.removeAt(oldIndex);
-                  _allCards.insert(newIndex, item);
-                });
-                _savePreferences();
-              },
-              itemBuilder: (context, index) {
-                final card = _allCards[index];
-                final isVisible = _visibleCards.contains(card.id);
-
-                return Card(
-                  key: ValueKey(card.id),
-                  margin: const EdgeInsets.only(bottom: 12),
-                  elevation: 0,
-                  color: color.surfaceContainerHighest,
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    leading: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: color.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(card.icon, color: color.primary, size: 24),
-                    ),
-                    title: Text(
-                      card.title,
-                      style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Switch(
-                          value: isVisible,
-                          onChanged: (value) {
-                            HapticFeedback.mediumImpact();
-                            setState(() {
-                              if (value) {
-                                _visibleCards.add(card.id);
-                              } else {
-                                _visibleCards.remove(card.id);
-                              }
-                            });
-                            _savePreferences();
-                          },
-                        ),
-                        const SizedBox(width: 8),
-                        Icon(Icons.drag_handle, color: color.onSurfaceVariant),
-                      ],
-                    ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '$visibleCount of ${_entries.length} cards active',
+                  style: textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: accent,
                   ),
-                );
-              },
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Drag to reorder, toggle to show or hide',
+                  style: textTheme.bodySmall?.copyWith(
+                    color: color.onSurfaceVariant,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
       ),
     );
   }
+
+  Widget _buildWidgetTile({
+    required Key key,
+    required _WidgetEntry entry,
+    required ColorScheme color,
+    required TextTheme textTheme,
+    required AppSpacing spacing,
+    required bool isLast,
+  }) {
+    final alpha = entry.visible ? 1.0 : 0.45;
+    final categoryLabel = _categoryLabel(entry.plugin.category);
+
+    return Card(
+      key: key,
+      elevation: 0,
+      margin: EdgeInsets.only(bottom: spacing.elementGap),
+      color: color.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        side: BorderSide(
+          color: color.outlineVariant.withValues(alpha: 0.5),
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          children: [
+            // Icon
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: color.primary.withValues(alpha: 0.12 * alpha),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                entry.plugin.icon,
+                color: color.primary.withValues(alpha: alpha),
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 14),
+
+            // Title + category
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    entry.plugin.title,
+                    style: textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w500,
+                      color: color.onSurface.withValues(alpha: alpha),
+                    ),
+                  ),
+                  if (categoryLabel != null)
+                    Text(
+                      categoryLabel,
+                      style: textTheme.labelSmall?.copyWith(
+                        color: color.onSurfaceVariant.withValues(alpha: alpha),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+
+            // Toggle
+            Switch(
+              value: entry.visible,
+              onChanged: entry.plugin.canBeDisabled
+                  ? (_) => _toggleVisibility(entry)
+                  : null,
+            ),
+            const SizedBox(width: 4),
+
+            // Drag handle
+            Icon(
+              LucideIcons.gripVertical,
+              color: color.onSurfaceVariant.withValues(alpha: 0.5),
+              size: 20,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String? _categoryLabel(WidgetCategory category) {
+    switch (category) {
+      case WidgetCategory.essential:
+        return 'Essential';
+      case WidgetCategory.finance:
+        return 'Finance';
+      case WidgetCategory.analytics:
+        return 'Analytics';
+      case WidgetCategory.actions:
+        return 'Actions';
+      case WidgetCategory.ai:
+        return 'AI Insights';
+      case WidgetCategory.contextual:
+        return 'Contextual';
+      case WidgetCategory.custom:
+        return null;
+    }
+  }
 }
 
-class _DashboardCard {
-  final String id;
-  final String title;
-  final IconData icon;
-  final String? pluginId;
+class _WidgetEntry {
+  final DashboardWidgetPlugin plugin;
+  bool visible;
+  bool pinned;
+  int order;
 
-  _DashboardCard({
-    required this.id,
-    required this.title,
-    required this.icon,
-    this.pluginId,
+  _WidgetEntry({
+    required this.plugin,
+    required this.visible,
+    required this.pinned,
+    required this.order,
   });
 }

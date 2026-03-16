@@ -267,5 +267,11 @@
   "transaction_enterValidAmountError": "অনুগ্রহ করে একটি বৈধ পরিমাণ লিখুন।",
   "sms_noPendingTransactions": "কোনো মুলতুবি লেনদেন নেই",
   "sms_approveLabel": "অনুমোদন",
-  "sms_approveTransactionTitle": "লেনদেন অনুমোদন করুন"
+  "sms_approveTransactionTitle": "লেনদেন অনুমোদন করুন",
+  "onboard_SmartSmsTracking": "স্মার্ট SMS ট্র্যাকিং",
+  "onboard_SmartSmsTrackingDesc": "ব্যাংক SMS থেকে স্বয়ংক্রিয়ভাবে লেনদেন শনাক্ত ও আমদানি করুন।",
+  "onboard_InsightsAndAnalytics": "ইনসাইটস ও অ্যানালিটিক্স",
+  "onboard_InsightsAndAnalyticsDesc": "বিস্তারিত চার্ট, ট্রেন্ড এবং স্মার্ট ইনসাইটস দিয়ে আপনার খরচের অভ্যাস বুঝুন।",
+  "onboard_SecureAndPrivate": "সুরক্ষিত ও ব্যক্তিগত",
+  "onboard_SecureAndPrivateDesc": "আপনার ডেটা আপনার ডিভাইসে থাকে। কোনো ক্লাউড নেই, কোনো ট্র্যাকিং নেই।"
 }

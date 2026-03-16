@@ -16,17 +16,17 @@ class TrendIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    
-    if (previous == 0) return SizedBox.shrink();
-    
+
+    if (previous == 0) return const SizedBox.shrink();
+
     final change = ((current - previous) / previous * 100);
     final isPositive = change > 0;
     final isGood = isIncome ? isPositive : !isPositive;
-    
+
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: (isGood ? Colors.green : Colors.red).withOpacity(0.1),
+        color: (isGood ? color.primary : color.tertiary).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -34,14 +34,14 @@ class TrendIndicator extends StatelessWidget {
         children: [
           Icon(
             isPositive ? Icons.trending_up : Icons.trending_down,
-            color: isGood ? Colors.green : Colors.red,
+            color: isGood ? color.primary : color.tertiary,
             size: 14,
           ),
-          SizedBox(width: 4),
+          const SizedBox(width: 4),
           Text(
             '${change.abs().toStringAsFixed(1)}%',
             style: textTheme.labelSmall?.copyWith(
-              color: isGood ? Colors.green : Colors.red,
+              color: isGood ? color.primary : color.tertiary,
               fontWeight: FontWeight.bold,
             ),
           ),

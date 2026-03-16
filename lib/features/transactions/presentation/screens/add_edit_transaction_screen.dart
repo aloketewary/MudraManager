@@ -26,6 +26,7 @@ import 'package:mudra_manager/features/budget/data/budget_service_provider.dart'
 import 'package:mudra_manager/features/category/data/category_provider.dart';
 import 'package:mudra_manager/features/sms/data/recurring_detector_service.dart';
 import 'package:mudra_manager/features/sms/data/sms_activity_service.dart';
+import 'package:mudra_manager/features/sms/presentation/screens/sms_activity_screen.dart';
 import 'package:mudra_manager/features/transactions/data/tag_provider.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 import 'package:mudra_manager/features/trip/data/trip_provider.dart';
@@ -36,8 +37,11 @@ class AddEditTransactionScreen extends ConsumerStatefulWidget {
   final Transaction? transaction;
   final SmsActivity? smsActivity;
 
-  const AddEditTransactionScreen(
-      {super.key, this.transaction, this.smsActivity});
+  const AddEditTransactionScreen({
+    super.key,
+    this.transaction,
+    this.smsActivity,
+  });
 
   @override
   ConsumerState<AddEditTransactionScreen> createState() =>
@@ -71,12 +75,12 @@ class _AddEditTransactionScreenState
     _amountController.text =
         widget.transaction?.amount.toStringAsFixed(2) ?? '';
     _descController.text = widget.transaction?.description ?? '';
-    
+
     // Clamp date to now if it's in the future (SMS parsing error)
     final transactionDate = widget.transaction?.date ?? DateTime.now();
     final now = DateTime.now();
     _selectedDate = transactionDate.isAfter(now) ? now : transactionDate;
-    
+
     _selectedAccount = widget.transaction?.account.value;
     _selectedCategory = widget.transaction?.category.value;
     _isExpense = widget.transaction?.isExpense ?? true;
@@ -285,7 +289,8 @@ class _AddEditTransactionScreenState
             InkWell(
               onTap: () async {
                 final now = DateTime.now();
-                final safeInitialDate = _selectedDate.isAfter(now) ? now : _selectedDate;
+                final safeInitialDate =
+                    _selectedDate.isAfter(now) ? now : _selectedDate;
                 final pick = await showDatePicker(
                   context: context,
                   initialDate: safeInitialDate,
@@ -354,7 +359,8 @@ class _AddEditTransactionScreenState
                           Text(
                             'Split equally with ${_selectedParticipants.length} people',
                             style: textTheme.labelSmall?.copyWith(
-                              color: color.onPrimaryContainer.withValues(alpha: 0.7),
+                              color: color.onPrimaryContainer
+                                  .withValues(alpha: 0.7),
                             ),
                           ),
                         ],
@@ -492,7 +498,7 @@ class _AddEditTransactionScreenState
           _paidBy != null &&
           _selectedParticipants.isNotEmpty) {
         List<double> splitAmounts;
-        
+
         if (_splitType == SplitType.equal) {
           splitAmounts = List.filled(
             _selectedParticipants.length,
@@ -503,7 +509,7 @@ class _AddEditTransactionScreenState
               .map((p) => _splitAmounts[p.id] ?? 0.0)
               .toList();
         }
-        
+
         await ref.read(tripServiceProvider).addTransactionToTrip(
               _selectedTrip!.id,
               txn,
@@ -534,19 +540,23 @@ class _AddEditTransactionScreenState
       await _checkLowBalance(txn.account.value);
       await _checkBudgetAlerts(txn);
       await WidgetService.updateWidget(ref);
-      
+
       if (mounted) {
-        // Only invalidate specific providers, not all
         ref.invalidate(transactionProvider);
         ref.invalidate(accountServiceProvider);
         ref.invalidate(budgetServiceProvider);
-        
+        if (widget.smsActivity != null) {
+          ref.invalidate(smsActivityProvider);
+          ref.invalidate(pendingCountProvider);
+          ref.read(smsRefreshProvider.notifier).state++;
+        }
+
         SnackbarService.success(
           widget.transaction == null
               ? 'Transaction added successfully'
               : 'Transaction updated successfully',
         );
-        Navigator.of(context).pop(true);
+        context.pop(true);
       }
     }
   }
@@ -635,14 +645,14 @@ class _AddEditTransactionScreenState
   void _showSplitCustomizer() {
     final amount = double.tryParse(_amountController.text) ?? 0.0;
     final controllers = <int, TextEditingController>{};
-    
+
     // Initialize controllers
     for (var p in _selectedParticipants) {
       controllers[p.id] = TextEditingController(
         text: (_splitAmounts[p.id] ?? 0).toString(),
       );
     }
-    
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -653,18 +663,19 @@ class _AddEditTransactionScreenState
         builder: (context, setModalState) {
           final color = Theme.of(context).colorScheme;
           final textTheme = Theme.of(context).textTheme;
-          
+
           // Calculate remaining for custom/percentage splits
           double currentSum = 0;
           for (var id in _selectedParticipants.map((p) => p.id)) {
             currentSum += double.tryParse(
-              _splitAmounts[id]?.toString() ?? '0',
-            ) ?? 0;
+                  _splitAmounts[id]?.toString() ?? '0',
+                ) ??
+                0;
           }
           final isPercentage = _splitType == SplitType.percentage;
           final target = isPercentage ? 100.0 : amount;
           final remaining = target - currentSum;
-          
+
           return Padding(
             padding: EdgeInsets.only(
               bottom: MediaQuery.of(context).viewInsets.bottom + 16,
@@ -699,7 +710,9 @@ class _AddEditTransactionScreenState
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text('Split Type', style: textTheme.titleSmall),
-                    if ((_splitType == SplitType.custom || _splitType == SplitType.percentage) && amount > 0)
+                    if ((_splitType == SplitType.custom ||
+                            _splitType == SplitType.percentage) &&
+                        amount > 0)
                       Text(
                         isPercentage
                             ? 'Remaining: ${remaining.toStringAsFixed(1)}%'
@@ -749,20 +762,23 @@ class _AddEditTransactionScreenState
                     separatorBuilder: (_, __) => const SizedBox(height: 8),
                     itemBuilder: (context, index) {
                       final p = _selectedTrip!.participants.toList()[index];
-                      final isSelected = _selectedParticipants.any((sp) => sp.id == p.id);
-                      
+                      final isSelected =
+                          _selectedParticipants.any((sp) => sp.id == p.id);
+
                       return InkWell(
                         onTap: () {
                           HapticFeedback.lightImpact();
                           setState(() {
                             if (isSelected) {
-                              _selectedParticipants.removeWhere((sp) => sp.id == p.id);
+                              _selectedParticipants
+                                  .removeWhere((sp) => sp.id == p.id);
                               _splitAmounts.remove(p.id);
                             } else {
                               _selectedParticipants.add(p);
                               if (_splitType != SplitType.equal) {
                                 _splitAmounts[p.id] = 0.0;
-                                controllers[p.id] = TextEditingController(text: '0');
+                                controllers[p.id] =
+                                    TextEditingController(text: '0');
                               }
                             }
                           });
@@ -800,20 +816,27 @@ class _AddEditTransactionScreenState
                               ),
                               const SizedBox(width: 16),
                               Expanded(
-                                child: (_splitType == SplitType.custom || _splitType == SplitType.percentage) && isSelected
+                                child: (_splitType == SplitType.custom ||
+                                            _splitType ==
+                                                SplitType.percentage) &&
+                                        isSelected
                                     ? Row(
                                         children: [
                                           Text(
                                             p.name,
-                                            style: textTheme.titleMedium?.copyWith(
+                                            style:
+                                                textTheme.titleMedium?.copyWith(
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
                                           const Spacer(),
-                                          if (_splitType == SplitType.percentage && amount > 0)
+                                          if (_splitType ==
+                                                  SplitType.percentage &&
+                                              amount > 0)
                                             Text(
                                               '₹${(amount * (_splitAmounts[p.id] ?? 0) / 100).toStringAsFixed(0)}  ',
-                                              style: textTheme.bodySmall?.copyWith(
+                                              style:
+                                                  textTheme.bodySmall?.copyWith(
                                                 color: color.primary,
                                                 fontWeight: FontWeight.bold,
                                               ),
@@ -822,29 +845,56 @@ class _AddEditTransactionScreenState
                                             width: 120,
                                             child: TextField(
                                               controller: controllers[p.id],
-                                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                              keyboardType: const TextInputType
+                                                  .numberWithOptions(
+                                                  decimal: true),
                                               decoration: InputDecoration(
-                                                prefixText: _splitType == SplitType.percentage ? '' : '₹',
-                                                suffixText: _splitType == SplitType.percentage ? '%' : null,
+                                                prefixText: _splitType ==
+                                                        SplitType.percentage
+                                                    ? ''
+                                                    : '₹',
+                                                suffixText: _splitType ==
+                                                        SplitType.percentage
+                                                    ? '%'
+                                                    : null,
                                                 isDense: true,
-                                                contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                                                contentPadding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 8,
+                                                        vertical: 8),
                                                 border: OutlineInputBorder(
-                                                  borderRadius: BorderRadius.circular(8),
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
                                                 ),
                                                 suffixIcon: IconButton(
-                                                  icon: Icon(Icons.auto_fix_high, size: 18, color: color.primary),
-                                                  tooltip: 'Auto-fill remaining',
+                                                  icon: Icon(
+                                                      Icons.auto_fix_high,
+                                                      size: 18,
+                                                      color: color.primary),
+                                                  tooltip:
+                                                      'Auto-fill remaining',
                                                   padding: EdgeInsets.zero,
-                                                  constraints: const BoxConstraints(),
+                                                  constraints:
+                                                      const BoxConstraints(),
                                                   onPressed: () {
                                                     double othersSum = 0;
-                                                    for (var sp in _selectedParticipants) {
-                                                      if (sp.id == p.id) continue;
-                                                      othersSum += _splitAmounts[sp.id] ?? 0;
+                                                    for (var sp
+                                                        in _selectedParticipants) {
+                                                      if (sp.id == p.id)
+                                                        continue;
+                                                      othersSum +=
+                                                          _splitAmounts[
+                                                                  sp.id] ??
+                                                              0;
                                                     }
-                                                    final remaining = target - othersSum;
-                                                    setState(() => _splitAmounts[p.id] = remaining);
-                                                    controllers[p.id]!.text = remaining.toStringAsFixed(
+                                                    final remaining =
+                                                        target - othersSum;
+                                                    setState(() =>
+                                                        _splitAmounts[p.id] =
+                                                            remaining);
+                                                    controllers[p.id]!.text =
+                                                        remaining
+                                                            .toStringAsFixed(
                                                       isPercentage ? 1 : 2,
                                                     );
                                                     setModalState(() {});
@@ -853,7 +903,9 @@ class _AddEditTransactionScreenState
                                               ),
                                               onChanged: (value) {
                                                 setState(() {
-                                                  _splitAmounts[p.id] = double.tryParse(value) ?? 0.0;
+                                                  _splitAmounts[p.id] =
+                                                      double.tryParse(value) ??
+                                                          0.0;
                                                 });
                                                 setModalState(() {});
                                               },
@@ -864,14 +916,18 @@ class _AddEditTransactionScreenState
                                     : Text(
                                         p.name,
                                         style: textTheme.titleMedium?.copyWith(
-                                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                          fontWeight: isSelected
+                                              ? FontWeight.bold
+                                              : FontWeight.normal,
                                         ),
                                       ),
                               ),
                               if (isSelected && _splitType == SplitType.equal)
-                                Icon(Icons.check_circle_rounded, color: color.primary)
+                                Icon(Icons.check_circle_rounded,
+                                    color: color.primary)
                               else if (!isSelected)
-                                Icon(Icons.circle_outlined, color: color.outline),
+                                Icon(Icons.circle_outlined,
+                                    color: color.outline),
                             ],
                           ),
                         ),
@@ -958,24 +1014,27 @@ class _AddEditTransactionScreenState
                   ? 'Split by Percentage'
                   : 'Split by Amount',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: 16),
-            ..._selectedParticipants.map((p) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: TextField(
-                controller: controllers[p.id],
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: InputDecoration(
-                  labelText: p.name,
-                  suffixText: _splitType == SplitType.percentage ? '%' : '₹',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+            ..._selectedParticipants.map(
+              (p) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: TextField(
+                  controller: controllers[p.id],
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  decoration: InputDecoration(
+                    labelText: p.name,
+                    suffixText: _splitType == SplitType.percentage ? '%' : '₹',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 ),
               ),
-            )),
+            ),
             const SizedBox(height: 16),
             FilledButton(
               onPressed: () {
@@ -1045,22 +1104,24 @@ class _AddEditTransactionScreenState
                   ctx.pop();
                 },
               ),
-              ...trips.map((trip) => ListTile(
-                    leading: Icon(
-                      trip.isActive ? Icons.luggage : Icons.luggage_outlined,
-                    ),
-                    title: Text(trip.name),
-                    subtitle: trip.isActive ? const Text('Active') : null,
-                    selected: _selectedTrip?.id == trip.id,
-                    onTap: () {
-                      setState(() {
-                        _selectedTrip = trip;
-                        _selectedParticipants = trip.participants.toList();
-                        _paidBy = trip.participants.firstOrNull;
-                      });
-                      ctx.pop();
-                    },
-                  )),
+              ...trips.map(
+                (trip) => ListTile(
+                  leading: Icon(
+                    trip.isActive ? Icons.luggage : Icons.luggage_outlined,
+                  ),
+                  title: Text(trip.name),
+                  subtitle: trip.isActive ? const Text('Active') : null,
+                  selected: _selectedTrip?.id == trip.id,
+                  onTap: () {
+                    setState(() {
+                      _selectedTrip = trip;
+                      _selectedParticipants = trip.participants.toList();
+                      _paidBy = trip.participants.firstOrNull;
+                    });
+                    ctx.pop();
+                  },
+                ),
+              ),
             ],
           ),
         ),

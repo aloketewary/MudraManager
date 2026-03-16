@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_boring_avatars/flutter_boring_avatars.dart';
 import 'package:intl/intl.dart';
 import 'dart:math' as math;
+
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/shared/widgets/widgets.dart';
 
 class SettlementCard extends StatelessWidget {
   final String fromPerson;
@@ -9,6 +13,7 @@ class SettlementCard extends StatelessWidget {
   final bool isPaid;
   final VoidCallback? onMarkPaid;
   final DateTime? settledDate;
+  final AppSpacing spacing;
 
   const SettlementCard({
     super.key,
@@ -18,6 +23,7 @@ class SettlementCard extends StatelessWidget {
     this.isPaid = false,
     this.onMarkPaid,
     this.settledDate,
+    required this.spacing,
   });
 
   @override
@@ -28,13 +34,17 @@ class SettlementCard extends StatelessWidget {
     return Opacity(
       opacity: isPaid ? 0.6 : 1.0,
       child: CustomPaint(
-        painter: isPaid ? DashedBorderPainter(color: color.outline.withValues(alpha: 0.5)) : null,
+        painter: isPaid
+            ? DashedBorderPainter(color: color.outline.withValues(alpha: 0.5))
+            : null,
         child: Card(
-          margin: EdgeInsets.only(bottom: 12),
+          margin: const EdgeInsets.only(),
           elevation: 0,
-          color: isPaid ? color.surfaceContainerLow : color.surfaceContainerHighest,
+          color: isPaid
+              ? color.surfaceContainerLow
+              : color.surfaceContainerHighest,
           child: Padding(
-            padding: EdgeInsets.all(16),
+            padding: EdgeInsets.all(spacing.cardInner),
             child: Column(
               children: [
                 Row(
@@ -43,19 +53,23 @@ class SettlementCard extends StatelessWidget {
                     Expanded(
                       child: Column(
                         children: [
-                          CircleAvatar(
-                            radius: 28,
-                            backgroundColor: isPaid ? color.surfaceContainerHigh : color.errorContainer,
-                            child: Text(
-                              fromPerson[0].toUpperCase(),
-                              style: TextStyle(
-                                color: isPaid ? color.onSurfaceVariant : color.error,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20,
+                          SizedBox(
+                            width: 48,
+                            height: 48,
+                            child: ClipOval(
+                              child: BoringAvatar(
+                                name: fromPerson,
+                                palette: BoringAvatarPalette([
+                                  color.primary,
+                                  color.tertiary,
+                                  color.primaryContainer,
+                                  color.tertiaryContainer,
+                                ]),
+                                type: BoringAvatarType.beam,
                               ),
                             ),
                           ),
-                          SizedBox(height: 8),
+                          SizedBox(height: spacing.elementGap),
                           Text(
                             fromPerson,
                             style: textTheme.bodyMedium?.copyWith(
@@ -66,17 +80,25 @@ class SettlementCard extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          SizedBox(height: 4),
+                          SizedBox(height: spacing.elementGap),
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: spacing.cardHorizontalMin,
+                              vertical: spacing.cardVerticalMin,
+                            ),
                             decoration: BoxDecoration(
-                              color: isPaid ? color.surfaceContainerHigh : color.errorContainer,
-                              borderRadius: BorderRadius.circular(12),
+                              color: isPaid
+                                  ? color.surfaceContainerHigh
+                                  : color.errorContainer,
+                              borderRadius:
+                                  BorderRadius.circular(spacing.radiusMedium),
                             ),
                             child: Text(
                               'Owes',
                               style: textTheme.labelSmall?.copyWith(
-                                color: isPaid ? color.onSurfaceVariant : color.error,
+                                color: isPaid
+                                    ? color.onSurfaceVariant
+                                    : color.error,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -84,57 +106,76 @@ class SettlementCard extends StatelessWidget {
                         ],
                       ),
                     ),
-                    
+
                     // Arrow and Amount
                     Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: spacing.cardHorizontal,
+                        vertical: spacing.cardVertical,
+                      ),
                       child: Column(
                         children: [
                           Icon(
                             Icons.arrow_forward_rounded,
-                            color: isPaid ? color.onSurfaceVariant : color.error,
+                            color:
+                                isPaid ? color.onSurfaceVariant : color.error,
                             size: 32,
                           ),
-                          SizedBox(height: 8),
+                          SizedBox(height: spacing.elementGap),
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: spacing.cardHorizontal,
+                              vertical: spacing.cardVertical,
+                            ),
                             decoration: BoxDecoration(
-                              color: isPaid ? color.surfaceContainerHigh : color.errorContainer,
+                              color: isPaid
+                                  ? color.surfaceContainerHigh
+                                  : color.errorContainer,
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(
-                                color: isPaid ? color.onSurfaceVariant : color.error,
+                                color: isPaid
+                                    ? color.onSurfaceVariant
+                                    : color.error,
                                 width: 2,
                               ),
                             ),
-                            child: Text(
-                              '₹${amount.toStringAsFixed(2)}',
+                            child: CurrencyText(
+                              amount: amount,
+                              fixedLength: 2,
+                              compact: false,
                               style: textTheme.titleLarge?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                color: isPaid ? color.onSurfaceVariant : color.error,
+                                color: isPaid
+                                    ? color.onSurfaceVariant
+                                    : color.error,
                               ),
                             ),
                           ),
                         ],
                       ),
                     ),
-                    
+
                     // To Person
                     Expanded(
                       child: Column(
                         children: [
-                          CircleAvatar(
-                            radius: 28,
-                            backgroundColor: isPaid ? color.surfaceContainerHigh : color.primaryContainer,
-                            child: Text(
-                              toPerson[0].toUpperCase(),
-                              style: TextStyle(
-                                color: isPaid ? color.onSurfaceVariant : color.primary,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20,
+                          SizedBox(
+                            width: 48,
+                            height: 48,
+                            child: ClipOval(
+                              child: BoringAvatar(
+                                name: toPerson,
+                                palette: BoringAvatarPalette([
+                                  color.primary,
+                                  color.tertiary,
+                                  color.primaryContainer,
+                                  color.tertiaryContainer,
+                                ]),
+                                type: BoringAvatarType.beam,
                               ),
                             ),
                           ),
-                          SizedBox(height: 8),
+                          SizedBox(height: spacing.elementGap),
                           Text(
                             toPerson,
                             style: textTheme.bodyMedium?.copyWith(
@@ -145,17 +186,24 @@ class SettlementCard extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          SizedBox(height: 4),
+                          SizedBox(height: spacing.elementGap),
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: spacing.cardHorizontalMin,
+                              vertical: spacing.cardVerticalMin,
+                            ),
                             decoration: BoxDecoration(
-                              color: isPaid ? color.surfaceContainerHigh : color.primaryContainer,
+                              color: isPaid
+                                  ? color.surfaceContainerHigh
+                                  : color.primaryContainer,
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
                               'Gets',
                               style: textTheme.labelSmall?.copyWith(
-                                color: isPaid ? color.onSurfaceVariant : color.primary,
+                                color: isPaid
+                                    ? color.onSurfaceVariant
+                                    : color.primary,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -165,15 +213,14 @@ class SettlementCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                
                 if (!isPaid && onMarkPaid != null) ...[
-                  SizedBox(height: 16),
+                  SizedBox(height: spacing.cardHorizontalMax),
                   FilledButton.icon(
                     onPressed: onMarkPaid,
-                    icon: Icon(Icons.check_circle_outline, size: 20),
-                    label: Text('Mark as Paid'),
+                    icon: const Icon(Icons.check_circle_outline, size: 20),
+                    label: const Text('Mark as Paid'),
                     style: FilledButton.styleFrom(
-                      minimumSize: Size(double.infinity, 44),
+                      minimumSize: const Size(double.infinity, 44),
                       backgroundColor: color.primary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -181,11 +228,13 @@ class SettlementCard extends StatelessWidget {
                     ),
                   ),
                 ],
-                
                 if (isPaid && settledDate != null)
                   Container(
-                    margin: EdgeInsets.only(top: 12),
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    margin: EdgeInsets.only(top: spacing.cardHorizontal),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: spacing.cardHorizontal,
+                      vertical: spacing.cardVertical,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.green.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
@@ -193,8 +242,12 @@ class SettlementCard extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.check_circle, color: Colors.green, size: 18),
-                        SizedBox(width: 8),
+                        const Icon(
+                          Icons.check_circle,
+                          color: Colors.green,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 8),
                         Text(
                           'Settled on ${DateFormat.MMMd().format(settledDate!)}',
                           style: textTheme.labelLarge?.copyWith(
@@ -233,10 +286,12 @@ class DashedBorderPainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
 
     final path = Path()
-      ..addRRect(RRect.fromRectAndRadius(
-        Rect.fromLTWH(0, 0, size.width, size.height),
-        Radius.circular(12),
-      ));
+      ..addRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromLTWH(0, 0, size.width, size.height),
+          const Radius.circular(12),
+        ),
+      );
 
     final dashPath = _createDashedPath(path, dashLength, gapLength);
     canvas.drawPath(dashPath, paint);

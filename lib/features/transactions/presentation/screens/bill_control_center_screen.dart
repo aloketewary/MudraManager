@@ -6,104 +6,480 @@ import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/db/models/frequency.dart';
 import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
-import 'package:mudra_manager/core/utils/icon_helper.dart';
+import 'package:mudra_manager/core/db/models/transaction.dart';
+import 'package:mudra_manager/core/providers/isar_provider.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/core/utils/utils.dart';
 import 'package:mudra_manager/features/transactions/data/recurring_transaction_provider.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
+import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
-import 'package:table_calendar/table_calendar.dart';
+import 'package:mudra_manager/shared/widgets/widgets.dart';
 
 class BillControlCenterScreen extends ConsumerStatefulWidget {
   const BillControlCenterScreen({super.key});
 
   @override
-  ConsumerState<BillControlCenterScreen> createState() => _BillControlCenterScreenState();
+  ConsumerState<BillControlCenterScreen> createState() =>
+      _BillControlCenterScreenState();
 }
 
-class _BillControlCenterScreenState extends ConsumerState<BillControlCenterScreen> {
-  DateTime _focusedDay = DateTime.now();
-  DateTime _selectedDay = DateTime.now();
+class _BillControlCenterScreenState
+    extends ConsumerState<BillControlCenterScreen> {
+  String _selectedFilter = 'All';
 
   @override
   Widget build(BuildContext context) {
-    final color = Theme.of(context).colorScheme;
+    final spacing = ref.watch(spacingProvider);
+    final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final recurringAsync = ref.watch(recurringTransactionsProvider);
     final accountsAsync = ref.watch(accountsProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Bill Control Center'),
-        actions: [
-          IconButton(
-            icon: const Icon(LucideIcons.plus),
-            onPressed: () {
-              HapticFeedback.mediumImpact();
-              context.push('/add-recurring');
-            },
-          ),
-        ],
-      ),
+      backgroundColor: colorScheme.surface,
       body: recurringAsync.when(
         data: (bills) {
           if (bills.isEmpty) {
-            return const NoDataFound(
-              message: 'No bills yet',
-              iconData: Icons.receipt_long,
+            return CustomScrollView(
+              slivers: [
+                SliverAppBar(
+                  title: const Text('Bill Control Center'),
+                  pinned: true,
+                  actions: [
+                    IconButton(
+                      icon: const Icon(LucideIcons.plus),
+                      onPressed: () {
+                        HapticFeedback.mediumImpact();
+                        context.push('/add-recurring');
+                      },
+                    ),
+                  ],
+                ),
+                const SliverFillRemaining(
+                  child: NoDataFound(
+                    message: 'No bills yet',
+                    iconData: LucideIcons.receipt,
+                  ),
+                ),
+              ],
             );
           }
 
           final activeBills = bills.where((b) => b.isActive).toList();
-          final upcomingBills = _getUpcomingBills(activeBills);
-          final alerts = _generateAlerts(activeBills);
+          final now = DateTime.now();
+          final overdueBills =
+              activeBills.where((b) => b.nextDueDate.isBefore(now)).toList();
+          final dueSoonBills = activeBills
+              .where(
+                (b) =>
+                    b.nextDueDate.isAfter(now) &&
+                    b.nextDueDate.difference(now).inDays <= 7,
+              )
+              .toList();
+          final upcomingBills = activeBills
+              .where((b) => b.nextDueDate.difference(now).inDays > 7)
+              .toList();
+
+          // Sort by due date
+          overdueBills.sort((a, b) => a.nextDueDate.compareTo(b.nextDueDate));
+          dueSoonBills.sort((a, b) => a.nextDueDate.compareTo(b.nextDueDate));
+          upcomingBills.sort((a, b) => a.nextDueDate.compareTo(b.nextDueDate));
 
           return accountsAsync.when(
             data: (accounts) {
-              final totalBalance = accounts.fold(0.0, (sum, a) => sum + a.initialBalance);
-              final upcomingTotal = upcomingBills.fold(0.0, (sum, b) => sum + b.amount);
+              final totalBalance =
+                  accounts.fold(0.0, (sum, a) => sum + a.initialBalance);
+              final upcomingTotal =
+                  activeBills.fold(0.0, (sum, b) => sum + b.amount);
               final safeToSpend = totalBalance - upcomingTotal;
+              final overdueTotal =
+                  overdueBills.fold(0.0, (sum, b) => sum + b.amount);
+              final dueSoonTotal =
+                  dueSoonBills.fold(0.0, (sum, b) => sum + b.amount);
 
               return CustomScrollView(
                 slivers: [
-                  // Cash-Flow Forecast
-                  SliverToBoxAdapter(
-                    child: _buildCashFlowForecast(safeToSpend, upcomingTotal, totalBalance, color, textTheme),
-                  ),
-
-                  // Priority Alerts
-                  if (alerts.isNotEmpty)
-                    SliverToBoxAdapter(
-                      child: _buildPriorityAlerts(alerts, color, textTheme),
+                  // Modern SliverAppBar with Stats
+                  SliverAppBar(
+                    expandedHeight: 300,
+                    pinned: true,
+                    elevation: 0,
+                    title: LayoutBuilder(
+                      builder: (context, constraints) {
+                        return const Text(
+                          'Bill Control Center',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        );
+                      },
                     ),
-
-                  // Calendar View
-                  SliverToBoxAdapter(
-                    child: _buildCalendarView(activeBills, color, textTheme),
-                  ),
-
-                  // Upcoming Bills
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
-                      child: Text(
-                        'Upcoming Bills',
-                        style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                    actions: [
+                      IconButton(
+                        icon: const Icon(LucideIcons.plus),
+                        onPressed: () {
+                          HapticFeedback.mediumImpact();
+                          context.push('/add-recurring');
+                        },
+                      ),
+                    ],
+                    flexibleSpace: FlexibleSpaceBar(
+                      background: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              colorScheme.primaryContainer,
+                              colorScheme.secondaryContainer,
+                            ],
+                          ),
+                        ),
+                        child: SafeArea(
+                          child: LayoutBuilder(
+                            builder: (context, constraints) {
+                              return Opacity(
+                                opacity:
+                                    constraints.maxHeight > 100 ? 1.0 : 0.0,
+                                child: Padding(
+                                  padding: EdgeInsets.fromLTRB(
+                                    spacing.cardHorizontal,
+                                    spacing.sectionGap * 3,
+                                    spacing.cardHorizontal,
+                                    spacing.sectionGap,
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Container(
+                                            padding: EdgeInsets.all(
+                                              spacing.elementGap,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: colorScheme.primary
+                                                  .withValues(alpha: 0.15),
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                spacing.radiusMedium,
+                                              ),
+                                            ),
+                                            child: Icon(
+                                              LucideIcons.receiptText,
+                                              color: colorScheme.primary,
+                                              size: 20,
+                                            ),
+                                          ),
+                                          SizedBox(width: spacing.elementGap),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                // Text(
+                                                //   'Bill Control Center',
+                                                //   style: textTheme.headlineSmall
+                                                //       ?.copyWith(
+                                                //     fontWeight: FontWeight.bold,
+                                                //     color: colorScheme
+                                                //         .onPrimaryContainer,
+                                                //   ),
+                                                // ),
+                                                Text(
+                                                  '${activeBills.length} Active Bills',
+                                                  style: textTheme.bodyMedium
+                                                      ?.copyWith(
+                                                    color: colorScheme
+                                                        .onPrimaryContainer
+                                                        .withValues(alpha: 0.7),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const Spacer(),
+                                      Container(
+                                        padding:
+                                            EdgeInsets.all(spacing.cardInner),
+                                        decoration: BoxDecoration(
+                                          color: colorScheme.surface
+                                              .withValues(alpha: 0.9),
+                                          borderRadius: BorderRadius.circular(
+                                            spacing.radiusLarge,
+                                          ),
+                                          border: Border.all(
+                                            color: colorScheme.outline
+                                                .withValues(alpha: 0.1),
+                                            width: 1,
+                                          ),
+                                        ),
+                                        child: Column(
+                                          children: [
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      'Safe to Spend',
+                                                      style: textTheme.bodySmall
+                                                          ?.copyWith(
+                                                        color: colorScheme
+                                                            .onSurfaceVariant,
+                                                      ),
+                                                    ),
+                                                    SizedBox(
+                                                      height:
+                                                          spacing.elementGap *
+                                                              0.5,
+                                                    ),
+                                                    CurrencyText(
+                                                      amount: safeToSpend,
+                                                      fixedLength: 0,
+                                                      compact: false,
+                                                      showSign: true,
+                                                      showPositiveSign: false,
+                                                      style: textTheme
+                                                          .headlineMedium
+                                                          ?.copyWith(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: safeToSpend < 0
+                                                            ? colorScheme.error
+                                                            : const Color(
+                                                                0xFF10B981,
+                                                              ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                Container(
+                                                  padding: EdgeInsets.all(
+                                                    spacing.elementGap,
+                                                  ),
+                                                  decoration: BoxDecoration(
+                                                    color: (safeToSpend < 0
+                                                            ? colorScheme.error
+                                                            : const Color(
+                                                                0xFF10B981,
+                                                              ))
+                                                        .withValues(
+                                                      alpha: 0.15,
+                                                    ),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                      spacing.radiusMedium,
+                                                    ),
+                                                  ),
+                                                  child: Icon(
+                                                    safeToSpend < 0
+                                                        ? LucideIcons
+                                                            .triangleAlert
+                                                        : LucideIcons
+                                                            .circleCheck,
+                                                    color: safeToSpend < 0
+                                                        ? colorScheme.error
+                                                        : const Color(
+                                                            0xFF10B981,
+                                                          ),
+                                                    size: 24,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            SizedBox(
+                                              height: spacing.elementGap,
+                                            ),
+                                            Row(
+                                              children: [
+                                                Expanded(
+                                                  child: _buildQuickStat(
+                                                    'Balance',
+                                                    totalBalance,
+                                                    colorScheme,
+                                                    textTheme,
+                                                    spacing,
+                                                  ),
+                                                ),
+                                                Container(
+                                                  width: 1,
+                                                  height: 30,
+                                                  color: colorScheme
+                                                      .outlineVariant
+                                                      .withValues(alpha: 0.5),
+                                                ),
+                                                Expanded(
+                                                  child: _buildQuickStat(
+                                                    'Total Bills',
+                                                    upcomingTotal,
+                                                    colorScheme,
+                                                    textTheme,
+                                                    spacing,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
                       ),
                     ),
                   ),
 
-                  SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) => _buildBillCard(upcomingBills[index], color, textTheme),
-                      childCount: upcomingBills.length,
+                  // Alert Cards
+                  if (overdueBills.isNotEmpty || dueSoonBills.isNotEmpty)
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: spacing.cardHorizontal,
+                          vertical: spacing.cardVertical,
+                        ),
+                        child: Column(
+                          children: [
+                            if (overdueBills.isNotEmpty)
+                              _buildAlertCard(
+                                'Overdue Bills',
+                                '${overdueBills.length} bills • ₹${overdueTotal.toStringAsFixed(0)}',
+                                LucideIcons.circleAlert,
+                                colorScheme.error,
+                                colorScheme,
+                                textTheme,
+                                spacing,
+                              ),
+                            if (overdueBills.isNotEmpty &&
+                                dueSoonBills.isNotEmpty)
+                              SizedBox(height: spacing.elementGap),
+                            if (dueSoonBills.isNotEmpty)
+                              _buildAlertCard(
+                                'Due This Week',
+                                '${dueSoonBills.length} bills • ₹${dueSoonTotal.toStringAsFixed(0)}',
+                                LucideIcons.clock,
+                                const Color(0xFFFFA726),
+                                colorScheme,
+                                textTheme,
+                                spacing,
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                  // Filter Chips
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: spacing.cardHorizontal,
+                        vertical: spacing.cardVertical,
+                      ),
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            _buildFilterChip(
+                              'All',
+                              activeBills.length,
+                              colorScheme,
+                              textTheme,
+                              spacing,
+                            ),
+                            SizedBox(width: spacing.elementGap),
+                            _buildFilterChip(
+                              'Overdue',
+                              overdueBills.length,
+                              colorScheme,
+                              textTheme,
+                              spacing,
+                            ),
+                            SizedBox(width: spacing.elementGap),
+                            _buildFilterChip(
+                              'Due Soon',
+                              dueSoonBills.length,
+                              colorScheme,
+                              textTheme,
+                              spacing,
+                            ),
+                            SizedBox(width: spacing.elementGap),
+                            _buildFilterChip(
+                              'Upcoming',
+                              upcomingBills.length,
+                              colorScheme,
+                              textTheme,
+                              spacing,
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
 
-                  const SliverToBoxAdapter(child: SizedBox(height: 100)),
+                  // Bills List
+                  SliverPadding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: spacing.cardHorizontal,
+                      vertical: spacing.cardVertical,
+                    ),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          List<RecurringTransaction> filteredBills;
+                          switch (_selectedFilter) {
+                            case 'Overdue':
+                              filteredBills = overdueBills;
+                              break;
+                            case 'Due Soon':
+                              filteredBills = dueSoonBills;
+                              break;
+                            case 'Upcoming':
+                              filteredBills = upcomingBills;
+                              break;
+                            default:
+                              filteredBills = activeBills
+                                ..sort(
+                                  (a, b) =>
+                                      a.nextDueDate.compareTo(b.nextDueDate),
+                                );
+                          }
+
+                          if (index >= filteredBills.length) return null;
+
+                          return Padding(
+                            padding:
+                                EdgeInsets.only(bottom: spacing.elementGap),
+                            child: _buildBillCard(
+                              filteredBills[index],
+                              colorScheme,
+                              textTheme,
+                              spacing,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+
+                  SliverToBoxAdapter(
+                    child: SizedBox(height: spacing.sectionGap * 5),
+                  ),
                 ],
               );
             },
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (_, __) => const Center(child: Text('Error loading accounts')),
+            error: (_, __) =>
+                const Center(child: Text('Error loading accounts')),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -112,213 +488,243 @@ class _BillControlCenterScreenState extends ConsumerState<BillControlCenterScree
     );
   }
 
-  Widget _buildCashFlowForecast(double safeToSpend, double upcomingTotal, double balance, ColorScheme color, TextTheme textTheme) {
-    final forecastColor = safeToSpend < upcomingTotal * 0.2 ? color.error : color.tertiary;
-
-    return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [forecastColor.withValues(alpha: 0.15), forecastColor.withValues(alpha: 0.05)],
-        ),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: forecastColor.withValues(alpha: 0.3), width: 2),
-      ),
+  Widget _buildQuickStat(
+    String label,
+    double value,
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: spacing.elementGap),
       child: Column(
         children: [
-          Row(
-            children: [
-              Icon(LucideIcons.trendingUp, color: forecastColor, size: 24),
-              const SizedBox(width: 12),
-              Text('Cash-Flow Forecast', style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-            ],
-          ),
-          const SizedBox(height: 16),
           Text(
-            '₹${safeToSpend.toStringAsFixed(0)}',
-            style: textTheme.displayMedium?.copyWith(fontWeight: FontWeight.bold, color: forecastColor),
+            label,
+            style: textTheme.bodySmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
           ),
-          Text('Safe to Spend', style: textTheme.bodyLarge?.copyWith(color: color.onSurfaceVariant)),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildMetric('Balance', balance, color.primary, textTheme, color),
-              _buildMetric('Upcoming', upcomingTotal, color.error, textTheme, color, prefix: '-'),
-            ],
+          SizedBox(height: spacing.elementGap * 0.5),
+          CurrencyText(
+            amount: value,
+            fixedLength: 0,
+            style: textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildMetric(String label, double value, Color valueColor, TextTheme textTheme, ColorScheme color, {String prefix = ''}) {
-    return Column(
-      children: [
-        Text(
-          '$prefix₹${value.toStringAsFixed(0)}',
-          style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: valueColor),
-        ),
-        Text(label, style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant)),
-      ],
-    );
-  }
-
-  Widget _buildPriorityAlerts(List<_Alert> alerts, ColorScheme color, TextTheme textTheme) {
+  Widget _buildAlertCard(
+    String title,
+    String subtitle,
+    IconData icon,
+    Color alertColor,
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      padding: EdgeInsets.all(spacing.cardInner),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            alertColor.withValues(alpha: 0.15),
+            alertColor.withValues(alpha: 0.05),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(spacing.radiusLarge),
+        border: Border.all(
+          color: alertColor.withValues(alpha: 0.3),
+          width: 1,
+        ),
+      ),
+      child: Row(
         children: [
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: Row(
+          Container(
+            padding: EdgeInsets.all(spacing.elementGap),
+            decoration: BoxDecoration(
+              color: alertColor.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(spacing.radiusMedium),
+            ),
+            child: Icon(
+              icon,
+              color: alertColor,
+              size: 24,
+            ),
+          ),
+          SizedBox(width: spacing.elementGap * 1.5),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(LucideIcons.triangleAlert, size: 20, color: Colors.orange),
-                const SizedBox(width: 8),
                 Text(
-                  'Action Needed',
-                  style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                  title,
+                  style: textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: alertColor,
+                  ),
+                ),
+                Text(
+                  subtitle,
+                  style: textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ],
             ),
           ),
-          ...alerts.map((alert) => Card(
-                margin: const EdgeInsets.only(bottom: 8),
-                elevation: 0,
-                color: alert.color.withValues(alpha: 0.1),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      Icon(alert.icon, color: alert.color, size: 20),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              alert.title,
-                              style: textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: alert.color,
-                              ),
-                            ),
-                            Text(
-                              alert.message,
-                              style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              )),
+          Icon(
+            LucideIcons.chevronRight,
+            color: alertColor,
+            size: 20,
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildCalendarView(List<RecurringTransaction> bills, ColorScheme color, TextTheme textTheme) {
-    final billDates = <DateTime, List<RecurringTransaction>>{};
-    for (final bill in bills) {
-      final date = DateTime(bill.nextDueDate.year, bill.nextDueDate.month, bill.nextDueDate.day);
-      (billDates[date] ??= []).add(bill);
-    }
-
-    return Container(
-      margin: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: color.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(16),
+  Widget _buildFilterChip(
+    String label,
+    int count,
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
+    final isSelected = _selectedFilter == label;
+    return FilterChip(
+      label: Text('$label ($count)'),
+      selected: isSelected,
+      onSelected: (selected) {
+        setState(() {
+          _selectedFilter = label;
+        });
+      },
+      backgroundColor: colorScheme.surfaceContainerLow,
+      selectedColor: colorScheme.primaryContainer,
+      labelStyle: textTheme.bodyMedium?.copyWith(
+        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        color: isSelected
+            ? colorScheme.onPrimaryContainer
+            : colorScheme.onSurfaceVariant,
       ),
-      child: TableCalendar(
-        firstDay: DateTime.now().subtract(const Duration(days: 365)),
-        lastDay: DateTime.now().add(const Duration(days: 365)),
-        focusedDay: _focusedDay,
-        selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-        onDaySelected: (selected, focused) {
-          setState(() {
-            _selectedDay = selected;
-            _focusedDay = focused;
-          });
-        },
-        calendarStyle: CalendarStyle(
-          todayDecoration: BoxDecoration(
-            color: color.primary.withValues(alpha: 0.3),
-            shape: BoxShape.circle,
-          ),
-          selectedDecoration: BoxDecoration(
-            color: color.primary,
-            shape: BoxShape.circle,
-          ),
-          markerDecoration: BoxDecoration(
-            color: color.error,
-            shape: BoxShape.circle,
-          ),
-          weekendTextStyle: TextStyle(color: color.error),
-          outsideDaysVisible: false,
-        ),
-        daysOfWeekStyle: DaysOfWeekStyle(
-          weekendStyle: TextStyle(color: color.error, fontWeight: FontWeight.bold),
-        ),
-        eventLoader: (day) {
-          final date = DateTime(day.year, day.month, day.day);
-          return billDates[date] ?? [];
-        },
-        headerStyle: HeaderStyle(
-          formatButtonVisible: false,
-          titleCentered: true,
-          titleTextStyle: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold) ?? const TextStyle(),
-        ),
+      side: BorderSide(
+        color: isSelected
+            ? colorScheme.primary
+            : colorScheme.outlineVariant.withValues(alpha: 0.5),
+        width: isSelected ? 2 : 1,
+      ),
+      padding: EdgeInsets.symmetric(
+        horizontal: spacing.elementGap,
+        vertical: spacing.elementGap * 0.5,
       ),
     );
   }
 
-  Widget _buildBillCard(RecurringTransaction bill, ColorScheme color, TextTheme textTheme) {
-    final daysUntil = bill.nextDueDate.difference(DateTime.now()).inDays;
-    final isUrgent = daysUntil <= 3;
-    final cardColor = isUrgent ? color.errorContainer : color.surfaceContainerHighest;
+  Widget _buildBillCard(
+    RecurringTransaction bill,
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
+    final now = DateTime.now();
+    final daysUntil = bill.nextDueDate.difference(now).inDays;
+    final isOverdue = daysUntil < 0;
+    final isDueSoon = daysUntil >= 0 && daysUntil <= 7;
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      elevation: 0,
-      color: cardColor,
+    Color statusColor;
+    String statusText;
+    IconData statusIcon;
+
+    if (isOverdue) {
+      statusColor = colorScheme.error;
+      statusText = '${daysUntil.abs()} days overdue';
+      statusIcon = LucideIcons.circleAlert;
+    } else if (isDueSoon) {
+      statusColor = const Color(0xFFFFA726);
+      statusText = daysUntil == 0
+          ? 'Due today'
+          : daysUntil == 1
+              ? 'Due tomorrow'
+              : 'Due in $daysUntil days';
+      statusIcon = LucideIcons.clock;
+    } else {
+      statusColor = colorScheme.primary;
+      statusText = 'Due ${DateFormat('MMM d').format(bill.nextDueDate)}';
+      statusIcon = LucideIcons.calendar;
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(spacing.radiusLarge),
+        border: Border.all(
+          color: isOverdue
+              ? colorScheme.error.withValues(alpha: 0.5)
+              : colorScheme.outlineVariant.withValues(alpha: 0.5),
+          width: isOverdue ? 2 : 1,
+        ),
+      ),
       child: InkWell(
         onTap: () => context.push('/add-recurring', extra: {'recurring': bill}),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(spacing.radiusLarge),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(spacing.cardInner),
           child: Column(
             children: [
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: EdgeInsets.all(spacing.elementGap),
                     decoration: BoxDecoration(
-                      color: color.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
+                      color: colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(spacing.radiusMedium),
                     ),
                     child: Icon(
-                      IconHelper.iconFromName(bill.category.value?.iconName ?? 'category'),
-                      color: color.primary,
+                      IconHelper.iconFromName(
+                        bill.category.value?.iconName ?? 'category',
+                      ),
+                      color: colorScheme.primary,
                       size: 24,
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  SizedBox(width: spacing.elementGap * 1.5),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           bill.category.value?.name ?? 'Unknown',
-                          style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                          style: textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                        Text(
-                          'Due ${DateFormat('MMM d').format(bill.nextDueDate)} • ${_getFrequencyText(bill.frequency)}',
-                          style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+                        SizedBox(height: spacing.elementGap * 0.25),
+                        Row(
+                          children: [
+                            Icon(
+                              statusIcon,
+                              size: 14,
+                              color: statusColor,
+                            ),
+                            SizedBox(width: spacing.elementGap * 0.5),
+                            Text(
+                              statusText,
+                              style: textTheme.bodySmall?.copyWith(
+                                color: statusColor,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Text(
+                              ' • ${_getFrequencyText(bill.frequency)}',
+                              style: textTheme.bodySmall?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -330,20 +736,26 @@ class _BillControlCenterScreenState extends ConsumerState<BillControlCenterScree
                         '₹${bill.amount.toStringAsFixed(0)}',
                         style: textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: color.error,
+                          color: colorScheme.error,
                         ),
                       ),
-                      if (isUrgent)
+                      if (isOverdue || isDueSoon)
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          margin:
+                              EdgeInsets.only(top: spacing.elementGap * 0.5),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: spacing.elementGap * 0.75,
+                            vertical: spacing.elementGap * 0.25,
+                          ),
                           decoration: BoxDecoration(
-                            color: color.error.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(8),
+                            color: statusColor.withValues(alpha: 0.15),
+                            borderRadius:
+                                BorderRadius.circular(spacing.radiusSmall),
                           ),
                           child: Text(
-                            '$daysUntil days',
+                            isOverdue ? 'OVERDUE' : 'URGENT',
                             style: textTheme.labelSmall?.copyWith(
-                              color: color.error,
+                              color: statusColor,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -352,30 +764,34 @@ class _BillControlCenterScreenState extends ConsumerState<BillControlCenterScree
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: spacing.elementGap * 1.5),
               Row(
                 children: [
                   Expanded(
                     child: OutlinedButton.icon(
-                      onPressed: () => context.push('/add-recurring', extra: {'recurring': bill}),
+                      onPressed: () => context
+                          .push('/add-recurring', extra: {'recurring': bill}),
                       icon: const Icon(LucideIcons.settings, size: 16),
                       label: const Text('Manage'),
                       style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        padding:
+                            EdgeInsets.symmetric(vertical: spacing.elementGap),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: spacing.elementGap),
                   Expanded(
                     child: FilledButton.icon(
                       onPressed: () {
                         HapticFeedback.mediumImpact();
-                        // TODO: Mark as paid
+                        _markAsPaid(bill);
                       },
                       icon: const Icon(LucideIcons.check, size: 16),
                       label: const Text('Mark Paid'),
                       style: FilledButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        padding:
+                            EdgeInsets.symmetric(vertical: spacing.elementGap),
+                        backgroundColor: statusColor,
                       ),
                     ),
                   ),
@@ -388,43 +804,93 @@ class _BillControlCenterScreenState extends ConsumerState<BillControlCenterScree
     );
   }
 
-  List<RecurringTransaction> _getUpcomingBills(List<RecurringTransaction> bills) {
+  void _markAsPaid(RecurringTransaction bill) async {
     final now = DateTime.now();
-    final upcoming = bills.where((b) => b.nextDueDate.isAfter(now)).toList();
-    upcoming.sort((a, b) => a.nextDueDate.compareTo(b.nextDueDate));
-    return upcoming.take(10).toList();
-  }
+    final today = DateTime(now.year, now.month, now.day);
+    final dueDate = DateTime(
+      bill.nextDueDate.year,
+      bill.nextDueDate.month,
+      bill.nextDueDate.day,
+    );
 
-  List<_Alert> _generateAlerts(List<RecurringTransaction> bills) {
-    final dueSoon = bills.where((b) => b.nextDueDate.difference(DateTime.now()).inDays <= 3).length;
-    return dueSoon > 0
-        ? [_Alert(
-            title: '$dueSoon Bills Due Soon',
-            message: 'Review and prepare payments',
-            icon: LucideIcons.clock,
-            color: Colors.orange,
-          )]
-        : [];
+    // Check if bill is in the future
+    if (dueDate.isAfter(today)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(LucideIcons.circleAlert, color: Colors.white),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Cannot mark future bills as paid. Due on ${DateFormat('MMM d').format(bill.nextDueDate)}',
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: Theme.of(context).colorScheme.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    final isar = await ref.read(isarServiceProvider).getInstance();
+
+    try {
+      // Create a transaction for this bill payment
+      final transaction = Transaction.create(
+        date: DateTime.now(),
+        amount: bill.amount,
+        isExpense: bill.isExpense,
+        description: bill.description?.isNotEmpty == true
+            ? '${bill.description} (Paid)'
+            : '${bill.category.value?.name ?? "Bill"} (Paid)',
+      )
+        ..account.value = bill.account.value
+        ..category.value = bill.category.value
+        ..recurringTransactionSource.value = bill;
+
+      // Save the transaction
+      await isar.writeTxn(() async {
+        await isar.transactions.put(transaction);
+        await transaction.account.save();
+        await transaction.category.save();
+        await transaction.recurringTransactionSource.save();
+      });
+
+      // Update next due date
+      final nextDate = calculateNextDueDate(
+        bill.nextDueDate,
+        bill.frequency,
+        bill.startDate,
+      );
+
+      if (bill.endDate != null && nextDate.isAfter(bill.endDate!)) {
+        bill.isActive = false;
+      } else {
+        bill.nextDueDate = nextDate;
+      }
+
+      await isar.writeTxn(() async {
+        await isar.recurringTransactions.put(bill);
+      });
+      ref.invalidate(transactionProvider);
+      if (mounted) {
+        HapticFeedback.mediumImpact();
+        SnackbarService.success('${bill.category.value?.name} marked as paid');
+      }
+    } catch (e) {
+      if (mounted) {
+        SnackbarService.error('Error marking bill as paid: ${e.toString()}');
+      }
+    }
   }
 
   String _getFrequencyText(Frequency freq) => switch (freq) {
-    Frequency.daily => 'Daily',
-    Frequency.weekly => 'Weekly',
-    Frequency.monthly => 'Monthly',
-    Frequency.yearly => 'Yearly',
-  };
-}
-
-class _Alert {
-  final String title;
-  final String message;
-  final IconData icon;
-  final Color color;
-
-  _Alert({
-    required this.title,
-    required this.message,
-    required this.icon,
-    required this.color,
-  });
+        Frequency.daily => 'Daily',
+        Frequency.weekly => 'Weekly',
+        Frequency.monthly => 'Monthly',
+        Frequency.yearly => 'Yearly',
+      };
 }

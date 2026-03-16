@@ -73,6 +73,18 @@ extension AppLocalizationsHelper on AppLocalizations {
         return statistics_selectPeriodMonthText;
       case 'Year':
         return statistics_selectPeriodYearText;
+      case 'onboard_SmartSmsTracking':
+        return onboard_SmartSmsTracking;
+      case 'onboard_SmartSmsTrackingDesc':
+        return onboard_SmartSmsTrackingDesc;
+      case 'onboard_InsightsAndAnalytics':
+        return onboard_InsightsAndAnalytics;
+      case 'onboard_InsightsAndAnalyticsDesc':
+        return onboard_InsightsAndAnalyticsDesc;
+      case 'onboard_SecureAndPrivate':
+        return onboard_SecureAndPrivate;
+      case 'onboard_SecureAndPrivateDesc':
+        return onboard_SecureAndPrivateDesc;
       default:
         return key;
     }
@@ -99,20 +111,23 @@ extension AppLocalizationsHelper on AppLocalizations {
     return format;
   }
 
-  String formatCurrencyWithSign(int fixedStringLength, double amount, {bool compact = false}) {
-    final format = compact ? formatCompactLocalizedCurrency(fixedStringLength) : formatLocalizedCurrency(fixedStringLength);
+  String formatCurrencyWithSign(int fixedStringLength, double amount,
+      {bool compact = false}) {
+    final format = compact
+        ? formatCompactLocalizedCurrency(fixedStringLength)
+        : formatLocalizedCurrency(fixedStringLength);
     return "${compact ? "₹" : ""}${format.format(amount)}";
   }
 
-  String formatCompactCurrency(double amount) {
+  String formatCompactCurrency(double amount, {int fixedStringLength = 2}) {
     if (amount.abs() >= 10000000) {
-      return '₹${(amount / 10000000).toStringAsFixed(2)}$currency_crore_short';
+      return '₹${(amount / 10000000).toStringAsFixed(fixedStringLength)}$currency_crore_short';
     } else if (amount.abs() >= 100000) {
-      return '₹${(amount / 100000).toStringAsFixed(2)}$currency_lakh_short';
+      return '₹${(amount / 100000).toStringAsFixed(fixedStringLength)}$currency_lakh_short';
     } else if (amount.abs() >= 1000) {
-      return '₹${(amount / 1000).toStringAsFixed(2)}$currency_thousand_short';
+      return '₹${(amount / 1000).toStringAsFixed(fixedStringLength)}$currency_thousand_short';
     }
-    return formatCurrencyWithSign(2, amount);
+    return formatCurrencyWithSign(fixedStringLength, amount);
   }
 
   NumberFormat formatCompactNumber() {

@@ -17,6 +17,7 @@ final netWorthProvider = FutureProvider.autoDispose((ref) async {
       name: account.name,
       balance: balance.abs(),
       accountType: account.accountType,
+      colorValue: account.colorValue,
     );
 
     if (account.accountType == AccountType.creditCard) {
@@ -78,7 +79,8 @@ final netWorthHistoryProvider = FutureProvider.autoDispose((ref) async {
     double dayNetWorth = 0.0;
 
     for (final account in accounts) {
-      final balance = await BalanceHistoryService.instance.getBalanceOnDate(account.id, date);
+      final balance = await BalanceHistoryService.instance
+          .getBalanceOnDate(account.id, date);
       if (balance != null) {
         if (account.accountType == AccountType.creditCard) {
           dayNetWorth -= balance.abs();
@@ -116,11 +118,13 @@ class AccountItem {
   final String name;
   final double balance;
   final AccountType accountType;
+  final int? colorValue;
 
   AccountItem({
     required this.name,
     required this.balance,
     required this.accountType,
+    this.colorValue,
   });
 }
 

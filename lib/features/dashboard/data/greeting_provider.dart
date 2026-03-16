@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final greetingProvider = FutureProvider.autoDispose<String>((ref) async {
-  return _updateGreeting(); // Your async greeting logic
+final greetingProvider = Provider<String>((ref) {
+  return _updateGreeting();
 });
 
 String _updateGreeting() {

@@ -1071,5 +1071,29 @@
   "sms_approveTransactionTitle": "Approve Transaction",
   "@sms_approveTransactionTitle": {
     "description": "Title for approve transaction dialog"
+  },
+  "onboard_SmartSmsTracking": "Smart SMS Tracking",
+  "@onboard_SmartSmsTracking": {
+    "description": "Auto-detect bank SMS transactions"
+  },
+  "onboard_SmartSmsTrackingDesc": "Automatically detect and import transactions from your bank SMS messages.",
+  "@onboard_SmartSmsTrackingDesc": {
+    "description": "Description for SMS tracking onboarding page"
+  },
+  "onboard_InsightsAndAnalytics": "Insights & Analytics",
+  "@onboard_InsightsAndAnalytics": {
+    "description": "Financial insights and analytics"
+  },
+  "onboard_InsightsAndAnalyticsDesc": "Understand your spending habits with detailed charts, trends, and smart insights.",
+  "@onboard_InsightsAndAnalyticsDesc": {
+    "description": "Description for insights onboarding page"
+  },
+  "onboard_SecureAndPrivate": "Secure & Private",
+  "@onboard_SecureAndPrivate": {
+    "description": "Data security and privacy"
+  },
+  "onboard_SecureAndPrivateDesc": "Your data stays on your device. No cloud, no tracking — just encrypted local storage.",
+  "@onboard_SecureAndPrivateDesc": {
+    "description": "Description for security onboarding page"
   }
 }

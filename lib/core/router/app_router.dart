@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:mudra_manager/core/db/models/goal.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/core/router/home_screen.dart';
 import 'package:mudra_manager/core/utils/auth_gate.dart';
@@ -10,7 +9,6 @@ import 'package:mudra_manager/features/analytics/presentation/spending_personali
 import 'package:mudra_manager/features/analytics/presentation/net_worth_screen.dart';
 import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
 import 'package:mudra_manager/features/budget/presentation/screens/add_budget_screen.dart';
-import 'package:mudra_manager/features/budget/presentation/screens/budget_dashboard.dart';
 import 'package:mudra_manager/features/budget/presentation/screens/adaptive_budget_dashboard.dart';
 import 'package:mudra_manager/features/budget/presentation/screens/budget_details_screen.dart';
 import 'package:mudra_manager/features/dashboard/presentation/screens/dashboard_customize_screen.dart';
@@ -24,6 +22,7 @@ import 'package:mudra_manager/features/onboarding/presentation/screens/onboardin
 import 'package:mudra_manager/features/profile/presentation/screens/about_app.dart';
 import 'package:mudra_manager/features/profile/presentation/screens/add_edit_category_screen.dart';
 import 'package:mudra_manager/features/profile/presentation/screens/app_settings_page.dart';
+import 'package:mudra_manager/features/profile/presentation/screens/appearance_screen.dart';
 import 'package:mudra_manager/features/profile/presentation/screens/backup_restore_screen.dart';
 import 'package:mudra_manager/features/profile/presentation/screens/choose_language_screen.dart';
 import 'package:mudra_manager/features/profile/presentation/screens/edit_user_profile_screen.dart';
@@ -39,11 +38,9 @@ import 'package:mudra_manager/features/sms/presentation/screens/sms_activity_scr
 import 'package:mudra_manager/features/statistics/presentation/screens/monthly_comparison_screen.dart';
 import 'package:mudra_manager/features/transactions/presentation/screens/add_edit_transaction_screen.dart';
 import 'package:mudra_manager/features/transactions/presentation/screens/add_recurring_transaction_screen.dart';
-import 'package:mudra_manager/features/transactions/presentation/screens/recurring_transactions_screen.dart';
 import 'package:mudra_manager/features/transactions/presentation/screens/bill_control_center_screen.dart';
 import 'package:mudra_manager/features/transactions/presentation/screens/transfer_screen_new.dart';
 import 'package:mudra_manager/features/trip/presentation/screens/add_trip_transaction_screen.dart';
-import 'package:mudra_manager/features/trip/presentation/screens/create_trip_screen.dart';
 import 'package:mudra_manager/features/trip/presentation/screens/edit_trip_screen.dart';
 import 'package:mudra_manager/features/trip/presentation/screens/expense_detail_screen.dart';
 import 'package:mudra_manager/features/trip/presentation/screens/trip_detail_screen.dart';
@@ -240,8 +237,8 @@ class AppRouter {
               GoRoute(
                 path: '/goal-details',
                 builder: (context, state) {
-                  final goal = state.extra as Goal;
-                  return GoalDetailsScreen(goal: goal);
+                  final extra = state.extra as Map<String, dynamic>?;
+                  return GoalDetailsScreen(goal: extra?['goal']);
                 },
               ),
               GoRoute(
@@ -261,8 +258,7 @@ class AppRouter {
               ),
               GoRoute(
                 path: '/recurring-transactions',
-                builder: (context, state) =>
-                    const BillControlCenterScreen(),
+                builder: (context, state) => const BillControlCenterScreen(),
               ),
               GoRoute(
                 path: '/add-recurring',
@@ -279,7 +275,7 @@ class AppRouter {
               ),
               GoRoute(
                 path: '/create-trip',
-                builder: (context, state) => const CreateTripScreen(),
+                builder: (context, state) => const ManageTripScreen(),
               ),
               GoRoute(
                 path: '/trip-detail',
@@ -292,16 +288,17 @@ class AppRouter {
                 path: '/add-trip-transaction',
                 builder: (context, state) {
                   final extra = state.extra;
-                  final tripId = extra is int ? extra : (extra as Map<String, dynamic>)['tripId'] as int;
+                  final tripId = extra is int
+                      ? extra
+                      : (extra as Map<String, dynamic>)['tripId'] as int;
                   return AddTripTransactionScreen(tripId: tripId);
                 },
               ),
               GoRoute(
-                path: '/edit-trip',
+                path: '/edit-trip/:id',
                 builder: (context, state) {
-                  // Retrieve the tripId passed via 'extra'
-                  final tripId = state.extra as int;
-                  return EditTripScreen(tripId: tripId);
+                  final id = int.parse(state.pathParameters['id']!);
+                  return ManageTripScreen(tripId: id);
                 },
               ),
               GoRoute(
@@ -341,6 +338,11 @@ class AppRouter {
               GoRoute(
                 path: '/credit-card-reminders',
                 builder: (context, state) => const CreditCardReminderSettings(),
+              ),
+              // Add route (inside the ShellRoute routes list, near the other settings routes)
+              GoRoute(
+                path: '/appearance',
+                builder: (context, state) => const AppearanceScreen(),
               ),
             ],
           ),

@@ -13,7 +13,6 @@ import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/transactions/data/pending_transaction_prodiver.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 import 'package:mudra_manager/features/transactions/presentation/widgets/transaction_card.dart';
-import 'package:mudra_manager/features/transactions/presentation/widgets/sms_activity_card.dart';
 import 'package:mudra_manager/features/transactions/presentation/widgets/transaction_group.dart';
 import 'package:mudra_manager/features/trip/data/trip_provider.dart';
 import 'package:mudra_manager/shared/widgets/adaptive_text.dart';
@@ -25,8 +24,9 @@ final _dateHeaderFormatter = DateFormat.yMMMMd();
 
 class TransactionListScreen extends ConsumerStatefulWidget {
   final bool showAppBar;
+  final Function(bool isScrollingDown)? onScrollChanged;
 
-  const TransactionListScreen({super.key, this.showAppBar = false});
+  const TransactionListScreen({super.key, this.showAppBar = false, this.onScrollChanged});
 
   @override
   ConsumerState<TransactionListScreen> createState() =>
@@ -34,7 +34,10 @@ class TransactionListScreen extends ConsumerStatefulWidget {
 }
 
 class TransactionListScreenState extends ConsumerState<TransactionListScreen>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   String _filter = 'all';
   double rightBoxWidthFactor = 0.3;
   double leftBoxWidthFactor = 0.3;
@@ -52,16 +55,18 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
   bool _showMonthPicker = false;
   RangeSelectionMode _rangeSelectionMode = RangeSelectionMode.toggledOff;
   bool _showSearch = false;
-  final ScrollController _scrollController = ScrollController();
+  late final ScrollController _scrollController;
   int _displayLimit = 50;
   bool _isLoadingMore = false;
   bool _useInfiniteScroll = true;
   List<TxListEntry>? _cachedFiltered;
   String _lastFilterKey = '';
+  double _lastScrollOffset = 0;
 
   @override
   void initState() {
     super.initState();
+    _scrollController = ScrollController(keepScrollOffset: true);
     _scrollController.addListener(_onScroll);
   }
 
@@ -72,6 +77,12 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
   }
 
   void _onScroll() {
+    final currentOffset = _scrollController.offset;
+    if (widget.onScrollChanged != null && (currentOffset - _lastScrollOffset).abs() > 10) {
+      widget.onScrollChanged!(currentOffset > _lastScrollOffset && currentOffset > 100);
+      _lastScrollOffset = currentOffset;
+    }
+
     if (_scrollController.position.pixels >=
             _scrollController.position.maxScrollExtent - 200 &&
         !_isLoadingMore) {
@@ -110,9 +121,15 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
       yesterday.day,
     );
 
-    if (dateOnly == todayOnly) return ctxt.transaction_listViewGroupTodayLabel;
-    if (dateOnly == yesterdayOnly) {
-      return ctxt.transaction_listViewGroupYesterdayLabel;
+    // Only show Today/Yesterday if we're viewing the current month or all transactions
+    final isViewingCurrentMonth = _useInfiniteScroll ||
+        (_selectedDate.year == today.year && _selectedDate.month == today.month);
+
+    if (isViewingCurrentMonth) {
+      if (dateOnly == todayOnly) return ctxt.transaction_listViewGroupTodayLabel;
+      if (dateOnly == yesterdayOnly) {
+        return ctxt.transaction_listViewGroupYesterdayLabel;
+      }
     }
 
     return _dateHeaderFormatter.format(date);
@@ -136,7 +153,9 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
   }
 
   @override
+  @mustCallSuper
   Widget build(BuildContext context) {
+    super.build(context);
     final textTheme = Theme.of(context).textTheme;
     final color = Theme.of(context).colorScheme;
     final ctxt = AppLocalizations.of(context)!;
@@ -164,7 +183,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                 ),
               ],
             ),
-            body: Hero(tag: 'cashFlowPage', child: _buildMainComponent()),
+            body: _buildMainComponent(),
             floatingActionButtonLocation:
                 FloatingActionButtonLocation.centerFloat,
             floatingActionButton: AnimatedSwitcher(
@@ -186,7 +205,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
               ),
             ),
           )
-        : Hero(tag: 'cashFlowPage', child: _buildMainComponent());
+        : _buildMainComponent();
   }
 
   Widget _buildMainComponent() {
@@ -195,9 +214,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
     final color = Theme.of(context).colorScheme;
     final ctxt = AppLocalizations.of(context)!;
 
-    final sectionedAsync = _filter == 'needsReview'
-        ? ref.watch(allSectionedTransactionsProvider(_filter))
-        : _useInfiniteScroll && _filterStartDate == null && _filterEndDate == null
+    final sectionedAsync = _useInfiniteScroll && _filterStartDate == null && _filterEndDate == null
         ? ref.watch(allSectionedTransactionsProvider(_filter))
         : _filterStartDate != null && _filterEndDate != null
         ? ref.watch(
@@ -205,7 +222,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
               start: _filterStartDate!,
               end: _filterEndDate!,
               type: _filter,
-            )),
+            ),),
           )
         : ref.watch(
             sectionedTransactionsProvider((
@@ -331,10 +348,22 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                 child: InkWell(
                   onTap: () {
                     HapticFeedback.mediumImpact();
-                    setState(() {
-                      _showCalendar = !_showCalendar;
-                      _showMonthPicker = false;
-                    });
+                    if (_useInfiniteScroll && _filterStartDate == null) {
+                      // Switch to month view
+                      setState(() {
+                        _useInfiniteScroll = false;
+                        _displayLimit = 50;
+                        _cachedFiltered = null;
+                        _lastFilterKey = '';
+                      });
+                      ref.read(transactionRefreshProvider.notifier).state++;
+                    } else {
+                      // Toggle calendar
+                      setState(() {
+                        _showCalendar = !_showCalendar;
+                        _showMonthPicker = false;
+                      });
+                    }
                   },
                   borderRadius: BorderRadius.circular(20),
                   child: Padding(
@@ -413,7 +442,10 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                                             _selectedDate.month - 1,
                                           );
                                           _focusedDay = _selectedDate;
+                                          _cachedFiltered = null;
+                                          _lastFilterKey = '';
                                         });
+                                        ref.read(transactionRefreshProvider.notifier).state++;
                                       },
                                     ),
                                     if (!isSameMonth(
@@ -432,7 +464,10 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                                           setState(() {
                                             _selectedDate = DateTime.now();
                                             _focusedDay = DateTime.now();
+                                            _cachedFiltered = null;
+                                            _lastFilterKey = '';
                                           });
+                                          ref.read(transactionRefreshProvider.notifier).state++;
                                         },
                                       )
                                     else
@@ -445,10 +480,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                                         tooltip: 'Select Month',
                                         onPressed: () {
                                           HapticFeedback.mediumImpact();
-                                          setState(
-                                            () => _showMonthPicker =
-                                                !_showMonthPicker,
-                                          );
+                                          setState(() => _showMonthPicker = !_showMonthPicker);
                                         },
                                       ),
                                     IconButton(
@@ -471,7 +503,10 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                                                   _selectedDate.month + 1,
                                                 );
                                                 _focusedDay = _selectedDate;
+                                                _cachedFiltered = null;
+                                                _lastFilterKey = '';
                                               });
+                                              ref.read(transactionRefreshProvider.notifier).state++;
                                             },
                                     ),
                                   ],
@@ -493,19 +528,23 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                                         _useInfiniteScroll =
                                             !_useInfiniteScroll;
                                         _displayLimit = 50;
+                                        _cachedFiltered = null;
+                                        _lastFilterKey = '';
                                       });
+                                      ref.read(transactionRefreshProvider.notifier).state++;
                                     },
                                   ),
                                 ],
                               ),
                             ),
                             const SizedBox(width: 8),
-                            Icon(
-                              _showCalendar || _showMonthPicker
-                                  ? Icons.keyboard_arrow_up_rounded
-                                  : Icons.keyboard_arrow_down_rounded,
-                              color: color.onSurfaceVariant,
-                            ),
+                            if (!_useInfiniteScroll || _filterStartDate != null)
+                              Icon(
+                                _showCalendar || _showMonthPicker
+                                    ? Icons.keyboard_arrow_up_rounded
+                                    : Icons.keyboard_arrow_down_rounded,
+                                color: color.onSurfaceVariant,
+                              ),
                           ],
                         ),
                         if (_showCalendar || _showMonthPicker)
@@ -604,7 +643,10 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                                             );
                                             _focusedDay = _selectedDate;
                                             _showMonthPicker = false;
+                                            _cachedFiltered = null;
+                                            _lastFilterKey = '';
                                           });
+                                          ref.read(transactionRefreshProvider.notifier).state++;
                                         },
                                   borderRadius: BorderRadius.circular(12),
                                   child: Container(
@@ -747,7 +789,10 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                           );
                           _focusedDay = focusedDay;
                           _showCalendar = false;
+                          _cachedFiltered = null;
+                          _lastFilterKey = '';
                         });
+                        ref.read(transactionRefreshProvider.notifier).state++;
                       }
                     },
                     onRangeSelected: (start, end, focusedDay) {
@@ -756,10 +801,13 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                         _filterStartDate = start;
                         _filterEndDate = end;
                         _focusedDay = focusedDay;
+                        _cachedFiltered = null;
+                        _lastFilterKey = '';
                         if (start != null && end != null) {
                           _showCalendar = false;
                         }
                       });
+                      ref.read(transactionRefreshProvider.notifier).state++;
                     },
                     onFormatChanged: (format) {
                       setState(() => _calendarFormat = format);
@@ -774,8 +822,13 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                             focusedDay.month,
                             1,
                           );
+                          _cachedFiltered = null;
+                          _lastFilterKey = '';
                         }
                       });
+                      if (_rangeSelectionMode == RangeSelectionMode.toggledOff) {
+                        ref.read(transactionRefreshProvider.notifier).state++;
+                      }
                     },
                     enabledDayPredicate: (day) => !day.isAfter(DateTime.now()),
                     calendarStyle: CalendarStyle(
@@ -881,6 +934,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                   final tripNames = tripNamesSnapshot.data ?? {};
 
                   return ListView.builder(
+                    key: const PageStorageKey('transactionList'),
                     controller: _scrollController,
                     itemCount: displayItems.length + (hasMore ? 1 : 0),
                     itemBuilder: (context, index) {
@@ -911,10 +965,6 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                     );
                   }
 
-                  if (entry is SmsActivityItem) {
-                    return SmsActivityCard(activity: entry.activity);
-                  }
-
                   final transaction = (entry as TxItem).txn;
                   final tags = transaction.tags.toList();
                   final isRecurring = transaction.recurringTransactionSource.value != null;
@@ -930,7 +980,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                     isTransfer: transaction.isTransfer,
                     tags: tags,
                     related: transaction.related.value,
-                    tripName: tripName,
+                    tripName: isRecurring ? null : tripName,
                     isRecurring: isRecurring,
                     onEdit: () async {
                           final result = transaction.isTransfer
@@ -1045,23 +1095,6 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
         continue;
       }
 
-      if (entry is SmsActivityItem) {
-        if (currentDate != null) {
-          if (filtered.isEmpty || filtered.last is! TxHeader) {
-            filtered.add(TxHeader(currentDate));
-          } else {
-            final lastHeader = filtered.last as TxHeader;
-            if (lastHeader.group.year != currentDate.year ||
-                lastHeader.group.month != currentDate.month ||
-                lastHeader.group.day != currentDate.day) {
-              filtered.add(TxHeader(currentDate));
-            }
-          }
-          filtered.add(entry);
-        }
-        continue;
-      }
-
       final txItem = entry as TxItem;
       final tx = txItem.txn;
 
@@ -1162,7 +1195,12 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                           ),
                           onChanged: (value) {
                             HapticFeedback.mediumImpact();
-                            setState(() => _filter = value!);
+                            setState(() {
+                              _filter = value!;
+                              _cachedFiltered = null;
+                              _lastFilterKey = '';
+                            });
+                            ref.read(transactionRefreshProvider.notifier).state++;
                             setModalState(() {});
                           },
                         ),
@@ -1174,7 +1212,12 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                           ),
                           onChanged: (value) {
                             HapticFeedback.mediumImpact();
-                            setState(() => _filter = value!);
+                            setState(() {
+                              _filter = value!;
+                              _cachedFiltered = null;
+                              _lastFilterKey = '';
+                            });
+                            ref.read(transactionRefreshProvider.notifier).state++;
                             setModalState(() {});
                           },
                         ),
@@ -1186,17 +1229,12 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                           ),
                           onChanged: (value) {
                             HapticFeedback.mediumImpact();
-                            setState(() => _filter = value!);
-                            setModalState(() {});
-                          },
-                        ),
-                        RadioListTile<String>(
-                          value: 'needsReview',
-                          groupValue: _filter,
-                          title: const Text('NEEDS REVIEW'),
-                          onChanged: (value) {
-                            HapticFeedback.mediumImpact();
-                            setState(() => _filter = value!);
+                            setState(() {
+                              _filter = value!;
+                              _cachedFiltered = null;
+                              _lastFilterKey = '';
+                            });
+                            ref.read(transactionRefreshProvider.notifier).state++;
                             setModalState(() {});
                           },
                         ),
@@ -1257,7 +1295,11 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                                 ),
                                 onChanged: (value) {
                                   HapticFeedback.mediumImpact();
-                                  setState(() => _selectedCategoryId = value);
+                                  setState(() {
+                                    _selectedCategoryId = value;
+                                    _cachedFiltered = null;
+                                    _lastFilterKey = '';
+                                  });
                                   setModalState(() {});
                                 },
                               ),
@@ -1288,9 +1330,11 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                                       ),
                                       onChanged: (value) {
                                         HapticFeedback.mediumImpact();
-                                        setState(
-                                          () => _selectedCategoryId = value,
-                                        );
+                                        setState(() {
+                                          _selectedCategoryId = value;
+                                          _cachedFiltered = null;
+                                          _lastFilterKey = '';
+                                        });
                                         setModalState(() {});
                                       },
                                     ),

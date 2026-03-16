@@ -11,6 +11,10 @@ class CurrencyText extends StatelessWidget {
   final bool showSign;
   final bool compact;
   final bool? isExpense;
+  final int fixedLength;
+  final String? suffixText;
+  final String? prefixText;
+  final bool showPositiveSign;
 
   const CurrencyText({
     super.key,
@@ -21,26 +25,42 @@ class CurrencyText extends StatelessWidget {
     this.showSign = false,
     this.compact = true,
     this.isExpense = false,
+    this.fixedLength = 2,
+    this.suffixText,
+    this.prefixText,
+    this.showPositiveSign = true,
   });
 
   @override
   Widget build(BuildContext context) {
     final ctxt = AppLocalizations.of(context)!;
     final displayText = compact
-        ? '${showSign ? ((amount >= 0 && isExpense == false) ? '+' : '-') : ''}${ctxt.formatCompactCurrency(amount.abs())}'
-        : '${showSign ? ((amount >= 0 && isExpense == false) ? '+' : '-') : ''}${ctxt.formatCurrencyWithSign(2, amount.abs())}';
+        ? '${_getSign()}${ctxt.formatCompactCurrency(amount.abs(), fixedStringLength: fixedLength)}'
+        : '${_getSign()}${ctxt.formatCurrencyWithSign(fixedLength, amount.abs())}';
     final fullText =
-        '${showSign ? (amount >= 0 ? '+' : '-') : ''}${ctxt.formatCurrencyWithSign(2, amount.abs())}';
+        '${_getSign()}${ctxt.formatCurrencyWithSign(fixedLength, amount.abs())}';
 
     return Tooltip(
       message: fullText,
       child: AdaptiveText(
-        displayText,
+        '${prefixText != null ? '$prefixText ' : ''}$displayText${suffixText != null ? ' $suffixText' : ''}',
         style: style,
         maxLines: maxLines,
         textAlign: textAlign,
         isNumeric: true,
       ),
     );
+  }
+
+  String _getSign() {
+    String sign = '';
+    if (showSign) {
+      if (amount >= 0 && isExpense == false) {
+        sign = showPositiveSign ? '+' : '';
+      } else {
+        sign = '-';
+      }
+    }
+    return sign;
   }
 }

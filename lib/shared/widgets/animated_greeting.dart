@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 
 class AnimatedGreeting extends StatefulWidget {
   final String greeting;
@@ -25,6 +24,7 @@ class AnimatedGreeting extends StatefulWidget {
 
 class _AnimatedGreetingState extends State<AnimatedGreeting>
     with TickerProviderStateMixin {
+  static bool _hasPlayedAnimation = false;
   bool _showName = false;
   late AnimationController _controller;
   late Animation<Offset> _greetingSlide;
@@ -72,12 +72,20 @@ class _AnimatedGreetingState extends State<AnimatedGreeting>
       curve: const Interval(0.3, 1.0, curve: Curves.easeOut),
     ));
 
-    Future.delayed(widget.delay, () {
-      if (mounted) {
-        setState(() => _showName = true);
-        _controller.forward();
-      }
-    });
+    // If animation already played, show name immediately
+    if (_hasPlayedAnimation) {
+      _showName = true;
+      _controller.value = 1.0;
+    } else {
+      // Play animation only once
+      Future.delayed(widget.delay, () {
+        if (mounted) {
+          setState(() => _showName = true);
+          _controller.forward();
+          _hasPlayedAnimation = true;
+        }
+      });
+    }
   }
 
   @override

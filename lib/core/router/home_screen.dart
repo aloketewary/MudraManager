@@ -28,6 +28,9 @@ import 'package:mudra_manager/features/statistics/presentation/screens/utility_s
 import 'package:mudra_manager/features/transactions/presentation/widgets/quick_add_transaction_sheet.dart';
 import 'package:mudra_manager/features/transactions/presentation/screens/transaction_list_screen.dart';
 import 'package:mudra_manager/shared/widgets/adaptive_text.dart';
+import 'package:mudra_manager/shared/widgets/animated_greeting.dart';
+import 'package:flutter_boring_avatars/flutter_boring_avatars.dart';
+import 'package:mudra_manager/features/trip/data/trip_provider.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   final int initialIndex;
@@ -40,7 +43,6 @@ class HomePage extends ConsumerStatefulWidget {
 class HomePageState extends ConsumerState<HomePage>
     with TickerProviderStateMixin {
   late int _selectedIndex;
-  List<Widget> _pages = [];
   final transactionListKey = GlobalKey<TransactionListScreenState>();
   final utilityKey = GlobalKey<UtilityScreenState>();
   late AnimationController _fabController;
@@ -53,14 +55,8 @@ class HomePageState extends ConsumerState<HomePage>
     _fabController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
+      value: 1.0,
     );
-    _pages = [
-      const DashboardHome(),
-      TransactionListScreen(key: transactionListKey),
-      UtilityScreen(key: utilityKey),
-      const StatisticsScreen(),
-      const ProfileScreen(),
-    ];
     initNotification();
     _setupWidgetClickListener();
     _setupMethodChannel();
@@ -130,14 +126,14 @@ class HomePageState extends ConsumerState<HomePage>
     setState(() => _selectedIndex = index);
 
     // Update route to match tab
-    final routes = [
-      '/home',
-      '/transactions',
-      '/utilities',
-      '/statistics',
-      '/profile',
-    ];
-    context.go(routes[index]);
+    // final routes = [
+    //   '/home',
+    //   '/transactions',
+    //   '/utilities',
+    //   '/statistics',
+    //   '/profile',
+    // ];
+    // context.go(routes[index]);
   }
 
   @override
@@ -158,22 +154,16 @@ class HomePageState extends ConsumerState<HomePage>
         extendBody: true,
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         floatingActionButton: _selectedIndex == 1
-            ? FloatingActionButton.extended(
-                heroTag: 'addTransactionHeroTab1',
-                onPressed: () => context.push('/add-transaction'),
-                icon: const Icon(LucideIcons.plus),
-                label: Text(ctxt.dashboard_add_transaction_text),
+            ? ScaleTransition(
+                scale: _fabController,
+                child: FloatingActionButton.extended(
+                  heroTag: 'addTransactionHeroTab1',
+                  onPressed: () => context.push('/add-transaction'),
+                  icon: const Icon(LucideIcons.plus),
+                  label: Text(ctxt.dashboard_add_transaction_text),
+                ),
               )
-            : _selectedIndex == 2
-                ? FloatingActionButton.extended(
-                    onPressed: () {
-                      HapticFeedback.mediumImpact();
-                      utilityKey.currentState?.showCustomizeSheet();
-                    },
-                    icon: const Icon(LucideIcons.settings2),
-                    label: const Text('Customise'),
-                  )
-                : null,
+            : null,
         bottomNavigationBar: NavigationBar(
           selectedIndex: _selectedIndex,
           onDestinationSelected: _onTabSelected,
@@ -181,64 +171,197 @@ class HomePageState extends ConsumerState<HomePage>
           animationDuration: const Duration(milliseconds: 300),
           destinations: [
             NavigationDestination(
-              icon: SvgPicture.asset('assets/logo/nav/outline/home.svg',
-                  colorFilter: ColorFilter.mode(
-                      isDark ? Colors.white : Colors.black, BlendMode.srcIn,),),
-              selectedIcon: SvgPicture.asset('assets/logo/nav/solid/home.svg',
-                  colorFilter: ColorFilter.mode(
-                      isDark ? Colors.white : Colors.black, BlendMode.srcIn,),)
-                  .animate(target: _selectedIndex == 0 ? 1 : 0)
-                  .scale(begin: const Offset(0.9, 0.9), end: const Offset(1, 1), curve: Curves.easeOutCubic, duration: 250.ms),
+              icon: SvgPicture.asset(
+                'assets/logo/nav/outline/home.svg',
+                colorFilter: ColorFilter.mode(
+                  isDark ? Colors.white : Colors.black,
+                  BlendMode.srcIn,
+                ),
+              ),
+              selectedIcon: SvgPicture.asset(
+                'assets/logo/nav/solid/home.svg',
+                colorFilter: ColorFilter.mode(
+                  isDark ? Colors.white : Colors.black,
+                  BlendMode.srcIn,
+                ),
+              ).animate(target: _selectedIndex == 0 ? 1 : 0).scale(
+                    begin: const Offset(0.9, 0.9),
+                    end: const Offset(1, 1),
+                    curve: Curves.easeOutCubic,
+                    duration: 250.ms,
+                  ),
               label: ctxt.home_screen_title,
             ),
             NavigationDestination(
-              icon: SvgPicture.asset('assets/logo/nav/outline/activity.svg',
-                  colorFilter: ColorFilter.mode(
-                      isDark ? Colors.white : Colors.black, BlendMode.srcIn,),),
-              selectedIcon: SvgPicture.asset('assets/logo/nav/solid/activity.svg',
-                  colorFilter: ColorFilter.mode(
-                      isDark ? Colors.white : Colors.black, BlendMode.srcIn,),)
-                  .animate(target: _selectedIndex == 1 ? 1 : 0)
-                  .scale(begin: const Offset(0.9, 0.9), end: const Offset(1, 1), curve: Curves.easeOutCubic, duration: 250.ms),
-              label: 'Transactions',
+              icon: SvgPicture.asset(
+                'assets/logo/nav/outline/activity.svg',
+                colorFilter: ColorFilter.mode(
+                  isDark ? Colors.white : Colors.black,
+                  BlendMode.srcIn,
+                ),
+              ),
+              selectedIcon: SvgPicture.asset(
+                'assets/logo/nav/solid/activity.svg',
+                colorFilter: ColorFilter.mode(
+                  isDark ? Colors.white : Colors.black,
+                  BlendMode.srcIn,
+                ),
+              ).animate(target: _selectedIndex == 1 ? 1 : 0).scale(
+                    begin: const Offset(0.9, 0.9),
+                    end: const Offset(1, 1),
+                    curve: Curves.easeOutCubic,
+                    duration: 250.ms,
+                  ),
+              label: 'Activity',
             ),
             NavigationDestination(
-              icon: SvgPicture.asset('assets/logo/nav/outline/utility.svg',
-                  colorFilter: ColorFilter.mode(
-                      isDark ? Colors.white : Colors.black, BlendMode.srcIn,),),
-              selectedIcon: SvgPicture.asset('assets/logo/nav/solid/utility.svg',
-                  colorFilter: ColorFilter.mode(
-                      isDark ? Colors.white : Colors.black, BlendMode.srcIn,),)
-                  .animate(target: _selectedIndex == 2 ? 1 : 0)
-                  .scale(begin: const Offset(0.9, 0.9), end: const Offset(1, 1), curve: Curves.easeOutCubic, duration: 250.ms),
+              icon: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  SvgPicture.asset(
+                    'assets/logo/nav/outline/utility.svg',
+                    colorFilter: ColorFilter.mode(
+                      isDark ? Colors.white : Colors.black,
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                  Consumer(
+                    builder: (context, ref, _) {
+                      final activeTrips = ref.watch(activeTripsProvider);
+                      return activeTrips.maybeWhen(
+                        data: (trips) => trips.isNotEmpty
+                            ? Positioned(
+                                right: -2,
+                                top: -2,
+                                child: Container(
+                                  width: 8,
+                                  height: 8,
+                                  decoration: BoxDecoration(
+                                    color:
+                                        Theme.of(context).colorScheme.secondary,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                              )
+                            : const SizedBox.shrink(),
+                        orElse: () => const SizedBox.shrink(),
+                      );
+                    },
+                  ),
+                ],
+              ),
+              selectedIcon: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  SvgPicture.asset(
+                    'assets/logo/nav/solid/utility.svg',
+                    colorFilter: ColorFilter.mode(
+                      isDark ? Colors.white : Colors.black,
+                      BlendMode.srcIn,
+                    ),
+                  ).animate(target: _selectedIndex == 2 ? 1 : 0).scale(
+                        begin: const Offset(0.9, 0.9),
+                        end: const Offset(1, 1),
+                        curve: Curves.easeOutCubic,
+                        duration: 250.ms,
+                      ),
+                  Consumer(
+                    builder: (context, ref, _) {
+                      final activeTrips = ref.watch(activeTripsProvider);
+                      return activeTrips.maybeWhen(
+                        data: (trips) => trips.isNotEmpty
+                            ? Positioned(
+                                right: -2,
+                                top: -2,
+                                child: Container(
+                                  width: 8,
+                                  height: 8,
+                                  decoration: BoxDecoration(
+                                    color:
+                                        Theme.of(context).colorScheme.secondary,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                              )
+                            : const SizedBox.shrink(),
+                        orElse: () => const SizedBox.shrink(),
+                      );
+                    },
+                  ),
+                ],
+              ),
               label: 'Manage',
             ),
             NavigationDestination(
-              icon: SvgPicture.asset('assets/logo/nav/outline/statistics.svg',
-                  colorFilter: ColorFilter.mode(
-                      isDark ? Colors.white : Colors.black, BlendMode.srcIn,),),
-              selectedIcon: SvgPicture.asset('assets/logo/nav/solid/statistics.svg',
-                  colorFilter: ColorFilter.mode(
-                      isDark ? Colors.white : Colors.black, BlendMode.srcIn,),)
-                  .animate(target: _selectedIndex == 3 ? 1 : 0)
-                  .scale(begin: const Offset(0.9, 0.9), end: const Offset(1, 1), curve: Curves.easeOutCubic, duration: 250.ms),
+              icon: SvgPicture.asset(
+                'assets/logo/nav/outline/statistics.svg',
+                colorFilter: ColorFilter.mode(
+                  isDark ? Colors.white : Colors.black,
+                  BlendMode.srcIn,
+                ),
+              ),
+              selectedIcon: SvgPicture.asset(
+                'assets/logo/nav/solid/statistics.svg',
+                colorFilter: ColorFilter.mode(
+                  isDark ? Colors.white : Colors.black,
+                  BlendMode.srcIn,
+                ),
+              ).animate(target: _selectedIndex == 3 ? 1 : 0).scale(
+                    begin: const Offset(0.9, 0.9),
+                    end: const Offset(1, 1),
+                    curve: Curves.easeOutCubic,
+                    duration: 250.ms,
+                  ),
               label: 'Insights',
             ),
             NavigationDestination(
-              icon: SvgPicture.asset('assets/logo/nav/outline/profile.svg',
-                  colorFilter: ColorFilter.mode(
-                      isDark ? Colors.white : Colors.black, BlendMode.srcIn,),),
+              icon: SvgPicture.asset(
+                'assets/logo/nav/outline/profile.svg',
+                colorFilter: ColorFilter.mode(
+                  isDark ? Colors.white : Colors.black,
+                  BlendMode.srcIn,
+                ),
+              ),
               selectedIcon: SvgPicture.asset(
-                  'assets/logo/nav/solid/profile.svg',
-                  colorFilter: ColorFilter.mode(
-                      isDark ? Colors.white : Colors.black, BlendMode.srcIn,),)
-                  .animate(target: _selectedIndex == 4 ? 1 : 0)
-                  .scale(begin: const Offset(0.9, 0.9), end: const Offset(1, 1), curve: Curves.easeOutCubic, duration: 250.ms),
+                'assets/logo/nav/solid/profile.svg',
+                colorFilter: ColorFilter.mode(
+                  isDark ? Colors.white : Colors.black,
+                  BlendMode.srcIn,
+                ),
+              ).animate(target: _selectedIndex == 4 ? 1 : 0).scale(
+                    begin: const Offset(0.9, 0.9),
+                    end: const Offset(1, 1),
+                    curve: Curves.easeOutCubic,
+                    duration: 250.ms,
+                  ),
               label: ctxt.profile_screen_title,
             ),
           ],
         ),
-        body: _pages[_selectedIndex],
+        body: IndexedStack(
+          index: _selectedIndex,
+          children: [
+            Column(
+              children: [
+                _buildActiveTripBanner(),
+                const Expanded(child: DashboardHome()),
+              ],
+            ),
+            TransactionListScreen(
+              key: transactionListKey,
+              onScrollChanged: (isScrollingDown) {
+                if (isScrollingDown) {
+                  _fabController.reverse();
+                } else {
+                  _fabController.forward();
+                }
+              },
+            ),
+            UtilityScreen(key: utilityKey),
+            const StatisticsScreen(),
+            const ProfileScreen(),
+          ],
+        ),
       ),
     );
   }
@@ -247,7 +370,8 @@ class HomePageState extends ConsumerState<HomePage>
     AsyncValue<UserProfile?> profileAsync,
     int selectedIndex,
   ) {
-    final greetingAsync = ref.watch(greetingProvider);
+    final greeting =
+        ref.watch(greetingProvider); // Changed: now returns String directly
     final textTheme = Theme.of(context).textTheme;
     final color = Theme.of(context).colorScheme;
     final notificationService = ref.watch(notificationRecordServiceProvider);
@@ -256,38 +380,76 @@ class HomePageState extends ConsumerState<HomePage>
     switch (selectedIndex) {
       case 0:
         return AppBar(
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          automaticallyImplyLeading: false,
+          title: Row(
             children: [
-              greetingAsync.when(
-                data: (greeting) => AdaptiveText(
-                  '${ctxt.translate(greeting)},',
-                  style: textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w400,
-                  ),
-                  maxLines: 1,
-                ),
-                loading: () => AdaptiveText(
-                  '${ctxt.greeting_hello_text}, ',
-                  style: textTheme.titleMedium,
-                  maxLines: 1,
-                ),
-                error: (e, _) => Text('Error: $e'),
-              ),
               profileAsync.when(
-                data: (profile) => AdaptiveText(
-                  profile?.name ?? 'Awesome User',
-                  style: textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
+                data: (profile) => SizedBox(
+                  width: 32,
+                  height: 32,
+                  child: ClipOval(
+                    child: BoringAvatar(
+                      name: profile?.name ?? 'User',
+                      palette: BoringAvatarPalette([
+                        color.primary,
+                        color.tertiary,
+                        color.primaryContainer,
+                        color.tertiaryContainer,
+                      ]),
+                      type: BoringAvatarType.beam,
+                    ),
                   ),
-                  maxLines: 1,
                 ),
-                loading: () => const SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                loading: () => Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: color.surfaceContainerHighest,
+                    shape: BoxShape.circle,
+                  ),
                 ),
-                error: (e, _) => Text('Error: $e'),
+                error: (_, __) => Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: color.surfaceContainerHighest,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    profileAsync.when(
+                      data: (profile) => AnimatedGreeting(
+                        greeting: '${ctxt.translate(greeting)},',
+                        name: profile?.name ?? 'Awesome User',
+                        greetingStyle: textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w400,
+                        ),
+                        nameStyle: textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      loading: () => AdaptiveText(
+                        '${ctxt.translate(greeting)},',
+                        style: textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w400,
+                        ),
+                        maxLines: 1,
+                      ),
+                      error: (_, __) => AdaptiveText(
+                        '${ctxt.translate(greeting)},',
+                        style: textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w400,
+                        ),
+                        maxLines: 1,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -344,6 +506,7 @@ class HomePageState extends ConsumerState<HomePage>
         );
       case 1:
         return AppBar(
+          automaticallyImplyLeading: false,
           title: Text(
             ctxt.transaction_screen_title,
             style: textTheme.titleLarge,
@@ -364,9 +527,22 @@ class HomePageState extends ConsumerState<HomePage>
           ],
         );
       case 2:
-        return AppBar(title: Text('Manage', style: textTheme.titleLarge));
+        return AppBar(
+          automaticallyImplyLeading: false,
+          title: Text('Manage', style: textTheme.titleLarge),
+          actions: [
+            IconButton(
+              onPressed: () {
+                utilityKey.currentState?.showCustomizeSheet();
+              },
+              icon: const Icon(LucideIcons.settings2),
+              tooltip: 'Customize',
+            ),
+          ],
+        );
       case 3:
         return AppBar(
+          automaticallyImplyLeading: false,
           title: Text(
             'Insights',
             style: textTheme.titleLarge,
@@ -384,6 +560,86 @@ class HomePageState extends ConsumerState<HomePage>
     return null;
   }
 
+  Widget _buildActiveTripBanner() {
+    final activeTripsAsync = ref.watch(activeTripsProvider);
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return activeTripsAsync.when(
+      data: (trips) {
+        if (trips.isEmpty) return const SizedBox.shrink();
+        final trip = trips.first;
+        return Container(
+          margin: const EdgeInsets.all(16),
+          child: Material(
+            color: color.secondaryContainer,
+            elevation: 1,
+            shadowColor: color.shadow,
+            borderRadius: BorderRadius.circular(12),
+            child: InkWell(
+              onTap: () {
+                HapticFeedback.mediumImpact();
+                context.push('/trip-detail', extra: trip.id);
+              },
+              borderRadius: BorderRadius.circular(12),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: color.secondary,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        Icons.flight_takeoff,
+                        color: color.onSecondary,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Trip Mode Active',
+                            style: textTheme.labelSmall?.copyWith(
+                              color: color.onSecondaryContainer,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            trip.name,
+                            style: textTheme.titleSmall?.copyWith(
+                              color: color.onSecondaryContainer,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      Icons.chevron_right,
+                      color: color.onSecondaryContainer,
+                      size: 20,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+    );
+  }
+
   void initNotification() async {
     final savedTime = await NotificationService.getSavedReminderTime();
     ref.read(reminderTimeProvider.notifier).state = savedTime;
@@ -392,7 +648,7 @@ class HomePageState extends ConsumerState<HomePage>
   void _showExportDialog(BuildContext context) {
     final stats = ref.read(statsProvider('Month'));
     final profile = ref.read(userProfileProvider).value;
-    
+
     stats.whenData((data) {
       showDialog(
         context: context,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class SimpleColorPickerDialog extends StatefulWidget {
   final Color? initialColor;
@@ -14,163 +15,288 @@ class SimpleColorPickerDialog extends StatefulWidget {
 class _SimpleColorPickerDialogState extends State<SimpleColorPickerDialog> {
   late Color _selected;
 
-  final List<Color> _colors = [
-    // Reds
-    const Color(0xFFE53935), const Color(0xFFD32F2F), const Color(0xFFC62828), const Color(0xFFB71C1C),
-    const Color(0xFFFF5252), const Color(0xFFFF1744), const Color(0xFFD50000),
-    // Pinks
-    const Color(0xFFEC407A), const Color(0xFFE91E63), const Color(0xFFC2185B), const Color(0xFFAD1457),
-    const Color(0xFFFF4081), const Color(0xFFF50057), const Color(0xFFC51162),
-    // Purples
-    const Color(0xFFAB47BC), const Color(0xFF9C27B0), const Color(0xFF8E24AA), const Color(0xFF7B1FA2),
-    const Color(0xFFE040FB), const Color(0xFFD500F9), const Color(0xFFAA00FF),
-    // Deep Purples
-    const Color(0xFF7E57C2), const Color(0xFF673AB7), const Color(0xFF5E35B1), const Color(0xFF512DA8),
-    const Color(0xFF7C4DFF), const Color(0xFF651FFF), const Color(0xFF6200EA),
-    // Indigos
-    const Color(0xFF5C6BC0), const Color(0xFF3F51B5), const Color(0xFF3949AB), const Color(0xFF283593),
-    const Color(0xFF536DFE), const Color(0xFF3D5AFE), const Color(0xFF304FFE),
-    // Blues
-    const Color(0xFF42A5F5), const Color(0xFF2196F3), const Color(0xFF1E88E5), const Color(0xFF1565C0),
-    const Color(0xFF448AFF), const Color(0xFF2979FF), const Color(0xFF2962FF),
-    // Light Blues
-    const Color(0xFF29B6F6), const Color(0xFF03A9F4), const Color(0xFF039BE5), const Color(0xFF0277BD),
-    const Color(0xFF40C4FF), const Color(0xFF00B0FF), const Color(0xFF0091EA),
-    // Cyans
-    const Color(0xFF26C6DA), const Color(0xFF00BCD4), const Color(0xFF00ACC1), const Color(0xFF00838F),
-    const Color(0xFF18FFFF), const Color(0xFF00E5FF), const Color(0xFF00B8D4),
-    // Teals
-    const Color(0xFF26A69A), const Color(0xFF009688), const Color(0xFF00897B), const Color(0xFF00695C),
-    const Color(0xFF64FFDA), const Color(0xFF1DE9B6), const Color(0xFF00BFA5),
-    // Greens
-    const Color(0xFF66BB6A), const Color(0xFF4CAF50), const Color(0xFF43A047), const Color(0xFF2E7D32),
-    const Color(0xFF69F0AE), const Color(0xFF00E676), const Color(0xFF00C853),
-    // Light Greens
-    const Color(0xFF9CCC65), const Color(0xFF8BC34A), const Color(0xFF7CB342), const Color(0xFF558B2F),
-    const Color(0xFFB2FF59), const Color(0xFF76FF03), const Color(0xFF64DD17),
-    // Limes
-    const Color(0xFFD4E157), const Color(0xFFCDDC39), const Color(0xFFC0CA33), const Color(0xFFAFB42B),
-    const Color(0xFFEEFF41), const Color(0xFFC6FF00), const Color(0xFFAEEA00),
-    // Yellows
-    const Color(0xFFFFEE58), const Color(0xFFFFEB3B), const Color(0xFFFDD835), const Color(0xFFF9A825),
-    const Color(0xFFFFFF00), const Color(0xFFFFEA00), const Color(0xFFFFD600),
-    // Ambers
-    const Color(0xFFFFCA28), const Color(0xFFFFC107), const Color(0xFFFFB300), const Color(0xFFFF8F00),
-    const Color(0xFFFFD740), const Color(0xFFFFC400), const Color(0xFFFFAB00),
-    // Oranges
-    const Color(0xFFFFA726), const Color(0xFFFF9800), const Color(0xFFFB8C00), const Color(0xFFEF6C00),
-    const Color(0xFFFFAB40), const Color(0xFFFF9100), const Color(0xFFFF6D00),
-    // Deep Oranges
-    const Color(0xFFFF7043), const Color(0xFFFF5722), const Color(0xFFF4511E), const Color(0xFFD84315),
-    const Color(0xFFFF6E40), const Color(0xFFFF3D00), const Color(0xFFDD2C00),
-    // Browns
-    const Color(0xFF8D6E63), const Color(0xFF795548), const Color(0xFF6D4C41), const Color(0xFF5D4037),
-    const Color(0xFF4E342E), const Color(0xFF3E2723),
-    // Greys
-    const Color(0xFF757575), const Color(0xFF616161), const Color(0xFF424242), const Color(0xFF212121),
-    const Color(0xFF9E9E9E), const Color(0xFF78909C), const Color(0xFF546E7A),
+  static const _palette = <_ColorGroup>[
+    _ColorGroup('Red', [
+      Color(0xFFFFCDD2),
+      Color(0xFFEF9A9A),
+      Color(0xFFE57373),
+      Color(0xFFEF5350),
+      Color(0xFFE53935),
+      Color(0xFFD32F2F),
+      Color(0xFFC62828),
+      Color(0xFFB71C1C),
+    ]),
+    _ColorGroup('Pink', [
+      Color(0xFFF8BBD0),
+      Color(0xFFF48FB1),
+      Color(0xFFEC407A),
+      Color(0xFFE91E63),
+      Color(0xFFD81B60),
+      Color(0xFFC2185B),
+      Color(0xFFAD1457),
+      Color(0xFF880E4F),
+    ]),
+    _ColorGroup('Purple', [
+      Color(0xFFE1BEE7),
+      Color(0xFFCE93D8),
+      Color(0xFFAB47BC),
+      Color(0xFF9C27B0),
+      Color(0xFF8E24AA),
+      Color(0xFF7B1FA2),
+      Color(0xFF6A1B9A),
+      Color(0xFF4A148C),
+    ]),
+    _ColorGroup('Indigo', [
+      Color(0xFFC5CAE9),
+      Color(0xFF9FA8DA),
+      Color(0xFF7986CB),
+      Color(0xFF5C6BC0),
+      Color(0xFF3F51B5),
+      Color(0xFF3949AB),
+      Color(0xFF283593),
+      Color(0xFF1A237E),
+    ]),
+    _ColorGroup('Blue', [
+      Color(0xFFBBDEFB),
+      Color(0xFF90CAF9),
+      Color(0xFF64B5F6),
+      Color(0xFF42A5F5),
+      Color(0xFF2196F3),
+      Color(0xFF1E88E5),
+      Color(0xFF1565C0),
+      Color(0xFF0D47A1),
+    ]),
+    _ColorGroup('Cyan', [
+      Color(0xFFB2EBF2),
+      Color(0xFF80DEEA),
+      Color(0xFF4DD0E1),
+      Color(0xFF26C6DA),
+      Color(0xFF00BCD4),
+      Color(0xFF00ACC1),
+      Color(0xFF00838F),
+      Color(0xFF006064),
+    ]),
+    _ColorGroup('Teal', [
+      Color(0xFFB2DFDB),
+      Color(0xFF80CBC4),
+      Color(0xFF4DB6AC),
+      Color(0xFF26A69A),
+      Color(0xFF009688),
+      Color(0xFF00897B),
+      Color(0xFF00695C),
+      Color(0xFF004D40),
+    ]),
+    _ColorGroup('Green', [
+      Color(0xFFC8E6C9),
+      Color(0xFFA5D6A7),
+      Color(0xFF81C784),
+      Color(0xFF66BB6A),
+      Color(0xFF4CAF50),
+      Color(0xFF43A047),
+      Color(0xFF2E7D32),
+      Color(0xFF1B5E20),
+    ]),
+    _ColorGroup('Yellow', [
+      Color(0xFFFFF9C4),
+      Color(0xFFFFF176),
+      Color(0xFFFFEE58),
+      Color(0xFFFFEB3B),
+      Color(0xFFFDD835),
+      Color(0xFFFBC02D),
+      Color(0xFFF9A825),
+      Color(0xFFF57F17),
+    ]),
+    _ColorGroup('Orange', [
+      Color(0xFFFFE0B2),
+      Color(0xFFFFCC80),
+      Color(0xFFFFB74D),
+      Color(0xFFFFA726),
+      Color(0xFFFF9800),
+      Color(0xFFFB8C00),
+      Color(0xFFEF6C00),
+      Color(0xFFE65100),
+    ]),
+    _ColorGroup('Brown', [
+      Color(0xFFD7CCC8),
+      Color(0xFFBCAAA4),
+      Color(0xFFA1887F),
+      Color(0xFF8D6E63),
+      Color(0xFF795548),
+      Color(0xFF6D4C41),
+      Color(0xFF5D4037),
+      Color(0xFF3E2723),
+    ]),
+    _ColorGroup('Grey', [
+      Color(0xFFCFD8DC),
+      Color(0xFFB0BEC5),
+      Color(0xFF90A4AE),
+      Color(0xFF78909C),
+      Color(0xFF607D8B),
+      Color(0xFF546E7A),
+      Color(0xFF455A64),
+      Color(0xFF263238),
+    ]),
   ];
 
   @override
   void initState() {
     super.initState();
-    _selected = widget.initialColor ?? Colors.blue;
+    _selected = widget.initialColor ?? const Color(0xFF2196F3);
   }
 
   @override
   Widget build(BuildContext context) {
-    var color = Theme.of(context).colorScheme;
-    var textTheme = Theme.of(context).textTheme;
-    
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Dialog(
+      backgroundColor: color.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(24),
+      ),
       child: Container(
-        constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.8),
-        decoration: BoxDecoration(
-          color: color.surface,
-          borderRadius: BorderRadius.circular(28),
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.75,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // ── HEADER with live preview ──
             Padding(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
               child: Row(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       color: _selected.withValues(alpha: 0.15),
                       shape: BoxShape.circle,
+                      border: Border.all(
+                        color: _selected.withValues(alpha: 0.3),
+                        width: 1.5,
+                      ),
                     ),
-                    child: Icon(Icons.palette, color: _selected, size: 24),
+                    child: Icon(
+                      LucideIcons.palette,
+                      color: _selected,
+                      size: 22,
+                    ),
                   ),
                   const SizedBox(width: 12),
-                  Text(
-                    'Pick a Color',
-                    style: textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Pick a Color',
+                          style: textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          '#${_selected.toARGB32().toRadixString(16).substring(2).toUpperCase()}',
+                          style: textTheme.labelSmall?.copyWith(
+                            color: color.onSurfaceVariant,
+                            letterSpacing: 1,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Done button
+                  TextButton(
+                    onPressed: () {
+                      HapticFeedback.mediumImpact();
+                      Navigator.pop(context, _selected);
+                    },
+                    child: Text(
+                      'Done',
+                      style: textTheme.titleSmall?.copyWith(
+                        color: color.primary,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
-            const Divider(height: 1),
-            Flexible(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: GridView.count(
-                  shrinkWrap: true,
-                  crossAxisCount: 5,
-                  mainAxisSpacing: 12,
-                  crossAxisSpacing: 12,
-                  children: _colors.map((c) {
-                    final isSelected = _selected.toARGB32() == c.toARGB32();
-                    return GestureDetector(
-                      onTap: () {
-                        HapticFeedback.mediumImpact();
-                        setState(() => _selected = c);
-                      },
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        decoration: BoxDecoration(
-                          color: c,
-                          shape: BoxShape.circle,
-                          border: isSelected
-                              ? Border.all(color: color.outline, width: 3)
-                              : null,
-                        ),
-                        child: isSelected
-                            ? const Icon(Icons.check, color: Colors.white, size: 24)
-                            : null,
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
+            const SizedBox(height: 12),
+            Divider(
+              height: 1,
+              color: color.outlineVariant.withValues(alpha: 0.3),
             ),
-            Padding(
-              padding: const EdgeInsets.only(left: 24, right: 24, bottom: 24),
-              child: SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: FilledButton(
-                  onPressed: () {
-                    HapticFeedback.mediumImpact();
-                    Navigator.pop(context, _selected);
-                  },
-                  style: FilledButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+
+            // ── COLOR GRID (grouped) ──
+            Flexible(
+              child: ListView.builder(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+                itemCount: _palette.length,
+                itemBuilder: (context, index) {
+                  final group = _palette[index];
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 14),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          group.name,
+                          style: textTheme.labelSmall?.copyWith(
+                            color: color.onSurfaceVariant,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: group.colors.map((c) {
+                            final isSelected =
+                                _selected.toARGB32() == c.toARGB32();
+                            return GestureDetector(
+                              onTap: () {
+                                HapticFeedback.lightImpact();
+                                setState(() => _selected = c);
+                              },
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                width: 34,
+                                height: 34,
+                                decoration: BoxDecoration(
+                                  color: c,
+                                  shape: BoxShape.circle,
+                                  border: isSelected
+                                      ? Border.all(
+                                          color: color.onSurface,
+                                          width: 2.5,
+                                        )
+                                      : null,
+                                  boxShadow: isSelected
+                                      ? [
+                                          BoxShadow(
+                                            color: c.withValues(alpha: 0.4),
+                                            blurRadius: 8,
+                                          ),
+                                        ]
+                                      : null,
+                                ),
+                                child: isSelected
+                                    ? Icon(
+                                        LucideIcons.check,
+                                        color: c.computeLuminance() > 0.5
+                                            ? Colors.black
+                                            : Colors.white,
+                                        size: 16,
+                                      )
+                                    : null,
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ],
                     ),
-                  ),
-                  child: const Text(
-                    'SELECT COLOR',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.2,
-                    ),
-                  ),
-                ),
+                  );
+                },
               ),
             ),
           ],
@@ -178,4 +304,10 @@ class _SimpleColorPickerDialogState extends State<SimpleColorPickerDialog> {
       ),
     );
   }
+}
+
+class _ColorGroup {
+  final String name;
+  final List<Color> colors;
+  const _ColorGroup(this.name, this.colors);
 }

@@ -1,6 +1,7 @@
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/backup_metadata.dart';
+import 'package:mudra_manager/core/db/models/dashboard_widget_preference.dart';
 import 'package:mudra_manager/core/db/models/investment_holding.dart';
 import 'package:mudra_manager/core/db/models/balance_snapshot.dart';
 import 'package:mudra_manager/core/db/models/budget.dart';
@@ -60,6 +61,7 @@ class IsarService {
         BalanceSnapshotSchema,
         ReconciliationStatusSchema,
         InvestmentHoldingSchema,
+        DashboardWidgetPreferenceSchema,
       ],
       directory: dir.path,
     );

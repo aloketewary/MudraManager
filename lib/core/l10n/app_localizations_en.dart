@@ -868,4 +868,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sms_approveTransactionTitle => 'Approve Transaction';
+
+  @override
+  String get onboard_SmartSmsTracking => 'Smart SMS Tracking';
+
+  @override
+  String get onboard_SmartSmsTrackingDesc =>
+      'Automatically detect and import transactions from your bank SMS messages.';
+
+  @override
+  String get onboard_InsightsAndAnalytics => 'Insights & Analytics';
+
+  @override
+  String get onboard_InsightsAndAnalyticsDesc =>
+      'Understand your spending habits with detailed charts, trends, and smart insights.';
+
+  @override
+  String get onboard_SecureAndPrivate => 'Secure & Private';
+
+  @override
+  String get onboard_SecureAndPrivateDesc =>
+      'Your data stays on your device. No cloud, no tracking — just encrypted local storage.';
 }

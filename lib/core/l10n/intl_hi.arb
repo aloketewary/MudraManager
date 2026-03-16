@@ -1071,5 +1071,12 @@
   "sms_approveTransactionTitle": "लेनदेन अनुमोदित करें",
   "@sms_approveTransactionTitle": {
     "description": "Title for approve transaction dialog"
-  }
+  },
+  "onboard_SmartSmsTracking": "स्मार्ट SMS ट्रैकिंग",
+  "onboard_SmartSmsTrackingDesc": "बैंक SMS से लेनदेन स्वचालित रूप से पहचानें और आयात करें।",
+  "onboard_InsightsAndAnalytics": "इनसाइट्स और एनालिटिक्स",
+  "onboard_InsightsAndAnalyticsDesc": "विस्तृत चार्ट, ट्रेंड और स्मार्ट इनसाइट्स से अपनी खर्च की आदतें समझें।",
+  "onboard_SecureAndPrivate": "सुरक्षित और निजी",
+  "onboard_SecureAndPrivateDesc": "आपका डेटा आपके डिवाइस पर रहता है। कोई क्लाउड नहीं, कोई ट्रैकिंग नहीं।"
+
 }

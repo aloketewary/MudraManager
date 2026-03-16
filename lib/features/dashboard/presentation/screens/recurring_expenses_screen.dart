@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/db/models/frequency.dart';
-import 'package:mudra_manager/features/dashboard/presentation/widgets/recurring_expenses_card.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 
 class RecurringExpensesScreen extends ConsumerWidget {
@@ -22,7 +24,8 @@ class RecurringExpensesScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final recurring = ref.watch(recurringExpensesProvider);
+    final spacing = ref.watch(spacingProvider);
+    final dashboardAsync = ref.watch(dashboardDataProvider);
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
@@ -30,28 +33,35 @@ class RecurringExpensesScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Fixed Expenses'),
       ),
-      body: recurring.when(
-        data: (expenses) {
+      body: dashboardAsync.when(
+        data: (data) {
+          final expenses = data.recurringExpenses;
+
           if (expenses.isEmpty) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.repeat_outlined,
-                      size: 64, color: color.onSurfaceVariant),
-                  const SizedBox(height: 16),
+                  Icon(
+                    Icons.repeat_outlined,
+                    size: 64,
+                    color: color.onSurfaceVariant,
+                  ),
+                  SizedBox(height: spacing.cardHorizontal),
                   Text('No recurring expenses', style: textTheme.titleLarge),
-                  const SizedBox(height: 8),
-                  Text('Patterns will be detected automatically',
-                      style: textTheme.bodyMedium
-                          ?.copyWith(color: color.onSurfaceVariant)),
+                  SizedBox(height: spacing.cardHorizontal),
+                  Text(
+                    'Patterns will be detected automatically',
+                    style: textTheme.bodyMedium
+                        ?.copyWith(color: color.onSurfaceVariant),
+                  ),
                 ],
               ),
             );
           }
 
           return ListView.builder(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(spacing.elementGap),
             itemCount: expenses.length,
             itemBuilder: (context, i) {
               final expense = expenses[i];
@@ -60,15 +70,15 @@ class RecurringExpensesScreen extends ConsumerWidget {
                   expense.nextDueDate.difference(DateTime.now()).inDays;
 
               return Card(
-                margin: const EdgeInsets.only(bottom: 12),
+                margin: EdgeInsets.only(bottom: spacing.cardVertical),
                 child: ListTile(
                   leading: Container(
-                    padding: const EdgeInsets.all(8),
+                    padding: EdgeInsets.all(spacing.cardVertical),
                     decoration: BoxDecoration(
                       color: color.errorContainer,
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(spacing.radiusMedium),
                     ),
-                    child: Icon(Icons.repeat, color: color.error, size: 24),
+                    child: Icon(LucideIcons.repeat, color: color.error, size: 24),
                   ),
                   title: Text(
                     category?.name ?? 'Uncategorized',
@@ -101,28 +111,46 @@ class RecurringExpensesScreen extends ConsumerWidget {
           );
         },
         loading: () => ListView.builder(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(spacing.cardVertical),
           itemCount: 5,
           itemBuilder: (context, index) => Card(
-            margin: const EdgeInsets.only(bottom: 12),
+            margin: EdgeInsets.only(bottom: spacing.cardVertical),
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(spacing.cardHorizontalMax),
               child: Row(
                 children: [
-                  SkeletonLoader(width: 48, height: 48, borderRadius: BorderRadius.circular(8)),
-                  const SizedBox(width: 16),
+                  SkeletonLoader(
+                    width: 48,
+                    height: 48,
+                    borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                  ),
+                  SizedBox(width: spacing.cardHorizontalMax),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SkeletonLoader(width: double.infinity, height: 16, borderRadius: BorderRadius.circular(4)),
-                        const SizedBox(height: 8),
-                        SkeletonLoader(width: 100, height: 14, borderRadius: BorderRadius.circular(4)),
+                        SkeletonLoader(
+                          width: double.infinity,
+                          height: spacing.cardHorizontalMax,
+                          borderRadius:
+                              BorderRadius.circular(spacing.radiusSmall),
+                        ),
+                        SizedBox(height: spacing.cardHorizontal),
+                        SkeletonLoader(
+                          width: 100,
+                          height: 14,
+                          borderRadius:
+                              BorderRadius.circular(spacing.radiusSmall),
+                        ),
                       ],
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  SkeletonLoader(width: 60, height: 20, borderRadius: BorderRadius.circular(4)),
+                  SizedBox(width: spacing.cardHorizontal),
+                  SkeletonLoader(
+                    width: 60,
+                    height: 20,
+                    borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                  ),
                 ],
               ),
             ),

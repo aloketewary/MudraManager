@@ -8,6 +8,7 @@ class CommonTextInputField extends StatefulWidget {
   final IconData? iconData;
   final TextInputType inputType;
   final FormFieldValidator<String>? validateField;
+  final ValueChanged<String>? onChanged;
 
   const CommonTextInputField({
     super.key,
@@ -17,6 +18,7 @@ class CommonTextInputField extends StatefulWidget {
     this.inputType = TextInputType.text,
     this.hintText,
     this.validateField,
+    this.onChanged,
   });
 
   @override
@@ -83,6 +85,7 @@ class _CommonTextInputFieldState extends State<CommonTextInputField> {
           textInputAction: TextInputAction.next,
           keyboardType: widget.inputType,
           validator: widget.validateField,
+          onChanged: widget.onChanged,
         ),
       ),
     );

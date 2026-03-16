@@ -1708,6 +1708,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Approve Transaction'**
   String get sms_approveTransactionTitle;
+
+  /// Auto-detect bank SMS transactions
+  ///
+  /// In en, this message translates to:
+  /// **'Smart SMS Tracking'**
+  String get onboard_SmartSmsTracking;
+
+  /// Description for SMS tracking onboarding page
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically detect and import transactions from your bank SMS messages.'**
+  String get onboard_SmartSmsTrackingDesc;
+
+  /// Financial insights and analytics
+  ///
+  /// In en, this message translates to:
+  /// **'Insights & Analytics'**
+  String get onboard_InsightsAndAnalytics;
+
+  /// Description for insights onboarding page
+  ///
+  /// In en, this message translates to:
+  /// **'Understand your spending habits with detailed charts, trends, and smart insights.'**
+  String get onboard_InsightsAndAnalyticsDesc;
+
+  /// Data security and privacy
+  ///
+  /// In en, this message translates to:
+  /// **'Secure & Private'**
+  String get onboard_SecureAndPrivate;
+
+  /// Description for security onboarding page
+  ///
+  /// In en, this message translates to:
+  /// **'Your data stays on your device. No cloud, no tracking — just encrypted local storage.'**
+  String get onboard_SecureAndPrivateDesc;
 }
 
 class _AppLocalizationsDelegate

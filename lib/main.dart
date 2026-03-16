@@ -29,6 +29,49 @@ export 'main.dart' show setupSmsListener;
 
 final Telephony telephony = Telephony.instance;
 
+// IMPORTANT: This must be a top-level function
+@pragma('vm:entry-point')
+void backgroundMessageHandler(SmsMessage message) async {
+  try {
+    final log = AppLog(getLogger(), 'SMS-BG');
+
+    // Check if message has required data
+    if (message.body == null || message.address == null) {
+      log.w('Background SMS received with null data, skipping');
+      return;
+    }
+
+    log.i('Background SMS received from: ${message.address}');
+
+    // Ensure SharedPreferences is initialized
+    try {
+      SharedPrefsUtil.instance.getSmsImportEnabled();
+    } catch (e) {
+      // Not initialized, initialize it
+      final sharedPrefs = await SharedPreferences.getInstance();
+      SharedPrefsUtil.init(sharedPrefs);
+    }
+
+    // Check if SMS import is enabled
+    if (!SharedPrefsUtil.instance.getSmsImportEnabled()) {
+      log.i('SMS import disabled, skipping background processing');
+      return;
+    }
+
+    // Process the SMS
+    SmsProcessorService.instance.parseAndSaveTransaction(
+      body: message.body!,
+      address: message.address!,
+      sender: message.address,
+      timestamp: message.date ?? DateTime.now().millisecondsSinceEpoch,
+    );
+  } catch (e, stackTrace) {
+    // Silent fail - don't crash the app
+    final log = AppLog(getLogger(), 'SMS-BG');
+    log.e('Error processing background SMS', e, stackTrace);
+  }
+}
+
 void main() async {
   final log = AppLog(getLogger(), 'Main');
   WidgetsFlutterBinding.ensureInitialized();
@@ -48,16 +91,20 @@ void main() async {
   await NotificationService.initialize();
 
   final completed = SharedPrefsUtil.instance.isOnboardingComplete();
-  setupSmsListener();
+
+  // Setup SMS listener AFTER SharedPreferences is initialized
+  await setupSmsListener();
 
   final container = ProviderContainer();
   // Move heavy operations to background
   _initializeBackgroundServices(container);
 
-  runApp(UncontrolledProviderScope(
-    container: container,
-    child: MudraManagerApp(showOnboarding: !completed),
-  ),);
+  runApp(
+    UncontrolledProviderScope(
+      container: container,
+      child: MudraManagerApp(showOnboarding: !completed),
+    ),
+  );
 }
 
 // Background initialization to prevent UI blocking
@@ -67,7 +114,8 @@ Future<void> _initializeBackgroundServices(ProviderContainer container) async {
     // 1. Initialize Isar first
     log.i('🔄 Initializing Isar...');
     final isar = await safeExecute(
-        () => container.read(isarServiceProvider).getInstance(),);
+      () => container.read(isarServiceProvider).getInstance(),
+    );
     if (isar != null) {
       log.i('✅ Isar initialized');
 
@@ -84,7 +132,8 @@ Future<void> _initializeBackgroundServices(ProviderContainer container) async {
     // 2. Initialize gamification service (depends on Isar)
     log.i('🔄 Initializing Gamification service...');
     final gamification = await safeExecute(
-        () => container.read(gamificationServiceInitProvider.future),);
+      () => container.read(gamificationServiceInitProvider.future),
+    );
     if (gamification != null) {
       log.i('✅ Gamification service initialized');
     } else {
@@ -144,7 +193,7 @@ class MudraManagerApp extends ConsumerWidget {
           darkScheme = darkDynamic.harmonized();
           amoledScheme = darkDynamic.harmonized().copyWith(
                 surface: Colors.black,
-              ); // Using black for amoled
+              );
         } else {
           lightScheme = appColorTheme.lightColorScheme();
           darkScheme = appColorTheme.darkColorScheme();
@@ -204,43 +253,41 @@ class MudraManagerApp extends ConsumerWidget {
 Future<void> setupSmsListener() async {
   final log = AppLog(getLogger(), 'SMS');
 
-  if (!SharedPrefsUtil.instance.getSmsImportEnabled()) {
-    log.i('SMS import disabled');
-    return;
+  try {
+    if (!SharedPrefsUtil.instance.getSmsImportEnabled()) {
+      log.i('SMS import disabled');
+      return;
+    }
+
+    final telephony = Telephony.instance;
+
+    final bool? permissionsGranted = await telephony.requestSmsPermissions;
+
+    if (permissionsGranted == true) {
+      log.i('Setting up SMS listener...');
+
+      telephony.listenIncomingSms(
+        onNewMessage: (SmsMessage message) {
+          try {
+            SmsProcessorService.instance.parseAndSaveTransaction(
+              body: message.body ?? '',
+              address: message.address ?? '',
+              sender: message.address ?? '',
+              timestamp: message.date ?? DateTime.now().millisecondsSinceEpoch,
+            );
+          } catch (e, stackTrace) {
+            log.e('Error processing foreground SMS', e, stackTrace);
+          }
+        },
+        onBackgroundMessage: backgroundMessageHandler,
+        listenInBackground: true,
+      );
+
+      log.i('SMS listener setup complete');
+    } else {
+      log.w('SMS permissions not granted');
+    }
+  } catch (e, stackTrace) {
+    log.e('Error setting up SMS listener', e, stackTrace);
   }
-
-  final telephony = Telephony.instance;
-
-  final bool? permissionsGranted = await telephony.requestSmsPermissions;
-
-  if (permissionsGranted == true) {
-    log.i('SMS listener setup complete');
-
-    telephony.listenIncomingSms(
-      onNewMessage: (SmsMessage message) {
-        SmsProcessorService.instance.parseAndSaveTransaction(
-          body: message.body ?? '',
-          address: message.address ?? '',
-          sender: message.address ?? '',
-          timestamp: message.date ?? DateTime.now().millisecondsSinceEpoch,
-        );
-      },
-      onBackgroundMessage: backgroundMessageHandler,
-      listenInBackground: true,
-    );
-  } else {
-    log.w('SMS permissions not granted');
-  }
-}
-
-@pragma('vm:entry-point')
-void backgroundMessageHandler(SmsMessage message) {
-  final log = AppLog(getLogger(), 'SMS');
-  log.i('Background SMS received from: ${message.address}');
-  SmsProcessorService.instance.parseAndSaveTransaction(
-    body: message.body ?? '',
-    address: message.address ?? '',
-    sender: message.address ?? '',
-    timestamp: message.date ?? DateTime.now().millisecondsSinceEpoch,
-  );
 }

@@ -6,8 +6,10 @@ import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/db/models/goal.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/dialog_utils.dart';
 import 'package:mudra_manager/core/utils/icon_helper.dart';
+import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/goal/data/goal_provider.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
@@ -25,13 +27,13 @@ class GoalDetailsScreen extends ConsumerStatefulWidget {
 }
 
 class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
-  double _boostAmount = 0;
   late ConfettiController _confettiController;
 
   @override
   void initState() {
     super.initState();
-    _confettiController = ConfettiController(duration: const Duration(seconds: 3));
+    _confettiController =
+        ConfettiController(duration: const Duration(seconds: 3));
     if (widget.goal.progressPercent >= 1.0) {
       Future.delayed(const Duration(milliseconds: 500), () {
         _confettiController.play();
@@ -45,278 +47,637 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
     super.dispose();
   }
 
+  Future<void> _deleteGoal() async {
+    final confirmed = await DialogUtils.showDeleteConfirmation(
+      context,
+      title: 'Delete Goal?',
+      message:
+          'This will permanently delete this goal. This action cannot be undone.',
+    );
+    if (confirmed == true && mounted) {
+      await ref.read(goalServiceProvider).deleteGoal(widget.goal.id);
+      if (mounted) {
+        SnackbarService.success('Goal deleted successfully');
+        context.pop();
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final spacing = ref.watch(spacingProvider);
     final ctxt = AppLocalizations.of(context)!;
     final progress = widget.goal.progressPercent;
     final remaining = widget.goal.remainingAmount;
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final isGuestMode = ref.watch(guestModeProvider);
-    final goalColor = widget.goal.colorValue != null ? Color(widget.goal.colorValue!) : color.primary;
+    final goalColor = widget.goal.colorValue != null
+        ? Color(widget.goal.colorValue!)
+        : color.primary;
 
-    final daysLeft = widget.goal.targetDate?.difference(DateTime.now()).inDays ?? 0;
-    final monthsLeft = daysLeft / 30;
-    final currentMonthlyRate = monthsLeft > 0 ? remaining / monthsLeft : 0;
-    final boostedMonthlyRate = currentMonthlyRate + _boostAmount;
-    final boostedMonths = boostedMonthlyRate > 0 ? remaining / boostedMonthlyRate : monthsLeft;
-    final monthsSaved = monthsLeft - boostedMonths;
-    final newTargetDate = DateTime.now().add(Duration(days: (boostedMonths * 30).toInt()));
+    final daysLeft =
+        widget.goal.targetDate?.difference(DateTime.now()).inDays ?? 0;
+    final monthsLeft = daysLeft > 0 ? daysLeft / 30 : 0;
+    final suggestedMonthly = monthsLeft > 0 ? remaining / monthsLeft : 0;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.goal.name),
-        actions: [
-          IconButton(
-            icon: const Icon(LucideIcons.settings),
-            onPressed: () => context.push('/add-goal', extra: {'goal': widget.goal}),
-          ),
-        ],
-      ),
+      backgroundColor: color.surface,
       body: Stack(
         children: [
           CustomScrollView(
-        slivers: [
-          // Hero Progress Ring
-          SliverToBoxAdapter(
-            child: Container(
-              margin: const EdgeInsets.all(16),
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    goalColor.withValues(alpha: 0.15),
-                    goalColor.withValues(alpha: 0.05),
-                  ],
+            slivers: [
+              // Modern SliverAppBar with Gradient Header
+              SliverAppBar(
+                expandedHeight: 250,
+                pinned: true,
+                elevation: 0,
+                title: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final expandRatio = constraints.maxHeight > 80 ? 1.0 : 0.0;
+                    return Opacity(
+                      opacity: 1 - expandRatio,
+                      child: Text(
+                        widget.goal.name,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    );
+                  },
                 ),
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: Column(
-                children: [
-                  TweenAnimationBuilder<double>(
-                    duration: const Duration(milliseconds: 1500),
-                    curve: Curves.easeOutCubic,
-                    tween: Tween(begin: 0.0, end: progress),
-                    builder: (context, value, child) {
-                      return SizedBox(
-                        width: 180,
-                        height: 180,
-                        child: Stack(
-                          alignment: Alignment.center,
+                actions: [
+                  PopupMenuButton(
+                    icon: const Icon(LucideIcons.ellipsisVertical),
+                    onSelected: (value) {
+                      if (value == 'edit') {
+                        context.push('/add-goal', extra: {'goal': widget.goal});
+                      } else if (value == 'delete') {
+                        _deleteGoal();
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        value: 'edit',
+                        child: Row(
                           children: [
-                            CustomPaint(
-                              size: const Size(180, 180),
-                              painter: _HeroRingPainter(progress: value, color: goalColor),
+                            const Icon(LucideIcons.pen, size: 18),
+                            SizedBox(width: spacing.elementGap),
+                            const Text('Edit Goal'),
+                          ],
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            Icon(
+                              LucideIcons.trash2,
+                              size: 18,
+                              color: color.error,
                             ),
-                            Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  '${(value * 100).toStringAsFixed(0)}%',
-                                  style: textTheme.displayLarge?.copyWith(
-                                    fontWeight: FontWeight.w900,
-                                    color: goalColor,
-                                    height: 1,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                CurrencyText(
-                                  amount: GuestModeUtil.applyGuestMode(widget.goal.currentAmount, isGuestMode),
-                                  style: textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: color.onSurface,
-                                  ),
-                                ),
-                                Text(
-                                  'of ₹${widget.goal.targetAmount.toStringAsFixed(0)}',
-                                  style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
-                                ),
-                              ],
+                            SizedBox(width: spacing.elementGap),
+                            Text(
+                              'Delete Goal',
+                              style: TextStyle(color: color.error),
                             ),
                           ],
                         ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          // Time-to-Goal Card
-          if (widget.goal.targetDate != null)
-            SliverToBoxAdapter(
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: color.primaryContainer,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Row(
-                  children: [
-                    Icon(LucideIcons.calendar, color: color.onPrimaryContainer, size: 24),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Target Date',
-                            style: textTheme.labelMedium?.copyWith(color: color.onPrimaryContainer),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            DateFormat('MMMM d, y').format(_boostAmount > 0 ? newTargetDate : widget.goal.targetDate!),
-                            style: textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: color.onPrimaryContainer,
-                            ),
-                          ),
-                          if (daysLeft > 0)
-                            Text(
-                              '$daysLeft days remaining',
-                              style: textTheme.bodySmall?.copyWith(color: color.onPrimaryContainer.withValues(alpha: 0.7)),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-          // What-If Simulator
-          SliverToBoxAdapter(
-            child: Container(
-              margin: const EdgeInsets.all(16),
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: color.tertiaryContainer,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: color.tertiary.withValues(alpha: 0.3), width: 2),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(LucideIcons.zap, color: color.tertiary, size: 20),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Boost Your Progress',
-                        style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Add ₹${_boostAmount.toStringAsFixed(0)}/month',
-                    style: textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: color.tertiary,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  if (_boostAmount > 0 && monthsLeft > 0 && monthsSaved > 0)
-                    Text(
-                      'Reach goal ${monthsSaved.abs().toStringAsFixed(1)} months earlier',
-                      style: textTheme.bodyMedium?.copyWith(color: color.onTertiaryContainer),
-                    )
-                  else if (_boostAmount > 0)
-                    Text(
-                      'Boost your monthly contribution',
-                      style: textTheme.bodyMedium?.copyWith(color: color.onTertiaryContainer),
-                    ),
-                  const SizedBox(height: 16),
-                  SliderTheme(
-                    data: SliderTheme.of(context).copyWith(
-                      activeTrackColor: color.tertiary,
-                      inactiveTrackColor: color.tertiary.withValues(alpha: 0.2),
-                      thumbColor: color.tertiary,
-                      overlayColor: color.tertiary.withValues(alpha: 0.2),
-                    ),
-                    child: Slider(
-                      value: _boostAmount,
-                      min: 0,
-                      max: 10000,
-                      divisions: 100,
-                      onChanged: (value) {
-                        HapticFeedback.selectionClick();
-                        setState(() => _boostAmount = value);
-                      },
-                    ),
-                  ),
+                  SizedBox(width: spacing.cardHorizontal),
                 ],
-              ),
-            ),
-          ),
-
-          // Quick Deposit Button
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: FilledButton.icon(
-                onPressed: () {
-                  HapticFeedback.mediumImpact();
-                  _showQuickDepositSheet(context, goalColor);
-                },
-                icon: const Icon(LucideIcons.plus, size: 20),
-                label: const Text('Quick Deposit'),
-                style: FilledButton.styleFrom(
-                  backgroundColor: goalColor,
-                  minimumSize: const Size(double.infinity, 56),
+                flexibleSpace: FlexibleSpaceBar(
+                  background: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          goalColor.withValues(alpha: 0.2),
+                          goalColor.withValues(alpha: 0.05),
+                        ],
+                      ),
+                    ),
+                    child: SafeArea(
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          return Opacity(
+                            opacity: constraints.maxHeight > 100 ? 1.0 : 0.0,
+                            child: Padding(
+                              padding: EdgeInsets.fromLTRB(
+                                spacing.cardHorizontal,
+                                spacing.sectionGap * 3,
+                                spacing.cardHorizontal,
+                                spacing.sectionGap,
+                              ),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    children: [
+                                      Container(
+                                        padding: EdgeInsets.all(
+                                          spacing.elementGap,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color:
+                                              goalColor.withValues(alpha: 0.15),
+                                          borderRadius: BorderRadius.circular(
+                                            spacing.radiusMedium,
+                                          ),
+                                        ),
+                                        child: Icon(
+                                          IconHelper.getIconData(
+                                            widget.goal.iconName,
+                                          ),
+                                          color: goalColor,
+                                          size: 32,
+                                        ),
+                                      ),
+                                      SizedBox(width: spacing.elementGap),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              widget.goal.name,
+                                              style: textTheme.headlineSmall
+                                                  ?.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                                color: color.onSurface,
+                                              ),
+                                            ),
+                                            if (widget.goal.description != null)
+                                              Text(
+                                                widget.goal.description!,
+                                                style: textTheme.bodyMedium
+                                                    ?.copyWith(
+                                                  color: color.onSurfaceVariant,
+                                                ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const Spacer(),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Current',
+                                              style:
+                                                  textTheme.bodySmall?.copyWith(
+                                                color: color.onSurfaceVariant,
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              height: spacing.elementGap,
+                                            ),
+                                            CurrencyText(
+                                              amount:
+                                                  GuestModeUtil.applyGuestMode(
+                                                widget.goal.currentAmount,
+                                                isGuestMode,
+                                              ),
+                                              style: textTheme.headlineMedium
+                                                  ?.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                                color: goalColor,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Container(
+                                        width: 1,
+                                        height: 40,
+                                        color: color.outlineVariant
+                                            .withValues(alpha: 0.5),
+                                      ),
+                                      SizedBox(width: spacing.sectionGap),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.end,
+                                          children: [
+                                            Text(
+                                              'Target',
+                                              style:
+                                                  textTheme.bodySmall?.copyWith(
+                                                color: color.onSurfaceVariant,
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              height: spacing.elementGap,
+                                            ),
+                                            CurrencyText(
+                                              amount: widget.goal.targetAmount,
+                                              fixedLength: 0,
+                                              style: textTheme.headlineMedium
+                                                  ?.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                                color: color.onSurface,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: spacing.elementGap),
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(
+                                      spacing.radiusSmall,
+                                    ),
+                                    child: TweenAnimationBuilder<double>(
+                                      duration:
+                                          const Duration(milliseconds: 1500),
+                                      curve: Curves.easeOutCubic,
+                                      tween: Tween(begin: 0.0, end: progress),
+                                      builder: (context, value, child) {
+                                        return LinearProgressIndicator(
+                                          value: value,
+                                          minHeight: 8,
+                                          backgroundColor: color.outline
+                                              .withValues(alpha: 0.1),
+                                          valueColor:
+                                              AlwaysStoppedAnimation(goalColor),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                  SizedBox(height: spacing.elementGap),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        '${(progress * 100).toStringAsFixed(1)}% Complete',
+                                        style: textTheme.bodySmall?.copyWith(
+                                          color: goalColor,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      CurrencyText(
+                                        amount: remaining,
+                                        fixedLength: 0,
+                                        suffixText: 'remaining',
+                                        style: textTheme.bodySmall?.copyWith(
+                                          color: color.onSurfaceVariant,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
 
-          // Milestones
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Milestones',
-                    style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              // Quick Stats Cards
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: spacing.cardHorizontal,
+                    vertical: spacing.cardVertical,
                   ),
-                  const SizedBox(height: 16),
-                  _buildMilestone('Started', widget.goal.currentAmount >= 0, goalColor, textTheme, color),
-                  _buildMilestone('25% Complete', progress >= 0.25, goalColor, textTheme, color),
-                  _buildMilestone('50% Complete', progress >= 0.50, goalColor, textTheme, color),
-                  _buildMilestone('75% Complete', progress >= 0.75, goalColor, textTheme, color),
-                  _buildMilestone('Goal Reached!', progress >= 1.0, goalColor, textTheme, color),
-                ],
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _buildStatCard(
+                          'Remaining',
+                          remaining,
+                          LucideIcons.target,
+                          color,
+                          textTheme,
+                          spacing,
+                          isLeft: true,
+                        ),
+                      ),
+                      SizedBox(width: spacing.elementGap),
+                      Expanded(
+                        child: _buildStatCard(
+                          daysLeft > 0 ? 'Days Left' : 'No Deadline',
+                          daysLeft > 0 ? daysLeft.toDouble() : -1,
+                          LucideIcons.calendar,
+                          color,
+                          textTheme,
+                          spacing,
+                          isRight: true,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
+
+              // Quick Deposit Button
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: spacing.cardHorizontal,
+                    vertical: spacing.cardVertical,
+                  ),
+                  child: FilledButton.icon(
+                    onPressed: () {
+                      HapticFeedback.mediumImpact();
+                      _showQuickDepositSheet(context, goalColor, spacing);
+                    },
+                    icon: const Icon(LucideIcons.plus, size: 20),
+                    label: const Text('Quick Deposit'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: goalColor,
+                      minimumSize: const Size(double.infinity, 56),
+                    ),
+                  ),
+                ),
+              ),
+
+              // Target Date Card
+              if (widget.goal.targetDate != null)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: spacing.cardHorizontal,
+                        vertical: spacing.cardVertical),
+                    child: Container(
+                      padding: EdgeInsets.all(spacing.cardInner),
+                      decoration: BoxDecoration(
+                        color: color.surfaceContainerLow,
+                        borderRadius:
+                            BorderRadius.circular(spacing.radiusMedium),
+                        border: Border.all(
+                          color: color.outlineVariant.withValues(alpha: 0.5),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.all(spacing.elementGap),
+                            decoration: BoxDecoration(
+                              color: color.primaryContainer,
+                              borderRadius:
+                                  BorderRadius.circular(spacing.radiusMedium),
+                            ),
+                            child: Icon(
+                              LucideIcons.calendar,
+                              color: color.primary,
+                              size: 24,
+                            ),
+                          ),
+                          SizedBox(width: spacing.elementGap),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Target Date',
+                                  style: textTheme.bodySmall?.copyWith(
+                                    color: color.onSurfaceVariant,
+                                  ),
+                                ),
+                                SizedBox(height: spacing.elementGap * 0.5),
+                                Text(
+                                  DateFormat('dd MMMM yyyy', ctxt.localeName)
+                                      .format(widget.goal.targetDate!),
+                                  style: textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                if (daysLeft > 0 && suggestedMonthly > 0)
+                                  Text(
+                                    'Save ₹${suggestedMonthly.toStringAsFixed(0)}/month to reach on time',
+                                    style: textTheme.bodySmall?.copyWith(
+                                      color: color.onSurfaceVariant,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+              // Milestones Section
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    spacing.sectionGap,
+                    spacing.elementGap,
+                    spacing.sectionGap,
+                    spacing.elementGap,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        LucideIcons.award,
+                        size: 20,
+                        color: color.primary,
+                      ),
+                      SizedBox(width: spacing.elementGap),
+                      Text(
+                        'Milestones',
+                        style: textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Milestones List
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: spacing.cardHorizontal,
+                    vertical: spacing.cardVertical,
+                  ),
+                  child: Container(
+                    padding: EdgeInsets.all(spacing.cardInner),
+                    decoration: BoxDecoration(
+                      color: color.surfaceContainerLow,
+                      borderRadius: BorderRadius.circular(spacing.radiusLarge),
+                      border: Border.all(
+                        color: color.outlineVariant.withValues(alpha: 0.5),
+                        width: 1,
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        _buildMilestone(
+                          'Started',
+                          widget.goal.currentAmount >= 0,
+                          goalColor,
+                          textTheme,
+                          color,
+                          spacing,
+                        ),
+                        _buildMilestone(
+                          '25% Complete',
+                          progress >= 0.25,
+                          goalColor,
+                          textTheme,
+                          color,
+                          spacing,
+                        ),
+                        _buildMilestone(
+                          '50% Complete',
+                          progress >= 0.50,
+                          goalColor,
+                          textTheme,
+                          color,
+                          spacing,
+                        ),
+                        _buildMilestone(
+                          '75% Complete',
+                          progress >= 0.75,
+                          goalColor,
+                          textTheme,
+                          color,
+                          spacing,
+                        ),
+                        _buildMilestone(
+                          'Goal Reached!',
+                          progress >= 1.0,
+                          goalColor,
+                          textTheme,
+                          color,
+                          spacing,
+                          isLast: true,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              SliverToBoxAdapter(
+                  child: SizedBox(height: spacing.sectionGap * 5)),
+            ],
+          ),
+          Align(
+            alignment: Alignment.topCenter,
+            child: ConfettiWidget(
+              confettiController: _confettiController,
+              blastDirection: math.pi / 2,
+              emissionFrequency: 0.05,
+              numberOfParticles: 20,
+              gravity: 0.3,
+              colors: [
+                goalColor,
+                Colors.amber,
+                Colors.green,
+                Colors.pink,
+                Colors.blue,
+              ],
             ),
           ),
-
-          const SliverToBoxAdapter(child: SizedBox(height: 100)),
         ],
-      ),
-      Align(
-        alignment: Alignment.topCenter,
-        child: ConfettiWidget(
-          confettiController: _confettiController,
-          blastDirection: math.pi / 2,
-          emissionFrequency: 0.05,
-          numberOfParticles: 20,
-          gravity: 0.3,
-          colors: [goalColor, Colors.amber, Colors.green, Colors.pink, Colors.blue],
-        ),
-      ),
-    ],
       ),
     );
   }
 
-  Widget _buildMilestone(String label, bool achieved, Color goalColor, TextTheme textTheme, ColorScheme color) {
+  Widget _buildStatCard(
+    String label,
+    double value,
+    IconData icon,
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing, {
+    bool isLeft = false,
+    bool isRight = false,
+  }) {
+    return Container(
+      padding: EdgeInsets.all(spacing.cardInner),
+      decoration: BoxDecoration(
+        color: color.surfaceContainerLow,
+        borderRadius: BorderRadius.horizontal(
+          left: isLeft
+              ? Radius.circular(
+                  spacing.radiusMedium,
+                )
+              : Radius.zero,
+          right: isRight
+              ? Radius.circular(
+                  spacing.radiusMedium,
+                )
+              : Radius.zero,
+        ),
+        border: Border.all(
+          color: color.outlineVariant.withValues(alpha: 0.5),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: EdgeInsets.all(spacing.elementGap * 0.75),
+            decoration: BoxDecoration(
+              color: color.primaryContainer,
+              borderRadius: BorderRadius.circular(spacing.radiusSmall),
+            ),
+            child: Icon(
+              icon,
+              size: 20,
+              color: color.primary,
+            ),
+          ),
+          SizedBox(height: spacing.elementGap),
+          Text(
+            label,
+            style: textTheme.bodySmall?.copyWith(
+              color: color.onSurfaceVariant,
+            ),
+          ),
+          SizedBox(height: spacing.elementGap),
+          if (isLeft)
+            CurrencyText(
+              amount: value,
+              fixedLength: 0,
+              style: textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          if (isRight)
+            Text(
+              value >= 0 ? value.toStringAsFixed(0) : '--',
+              style: textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMilestone(
+    String label,
+    bool achieved,
+    Color goalColor,
+    TextTheme textTheme,
+    ColorScheme color,
+    AppSpacing spacing, {
+    bool isLast = false,
+  }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: EdgeInsets.only(bottom: isLast ? 0 : spacing.elementGap),
       child: Row(
         children: [
           Container(
@@ -325,17 +686,25 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
             decoration: BoxDecoration(
               color: achieved ? goalColor : color.surfaceContainerHighest,
               shape: BoxShape.circle,
+              border: Border.all(
+                color: achieved
+                    ? goalColor
+                    : color.outlineVariant.withValues(alpha: 0.5),
+                width: 2,
+              ),
             ),
             child: achieved
-                ? Icon(LucideIcons.check, color: Colors.white, size: 18)
+                ? const Icon(LucideIcons.check, color: Colors.white, size: 16)
                 : null,
           ),
-          const SizedBox(width: 12),
-          Text(
-            label,
-            style: textTheme.bodyLarge?.copyWith(
-              fontWeight: achieved ? FontWeight.bold : FontWeight.normal,
-              color: achieved ? color.onSurface : color.onSurfaceVariant,
+          SizedBox(width: spacing.elementGap * 1.5),
+          Expanded(
+            child: Text(
+              label,
+              style: textTheme.bodyLarge?.copyWith(
+                fontWeight: achieved ? FontWeight.bold : FontWeight.normal,
+                color: achieved ? color.onSurface : color.onSurfaceVariant,
+              ),
             ),
           ),
         ],
@@ -343,9 +712,12 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
     );
   }
 
-  void _showQuickDepositSheet(BuildContext context, Color goalColor) {
+  void _showQuickDepositSheet(
+    BuildContext context,
+    Color goalColor,
+    AppSpacing spacing,
+  ) {
     final textTheme = Theme.of(context).textTheme;
-    final color = Theme.of(context).colorScheme;
     final amountController = TextEditingController();
 
     showModalBottomSheet(
@@ -353,10 +725,10 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
       isScrollControlled: true,
       builder: (context) => Padding(
         padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-          left: 16,
-          right: 16,
-          top: 24,
+          bottom: MediaQuery.of(context).viewInsets.bottom + spacing.sectionGap,
+          left: spacing.sectionGap,
+          right: spacing.sectionGap,
+          top: spacing.sectionGap,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -364,99 +736,79 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
           children: [
             Row(
               children: [
-                Icon(LucideIcons.piggyBank, color: goalColor, size: 24),
-                const SizedBox(width: 12),
+                Container(
+                  padding: EdgeInsets.all(spacing.elementGap),
+                  decoration: BoxDecoration(
+                    color: goalColor.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                  ),
+                  child: Icon(
+                    LucideIcons.piggyBank,
+                    color: goalColor,
+                    size: 24,
+                  ),
+                ),
+                SizedBox(width: spacing.elementGap * 1.5),
                 Text(
                   'Quick Deposit',
-                  style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                  style: textTheme.titleLarge
+                      ?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: spacing.sectionGap),
             TextField(
               controller: amountController,
-              keyboardType: TextInputType.number,
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
               autofocus: true,
               decoration: InputDecoration(
                 labelText: 'Amount',
-                prefixText: '₹',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                prefixIcon: const Icon(LucideIcons.indianRupee),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                ),
               ),
             ),
-            const SizedBox(height: 24),
-            FilledButton(
+            SizedBox(height: spacing.sectionGap),
+            FilledButton.icon(
               onPressed: () async {
-                final amount = double.tryParse(amountController.text);
+                final amount = double.tryParse(amountController.text.trim());
                 if (amount != null && amount > 0) {
                   HapticFeedback.mediumImpact();
                   final wasComplete = widget.goal.progressPercent >= 1.0;
                   widget.goal.currentAmount += amount;
                   final isNowComplete = widget.goal.progressPercent >= 1.0;
-                  
+
                   await ref.read(goalServiceProvider).updateGoal(widget.goal);
                   ref.invalidate(goalsProvider);
-                  
+
                   if (context.mounted) {
                     Navigator.pop(context);
                     setState(() {});
-                    
+
+                    SnackbarService.success(
+                      '₹${amount.toStringAsFixed(0)} added to ${widget.goal.name}',
+                    );
+
                     if (!wasComplete && isNowComplete) {
                       _confettiController.play();
+                      SnackbarService.success(
+                          '🎉 Goal completed! Congratulations!');
                     }
                   }
                 }
               },
+              icon: const Icon(LucideIcons.plus, size: 20),
               style: FilledButton.styleFrom(
                 backgroundColor: goalColor,
                 minimumSize: const Size(double.infinity, 56),
               ),
-              child: const Text('Add to Goal'),
+              label: const Text('Add to Goal'),
             ),
-            const SizedBox(height: 24),
           ],
         ),
       ),
     );
   }
-}
-
-class _HeroRingPainter extends CustomPainter {
-  final double progress;
-  final Color color;
-
-  _HeroRingPainter({required this.progress, required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width / 2 - 12;
-    const strokeWidth = 16.0;
-
-    final bgPaint = Paint()
-      ..color = color.withValues(alpha: 0.1)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
-
-    canvas.drawCircle(center, radius, bgPaint);
-
-    final rect = Rect.fromCircle(center: center, radius: radius);
-    final gradient = SweepGradient(
-      colors: [color, color.withValues(alpha: 0.6), color],
-      stops: const [0.0, 0.5, 1.0],
-      transform: const GradientRotation(-math.pi / 2),
-    );
-
-    final progressPaint = Paint()
-      ..shader = gradient.createShader(rect)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
-
-    canvas.drawArc(rect, -math.pi / 2, 2 * math.pi * progress, false, progressPaint);
-  }
-
-  @override
-  bool shouldRepaint(_HeroRingPainter oldDelegate) =>
-      oldDelegate.progress != progress || oldDelegate.color != color;
 }

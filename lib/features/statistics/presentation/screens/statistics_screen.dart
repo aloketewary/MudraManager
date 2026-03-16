@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/features/analytics/data/analytics_provider.dart';
 import 'package:mudra_manager/features/analytics/data/net_worth_service.dart';
+import 'package:mudra_manager/features/analytics/data/personality_archetype.dart';
 import 'package:mudra_manager/features/dashboard/data/status_data_provider.dart';
+import 'package:mudra_manager/features/dashboard/presentation/widgets/spending_personality_card.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/shared/widgets/period_calendar_selector.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
@@ -42,102 +47,167 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
 
     return Scaffold(
       body: stats.when(
-        data: (d) => CustomScrollView(
-          slivers: [
-            // Sticky Period Selector
-            SliverAppBar(
-              pinned: true,
-              backgroundColor: color.surface,
-              elevation: 0,
-              toolbarHeight: 80,
-              automaticallyImplyLeading: false,
-              titleSpacing: 0,
-              title: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: PeriodCalendarSelector(
-                  selectedPeriod: _selectedPeriod,
-                  customStart: _customStart,
-                  customEnd: _customEnd,
-                  onChanged: (period, start, end) {
-                    setState(() {
-                      _selectedPeriod = period;
-                      _customStart = start;
-                      _customEnd = end;
-                      _period = period == PeriodType.day
-                          ? 'Today'
-                          : period == PeriodType.week
-                              ? 'Week'
-                              : period == PeriodType.month
-                                  ? 'Month'
-                                  : period == PeriodType.year
-                                      ? 'Year'
-                                      : 'Custom';
-                    });
-                  },
+        data: (d) {
+          final hasData =
+              d.income > 0 || d.expense > 0 || d.categoryData.isNotEmpty;
+          return CustomScrollView(
+            slivers: [
+              // Sticky Period Selector
+              SliverAppBar(
+                pinned: true,
+                backgroundColor: color.surface,
+                elevation: 0,
+                toolbarHeight: 80,
+                automaticallyImplyLeading: false,
+                titleSpacing: 0,
+                title: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: PeriodCalendarSelector(
+                    selectedPeriod: _selectedPeriod,
+                    customStart: _customStart,
+                    customEnd: _customEnd,
+                    onChanged: (period, start, end) {
+                      setState(() {
+                        _selectedPeriod = period;
+                        _customStart = start;
+                        _customEnd = end;
+                        _period = period == PeriodType.day
+                            ? 'Today'
+                            : period == PeriodType.week
+                                ? 'Week'
+                                : period == PeriodType.month
+                                    ? 'Month'
+                                    : period == PeriodType.year
+                                        ? 'Year'
+                                        : 'Custom';
+                      });
+                    },
+                  ),
                 ),
               ),
-            ),
+              if (!hasData)
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: _buildEmptyState(color, textTheme),
+                )
+              else
+                SliverPadding(
+                  padding: const EdgeInsets.all(16),
+                  sliver: SliverList(
+                    delegate: SliverChildListDelegate([
+                      // ZONE 1: THE PULSE (4-Card Grid)
+                      _buildPulseZone(d, color, textTheme, isGuestMode),
+                      const SizedBox(height: 32),
 
-            SliverPadding(
-              padding: const EdgeInsets.all(16),
-              sliver: SliverList(
-                delegate: SliverChildListDelegate([
-                  // ZONE 1: THE PULSE (4-Card Grid)
-                  _buildPulseZone(d, color, textTheme, isGuestMode),
-                  const SizedBox(height: 32),
+                      // ZONE 2: THE NARRATIVE (Tabbed Charts)
+                      _buildNarrativeZone(d, color, textTheme),
+                      const SizedBox(height: 32),
 
-                  // ZONE 2: THE NARRATIVE (Tabbed Charts)
-                  _buildNarrativeZone(d, color, textTheme),
-                  const SizedBox(height: 32),
+                      // ZONE 3: THE INTELLIGENCE (Insights & Actions)
+                      _buildIntelligenceZone(d, color, textTheme, isGuestMode),
+                      const SizedBox(height: 32),
 
-                  // ZONE 3: THE INTELLIGENCE (Insights & Actions)
-                  _buildIntelligenceZone(d, color, textTheme, isGuestMode),
-                  const SizedBox(height: 100),
-                ]),
-              ),
-            ),
-          ],
-        ),
+                      // ZONE 4: FINANCIAL HEALTH
+                      _buildFinancialHealthZone(color, textTheme),
+                      const SizedBox(height: 32),
+
+                      // ZONE 5: SPENDING PERSONALITY
+                      _buildSpendingPersonalityZone(color, textTheme),
+                      const SizedBox(height: 100),
+                    ]),
+                  ),
+                ),
+            ],
+          );
+        },
         loading: () => Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
               SkeletonLoader(
-                  width: double.infinity,
-                  height: 80,
-                  borderRadius: BorderRadius.circular(12),),
+                width: double.infinity,
+                height: 80,
+                borderRadius: BorderRadius.circular(12),
+              ),
               const SizedBox(height: 16),
               Row(
                 children: [
                   Expanded(
-                      child: SkeletonLoader(
-                          width: double.infinity,
-                          height: 120,
-                          borderRadius: BorderRadius.circular(12),),),
+                    child: SkeletonLoader(
+                      width: double.infinity,
+                      height: 120,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
-                      child: SkeletonLoader(
-                          width: double.infinity,
-                          height: 120,
-                          borderRadius: BorderRadius.circular(12),),),
+                    child: SkeletonLoader(
+                      width: double.infinity,
+                      height: 120,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 12),
               SkeletonLoader(
-                  width: double.infinity,
-                  height: 120,
-                  borderRadius: BorderRadius.circular(12),),
+                width: double.infinity,
+                height: 120,
+                borderRadius: BorderRadius.circular(12),
+              ),
               const SizedBox(height: 32),
               SkeletonLoader(
-                  width: double.infinity,
-                  height: 300,
-                  borderRadius: BorderRadius.circular(12),),
+                width: double.infinity,
+                height: 300,
+                borderRadius: BorderRadius.circular(12),
+              ),
             ],
           ),
         ),
         error: (_, __) =>
             const Center(child: Text('Unable to load statistics')),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(ColorScheme color, TextTheme textTheme) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: color.primaryContainer.withValues(alpha: 0.3),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                LucideIcons.chartBar,
+                size: 36,
+                color: color.primary.withValues(alpha: 0.6),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'No transactions yet',
+              style: textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Add your first transaction to see insights and analytics for this period.',
+              textAlign: TextAlign.center,
+              style: textTheme.bodyMedium?.copyWith(
+                color: color.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -152,9 +222,10 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Overview',
-            style:
-                textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),),
+        Text(
+          'Overview',
+          style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 16),
         Row(
           children: [
@@ -187,9 +258,10 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
         ),
         const SizedBox(height: 12),
         _NetWorthCard(
-            isGuestMode: isGuestMode,
-            savingsRate: d.savingsRate,
-            savingsSpots: d.savingsSpots,),
+          isGuestMode: isGuestMode,
+          savingsRate: d.savingsRate,
+          savingsSpots: d.savingsSpots,
+        ),
       ],
     );
   }
@@ -225,9 +297,10 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Trends',
-            style:
-                textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),),
+        Text(
+          'Trends',
+          style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 16),
         Container(
           decoration: BoxDecoration(
@@ -243,7 +316,11 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                   children: [
                     Expanded(
                       child: _buildTabButton(
-                          '12-Month Trend', 0, color, textTheme,),
+                        '12-Month Trend',
+                        0,
+                        color,
+                        textTheme,
+                      ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
@@ -325,12 +402,15 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
         );
       },
       loading: () => SizedBox(
-          height: 200,
-          child: Center(
-              child: SkeletonLoader(
-                  width: double.infinity,
-                  height: 200,
-                  borderRadius: BorderRadius.circular(12),),),),
+        height: 200,
+        child: Center(
+          child: SkeletonLoader(
+            width: double.infinity,
+            height: 200,
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      ),
       error: (_, __) => const SizedBox(
         height: 200,
         child: Center(child: Text('Error loading data')),
@@ -375,8 +455,8 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                       return Text(
                         days[value.toInt()],
                         style: textTheme.bodySmall?.copyWith(
-                            color:
-                                color.onSurfaceVariant.withValues(alpha: 0.6),),
+                          color: color.onSurfaceVariant.withValues(alpha: 0.6),
+                        ),
                       );
                     },
                   ),
@@ -392,31 +472,55 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
               borderData: FlBorderData(show: false),
               barGroups: [
                 _buildBarGroup(
-                    0, byDay['Mon']!, color.primary.withValues(alpha: 0.9),),
+                  0,
+                  byDay['Mon']!,
+                  color.primary.withValues(alpha: 0.9),
+                ),
                 _buildBarGroup(
-                    1, byDay['Tue']!, color.primary.withValues(alpha: 0.9),),
+                  1,
+                  byDay['Tue']!,
+                  color.primary.withValues(alpha: 0.9),
+                ),
                 _buildBarGroup(
-                    2, byDay['Wed']!, color.primary.withValues(alpha: 0.9),),
+                  2,
+                  byDay['Wed']!,
+                  color.primary.withValues(alpha: 0.9),
+                ),
                 _buildBarGroup(
-                    3, byDay['Thu']!, color.primary.withValues(alpha: 0.9),),
+                  3,
+                  byDay['Thu']!,
+                  color.primary.withValues(alpha: 0.9),
+                ),
                 _buildBarGroup(
-                    4, byDay['Fri']!, color.primary.withValues(alpha: 0.9),),
+                  4,
+                  byDay['Fri']!,
+                  color.primary.withValues(alpha: 0.9),
+                ),
                 _buildBarGroup(
-                    5, byDay['Sat']!, color.primary.withValues(alpha: 0.9),),
+                  5,
+                  byDay['Sat']!,
+                  color.primary.withValues(alpha: 0.9),
+                ),
                 _buildBarGroup(
-                    6, byDay['Sun']!, color.primary.withValues(alpha: 0.9),),
+                  6,
+                  byDay['Sun']!,
+                  color.primary.withValues(alpha: 0.9),
+                ),
               ],
             ),
           ),
         );
       },
       loading: () => SizedBox(
-          height: 200,
-          child: Center(
-              child: SkeletonLoader(
-                  width: double.infinity,
-                  height: 200,
-                  borderRadius: BorderRadius.circular(12),),),),
+        height: 200,
+        child: Center(
+          child: SkeletonLoader(
+            width: double.infinity,
+            height: 200,
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      ),
       error: (_, __) => const SizedBox(
         height: 200,
         child: Center(child: Text('Error loading data')),
@@ -448,9 +552,10 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Insights',
-            style:
-                textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),),
+        Text(
+          'Insights',
+          style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 16),
         // Spending Prediction Banner
         Consumer(
@@ -589,8 +694,9 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                                               Container(
                                                 padding:
                                                     const EdgeInsets.symmetric(
-                                                        horizontal: 8,
-                                                        vertical: 4,),
+                                                  horizontal: 8,
+                                                  vertical: 4,
+                                                ),
                                                 decoration: BoxDecoration(
                                                   color: (trend.changePercent >
                                                               0
@@ -699,6 +805,430 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildFinancialHealthZone(ColorScheme color, TextTheme textTheme) {
+    return Consumer(
+      builder: (context, ref, child) {
+        final healthAsync = ref.watch(financialHealthProvider);
+        return healthAsync.when(
+          data: (health) {
+            if (health.score == 0) return const SizedBox.shrink();
+
+            final scoreColor = health.score >= 80
+                ? const Color(0xFF4CAF50)
+                : health.score >= 60
+                    ? const Color(0xFF2196F3)
+                    : health.score >= 40
+                        ? const Color(0xFFFF9800)
+                        : const Color(0xFFF44336);
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Financial Health',
+                  style: textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Card(
+                  elevation: 0,
+                  color: color.surfaceContainerLow,
+                  child: InkWell(
+                    onTap: () {
+                      HapticFeedback.mediumImpact();
+                      context.push('/financial-health');
+                    },
+                    borderRadius: BorderRadius.circular(12),
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        children: [
+                          // Score ring + rating
+                          Row(
+                            children: [
+                              TweenAnimationBuilder<double>(
+                                duration: const Duration(milliseconds: 1500),
+                                curve: Curves.easeOutCubic,
+                                tween: Tween(
+                                  begin: 0.0,
+                                  end: health.score / 100,
+                                ),
+                                builder: (context, value, child) {
+                                  return Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      SizedBox(
+                                        width: 72,
+                                        height: 72,
+                                        child: CircularProgressIndicator(
+                                          value: value,
+                                          strokeWidth: 6,
+                                          strokeCap: StrokeCap.round,
+                                          backgroundColor: scoreColor
+                                              .withValues(alpha: 0.15),
+                                          valueColor: AlwaysStoppedAnimation(
+                                            scoreColor,
+                                          ),
+                                        ),
+                                      ),
+                                      Text(
+                                        '${(value * 100).toInt()}',
+                                        style:
+                                            textTheme.headlineSmall?.copyWith(
+                                          fontWeight: FontWeight.w900,
+                                          color: scoreColor,
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              ),
+                              const SizedBox(width: 20),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color:
+                                            scoreColor.withValues(alpha: 0.12),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Text(
+                                        health.rating,
+                                        style: textTheme.labelLarge?.copyWith(
+                                          color: scoreColor,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    if (health.insights.isNotEmpty)
+                                      Text(
+                                        health.insights.first,
+                                        style: textTheme.bodyMedium?.copyWith(
+                                          color: color.onSurfaceVariant,
+                                        ),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                  ],
+                                ),
+                              ),
+                              Icon(
+                                LucideIcons.chevronRight,
+                                color: color.onSurfaceVariant,
+                                size: 20,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                          // Metric bars
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildHealthMetric(
+                                  label: 'Savings Rate',
+                                  value: health.savingsRate,
+                                  maxValue: 100,
+                                  suffix: '%',
+                                  barColor: const Color(0xFF4CAF50),
+                                  color: color,
+                                  textTheme: textTheme,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: _buildHealthMetric(
+                                  label: 'Expense Ratio',
+                                  value: health.expenseRatio,
+                                  maxValue: 100,
+                                  suffix: '%',
+                                  barColor: health.expenseRatio > 80
+                                      ? const Color(0xFFF44336)
+                                      : const Color(0xFFFF9800),
+                                  color: color,
+                                  textTheme: textTheme,
+                                ),
+                              ),
+                            ],
+                          ),
+                          // Additional insights
+                          if (health.insights.length > 1) ...[
+                            const SizedBox(height: 16),
+                            ...health.insights.skip(1).take(2).map(
+                                  (insight) => Padding(
+                                    padding: const EdgeInsets.only(bottom: 8),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          LucideIcons.lightbulb,
+                                          size: 14,
+                                          color: color.primary,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            insight,
+                                            style:
+                                                textTheme.bodySmall?.copyWith(
+                                              color: color.onSurfaceVariant,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+          loading: () => const SizedBox.shrink(),
+          error: (_, __) => const SizedBox.shrink(),
+        );
+      },
+    );
+  }
+
+  Widget _buildHealthMetric({
+    required String label,
+    required double value,
+    required double maxValue,
+    required String suffix,
+    required Color barColor,
+    required ColorScheme color,
+    required TextTheme textTheme,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              label,
+              style: textTheme.labelMedium?.copyWith(
+                color: color.onSurfaceVariant,
+              ),
+            ),
+            Text(
+              '${value.toStringAsFixed(1)}$suffix',
+              style: textTheme.labelLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: barColor,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: TweenAnimationBuilder<double>(
+            duration: const Duration(milliseconds: 1200),
+            curve: Curves.easeOutCubic,
+            tween: Tween(begin: 0.0, end: (value / maxValue).clamp(0.0, 1.0)),
+            builder: (context, animValue, child) {
+              return LinearProgressIndicator(
+                value: animValue,
+                minHeight: 8,
+                backgroundColor: color.surfaceContainerHighest,
+                valueColor: AlwaysStoppedAnimation(barColor),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSpendingPersonalityZone(
+    ColorScheme color,
+    TextTheme textTheme,
+  ) {
+    return Consumer(
+      builder: (context, ref, child) {
+        final personalityAsync = ref.watch(spendingPersonalityProvider);
+        return personalityAsync.when(
+          data: (data) {
+            if (data == null) return const SizedBox.shrink();
+
+            final archetype =
+                PersonalityArchetype.fromSpendingPersonality(data);
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Spending Personality',
+                  style: textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Card(
+                  elevation: 0,
+                  color: color.surfaceContainerLow,
+                  child: InkWell(
+                    onTap: () {
+                      HapticFeedback.mediumImpact();
+                      context.push('/spending-personality');
+                    },
+                    borderRadius: BorderRadius.circular(12),
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Archetype header
+                          Row(
+                            children: [
+                              Container(
+                                width: 56,
+                                height: 56,
+                                decoration: BoxDecoration(
+                                  color:
+                                      archetype.color.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Icon(
+                                  archetype.icon,
+                                  color: archetype.color,
+                                  size: 28,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      archetype.name,
+                                      style: textTheme.titleLarge?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      archetype.tagline,
+                                      style: textTheme.bodyMedium?.copyWith(
+                                        color: archetype.color,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Icon(
+                                LucideIcons.chevronRight,
+                                color: color.onSurfaceVariant,
+                                size: 20,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                          // Trait pills
+                          // Replace the Wrap(...) block inside _buildSpendingPersonalityZone with:
+                          const SizedBox(height: 16),
+                          Column(
+                            children: [
+                              _buildTraitRow(
+                                icon: LucideIcons.tag,
+                                label: data.topCategory,
+                                subtitle: 'Top Category',
+                                color: color,
+                                textTheme: textTheme,
+                              ),
+                              _buildTraitRow(
+                                icon: LucideIcons.calendar,
+                                label: data.spendingPattern,
+                                subtitle: 'Pattern',
+                                color: color,
+                                textTheme: textTheme,
+                              ),
+                              _buildTraitRow(
+                                icon: LucideIcons.brain,
+                                label: data.behaviorType,
+                                subtitle: 'Behavior',
+                                color: color,
+                                textTheme: textTheme,
+                              ),
+                              _buildTraitRow(
+                                icon: LucideIcons.trendingUp,
+                                label: data.spendingTrend,
+                                subtitle: 'Trend',
+                                color: color,
+                                textTheme: textTheme,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+          loading: () => const SizedBox.shrink(),
+          error: (_, __) => const SizedBox.shrink(),
+        );
+      },
+    );
+  }
+
+  Widget _buildTraitRow({
+    required IconData icon,
+    required String label,
+    required String subtitle,
+    required ColorScheme color,
+    required TextTheme textTheme,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: color.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, size: 16, color: color.primary),
+          ),
+          const SizedBox(width: 4),
+          Expanded(
+            child: Text(
+              subtitle,
+              style: textTheme.bodySmall?.copyWith(
+                color: color.onSurfaceVariant,
+              ),
+            ),
+          ),
+          Text(
+            label,
+            style: textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }

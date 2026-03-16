@@ -870,4 +870,25 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get sms_approveTransactionTitle => 'लेनदेन अनुमोदित करें';
+
+  @override
+  String get onboard_SmartSmsTracking => 'स्मार्ट SMS ट्रैकिंग';
+
+  @override
+  String get onboard_SmartSmsTrackingDesc =>
+      'बैंक SMS से लेनदेन स्वचालित रूप से पहचानें और आयात करें।';
+
+  @override
+  String get onboard_InsightsAndAnalytics => 'इनसाइट्स और एनालिटिक्स';
+
+  @override
+  String get onboard_InsightsAndAnalyticsDesc =>
+      'विस्तृत चार्ट, ट्रेंड और स्मार्ट इनसाइट्स से अपनी खर्च की आदतें समझें।';
+
+  @override
+  String get onboard_SecureAndPrivate => 'सुरक्षित और निजी';
+
+  @override
+  String get onboard_SecureAndPrivateDesc =>
+      'आपका डेटा आपके डिवाइस पर रहता है। कोई क्लाउड नहीं, कोई ट्रैकिंग नहीं।';
 }

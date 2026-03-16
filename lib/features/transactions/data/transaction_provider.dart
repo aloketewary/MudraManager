@@ -5,12 +5,14 @@ import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
-import 'package:mudra_manager/core/db/models/sms_activity.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
 import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
 import 'package:mudra_manager/features/transactions/presentation/widgets/transaction_group.dart';
+
+// Refresh notifier to force provider updates
+final transactionRefreshProvider = StateProvider<int>((ref) => 0);
 
 final transactionProvider = Provider<TransactionService>((ref) {
   final isarService = ref.watch(isarServiceProvider);
@@ -88,57 +90,23 @@ final sectionedTransactionsProvider =
       ref,
       arg,
     ) async {
+      ref.watch(transactionRefreshProvider);
       final transactions = await ref.watch(
         transactionsByMonthAndTypeProvider(arg).future,
       );
 
-      // Get pending SMS activities for this month
-      final service = ref.watch(transactionProvider);
-      final isar = await service.isarService.getInstance();
-      final start = DateTime(arg.month.year, arg.month.month, 1);
-      final end = DateTime(arg.month.year, arg.month.month + 1, 1);
-      
-      final pendingActivities = await isar.smsActivitys
-          .filter()
-          .dateBetween(start, end)
-          .and()
-          .not()
-          .statusEqualTo(ActivityStatus.approved)
-          .and()
-          .not()
-          .statusEqualTo(ActivityStatus.rejected)
-          .sortByDateDesc()
-          .findAll();
-
-      // Combine
-      final combined = <dynamic>[
-        ...transactions,
-        ...pendingActivities,
-      ];
-
-      combined.sort((a, b) {
-        final dateA = a is Transaction ? a.date : (a as SmsActivity).date;
-        final dateB = b is Transaction ? b.date : (b as SmsActivity).date;
-        return dateB.compareTo(dateA);
-      });
-
-      if (combined.isEmpty) return [];
+      if (transactions.isEmpty) return [];
 
       final List<TxListEntry> sectioned = [];
       DateTime? currentDate;
 
-      for (var item in combined) {
-        final date = item is Transaction ? item.date : (item as SmsActivity).date;
-        final txDate = DateTime(date.year, date.month, date.day);
+      for (var tx in transactions) {
+        final txDate = DateTime(tx.date.year, tx.date.month, tx.date.day);
         if (currentDate == null || txDate != currentDate) {
           currentDate = txDate;
           sectioned.add(TxHeader(txDate));
         }
-        if (item is Transaction) {
-          sectioned.add(TxItem(item));
-        } else {
-          sectioned.add(SmsActivityItem(item as SmsActivity));
-        }
+        sectioned.add(TxItem(tx));
       }
 
       return sectioned;
@@ -149,6 +117,7 @@ final sectionedTransactionsByDateRangeProvider =
       List<TxListEntry>,
       ({DateTime start, DateTime end, String type})
     >((ref, arg) async {
+      ref.watch(transactionRefreshProvider);
       final startDate = DateTime(
         arg.start.year,
         arg.start.month,
@@ -171,42 +140,13 @@ final sectionedTransactionsByDateRangeProvider =
         )).future,
       );
 
-      // Get pending SMS activities for this date range
-      final service = ref.watch(transactionProvider);
-      final isar = await service.isarService.getInstance();
-      
-      final pendingActivities = await isar.smsActivitys
-          .filter()
-          .dateBetween(startDate, endDate)
-          .and()
-          .not()
-          .statusEqualTo(ActivityStatus.approved)
-          .and()
-          .not()
-          .statusEqualTo(ActivityStatus.rejected)
-          .sortByDateDesc()
-          .findAll();
-
-      // Combine
-      final combined = <dynamic>[
-        ...transactions,
-        ...pendingActivities,
-      ];
-
-      combined.sort((a, b) {
-        final dateA = a is Transaction ? a.date : (a as SmsActivity).date;
-        final dateB = b is Transaction ? b.date : (b as SmsActivity).date;
-        return dateB.compareTo(dateA);
-      });
-
-      if (combined.isEmpty) return [];
+      if (transactions.isEmpty) return [];
 
       final List<TxListEntry> sectioned = [];
       DateTime? currentDate;
 
-      for (var item in combined) {
-        final date = item is Transaction ? item.date : (item as SmsActivity).date;
-        final txDate = DateTime(date.year, date.month, date.day);
+      for (var tx in transactions) {
+        final txDate = DateTime(tx.date.year, tx.date.month, tx.date.day);
         if (currentDate == null ||
             currentDate.year != txDate.year ||
             currentDate.month != txDate.month ||
@@ -214,11 +154,7 @@ final sectionedTransactionsByDateRangeProvider =
           currentDate = txDate;
           sectioned.add(TxHeader(txDate));
         }
-        if (item is Transaction) {
-          sectioned.add(TxItem(item));
-        } else {
-          sectioned.add(SmsActivityItem(item as SmsActivity));
-        }
+        sectioned.add(TxItem(tx));
       }
 
       return sectioned;
@@ -226,40 +162,8 @@ final sectionedTransactionsByDateRangeProvider =
 
 final allSectionedTransactionsProvider =
     FutureProvider.autoDispose.family<List<TxListEntry>, String>((ref, type) async {
+      ref.watch(transactionRefreshProvider);
       final service = ref.watch(transactionProvider);
-
-      // Handle needsReview filter - only show SMS activities
-      if (type == 'needsReview') {
-        final isar = await service.isarService.getInstance();
-        final needsReviewActivities = await isar.smsActivitys
-            .filter()
-            .statusEqualTo(ActivityStatus.needsReview)
-            .or()
-            .statusEqualTo(ActivityStatus.pending)
-            .or()
-            .statusEqualTo(ActivityStatus.duplicate)
-            .sortByDateDesc()
-            .findAll();
-
-        if (needsReviewActivities.isEmpty) return [];
-
-        final List<TxListEntry> sectioned = [];
-        DateTime? currentDate;
-
-        for (var activity in needsReviewActivities) {
-          final txDate = DateTime(activity.date.year, activity.date.month, activity.date.day);
-          if (currentDate == null ||
-              currentDate.year != txDate.year ||
-              currentDate.month != txDate.month ||
-              currentDate.day != txDate.day) {
-            currentDate = txDate;
-            sectioned.add(TxHeader(txDate));
-          }
-          sectioned.add(SmsActivityItem(activity));
-        }
-
-        return sectioned;
-      }
 
       List<Transaction> transactions;
       if (type == 'income') {
@@ -270,39 +174,13 @@ final allSectionedTransactionsProvider =
         transactions = await service.getAll();
       }
 
-      // Get pending SMS activities
-      final isar = await service.isarService.getInstance();
-      final pendingActivities = await isar.smsActivitys
-          .filter()
-          .not()
-          .statusEqualTo(ActivityStatus.approved)
-          .and()
-          .not()
-          .statusEqualTo(ActivityStatus.rejected)
-          .sortByDateDesc()
-          .findAll();
-
-      // Combine transactions and activities
-      final combined = <dynamic>[
-        ...transactions,
-        ...pendingActivities,
-      ];
-
-      // Sort by date
-      combined.sort((a, b) {
-        final dateA = a is Transaction ? a.date : (a as SmsActivity).date;
-        final dateB = b is Transaction ? b.date : (b as SmsActivity).date;
-        return dateB.compareTo(dateA);
-      });
-
-      if (combined.isEmpty) return [];
+      if (transactions.isEmpty) return [];
 
       final List<TxListEntry> sectioned = [];
       DateTime? currentDate;
 
-      for (var item in combined) {
-        final date = item is Transaction ? item.date : (item as SmsActivity).date;
-        final txDate = DateTime(date.year, date.month, date.day);
+      for (var tx in transactions) {
+        final txDate = DateTime(tx.date.year, tx.date.month, tx.date.day);
         if (currentDate == null ||
             currentDate.year != txDate.year ||
             currentDate.month != txDate.month ||
@@ -310,11 +188,7 @@ final allSectionedTransactionsProvider =
           currentDate = txDate;
           sectioned.add(TxHeader(txDate));
         }
-        if (item is Transaction) {
-          sectioned.add(TxItem(item));
-        } else {
-          sectioned.add(SmsActivityItem(item as SmsActivity));
-        }
+        sectioned.add(TxItem(tx));
       }
 
       return sectioned;

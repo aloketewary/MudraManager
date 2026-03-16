@@ -14,67 +14,67 @@ class DialogUtils {
     return showModalBottomSheet<bool>(
       context: context,
       backgroundColor: color.surface,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (context) => SafeArea(
         child: Padding(
-          padding: EdgeInsets.all(24),
+          padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
                 width: 40,
                 height: 4,
-                margin: EdgeInsets.only(bottom: 24),
+                margin: const EdgeInsets.only(bottom: 24),
                 decoration: BoxDecoration(
                   color: color.onSurfaceVariant.withValues(alpha: 0.4),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
               Icon(Icons.delete_forever_rounded, size: 48, color: color.error),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Text(
                 title,
                 style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               Text(
                 message,
                 style: textTheme.bodyMedium?.copyWith(color: color.onSurfaceVariant),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: 32),
+              const SizedBox(height: 32),
               Row(
                 children: [
                   Expanded(
                     child: OutlinedButton(
                       onPressed: () => Navigator.pop(context, false),
                       style: OutlinedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(vertical: 16),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
                         side: BorderSide(color: color.outline),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       child: Text(
                         (cancelText ?? 'CANCEL').toUpperCase(),
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                        style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
-                  SizedBox(width: 16),
+                  const SizedBox(width: 16),
                   Expanded(
                     child: FilledButton(
                       onPressed: () => Navigator.pop(context, true),
                       style: FilledButton.styleFrom(
                         backgroundColor: color.error,
                         foregroundColor: color.onError,
-                        padding: EdgeInsets.symmetric(vertical: 16),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       child: Text(
                         (deleteText ?? 'DELETE').toUpperCase(),
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                        style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
@@ -101,19 +101,19 @@ class DialogUtils {
     return showModalBottomSheet<bool>(
       context: context,
       backgroundColor: color.surface,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (context) => SafeArea(
         child: Padding(
-          padding: EdgeInsets.all(24),
+          padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
                 width: 40,
                 height: 4,
-                margin: EdgeInsets.only(bottom: 24),
+                margin: const EdgeInsets.only(bottom: 24),
                 decoration: BoxDecoration(
                   color: color.onSurfaceVariant.withValues(alpha: 0.4),
                   borderRadius: BorderRadius.circular(2),
@@ -121,47 +121,47 @@ class DialogUtils {
               ),
               if (icon != null) ...[
                 Icon(icon, size: 48, color: color.primary),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
               ],
               Text(
                 title,
                 style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               Text(
                 message,
                 style: textTheme.bodyMedium?.copyWith(color: color.onSurfaceVariant),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: 32),
+              const SizedBox(height: 32),
               Row(
                 children: [
                   Expanded(
                     child: OutlinedButton(
                       onPressed: () => Navigator.pop(context, false),
                       style: OutlinedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(vertical: 16),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
                         side: BorderSide(color: color.outline),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       child: Text(
                         (cancelText ?? 'CANCEL').toUpperCase(),
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                        style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
-                  SizedBox(width: 16),
+                  const SizedBox(width: 16),
                   Expanded(
                     child: FilledButton(
                       onPressed: () => Navigator.pop(context, true),
                       style: FilledButton.styleFrom(
-                        padding: EdgeInsets.symmetric(vertical: 16),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       child: Text(
                         (confirmText ?? 'CONFIRM').toUpperCase(),
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                        style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
@@ -185,7 +185,7 @@ class DialogUtils {
       context: context,
       backgroundColor: color.surface,
       isScrollControlled: true,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (context) => _PasswordDialogContent(isRestore: isRestore, color: color, textTheme: textTheme),
@@ -241,81 +241,81 @@ class _PasswordDialogContentState extends State<_PasswordDialogContent> {
           Container(
             width: 40,
             height: 4,
-            margin: EdgeInsets.only(bottom: 24),
+            margin: const EdgeInsets.only(bottom: 24),
             decoration: BoxDecoration(
               color: widget.color.onSurfaceVariant.withValues(alpha: 0.4),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
           Icon(Icons.lock_outline, size: 48, color: widget.color.primary),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Text(
             widget.isRestore ? 'Enter Password' : 'Set Backup Password',
             style: widget.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
           ),
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
           TextField(
             controller: _controller,
             obscureText: true,
             decoration: InputDecoration(
               labelText: 'Password',
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-              prefixIcon: Icon(Icons.password),
+              prefixIcon: const Icon(Icons.password),
             ),
           ),
           if (!widget.isRestore) ...[
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             TextField(
               controller: _confirmController,
               obscureText: true,
               decoration: InputDecoration(
                 labelText: 'Confirm Password',
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                prefixIcon: Icon(Icons.password),
+                prefixIcon: const Icon(Icons.password),
               ),
             ),
           ],
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
           Row(
             children: [
               Expanded(
                 child: OutlinedButton(
                   onPressed: () => Navigator.pop(context),
                   style: OutlinedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(vertical: 16),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: Text('CANCEL', style: TextStyle(fontWeight: FontWeight.bold)),
+                  child: const Text('CANCEL', style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
               ),
-              SizedBox(width: 16),
+              const SizedBox(width: 16),
               Expanded(
                 child: FilledButton(
                   onPressed: () {
                     if (!widget.isRestore && _controller.text != _confirmController.text) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Passwords do not match')),
+                        const SnackBar(content: Text('Passwords do not match')),
                       );
                       return;
                     }
                     if (_controller.text.length < 6) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Password must be at least 6 characters')),
+                        const SnackBar(content: Text('Password must be at least 6 characters')),
                       );
                       return;
                     }
                     Navigator.pop(context, _controller.text);
                   },
                   style: FilledButton.styleFrom(
-                    padding: EdgeInsets.symmetric(vertical: 16),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: Text('CONTINUE', style: TextStyle(fontWeight: FontWeight.bold)),
+                  child: const Text('CONTINUE', style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
               ),
             ],
           ),
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
         ],
       ),
     );

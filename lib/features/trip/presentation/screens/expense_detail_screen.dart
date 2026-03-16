@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_boring_avatars/flutter_boring_avatars.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:mudra_manager/core/db/models/transaction.dart';
+import 'package:intl/intl.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/db/models/trip.dart';
+import 'package:mudra_manager/core/extension/case_extention.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/dialog_utils.dart';
+import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
+import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/features/trip/data/trip_provider.dart';
+import 'package:mudra_manager/shared/widgets/currency_text.dart';
 
 class ExpenseDetailScreen extends ConsumerStatefulWidget {
   final int expenseId;
@@ -24,286 +31,487 @@ class ExpenseDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
-  late TextEditingController _amountController;
-  late TextEditingController _descController;
   List<TripParticipant> _selectedParticipants = [];
-  TripParticipant? _paidBy;
   SplitType _splitType = SplitType.equal;
-  Map<int, double> _splitAmounts = {};
+  final Map<int, double> _splitAmounts = {};
   bool _isInitialized = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _amountController = TextEditingController();
-    _descController = TextEditingController();
-  }
-
-  @override
-  void dispose() {
-    _amountController.dispose();
-    _descController.dispose();
-    super.dispose();
-  }
 
   void _initializeData(TripTransaction tripTxn, Trip trip) {
     if (_isInitialized) return;
-    final txn = tripTxn.transaction.value;
-    if (txn == null) return;
-    _amountController.text = txn.amount.toString();
-    _descController.text = txn.description ?? '';
-    _selectedParticipants = trip.participants.toList();
-    _paidBy = trip.participants.firstOrNull;
+    _splitType = tripTxn.splitType;
+    _selectedParticipants = trip.participants
+        .where((p) => tripTxn.participantIds.contains(p.id))
+        .toList();
+    if (_selectedParticipants.isEmpty) {
+      _selectedParticipants = trip.participants.toList();
+    }
+    for (var i = 0; i < tripTxn.participantIds.length; i++) {
+      if (i < tripTxn.splitAmounts.length) {
+        _splitAmounts[tripTxn.participantIds[i]] = tripTxn.splitAmounts[i];
+      }
+    }
     _isInitialized = true;
   }
 
   @override
   Widget build(BuildContext context) {
     final tripAsync = ref.watch(tripByIdProvider(widget.tripId));
+    final spacing = ref.watch(spacingProvider);
+    final isGuestMode = ref.watch(guestModeProvider);
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Expense Details'),
-        actions: [
-          PopupMenuButton(
-            icon: const Icon(Icons.more_vert),
-            itemBuilder: (ctx) => [
-              PopupMenuItem(
-                value: 'delete',
-                child: Row(
-                  children: [
-                    Icon(Icons.delete_forever, color: color.error),
-                    const SizedBox(width: 8),
-                    Text('Delete', style: TextStyle(color: color.error)),
-                  ],
-                ),
-              ),
-            ],
-            onSelected: (val) {
-              if (val == 'delete') _deleteExpense();
-            },
-          ),
-        ],
-      ),
-      body: tripAsync.when(
-        data: (trip) {
-          if (trip == null) return const Center(child: Text('Trip not found'));
-          final tripTxn = trip.transactions
-              .where((t) => t.id == widget.expenseId)
-              .firstOrNull;
-          if (tripTxn == null) {
-            return const Center(child: Text('Expense not found'));
-          }
-          
-          final expense = tripTxn.transaction.value;
-          if (expense == null) {
-            return const Center(child: Text('Expense not found'));
-          }
+    return tripAsync.when(
+      data: (trip) {
+        if (trip == null) {
+          return Scaffold(
+            appBar: AppBar(title: const Text('Trip Not Found')),
+            body: const Center(child: Text('Trip not found')),
+          );
+        }
+        final tripTxn = trip.transactions
+            .where((t) => t.id == widget.expenseId)
+            .firstOrNull;
+        final expense = tripTxn?.transaction.value;
+        if (tripTxn == null || expense == null) {
+          return Scaffold(
+            appBar: AppBar(title: const Text('Not Found')),
+            body: const Center(child: Text('Expense not found')),
+          );
+        }
 
-          _initializeData(tripTxn, trip);
+        _initializeData(tripTxn, trip);
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Card(
-                  elevation: 0,
-                  color: color.surfaceContainerHighest,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
+        final amount =
+            GuestModeUtil.applyGuestMode(expense.amount, isGuestMode);
+        final paidBy = tripTxn.paidBy.value;
+        final category = expense.category.value?.name ?? 'Uncategorized';
+        final perPerson = _selectedParticipants.isNotEmpty
+            ? amount / _selectedParticipants.length
+            : 0.0;
+
+        return Scaffold(
+          appBar: AppBar(
+            leading: IconButton(
+              icon: const Icon(LucideIcons.arrowLeft),
+              onPressed: () {
+                HapticFeedback.mediumImpact();
+                context.pop();
+              },
+            ),
+            title: const Text('Expense Details'),
+            actions: [
+              PopupMenuButton(
+                icon: const Icon(LucideIcons.ellipsisVertical),
+                itemBuilder: (ctx) => [
+                  PopupMenuItem(
+                    value: 'delete',
                     child: Row(
                       children: [
-                        CircleAvatar(
-                          backgroundColor: color.primaryContainer,
-                          child: Icon(
-                            Icons.receipt_long,
-                            color: color.primary,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                expense.category.value?.name ?? 'Expense',
-                                style: textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                '${expense.date.day}/${expense.date.month}/${expense.date.year}',
-                                style: textTheme.bodySmall?.copyWith(
-                                  color: color.onSurfaceVariant,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                        Icon(LucideIcons.trash2, color: color.error, size: 18),
+                        const SizedBox(width: 8),
+                        Text('Delete', style: TextStyle(color: color.error)),
                       ],
                     ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                Card(
-                  elevation: 0,
-                  color: color.surfaceContainerHighest,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Amount',
-                          style: textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        TextField(
-                          controller: _amountController,
-                          decoration: InputDecoration(
-                            prefixIcon: const Icon(Icons.currency_rupee),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            filled: true,
-                            fillColor: color.surface,
-                          ),
-                          keyboardType: TextInputType.number,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Description',
-                          style: textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        TextField(
-                          controller: _descController,
-                          decoration: InputDecoration(
-                            prefixIcon: const Icon(Icons.notes),
-                            hintText: 'Optional',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            filled: true,
-                            fillColor: color.surface,
-                          ),
-                          maxLines: 2,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Card(
-                  elevation: 0,
-                  color: color.surfaceContainerHighest,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Split Details',
-                              style: textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            TextButton.icon(
-                              onPressed: () => _editSplit(trip),
-                              icon: const Icon(Icons.edit, size: 16),
-                              label: const Text('Edit Split'),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: color.surface,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Split ${_selectedParticipants.length} ways',
-                                style: textTheme.bodyMedium?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                _selectedParticipants
-                                    .map((p) => p.name)
-                                    .join(', '),
-                                style: textTheme.bodySmall?.copyWith(
-                                  color: color.onSurfaceVariant,
-                                ),
-                              ),
-                              if (_amountController.text.isNotEmpty) ...[
-                                const SizedBox(height: 8),
-                                Text(
-                                  '₹${(double.tryParse(_amountController.text) ?? 0) / _selectedParticipants.length} per person',
-                                  style: textTheme.bodySmall?.copyWith(
-                                    color: color.primary,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                FilledButton(
-                  onPressed: () => _saveExpense(tripTxn, trip),
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 56),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text(
-                    'SAVE CHANGES',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.2,
-                    ),
-                  ),
-                ),
-              ],
+                ],
+                onSelected: (val) {
+                  if (val == 'delete') _deleteExpense();
+                },
+              ),
+            ],
+          ),
+          body: ListView(
+            padding: EdgeInsets.symmetric(
+              horizontal: spacing.cardHorizontal,
+              vertical: spacing.cardVertical,
             ),
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+            children: [
+              // Amount hero
+              _buildAmountHero(
+                amount,
+                category,
+                expense.date,
+                spacing,
+                color,
+                textTheme,
+              ),
+              SizedBox(height: spacing.sectionGap),
+              // Info card
+              _buildInfoCard(
+                paidBy: paidBy,
+                description: expense.description,
+                spacing: spacing,
+                color: color,
+                textTheme: textTheme,
+              ),
+              const SizedBox(height: 16),
+              // Split breakdown
+              _buildSplitBreakdown(
+                tripTxn: tripTxn,
+                trip: trip,
+                totalAmount: amount,
+                perPerson: perPerson,
+                spacing: spacing,
+                color: color,
+                textTheme: textTheme,
+              ),
+            ],
+          ),
+        );
+      },
+      loading: () => const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      ),
+      error: (e, _) => Scaffold(
+        appBar: AppBar(title: const Text('Error')),
+        body: Center(child: Text('Error: $e')),
       ),
     );
   }
 
-  void _editSplit(Trip trip) {
-    final amount = double.tryParse(_amountController.text) ?? 0.0;
+  Widget _buildAmountHero(
+    double amount,
+    String category,
+    DateTime date,
+    AppSpacing spacing,
+    ColorScheme color,
+    TextTheme textTheme,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            color.primary,
+            color.primary.withValues(alpha: 0.8),
+            color.tertiary.withValues(alpha: 0.7),
+          ],
+        ),
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            top: -30,
+            right: -30,
+            child: Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    Colors.white.withValues(alpha: 0.1),
+                    Colors.white.withValues(alpha: 0.0),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.all(spacing.cardInner),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: spacing.cardHorizontal,
+                    vertical: spacing.cardVertical,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                  ),
+                  child: Text(
+                    category,
+                    style: textTheme.labelLarge?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                SizedBox(height: spacing.sectionGap),
+                CurrencyText(
+                  amount: amount,
+                  compact: false,
+                  style: textTheme.displaySmall?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                  ),
+                ),
+                SizedBox(height: spacing.elementGap),
+                Text(
+                  DateFormat('EEEE, d MMMM yyyy').format(date),
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: Colors.white.withValues(alpha: 0.7),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoCard({
+    required TripParticipant? paidBy,
+    required String? description,
+    required AppSpacing spacing,
+    required ColorScheme color,
+    required TextTheme textTheme,
+  }) {
+    return Card(
+      elevation: 0,
+      margin: const EdgeInsets.only(),
+      color: color.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        side: BorderSide(
+          color: color.outlineVariant.withValues(alpha: 0.5),
+        ),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(spacing.cardInner),
+        child: Column(
+          children: [
+            _infoRow(
+              icon: LucideIcons.user,
+              label: 'Paid by',
+              value: paidBy?.name ?? 'Unknown',
+              color: color,
+              textTheme: textTheme,
+              spacing: spacing,
+            ),
+            if (description != null && description.isNotEmpty) ...[
+              Divider(color: color.outlineVariant.withValues(alpha: 0.3)),
+              _infoRow(
+                icon: LucideIcons.textQuote,
+                label: 'Note',
+                value: description,
+                color: color,
+                textTheme: textTheme,
+                spacing: spacing,
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _infoRow({
+    required IconData icon,
+    required String label,
+    required String value,
+    required ColorScheme color,
+    required TextTheme textTheme,
+    required AppSpacing spacing,
+  }) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: spacing.cardVertical),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.primaryContainer.withValues(alpha: 0.5),
+              borderRadius: BorderRadius.circular(spacing.radiusMedium),
+            ),
+            child: Icon(icon, size: 18, color: color.primary),
+          ),
+          SizedBox(width: spacing.sectionGap),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: textTheme.labelSmall?.copyWith(
+                    color: color.onSurfaceVariant,
+                  ),
+                ),
+                SizedBox(height: spacing.cardHorizontalMin),
+                Text(
+                  value,
+                  style: textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSplitBreakdown({
+    required TripTransaction tripTxn,
+    required Trip trip,
+    required double totalAmount,
+    required double perPerson,
+    required AppSpacing spacing,
+    required ColorScheme color,
+    required TextTheme textTheme,
+  }) {
+    final chartColors = [
+      color.primary,
+      color.tertiary,
+      color.secondary,
+      color.error,
+      color.primaryContainer,
+      color.tertiaryContainer,
+    ];
+
+    return Card(
+      elevation: 0,
+      margin: const EdgeInsets.only(),
+      color: color.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        side: BorderSide(
+          color: color.outlineVariant.withValues(alpha: 0.5),
+        ),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(spacing.cardInner),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(LucideIcons.users, color: color.secondary, size: 20),
+                SizedBox(width: spacing.sectionGap),
+                Expanded(
+                  child: Text(
+                    'Split · ${_splitType.name.toTitleCase()}',
+                    style: textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                TextButton.icon(
+                  onPressed: () => _editSplit(trip, tripTxn),
+                  icon: const Icon(LucideIcons.pencil, size: 14),
+                  label: const Text('Edit'),
+                  style: TextButton.styleFrom(
+                    visualDensity: VisualDensity.compact,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: spacing.sectionGap),
+            ..._selectedParticipants.asMap().entries.map((entry) {
+              final i = entry.key;
+              final p = entry.value;
+              final pIdx = tripTxn.participantIds.indexOf(p.id);
+              double share;
+              if (_splitType == SplitType.equal) {
+                share = totalAmount / _selectedParticipants.length;
+              } else if (pIdx >= 0 && pIdx < tripTxn.splitAmounts.length) {
+                share = _splitType == SplitType.percentage
+                    ? totalAmount * tripTxn.splitAmounts[pIdx] / 100
+                    : tripTxn.splitAmounts[pIdx];
+              } else {
+                share = perPerson;
+              }
+              final pct = totalAmount > 0 ? share / totalAmount : 0.0;
+              final barColor = chartColors[i % chartColors.length];
+
+              return Container(
+                padding: EdgeInsets.all(spacing.cardInner),
+                decoration: BoxDecoration(
+                  color: color.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                ),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 36,
+                      height: 36,
+                      child: ClipOval(
+                        child: BoringAvatar(
+                          name: p.name,
+                          palette: BoringAvatarPalette([
+                            color.primary,
+                            color.tertiary,
+                            color.primaryContainer,
+                            color.tertiaryContainer,
+                          ]),
+                          type: BoringAvatarType.beam,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: spacing.elementGap),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            p.name,
+                            style: textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          SizedBox(height: spacing.cardHorizontalMin),
+                          ClipRRect(
+                            borderRadius:
+                                BorderRadius.circular(spacing.radiusSmall),
+                            child: LinearProgressIndicator(
+                              value: pct,
+                              minHeight: 4,
+                              backgroundColor: color.surface,
+                              valueColor: AlwaysStoppedAnimation(barColor),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(width: spacing.elementGap),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        CurrencyText(
+                          amount: share,
+                          compact: false,
+                          fixedLength: 0,
+                          style: textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: barColor,
+                          ),
+                        ),
+                        Text(
+                          '${(pct * 100).toStringAsFixed(0)}%',
+                          style: textTheme.labelSmall?.copyWith(
+                            color: color.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ─── SPLIT EDIT + ACTIONS ───
+
+  void _editSplit(Trip trip, TripTransaction tripTxn) {
+    final amount = tripTxn.transaction.value?.amount ?? 0.0;
     final controllers = <int, TextEditingController>{};
-    
     for (var p in _selectedParticipants) {
       controllers[p.id] = TextEditingController(
         text: (_splitAmounts[p.id] ?? 0).toString(),
       );
     }
-    
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -314,7 +522,7 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
         builder: (ctx, setModalState) {
           final color = Theme.of(context).colorScheme;
           final textTheme = Theme.of(context).textTheme;
-          
+
           double currentSum = 0;
           for (var id in _selectedParticipants.map((p) => p.id)) {
             currentSum += _splitAmounts[id] ?? 0;
@@ -322,7 +530,7 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
           final isPercentage = _splitType == SplitType.percentage;
           final target = isPercentage ? 100.0 : amount;
           final remaining = target - currentSum;
-          
+
           return Padding(
             padding: EdgeInsets.only(
               bottom: MediaQuery.of(context).viewInsets.bottom + 16,
@@ -345,7 +553,9 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text('Split Type', style: textTheme.titleSmall),
-                    if ((_splitType == SplitType.custom || _splitType == SplitType.percentage) && amount > 0)
+                    if ((_splitType == SplitType.custom ||
+                            _splitType == SplitType.percentage) &&
+                        amount > 0)
                       Text(
                         isPercentage
                             ? 'Remaining: ${remaining.toStringAsFixed(1)}%'
@@ -395,20 +605,23 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
                     separatorBuilder: (_, __) => const SizedBox(height: 8),
                     itemBuilder: (context, index) {
                       final p = trip.participants.toList()[index];
-                      final isSelected = _selectedParticipants.any((sp) => sp.id == p.id);
-                      
+                      final isSelected =
+                          _selectedParticipants.any((sp) => sp.id == p.id);
+
                       return InkWell(
                         onTap: () {
                           HapticFeedback.lightImpact();
                           setState(() {
                             if (isSelected) {
-                              _selectedParticipants.removeWhere((sp) => sp.id == p.id);
+                              _selectedParticipants
+                                  .removeWhere((sp) => sp.id == p.id);
                               _splitAmounts.remove(p.id);
                             } else {
                               _selectedParticipants.add(p);
                               if (_splitType != SplitType.equal) {
                                 _splitAmounts[p.id] = 0.0;
-                                controllers[p.id] = TextEditingController(text: '0');
+                                controllers[p.id] =
+                                    TextEditingController(text: '0');
                               }
                             }
                           });
@@ -446,20 +659,27 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
                               ),
                               const SizedBox(width: 16),
                               Expanded(
-                                child: (_splitType == SplitType.custom || _splitType == SplitType.percentage) && isSelected
+                                child: (_splitType == SplitType.custom ||
+                                            _splitType ==
+                                                SplitType.percentage) &&
+                                        isSelected
                                     ? Row(
                                         children: [
                                           Text(
                                             p.name,
-                                            style: textTheme.titleMedium?.copyWith(
+                                            style:
+                                                textTheme.titleMedium?.copyWith(
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
                                           const Spacer(),
-                                          if (_splitType == SplitType.percentage && amount > 0)
+                                          if (_splitType ==
+                                                  SplitType.percentage &&
+                                              amount > 0)
                                             Text(
                                               '₹${(amount * (_splitAmounts[p.id] ?? 0) / 100).toStringAsFixed(0)}  ',
-                                              style: textTheme.bodySmall?.copyWith(
+                                              style:
+                                                  textTheme.bodySmall?.copyWith(
                                                 color: color.primary,
                                                 fontWeight: FontWeight.bold,
                                               ),
@@ -468,29 +688,61 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
                                             width: 120,
                                             child: TextField(
                                               controller: controllers[p.id],
-                                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                              keyboardType: const TextInputType
+                                                  .numberWithOptions(
+                                                decimal: true,
+                                              ),
                                               decoration: InputDecoration(
-                                                prefixText: _splitType == SplitType.percentage ? '' : '₹',
-                                                suffixText: _splitType == SplitType.percentage ? '%' : null,
+                                                prefixText: _splitType ==
+                                                        SplitType.percentage
+                                                    ? ''
+                                                    : '₹',
+                                                suffixText: _splitType ==
+                                                        SplitType.percentage
+                                                    ? '%'
+                                                    : null,
                                                 isDense: true,
-                                                contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                                                contentPadding:
+                                                    const EdgeInsets.symmetric(
+                                                  horizontal: 8,
+                                                  vertical: 8,
+                                                ),
                                                 border: OutlineInputBorder(
-                                                  borderRadius: BorderRadius.circular(8),
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
                                                 ),
                                                 suffixIcon: IconButton(
-                                                  icon: Icon(Icons.auto_fix_high, size: 18, color: color.primary),
-                                                  tooltip: 'Auto-fill remaining',
+                                                  icon: Icon(
+                                                    Icons.auto_fix_high,
+                                                    size: 18,
+                                                    color: color.primary,
+                                                  ),
+                                                  tooltip:
+                                                      'Auto-fill remaining',
                                                   padding: EdgeInsets.zero,
-                                                  constraints: const BoxConstraints(),
+                                                  constraints:
+                                                      const BoxConstraints(),
                                                   onPressed: () {
                                                     double othersSum = 0;
-                                                    for (var sp in _selectedParticipants) {
-                                                      if (sp.id == p.id) continue;
-                                                      othersSum += _splitAmounts[sp.id] ?? 0;
+                                                    for (var sp
+                                                        in _selectedParticipants) {
+                                                      if (sp.id == p.id) {
+                                                        continue;
+                                                      }
+                                                      othersSum +=
+                                                          _splitAmounts[
+                                                                  sp.id] ??
+                                                              0;
                                                     }
-                                                    final remaining = target - othersSum;
-                                                    setState(() => _splitAmounts[p.id] = remaining);
-                                                    controllers[p.id]!.text = remaining.toStringAsFixed(
+                                                    final rem =
+                                                        target - othersSum;
+                                                    setState(
+                                                      () =>
+                                                          _splitAmounts[p.id] =
+                                                              rem,
+                                                    );
+                                                    controllers[p.id]!.text =
+                                                        rem.toStringAsFixed(
                                                       isPercentage ? 1 : 2,
                                                     );
                                                     setModalState(() {});
@@ -499,7 +751,9 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
                                               ),
                                               onChanged: (value) {
                                                 setState(() {
-                                                  _splitAmounts[p.id] = double.tryParse(value) ?? 0.0;
+                                                  _splitAmounts[p.id] =
+                                                      double.tryParse(value) ??
+                                                          0.0;
                                                 });
                                                 setModalState(() {});
                                               },
@@ -510,14 +764,22 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
                                     : Text(
                                         p.name,
                                         style: textTheme.titleMedium?.copyWith(
-                                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                          fontWeight: isSelected
+                                              ? FontWeight.bold
+                                              : FontWeight.normal,
                                         ),
                                       ),
                               ),
                               if (isSelected && _splitType == SplitType.equal)
-                                Icon(Icons.check_circle_rounded, color: color.primary)
+                                Icon(
+                                  Icons.check_circle_rounded,
+                                  color: color.primary,
+                                )
                               else if (!isSelected)
-                                Icon(Icons.circle_outlined, color: color.outline),
+                                Icon(
+                                  Icons.circle_outlined,
+                                  color: color.outline,
+                                ),
                             ],
                           ),
                         ),
@@ -546,52 +808,20 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
     );
   }
 
-  Future<void> _saveExpense(TripTransaction tripTxn, Trip trip) async {
-    final expense = tripTxn.transaction.value;
-    if (expense == null) return;
-    
-    final amount = double.tryParse(_amountController.text.trim());
-    if (amount == null || amount <= 0) {
-      SnackbarService.error('Enter valid amount');
-      return;
-    }
-    if (_selectedParticipants.isEmpty) {
-      SnackbarService.error('Select at least one participant');
-      return;
-    }
-
-    HapticFeedback.mediumImpact();
-
-    expense.amount = amount;
-    expense.description = _descController.text.trim().isEmpty
-        ? null
-        : _descController.text.trim();
-
-    final isar = await ref.read(tripServiceProvider).isarService.getInstance();
-    await isar.writeTxn(() async {
-      await isar.transactions.put(expense);
-    });
-
-    ref.invalidate(tripByIdProvider(widget.tripId));
-
-    SnackbarService.success('Recalculating group debts...');
-    if (mounted) context.pop();
-  }
-
   Future<void> _deleteExpense() async {
     final confirm = await DialogUtils.showConfirmation(
       context,
       title: 'Delete Expense',
       message: 'This will adjust everyone\'s balance. Continue?',
       confirmText: 'Delete',
-      icon: Icons.delete_forever,
+      icon: LucideIcons.trash2,
     );
     if (confirm != true) return;
 
     await ref.read(tripServiceProvider).removeTripTransaction(
-      widget.tripId,
-      widget.expenseId,
-    );
+          widget.tripId,
+          widget.expenseId,
+        );
     ref.invalidate(tripByIdProvider(widget.tripId));
 
     SnackbarService.success('Expense deleted');

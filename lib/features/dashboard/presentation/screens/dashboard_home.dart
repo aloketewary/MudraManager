@@ -3,31 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/budget/data/budget_alert_provider.dart';
-import 'package:mudra_manager/features/dashboard/presentation/screens/cash_flow_screen.dart';
-import 'package:mudra_manager/features/dashboard/presentation/widgets/budget_card.dart';
-import 'package:mudra_manager/features/dashboard/presentation/widgets/financial_health_card.dart';
-import 'package:mudra_manager/features/dashboard/presentation/widgets/goal_card.dart';
-import 'package:mudra_manager/features/dashboard/presentation/widgets/net_worth_card.dart';
-import 'package:mudra_manager/features/dashboard/presentation/widgets/spending_prediction_card.dart';
-import 'package:mudra_manager/features/dashboard/presentation/widgets/recurring_expenses_card.dart';
-import 'package:mudra_manager/features/dashboard/presentation/widgets/spending_personality_card.dart';
-import 'package:mudra_manager/features/dashboard/presentation/widgets/dashboard_action_button.dart';
-import 'package:mudra_manager/features/dashboard/presentation/widgets/swipeable_account_card.dart';
+import 'package:mudra_manager/features/budget/data/budget_alert_service.dart';
+import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
+import 'package:mudra_manager/features/dashboard/presentation/providers/widget_preferences_provider.dart';
 import 'package:mudra_manager/features/profile/data/help_guide_provider.dart';
-import 'package:mudra_manager/features/trip/presentation/widgets/active_trip_mini_card.dart';
-import 'package:mudra_manager/features/marketplace/services/marketplace_service.dart';
 import 'package:mudra_manager/shared/widgets/budget_alert_banner.dart';
-import 'package:mudra_manager/shared/widgets/period_calendar_selector.dart';
-import 'package:mudra_manager/shared/widgets/responseive_layout_builder.dart';
-import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class DashboardHome extends ConsumerStatefulWidget {
   const DashboardHome({super.key});
@@ -37,20 +24,13 @@ class DashboardHome extends ConsumerStatefulWidget {
 }
 
 class _DashboardHomeState extends ConsumerState<DashboardHome> {
-  double globalPadding = 8.0;
-  double allBoxWidthFactor = 0.4;
-  PeriodType _selectedPeriod = PeriodType.month;
-  DateTime? _customStart;
-  DateTime? _customEnd;
   final AppLog log = AppLog(getLogger(), 'DashBoardHome');
-  List<String> _visibleCards = [];
-  List<String> _cardOrder = [];
-  bool _isLoading = true;
+  int _revealedCount = 0;
+  bool _allRevealed = false;
 
   @override
   void initState() {
     super.initState();
-    _loadCardPreferences();
     Future.delayed(const Duration(milliseconds: 500), _performDailyCheckIn);
   }
 
@@ -74,355 +54,90 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
     }
   }
 
-  Future<void> _loadCardPreferences() async {
-    final prefs = await SharedPreferences.getInstance();
-    final visible = prefs.getStringList('visible_dashboard_cards');
-    final order = prefs.getStringList('dashboard_cards_order');
-
-    // Check if travel plugin is enabled
-    final marketplace = MarketplaceService();
-    final isTravelEnabled =
-        await marketplace.isPluginEnabled('com.mudra.travel_expenses');
-
-    setState(() {
-      _visibleCards = visible ??
-          [
-            'accounts',
-            'action_buttons',
-            'spending_personality',
-            'cash_flow',
-            'financial_health',
-            'net_worth',
-            'spending_prediction',
-            'recurring_expenses',
-            if (isTravelEnabled) 'active_trip',
-            'budget',
-            'goal',
-          ];
-      _cardOrder = order ??
-          [
-            'accounts',
-            'action_buttons',
-            'spending_personality',
-            'cash_flow',
-            'financial_health',
-            'net_worth',
-            'spending_prediction',
-            'recurring_expenses',
-            if (isTravelEnabled) 'active_trip',
-            'budget',
-            'goal',
-          ];
-      _isLoading = false;
+  void _revealNext(int total) {
+    if (_allRevealed || !mounted) return;
+    Future.delayed(const Duration(milliseconds: 80), () {
+      if (!mounted) return;
+      setState(() {
+        _revealedCount++;
+        if (_revealedCount >= total) _allRevealed = true;
+      });
     });
-  }
-
-  bool _isCardVisible(String cardId) => _visibleCards.contains(cardId);
-
-  Widget? _buildCard(String cardId, int index) {
-    if (!_isCardVisible(cardId)) return null;
-    final ctxt = AppLocalizations.of(context)!;
-
-    switch (cardId) {
-      case 'accounts':
-        return const AnimatedSwipeableAccountCards();
-      case 'action_buttons':
-        return Container(
-          margin: EdgeInsets.symmetric(horizontal: globalPadding),
-          child: ResponsiveLayoutBuilder(
-            columnWidget: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Flexible(
-                  child: DashboardActionButton(
-                    label: ctxt.dashboard_add_transaction_text,
-                    icon: LucideIcons.circlePlus,
-                    onTap: () => context.push('/add-transaction'),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Flexible(
-                  child: DashboardActionButton(
-                    label: ctxt.dashboard_add_transfer_text,
-                    icon: LucideIcons.arrowLeftRight,
-                    onTap: () => context.push('/transfer'),
-                    backgroundColor:
-                        Theme.of(context).colorScheme.surfaceContainerHigh,
-                    iconColor: Theme.of(context).colorScheme.tertiary,
-                    textColor: Theme.of(context).colorScheme.tertiary,
-                  ),
-                ),
-              ],
-            ),
-            rowWidget: Row(
-              children: [
-                Expanded(
-                  child: DashboardActionButton(
-                    label: ctxt.dashboard_add_transaction_text,
-                    icon: LucideIcons.circlePlus,
-                    onTap: () => context.push('/add-transaction'),
-                    heroTag: 'addTransactionHeroDashboard',
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: DashboardActionButton(
-                    label: ctxt.dashboard_add_transfer_text,
-                    icon: LucideIcons.arrowLeftRight,
-                    onTap: () => context.push('/transfer'),
-                    backgroundColor:
-                        Theme.of(context).colorScheme.surfaceContainerHigh,
-                    iconColor: Theme.of(context).colorScheme.tertiary,
-                    textColor: Theme.of(context).colorScheme.tertiary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      case 'spending_personality':
-        return SpendingPersonalityCard(globalPadding: globalPadding);
-      case 'cash_flow':
-        return Column(
-          children: [
-            CashFlowScreen(
-              globalPadding: globalPadding,
-              selectedPeriod: _selectedPeriod,
-              customStart: _customStart,
-              customEnd: _customEnd,
-            ),
-            const SizedBox(height: 8),
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: globalPadding),
-              child: PeriodCalendarSelector(
-                selectedPeriod: _selectedPeriod,
-                customStart: _customStart,
-                customEnd: _customEnd,
-                onChanged: (period, start, end) {
-                  setState(() {
-                    _selectedPeriod = period;
-                    _customStart = start;
-                    _customEnd = end;
-                  });
-                },
-              ),
-            ),
-          ],
-        );
-      case 'financial_health':
-        return FinancialHealthCard(globalPadding: globalPadding);
-      case 'net_worth':
-        return NetWorthCard(globalPadding: globalPadding);
-      case 'spending_prediction':
-        return SpendingPredictionCard(globalPadding: globalPadding);
-      case 'recurring_expenses':
-        return RecurringExpensesCard(globalPadding: globalPadding);
-      case 'active_trip':
-        return ActiveTripMiniCard(globalPadding: globalPadding);
-      case 'budget':
-        return BudgetCard(globalPadding: globalPadding);
-      case 'goal':
-        return GoalCard(globalPadding: globalPadding);
-      default:
-        return null;
-    }
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final color = Theme.of(context).colorScheme;
-    final ctxt = AppLocalizations.of(context)!;
+    final widgets = ref.watch(orderedDashboardWidgetsProvider);
     final alerts = ref.watch(budgetAlertsProvider);
     final hasSeenHelp = ref.watch(hasSeenHelpGuideProvider);
-    final hasAnyVisibleCards = _visibleCards.isNotEmpty;
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
-    if (_isLoading) {
-      return Scaffold(
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              const SizedBox(height: 16),
-              Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: globalPadding,
-                  vertical: 8,
-                ),
-                child: SkeletonLoader(
-                  width: double.infinity,
-                  height: 180,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: globalPadding,
-                  vertical: 8,
-                ),
-                child: SkeletonLoader(
-                  width: double.infinity,
-                  height: 100,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: globalPadding,
-                  vertical: 8,
-                ),
-                child: SkeletonLoader(
-                  width: double.infinity,
-                  height: 120,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: globalPadding,
-                  vertical: 8,
-                ),
-                child: SkeletonLoader(
-                  width: double.infinity,
-                  height: 140,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: globalPadding,
-                  vertical: 8,
-                ),
-                child: SkeletonLoader(
-                  width: double.infinity,
-                  height: 160,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              const SizedBox(height: 100),
-            ],
-          ),
-        ),
-      );
+    // Once all revealed, skip stagger logic on rebuilds
+    if (!_allRevealed && _revealedCount == 0 && widgets.isNotEmpty) {
+      // Kick off the first reveal
+      _revealNext(widgets.length);
     }
 
+    final visibleCount = _allRevealed ? widgets.length : _revealedCount;
+
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (!hasSeenHelp)
-              Container(
-                margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                child: Card(
-                  elevation: 0,
-                  color: color.primaryContainer,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(12),
-                    onTap: () {
-                      HapticFeedback.mediumImpact();
-                      context.push('/help');
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: color.primary,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Icon(
-                              Icons.help_outline,
-                              color: color.onPrimary,
-                              size: 24,
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'New to Mudra Manager?',
-                                  style: textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: color.onPrimaryContainer,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Check out our help guide to get started',
-                                  style: textTheme.bodySmall?.copyWith(
-                                    color: color.onPrimaryContainer,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Icon(
-                            Icons.arrow_forward_ios,
-                            size: 16,
-                            color: color.onPrimaryContainer,
-                          ),
-                          IconButton(
-                            icon: Icon(
-                              Icons.close,
-                              size: 20,
-                              color: color.onPrimaryContainer,
-                            ),
-                            onPressed: () async {
-                              await SharedPrefsUtil.instance
-                                  .setHasSeenHelpGuide(true);
-                              ref
-                                  .read(hasSeenHelpGuideProvider.notifier)
-                                  .state = true;
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          ref.invalidate(dashboardDataProvider);
+          for (final widget in widgets) {
+            await widget.refresh(ref);
+          }
+        },
+        child: CustomScrollView(
+          key: const PageStorageKey('dashboard_scroll'),
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            // Help banner
+            if (!hasSeenHelp) SliverToBoxAdapter(child: _HelpBanner()),
+
+            // Alert banners
+            if (!hasSeenHelp && alerts.isNotEmpty)
+              SliverToBoxAdapter(
+                child: _AlertBanner(alerts: alerts),
               ),
-            if (alerts.isNotEmpty)
-              BudgetAlertBanner(
-                alerts: alerts,
-                onDismiss: () {
-                  ref
-                      .read(budgetAlertsProvider.notifier)
-                      .dismissAlert(alerts.first);
+
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final widget = widgets[index];
+
+                  if (index < visibleCount) {
+                    // Reveal next after this one builds
+                    if (index == visibleCount - 1 && !_allRevealed) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        _revealNext(widgets.length);
+                      });
+                    }
+                    return _StaggeredEntry(
+                      key: ValueKey(widget.id),
+                      child: widget.build(context, ref),
+                    );
+                  }
+
+                  // Placeholder for not-yet-revealed widgets
+                  return const SizedBox.shrink();
                 },
+                childCount: widgets.length,
               ),
-            const SizedBox(height: 16),
-            ...() {
-              final widgets = <Widget>[];
-              for (int i = 0; i < _cardOrder.length; i++) {
-                final widget = _buildCard(_cardOrder[i], i);
-                if (widget != null && widget is! SizedBox) {
-                  widgets.add(widget);
-                }
-              }
-              return widgets;
-            }(),
-            if (!hasAnyVisibleCards)
-              Container(
-                margin: const EdgeInsets.all(16),
-                child: Card(
-                  elevation: 0,
-                  color: color.surfaceContainerHighest,
+            ),
+
+            if (widgets.isEmpty)
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: Center(
                   child: Padding(
                     padding: const EdgeInsets.all(24),
                     child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          Icons.dashboard_customize,
+                          LucideIcons.layoutDashboard,
                           size: 64,
                           color: color.onSurfaceVariant,
                         ),
@@ -441,10 +156,10 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                           ),
                           textAlign: TextAlign.center,
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 24),
                         FilledButton.icon(
                           onPressed: () => context.push('/dashboard-customize'),
-                          icon: const Icon(Icons.add),
+                          icon: const Icon(LucideIcons.plus),
                           label: const Text('Enable Cards'),
                         ),
                       ],
@@ -452,8 +167,175 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                   ),
                 ),
               ),
-            const SizedBox(height: 100), // Extra space for bottom nav
+
+            // Bottom spacing
+            if (widgets.isNotEmpty)
+              const SliverToBoxAdapter(
+                child: SizedBox(height: 100),
+              ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Fade-in entry for each staggered widget
+class _StaggeredEntry extends StatefulWidget {
+  final Widget child;
+  const _StaggeredEntry({super.key, required this.child});
+
+  @override
+  State<_StaggeredEntry> createState() => _StaggeredEntryState();
+}
+
+class _StaggeredEntryState extends State<_StaggeredEntry>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _opacity;
+  late final Animation<Offset> _slide;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _opacity = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
+    _slide = Tween<Offset>(
+      begin: const Offset(0, 0.04),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _opacity,
+      child: SlideTransition(
+        position: _slide,
+        child: widget.child,
+      ),
+    );
+  }
+}
+
+class _AlertBanner extends ConsumerWidget {
+  final List<BudgetAlert> alerts;
+
+  const _AlertBanner({required this.alerts});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Column(
+      children: [
+        BudgetAlertBanner(
+          alerts: alerts,
+          onDismiss: () {
+            ref.read(budgetAlertsProvider.notifier).dismissAlert(alerts.first);
+          },
+        ),
+        const SizedBox(height: 16),
+      ],
+    );
+  }
+}
+
+class _HelpBanner extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final spacing = ref.watch(spacingProvider);
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final accent = color.primary;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: spacing.cardHorizontal,
+        vertical: spacing.cardVertical,
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(spacing.radiusMedium),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              accent.withValues(alpha: isDark ? 0.2 : 0.12),
+              accent.withValues(alpha: isDark ? 0.08 : 0.04),
+            ],
+          ),
+          border: Border.all(color: accent.withValues(alpha: 0.3)),
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(spacing.radiusMedium),
+          onTap: () {
+            HapticFeedback.mediumImpact();
+            context.push('/help');
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: accent.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                  ),
+                  child: Icon(LucideIcons.badgeQuestionMark, color: accent, size: 20),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'New to Mudra Manager?',
+                        style: textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: color.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Tap to explore the help guide',
+                        style: textTheme.bodySmall?.copyWith(
+                          color: color.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  LucideIcons.chevronRight,
+                  size: 18,
+                  color: color.onSurfaceVariant,
+                ),
+                const SizedBox(width: 4),
+                GestureDetector(
+                  onTap: () async {
+                    await SharedPrefsUtil.instance.setHasSeenHelpGuide(true);
+                    ref.read(hasSeenHelpGuideProvider.notifier).state = true;
+                  },
+                  child: Icon(
+                    LucideIcons.x,
+                    size: 18,
+                    color: color.onSurfaceVariant.withValues(alpha: 0.6),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
