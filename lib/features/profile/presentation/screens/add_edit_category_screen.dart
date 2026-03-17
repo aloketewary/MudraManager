@@ -11,6 +11,8 @@ import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/icon_helper.dart';
 import 'package:mudra_manager/core/utils/simple_color_picker.dart';
 import 'package:mudra_manager/features/category/data/category_provider.dart';
+import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
+import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
 import 'package:mudra_manager/features/profile/presentation/widgets/icon_picker_bottom_sheet.dart';
 
 class AddEditCategoryScreen extends ConsumerStatefulWidget {
@@ -137,7 +139,11 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
           ),
           children: [
             // ── HERO PREVIEW ──
-            _buildHeroPreview(color, textTheme, spacing,),
+            _buildHeroPreview(
+              color,
+              textTheme,
+              spacing,
+            ),
             SizedBox(height: spacing.sectionGap),
 
             // ── TYPE ──
@@ -170,7 +176,11 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
             // ── DETAILS ──
             _sectionLabel('Details', textTheme),
             SizedBox(height: spacing.sectionGap),
-            _buildDetailsCard(color, textTheme, spacing,),
+            _buildDetailsCard(
+              color,
+              textTheme,
+              spacing,
+            ),
             SizedBox(height: spacing.sectionGap),
 
             // ── PARENT CATEGORY ──
@@ -191,7 +201,8 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
   }
 
   // ── HERO PREVIEW ──
-  Widget _buildHeroPreview(ColorScheme color, TextTheme textTheme, AppSpacing spacing) {
+  Widget _buildHeroPreview(
+      ColorScheme color, TextTheme textTheme, AppSpacing spacing) {
     final name = _nameController.text.trim();
     final iconData = _selectedIcon != null
         ? IconHelper.iconFromName(_selectedIcon!)
@@ -246,7 +257,8 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
                       width: 1.5,
                     ),
                   ),
-                  child: Icon(iconData, size: 28, color: color.onSurfaceVariant),
+                  child:
+                      Icon(iconData, size: 28, color: color.onSurfaceVariant),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -319,14 +331,17 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
   }
 
   // ── DETAILS CARD ──
-  Widget _buildDetailsCard(ColorScheme color, TextTheme textTheme, AppSpacing spacing,) {
+  Widget _buildDetailsCard(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
     return Card(
       elevation: 0,
       color: color.surfaceContainerLow,
       margin: const EdgeInsets.only(),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -621,6 +636,11 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
         await category.parentCategory.save();
       });
       ref.invalidate(categoryListProvider);
+      if (!_isEditing) {
+        ref
+            .read(gamificationServiceProvider)
+            ?.track(GamificationEvent.categoryCreated);
+      }
 
       if (mounted) context.pop(true);
     } finally {

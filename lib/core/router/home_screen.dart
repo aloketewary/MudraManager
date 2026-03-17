@@ -6,12 +6,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/db/models/notification_record.dart';
 import 'package:mudra_manager/core/db/models/user_profile.dart';
 import 'package:mudra_manager/core/extension/localization_extenstion.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/notification_record_service.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/services/notification_service.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/features/dashboard/data/greeting_provider.dart';
@@ -31,6 +33,7 @@ import 'package:mudra_manager/shared/widgets/adaptive_text.dart';
 import 'package:mudra_manager/shared/widgets/animated_greeting.dart';
 import 'package:flutter_boring_avatars/flutter_boring_avatars.dart';
 import 'package:mudra_manager/features/trip/data/trip_provider.dart';
+import 'package:mudra_manager/shared/widgets/speed_dial_fab.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   final int initialIndex;
@@ -47,6 +50,7 @@ class HomePageState extends ConsumerState<HomePage>
   final utilityKey = GlobalKey<UtilityScreenState>();
   late AnimationController _fabController;
   late AppLog log;
+  final _speedDialKey = GlobalKey<ExpandableFabState>();
 
   @override
   void initState() {
@@ -124,16 +128,9 @@ class HomePageState extends ConsumerState<HomePage>
     HapticFeedback.mediumImpact();
     log.d('Tab changed: $index');
     setState(() => _selectedIndex = index);
-
-    // Update route to match tab
-    // final routes = [
-    //   '/home',
-    //   '/transactions',
-    //   '/utilities',
-    //   '/statistics',
-    //   '/profile',
-    // ];
-    // context.go(routes[index]);
+    // Close speed dial when leaving transactions tab
+    _speedDialKey.currentState?.close();
+    setState(() => _selectedIndex = index);
   }
 
   @override
@@ -152,18 +149,6 @@ class HomePageState extends ConsumerState<HomePage>
       child: Scaffold(
         appBar: buildTopBar(profileAsync, _selectedIndex),
         extendBody: true,
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-        floatingActionButton: _selectedIndex == 1
-            ? ScaleTransition(
-                scale: _fabController,
-                child: FloatingActionButton.extended(
-                  heroTag: 'addTransactionHeroTab1',
-                  onPressed: () => context.push('/add-transaction'),
-                  icon: const Icon(LucideIcons.plus),
-                  label: Text(ctxt.dashboard_add_transaction_text),
-                ),
-              )
-            : null,
         bottomNavigationBar: NavigationBar(
           selectedIndex: _selectedIndex,
           onDestinationSelected: _onTabSelected,
@@ -338,28 +323,38 @@ class HomePageState extends ConsumerState<HomePage>
             ),
           ],
         ),
-        body: IndexedStack(
-          index: _selectedIndex,
+        body: Stack(
           children: [
-            Column(
+            IndexedStack(
+              index: _selectedIndex,
               children: [
-                _buildActiveTripBanner(),
-                const Expanded(child: DashboardHome()),
+                Column(
+                  children: [
+                    _buildActiveTripBanner(),
+                    const Expanded(child: DashboardHome()),
+                  ],
+                ),
+                TransactionListScreen(
+                  key: transactionListKey,
+                  onScrollChanged: (isScrollingDown) {
+                    if (isScrollingDown) {
+                      _fabController.reverse();
+                    } else {
+                      _fabController.forward();
+                    }
+                  },
+                ),
+                UtilityScreen(key: utilityKey),
+                const StatisticsScreen(),
+                const ProfileScreen(),
               ],
             ),
-            TransactionListScreen(
-              key: transactionListKey,
-              onScrollChanged: (isScrollingDown) {
-                if (isScrollingDown) {
-                  _fabController.reverse();
-                } else {
-                  _fabController.forward();
-                }
-              },
-            ),
-            UtilityScreen(key: utilityKey),
-            const StatisticsScreen(),
-            const ProfileScreen(),
+            if (_selectedIndex == 1)
+              ExpandableFab(
+                key: _speedDialKey,
+                visibilityController: _fabController,
+                padding: const EdgeInsets.only(bottom: 96),
+              ),
           ],
         ),
       ),
@@ -376,6 +371,7 @@ class HomePageState extends ConsumerState<HomePage>
     final color = Theme.of(context).colorScheme;
     final notificationService = ref.watch(notificationRecordServiceProvider);
     final ctxt = AppLocalizations.of(context)!;
+    final spacing = ref.watch(spacingProvider);
 
     switch (selectedIndex) {
       case 0:
@@ -454,17 +450,19 @@ class HomePageState extends ConsumerState<HomePage>
             ],
           ),
           actions: [
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
+             Padding(
+              padding: EdgeInsets.symmetric(horizontal: spacing.cardHorizontal),
+              child: const Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [StreakIndicator()],
               ),
             ),
-            FutureBuilder(
-              future: notificationService.countUnreadNotification(),
+            StreamBuilder<List<NotificationRecord>>(
+              stream: notificationService.watchNotifications(),
               builder: (_, snapshot) {
-                final count = snapshot.data ?? 0;
+                final count = (snapshot.data ?? [])
+                    .where((n) => !n.isRead && !n.isArchived)
+                    .length;
                 return Stack(
                   alignment: Alignment.center,
                   children: [
@@ -476,24 +474,31 @@ class HomePageState extends ConsumerState<HomePage>
                       Positioned(
                         right: 8,
                         top: 8,
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: color.error,
-                            shape: BoxShape.circle,
-                          ),
-                          constraints: const BoxConstraints(
-                            minWidth: 16,
-                            minHeight: 16,
-                          ),
-                          child: Text(
-                            '$count',
-                            style: TextStyle(
-                              color: color.onError,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
+                        child: TweenAnimationBuilder<double>(
+                          tween: Tween(begin: 0, end: 1),
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.elasticOut,
+                          builder: (_, scale, child) =>
+                              Transform.scale(scale: scale, child: child),
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: color.error,
+                              shape: BoxShape.circle,
                             ),
-                            textAlign: TextAlign.center,
+                            constraints: const BoxConstraints(
+                              minWidth: 16,
+                              minHeight: 16,
+                            ),
+                            child: Text(
+                              count > 9 ? '9+' : '$count',
+                              style: TextStyle(
+                                color: color.onError,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
                           ),
                         ),
                       ),
@@ -521,7 +526,7 @@ class HomePageState extends ConsumerState<HomePage>
             ),
             IconButton(
               onPressed: () => transactionListKey.currentState
-                  ?.showFilterBottomSheet(context),
+                  ?.showFilterBottomSheet(context, spacing),
               icon: const Icon(Icons.filter_list_rounded),
             ),
           ],

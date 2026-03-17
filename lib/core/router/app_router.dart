@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/core/router/home_screen.dart';
 import 'package:mudra_manager/core/utils/auth_gate.dart';
@@ -123,13 +124,26 @@ class AppRouter {
                   return AddEditTransactionScreen(
                     transaction: extra?['transaction'],
                     smsActivity: extra?['smsActivity'],
+                    initialIsIncome: extra?['isIncome'] as bool? ?? false,
                   );
                 },
               ),
               GoRoute(
                 path: '/transfer',
-                builder: (context, state) => const TransferScreenNew(),
+                builder: (context, state) {
+                  final extra = state.extra as Map<String, dynamic>?;
+                  return TransferScreenNew(
+                    initialAmount: extra?['amount'] as String?,
+                    initialNote: extra?['note'] as String?,
+                    initialDate: extra?['date'] as DateTime?,
+                    initialFromAccount: extra?['fromAccount'] as Account?,
+                    initialToAccount: extra?['toAccount'] as Account?,
+                    editFromId: extra?['fromId'] as int?,
+                    editToId: extra?['toId'] as int?,
+                  );
+                },
               ),
+
               GoRoute(
                 path: '/sms-activity',
                 builder: (context, state) => const SmsActivityScreen(),

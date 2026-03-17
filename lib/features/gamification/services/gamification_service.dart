@@ -23,10 +23,8 @@ class GamificationService {
   Future<void> initialize() async {
     await _runMigrations();
     for (final def in AchievementRegistry.all.values) {
-      final exists = await isar.achievements
-          .filter()
-          .keyEqualTo(def.key)
-          .findFirst();
+      final exists =
+          await isar.achievements.filter().keyEqualTo(def.key).findFirst();
 
       if (exists == null) {
         await isar.writeTxn(() async {
@@ -171,10 +169,12 @@ class GamificationService {
   Future<void> _updateAchievementSeries() async {
     await isar.writeTxn(() async {
       final allAchievements = await isar.achievements.where().findAll();
-      
+
       for (final achievement in allAchievements) {
         final def = AchievementRegistry.all[achievement.key];
-        if (def != null && (achievement.series != def.series || achievement.seriesOrder != def.seriesOrder)) {
+        if (def != null &&
+            (achievement.series != def.series ||
+                achievement.seriesOrder != def.seriesOrder)) {
           achievement.series = def.series;
           achievement.seriesOrder = def.seriesOrder;
           await isar.achievements.put(achievement);
@@ -256,6 +256,26 @@ class GamificationService {
         await _increment('trip_first');
         await _increment('trip_5');
         break;
+
+      case GamificationEvent.backupCreated:
+        await _increment('first_backup');
+        await _increment('backup_10');
+        break;
+
+      case GamificationEvent.expenseSplit:
+        await _increment('first_split');
+        await _increment('split_20');
+        break;
+
+      case GamificationEvent.reconciliationDone:
+        await _increment('reconcile_first');
+        await _increment('reconcile_50');
+        break;
+
+      case GamificationEvent.zeroSpendDay:
+        await _increment('zero_spend_1');
+        await _increment('zero_spend_10');
+        break;
     }
   }
 
@@ -264,10 +284,8 @@ class GamificationService {
   ===================================================== */
 
   Future<void> _setProgress(String key, int progress) async {
-    var achievement = await isar.achievements
-        .filter()
-        .keyEqualTo(key)
-        .findFirst();
+    var achievement =
+        await isar.achievements.filter().keyEqualTo(key).findFirst();
 
     if (achievement == null) {
       achievement = _clone(_getAchievementDefinition(key));
@@ -275,13 +293,15 @@ class GamificationService {
     }
 
     // Check if this achievement is locked in a series
-    if (achievement.series != null && achievement.seriesOrder != null && achievement.seriesOrder! > 1) {
+    if (achievement.series != null &&
+        achievement.seriesOrder != null &&
+        achievement.seriesOrder! > 1) {
       final previous = await isar.achievements
           .filter()
-          .seriesEqualTo(achievement.series!)
+          .seriesEqualTo(achievement.series)
           .seriesOrderEqualTo(achievement.seriesOrder! - 1)
           .findFirst();
-      
+
       if (previous == null || !previous.isUnlocked) {
         return;
       }
@@ -315,10 +335,8 @@ class GamificationService {
   }
 
   Future<void> _increment(String key, [int amount = 1]) async {
-    var achievement = await isar.achievements
-        .filter()
-        .keyEqualTo(key)
-        .findFirst();
+    var achievement =
+        await isar.achievements.filter().keyEqualTo(key).findFirst();
 
     if (achievement == null) {
       achievement = _clone(_getAchievementDefinition(key));
@@ -326,14 +344,16 @@ class GamificationService {
     }
 
     // Check if this achievement is locked in a series
-    if (achievement.series != null && achievement.seriesOrder != null && achievement.seriesOrder! > 1) {
+    if (achievement.series != null &&
+        achievement.seriesOrder != null &&
+        achievement.seriesOrder! > 1) {
       // Check if previous in series is unlocked
       final previous = await isar.achievements
           .filter()
-          .seriesEqualTo(achievement.series!)
+          .seriesEqualTo(achievement.series)
           .seriesOrderEqualTo(achievement.seriesOrder! - 1)
           .findFirst();
-      
+
       if (previous == null || !previous.isUnlocked) {
         // Previous not unlocked, skip this achievement
         return;
@@ -402,10 +422,8 @@ class GamificationService {
   }
 
   Future<Achievement> _getOrCreate(Achievement def) async {
-    final existing = await isar.achievements
-        .filter()
-        .keyEqualTo(def.key)
-        .findFirst();
+    final existing =
+        await isar.achievements.filter().keyEqualTo(def.key).findFirst();
 
     if (existing != null) return existing;
 
@@ -522,10 +540,8 @@ class GamificationService {
   }
 
   Future<Streak> _getOrCreateStreak() async {
-    final existing = await isar.streaks
-        .filter()
-        .typeEqualTo('daily_checkin')
-        .findFirst();
+    final existing =
+        await isar.streaks.filter().typeEqualTo('daily_checkin').findFirst();
 
     if (existing != null) return existing;
 
@@ -613,7 +629,7 @@ class GamificationService {
     final d2 = DateTime(now.year, now.month, now.day);
     final daysDiff = d2.difference(d1).inDays;
     final hoursDiff = now.difference(last).inHours;
-    
+
     // Must be exactly 1 day apart (next day) and within 48 hours
     return daysDiff == 1 && hoursDiff > 24 && hoursDiff <= 48;
   }
@@ -646,7 +662,7 @@ class GamificationService {
     // Sum progress from all previous achievements + current
     final allInSeries = await isar.achievements
         .filter()
-        .seriesEqualTo(achievement.series!)
+        .seriesEqualTo(achievement.series)
         .seriesOrderLessThan(achievement.seriesOrder! + 1)
         .findAll();
 
@@ -660,15 +676,12 @@ class GamificationService {
     // -------------------------------
     // 1. Update streak (DB only)
     // -------------------------------
-    final streak = await isar.streaks
-        .filter()
-        .typeEqualTo('daily_checkin')
-        .findFirst();
+    final streak =
+        await isar.streaks.filter().typeEqualTo('daily_checkin').findFirst();
 
     log.i('📊 Existing streak: ${streak?.lastChecked}');
 
-    final existing =
-        streak ??
+    final existing = streak ??
         (Streak()
           ..type = 'daily_checkin'
           ..currentCount = 0
@@ -730,6 +743,11 @@ class GamificationService {
     // 3. Check budget adherence (async, don't await)
     // -------------------------------
     _checkBudgetAdherence();
+    // Check zero-spend yesterday
+    await _checkZeroSpendDay(now);
+
+// Check savings streak
+    await _checkSavingsStreak(now);
 
     log.i('🎉 Check-in complete: Day $newStreak, +$xp XP');
     return 'Day $newStreak streak! +$xp XP';
@@ -800,8 +818,7 @@ class GamificationService {
           .typeEqualTo('budget_adherence')
           .findFirst();
 
-      final existing =
-          streak ??
+      final existing = streak ??
           (Streak()
             ..type = 'budget_adherence'
             ..currentCount = 0
@@ -818,7 +835,9 @@ class GamificationService {
       if (allWithinBudget) {
         if (last != null && _isConsecutiveDay(last, now)) {
           existing.currentCount++;
-          log.i('💰 Budget adherence streak continued: ${existing.currentCount}');
+          log.i(
+            '💰 Budget adherence streak continued: ${existing.currentCount}',
+          );
         } else {
           existing.currentCount = 1;
           log.i('💰 Budget adherence streak started: 1');
@@ -843,6 +862,89 @@ class GamificationService {
       await isar.writeTxn(() => isar.streaks.put(existing));
     } catch (e) {
       log.e('Error checking budget adherence', e);
+    }
+  }
+
+  Future<void> _checkZeroSpendDay(DateTime now) async {
+    try {
+      final yesterday = now.subtract(const Duration(days: 1));
+      final start = DateTime(yesterday.year, yesterday.month, yesterday.day);
+      final end =
+          DateTime(yesterday.year, yesterday.month, yesterday.day, 23, 59, 59);
+      final count = await isar.transactions
+          .filter()
+          .isExpenseEqualTo(true)
+          .isTransferEqualTo(false)
+          .dateBetween(start, end)
+          .count();
+      if (count == 0) {
+        await track(GamificationEvent.zeroSpendDay);
+      }
+    } catch (e) {
+      log.e('Error checking zero spend day', e);
+    }
+  }
+
+  Future<void> _checkSavingsStreak(DateTime now) async {
+    try {
+      final yesterday = now.subtract(const Duration(days: 1));
+      final start = DateTime(yesterday.year, yesterday.month, yesterday.day);
+      final end =
+          DateTime(yesterday.year, yesterday.month, yesterday.day, 23, 59, 59);
+
+      final income = await isar.transactions
+          .filter()
+          .isExpenseEqualTo(false)
+          .isTransferEqualTo(false)
+          .dateBetween(start, end)
+          .amountProperty()
+          .sum();
+      final expense = await isar.transactions
+          .filter()
+          .isExpenseEqualTo(true)
+          .isTransferEqualTo(false)
+          .dateBetween(start, end)
+          .amountProperty()
+          .sum();
+
+      final streak =
+          await isar.streaks.filter().typeEqualTo('savings_streak').findFirst();
+
+      final existing = streak ??
+          (Streak()
+            ..type = 'savings_streak'
+            ..currentCount = 0
+            ..longestCount = 0
+            ..lastChecked = null
+            ..lastUpdated = now);
+
+      final last = existing.lastChecked;
+      if (last != null && _isSameDay(last, now)) return;
+
+      if (expense <= income) {
+        if (last != null && _isConsecutiveDay(last, now)) {
+          existing.currentCount++;
+        } else {
+          existing.currentCount = 1;
+        }
+        if (existing.currentCount > existing.longestCount) {
+          existing.longestCount = existing.currentCount;
+        }
+        if (existing.currentCount >= 7) {
+          await _setProgress('savings_streak_7', existing.currentCount);
+        }
+        if (existing.currentCount >= 30) {
+          await _setProgress('savings_streak_30', existing.currentCount);
+        }
+      } else {
+        existing.currentCount = 0;
+      }
+
+      existing.lastChecked = now;
+      existing.lastUpdated = now;
+      await isar.writeTxn(() => isar.streaks.put(existing));
+    } catch (e) {
+      log.e('Error checking savings streak', e);
     }
   }
 }

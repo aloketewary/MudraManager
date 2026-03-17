@@ -171,6 +171,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                                 .read(tripServiceProvider)
                                 .markTripInactive(widget.tripId);
                             ref.invalidate(allTripsProvider);
+                            ref.invalidate(activeTripsProvider);
                             ref.invalidate(tripByIdProvider(widget.tripId));
                           }
                         } else if (value == 'delete') {
@@ -186,6 +187,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                                 .read(tripServiceProvider)
                                 .deleteTrip(widget.tripId);
                             ref.invalidate(allTripsProvider);
+                            ref.invalidate(activeTripsProvider);
                             if (mounted) {
                               context.pop();
                             }

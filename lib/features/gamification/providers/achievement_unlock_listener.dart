@@ -4,7 +4,8 @@ import 'package:mudra_manager/features/gamification/models/achievement.dart';
 import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
 import 'package:mudra_manager/features/gamification/widgets/achievement_unlock_dialog.dart';
 
-final achievementUnlockListenerProvider = Provider<AchievementUnlockListener>((ref) {
+final achievementUnlockListenerProvider =
+    Provider<AchievementUnlockListener>((ref) {
   return AchievementUnlockListener(ref);
 });
 
@@ -20,12 +21,11 @@ class AchievementUnlockListener {
       (previous, next) {
         next.whenData((achievements) {
           final now = DateTime.now();
-          
+
           for (final achievement in achievements) {
-            if (achievement.isUnlocked && 
+            if (achievement.isUnlocked &&
                 achievement.unlockedAt != null &&
                 !_shownAchievements.contains(achievement.key)) {
-              
               final timeSinceUnlock = now.difference(achievement.unlockedAt!);
               if (timeSinceUnlock.inSeconds < 10) {
                 _shownAchievements.add(achievement.key);
@@ -44,7 +44,7 @@ class AchievementUnlockListener {
 
   void _showAchievementDialog(BuildContext context, Achievement achievement) {
     if (!context.mounted) return;
-    
+
     showDialog(
       context: context,
       barrierDismissible: false,

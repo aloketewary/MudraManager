@@ -13,4 +13,8 @@ enum GamificationEvent {
   analyticsViewed,
   reportExported,
   tripCreated,
+  backupCreated,
+  expenseSplit,
+  reconciliationDone,
+  zeroSpendDay,
 }

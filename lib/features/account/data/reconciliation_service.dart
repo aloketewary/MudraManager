@@ -6,32 +6,47 @@ import 'package:mudra_manager/core/db/models/reconciliation_status.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
-
-import '../../../core/db/models/reconciliation_status.dart';
+import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
+import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
+import 'package:mudra_manager/features/gamification/services/gamification_service.dart';
 
 final reconciliationServiceProvider = Provider<ReconciliationService>((ref) {
   final isarService = ref.watch(isarServiceProvider);
   final log = ref.getLogger('ReconciliationService');
-  return ReconciliationService(isarService, log);
+  final gamificationService = ref.watch(gamificationServiceProvider);
+
+  return ReconciliationService(isarService, log, gamificationService);
 });
 
 class ReconciliationService {
   final IsarService _isarService;
   final AppLog _log;
+  final GamificationService? _gamificationService;
 
-  ReconciliationService(this._isarService, this._log);
+  ReconciliationService(
+    this._isarService,
+    this._log,
+    this._gamificationService,
+  );
 
-  Future<void> verifyTransaction(int transactionId, {double? bankAmount}) async {
+  Future<void> verifyTransaction(
+    int transactionId, {
+    double? bankAmount,
+  }) async {
     await _upsertStatus(
       transactionId: transactionId,
       state: ReconciliationState.verified,
       bankAmount: bankAmount,
     );
     _log.i('Transaction $transactionId verified');
+    await _gamificationService?.track(GamificationEvent.reconciliationDone);
   }
 
-  Future<void> markDiscrepancy(int transactionId, double bankAmount,
-      {String? notes}) async {
+  Future<void> markDiscrepancy(
+    int transactionId,
+    double bankAmount, {
+    String? notes,
+  }) async {
     await _upsertStatus(
       transactionId: transactionId,
       state: ReconciliationState.discrepancy,
@@ -109,7 +124,8 @@ class ReconciliationService {
   }
 
   Future<ReconciliationStatus?> getReconciliationStatus(
-      int transactionId) async {
+    int transactionId,
+  ) async {
     try {
       final isar = await _isarService.getInstance();
       return await isar.reconciliationStatus
@@ -151,7 +167,11 @@ class ReconciliationService {
         await isar.writeTxn(() => isar.reconciliationStatus.put(status));
       }
     } catch (e, stack) {
-      _log.e('Failed to upsert status for transaction $transactionId', e, stack);
+      _log.e(
+        'Failed to upsert status for transaction $transactionId',
+        e,
+        stack,
+      );
       rethrow;
     }
   }

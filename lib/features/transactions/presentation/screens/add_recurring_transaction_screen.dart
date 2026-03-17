@@ -10,6 +10,8 @@ import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
 import 'package:mudra_manager/core/utils/icon_helper.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/category/data/category_provider.dart';
+import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
+import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
 import 'package:mudra_manager/features/transactions/data/recurring_transaction_provider.dart';
 import 'package:mudra_manager/shared/widgets/adaptive_text.dart';
 
@@ -95,13 +97,17 @@ class _AddRecurringTransactionScreenState
             style: ButtonStyle(
               backgroundColor: WidgetStateProperty.resolveWith((states) {
                 if (states.contains(WidgetState.selected)) {
-                  return _isExpense ? colorScheme.errorContainer : colorScheme.primaryContainer;
+                  return _isExpense
+                      ? colorScheme.errorContainer
+                      : colorScheme.primaryContainer;
                 }
                 return null;
               }),
               foregroundColor: WidgetStateProperty.resolveWith((states) {
                 if (states.contains(WidgetState.selected)) {
-                  return _isExpense ? colorScheme.onErrorContainer : colorScheme.onPrimaryContainer;
+                  return _isExpense
+                      ? colorScheme.onErrorContainer
+                      : colorScheme.onPrimaryContainer;
                 }
                 return null;
               }),
@@ -181,7 +187,8 @@ class _AddRecurringTransactionScreenState
                     itemBuilder: (context, index) {
                       final account = accounts[index];
                       final isSelected = _selectedAccount?.id == account.id;
-                      final accountColor = Color(account.colorValue ?? colorScheme.primary.toARGB32());
+                      final accountColor = Color(
+                          account.colorValue ?? colorScheme.primary.toARGB32());
                       return GestureDetector(
                         onTap: () {
                           HapticFeedback.mediumImpact();
@@ -189,7 +196,9 @@ class _AddRecurringTransactionScreenState
                         },
                         child: Card(
                           elevation: 0,
-                          color: isSelected ? colorScheme.primaryContainer : colorScheme.surfaceContainerHighest,
+                          color: isSelected
+                              ? colorScheme.primaryContainer
+                              : colorScheme.surfaceContainerHighest,
                           child: Container(
                             width: 150,
                             padding: const EdgeInsets.all(16),
@@ -213,7 +222,9 @@ class _AddRecurringTransactionScreenState
                                   account.name,
                                   style: textTheme.labelLarge?.copyWith(
                                     fontWeight: FontWeight.bold,
-                                    color: isSelected ? colorScheme.onPrimaryContainer : colorScheme.onSurface,
+                                    color: isSelected
+                                        ? colorScheme.onPrimaryContainer
+                                        : colorScheme.onSurface,
                                   ),
                                   maxLines: 1,
                                 ),
@@ -243,11 +254,14 @@ class _AddRecurringTransactionScreenState
               final categoriesAsync = ref.watch(categoryListProvider);
               return categoriesAsync.when(
                 data: (categories) {
-                  final filtered = categories.where((c) => 
-                    (_isExpense ? c.categoryType == CategoryType.expense : c.categoryType == CategoryType.income) && 
-                    c.parentCategory.value == null
-                  ).toList();
-                  
+                  final filtered = categories
+                      .where((c) =>
+                          (_isExpense
+                              ? c.categoryType == CategoryType.expense
+                              : c.categoryType == CategoryType.income) &&
+                          c.parentCategory.value == null)
+                      .toList();
+
                   return SizedBox(
                     height: 120,
                     child: ListView.separated(
@@ -256,17 +270,26 @@ class _AddRecurringTransactionScreenState
                       separatorBuilder: (_, __) => const SizedBox(width: 12),
                       itemBuilder: (context, index) {
                         final category = filtered[index];
-                        final isParentSelected = _selectedCategory?.id == category.id;
-                        final isChildSelected = _selectedCategory?.parentCategory.value?.id == category.id;
+                        final isParentSelected =
+                            _selectedCategory?.id == category.id;
+                        final isChildSelected =
+                            _selectedCategory?.parentCategory.value?.id ==
+                                category.id;
                         final isSelected = isParentSelected || isChildSelected;
-                        final hasSubcategories = categories.any((c) => c.parentCategory.value?.id == category.id);
-                        final categoryColor = Color(category.colorValue ?? colorScheme.primary.value);
-                        
+                        final hasSubcategories = categories.any(
+                            (c) => c.parentCategory.value?.id == category.id);
+                        final categoryColor = Color(
+                            category.colorValue ?? colorScheme.primary.value);
+
                         return GestureDetector(
                           onTap: () async {
                             if (hasSubcategories) {
-                              final subcategories = categories.where((c) => c.parentCategory.value?.id == category.id).toList();
-                              final selected = await showModalBottomSheet<Category>(
+                              final subcategories = categories
+                                  .where((c) =>
+                                      c.parentCategory.value?.id == category.id)
+                                  .toList();
+                              final selected =
+                                  await showModalBottomSheet<Category>(
                                 context: context,
                                 builder: (_) => _SubcategoryPicker(
                                   parent: category,
@@ -274,25 +297,31 @@ class _AddRecurringTransactionScreenState
                                   selected: _selectedCategory,
                                 ),
                               );
-                              if (selected != null) setState(() => _selectedCategory = selected);
+                              if (selected != null)
+                                setState(() => _selectedCategory = selected);
                             } else {
                               HapticFeedback.mediumImpact();
                               setState(() => _selectedCategory = category);
                             }
                           },
-                          onLongPress: hasSubcategories ? () {
-                            HapticFeedback.mediumImpact();
-                            setState(() => _selectedCategory = category);
-                          } : null,
+                          onLongPress: hasSubcategories
+                              ? () {
+                                  HapticFeedback.mediumImpact();
+                                  setState(() => _selectedCategory = category);
+                                }
+                              : null,
                           child: Card(
                             elevation: 0,
-                            color: isSelected ? colorScheme.primaryContainer : colorScheme.surfaceContainerHighest,
+                            color: isSelected
+                                ? colorScheme.primaryContainer
+                                : colorScheme.surfaceContainerHighest,
                             child: Container(
                               width: 120,
                               padding: const EdgeInsets.all(16),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   SizedBox(
                                     height: 40,
@@ -301,34 +330,47 @@ class _AddRecurringTransactionScreenState
                                         Container(
                                           padding: const EdgeInsets.all(8),
                                           decoration: BoxDecoration(
-                                            color: categoryColor.withValues(alpha: 0.15),
+                                            color: categoryColor.withValues(
+                                                alpha: 0.15),
                                             shape: BoxShape.circle,
                                           ),
                                           child: Icon(
-                                            IconHelper.iconFromName(category.iconName ?? 'category'),
+                                            IconHelper.iconFromName(
+                                                category.iconName ??
+                                                    'category'),
                                             color: categoryColor,
                                             size: 20,
                                           ),
                                         ),
-                                        if (isChildSelected && _selectedCategory != null)
+                                        if (isChildSelected &&
+                                            _selectedCategory != null)
                                           Positioned(
                                             right: 0,
                                             bottom: 0,
                                             child: Container(
                                               padding: const EdgeInsets.all(4),
                                               decoration: BoxDecoration(
-                                                color: Color(_selectedCategory!.colorValue ?? colorScheme.primary.toARGB32()),
+                                                color: Color(_selectedCategory!
+                                                        .colorValue ??
+                                                    colorScheme.primary
+                                                        .toARGB32()),
                                                 shape: BoxShape.circle,
-                                                border: Border.all(color: colorScheme.surface, width: 2),
+                                                border: Border.all(
+                                                    color: colorScheme.surface,
+                                                    width: 2),
                                               ),
                                               child: Icon(
-                                                IconHelper.iconFromName(_selectedCategory!.iconName ?? 'category'),
+                                                IconHelper.iconFromName(
+                                                    _selectedCategory!
+                                                            .iconName ??
+                                                        'category'),
                                                 color: Colors.white,
                                                 size: 12,
                                               ),
                                             ),
                                           ),
-                                        if (hasSubcategories && !isChildSelected)
+                                        if (hasSubcategories &&
+                                            !isChildSelected)
                                           Positioned(
                                             right: 0,
                                             top: 0,
@@ -338,30 +380,40 @@ class _AddRecurringTransactionScreenState
                                                 color: colorScheme.primary,
                                                 shape: BoxShape.circle,
                                               ),
-                                              child: Icon(Icons.chevron_right, size: 12, color: colorScheme.onPrimary),
+                                              child: Icon(Icons.chevron_right,
+                                                  size: 12,
+                                                  color: colorScheme.onPrimary),
                                             ),
                                           ),
                                       ],
                                     ),
                                   ),
                                   Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       AdaptiveText(
-                                        isChildSelected && _selectedCategory != null
+                                        isChildSelected &&
+                                                _selectedCategory != null
                                             ? _selectedCategory!.name
                                             : category.name,
                                         style: textTheme.labelLarge?.copyWith(
                                           fontWeight: FontWeight.bold,
-                                          color: isSelected ? colorScheme.onPrimaryContainer : colorScheme.onSurface,
+                                          color: isSelected
+                                              ? colorScheme.onPrimaryContainer
+                                              : colorScheme.onSurface,
                                         ),
                                         maxLines: 1,
                                       ),
-                                      if (isChildSelected && _selectedCategory != null)
+                                      if (isChildSelected &&
+                                          _selectedCategory != null)
                                         Text(
                                           category.name,
                                           style: textTheme.labelSmall?.copyWith(
-                                            color: isSelected ? colorScheme.onPrimaryContainer.withValues(alpha: 0.7) : colorScheme.onSurfaceVariant,
+                                            color: isSelected
+                                                ? colorScheme.onPrimaryContainer
+                                                    .withValues(alpha: 0.7)
+                                                : colorScheme.onSurfaceVariant,
                                           ),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
@@ -500,7 +552,12 @@ class _AddRecurringTransactionScreenState
       recurring.category.value = _selectedCategory;
 
       await ref.read(recurringTransactionServiceProvider).save(recurring);
-      
+      if (widget.recurring == null) {
+        ref
+            .read(gamificationServiceProvider)
+            ?.track(GamificationEvent.recurringTransactionCreated);
+      }
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Recurring transaction saved')),
@@ -573,14 +630,14 @@ class _SubcategoryPicker extends StatelessWidget {
           ),
           const Divider(),
           ...subcategories.map((sub) => ListTile(
-            leading: Icon(
-              IconHelper.iconFromName(sub.iconName ?? 'category'),
-              color: Color(sub.colorValue ?? 0xFF000000),
-            ),
-            title: Text(sub.name),
-            selected: selected?.id == sub.id,
-            onTap: () => Navigator.pop(context, sub),
-          )),
+                leading: Icon(
+                  IconHelper.iconFromName(sub.iconName ?? 'category'),
+                  color: Color(sub.colorValue ?? 0xFF000000),
+                ),
+                title: Text(sub.name),
+                selected: selected?.id == sub.id,
+                onTap: () => Navigator.pop(context, sub),
+              )),
         ],
       ),
     );

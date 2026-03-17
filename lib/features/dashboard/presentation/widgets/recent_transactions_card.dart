@@ -33,7 +33,8 @@ class RecentTransactionsCard extends ConsumerWidget {
     if (transactions.isEmpty) return const SizedBox.shrink();
 
     // Get recent transactions (sorted by date, most recent first)
-    final recentTransactions = transactions.take(maxTransactions).toList();
+    final recentTransactions =
+        transactions.where((t) => !t.isTransfer).take(maxTransactions).toList();
 
     return Container(
       margin: EdgeInsets.symmetric(

@@ -3,41 +3,95 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
+import 'package:mudra_manager/core/extension/account_type_extenstion.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/services/widget_service.dart';
+import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
+import 'package:mudra_manager/shared/widgets/currency_text.dart';
 
 class TransferScreenNew extends ConsumerStatefulWidget {
-  const TransferScreenNew({super.key});
+  final String? initialAmount;
+  final String? initialNote;
+  final DateTime? initialDate;
+  final Account? initialFromAccount;
+  final Account? initialToAccount;
+  final int? editFromId;
+  final int? editToId;
+
+  const TransferScreenNew({
+    super.key,
+    this.initialAmount,
+    this.initialNote,
+    this.initialDate,
+    this.initialFromAccount,
+    this.initialToAccount,
+    this.editFromId,
+    this.editToId,
+  });
 
   @override
   ConsumerState<TransferScreenNew> createState() => _TransferScreenNewState();
 }
 
-class _TransferScreenNewState extends ConsumerState<TransferScreenNew> {
+class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
+    with SingleTickerProviderStateMixin {
   final _amountController = TextEditingController();
   final _noteController = TextEditingController();
   final _amountFocus = FocusNode();
-  
+  bool get _isEditing => widget.editFromId != null && widget.editToId != null;
+
   Account? _fromAccount;
   Account? _toAccount;
   DateTime _date = DateTime.now();
-  double _slideProgress = 0.0;
-  
-  // Cache balances to avoid repeated queries
-  final Map<int, Future<double>> _balanceCache = {};
+  bool _saving = false;
+  Map<int, double> _balanceMap = {};
+  bool _initialized = false;
+
+  late AnimationController _flowController;
 
   @override
   void initState() {
     super.initState();
+    _flowController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat();
+
+    // ── Pre-fill for edit mode ──
+    if (widget.initialAmount != null) {
+      _amountController.text = widget.initialAmount!;
+    }
+    if (widget.initialNote != null) {
+      _noteController.text = widget.initialNote!;
+    }
+    if (widget.initialDate != null) {
+      _date = widget.initialDate!;
+    }
+    _fromAccount = widget.initialFromAccount;
+    _toAccount = widget.initialToAccount;
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _amountFocus.requestFocus();
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      _initialized = true;
+      ref.read(accountServiceProvider).getAccountBalanceMap().then((val) {
+        if (mounted) setState(() => _balanceMap = val);
+      });
+    }
   }
 
   @override
@@ -45,17 +99,12 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew> {
     _amountController.dispose();
     _noteController.dispose();
     _amountFocus.dispose();
+    _flowController.dispose();
     super.dispose();
-  }
-  
-  Future<double> _getCachedBalance(int accountId) {
-    return _balanceCache.putIfAbsent(
-      accountId,
-      () => ref.read(accountServiceProvider).getAccountBalance(accountId),
-    );
   }
 
   void _swapAccounts() {
+    if (_fromAccount == null && _toAccount == null) return;
     HapticFeedback.mediumImpact();
     setState(() {
       final temp = _fromAccount;
@@ -64,27 +113,42 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew> {
     });
   }
 
+  bool get _canTransfer =>
+      !_saving &&
+      _fromAccount != null &&
+      _toAccount != null &&
+      _amountController.text.isNotEmpty &&
+      (double.tryParse(_amountController.text) ?? 0) > 0;
+
   Future<void> _executeTransfer() async {
-    if (_fromAccount == null || _toAccount == null) return;
-    final amount = double.tryParse(_amountController.text);
-    if (amount == null || amount <= 0) return;
+    if (!_canTransfer) return;
+    setState(() => _saving = true);
 
-    HapticFeedback.heavyImpact();
-    
-    final service = ref.read(transactionProvider);
-    await service.transfer(
-      from: _fromAccount!,
-      to: _toAccount!,
-      amount: amount,
-      date: _date,
-      note: _noteController.text.trim().isEmpty ? null : _noteController.text.trim(),
-    );
+    try {
+      HapticFeedback.heavyImpact();
+      await ref.read(transactionProvider).transfer(
+            from: _fromAccount!,
+            to: _toAccount!,
+            amount: double.parse(_amountController.text),
+            date: _date,
+            note: _noteController.text.trim().isEmpty
+                ? null
+                : _noteController.text.trim(),
+            fromId: widget.editFromId,
+            toId: widget.editToId,
+          );
 
-    await WidgetService.updateWidget(ref);
-    
-    if (mounted) {
-      invalidateAll(ref);
-      context.pop();
+      await WidgetService.updateWidget(ref);
+
+      if (mounted) {
+        invalidateAll(ref);
+        SnackbarService.success(
+          _isEditing ? 'Transfer updated' : 'Transfer completed',
+        );
+        context.pop(true); // return true so list screen knows to refresh
+      }
+    } finally {
+      if (mounted) setState(() => _saving = false);
     }
   }
 
@@ -93,30 +157,23 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew> {
     final accountsAsync = ref.watch(accountsProvider);
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
     final isGuestMode = ref.watch(guestModeProvider);
-    final accountService = ref.watch(accountServiceProvider);
 
     return Scaffold(
       backgroundColor: color.surface,
       appBar: AppBar(
-        title: const Text('Transfer Money'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.calendar_today, size: 20),
-            onPressed: () async {
-              final picked = await showDatePicker(
-                context: context,
-                initialDate: _date,
-                firstDate: DateTime(2000),
-                lastDate: DateTime.now(),
-              );
-              if (picked != null) {
-                HapticFeedback.lightImpact();
-                setState(() => _date = picked);
-              }
-            },
-          ),
-        ],
+        leading: IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: () {
+            HapticFeedback.mediumImpact();
+            context.pop();
+          },
+        ),
+        title: Text(
+          _isEditing ? 'Edit Transfer' : 'Transfer',
+          style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+        ),
       ),
       body: accountsAsync.when(
         data: (accounts) {
@@ -126,189 +183,290 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew> {
             );
           }
 
-          // Auto-select first account if none selected
           if (_fromAccount == null && accounts.isNotEmpty) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (mounted) setState(() => _fromAccount = accounts.first);
             });
           }
 
-          final fromBalance = _fromAccount != null
-              ? _getCachedBalance(_fromAccount!.id)
-              : Future.value(0.0);
-
           return Column(
             children: [
               Expanded(
                 child: ListView(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: spacing.cardHorizontal,
+                    vertical: spacing.cardVertical,
+                  ),
                   children: [
-                    // FROM Card (Persistent)
-                    _AccountCard(
-                      label: 'FROM',
-                      account: _fromAccount,
-                      balance: fromBalance,
-                      isGuestMode: isGuestMode,
-                      onTap: () => _showAccountPicker(
-                        context,
-                        accounts.where((a) => a.id != _toAccount?.id).toList(),
-                        (account) {
-                          setState(() => _fromAccount = account);
-                          _balanceCache.clear(); // Clear cache on account change
-                        },
-                      ),
-                    ),
-                    
-                    const SizedBox(height: 16),
-                    
-                    // Swap Button
-                    Center(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: color.primaryContainer,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: color.primary.withValues(alpha: 0.3),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: IconButton(
-                          onPressed: _fromAccount != null && _toAccount != null
-                              ? _swapAccounts
-                              : null,
-                          icon: Icon(
-                            Icons.swap_vert,
-                            color: _fromAccount != null && _toAccount != null
-                                ? color.onPrimaryContainer
-                                : color.onSurfaceVariant.withValues(alpha: 0.3),
-                          ),
-                          iconSize: 32,
-                          padding: const EdgeInsets.all(16),
-                        ),
-                      ),
-                    ),
-                    
-                    const SizedBox(height: 16),
-                    
-                    // TO Card (Persistent)
-                    _AccountCard(
-                      label: 'TO',
-                      account: _toAccount,
-                      balance: _toAccount != null
-                          ? _getCachedBalance(_toAccount!.id)
-                          : Future.value(0.0),
-                      isGuestMode: isGuestMode,
-                      onTap: () => _showAccountPicker(
-                        context,
-                        accounts.where((a) => a.id != _fromAccount?.id).toList(),
-                        (account) {
-                          setState(() => _toAccount = account);
-                          _balanceCache.clear(); // Clear cache on account change
-                        },
-                      ),
-                    ),
-                    
-                    const SizedBox(height: 32),
-                    
-                    // Amount Field (Center Focus)
-                    RepaintBoundary(
-                      child: TextField(
-                        controller: _amountController,
-                        focusNode: _amountFocus,
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        textAlign: TextAlign.center,
-                        style: textTheme.displayMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: color.primary,
-                        ),
-                        decoration: InputDecoration(
-                          hintText: '0.00',
-                          prefixText: '₹ ',
-                          prefixStyle: textTheme.displayMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: color.primary.withValues(alpha: 0.5),
-                          ),
-                          border: InputBorder.none,
-                          filled: true,
-                          fillColor: color.primaryContainer.withValues(alpha: 0.3),
-                          contentPadding: const EdgeInsets.symmetric(vertical: 24),
-                        ),
-                        onChanged: (_) => setState(() {}),
-                      ),
-                    ),
-                    
-                    // Quick Amount Chips
-                    const SizedBox(height: 16),
-                    Wrap(
-                      alignment: WrapAlignment.center,
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [500, 1000, 2000, 5000, 10000].map((amt) {
-                        return ActionChip(
-                          label: Text('₹$amt'),
-                          onPressed: () {
-                            HapticFeedback.selectionClick();
-                            _amountController.text = amt.toString();
-                            setState(() {});
-                          },
-                          backgroundColor: color.surfaceContainerHigh,
-                        );
-                      }).toList(),
-                    ),
-                    
-                    const SizedBox(height: 24),
-                    
-                    // Note Field (Optional)
-                    TextField(
-                      controller: _noteController,
-                      decoration: InputDecoration(
-                        labelText: 'Note (optional)',
-                        hintText: 'Add a note',
-                        prefixIcon: const Icon(Icons.note_outlined),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      maxLines: 2,
-                    ),
-                    
-                    const SizedBox(height: 16),
-                    
-                    // Date Display
+                    // ── AMOUNT ──
                     Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: color.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(12),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: spacing.cardHorizontal,
+                        vertical: spacing.cardVertical,
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      decoration: BoxDecoration(
+                        color: color.primaryContainer.withValues(alpha: 0.2),
+                        borderRadius:
+                            BorderRadius.circular(spacing.radiusMedium),
+                      ),
+                      child: Column(
                         children: [
-                          Icon(Icons.calendar_today, size: 16, color: color.onSurfaceVariant),
-                          const SizedBox(width: 8),
-                          Text(
-                            DateFormat.yMMMd().format(_date),
-                            style: textTheme.bodyMedium?.copyWith(
-                              color: color.onSurfaceVariant,
+                          TextField(
+                            controller: _amountController,
+                            focusNode: _amountFocus,
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
+                            textAlign: TextAlign.center,
+                            style: textTheme.displaySmall?.copyWith(
+                              fontWeight: FontWeight.w900,
+                              color: color.primary,
+                            ),
+                            decoration: InputDecoration(
+                              hintText: '0.00',
+                              hintStyle: textTheme.displaySmall?.copyWith(
+                                fontWeight: FontWeight.w900,
+                                color: color.primary.withValues(alpha: 0.2),
+                              ),
+                              prefixText: '₹ ',
+                              prefixStyle: textTheme.displaySmall?.copyWith(
+                                fontWeight: FontWeight.w900,
+                                color: color.primary.withValues(alpha: 0.5),
+                              ),
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.symmetric(
+                                vertical: spacing.cardVerticalMax,
+                              ),
+                              filled: false,
+                              enabledBorder: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                            ),
+                            onChanged: (_) => setState(() {}),
+                          ),
+                          // Quick amounts
+                          Padding(
+                            padding:
+                                EdgeInsets.only(bottom: spacing.elementGap),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Consumer(
+                                  builder: (context, ref, _) {
+                                    final amounts =
+                                        ref.watch(quickAmountsProvider);
+                                    final chips = amounts.valueOrNull ??
+                                        [100, 500, 1000, 2000, 5000];
+                                    return Wrap(
+                                      alignment: WrapAlignment.center,
+                                      spacing: 8,
+                                      children: chips.map((amt) {
+                                        return ActionChip(
+                                          label: Text(
+                                            '₹$amt',
+                                            style:
+                                                textTheme.labelSmall?.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                          onPressed: () {
+                                            HapticFeedback.selectionClick();
+                                            _amountController.text =
+                                                amt.toString();
+                                            setState(() {});
+                                          },
+                                          visualDensity: VisualDensity.compact,
+                                          side: BorderSide.none,
+                                          backgroundColor: color.primary
+                                              .withValues(alpha: 0.08),
+                                        );
+                                      }).toList(),
+                                    );
+                                  },
+                                ),
+                              ],
                             ),
                           ),
                         ],
                       ),
                     ),
+
+                    SizedBox(height: spacing.sectionGap + 8),
+
+                    // ── FROM / SWAP / TO ──
+                    _buildAccountCard(
+                      label: 'FROM',
+                      icon: LucideIcons.arrowUpRight,
+                      iconColor: color.error,
+                      account: _fromAccount,
+                      accounts: accounts
+                          .where((a) => a.id != _toAccount?.id)
+                          .toList(),
+                      isGuestMode: isGuestMode,
+                      onSelect: (a) => setState(() => _fromAccount = a),
+                      color: color,
+                      textTheme: textTheme,
+                      spacing: spacing,
+                    ),
+
+                    // Swap row
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Row(
+                        children: [
+                          const SizedBox(width: 20),
+                          AnimatedBuilder(
+                            animation: _flowController,
+                            builder: (_, __) {
+                              return CustomPaint(
+                                size: const Size(2, 32),
+                                painter: _FlowLinePainter(
+                                  color: color.primary,
+                                  progress: _flowController.value,
+                                  enabled: _canTransfer,
+                                ),
+                              );
+                            },
+                          ),
+                          const Spacer(),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: color.surfaceContainerHighest,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color:
+                                    color.outlineVariant.withValues(alpha: 0.5),
+                              ),
+                            ),
+                            child: IconButton(
+                              onPressed:
+                                  _fromAccount != null || _toAccount != null
+                                      ? _swapAccounts
+                                      : null,
+                              icon: Icon(
+                                LucideIcons.arrowUpDown,
+                                size: 18,
+                                color:
+                                    _fromAccount != null || _toAccount != null
+                                        ? color.primary
+                                        : color.onSurfaceVariant
+                                            .withValues(alpha: 0.3),
+                              ),
+                              visualDensity: VisualDensity.compact,
+                              tooltip: 'Swap accounts',
+                            ),
+                          ),
+                          const Spacer(),
+                          const SizedBox(width: 22),
+                        ],
+                      ),
+                    ),
+
+                    _buildAccountCard(
+                      label: 'TO',
+                      icon: LucideIcons.arrowDownLeft,
+                      iconColor: const Color(0xFF4CAF50),
+                      account: _toAccount,
+                      accounts: accounts
+                          .where((a) => a.id != _fromAccount?.id)
+                          .toList(),
+                      isGuestMode: isGuestMode,
+                      onSelect: (a) => setState(() => _toAccount = a),
+                      color: color,
+                      textTheme: textTheme,
+                      spacing: spacing,
+                    ),
+
+                    SizedBox(height: spacing.sectionGap + 8),
+
+                    // ── NOTE ──
+                    TextField(
+                      controller: _noteController,
+                      decoration: InputDecoration(
+                        hintText: 'Add a note (optional)',
+                        prefixIcon: Icon(
+                          LucideIcons.pencilLine,
+                          size: 18,
+                          color: color.onSurfaceVariant,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius:
+                              BorderRadius.circular(spacing.radiusMedium),
+                          borderSide: BorderSide(
+                            color: color.outlineVariant.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius:
+                              BorderRadius.circular(spacing.radiusMedium),
+                          borderSide: BorderSide(
+                            color: color.outlineVariant.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                      ),
+                    ),
+
+                    SizedBox(height: spacing.elementGap + 4),
+
+                    // ── DATE ──
+                    InkWell(
+                      onTap: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: _date,
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime.now(),
+                        );
+                        if (picked != null) {
+                          HapticFeedback.lightImpact();
+                          setState(() => _date = picked);
+                        }
+                      },
+                      borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                        decoration: BoxDecoration(
+                          borderRadius:
+                              BorderRadius.circular(spacing.radiusMedium),
+                          border: Border.all(
+                            color: color.outlineVariant.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              LucideIcons.calendar,
+                              size: 18,
+                              color: color.onSurfaceVariant,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              DateFormat('MMM dd, yyyy').format(_date),
+                              style: textTheme.bodyLarge,
+                            ),
+                            const Spacer(),
+                            Icon(
+                              LucideIcons.chevronRight,
+                              size: 16,
+                              color: color.onSurfaceVariant,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
-              
-              // Slide to Transfer Button
+
+              // ── SLIDE TO TRANSFER ──
               _SlideToTransferButton(
-                enabled: _fromAccount != null &&
-                    _toAccount != null &&
-                    (_amountController.text.isNotEmpty &&
-                        double.tryParse(_amountController.text) != null &&
-                        double.parse(_amountController.text) > 0),
+                enabled: _canTransfer,
                 onSlideComplete: _executeTransfer,
               ),
             ],
@@ -320,232 +478,255 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew> {
     );
   }
 
+  // ── ACCOUNT CARD ──
+  Widget _buildAccountCard({
+    required String label,
+    required IconData icon,
+    required Color iconColor,
+    required Account? account,
+    required List<Account> accounts,
+    required bool isGuestMode,
+    required ValueChanged<Account> onSelect,
+    required ColorScheme color,
+    required TextTheme textTheme,
+    required AppSpacing spacing,
+  }) {
+    final accountColor = account != null
+        ? Color(account.colorValue ?? color.primary.toARGB32())
+        : color.onSurfaceVariant;
+    final balance = account != null ? _balanceMap[account.id] ?? 0.0 : 0.0;
+    final displayBalance = GuestModeUtil.applyGuestMode(balance, isGuestMode);
+
+    return InkWell(
+      onTap: () => _showAccountPicker(context, accounts, onSelect),
+      borderRadius: BorderRadius.circular(spacing.radiusMedium),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: account != null
+              ? accountColor.withValues(alpha: 0.06)
+              : color.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(spacing.radiusMedium),
+          border: Border.all(
+            color: account != null
+                ? accountColor.withValues(alpha: 0.3)
+                : color.outlineVariant.withValues(alpha: 0.3),
+          ),
+        ),
+        child: account != null
+            ? Row(
+                children: [
+                  // Direction icon
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: iconColor.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(icon, size: 16, color: iconColor),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          label,
+                          style: textTheme.labelSmall?.copyWith(
+                            color: iconColor,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          account.name,
+                          style: textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Icon(
+                        account.accountType.icon,
+                        size: 18,
+                        color: accountColor,
+                      ),
+                      const SizedBox(height: 4),
+                      CurrencyText(
+                        amount: displayBalance,
+                        compact: true,
+                        style: textTheme.labelMedium?.copyWith(
+                          color: color.onSurfaceVariant,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              )
+            : Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: color.onSurfaceVariant.withValues(alpha: 0.08),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      icon,
+                      size: 16,
+                      color: iconColor.withValues(alpha: 0.4),
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Text(
+                    'Select $label account',
+                    style: textTheme.bodyLarge?.copyWith(
+                      color: color.onSurfaceVariant,
+                    ),
+                  ),
+                  const Spacer(),
+                  Icon(
+                    LucideIcons.chevronRight,
+                    size: 16,
+                    color: color.onSurfaceVariant,
+                  ),
+                ],
+              ),
+      ),
+    );
+  }
+
+  // ── ACCOUNT PICKER ──
   void _showAccountPicker(
     BuildContext context,
     List<Account> accounts,
-    Function(Account) onSelect,
+    ValueChanged<Account> onSelect,
   ) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final accountService = ref.watch(accountServiceProvider);
-    final isGuestMode = ref.watch(guestModeProvider);
+    final spacing = ref.read(spacingProvider);
+    final isGuestMode = ref.read(guestModeProvider);
 
+    HapticFeedback.lightImpact();
     showModalBottomSheet(
       context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      shape: RoundedRectangleBorder(
+        borderRadius:
+            BorderRadius.vertical(top: Radius.circular(spacing.radiusLarge)),
       ),
-      builder: (ctx) => DraggableScrollableSheet(
-        initialChildSize: 0.6,
-        minChildSize: 0.4,
-        maxChildSize: 0.9,
-        expand: false,
-        builder: (context, scrollController) => Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 8),
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: color.onSurfaceVariant.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(2),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 8),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: color.onSurfaceVariant.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Select Account',
+              style:
+                  textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            ...accounts.map((account) {
+              final acColor =
+                  Color(account.colorValue ?? color.primary.toARGB32());
+              final bal = _balanceMap[account.id] ?? 0.0;
+              final displayBal = GuestModeUtil.applyGuestMode(bal, isGuestMode);
+
+              return ListTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: acColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    account.accountType.icon,
+                    color: acColor,
+                    size: 20,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Select Account',
-                style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              Expanded(
-                child: ListView.builder(
-                  controller: scrollController,
-                  itemCount: accounts.length,
-                  itemBuilder: (context, index) {
-                    final account = accounts[index];
-                    return _AccountPickerItem(
-                      account: account,
-                      isGuestMode: isGuestMode,
-                      onTap: () {
-                        HapticFeedback.mediumImpact();
-                        onSelect(account);
-                        ctx.pop();
-                      },
-                    );
-                  },
+                title: Text(
+                  account.name,
+                  style: textTheme.bodyLarge
+                      ?.copyWith(fontWeight: FontWeight.w600),
                 ),
-              ),
-              const SizedBox(height: 16),
-            ],
-          ),
+                trailing: CurrencyText(
+                  amount: displayBal,
+                  compact: true,
+                  style: textTheme.labelLarge?.copyWith(
+                    color: color.onSurfaceVariant,
+                  ),
+                ),
+                onTap: () {
+                  HapticFeedback.mediumImpact();
+                  onSelect(account);
+                  ctx.pop();
+                },
+              );
+            }),
+            const SizedBox(height: 16),
+          ],
         ),
       ),
     );
   }
-
-  IconData _getAccountIcon(AccountType type) {
-    switch (type) {
-      case AccountType.bank:
-        return Icons.account_balance;
-      case AccountType.cash:
-        return Icons.money;
-      case AccountType.creditCard:
-        return Icons.credit_card;
-      case AccountType.eWallet:
-        return Icons.account_balance_wallet;
-      case AccountType.investment:
-        return Icons.trending_up;
-      case AccountType.other:
-        return Icons.attach_money;
-    }
-  }
 }
 
-class _AccountCard extends StatelessWidget {
-  final String label;
-  final Account? account;
-  final Future<double> balance;
-  final bool isGuestMode;
-  final VoidCallback onTap;
+// ── FLOW LINE PAINTER ──
+class _FlowLinePainter extends CustomPainter {
+  final Color color;
+  final double progress;
+  final bool enabled;
 
-  const _AccountCard({
-    required this.label,
-    required this.account,
-    required this.balance,
-    required this.isGuestMode,
-    required this.onTap,
+  _FlowLinePainter({
+    required this.color,
+    required this.progress,
+    required this.enabled,
   });
 
   @override
-  Widget build(BuildContext context) {
-    final color = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+  void paint(Canvas canvas, Size size) {
+    final trackPaint = Paint()
+      ..color = color.withValues(alpha: 0.15)
+      ..strokeWidth = 2
+      ..style = PaintingStyle.stroke;
 
-    return RepaintBoundary(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: account != null
-                ? color.primaryContainer.withValues(alpha: 0.3)
-                : color.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: account != null
-                  ? color.primary.withValues(alpha: 0.5)
-                  : color.outline.withValues(alpha: 0.2),
-              width: 2,
-            ),
-          ),
-          child: account != null
-              ? Row(
-                  children: [
-                    CircleAvatar(
-                      backgroundColor: Color(
-                        account!.colorValue ?? color.primary.toARGB32(),
-                      ).withValues(alpha: 0.2),
-                      child: Icon(
-                        _getAccountIcon(account!.accountType),
-                        color: Color(
-                          account!.colorValue ?? color.primary.toARGB32(),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            label,
-                            style: textTheme.labelSmall?.copyWith(
-                              color: color.primary,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 1.2,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            account!.name,
-                            style: textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          FutureBuilder<double>(
-                            future: balance,
-                            builder: (context, snapshot) {
-                              if (!snapshot.hasData) {
-                                return Text(
-                                  'Loading...',
-                                  style: textTheme.bodySmall?.copyWith(
-                                    color: color.onSurfaceVariant,
-                                  ),
-                                );
-                              }
-                              final bal = GuestModeUtil.applyGuestMode(
-                                snapshot.data!,
-                                isGuestMode,
-                              );
-                              return Text(
-                                'Available: ₹${bal.toStringAsFixed(2)}',
-                                style: textTheme.bodySmall?.copyWith(
-                                  color: color.onSurfaceVariant,
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                    Icon(Icons.edit, color: color.primary, size: 20),
-                  ],
-                )
-              : Column(
-                  children: [
-                    Icon(
-                      Icons.add_circle_outline,
-                      size: 48,
-                      color: color.onSurfaceVariant,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Tap to select $label account',
-                      style: textTheme.bodyMedium?.copyWith(
-                        color: color.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-        ),
-      ),
+    canvas.drawLine(
+      Offset(size.width / 2, 0),
+      Offset(size.width / 2, size.height),
+      trackPaint,
     );
+
+    if (!enabled) return;
+
+    final dotPaint = Paint()
+      ..color = color.withValues(alpha: 0.8)
+      ..style = PaintingStyle.fill;
+
+    final y = progress * size.height;
+    canvas.drawCircle(Offset(size.width / 2, y), 3, dotPaint);
   }
 
-  IconData _getAccountIcon(AccountType type) {
-    switch (type) {
-      case AccountType.bank:
-        return Icons.account_balance;
-      case AccountType.cash:
-        return Icons.money;
-      case AccountType.creditCard:
-        return Icons.credit_card;
-      case AccountType.eWallet:
-        return Icons.account_balance_wallet;
-      case AccountType.investment:
-        return Icons.trending_up;
-      case AccountType.other:
-        return Icons.attach_money;
-    }
-  }
+  @override
+  bool shouldRepaint(covariant _FlowLinePainter old) =>
+      old.progress != progress || old.enabled != enabled;
 }
 
+// ── SLIDE TO TRANSFER ──
 class _SlideToTransferButton extends StatefulWidget {
   final bool enabled;
   final VoidCallback onSlideComplete;
@@ -559,160 +740,252 @@ class _SlideToTransferButton extends StatefulWidget {
   State<_SlideToTransferButton> createState() => _SlideToTransferButtonState();
 }
 
-class _SlideToTransferButtonState extends State<_SlideToTransferButton> {
+class _SlideToTransferButtonState extends State<_SlideToTransferButton>
+    with TickerProviderStateMixin {
   double _dragPosition = 0.0;
   bool _isCompleted = false;
+  double _maxDrag = 0.0;
+
+  late final AnimationController _shimmerController;
+  late final AnimationController _snapBackController;
+  late final Animation<double> _snapBackAnimation;
+
+  // Haptic milestone tracking
+  final _hapticThresholds = {0.25, 0.50, 0.75};
+  final _triggeredThresholds = <double>{};
+
+  static const _thumbSize = 60.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _shimmerController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2000),
+    )..repeat();
+
+    _snapBackController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+    _snapBackAnimation = CurvedAnimation(
+      parent: _snapBackController,
+      curve: Curves.elasticOut,
+    );
+    _snapBackController.addListener(() {
+      setState(() {
+        _dragPosition = _dragPosition * (1 - _snapBackAnimation.value);
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _shimmerController.dispose();
+    _snapBackController.dispose();
+    super.dispose();
+  }
+
+  double get _progress =>
+      _maxDrag > 0 ? (_dragPosition / _maxDrag).clamp(0.0, 1.0) : 0.0;
+
+  void _onDragUpdate(DragUpdateDetails details) {
+    if (!widget.enabled || _isCompleted) return;
+    setState(() {
+      _dragPosition = (_dragPosition + details.delta.dx).clamp(0.0, _maxDrag);
+    });
+
+    // Milestone haptics
+    for (final t in _hapticThresholds) {
+      if (_progress >= t && !_triggeredThresholds.contains(t)) {
+        _triggeredThresholds.add(t);
+        HapticFeedback.lightImpact();
+      }
+    }
+  }
+
+  void _onDragEnd(DragEndDetails details) {
+    if (!widget.enabled || _isCompleted) return;
+
+    if (_progress >= 0.85) {
+      setState(() => _isCompleted = true);
+      HapticFeedback.heavyImpact();
+      widget.onSlideComplete();
+    } else {
+      // Spring snap-back
+      _triggeredThresholds.clear();
+      final startPos = _dragPosition;
+      _snapBackController.reset();
+      _snapBackController.forward();
+      // Store start position for interpolation
+      _dragPosition = startPos;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final screenWidth = MediaQuery.of(context).size.width - 32;
-    final threshold = screenWidth - 80;
 
-    return Container(
-      margin: const EdgeInsets.all(16),
-      height: 70,
-      decoration: BoxDecoration(
-        color: widget.enabled
-            ? color.primaryContainer
-            : color.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(35),
-      ),
-      child: Stack(
-        children: [
-          // Background Text
-          Center(
-            child: Text(
-              _isCompleted ? 'Transferring...' : 'Slide to Transfer',
-              style: textTheme.titleMedium?.copyWith(
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final maxWidth = constraints.maxWidth;
+          _maxDrag = maxWidth - _thumbSize - 8;
+
+          return Container(
+            height: 68,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(34),
+              border: Border.all(
                 color: widget.enabled
-                    ? color.onPrimaryContainer.withValues(alpha: 0.5)
-                    : color.onSurfaceVariant.withValues(alpha: 0.3),
-                fontWeight: FontWeight.bold,
+                    ? color.primary.withValues(alpha: 0.2)
+                    : color.outlineVariant.withValues(alpha: 0.2),
               ),
             ),
-          ),
-          
-          // Draggable Button
-          AnimatedPositioned(
-            duration: const Duration(milliseconds: 200),
-            left: _dragPosition,
-            top: 5,
-            bottom: 5,
-            child: GestureDetector(
-              onHorizontalDragUpdate: widget.enabled && !_isCompleted
-                  ? (details) {
-                      setState(() {
-                        _dragPosition = (_dragPosition + details.delta.dx)
-                            .clamp(0.0, threshold);
-                      });
-                      
-                      // Haptic feedback at intervals
-                      if (_dragPosition % 50 < 5) {
-                        HapticFeedback.selectionClick();
-                      }
-                    }
-                  : null,
-              onHorizontalDragEnd: widget.enabled && !_isCompleted
-                  ? (details) {
-                      if (_dragPosition >= threshold * 0.9) {
-                        setState(() => _isCompleted = true);
-                        HapticFeedback.heavyImpact();
-                        widget.onSlideComplete();
-                      } else {
-                        setState(() => _dragPosition = 0);
-                      }
-                    }
-                  : null,
-              child: Container(
-                width: 60,
-                decoration: BoxDecoration(
-                  color: widget.enabled ? color.primary : color.surfaceContainerHigh,
-                  shape: BoxShape.circle,
-                  boxShadow: widget.enabled
-                      ? [
-                          BoxShadow(
-                            color: color.primary.withValues(alpha: 0.4),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
+            child: Stack(
+              children: [
+                // ── Background track ──
+                Container(
+                  decoration: BoxDecoration(
+                    color: widget.enabled
+                        ? color.primaryContainer.withValues(alpha: 0.4)
+                        : color.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(34),
+                  ),
+                ),
+
+                // ── Progress fill ──
+                if (widget.enabled)
+                  AnimatedContainer(
+                    duration: _dragPosition == 0
+                        ? const Duration(milliseconds: 300)
+                        : Duration.zero,
+                    width: _dragPosition + _thumbSize + 8,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(34),
+                      gradient: LinearGradient(
+                        colors: [
+                          color.primary.withValues(alpha: 0.25),
+                          color.primary.withValues(alpha: 0.08),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                // ── Shimmer hint text ──
+                Center(
+                  child: AnimatedBuilder(
+                    animation: _shimmerController,
+                    builder: (_, child) {
+                      if (!widget.enabled || _isCompleted || _progress > 0.3) {
+                        return Text(
+                          _isCompleted
+                              ? 'Transferring...'
+                              : 'Slide to Transfer',
+                          style: textTheme.titleSmall?.copyWith(
+                            color: widget.enabled
+                                ? color.onPrimaryContainer
+                                    .withValues(alpha: 0.5)
+                                : color.onSurfaceVariant.withValues(alpha: 0.3),
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.5,
                           ),
-                        ]
-                      : null,
+                        );
+                      }
+
+                      return ShaderMask(
+                        shaderCallback: (bounds) {
+                          final dx = _shimmerController.value * 2 - 0.5;
+                          return LinearGradient(
+                            begin: Alignment(dx - 0.3, 0),
+                            end: Alignment(dx + 0.3, 0),
+                            colors: [
+                              color.onPrimaryContainer.withValues(alpha: 0.4),
+                              color.primary,
+                              color.onPrimaryContainer.withValues(alpha: 0.4),
+                            ],
+                            stops: const [0.0, 0.5, 1.0],
+                          ).createShader(bounds);
+                        },
+                        child: Text(
+                          'Slide to Transfer',
+                          style: textTheme.titleSmall?.copyWith(
+                            color: Colors.white, // ShaderMask needs opaque base
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 ),
-                child: Icon(
-                  _isCompleted ? Icons.check : Icons.arrow_forward,
-                  color: widget.enabled ? color.onPrimary : color.onSurfaceVariant,
+
+                // ── Draggable thumb ──
+                AnimatedPositioned(
+                  duration:
+                      _snapBackController.isAnimating || _dragPosition == 0
+                          ? Duration.zero
+                          : Duration.zero,
+                  left: _dragPosition + 4,
+                  top: 4,
+                  bottom: 4,
+                  child: GestureDetector(
+                    onHorizontalDragUpdate: _onDragUpdate,
+                    onHorizontalDragEnd: _onDragEnd,
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      width: _thumbSize,
+                      height: _thumbSize,
+                      decoration: BoxDecoration(
+                        color: widget.enabled
+                            ? Color.lerp(
+                                color.primary,
+                                const Color(0xFF4CAF50),
+                                _progress,
+                              )
+                            : color.surfaceContainerHigh,
+                        shape: BoxShape.circle,
+                        boxShadow: widget.enabled
+                            ? [
+                                BoxShadow(
+                                  color: Color.lerp(
+                                    color.primary,
+                                    const Color(0xFF4CAF50),
+                                    _progress,
+                                  )!
+                                      .withValues(alpha: 0.3),
+                                  blurRadius: 12 + (_progress * 8),
+                                  offset: const Offset(0, 4),
+                                ),
+                              ]
+                            : null,
+                      ),
+                      child: _isCompleted
+                          ? Icon(
+                              LucideIcons.check,
+                              color: color.onPrimary,
+                              size: 22,
+                            )
+                          : Icon(
+                              _progress > 0.7
+                                  ? LucideIcons.checkCheck
+                                  : LucideIcons.arrowRight,
+                              color: widget.enabled
+                                  ? color.onPrimary
+                                  : color.onSurfaceVariant
+                                      .withValues(alpha: 0.3),
+                              size: 22,
+                            ),
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
-          ),
-        ],
+          );
+        },
       ),
     );
-  }
-}
-
-
-class _AccountPickerItem extends ConsumerWidget {
-  final Account account;
-  final bool isGuestMode;
-  final VoidCallback onTap;
-
-  const _AccountPickerItem({
-    required this.account,
-    required this.isGuestMode,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final color = Theme.of(context).colorScheme;
-    final balance = ref.watch(accountServiceProvider).getAccountBalance(account.id);
-
-    return FutureBuilder<double>(
-      future: balance,
-      builder: (context, snapshot) {
-        final bal = GuestModeUtil.applyGuestMode(
-          snapshot.data ?? 0,
-          isGuestMode,
-        );
-        return ListTile(
-          leading: CircleAvatar(
-            backgroundColor: Color(
-              account.colorValue ?? color.primary.toARGB32(),
-            ).withValues(alpha: 0.2),
-            child: Icon(
-              _getAccountIcon(account.accountType),
-              color: Color(
-                account.colorValue ?? color.primary.toARGB32(),
-              ),
-            ),
-          ),
-          title: Text(account.name),
-          subtitle: snapshot.hasData
-              ? Text('₹${bal.toStringAsFixed(2)}')
-              : const Text('Loading...'),
-          onTap: onTap,
-        );
-      },
-    );
-  }
-
-  IconData _getAccountIcon(AccountType type) {
-    switch (type) {
-      case AccountType.bank:
-        return Icons.account_balance;
-      case AccountType.cash:
-        return Icons.money;
-      case AccountType.creditCard:
-        return Icons.credit_card;
-      case AccountType.eWallet:
-        return Icons.account_balance_wallet;
-      case AccountType.investment:
-        return Icons.trending_up;
-      case AccountType.other:
-        return Icons.attach_money;
-    }
   }
 }

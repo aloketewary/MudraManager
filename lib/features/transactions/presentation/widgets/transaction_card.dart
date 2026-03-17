@@ -8,6 +8,7 @@ import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/extension/account_type_extenstion.dart';
 import 'package:mudra_manager/core/extension/case_extention.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/icon_helper.dart';
 import 'package:mudra_manager/core/utils/string_util.dart';
 import 'package:mudra_manager/shared/widgets/adaptive_text.dart';
@@ -81,10 +82,12 @@ class _TransactionCardState extends ConsumerState<TransactionCard>
 
   @override
   Widget build(BuildContext context) {
+    final spacing = ref.watch(spacingProvider);
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final isGuestMode = ref.watch(guestModeProvider);
-    displayAmount = GuestModeUtil.applyGuestMode(widget.amount.toDouble(), isGuestMode);
+    displayAmount =
+        GuestModeUtil.applyGuestMode(widget.amount.toDouble(), isGuestMode);
     widget.related?.category.load();
     widget.related?.account.load();
 
@@ -98,157 +101,172 @@ class _TransactionCardState extends ConsumerState<TransactionCard>
         child: ScaleTransition(
           scale: _scaleAnimation,
           child: Card(
-            margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
+            margin: EdgeInsets.symmetric(
+              horizontal: spacing.cardHorizontal,
+              vertical: spacing.cardVertical,
+            ),
             elevation: 0,
             color: color.surfaceContainerLow,
-        child: Stack(
-          children: [
-            if (widget.isRecurring)
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: color.errorContainer.withValues(alpha: 0.3),
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(20),
-                      bottomRight: Radius.circular(16),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.repeat,
-                        size: 12,
-                        color: color.error,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'SUBSCRIPTION',
-                        style: textTheme.labelSmall?.copyWith(
-                          color: color.error,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            if (widget.tripName != null)
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: color.primaryContainer.withValues(alpha: 0.3),
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(20),
-                      bottomRight: Radius.circular(16),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.flight_takeoff,
-                        size: 12,
-                        color: color.primary,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'TRIP',
-                        style: textTheme.labelSmall?.copyWith(
-                          color: color.primary,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            Padding(
-              padding: const EdgeInsets.all(14),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  widget.isTransfer ? buildTransferCard() : buildNormalCard(),
-                  if (widget.description?.isNotEmpty == true ||
-                      widget.tags.isNotEmpty) ...[
-                    const SizedBox(height: 12),
-                    if (widget.description?.isNotEmpty == true)
-                      Text(
-                        widget.description!.length > 80
-                            ? '${widget.description!.substring(0, 80)}...'
-                            : widget.description!,
-                        style: textTheme.bodySmall?.copyWith(
-                          color: color.onSurfaceVariant,
-                          fontStyle: FontStyle.italic,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    if (widget.tags.isNotEmpty) ...[
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 6,
-                        runSpacing: 6,
-                        children: widget.tags
-                            .map(
-                              (tag) => Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: color.secondaryContainer,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.tag,
-                                      size: 12,
-                                      color: color.onSecondaryContainer,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      tag.name,
-                                      style: textTheme.labelSmall?.copyWith(
-                                        color: color.onSecondaryContainer,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            )
-                            .toList(),
-                      ),
-                    ],
-                  ],
-                ],
-              ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(spacing.radiusMedium),
+              side: BorderSide(color: color.outlineVariant, width: 0.5),
             ),
-          ],
-        ),
+            child: Stack(
+              children: [
+                if (widget.isRecurring)
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: color.errorContainer.withValues(alpha: 0.3),
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(20),
+                          bottomRight: Radius.circular(16),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.repeat,
+                            size: 12,
+                            color: color.error,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'SUBSCRIPTION',
+                            style: textTheme.labelSmall?.copyWith(
+                              color: color.error,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                if (widget.tripName != null)
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: color.primaryContainer.withValues(alpha: 0.3),
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(20),
+                          bottomRight: Radius.circular(16),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.flight_takeoff,
+                            size: 12,
+                            color: color.primary,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'TRIP',
+                            style: textTheme.labelSmall?.copyWith(
+                              color: color.primary,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      widget.isTransfer
+                          ? buildTransferCard()
+                          : buildNormalCard(),
+                      if (widget.description?.isNotEmpty == true ||
+                          widget.tags.isNotEmpty) ...[
+                        const SizedBox(height: 12),
+                        if (widget.description?.isNotEmpty == true)
+                          Text(
+                            widget.description!.length > 80
+                                ? '${widget.description!.substring(0, 80)}...'
+                                : widget.description!,
+                            style: textTheme.bodySmall?.copyWith(
+                              color: color.onSurfaceVariant,
+                              fontStyle: FontStyle.italic,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        if (widget.tags.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 6,
+                            runSpacing: 6,
+                            children: widget.tags
+                                .map(
+                                  (tag) => Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: color.secondaryContainer,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.tag,
+                                          size: 12,
+                                          color: color.onSecondaryContainer,
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          tag.name,
+                                          style: textTheme.labelSmall?.copyWith(
+                                            color: color.onSecondaryContainer,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                          ),
+                        ],
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
 
     if (widget.index != null) {
-      return card.animate()
-          .fadeIn(delay: Duration(milliseconds: widget.index! * 30), duration: 250.ms)
-          .slideX(begin: 0.1, delay: Duration(milliseconds: widget.index! * 30), duration: 250.ms);
+      return card
+          .animate()
+          .fadeIn(
+              delay: Duration(milliseconds: widget.index! * 30),
+              duration: 250.ms)
+          .slideX(
+              begin: 0.1,
+              delay: Duration(milliseconds: widget.index! * 30),
+              duration: 250.ms);
     }
     return card;
   }

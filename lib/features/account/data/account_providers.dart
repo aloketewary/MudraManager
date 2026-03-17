@@ -18,6 +18,12 @@ final accountServiceProvider = Provider((ref) {
   return AccountsService(isar, log);
 });
 
+final allAccountsProvider = FutureProvider.autoDispose((ref) async {
+  final isarService = ref.watch(isarServiceProvider);
+  final isar = await isarService.getInstance();
+  return await isar.accounts.where().findAll();
+});
+
 final balanceVisibilityProvider = StateProvider.autoDispose<bool>((ref) => true);
 
 class AccountsService {

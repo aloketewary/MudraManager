@@ -10,51 +10,54 @@ class StreakIndicator extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final streak = ref.watch(dailyStreakProvider);
+    if (streak == null || streak.currentCount == 0) {
+      return const SizedBox.shrink();
+    }
 
-    if (streak == null || streak.currentCount == 0) return const SizedBox.shrink();
-
+    final color = Theme.of(context).colorScheme;
     final now = DateTime.now();
     final isCheckedToday = streak.lastChecked != null &&
         streak.lastChecked!.year == now.year &&
         streak.lastChecked!.month == now.month &&
         streak.lastChecked!.day == now.day;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.orange.shade400, Colors.deepOrange.shade600],
-        ),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          isCheckedToday
-              ? const Icon(LucideIcons.flame, color: Colors.white, size: 20)
-                  .animate(
-                    onPlay: (controller) => controller.repeat(),
-                  )
-                  .shimmer(
-                    duration: 1500.ms,
-                    color: Colors.yellow.withValues(alpha: 0.5),
-                  )
-                  .shake(
-                    duration: 2000.ms,
-                    hz: 2,
-                    rotation: 0.05,
-                  )
-              : const Icon(LucideIcons.flame, color: Colors.white, size: 20),
-          const SizedBox(width: 4),
-          Text(
-            '${streak.currentCount}',
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-            ),
+    final icon = Icon(LucideIcons.flame, color: color.onError, size: 18);
+
+    return Semantics(
+      label: '${streak.currentCount} day streak',
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              color.error.withValues(alpha: 0.8),
+              color.error,
+            ],
           ),
-        ],
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            isCheckedToday
+                ? icon
+                    .animate(onPlay: (c) => c.repeat())
+                    .shimmer(
+                      duration: 1500.ms,
+                      color: color.onError.withValues(alpha: 0.4),
+                    )
+                : icon,
+            const SizedBox(width: 4),
+            Text(
+              '${streak.currentCount}',
+              style: TextStyle(
+                color: color.onError,
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

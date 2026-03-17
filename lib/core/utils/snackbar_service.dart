@@ -3,23 +3,33 @@ import 'package:flutter/material.dart';
 enum SnackbarType { error, success, info, warning }
 
 class SnackbarService {
-  static final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+  static final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
+      GlobalKey<ScaffoldMessengerState>();
 
   static void show(String message, SnackbarType type) {
-    scaffoldMessengerKey.currentState?.showSnackBar(
+    final messenger = scaffoldMessengerKey.currentState;
+    if (messenger == null) return;
+
+    // Clear any existing snackbar to prevent animation status
+    // listener from firing on a deactivated widget tree
+    messenger.clearSnackBars();
+
+    messenger.showSnackBar(
       SnackBar(
         content: Row(
           children: [
             Icon(_getIcon(type), color: Colors.white),
-            SizedBox(width: 12),
-            Expanded(child: Text(message, style: TextStyle(color: Colors.white))),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(message, style: const TextStyle(color: Colors.white)),
+            ),
           ],
         ),
         backgroundColor: _getColor(type),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        margin: EdgeInsets.all(16),
-        duration: Duration(seconds: 3),
+        margin: const EdgeInsets.all(16),
+        duration: const Duration(seconds: 3),
       ),
     );
   }
@@ -32,13 +42,13 @@ class SnackbarService {
   static Color _getColor(SnackbarType type) {
     switch (type) {
       case SnackbarType.error:
-        return Color(0xFFD32F2F);
+        return const Color(0xFFD32F2F);
       case SnackbarType.success:
-        return Color(0xFF388E3C);
+        return const Color(0xFF388E3C);
       case SnackbarType.info:
-        return Color(0xFF1976D2);
+        return const Color(0xFF1976D2);
       case SnackbarType.warning:
-        return Color(0xFFF57C00);
+        return const Color(0xFFF57C00);
     }
   }
 

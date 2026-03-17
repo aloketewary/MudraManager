@@ -12,6 +12,8 @@ import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/services/backup_restore_service.dart';
 import 'package:mudra_manager/core/utils/dialog_utils.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
+import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
+import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
 
 final _backupHistoryProvider = FutureProvider.autoDispose((ref) {
   return BackupService.getBackupHistory();
@@ -444,6 +446,9 @@ class BackupRestoreScreen extends ConsumerWidget {
     if (filePath != null) {
       SnackbarService.success(ctxt.backup_completedMessage);
       ref.invalidate(_backupHistoryProvider);
+      ref
+          .read(gamificationServiceProvider)
+          ?.track(GamificationEvent.backupCreated);
     }
   }
 

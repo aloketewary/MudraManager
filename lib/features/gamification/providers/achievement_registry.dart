@@ -476,5 +476,150 @@ class AchievementRegistry {
       ..type = AchievementType.badge
       ..series = 'trips'
       ..seriesOrder = 2,
+
+    // ==================== BACKUP ACHIEVEMENTS ====================
+    'first_backup': Achievement()
+      ..key = 'first_backup'
+      ..title = 'Safety First'
+      ..description = 'Create your first backup'
+      ..icon = 'shield'
+      ..category = AchievementCategory.engagement
+      ..type = AchievementType.badge
+      ..progress = 0
+      ..target = 1
+      ..rewardXP = 25
+      ..rewardCoins = 0
+      ..series = 'backup'
+      ..seriesOrder = 1,
+
+    'backup_10': Achievement()
+      ..key = 'backup_10'
+      ..title = 'Data Guardian'
+      ..description = 'Create 10 backups'
+      ..icon = 'vault'
+      ..category = AchievementCategory.engagement
+      ..type = AchievementType.badge
+      ..progress = 0
+      ..target = 10
+      ..rewardXP = 75
+      ..rewardCoins = 0
+      ..series = 'backup'
+      ..seriesOrder = 2,
+
+// ==================== SPLIT/SETTLEMENT ACHIEVEMENTS ====================
+    'first_split': Achievement()
+      ..key = 'first_split'
+      ..title = 'Fair Share'
+      ..description = 'Split your first expense'
+      ..icon = 'split'
+      ..category = AchievementCategory.tracking
+      ..type = AchievementType.badge
+      ..progress = 0
+      ..target = 1
+      ..rewardXP = 20
+      ..rewardCoins = 0
+      ..series = 'splits'
+      ..seriesOrder = 1,
+
+    'split_20': Achievement()
+      ..key = 'split_20'
+      ..title = 'Split Master'
+      ..description = 'Split 20 expenses with friends'
+      ..icon = 'users'
+      ..category = AchievementCategory.tracking
+      ..type = AchievementType.badge
+      ..progress = 0
+      ..target = 20
+      ..rewardXP = 75
+      ..rewardCoins = 0
+      ..series = 'splits'
+      ..seriesOrder = 2,
+
+// ==================== SAVINGS MILESTONES ====================
+    'savings_streak_7': Achievement()
+      ..key = 'savings_streak_7'
+      ..title = 'Saver\'s Habit'
+      ..description = 'Spend less than income for 7 days straight'
+      ..icon = 'piggy'
+      ..category = AchievementCategory.saving
+      ..type = AchievementType.streak
+      ..progress = 0
+      ..target = 7
+      ..rewardXP = 50
+      ..rewardCoins = 0
+      ..series = 'savings_streak'
+      ..seriesOrder = 1,
+
+    'savings_streak_30': Achievement()
+      ..key = 'savings_streak_30'
+      ..title = 'Frugal Champion'
+      ..description = 'Spend less than income for 30 days straight'
+      ..icon = 'trophy'
+      ..category = AchievementCategory.saving
+      ..type = AchievementType.streak
+      ..progress = 0
+      ..target = 30
+      ..rewardXP = 200
+      ..rewardCoins = 0
+      ..series = 'savings_streak'
+      ..seriesOrder = 2,
+
+// ==================== ZERO SPEND DAY ====================
+    'zero_spend_1': Achievement()
+      ..key = 'zero_spend_1'
+      ..title = 'No Spend Day'
+      ..description = 'Have a day with zero expenses'
+      ..icon = 'ban'
+      ..category = AchievementCategory.saving
+      ..type = AchievementType.badge
+      ..progress = 0
+      ..target = 1
+      ..rewardXP = 15
+      ..rewardCoins = 0
+      ..series = 'zero_spend'
+      ..seriesOrder = 1,
+
+    'zero_spend_10': Achievement()
+      ..key = 'zero_spend_10'
+      ..title = 'Minimalist'
+      ..description = 'Have 10 zero-spend days'
+      ..icon = 'minimalist'
+      ..category = AchievementCategory.saving
+      ..type = AchievementType.badge
+      ..progress = 0
+      ..target = 10
+      ..rewardXP = 60
+      ..rewardCoins = 0
+      ..series = 'zero_spend'
+      ..seriesOrder = 2,
+
+// ==================== RECONCILIATION ====================
+    'reconcile_first': Achievement()
+      ..key = 'reconcile_first'
+      ..title = 'Balance Checker'
+      ..description = 'Reconcile your first transaction'
+      ..icon = 'check-circle'
+      ..category = AchievementCategory.tracking
+      ..type = AchievementType.badge
+      ..progress = 0
+      ..target = 1
+      ..rewardXP = 20
+      ..rewardCoins = 0
+      ..series = 'reconcile'
+      ..seriesOrder = 1,
+
+    'reconcile_50': Achievement()
+      ..key = 'reconcile_50'
+      ..title = 'Audit Pro'
+      ..description = 'Reconcile 50 transactions'
+      ..icon = 'clipboard-check'
+      ..category = AchievementCategory.tracking
+      ..type = AchievementType.badge
+      ..progress = 0
+      ..target = 50
+      ..rewardXP = 100
+      ..rewardCoins = 0
+      ..series = 'reconcile'
+      ..seriesOrder = 2,
   };
 }
