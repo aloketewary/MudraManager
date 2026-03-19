@@ -1,8 +1,25 @@
 import 'package:mudra_manager/core/services/mudra_api_impl.dart';
+import 'package:mudra_manager/core/services/permission_guarded_api.dart';
 import 'package:mudra_manager/core/services/plugin_analytics.dart';
-import 'package:mudra_manager/core/sdk/rule_engine.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
+import 'package:mudra_manager/plugins/category_packs/business_pack.dart';
+import 'package:mudra_manager/plugins/category_packs/category_pack.dart';
+import 'package:mudra_manager/plugins/category_packs/couple_pack.dart';
+import 'package:mudra_manager/plugins/category_packs/default_pack.dart';
+import 'package:mudra_manager/plugins/category_packs/family_pack.dart';
+import 'package:mudra_manager/plugins/category_packs/foodie_pack.dart';
+import 'package:mudra_manager/plugins/category_packs/freelancer_pack.dart';
+import 'package:mudra_manager/plugins/category_packs/health_pack.dart';
+import 'package:mudra_manager/plugins/category_packs/indian_common_pack.dart';
+import 'package:mudra_manager/plugins/category_packs/indian_east_pack.dart';
+import 'package:mudra_manager/plugins/category_packs/indian_north_pack.dart';
+import 'package:mudra_manager/plugins/category_packs/indian_south_pack.dart';
+import 'package:mudra_manager/plugins/category_packs/indian_west_pack.dart';
+import 'package:mudra_manager/plugins/category_packs/investor_pack.dart';
+import 'package:mudra_manager/plugins/category_packs/pet_owner_pack.dart';
+import 'package:mudra_manager/plugins/category_packs/student_pack.dart';
+import 'package:mudra_manager/plugins/category_packs/traveller_pack.dart';
 import 'package:mudra_manager/plugins/low_balance_alert_plugin.dart';
 import 'package:mudra_manager/plugins/sms_alert_plugin.dart';
 import 'package:mudra_manager/plugins/budget_guard_plugin.dart';
@@ -14,7 +31,6 @@ import 'package:mudra_manager/plugins/savings_milestone_plugin.dart';
 import 'package:mudra_manager/plugins/category_alert_plugin.dart';
 import 'package:mudra_manager/plugins/credit_card_reminder_plugin.dart';
 import 'package:mudra_plugin_sdk/mudra_plugin_sdk.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mudra_manager/features/marketplace/services/marketplace_service.dart';
 
 class PluginService {
@@ -23,37 +39,59 @@ class PluginService {
   PluginService._();
 
   final _manager = PluginManager();
-  final _ruleEngine = RuleEngine();
-  final _api = MudraApiImpl();
+  final _marketplace = MarketplaceService();
   final _analytics = PluginAnalytics();
   final _log = AppLog(getLogger(), 'PluginService');
   final Map<String, MudraPlugin> _availablePlugins = {};
-  final Map<String, MudraPlugin> _activePlugins = {}; // Cache active plugins
+  final Map<String, MudraPlugin> _activePlugins = {};
   bool _initialized = false;
 
   Future<void> initialize() async {
-    if (_initialized) return; // Prevent double initialization
+    if (_initialized) return;
 
-    final prefs = await SharedPreferences.getInstance();
-    final marketplaceService = MarketplaceService();
+// Register all category packs
+    _registerCategoryPacks();
 
-    // Set error callback
+    await _analytics.load();
+    await _marketplace.loadEnabledStates();
+
     _manager.onError = (pluginId, error) {
       _log.e('Plugin $pluginId error', error);
       _analytics.trackError(pluginId);
     };
 
-    // Register all available plugins (lazy loading)
+    _manager.onPluginDisabled = (pluginId, reason) {
+      _log.w('Plugin $pluginId auto-disabled: $reason');
+      _activePlugins.remove(pluginId);
+      _analytics.trackDisabled(pluginId, reason);
+    };
+
     _registerAvailablePlugins();
 
-    // Load plugin metadata once
-    final pluginMetadataList = await marketplaceService.fetchPlugins();
-
-    // Only register enabled plugins
-    await _loadEnabledPlugins(prefs, marketplaceService, pluginMetadataList);
+    final pluginMetadataList = await _marketplace.fetchPlugins();
+    await _loadEnabledPlugins(pluginMetadataList);
 
     _manager.start();
     _initialized = true;
+  }
+
+  void _registerCategoryPacks() {
+    CategoryPackRegistry.register(DefaultPack.instance);
+    CategoryPackRegistry.register(StudentPack.instance);
+    CategoryPackRegistry.register(FamilyPack.instance);
+    CategoryPackRegistry.register(FreelancerPack.instance);
+    CategoryPackRegistry.register(FoodiePack.instance);
+    CategoryPackRegistry.register(TravellerPack.instance);
+    CategoryPackRegistry.register(HealthPack.instance);
+    CategoryPackRegistry.register(IndianCommonPack.instance);
+    CategoryPackRegistry.register(IndianNorthPack.instance);
+    CategoryPackRegistry.register(IndianSouthPack.instance);
+    CategoryPackRegistry.register(IndianEastPack.instance);
+    CategoryPackRegistry.register(IndianWestPack.instance);
+    CategoryPackRegistry.register(BusinessPack.instance);
+    CategoryPackRegistry.register(InvestorPack.instance);
+    CategoryPackRegistry.register(PetOwnerPack.instance);
+    CategoryPackRegistry.register(CouplePack.instance);
   }
 
   void _registerAvailablePlugins() {
@@ -70,17 +108,19 @@ class PluginService {
         CreditCardReminderPlugin();
   }
 
-  Future<void> _loadEnabledPlugins(
-    SharedPreferences prefs,
-    MarketplaceService marketplaceService,
-    List<dynamic> pluginMetadataList,
-  ) async {
+  Future<void> _loadEnabledPlugins(List<dynamic> pluginMetadataList) async {
+    // ... unchanged ...
     for (final entry in _availablePlugins.entries) {
-      final enabled = prefs.getBool('plugin_${entry.key}') ?? true;
+      final enabled = await _marketplace.isPluginEnabled(entry.key);
       if (enabled) {
-        entry.value.setApi(_api);
+        final rawApi = MudraApiImpl(entry.key);
+        final guardedApi = PermissionGuardedApi(
+          rawApi,
+          entry.key,
+          entry.value.permissions,
+        );
+        entry.value.setApi(guardedApi);
 
-        // Load and set config
         dynamic metadata;
         try {
           metadata = pluginMetadataList.firstWhere((p) => p.id == entry.key);
@@ -91,7 +131,7 @@ class PluginService {
         if (metadata?.configOptions != null) {
           final configMap = <String, dynamic>{};
           for (final option in metadata.configOptions!) {
-            final savedValue = await marketplaceService.getPluginConfig(
+            final savedValue = await _marketplace.getPluginConfig(
               entry.key,
               option.key,
             );
@@ -101,96 +141,101 @@ class PluginService {
         }
 
         _manager.register(entry.value);
-        _activePlugins[entry.key] = entry.value; // Cache active plugins
+        _activePlugins[entry.key] = entry.value;
       }
     }
   }
 
-  void emitSms(String sender, String body) {
-    if (_activePlugins.isEmpty) return; // Early exit if no active plugins
+  Future<void> disablePlugin(String pluginId) async {
+    if (!_activePlugins.containsKey(pluginId)) return;
+    await _manager.unregister(pluginId);
+    _activePlugins.remove(pluginId);
+    await _marketplace.togglePlugin(pluginId, false);
+    _log.i('Plugin $pluginId disabled');
+  }
 
-    _ruleEngine.process('sms', {'body': body, 'sender': sender});
-    _manager.emitSms(SmsEvent(sender, body));
+  Future<void> dispose() async {
+    await _manager.disposeAll();
+    _activePlugins.clear();
+    _initialized = false;
+    _log.i('All plugins disposed');
+  }
 
-    // Track analytics for active plugins
+  bool isPluginTripped(String pluginId) => _manager.isPluginTripped(pluginId);
+
+  void resetPlugin(String pluginId) {
+    _manager.resetBreaker(pluginId);
+    _analytics.clearDisabled(pluginId);
+    final plugin = _availablePlugins[pluginId];
+    if (plugin != null && !_activePlugins.containsKey(pluginId)) {
+      _activePlugins[pluginId] = plugin;
+    }
+    _log.i('Plugin $pluginId circuit breaker reset');
+  }
+
+  // ============================================================
+  // GENERIC DISPATCH — single entry point
+  // ============================================================
+
+  /// Core dispatch. All typed convenience methods funnel through here.
+  List<PluginNotification> _emit(PluginEvent event) {
+    if (_activePlugins.isEmpty) return [];
+    final result = _manager.emit(event);
     for (final pluginId in _activePlugins.keys) {
-      _analytics.trackEvent(pluginId, 'sms');
+      _analytics.trackEvent(pluginId, event.eventType);
     }
+    return result;
   }
 
-  void emitExpense(String category, double amount, DateTime time) {
-    if (_activePlugins.isEmpty) return;
+  // --- Thin typed convenience methods (one-liners) ---
 
-    _ruleEngine.process('expense', {'category': category, 'amount': amount});
-    _manager.emitExpense(ExpenseEvent(category, amount, time));
+  void emitSms(String sender, String body) => _emit(SmsEvent(sender, body));
 
-    for (final pluginId in _activePlugins.keys) {
-      _analytics.trackEvent(pluginId, 'expense');
-    }
-  }
+  void emitExpense(String category, double amount, DateTime time) =>
+      _emit(ExpenseEvent(category, amount, time));
 
-  void emitBudget(double used, double limit) {
-    if (_activePlugins.isEmpty) return;
+  void emitIncome(String source, double amount, DateTime time) =>
+      _emit(IncomeEvent(source, amount, time));
 
-    _ruleEngine.process('budget', {'used': used, 'limit': limit});
-    _manager.emitBudget(BudgetEvent(used, limit));
+  void emitBudget(double used, double limit) => _emit(BudgetEvent(used, limit));
 
-    for (final pluginId in _activePlugins.keys) {
-      _analytics.trackEvent(pluginId, 'budget');
-    }
-  }
+  void emitGoal(String goalId, bool achieved) =>
+      _emit(GoalEvent(goalId, achieved));
 
-  void emitGoal(String goalId, bool achieved) {
-    _manager.emitGoal(GoalEvent(goalId, achieved));
-    for (final plugin in _manager.getActivePlugins()) {
-      _analytics.trackEvent(plugin.id, 'goal');
-    }
-  }
+  void emitTransfer(String from, String to, double amount, DateTime time) =>
+      _emit(TransferEvent(from, to, amount, time));
 
-  void emitIncome(String source, double amount, DateTime time) {
-    _manager.emitIncome(IncomeEvent(source, amount, time));
-    for (final plugin in _manager.getActivePlugins()) {
-      _analytics.trackEvent(plugin.id, 'income');
-    }
-  }
+  void emitRecurring(String name, double amount, String frequency) =>
+      _emit(RecurringEvent(name, amount, frequency));
 
-  void emitTransfer(
-    String fromAccount,
-    String toAccount,
-    double amount,
-    DateTime time,
-  ) {
-    _manager.emitTransfer(TransferEvent(fromAccount, toAccount, amount, time));
-    for (final plugin in _manager.getActivePlugins()) {
-      _analytics.trackEvent(plugin.id, 'transfer');
-    }
-  }
+  void emitLowBalance(String accountName, double balance, double threshold) =>
+      _emit(LowBalanceEvent(accountName, balance, threshold));
 
-  void emitRecurring(String name, double amount, String frequency) {
-    _manager.emitRecurring(RecurringEvent(name, amount, frequency));
-    for (final plugin in _manager.getActivePlugins()) {
-      _analytics.trackEvent(plugin.id, 'recurring');
-    }
-  }
+  void emitDailySummary() => _emit(DailySummaryEvent(DateTime.now()));
 
-  void emitLowBalance(String accountName, double balance, double threshold) {
-    _manager.emitLowBalance(LowBalanceEvent(accountName, balance, threshold));
-    for (final plugin in _manager.getActivePlugins()) {
-      _analytics.trackEvent(plugin.id, 'low_balance');
-    }
-  }
+  List<PluginNotification> emitTransactionSaved({
+    required double amount,
+    required bool isExpense,
+    required DateTime date,
+    String? category,
+    String? account,
+    String? description,
+    bool isTransfer = false,
+  }) =>
+      _emit(
+        TransactionSavedEvent(
+          amount: amount,
+          isExpense: isExpense,
+          date: date,
+          category: category,
+          account: account,
+          description: description,
+          isTransfer: isTransfer,
+        ),
+      );
 
-  void emitDailySummary() {
-    if (_activePlugins.isEmpty) return;
-    _manager.emitDailySummary(DailySummaryEvent(DateTime.now()));
-    for (final pluginId in _activePlugins.keys) {
-      _analytics.trackEvent(pluginId, 'daily_summary');
-    }
-  }
-
-  Map<String, int> getPluginStats(String pluginId) {
-    return _analytics.getPluginStats(pluginId);
-  }
+  Map<String, int> getPluginStats(String pluginId) =>
+      _analytics.getPluginStats(pluginId);
 
   int get activePluginCount => _activePlugins.length;
   int get totalPluginCount => _availablePlugins.length;

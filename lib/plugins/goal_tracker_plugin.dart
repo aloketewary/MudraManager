@@ -11,23 +11,30 @@ class GoalTrackerPlugin extends MudraPlugin {
   String get version => '1.1.0';
 
   @override
-  void onGoal(GoalEvent e) {
-    if (e.achieved) {
+  void onGoal(GoalEvent event) {
+    if (event.achieved) {
       api.showNotification('🎉 Goal achieved! Keep it up!');
     }
   }
 
   @override
-  void onIncome(IncomeEvent e) {
+  void onIncome(IncomeEvent event) {
     final trackSavings = config?.get<bool>('track_savings') ?? true;
-    if (trackSavings && e.source.toLowerCase().contains('savings')) {
-      api.showNotification('💰 Savings added: ₹${e.amount.toStringAsFixed(0)}');
+    if (trackSavings && event.source.toLowerCase().contains('savings')) {
+      api.showNotification(
+        '💰 Savings added: ₹${event.amount.toStringAsFixed(0)}',
+      );
     }
   }
 
   @override
   void onLoad() {}
-  
+
   @override
   void onStart() {}
+
+  @override
+  Set<PluginPermission> get permissions => {
+        PluginPermission.notifications,
+      };
 }

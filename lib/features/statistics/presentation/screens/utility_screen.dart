@@ -29,7 +29,6 @@ class UtilityScreenState extends ConsumerState<UtilityScreen> {
       subtitle: 'Group expenses & settlements',
       icon: LucideIcons.plane,
       route: '/trips',
-      pluginId: 'com.mudra.split_bills',
       color: const Color(0xFF6366F1),
     ),
     _UtilityItem(

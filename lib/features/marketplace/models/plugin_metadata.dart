@@ -26,6 +26,7 @@ class PluginMetadata {
   final String packageUrl;
   final PluginGroup group;
   final List<PluginConfigOption>? configOptions;
+  final List<String>? permissions;
 
   PluginMetadata({
     required this.id,
@@ -39,6 +40,7 @@ class PluginMetadata {
     required this.packageUrl,
     required this.group,
     this.configOptions,
+    this.permissions,
   });
 
   factory PluginMetadata.fromJson(Map<String, dynamic> json) => PluginMetadata(
@@ -60,16 +62,20 @@ class PluginMetadata {
                 .map((e) => PluginConfigOption.fromJson(e))
                 .toList()
             : null,
+        permissions: json['permissions'] != null
+            ? List<String>.from(json['permissions'])
+            : null,
       );
 }
 
 class PluginConfigOption {
   final String key;
   final String label;
-  final String type;
+  final String type; // 'number', 'text', 'multi_select'
   final dynamic defaultValue;
   final String? suffix;
   final String? prefix;
+  final List<String>? options; // for multi_select type
 
   PluginConfigOption({
     required this.key,
@@ -78,6 +84,7 @@ class PluginConfigOption {
     required this.defaultValue,
     this.suffix,
     this.prefix,
+    this.options,
   });
 
   factory PluginConfigOption.fromJson(Map<String, dynamic> json) =>
@@ -88,5 +95,7 @@ class PluginConfigOption {
         defaultValue: json['defaultValue'],
         suffix: json['suffix'],
         prefix: json['prefix'],
+        options:
+            json['options'] != null ? List<String>.from(json['options']) : null,
       );
 }

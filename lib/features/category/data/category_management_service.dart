@@ -1,109 +1,114 @@
 import 'package:isar_community/isar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
-import 'package:mudra_manager/plugins/business_categories_plugin.dart';
-import 'package:mudra_manager/plugins/regional_categories_plugin.dart';
-import 'package:mudra_manager/features/marketplace/services/marketplace_service.dart';
+import 'package:mudra_manager/plugins/category_packs/category_pack.dart';
 
 class CategoryManagementService {
-  static final MarketplaceService _marketplaceService = MarketplaceService();
-  static final Map<String, List<Category>> _categoryCache = {}; // Cache categories
+  /// Install a single pack by ID.
+  static Future<void> installPack(String packId) async {
+    final pack = CategoryPackRegistry.get(packId);
+    if (pack == null) return;
 
-  static Future<void> installPluginCategories(String pluginId) async {
     final isar = Isar.getInstance();
     if (isar == null) return;
 
-    final categories = _getCachedCategories(pluginId);
-    if (categories.isEmpty) return;
+    // Install dependencies first
+    for (final depId in pack.extendsPackIds) {
+      await installPack(depId);
+    }
+
+    final existingNames =
+        (await isar.categorys.where().nameProperty().findAll()).toSet();
+    final allExisting = await isar.categorys.where().findAll();
+    final nameToCategory = {for (final c in allExisting) c.name: c};
+
+    final parents = pack.categories.where((c) => c.parent == null).toList();
+    final children = pack.categories.where((c) => c.parent != null).toList();
 
     await isar.writeTxn(() async {
-      // Batch check existing categories
-      final existingNames = await isar.categorys
-          .filter()
-          .anyOf(categories, (q, category) => q.nameEqualTo(category.name))
-          .nameProperty()
-          .findAll();
-      
-      final existingSet = existingNames.toSet();
-      final newCategories = categories.where((cat) => !existingSet.contains(cat.name)).toList();
-      
-      if (newCategories.isNotEmpty) {
-        await isar.categorys.putAll(newCategories); // Batch insert
+      for (final def in parents) {
+        if (existingNames.contains(def.name)) continue;
+        final cat = def.toCategory();
+        await isar.categorys.put(cat);
+        existingNames.add(def.name);
+        nameToCategory[def.name] = cat;
+      }
+
+      for (final def in children) {
+        if (existingNames.contains(def.name)) continue;
+        final cat = def.toCategory();
+        final parentCat = nameToCategory[def.parent];
+        final hasParent = parentCat != null;
+
+        if (hasParent) {
+          cat.parentCategory.value = parentCat;
+        }
+
+        await isar.categorys.put(cat);
+        if (hasParent) {
+          await cat.parentCategory.save();
+        }
+        existingNames.add(def.name);
+        nameToCategory[def.name] = cat;
       }
     });
   }
 
-  static Future<void> removePluginCategories(String pluginId) async {
+  /// Remove categories owned by a pack.
+  /// Only removes categories that are NOT shared with other enabled packs.
+  static Future<void> removePack(
+    String packId,
+    Set<String> enabledPackIds,
+  ) async {
+    final pack = CategoryPackRegistry.get(packId);
+    if (pack == null) return;
+
     final isar = Isar.getInstance();
     if (isar == null) return;
 
-    final categoryNames = _getCategoryNames(pluginId);
-    if (categoryNames.isEmpty) return;
+    // Collect names owned by other enabled packs (don't delete shared ones)
+    final protectedNames = <String>{};
+    for (final otherId in enabledPackIds) {
+      if (otherId == packId) continue;
+      final other = CategoryPackRegistry.get(otherId);
+      if (other != null) protectedNames.addAll(other.allCategoryNames);
+    }
+
+    final toRemove = pack.allCategoryNames
+        .where((n) => !protectedNames.contains(n))
+        .toList();
+    if (toRemove.isEmpty) return;
 
     await isar.writeTxn(() async {
-      // Batch delete by names
-      final categoriesToDelete = await isar.categorys
+      final cats = await isar.categorys
           .filter()
-          .anyOf(categoryNames, (q, name) => q.nameEqualTo(name))
+          .anyOf(toRemove, (q, name) => q.nameEqualTo(name))
           .findAll();
-      
-      if (categoriesToDelete.isNotEmpty) {
-        await isar.categorys.deleteAll(categoriesToDelete.map((c) => c.id).toList());
+      if (cats.isNotEmpty) {
+        await isar.categorys.deleteAll(cats.map((c) => c.id).toList());
       }
     });
   }
 
-  static List<Category> _getCachedCategories(String pluginId) {
-    if (_categoryCache.containsKey(pluginId)) {
-      return _categoryCache[pluginId]!;
-    }
-    
-    List<Category> categories = [];
-    switch (pluginId) {
-      case 'com.mudra.business_categories':
-        categories = BusinessCategoriesPlugin.getBusinessCategories();
-        break;
-      case 'com.mudra.regional_categories':
-        categories = RegionalCategoriesPlugin.getRegionalCategories();
-        break;
-    }
-    
-    _categoryCache[pluginId] = categories;
-    return categories;
-  }
-
-  static List<String> _getCategoryNames(String pluginId) {
-    switch (pluginId) {
-      case 'com.mudra.business_categories':
-        return BusinessCategoriesPlugin.businessCategories
-            .map((cat) => cat['name'] as String)
-            .toList();
-      case 'com.mudra.regional_categories':
-        return RegionalCategoriesPlugin.regionalCategories
-            .map((cat) => cat['name'] as String)
-            .toList();
-      default:
-        return [];
+  /// Install multiple packs at once (used during onboarding).
+  static Future<void> installPacks(List<String> packIds) async {
+    for (final id in packIds) {
+      await installPack(id);
     }
   }
 
-  static Future<List<Category>> getAvailablePluginCategories() async {
-    final categories = <Category>[];
+  /// Remove all categories when no packs are enabled.
+  static Future<void> clearAll() async {
+    final isar = Isar.getInstance();
+    if (isar == null) return;
 
-    if (await _marketplaceService
-        .isPluginEnabled('com.mudra.business_categories')) {
-      categories.addAll(BusinessCategoriesPlugin.getBusinessCategories());
-    }
-
-    if (await _marketplaceService
-        .isPluginEnabled('com.mudra.regional_categories')) {
-      categories.addAll(RegionalCategoriesPlugin.getRegionalCategories());
-    }
-
-    return categories;
+    await isar.writeTxn(() async {
+      await isar.categorys.clear();
+    });
   }
 }
 
-final categoryManagementServiceProvider = Provider.autoDispose<CategoryManagementService>((ref) {
+final categoryManagementServiceProvider =
+    Provider.autoDispose<CategoryManagementService>((ref) {
   return CategoryManagementService();
 });

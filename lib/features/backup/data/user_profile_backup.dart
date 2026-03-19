@@ -12,7 +12,7 @@ class UserProfileBackup implements BackupAdapter<UserProfile> {
 
   UserProfileBackup.fromUserProfile(UserProfile profile)
     : id = profile.id,
-      name = profile.name,
+      name = profile.name ?? 'Awesome User',
       email = profile.email,
       phone = profile.phone,
       avatarIndex = profile.avatarIndex,

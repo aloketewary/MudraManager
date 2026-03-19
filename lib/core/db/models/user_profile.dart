@@ -10,7 +10,7 @@ part 'user_profile.g.dart';
 class UserProfile {
   Id id = Isar.autoIncrement;
 
-  late String name;
+  String? name;
   String? email;
   String? phone;
   int? avatarIndex; // Optional local path to an image
@@ -19,6 +19,7 @@ class UserProfile {
 
   UserProfile();
 
-  factory UserProfile.fromJson(Map<String, dynamic> json) => _$UserProfileFromJson(json);
+  factory UserProfile.fromJson(Map<String, dynamic> json) =>
+      _$UserProfileFromJson(json);
   Map<String, dynamic> toJson() => _$UserProfileToJson(this);
 }

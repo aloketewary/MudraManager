@@ -202,7 +202,10 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
 
   // ── HERO PREVIEW ──
   Widget _buildHeroPreview(
-      ColorScheme color, TextTheme textTheme, AppSpacing spacing) {
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
     final name = _nameController.text.trim();
     final iconData = _selectedIcon != null
         ? IconHelper.iconFromName(_selectedIcon!)

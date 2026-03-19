@@ -35,6 +35,7 @@ import 'package:mudra_manager/features/profile/presentation/screens/setting_scre
 import 'package:mudra_manager/features/profile/presentation/screens/sms_import_setting_screen.dart';
 import 'package:mudra_manager/features/profile/presentation/screens/theme_picker_screen.dart';
 import 'package:mudra_manager/features/profile/presentation/widgets/account_form.dart';
+import 'package:mudra_manager/features/recap/presentation/screens/monthly_recap_screen.dart';
 import 'package:mudra_manager/features/sms/presentation/screens/sms_activity_screen.dart';
 import 'package:mudra_manager/features/statistics/presentation/screens/monthly_comparison_screen.dart';
 import 'package:mudra_manager/features/transactions/presentation/screens/add_edit_transaction_screen.dart';
@@ -344,6 +345,13 @@ class AppRouter {
               GoRoute(
                 path: '/achievements',
                 builder: (context, state) => const AchievementsScreen(),
+              ),
+              GoRoute(
+                path: '/monthly-recap',
+                builder: (context, state) {
+                  final month = state.extra as DateTime?;
+                  return MonthlyRecapScreen(month: month);
+                },
               ),
               GoRoute(
                 path: '/marketplace',

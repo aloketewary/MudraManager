@@ -250,68 +250,160 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
     TextTheme textTheme,
   ) {
     final items = recentUnlocked.take(10).toList();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final shelfColor =
+        isDark ? const Color(0xFF3E2C1A) : const Color(0xFF8B6914);
+    final shelfHighlight =
+        isDark ? const Color(0xFF5A3D1E) : const Color(0xFFBB9B40);
+    final shelfShadow =
+        isDark ? const Color(0xFF1A1008) : const Color(0xFF5C4510);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionHeader(
-          'Trophy Shelf',
-          '${items.length}',
-          color,
-          textTheme,
-        ),
+            'Trophy Shelf', '${items.length}', color, textTheme),
         const SizedBox(height: 10),
-        SizedBox(
-          height: 80,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: items.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 12),
-            itemBuilder: (context, index) {
-              final a = items[index];
-              final accent = _categoryAccent(a.category);
-              return Column(
-                children: [
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: accent.withValues(alpha: 0.1),
-                      border: Border.all(
-                        color: accent.withValues(alpha: 0.3),
-                        width: 1.5,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: accent.withValues(alpha: 0.12),
-                          blurRadius: 10,
-                          spreadRadius: 1,
+        Container(
+          decoration: BoxDecoration(
+            color: color.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: color.outlineVariant.withValues(alpha: 0.3),
+            ),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            children: [
+              // ── Back wall with subtle pattern ──
+              Container(
+                padding: const EdgeInsets.only(top: 16, bottom: 8),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      color.surfaceContainerHighest.withValues(alpha: 0.3),
+                      color.surfaceContainerLow,
+                    ],
+                  ),
+                ),
+                child: SizedBox(
+                  height: 88,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: items.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 16),
+                    itemBuilder: (context, index) {
+                      final a = items[index];
+                      final accent = _categoryAccent(a.category);
+                      return SizedBox(
+                        width: 60,
+                        child: Column(
+                          children: [
+                            // Trophy/medal icon with glow
+                            Container(
+                              width: 52,
+                              height: 52,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: accent.withValues(alpha: 0.08),
+                                boxShadow: [
+                                  // Downward shadow as if sitting on shelf
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.15),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 3),
+                                  ),
+                                  // Subtle glow
+                                  BoxShadow(
+                                    color: accent.withValues(alpha: 0.15),
+                                    blurRadius: 12,
+                                    spreadRadius: 1,
+                                  ),
+                                ],
+                              ),
+                              child: ClipOval(
+                                child: Image.asset(
+                                  'assets/icons/20/${a.icon}.png',
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            // Name plate
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 4,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: accent.withValues(alpha: 0.08),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                a.title,
+                                style: textTheme.labelSmall?.copyWith(
+                                  fontSize: 8,
+                                  color: color.onSurfaceVariant,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                textAlign: TextAlign.center,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    child: ClipOval(
-                      child: Image.asset(
-                        'assets/icons/20/${a.icon}.png',
-                      ),
-                    ),
+                      );
+                    },
                   ),
-                  const SizedBox(height: 4),
-                  SizedBox(
-                    width: 52,
-                    child: Text(
-                      a.title,
-                      style: textTheme.labelSmall?.copyWith(
-                        fontSize: 9,
-                        color: color.onSurfaceVariant,
-                      ),
-                      textAlign: TextAlign.center,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                ),
+              ),
+
+              // ── Wooden shelf plank ──
+              Container(
+                height: 10,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      shelfHighlight,
+                      shelfColor,
+                      shelfShadow,
+                    ],
+                    stops: const [0.0, 0.5, 1.0],
                   ),
-                ],
-              );
-            },
+                  boxShadow: [
+                    BoxShadow(
+                      color:
+                          Colors.black.withValues(alpha: isDark ? 0.4 : 0.15),
+                      blurRadius: 6,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+              ),
+
+              // ── Shelf bracket / support strip ──
+              Container(
+                height: 4,
+                margin: const EdgeInsets.symmetric(horizontal: 24),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.transparent,
+                      shelfShadow.withValues(alpha: 0.5),
+                      Colors.transparent,
+                    ],
+                  ),
+                  borderRadius: const BorderRadius.vertical(
+                    bottom: Radius.circular(4),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ],
@@ -736,17 +828,17 @@ class _RankHeader extends StatelessWidget {
                           color: color.surface,
                           boxShadow: [
                             BoxShadow(
-                              color: accent.withValues(alpha: 0.1),
+                              color: rank.accent.withValues(alpha: 0.15),
                               blurRadius: 16,
                               spreadRadius: 2,
                             ),
                           ],
                         ),
                         child: Center(
-                          child: Image.asset(
-                            'assets/icons/medals/${rank.icon}.png',
-                            width: 40,
-                            height: 40,
+                          child: Icon(
+                            rank.icon,
+                            size: 32,
+                            color: rank.accent,
                           ),
                         ),
                       ),
@@ -759,7 +851,7 @@ class _RankHeader extends StatelessWidget {
                 rank.name,
                 style: textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w700,
-                  color: accent,
+                  color: rank.accent,
                 ),
               ),
               const SizedBox(height: 2),

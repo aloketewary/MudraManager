@@ -8,7 +8,7 @@ class SavingsMilestonePlugin extends MudraPlugin {
   String get name => 'Savings Milestone';
 
   @override
-  String get version => '1.0.0';
+  String get version => '1.1.0';
 
   @override
   void onGoal(GoalEvent event) {
@@ -19,7 +19,12 @@ class SavingsMilestonePlugin extends MudraPlugin {
 
   @override
   void onLoad() {}
-  
+
   @override
   void onStart() {}
+
+  @override
+  Set<PluginPermission> get permissions => {
+        PluginPermission.notifications,
+      };
 }

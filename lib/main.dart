@@ -120,11 +120,18 @@ Future<void> _initializeBackgroundServices(ProviderContainer container) async {
     if (isar != null) {
       log.i('✅ Isar initialized');
 
-      // Seed category keywords
+           // Seed category keywords
       await safeExecute(() async {
         await CategorySeeder.seedDefaultKeywords(isar);
         log.i('✅ Category keywords seeded');
       });
+
+      // Sync category icons from pack definitions
+      await safeExecute(() async {
+        await CategorySeeder.seedCategoryIcons(isar);
+        log.i('✅ Category icons synced');
+      });
+
     } else {
       log.e('❌ Isar initialization failed');
       return;

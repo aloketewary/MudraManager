@@ -13,7 +13,6 @@ import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
 import 'package:mudra_manager/features/category/data/category_provider.dart';
 import 'package:mudra_manager/features/profile/data/user_profile_provider.dart';
-import 'package:mudra_manager/features/gamification/widgets/badge_showcase.dart';
 import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/features/marketplace/services/marketplace_service.dart';
@@ -73,7 +72,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ? Padding(
                           padding: const EdgeInsets.only(right: 16),
                           child: Text(
-                            profile?.name ?? 'Unknown',
+                            profile?.name ?? 'Awesome User',
                             style: textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: color.onSurface,
@@ -334,11 +333,28 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     textTheme,
                   ),
                   const SizedBox(height: 14),
-                  // Name
-                  Text(
-                    profile?.name ?? 'Unknown',
-                    style: textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w900,
+                  GestureDetector(
+                    onTap: () {
+                      HapticFeedback.mediumImpact();
+                      context.push('/edit-profile');
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          profile?.name ?? 'Unknown',
+                          style: textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Icon(
+                          LucideIcons.pencil,
+                          size: 14,
+                          color: color.onSurfaceVariant,
+                        ),
+                      ],
                     ),
                   ),
                   if (profile?.email != null && profile!.email!.isNotEmpty) ...[
@@ -370,90 +386,81 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   ) {
     final userLevelAsync = ref.watch(userLevelProvider);
 
-    return GestureDetector(
-      onTap: () {
-        HapticFeedback.mediumImpact();
-        context.push('/edit-profile');
-      },
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          // Level ring
-          userLevelAsync.maybeWhen(
-            data: (level) {
-              if (level == null) return const SizedBox(width: 80, height: 80);
-              return TweenAnimationBuilder<double>(
-                duration: const Duration(milliseconds: 1200),
-                curve: Curves.easeOutCubic,
-                tween: Tween(
-                  begin: 0.0,
-                  end: level.progressPercent.clamp(0.0, 1.0),
-                ),
-                builder: (context, value, child) {
-                  return SizedBox(
-                    width: 80,
-                    height: 80,
-                    child: CircularProgressIndicator(
-                      value: value,
-                      strokeWidth: 3.5,
-                      strokeCap: StrokeCap.round,
-                      backgroundColor: color.primary.withValues(alpha: 0.15),
-                      valueColor: AlwaysStoppedAnimation(color.primary),
-                    ),
-                  );
-                },
-              );
-            },
-            orElse: () => const SizedBox(width: 80, height: 80),
-          ),
-          // Avatar
-          SizedBox(
-            width: 64,
-            height: 64,
-            child: ClipOval(
-              child: BoringAvatar(
-                name: profile.name,
-                palette: BoringAvatarPalette([
-                  color.primary,
-                  color.tertiary,
-                  color.primaryContainer,
-                  color.tertiaryContainer,
-                ]),
-                type: BoringAvatarType.beam,
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        userLevelAsync.maybeWhen(
+          data: (level) {
+            if (level == null) return const SizedBox(width: 80, height: 80);
+            return TweenAnimationBuilder<double>(
+              duration: const Duration(milliseconds: 1200),
+              curve: Curves.easeOutCubic,
+              tween: Tween(
+                begin: 0.0,
+                end: level.progressPercent.clamp(0.0, 1.0),
               ),
+              builder: (context, value, child) {
+                return SizedBox(
+                  width: 80,
+                  height: 80,
+                  child: CircularProgressIndicator(
+                    value: value,
+                    strokeWidth: 3.5,
+                    strokeCap: StrokeCap.round,
+                    backgroundColor: color.primary.withValues(alpha: 0.15),
+                    valueColor: AlwaysStoppedAnimation(color.primary),
+                  ),
+                );
+              },
+            );
+          },
+          orElse: () => const SizedBox(width: 80, height: 80),
+        ),
+        SizedBox(
+          width: 64,
+          height: 64,
+          child: ClipOval(
+            child: BoringAvatar(
+              name: profile?.name ?? 'Awesome User',
+              palette: BoringAvatarPalette([
+                color.primary,
+                color.tertiary,
+                color.primaryContainer,
+                color.tertiaryContainer,
+              ]),
+              type: BoringAvatarType.beam,
             ),
           ),
-          // Level badge
-          userLevelAsync.maybeWhen(
-            data: (level) {
-              if (level == null) return const SizedBox.shrink();
-              return Positioned(
-                bottom: 0,
-                right: 0,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: color.primary,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    'Lv${level.level}',
-                    style: textTheme.labelSmall?.copyWith(
-                      color: color.onPrimary,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 10,
-                    ),
+        ),
+        userLevelAsync.maybeWhen(
+          data: (level) {
+            if (level == null) return const SizedBox.shrink();
+            return Positioned(
+              bottom: 0,
+              right: 0,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 6,
+                  vertical: 2,
+                ),
+                decoration: BoxDecoration(
+                  color: color.primary,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  'Lv${level.level}',
+                  style: textTheme.labelSmall?.copyWith(
+                    color: color.onPrimary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 10,
                   ),
                 ),
-              );
-            },
-            orElse: () => const SizedBox.shrink(),
-          ),
-        ],
-      ),
+              ),
+            );
+          },
+          orElse: () => const SizedBox.shrink(),
+        ),
+      ],
     );
   }
 
@@ -673,48 +680,37 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
               ),
               child: InkWell(
-                onTap: () => setState(
-                  () => _achievementsExpanded = !_achievementsExpanded,
-                ),
+                onTap: () => context.push('/achievements'),
                 borderRadius: BorderRadius.circular(spacing.radiusMedium),
                 child: Padding(
                   padding: const EdgeInsets.all(16),
-                  child: Column(
+                  child: Row(
                     children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.emoji_events,
-                            color: color.primary,
-                            size: 24,
-                          ),
-                          const SizedBox(width: 12),
-                          Text(
-                            'Your Achievements',
-                            style: textTheme.titleMedium
-                                ?.copyWith(fontWeight: FontWeight.w600),
-                          ),
-                          const Spacer(),
-                          Text(
-                            '${unlocked.length}/${visible.length}',
-                            style: textTheme.bodyMedium?.copyWith(
-                              color: color.primary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Icon(
-                            _achievementsExpanded
-                                ? Icons.expand_less
-                                : Icons.expand_more,
-                            color: color.onSurfaceVariant,
-                          ),
-                        ],
+                      Icon(
+                        Icons.emoji_events,
+                        color: color.primary,
+                        size: 24,
                       ),
-                      if (_achievementsExpanded) ...[
-                        const SizedBox(height: 16),
-                        const BadgeShowcase(),
-                      ],
+                      const SizedBox(width: 12),
+                      Text(
+                        'Your Achievements',
+                        style: textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w600),
+                      ),
+                      const Spacer(),
+                      Text(
+                        '${unlocked.length}/${visible.length}',
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: color.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Icon(
+                        Icons.chevron_right,
+                        color: color.onSurfaceVariant,
+                        size: 20,
+                      ),
                     ],
                   ),
                 ),
@@ -886,27 +882,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         'Manage your data',
         () => context.push('/backup-restore'),
       ),
+      _SettingItem(
+        LucideIcons.fileText,
+        'Monthly Recap',
+        'View & download monthly report',
+        () => context.push('/monthly-recap'),
+      ),
     ];
 
     return Consumer(
       builder: (context, ref, _) {
-        final pluginAsync = ref.watch(lowBalancePluginProvider);
         final extraItems = [...items];
-        if (pluginAsync.valueOrNull == true) {
-          extraItems.add(
-            _SettingItem(
-              Icons.account_balance_wallet_outlined,
-              'Low Balance Threshold',
-              '₹${SharedPrefsUtil.instance.getLowBalanceThreshold().toStringAsFixed(0)}',
-              () => _showThresholdBottomSheet(
-                context,
-                ref,
-                color,
-                textTheme,
-              ),
-            ),
-          );
-        }
+
         return _buildGroupedCard(color, textTheme, spacing, items: extraItems);
       },
     );

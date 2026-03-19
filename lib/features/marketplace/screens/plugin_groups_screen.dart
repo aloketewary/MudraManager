@@ -4,10 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/core/utils/icon_helper.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/core/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
+import 'package:mudra_manager/features/category/data/category_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/plugin_metadata.dart';
 import '../services/marketplace_service.dart';
@@ -404,16 +406,7 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Center(
-                                child: SvgPicture.asset(
-                                  plugin.iconUrl,
-                                  width: 20,
-                                  height: 20,
-                                  placeholderBuilder: (_) => Icon(
-                                    _groupIcon(plugin.group),
-                                    color: color.primary,
-                                    size: 16,
-                                  ),
-                                ),
+                                child: _pluginIcon(plugin, color),
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -485,6 +478,12 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
                                   await ref
                                       .read(pluginStatesProvider.notifier)
                                       .togglePlugin(plugin.id, val);
+                                  if (plugin.group ==
+                                      PluginGroup.categoryManagement) {
+                                    ref.invalidate(categoryListProvider);
+                                    ref.invalidate(expenseCategoriesProvider);
+                                    ref.invalidate(incomeCategoriesProvider);
+                                  }
                                   SnackbarService.info(
                                     val
                                         ? '${plugin.name} enabled'
@@ -517,7 +516,6 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
   }
 
   // ── CONFIG DIALOGS ──
-
   void _showPluginConfigDialog(PluginMetadata plugin) {
     if (plugin.id == 'com.mudra.credit_card_reminder') {
       _showCreditCardConfigDialog(plugin);
@@ -650,6 +648,42 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
         );
       },
     );
+  }
+
+  Widget _pluginIcon(PluginMetadata plugin, ColorScheme color) {
+    final url = plugin.iconUrl;
+    if (url.endsWith('.svg')) {
+      return SvgPicture.asset(
+        url,
+        width: 20,
+        height: 20,
+        placeholderBuilder: (_) => Icon(
+          _groupIcon(plugin.group),
+          color: color.primary,
+          size: 16,
+        ),
+      );
+    }
+    if (url.endsWith('.png')) {
+      return Image.asset(
+        url,
+        width: 20,
+        height: 20,
+        errorBuilder: (_, __, ___) => Icon(
+          _groupIcon(plugin.group),
+          color: color.primary,
+          size: 16,
+        ),
+      );
+    }
+    if (url.isNotEmpty) {
+      return Icon(
+        IconHelper.getIconData(url),
+        color: color.primary,
+        size: 16,
+      );
+    }
+    return Icon(_groupIcon(plugin.group), color: color.primary, size: 16);
   }
 
   void _showCreditCardConfigDialog(PluginMetadata plugin) {

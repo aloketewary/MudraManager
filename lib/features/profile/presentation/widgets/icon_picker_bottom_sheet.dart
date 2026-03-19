@@ -23,112 +23,6 @@ class _IconPickerBottomSheetState extends State<IconPickerBottomSheet> {
   late String _query;
   late String? _selected;
 
-  static const _iconCategories = {
-    'Financial': [
-      'bank',
-      'attach_money',
-      'credit_card',
-      'savings',
-      'wallet',
-      'atm',
-      'investment',
-      'salary',
-    ],
-    'Food & Dining': [
-      'restaurant',
-      'coffee',
-      'fastfood',
-      'groceries',
-      'wine',
-      'nightlife',
-      'cake',
-    ],
-    'Shopping': [
-      'shopping_cart',
-      'shopping_bag',
-      'clothing',
-      'gift',
-      'electronics',
-      'furniture',
-    ],
-    'Transportation': [
-      'directions_car',
-      'gas',
-      'bus',
-      'train',
-      'flight',
-      'taxi',
-      'bike',
-      'walk',
-    ],
-    'Entertainment': [
-      'entertainment',
-      'games',
-      'music',
-      'sports',
-      'camera',
-      'photo',
-      'tv',
-      'videogame',
-    ],
-    'Health & Fitness': [
-      'local_hospital',
-      'medical',
-      'pharmacy',
-      'fitness',
-      'spa',
-      'beauty',
-    ],
-    'Education': ['school', 'book', 'library', 'work', 'business'],
-    'Home & Utilities': [
-      'home',
-      'electric',
-      'water',
-      'wifi',
-      'phone',
-      'bills',
-      'cleaning',
-      'laundry',
-    ],
-    'Travel': ['flight', 'hotel', 'travel', 'beach', 'park'],
-    'Family & Social': [
-      'pets',
-      'child',
-      'baby',
-      'toys',
-      'celebration',
-      'donation',
-      'charity',
-    ],
-    'Work & Business': [
-      'work',
-      'business',
-      'computer',
-      'phone_mobile',
-      'print',
-      'mail',
-    ],
-    'Personal Care': ['beauty', 'spa', 'watch', 'clothing', 'headphones'],
-    'Maintenance': [
-      'repair',
-      'tools',
-      'garden',
-      'cleaning',
-      'laundry',
-      'delivery',
-    ],
-    'Other': [
-      'subscriptions',
-      'insurance',
-      'tax',
-      'refund',
-      'bonus',
-      'trending_up',
-      'parking',
-      'others',
-    ],
-  };
-
   @override
   void initState() {
     super.initState();
@@ -255,12 +149,13 @@ class _IconPickerBottomSheetState extends State<IconPickerBottomSheet> {
     TextTheme textTheme,
     Color accentColor,
   ) {
+    final groups = IconHelper.iconGroups;
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-      itemCount: _iconCategories.length,
+      itemCount: groups.length,
       itemBuilder: (context, index) {
-        final category = _iconCategories.keys.elementAt(index);
-        final icons = _iconCategories[category]!;
+        final category = groups.keys.elementAt(index);
+        final icons = groups[category]!.keys.toList();
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,

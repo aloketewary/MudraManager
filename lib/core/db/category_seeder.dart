@@ -1,7 +1,45 @@
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
+import 'package:mudra_manager/features/marketplace/services/marketplace_service.dart';
+import 'package:mudra_manager/plugins/category_packs/category_pack.dart';
 
 class CategorySeeder {
+  /// Sync icon & color from enabled pack definitions → DB categories.
+  /// Runs on every app start so pack updates are always reflected.
+  static Future<void> seedCategoryIcons(Isar isar) async {
+    final marketplace = MarketplaceService();
+    final allCategories = await isar.categorys.where().findAll();
+    if (allCategories.isEmpty) return;
+
+    final nameToCategory = {for (final c in allCategories) c.name: c};
+
+    // Build definitive icon/color map from all enabled packs
+    final defMap = <String, CategoryDef>{};
+    for (final pack in CategoryPackRegistry.all) {
+      if (!marketplace.isPluginEnabledSync(pack.id)) continue;
+      for (final def in pack.categories) {
+        defMap[def.name] = def;
+      }
+    }
+
+    final toUpdate = <Category>[];
+    for (final entry in defMap.entries) {
+      final cat = nameToCategory[entry.key];
+      if (cat == null) continue;
+      final def = entry.value;
+      if (cat.iconName == def.icon && cat.colorValue == def.color) continue;
+      cat.iconName = def.icon;
+      cat.colorValue = def.color;
+      toUpdate.add(cat);
+    }
+
+    if (toUpdate.isEmpty) return;
+
+    await isar.writeTxn(() async {
+      await isar.categorys.putAll(toUpdate);
+    });
+  }
+
   static Future<void> seedDefaultKeywords(Isar isar) async {
     final categories = await isar.categorys.where().findAll();
 

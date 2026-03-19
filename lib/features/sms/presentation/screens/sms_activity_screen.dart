@@ -5,10 +5,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:isar_community/isar.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/sms_activity.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
+import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/sms/data/sms_activity_service.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
@@ -397,8 +401,11 @@ class _SmsActivityScreenState extends ConsumerState<SmsActivityScreen> {
                   ),
                 ),
                 trailing: selected
-                    ? Icon(LucideIcons.check,
-                        size: 18, color: color.onPrimaryContainer)
+                    ? Icon(
+                        LucideIcons.check,
+                        size: 18,
+                        color: color.onPrimaryContainer,
+                      )
                     : null,
                 onTap: () {
                   setState(() => _filterStatus = status);
@@ -717,20 +724,43 @@ class _StatusChip extends StatelessWidget {
 }
 
 // ── DETAILS SHEET ──
-class _ActivityDetailsSheet extends ConsumerWidget {
+class _ActivityDetailsSheet extends ConsumerStatefulWidget {
   final SmsActivity activity;
-
   const _ActivityDetailsSheet({required this.activity});
+  @override
+  ConsumerState<_ActivityDetailsSheet> createState() =>
+      _ActivityDetailsSheetState();
+}
+
+class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
+  bool _hasMatchingAccount = true;
+  @override
+  void initState() {
+    super.initState();
+    _checkAccount();
+  }
+
+  Future<void> _checkAccount() async {
+    final acc = widget.activity.account;
+    if (acc == null || acc.isEmpty) return;
+    final isar = await ref.read(isarServiceProvider).getInstance();
+    final match = await isar.accounts
+        .filter()
+        .accountNumberEqualTo(acc)
+        .isActiveEqualTo(true)
+        .findFirst();
+    if (mounted) setState(() => _hasMatchingAccount = match != null);
+  }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final spacing = ref.watch(spacingProvider);
-    final isIncome = activity.isIncome == true;
-    final isActionable = activity.status == ActivityStatus.pending ||
-        activity.status == ActivityStatus.needsReview ||
-        activity.status == ActivityStatus.duplicate;
+    final isIncome = widget.activity.isIncome == true;
+    final isActionable = widget.activity.status == ActivityStatus.pending ||
+        widget.activity.status == ActivityStatus.needsReview ||
+        widget.activity.status == ActivityStatus.duplicate;
 
     return SafeArea(
       child: Padding(
@@ -766,7 +796,7 @@ class _ActivityDetailsSheet extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          activity.sender,
+                          widget.activity.sender,
                           style: textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -774,7 +804,7 @@ class _ActivityDetailsSheet extends ConsumerWidget {
                         const SizedBox(height: 2),
                         Text(
                           DateFormat('dd MMM yyyy, hh:mm a')
-                              .format(activity.date),
+                              .format(widget.activity.date),
                           style: textTheme.bodySmall?.copyWith(
                             color: color.onSurfaceVariant,
                           ),
@@ -782,9 +812,9 @@ class _ActivityDetailsSheet extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  if (activity.amount != null)
+                  if (widget.activity.amount != null)
                     CurrencyText(
-                      amount: activity.amount!,
+                      amount: widget.activity.amount!,
                       showSign: true,
                       isExpense: !isIncome,
                       compact: false,
@@ -809,7 +839,7 @@ class _ActivityDetailsSheet extends ConsumerWidget {
                   ),
                 ),
                 child: Text(
-                  activity.body,
+                  widget.activity.body,
                   style: textTheme.bodySmall?.copyWith(
                     height: 1.5,
                     fontFamily: 'monospace',
@@ -834,69 +864,69 @@ class _ActivityDetailsSheet extends ConsumerWidget {
                   children: [
                     _detailRow(
                       'Status',
-                      activity.status.name.toUpperCase(),
+                      widget.activity.status.name.toUpperCase(),
                       color,
                       textTheme,
                     ),
-                    if (activity.confidence != null) ...[
+                    if (widget.activity.confidence != null) ...[
                       _divider(color),
                       _detailRow(
                         'Confidence',
-                        '${activity.confidence}%',
+                        '${widget.activity.confidence}%',
                         color,
                         textTheme,
                       ),
                     ],
-                    if (activity.account != null) ...[
+                    if (widget.activity.account != null) ...[
                       _divider(color),
                       _detailRow(
                         'Account',
-                        activity.account!,
+                        widget.activity.account!,
                         color,
                         textTheme,
                       ),
                     ],
-                    if (activity.fromBank != null) ...[
+                    if (widget.activity.fromBank != null) ...[
                       _divider(color),
                       _detailRow(
                         'Bank',
-                        activity.fromBank!,
+                        widget.activity.fromBank!,
                         color,
                         textTheme,
                       ),
                     ],
-                    if (activity.transactionType != null) ...[
+                    if (widget.activity.transactionType != null) ...[
                       _divider(color),
                       _detailRow(
                         'Type',
-                        activity.transactionType!,
+                        widget.activity.transactionType!,
                         color,
                         textTheme,
                       ),
                     ],
-                    if (activity.merchant != null) ...[
+                    if (widget.activity.merchant != null) ...[
                       _divider(color),
                       _detailRow(
                         'Merchant',
-                        activity.merchant!,
+                        widget.activity.merchant!,
                         color,
                         textTheme,
                       ),
                     ],
-                    if (activity.balance != null) ...[
+                    if (widget.activity.balance != null) ...[
                       _divider(color),
                       _detailRow(
                         'Balance',
-                        '₹${activity.balance!.toStringAsFixed(2)}',
+                        '₹${widget.activity.balance!.toStringAsFixed(2)}',
                         color,
                         textTheme,
                       ),
                     ],
-                    if (activity.transactionRef != null) ...[
+                    if (widget.activity.transactionRef != null) ...[
                       _divider(color),
                       _detailRow(
                         'Reference',
-                        activity.transactionRef!,
+                        widget.activity.transactionRef!,
                         color,
                         textTheme,
                       ),
@@ -910,7 +940,7 @@ class _ActivityDetailsSheet extends ConsumerWidget {
                 const SizedBox(height: 20),
 
                 // Duplicate warning
-                if (activity.status == ActivityStatus.duplicate)
+                if (widget.activity.status == ActivityStatus.duplicate)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 12),
                     child: Container(
@@ -925,12 +955,50 @@ class _ActivityDetailsSheet extends ConsumerWidget {
                       ),
                       child: Row(
                         children: [
-                          const Icon(LucideIcons.triangleAlert,
-                              color: Color(0xFFFF9800), size: 18),
+                          const Icon(
+                            LucideIcons.triangleAlert,
+                            color: Color(0xFFFF9800),
+                            size: 18,
+                          ),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
                               'This may be a duplicate transaction. Review carefully before approving.',
+                              style: textTheme.bodySmall?.copyWith(
+                                color: color.onSurfaceVariant,
+                                height: 1.4,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                if (!_hasMatchingAccount && widget.activity.account != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: color.tertiary.withValues(alpha: 0.08),
+                        borderRadius:
+                            BorderRadius.circular(spacing.radiusMedium),
+                        border: Border.all(
+                          color: color.tertiary.withValues(alpha: 0.2),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            LucideIcons.info,
+                            color: color.tertiary,
+                            size: 18,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              'No account found matching "${widget.activity.account}". Add one to approve.',
                               style: textTheme.bodySmall?.copyWith(
                                 color: color.onSurfaceVariant,
                                 height: 1.4,
@@ -950,7 +1018,7 @@ class _ActivityDetailsSheet extends ConsumerWidget {
                           HapticFeedback.mediumImpact();
                           Navigator.pop(context);
                           await SmsActivityService.instance
-                              .rejectActivity(activity, null);
+                              .rejectActivity(widget.activity, null);
                           ref.invalidate(smsActivityProvider);
                           ref.invalidate(pendingCountProvider);
                           ref.read(smsRefreshProvider.notifier).state++;
@@ -968,24 +1036,59 @@ class _ActivityDetailsSheet extends ConsumerWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    if (!_hasMatchingAccount &&
+                        widget.activity.account != null) ...[
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () {
+                            HapticFeedback.mediumImpact();
+                            context.push(
+                              '/manage-accounts/add',
+                              extra: {
+                                'accountNumber': widget.activity.account,
+                                'bankName': widget.activity.fromBank,
+                              },
+                            ).then((result) {
+                              if (result == true) {
+                                _checkAccount();
+                                ref.invalidate(accountsProvider);
+                                ref.invalidate(allAccountsProvider);
+                                ref.invalidate(frequencySortedAccountsProvider);
+                              }
+                            });
+                          },
+                          icon: const Icon(LucideIcons.plus, size: 16),
+                          label: const Text('Add A/C'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: color.tertiary,
+                            side: BorderSide(color: color.tertiary),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.circular(spacing.radiusMedium),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                    const SizedBox(width: 8),
                     Expanded(
                       child: FilledButton.icon(
                         onPressed: () {
                           HapticFeedback.mediumImpact();
                           context.pop();
-                          // Navigate to add-transaction with pre-filled data
                           final transaction = Transaction.create(
-                            date: activity.date,
-                            amount: activity.amount ?? 0,
-                            isExpense: activity.isIncome != true,
-                            description: activity.body,
+                            date: widget.activity.date,
+                            amount: widget.activity.amount ?? 0,
+                            isExpense: widget.activity.isIncome != true,
+                            description: widget.activity.body,
                           );
                           context.push(
                             '/add-transaction',
                             extra: {
                               'transaction': transaction,
-                              'smsActivity': activity,
+                              'smsActivity': widget.activity,
                             },
                           );
                         },

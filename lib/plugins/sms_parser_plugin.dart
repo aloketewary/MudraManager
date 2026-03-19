@@ -1,5 +1,4 @@
 import 'package:mudra_plugin_sdk/plugin.dart';
-import 'package:mudra_plugin_sdk/events.dart';
 
 abstract class SmsParserPlugin extends MudraPlugin {
   ParsedSms? parseSms(String sender, String body);
