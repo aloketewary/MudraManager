@@ -2,7 +2,7 @@ name: mudra_manager
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -16,13 +16,13 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 3.4.8+29
+version: 3.4.9+30
 minSdk: 29
 targetSdk: 33
 ndkVersion: 27.0.12077973
 
 environment:
-  sdk: '>=3.5.0 <4.0.0'
+  sdk: ">=3.5.0 <4.0.0"
   flutter: 3.41.2
 
 # Dependencies specify other packages that your package needs in order to work.
@@ -95,8 +95,6 @@ dependencies:
   http: ^1.2.2
   visibility_detector: ^0.4.0+2
 
-
-
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -123,46 +121,9 @@ flutter:
     - family: MudraManagerAvatar
       fonts:
         - asset: assets/fonts/MudraManagerAvatar.ttf
-
-    - family: Parkinsans
+    - family: NotoSansDevanagari
       fonts:
-        - asset: assets/fonts/Parkinsans-Bold.ttf
-        - asset: assets/fonts/Parkinsans-ExtraBold.ttf
-        - asset: assets/fonts/Parkinsans-Light.ttf
-        - asset: assets/fonts/Parkinsans-Medium.ttf
-        - asset: assets/fonts/Parkinsans-Regular.ttf
-        - asset: assets/fonts/Parkinsans-SemiBold.ttf
-    - family: Onest
-      fonts:
-        - asset: assets/fonts/Onest/static/Onest-Black.ttf
-          weight: 900 # Black
-        - asset: assets/fonts/Onest/static/Onest-Bold.ttf
-          weight: 700 # Bold
-        - asset: assets/fonts/Onest/static/Onest-ExtraBold.ttf
-          weight: 800 # ExtraBold
-        - asset: assets/fonts/Onest/static/Onest-ExtraLight.ttf
-          weight: 200 # ExtraLight
-        - asset: assets/fonts/Onest/static/Onest-Light.ttf
-          weight: 300 # Light
-        - asset: assets/fonts/Onest/static/Onest-Medium.ttf
-          weight: 500 # Medium
-        - asset: assets/fonts/Onest/static/Onest-Regular.ttf
-          weight: 400 # Regular
-        - asset: assets/fonts/Onest/static/Onest-SemiBold.ttf
-          weight: 600 # SemiBold
-        - asset: assets/fonts/Onest/static/Onest-Thin.ttf
-          weight: 100 # Thin
-
-    - family: Tuffy
-      fonts:
-        - asset: assets/fonts/Tuffy/Tuffy-Bold.ttf
-        - asset: assets/fonts/Tuffy/Tuffy-BoldItalic.ttf
-        - asset: assets/fonts/Tuffy/Tuffy-Italic.ttf
-        - asset: assets/fonts/Tuffy/Tuffy-Regular.ttf
-
-
-
-
+        - asset: assets/fonts/NotoSansDevanagari-VariableFont_wdth,wght.ttf
 
   # To add assets to your application, add an assets section, like this:
   assets:
