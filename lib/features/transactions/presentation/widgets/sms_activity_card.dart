@@ -13,6 +13,7 @@ import 'package:mudra_manager/features/sms/data/sms_activity_service.dart';
 import 'package:mudra_manager/features/sms/data/category_matcher_service.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 
 class SmsActivityCard extends ConsumerStatefulWidget {
   final SmsActivity activity;
@@ -189,7 +190,7 @@ class _SmsActivityCardState extends ConsumerState<SmsActivityCard> {
     );
 
     final result = await context.push<bool>(
-      '/add-transaction',
+      AppRoutes.addTransaction,
       extra: {
         'transaction': transaction,
         'smsActivity': widget.activity,

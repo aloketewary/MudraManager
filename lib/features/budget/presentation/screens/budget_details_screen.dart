@@ -12,6 +12,7 @@ import 'package:mudra_manager/features/budget/data/budget_service_provider.dart'
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 
 class BudgetDetailsScreen extends ConsumerWidget {
   final BudgetWithProgress data;
@@ -172,7 +173,7 @@ class BudgetDetailsScreen extends ConsumerWidget {
       // floatingActionButton: FloatingActionButton.extended(
       //   onPressed: () {
       //     HapticFeedback.mediumImpact();
-      //     context.push('/add-budget', extra: {'budget': b});
+      //     context.push(AppRoutes.addBudget, extra: {'budget': b});
       //   },
       //   icon: const Icon(LucideIcons.settings),
       //   label: const Text('Edit Budget'),
@@ -209,7 +210,7 @@ class BudgetDetailsScreen extends ConsumerWidget {
           tooltip: 'Edit Budget',
           onPressed: () {
             HapticFeedback.lightImpact();
-            context.push('/add-budget', extra: {'budget': data.budget});
+            context.push(AppRoutes.addBudget, extra: {'budget': data.budget});
           },
         ),
         PopupMenuButton<String>(

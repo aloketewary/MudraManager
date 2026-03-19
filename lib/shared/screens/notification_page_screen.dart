@@ -7,6 +7,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/db/models/notification_record.dart';
 import 'package:mudra_manager/core/providers/notification_record_service.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 import 'dart:convert';
 
@@ -497,9 +498,9 @@ class _NotificationPageState extends ConsumerState<NotificationPage> {
   ) {
     notificationService.readNotification(record: n);
     if (n.tripId != null) {
-      context.push('/trip-detail', extra: n.tripId);
+      context.push(AppRoutes.tripDetail, extra: n.tripId);
     } else if (n.budgetId != null) {
-      context.push('/budget-dashboard');
+      context.push(AppRoutes.budgetDashboard);
     }
   }
 
@@ -516,33 +517,33 @@ class _NotificationPageState extends ConsumerState<NotificationPage> {
         final data = jsonDecode(n.actionData!) as Map<String, dynamic>;
         switch (data['type'] as String?) {
           case 'settle_up':
-            if (n.tripId != null) context.push('/trip-detail', extra: n.tripId);
+            if (n.tripId != null) context.push(AppRoutes.tripDetail, extra: n.tripId);
           case 'view_expense':
             if (n.expenseId != null && n.tripId != null) {
-              context.push('/expense-detail',
+              context.push(AppRoutes.expenseDetail,
                   extra: {'expenseId': n.expenseId, 'tripId': n.tripId});
             }
           case 'view_budget':
-            context.push('/budget-dashboard');
+            context.push(AppRoutes.budgetDashboard);
           case 'view_bills':
-            context.push('/recurring-transactions');
+            context.push(AppRoutes.recurringTransactions);
           case 'view_accounts':
-            context.push('/manage-accounts');
+            context.push(AppRoutes.manageAccounts);
           case 'view_sms':
-            context.push('/sms-activity');
+            context.push(AppRoutes.smsActivity);
           case 'view_goals':
-            context.push('/goal-screen');
+            context.push(AppRoutes.goalScreen);
         }
       } catch (_) {}
     } else {
       // Fallback: route by notification category
       switch (n.category) {
         case NotificationCategory.budget:
-          context.push('/budget-dashboard');
+          context.push(AppRoutes.budgetDashboard);
         case NotificationCategory.trip:
-          if (n.tripId != null) context.push('/trip-detail', extra: n.tripId);
+          if (n.tripId != null) context.push(AppRoutes.tripDetail, extra: n.tripId);
         case NotificationCategory.financial:
-          context.push('/statistics');
+          context.push(AppRoutes.statistics);
         default:
           break;
       }
@@ -557,7 +558,7 @@ class _NotificationPageState extends ConsumerState<NotificationPage> {
     HapticFeedback.lightImpact();
     notificationService.readNotification(record: n);
     if (n.tripId != null) {
-      context.push('/trip-detail', extra: n.tripId);
+      context.push(AppRoutes.tripDetail, extra: n.tripId);
     }
   }
 

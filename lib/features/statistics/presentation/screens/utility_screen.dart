@@ -8,6 +8,7 @@ import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/features/marketplace/services/marketplace_service.dart';
 import 'package:mudra_manager/features/dashboard/data/priority_alert_provider.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UtilityScreen extends ConsumerStatefulWidget {
@@ -28,7 +29,7 @@ class UtilityScreenState extends ConsumerState<UtilityScreen> {
       title: 'Trips & Split',
       subtitle: 'Group expenses & settlements',
       icon: LucideIcons.plane,
-      route: '/trips',
+      route: AppRoutes.trips,
       color: const Color(0xFF6366F1),
     ),
     _UtilityItem(
@@ -36,7 +37,7 @@ class UtilityScreenState extends ConsumerState<UtilityScreen> {
       title: 'Monthly Comparison',
       subtitle: 'Current vs last month',
       icon: LucideIcons.arrowLeftRight,
-      route: '/monthly-comparison',
+      route: AppRoutes.monthlyComparison,
       color: const Color(0xFF8B5CF6),
     ),
     _UtilityItem(
@@ -44,7 +45,7 @@ class UtilityScreenState extends ConsumerState<UtilityScreen> {
       title: 'Bill Control Center',
       subtitle: 'Auto-create transactions',
       icon: LucideIcons.repeat,
-      route: '/recurring-transactions',
+      route: AppRoutes.recurringTransactions,
       color: const Color(0xFF10B981),
     ),
     _UtilityItem(
@@ -52,7 +53,7 @@ class UtilityScreenState extends ConsumerState<UtilityScreen> {
       title: 'Budgets',
       subtitle: 'Manage spending limits',
       icon: LucideIcons.chartPie,
-      route: '/budget-dashboard',
+      route: AppRoutes.budgetDashboard,
       color: const Color(0xFFEC4899),
     ),
     _UtilityItem(
@@ -60,7 +61,7 @@ class UtilityScreenState extends ConsumerState<UtilityScreen> {
       title: 'Goals',
       subtitle: 'Track savings progress',
       icon: LucideIcons.target,
-      route: '/goal-screen',
+      route: AppRoutes.goalScreen,
       color: const Color(0xFFF59E0B),
     ),
   ];

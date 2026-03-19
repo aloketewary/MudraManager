@@ -8,6 +8,7 @@ import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/l10n_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/shared/models/onboarding_page_model.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
@@ -41,7 +42,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         curve: Curves.easeInOut,
       );
     } else {
-      context.go('/account-setup');
+      context.go(AppRoutes.accountSetup);
     }
   }
 
@@ -85,7 +86,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   ),
                   if (!isLast)
                     TextButton(
-                      onPressed: () => context.go('/account-setup'),
+                      onPressed: () => context.go(AppRoutes.accountSetup),
                       child: Text(
                         'Skip',
                         style: textTheme.labelLarge?.copyWith(

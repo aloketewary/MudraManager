@@ -15,6 +15,7 @@ import 'package:mudra_manager/shared/widgets/period_calendar_selector.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 
 class StatisticsScreen extends ConsumerStatefulWidget {
   const StatisticsScreen({super.key});
@@ -909,7 +910,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                   child: InkWell(
                     onTap: () {
                       HapticFeedback.mediumImpact();
-                      context.push('/financial-health');
+                      context.push(AppRoutes.financialHealth);
                     },
                     borderRadius: BorderRadius.circular(12),
                     child: Padding(
@@ -1162,7 +1163,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                   child: InkWell(
                     onTap: () {
                       HapticFeedback.mediumImpact();
-                      context.push('/spending-personality');
+                      context.push(AppRoutes.spendingPersonality);
                     },
                     borderRadius: BorderRadius.circular(12),
                     child: Padding(

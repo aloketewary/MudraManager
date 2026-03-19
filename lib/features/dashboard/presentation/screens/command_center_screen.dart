@@ -6,6 +6,7 @@ import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 
 class CommandCenterScreen extends ConsumerWidget {
   const CommandCenterScreen({super.key});
@@ -75,7 +76,7 @@ class CommandCenterScreen extends ConsumerWidget {
                                   color: color.onSurface),
                               onPressed: () {
                                 HapticFeedback.mediumImpact();
-                                context.push('/notifications');
+                                context.push(AppRoutes.notifications);
                               },
                             ),
                           ],

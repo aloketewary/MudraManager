@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 
 class BadgeShowcase extends ConsumerWidget {
   const BadgeShowcase({super.key});
@@ -87,7 +88,7 @@ class BadgeShowcase extends ConsumerWidget {
                 GestureDetector(
                   onTap: () {
                     HapticFeedback.mediumImpact();
-                    context.push('/achievements');
+                    context.push(AppRoutes.achievements);
                   },
                   child: Text(
                     'View All',

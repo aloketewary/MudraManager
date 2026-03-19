@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:mudra_manager/core/db/models/budget.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
 import 'package:mudra_manager/shared/widgets/adaptive_text.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
@@ -46,7 +47,7 @@ class _BudgetMiniCardState extends ConsumerState<BudgetMiniCard> {
               Hero(
                 tag: 'budgetExpandHero',
                 child: TextButton(
-                  onPressed: () => context.push('/budget-dashboard'),
+                  onPressed: () => context.push(AppRoutes.budgetDashboard),
                   child: const Text('View All'),
                 ),
               ),
@@ -65,7 +66,7 @@ class _BudgetMiniCardState extends ConsumerState<BudgetMiniCard> {
                   child: InkWell(
                     onTap: () {
                       HapticFeedback.mediumImpact();
-                      context.push('/add-budget');
+                      context.push(AppRoutes.addBudget);
                     },
                     borderRadius: BorderRadius.circular(20),
                     child: Padding(
@@ -89,7 +90,7 @@ class _BudgetMiniCardState extends ConsumerState<BudgetMiniCard> {
                           FilledButton.icon(
                             onPressed: () {
                               HapticFeedback.mediumImpact();
-                              context.push('/add-budget');
+                              context.push(AppRoutes.addBudget);
                             },
                             icon: const Icon(Icons.add),
                             label: Text(ctxt.dashboard_mini_budget_add_text),

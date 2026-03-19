@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:mudra_manager/core/widgets/dashboard_widget_plugin.dart';
 import 'package:mudra_manager/features/dashboard/presentation/widgets/modern_cashflow_card.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 
 class CashFlowWidgetPlugin extends DashboardWidgetPlugin {
   @override
@@ -46,7 +47,7 @@ class CashFlowWidgetPlugin extends DashboardWidgetPlugin {
 
   @override
   void onTap(BuildContext context, WidgetRef ref) {
-    context.push('/transactions');
+    context.push(AppRoutes.transactions);
   }
 
   @override

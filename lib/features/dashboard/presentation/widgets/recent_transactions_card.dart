@@ -12,6 +12,7 @@ import 'package:mudra_manager/features/dashboard/presentation/providers/dashboar
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/shared/widgets/adaptive_text.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 
 class RecentTransactionsCard extends ConsumerWidget {
   final int maxTransactions;
@@ -70,7 +71,7 @@ class RecentTransactionsCard extends ConsumerWidget {
                   GestureDetector(
                     onTap: () {
                       HapticFeedback.mediumImpact();
-                      context.push('/transactions');
+                      context.push(AppRoutes.transactions);
                     },
                     child: Icon(
                       LucideIcons.chevronRight,

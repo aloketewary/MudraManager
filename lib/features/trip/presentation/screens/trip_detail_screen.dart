@@ -18,6 +18,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:mudra_manager/core/utils/file_utils.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 
 class TripDetailScreen extends ConsumerStatefulWidget {
   final int tripId;
@@ -768,7 +769,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                   onTap: () {
                     HapticFeedback.lightImpact();
                     context.push(
-                      '/expense-detail',
+                      AppRoutes.expenseDetail,
                       extra: {
                         'expenseId': tripTxn.id,
                         'tripId': widget.tripId,

@@ -34,6 +34,7 @@ import 'package:mudra_manager/shared/widgets/animated_greeting.dart';
 import 'package:flutter_boring_avatars/flutter_boring_avatars.dart';
 import 'package:mudra_manager/features/trip/data/trip_provider.dart';
 import 'package:mudra_manager/shared/widgets/speed_dial_fab.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   final int initialIndex;
@@ -468,7 +469,7 @@ class HomePageState extends ConsumerState<HomePage>
                   children: [
                     IconButton(
                       icon: const Icon(Icons.notifications_outlined, size: 28),
-                      onPressed: () => context.push('/notifications'),
+                      onPressed: () => context.push(AppRoutes.notifications),
                     ),
                     if (count > 0)
                       Positioned(
@@ -584,7 +585,7 @@ class HomePageState extends ConsumerState<HomePage>
             child: InkWell(
               onTap: () {
                 HapticFeedback.mediumImpact();
-                context.push('/trip-detail', extra: trip.id);
+                context.push(AppRoutes.tripDetail, extra: trip.id);
               },
               borderRadius: BorderRadius.circular(12),
               child: Padding(

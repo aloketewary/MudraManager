@@ -18,6 +18,7 @@ import 'package:mudra_manager/features/transactions/data/pending_transaction_pro
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 import 'package:mudra_manager/main.dart' show setupSmsListener;
 import 'package:permission_handler/permission_handler.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 
 class SmsImportSettingsScreen extends ConsumerStatefulWidget {
   const SmsImportSettingsScreen({super.key});
@@ -144,7 +145,7 @@ class _SmsImportSettingsScreenState
                       icon: LucideIcons.activity,
                       title: 'SMS Activity',
                       subtitle: 'View all SMS transactions',
-                      onTap: () => context.push('/sms-activity'),
+                      onTap: () => context.push(AppRoutes.smsActivity),
                       color: color,
                       textTheme: textTheme,
                       badge: ref

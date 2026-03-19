@@ -6,6 +6,7 @@ import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/utils/icon_helper.dart';
 import 'package:mudra_manager/features/category/data/category_provider.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 
 class CategorySelector extends ConsumerWidget {
   final Category? selectedCategory;
@@ -268,7 +269,7 @@ class _AddCategoryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => context.push('/add-category'),
+      onTap: () => context.push(AppRoutes.addCategory),
       child: Card(
         elevation: 0,
         color: color.surfaceContainerHigh,

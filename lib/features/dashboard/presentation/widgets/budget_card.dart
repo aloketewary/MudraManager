@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
 import 'dart:math' as math;
 
@@ -53,7 +54,7 @@ class BudgetCard extends ConsumerWidget {
                 child: InkWell(
                   onTap: () {
                     HapticFeedback.mediumImpact();
-                    context.push('/budget-dashboard');
+                    context.push(AppRoutes.budgetDashboard);
                   },
                   borderRadius: BorderRadius.circular(20),
                   child: Padding(

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
 import 'dart:math' as math;
 
@@ -38,7 +39,7 @@ class GoalCard extends ConsumerWidget {
         child: InkWell(
           onTap: () {
             HapticFeedback.mediumImpact();
-            context.push('/goal-screen');
+            context.push(AppRoutes.goalScreen);
           },
           borderRadius: BorderRadius.circular(spacing.radiusLarge),
           child: Padding(

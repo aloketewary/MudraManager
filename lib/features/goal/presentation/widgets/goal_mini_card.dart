@@ -2,6 +2,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/features/goal/data/goal_provider.dart';
 import 'package:mudra_manager/features/goal/presentation/widgets/goal_circular_card.dart';
 import 'package:mudra_manager/shared/widgets/adaptive_text.dart';
@@ -36,7 +37,7 @@ class GoalMiniCard extends ConsumerWidget {
               Hero(
                 tag: 'goalExpandHero',
                 child: TextButton(
-                  onPressed: () => context.push('/goal-screen'),
+                  onPressed: () => context.push(AppRoutes.goalScreen),
                   child: const Text('View All'),
                 ),
               ),
@@ -55,7 +56,7 @@ class GoalMiniCard extends ConsumerWidget {
                   child: InkWell(
                     onTap: () {
                       HapticFeedback.mediumImpact();
-                      context.push('/add-goal');
+                      context.push(AppRoutes.addGoal);
                     },
                     borderRadius: BorderRadius.circular(20),
                     child: Padding(
@@ -79,7 +80,7 @@ class GoalMiniCard extends ConsumerWidget {
                           FilledButton.icon(
                             onPressed: () {
                               HapticFeedback.mediumImpact();
-                              context.push('/add-goal');
+                              context.push(AppRoutes.addGoal);
                             },
                             icon: const Icon(Icons.add),
                             label: const Text('Add Goal'),

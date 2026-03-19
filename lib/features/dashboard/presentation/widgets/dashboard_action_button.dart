@@ -6,6 +6,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/shared/widgets/responseive_layout_builder.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 
 class QuickActionButton extends ConsumerWidget {
   const QuickActionButton({super.key});
@@ -25,7 +26,7 @@ class QuickActionButton extends ConsumerWidget {
               child: _DashboardActionButton(
                 label: 'Add Expense',
                 icon: LucideIcons.circlePlus,
-                onTap: () => context.push('/add-transaction'),
+                onTap: () => context.push(AppRoutes.addTransaction),
                 color: color.primary,
                 isLeft: true,
                 isRight: true,
@@ -36,7 +37,7 @@ class QuickActionButton extends ConsumerWidget {
               child: _DashboardActionButton(
                 label: ctxt.dashboard_add_transfer_text,
                 icon: LucideIcons.arrowLeftRight,
-                onTap: () => context.push('/transfer'),
+                onTap: () => context.push(AppRoutes.transfer),
                 color: color.tertiary,
                 isRight: true,
                 isLeft: true,
@@ -50,7 +51,7 @@ class QuickActionButton extends ConsumerWidget {
               child: _DashboardActionButton(
                 label: 'Add Expense',
                 icon: LucideIcons.circlePlus,
-                onTap: () => context.push('/add-transaction'),
+                onTap: () => context.push(AppRoutes.addTransaction),
                 color: color.primary,
                 isLeft: true,
               ),
@@ -60,7 +61,7 @@ class QuickActionButton extends ConsumerWidget {
               child: _DashboardActionButton(
                 label: ctxt.dashboard_add_transfer_text,
                 icon: LucideIcons.arrowLeftRight,
-                onTap: () => context.push('/transfer'),
+                onTap: () => context.push(AppRoutes.transfer),
                 color: color.tertiary,
                 isRight: true,
               ),

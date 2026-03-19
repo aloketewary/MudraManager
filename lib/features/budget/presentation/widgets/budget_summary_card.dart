@@ -9,6 +9,7 @@ import 'package:mudra_manager/features/budget/data/budget_service_provider.dart'
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 
 class BudgetSummaryCard extends ConsumerWidget {
   final BudgetWithProgress data;
@@ -38,7 +39,7 @@ class BudgetSummaryCard extends ConsumerWidget {
     return InkWell(
       onTap: () {
         HapticFeedback.mediumImpact();
-        context.push('/budget-details', extra: data);
+        context.push(AppRoutes.budgetDetails, extra: data);
       },
       borderRadius: BorderRadius.circular(12),
       child: Card(

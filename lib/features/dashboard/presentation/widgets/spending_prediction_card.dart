@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 
 // In spending_prediction_card.dart
 // Replace the predictedSpendingProvider watch with dashboardDataProvider
@@ -72,7 +73,7 @@ class SpendingPredictionCard extends ConsumerWidget {
           child: InkWell(
             onTap: () {
               HapticFeedback.mediumImpact();
-              context.push('/statistics');
+              context.push(AppRoutes.statistics);
             },
             borderRadius: BorderRadius.circular(20),
             child: Padding(

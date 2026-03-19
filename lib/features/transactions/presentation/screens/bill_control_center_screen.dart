@@ -15,6 +15,7 @@ import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 import 'package:mudra_manager/shared/widgets/widgets.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 
 class BillControlCenterScreen extends ConsumerStatefulWidget {
   const BillControlCenterScreen({super.key});
@@ -51,7 +52,7 @@ class _BillControlCenterScreenState
                       icon: const Icon(LucideIcons.plus),
                       onPressed: () {
                         HapticFeedback.mediumImpact();
-                        context.push('/add-recurring');
+                        context.push(AppRoutes.addRecurring);
                       },
                     ),
                   ],
@@ -118,7 +119,7 @@ class _BillControlCenterScreenState
                         icon: const Icon(LucideIcons.plus),
                         onPressed: () {
                           HapticFeedback.mediumImpact();
-                          context.push('/add-recurring');
+                          context.push(AppRoutes.addRecurring);
                         },
                       ),
                     ],
@@ -669,7 +670,7 @@ class _BillControlCenterScreenState
         ),
       ),
       child: InkWell(
-        onTap: () => context.push('/add-recurring', extra: {'recurring': bill}),
+        onTap: () => context.push(AppRoutes.addRecurring, extra: {'recurring': bill}),
         borderRadius: BorderRadius.circular(spacing.radiusLarge),
         child: Padding(
           padding: EdgeInsets.all(spacing.cardInner),
@@ -770,7 +771,7 @@ class _BillControlCenterScreenState
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: () => context
-                          .push('/add-recurring', extra: {'recurring': bill}),
+                          .push(AppRoutes.addRecurring, extra: {'recurring': bill}),
                       icon: const Icon(LucideIcons.settings, size: 16),
                       label: const Text('Manage'),
                       style: OutlinedButton.styleFrom(

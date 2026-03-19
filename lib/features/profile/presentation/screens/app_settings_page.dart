@@ -7,6 +7,7 @@ import 'package:mudra_manager/core/theme/theme_provider.dart';
 import 'package:mudra_manager/shared/widgets/adaptive_text.dart';
 import 'package:mudra_manager/features/profile/presentation/widgets/guest_mode_toggle.dart';
 import 'package:mudra_manager/features/marketplace/services/marketplace_service.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 
 class AppSettingsPage extends ConsumerStatefulWidget {
   const AppSettingsPage({super.key});
@@ -65,7 +66,7 @@ class _AppSettingsPageState extends ConsumerState<AppSettingsPage> {
             'Show/hide and reorder cards',
             () {
               HapticFeedback.mediumImpact();
-              context.push('/dashboard-customize');
+              context.push(AppRoutes.dashboardCustomize);
             },
           ),
           const SizedBox(height: 8),

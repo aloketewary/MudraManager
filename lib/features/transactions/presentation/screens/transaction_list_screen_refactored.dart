@@ -17,6 +17,7 @@ import 'package:mudra_manager/shared/widgets/adaptive_text.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 
 class TransactionListScreenRefactored extends ConsumerStatefulWidget {
   final bool showAppBar;
@@ -129,7 +130,7 @@ class TransactionListScreenRefactoredState
             floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
             floatingActionButton: FloatingActionButton.extended(
               heroTag: 'addTransactionHero',
-              onPressed: () => context.push('/add-transaction'),
+              onPressed: () => context.push(AppRoutes.addTransaction),
               icon: const Icon(Icons.add),
               label: AdaptiveText(
                 ctxt.dashboard_add_transaction_text,

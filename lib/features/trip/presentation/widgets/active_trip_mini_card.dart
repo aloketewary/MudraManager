@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/features/trip/data/trip_provider.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 
 class ActiveTripMiniCard extends ConsumerWidget {
   final double globalPadding;
@@ -44,7 +45,7 @@ class ActiveTripMiniCard extends ConsumerWidget {
                 child: InkWell(
                   onTap: () {
                     HapticFeedback.mediumImpact();
-                    context.push('/trip-detail', extra: trip.id);
+                    context.push(AppRoutes.tripDetail, extra: trip.id);
                   },
                   borderRadius: BorderRadius.circular(20),
                   child: Padding(

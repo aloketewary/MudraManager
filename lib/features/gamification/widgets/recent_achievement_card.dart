@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 
 class RecentAchievementCard extends ConsumerWidget {
   final double horizontalPadding;
@@ -86,7 +87,7 @@ class _AchievementCard extends StatelessWidget {
 
           onTap: () {
             HapticFeedback.selectionClick();
-            context.push('/achievements');
+            context.push(AppRoutes.achievements);
           },
 
           child: Padding(

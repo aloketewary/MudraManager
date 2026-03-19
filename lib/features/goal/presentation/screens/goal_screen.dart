@@ -11,6 +11,7 @@ import 'package:mudra_manager/features/goal/data/goal_provider.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/shared/widgets/widgets.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 
 class GoalScreen extends ConsumerWidget {
   const GoalScreen({super.key});
@@ -35,7 +36,7 @@ class GoalScreen extends ConsumerWidget {
                     icon: const Icon(LucideIcons.plus),
                     onPressed: () {
                       HapticFeedback.mediumImpact();
-                      context.push('/add-goal');
+                      context.push(AppRoutes.addGoal);
                     },
                   ),
                 ],
@@ -82,7 +83,7 @@ class GoalScreen extends ConsumerWidget {
                     icon: const Icon(LucideIcons.plus),
                     onPressed: () {
                       HapticFeedback.mediumImpact();
-                      context.push('/add-goal');
+                      context.push(AppRoutes.addGoal);
                     },
                   ),
                   SizedBox(width: spacing.cardHorizontal),
@@ -421,7 +422,7 @@ class GoalScreen extends ConsumerWidget {
       child: InkWell(
         onTap: () {
           HapticFeedback.mediumImpact();
-          context.push('/goal-details', extra: {'goal': goal});
+          context.push(AppRoutes.goalDetails, extra: {'goal': goal});
         },
         borderRadius: BorderRadius.circular(spacing.radiusLarge),
         child: Padding(

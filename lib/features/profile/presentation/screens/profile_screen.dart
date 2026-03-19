@@ -18,6 +18,7 @@ import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/features/marketplace/services/marketplace_service.dart';
 import 'package:mudra_manager/core/theme/theme_provider.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 
 final lowBalancePluginProvider = FutureProvider.autoDispose((ref) async {
   return await MarketplaceService()
@@ -127,19 +128,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       Icons.account_balance_wallet_outlined,
                       'Accounts',
                       'Manage your accounts',
-                      () => context.push('/manage-accounts'),
+                      () => context.push(AppRoutes.manageAccounts),
                     ),
                     _SettingItem(
                       Icons.category_outlined,
                       'Categories',
                       'Manage your categories',
-                      () => context.push('/manage-categories'),
+                      () => context.push(AppRoutes.manageCategories),
                     ),
                     _SettingItem(
                       Icons.lock,
                       'Security',
                       'PIN or Fingerprint',
-                      () => context.push('/security'),
+                      () => context.push(AppRoutes.security),
                     ),
                   ],
                 ),
@@ -168,7 +169,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       LucideIcons.palette,
                       'Appearance',
                       'Theme, language & display',
-                      () => context.push('/appearance'),
+                      () => context.push(AppRoutes.appearance),
                     ),
                   ],
                 ),
@@ -187,13 +188,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       Icons.dashboard_customize_outlined,
                       'Dashboard Layout',
                       'Customize widgets & cards',
-                      () => context.push('/dashboard-customize'),
+                      () => context.push(AppRoutes.dashboardCustomize),
                     ),
                     _SettingItem(
                       Icons.extension_outlined,
                       'Plugins',
                       'Manage extensions',
-                      () => context.push('/marketplace'),
+                      () => context.push(AppRoutes.marketplace),
                     ),
                   ],
                 ),
@@ -211,13 +212,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       Icons.help_outline,
                       'Help & Support',
                       'FAQs and feature guides',
-                      () => context.push('/help'),
+                      () => context.push(AppRoutes.help),
                     ),
                     _SettingItem(
                       Icons.info_outline,
                       'About App',
                       'Version & Info',
-                      () => context.push('/about'),
+                      () => context.push(AppRoutes.about),
                     ),
                   ],
                 ),
@@ -336,7 +337,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   GestureDetector(
                     onTap: () {
                       HapticFeedback.mediumImpact();
-                      context.push('/edit-profile');
+                      context.push(AppRoutes.editProfile);
                     },
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -680,7 +681,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
               ),
               child: InkWell(
-                onTap: () => context.push('/achievements'),
+                onTap: () => context.push(AppRoutes.achievements),
                 borderRadius: BorderRadius.circular(spacing.radiusMedium),
                 child: Padding(
                   padding: const EdgeInsets.all(16),
@@ -868,25 +869,25 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         Icons.notifications_outlined,
         'Notifications',
         'Daily & weekly summaries',
-        () => context.push('/notification-settings'),
+        () => context.push(AppRoutes.notificationSettings),
       ),
       _SettingItem(
         Icons.sms,
         'SMS Import',
         'Auto-import transactions',
-        () => context.push('/sms-import'),
+        () => context.push(AppRoutes.smsImport),
       ),
       _SettingItem(
         Icons.backup,
         'Backup & Restore',
         'Manage your data',
-        () => context.push('/backup-restore'),
+        () => context.push(AppRoutes.backupRestore),
       ),
       _SettingItem(
         LucideIcons.fileText,
         'Monthly Recap',
         'View & download monthly report',
-        () => context.push('/monthly-recap'),
+        () => context.push(AppRoutes.monthlyRecap),
       ),
     ];
 
@@ -1279,7 +1280,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         ref.invalidate(accountsProvider);
                         ref.invalidate(categoryListProvider);
                         ref.invalidate(budgetServiceProvider);
-                        if (ctx.mounted) ctx.go('/onboarding');
+                        if (ctx.mounted) ctx.go(AppRoutes.onboarding);
                       },
                       style: FilledButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),

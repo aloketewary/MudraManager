@@ -6,6 +6,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/features/analytics/data/analytics_provider.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'dart:math' as math;
+import 'package:mudra_manager/core/router/app_routes.dart';
 
 class FinancialHealthCard extends ConsumerWidget {
   final double globalPadding;
@@ -34,7 +35,7 @@ class FinancialHealthCard extends ConsumerWidget {
                 child: InkWell(
                   onTap: () {
                     HapticFeedback.mediumImpact();
-                    context.push('/financial-health');
+                    context.push(AppRoutes.financialHealth);
                   },
                   borderRadius: BorderRadius.circular(20),
                   child: Padding(

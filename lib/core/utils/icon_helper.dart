@@ -33,6 +33,7 @@ class IconHelper {
       'tax': LucideIcons.receiptIndianRupee,
       'bank': LucideIcons.landmark,
       'insurance': LucideIcons.shieldCheck,
+      'account_balance_wallet': LucideIcons.wallet,
     },
     'Payments & Transfers': {
       'upi': LucideIcons.qrCode,
@@ -275,6 +276,7 @@ class IconHelper {
       'maps': LucideIcons.mapPinned,
       'compass': LucideIcons.compass,
       'hotel': LucideIcons.bed,
+      'card_travel': LucideIcons.luggage,
     },
     'Social & Giving': {
       'wedding': LucideIcons.heart,
@@ -354,6 +356,9 @@ class IconHelper {
       'pets': LucideIcons.pawPrint,
       'repeat': LucideIcons.repeat,
       'photo': LucideIcons.image,
+      'sms': LucideIcons.messageSquare,
+      'backup': LucideIcons.cloudUpload,
+      'auto_graph': LucideIcons.chartSpline,
     },
   };
 

@@ -8,6 +8,7 @@ import 'package:mudra_manager/features/budget/presentation/widgets/budget_summar
 import 'package:mudra_manager/features/budget/presentation/widgets/overspend_warning_widget.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 import 'package:mudra_manager/core/widgets/skeleton_loader.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 
 class BudgetDashboard extends ConsumerStatefulWidget {
   const BudgetDashboard({super.key});
@@ -67,7 +68,7 @@ class _BudgetDashboardState extends ConsumerState<BudgetDashboard> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           HapticFeedback.mediumImpact();
-          context.push('/add-budget');
+          context.push(AppRoutes.addBudget);
         },
         icon: const Icon(Icons.add),
         label: Text(ctxt.budget_dashboardAddBudgetText),

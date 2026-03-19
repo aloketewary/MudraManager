@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/core/widgets/dashboard_widget_plugin.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
 import 'package:mudra_manager/features/dashboard/presentation/widgets/recurring_expenses_card.dart';
@@ -34,7 +35,7 @@ class RecurringExpensesWidgetPlugin extends DashboardWidgetPlugin {
 
   @override
   void onTap(BuildContext context, WidgetRef ref) {
-    context.push('/recurring-transactions');
+    context.push(AppRoutes.recurringTransactions);
   }
 
   @override

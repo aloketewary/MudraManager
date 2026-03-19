@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 
 class ExpandableFab extends StatefulWidget {
   final AnimationController? visibilityController;
@@ -217,7 +218,7 @@ class ExpandableFabState extends State<ExpandableFab>
                           accentColor: color.error,
                           color: color,
                           textTheme: textTheme,
-                          onTap: () => _onItemTap('/add-transaction'),
+                          onTap: () => _onItemTap(AppRoutes.addTransaction),
                         ),
                         _buildDivider(color, t),
                         _buildActionItem(
@@ -227,7 +228,7 @@ class ExpandableFabState extends State<ExpandableFab>
                           color: color,
                           textTheme: textTheme,
                           onTap: () => _onItemTap(
-                            '/add-transaction',
+                            AppRoutes.addTransaction,
                             extra: {'isIncome': true},
                           ),
                         ),
@@ -238,7 +239,7 @@ class ExpandableFabState extends State<ExpandableFab>
                           accentColor: Colors.orange,
                           color: color,
                           textTheme: textTheme,
-                          onTap: () => _onItemTap('/transfer'),
+                          onTap: () => _onItemTap(AppRoutes.transfer),
                         ),
                       ],
                     ),

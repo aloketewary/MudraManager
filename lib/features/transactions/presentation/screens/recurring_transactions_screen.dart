@@ -12,6 +12,7 @@ import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 import 'package:mudra_manager/core/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 
 class RecurringTransactionsScreen extends ConsumerWidget {
   const RecurringTransactionsScreen({super.key});
@@ -128,7 +129,7 @@ class RecurringTransactionsScreen extends ConsumerWidget {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           HapticFeedback.mediumImpact();
-          context.push('/add-recurring');
+          context.push(AppRoutes.addRecurring);
         },
         icon: const Icon(Icons.add),
         label: const Text('ADD'),
@@ -158,7 +159,7 @@ class _RecurringCard extends ConsumerWidget {
       color: colorScheme.surfaceContainerHighest,
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        onTap: () => context.push('/add-recurring', extra: {'recurring': item}),
+        onTap: () => context.push(AppRoutes.addRecurring, extra: {'recurring': item}),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(

@@ -9,6 +9,7 @@ import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 
 class NetWorthCard extends ConsumerWidget {
   final double globalPadding;
@@ -51,7 +52,7 @@ class NetWorthCard extends ConsumerWidget {
             child: InkWell(
               onTap: () {
                 HapticFeedback.mediumImpact();
-                context.push('/net-worth');
+                context.push(AppRoutes.netWorth);
               },
               borderRadius: BorderRadius.circular(20),
               child: Stack(

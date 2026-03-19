@@ -8,6 +8,7 @@ import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/features/trip/data/trip_provider.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/db/models/trip.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 
 final _dateFormatter = DateFormat.MMMd();
 
@@ -205,7 +206,7 @@ class TripsScreen extends ConsumerWidget {
                           FilledButton.icon(
                             onPressed: () {
                               HapticFeedback.mediumImpact();
-                              context.push('/create-trip');
+                              context.push(AppRoutes.createTrip);
                             },
                             icon: const Icon(LucideIcons.plus),
                             label: const Text('Create Trip'),
@@ -428,7 +429,7 @@ class TripsScreen extends ConsumerWidget {
         IconButton(
           onPressed: () {
             HapticFeedback.mediumImpact();
-            context.push('/create-trip');
+            context.push(AppRoutes.createTrip);
           },
           icon: const Icon(LucideIcons.plus),
           tooltip: 'New Trip',
@@ -656,7 +657,7 @@ class TripsScreen extends ConsumerWidget {
       child: InkWell(
         onTap: () {
           HapticFeedback.mediumImpact();
-          context.push('/trip-detail', extra: trip.id);
+          context.push(AppRoutes.tripDetail, extra: trip.id);
         },
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
         child: Padding(

@@ -13,6 +13,7 @@ import 'package:mudra_manager/core/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/features/category/data/category_provider.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 
 class ManageCategoriesScreen extends ConsumerWidget {
   const ManageCategoriesScreen({super.key});
@@ -37,7 +38,7 @@ class ManageCategoriesScreen extends ConsumerWidget {
             icon: const Icon(LucideIcons.plus),
             onPressed: () {
               HapticFeedback.mediumImpact();
-              context.push('/add-category');
+              context.push(AppRoutes.addCategory);
             },
             tooltip: ctxt.categories_addCategoryLabel,
           ),
@@ -50,7 +51,7 @@ class ManageCategoriesScreen extends ConsumerWidget {
               iconData: LucideIcons.tag,
               message: 'No categories found.',
               action: ElevatedButton.icon(
-                onPressed: () => context.push('/add-category'),
+                onPressed: () => context.push(AppRoutes.addCategory),
                 icon: const Icon(LucideIcons.plus),
                 label: Text(ctxt.categories_addCategoryLabel),
               ),
@@ -284,7 +285,7 @@ class ManageCategoriesScreen extends ConsumerWidget {
                 allCategories: allCategories,
                 transactionCounts: transactionCounts,
                 onEdit: () => context.push(
-                  '/add-category',
+                  AppRoutes.addCategory,
                   extra: {'category': category},
                 ),
                 onDelete: () => _deleteCategory(context, ref, category, ctxt),
@@ -506,7 +507,7 @@ class _CategoryRowState extends State<_CategoryRow> {
                     color,
                     textTheme,
                     onEdit: () => context.push(
-                      '/add-category',
+                      AppRoutes.addCategory,
                       extra: {'category': sub},
                     ),
                     onDelete: widget.onDelete,

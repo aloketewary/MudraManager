@@ -38,6 +38,7 @@ import 'package:mudra_manager/features/transactions/presentation/providers/smart
 import 'package:mudra_manager/features/trip/data/trip_provider.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/shared/widgets/simple_calculator.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 
 class AddEditTransactionScreen extends ConsumerStatefulWidget {
   final Transaction? transaction;
@@ -957,7 +958,7 @@ class _AddEditTransactionScreenState
                                     if (index == parents.length) {
                                       return GestureDetector(
                                         onTap: () =>
-                                            context.push('/add-category'),
+                                            context.push(AppRoutes.addCategory),
                                         child: Container(
                                           padding: const EdgeInsets.symmetric(
                                             horizontal: 14,

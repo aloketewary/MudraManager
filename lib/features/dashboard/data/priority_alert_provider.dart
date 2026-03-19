@@ -4,6 +4,7 @@ import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/features/goal/data/goal_provider.dart';
 
 class PriorityAlert {
@@ -54,7 +55,7 @@ final priorityAlertProvider = FutureProvider.autoDispose<PriorityAlert?>((ref) a
       return PriorityAlert(
         title: 'Action Needed',
         message: '$billsDueTomorrow bill${billsDueTomorrow > 1 ? 's' : ''} due tomorrow',
-        route: '/recurring-transactions',
+        route: AppRoutes.recurringTransactions,
         type: AlertType.urgent,
       );
     }
@@ -62,7 +63,7 @@ final priorityAlertProvider = FutureProvider.autoDispose<PriorityAlert?>((ref) a
     return PriorityAlert(
       title: 'Upcoming Bills',
       message: '${upcomingBills.length} bill${upcomingBills.length > 1 ? 's' : ''} due in 2 days',
-      route: '/recurring-transactions',
+      route: AppRoutes.recurringTransactions,
       type: AlertType.warning,
     );
   }
@@ -75,7 +76,7 @@ final priorityAlertProvider = FutureProvider.autoDispose<PriorityAlert?>((ref) a
     return PriorityAlert(
       title: 'Budget Alert',
       message: '${overBudget.length} budget${overBudget.length > 1 ? 's' : ''} exceeded',
-      route: '/budget-dashboard',
+      route: AppRoutes.budgetDashboard,
       type: AlertType.urgent,
     );
   }
@@ -90,7 +91,7 @@ final priorityAlertProvider = FutureProvider.autoDispose<PriorityAlert?>((ref) a
     return PriorityAlert(
       title: 'Budget Warning',
       message: '${nearLimit.length} budget${nearLimit.length > 1 ? 's' : ''} near limit',
-      route: '/budget-dashboard',
+      route: AppRoutes.budgetDashboard,
       type: AlertType.warning,
     );
   }
@@ -105,7 +106,7 @@ final priorityAlertProvider = FutureProvider.autoDispose<PriorityAlert?>((ref) a
     return PriorityAlert(
       title: 'Goal Progress',
       message: '${nearCompletion.length} goal${nearCompletion.length > 1 ? 's' : ''} almost complete!',
-      route: '/goal-screen',
+      route: AppRoutes.goalScreen,
       type: AlertType.info,
     );
   }

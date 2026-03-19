@@ -19,6 +19,7 @@ import 'package:mudra_manager/features/dashboard/presentation/providers/widget_p
 import 'package:mudra_manager/features/profile/data/help_guide_provider.dart';
 import 'package:mudra_manager/shared/widgets/budget_alert_banner.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 
 class DashboardHome extends ConsumerStatefulWidget {
   const DashboardHome({super.key});
@@ -201,7 +202,7 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                         ),
                         const SizedBox(height: 24),
                         FilledButton.icon(
-                          onPressed: () => context.push('/dashboard-customize'),
+                          onPressed: () => context.push(AppRoutes.dashboardCustomize),
                           icon: const Icon(LucideIcons.plus),
                           label: const Text('Enable Cards'),
                         ),
@@ -216,7 +217,7 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                   child: Padding(
                     padding: const EdgeInsets.only(top: 8),
                     child: TextButton.icon(
-                      onPressed: () => context.push('/dashboard-customize'),
+                      onPressed: () => context.push(AppRoutes.dashboardCustomize),
                       icon: Icon(
                         LucideIcons.settings2,
                         size: 16,
@@ -340,7 +341,7 @@ class _HelpBanner extends ConsumerWidget {
           borderRadius: BorderRadius.circular(spacing.radiusMedium),
           onTap: () {
             HapticFeedback.mediumImpact();
-            context.push('/help');
+            context.push(AppRoutes.help);
           },
           child: Padding(
             padding: const EdgeInsets.all(14),

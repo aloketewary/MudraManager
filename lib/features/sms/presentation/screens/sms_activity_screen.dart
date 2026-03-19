@@ -16,6 +16,7 @@ import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/sms/data/sms_activity_service.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 
 final smsActivityProvider =
     FutureProvider.autoDispose<List<SmsActivity>>((ref) async {
@@ -1085,7 +1086,7 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                             description: widget.activity.body,
                           );
                           context.push(
-                            '/add-transaction',
+                            AppRoutes.addTransaction,
                             extra: {
                               'transaction': transaction,
                               'smsActivity': widget.activity,

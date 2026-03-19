@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/db/models/frequency.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
 
 class RecurringExpensesCard extends ConsumerWidget {
@@ -35,7 +36,7 @@ class RecurringExpensesCard extends ConsumerWidget {
         child: InkWell(
           onTap: () {
             HapticFeedback.mediumImpact();
-            context.push('/recurring-transactions');
+            context.push(AppRoutes.recurringTransactions);
           },
           borderRadius: BorderRadius.circular(spacing.radiusLarge),
           child: Padding(

@@ -16,6 +16,7 @@ import 'package:mudra_manager/core/utils/icon_helper.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/category/data/category_management_service.dart';
 import 'package:mudra_manager/plugins/category_packs/category_pack.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 
 class AccountSetupScreen extends ConsumerStatefulWidget {
   const AccountSetupScreen({super.key});
@@ -65,7 +66,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
       HapticFeedback.lightImpact();
       setState(() => _step--);
     } else {
-      context.go('/onboarding');
+      context.go(AppRoutes.onboarding);
     }
   }
 
@@ -90,7 +91,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
         SharedPrefsUtil.instance.setOnboardingComplete();
         if (mounted) {
           SnackbarService.success('Backup restored successfully');
-          context.go('/home');
+          context.go(AppRoutes.home);
         }
       }
     } catch (e) {
@@ -135,7 +136,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
       SharedPrefsUtil.instance.setOnboardingComplete();
 
       if (mounted) {
-        context.go('/home');
+        context.go(AppRoutes.home);
       }
     } catch (e) {
       if (mounted) {

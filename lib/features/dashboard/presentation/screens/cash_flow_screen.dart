@@ -19,6 +19,7 @@ import 'package:mudra_manager/shared/widgets/trend_indicator.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 
 class CashFlowScreen extends ConsumerStatefulWidget {
   final double globalPadding;
@@ -156,7 +157,7 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
               GestureDetector(
                 onTap: () {
                   HapticFeedback.mediumImpact();
-                  context.push('/transactions');
+                  context.push(AppRoutes.transactions);
                 },
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 12, left: 4, right: 4),

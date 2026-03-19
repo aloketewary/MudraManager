@@ -16,6 +16,7 @@ import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 import 'package:confetti/confetti.dart';
 import 'dart:math' as math;
+import 'package:mudra_manager/core/router/app_routes.dart';
 
 class GoalDetailsScreen extends ConsumerStatefulWidget {
   final Goal goal;
@@ -109,7 +110,7 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
                     icon: const Icon(LucideIcons.ellipsisVertical),
                     onSelected: (value) {
                       if (value == 'edit') {
-                        context.push('/add-goal', extra: {'goal': widget.goal});
+                        context.push(AppRoutes.addGoal, extra: {'goal': widget.goal});
                       } else if (value == 'delete') {
                         _deleteGoal();
                       }

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 
 class PendingSplitsSection extends StatelessWidget {
   final List<Transaction> pendingTransactions;
@@ -194,7 +195,7 @@ class PendingSplitsSection extends StatelessWidget {
                     color: color.primary,
                     onTap: () {
                       Navigator.pop(ctx);
-                      context.push('/add-trip-transaction', extra: {
+                      context.push(AppRoutes.addTripTransaction, extra: {
                         'tripId': tripId,
                         'transactionId': txn.id,
                         'splitType': 'equal',
@@ -210,7 +211,7 @@ class PendingSplitsSection extends StatelessWidget {
                     color: color.secondary,
                     onTap: () {
                       Navigator.pop(ctx);
-                      context.push('/add-trip-transaction', extra: {
+                      context.push(AppRoutes.addTripTransaction, extra: {
                         'tripId': tripId,
                         'transactionId': txn.id,
                         'splitType': 'percentage',
@@ -226,7 +227,7 @@ class PendingSplitsSection extends StatelessWidget {
                     color: color.tertiary,
                     onTap: () {
                       Navigator.pop(ctx);
-                      context.push('/add-trip-transaction', extra: {
+                      context.push(AppRoutes.addTripTransaction, extra: {
                         'tripId': tripId,
                         'transactionId': txn.id,
                         'splitType': 'custom',

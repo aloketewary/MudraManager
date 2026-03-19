@@ -7,6 +7,7 @@ import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 
 class AdaptiveBudgetDashboard extends ConsumerStatefulWidget {
   const AdaptiveBudgetDashboard({super.key});
@@ -38,7 +39,7 @@ class _AdaptiveBudgetDashboardState
                     icon: const Icon(LucideIcons.plus),
                     onPressed: () {
                       HapticFeedback.mediumImpact();
-                      context.push('/add-budget');
+                      context.push(AppRoutes.addBudget);
                     },
                   ),
                 ],
@@ -229,7 +230,7 @@ class _AdaptiveBudgetDashboardState
         IconButton(
           onPressed: () {
             HapticFeedback.mediumImpact();
-            context.push('/add-budget');
+            context.push(AppRoutes.addBudget);
           },
           icon: const Icon(LucideIcons.plus),
         ),
@@ -611,7 +612,7 @@ class _AdaptiveBudgetDashboardState
         borderRadius: BorderRadius.circular(spacing.radiusLarge),
         onTap: () {
           HapticFeedback.lightImpact();
-          context.push('/budget-details', extra: budgetWithProgress);
+          context.push(AppRoutes.budgetDetails, extra: budgetWithProgress);
         },
         child: Padding(
           padding: EdgeInsets.all(spacing.cardInner),

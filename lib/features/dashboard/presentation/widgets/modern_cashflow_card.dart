@@ -16,6 +16,7 @@ import 'package:mudra_manager/features/dashboard/presentation/providers/dashboar
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/shared/widgets/animated_balance.dart';
 import 'package:mudra_manager/shared/widgets/widgets.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 
 class ModernCashFlowCard extends ConsumerStatefulWidget {
   const ModernCashFlowCard({super.key});
@@ -139,7 +140,7 @@ class _ModernCashFlowCardState extends ConsumerState<ModernCashFlowCard> {
           GestureDetector(
             onTap: () {
               HapticFeedback.mediumImpact();
-              context.push('/transactions');
+              context.push(AppRoutes.transactions);
             },
             child: Icon(
               LucideIcons.chevronRight,

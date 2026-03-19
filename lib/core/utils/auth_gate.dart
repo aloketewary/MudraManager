@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:mudra_manager/core/providers/auth_service.dart';
 import 'package:mudra_manager/features/profile/presentation/widgets/pin_entry_dialog.dart';
 import 'package:mudra_manager/shared/widgets/adaptive_text.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 
 final _authStateProvider = StateProvider<bool>((ref) => false);
 final _authInitProvider = StateProvider<bool>((ref) => false);
@@ -159,7 +160,7 @@ class _AuthGateState extends ConsumerState<AuthGate>
         if (didPop) return;
         if (!unlocked) return;
         final location = GoRouterState.of(context).uri.toString();
-        if (location == '/home') {
+        if (location == AppRoutes.home) {
           final shouldExit = await showModalBottomSheet<bool>(
             context: context,
             builder: (context) => Container(
@@ -201,7 +202,7 @@ class _AuthGateState extends ConsumerState<AuthGate>
           );
           if (shouldExit == true) SystemNavigator.pop();
         } else {
-          context.go('/home');
+          context.go(AppRoutes.home);
         }
       },
       child: Stack(

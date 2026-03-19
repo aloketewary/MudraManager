@@ -7,6 +7,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/features/analytics/data/spending_analyzer.dart';
 import 'package:mudra_manager/features/analytics/data/personality_archetype.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 
 final spendingPersonalityProvider = FutureProvider<SpendingPersonality?>((ref) async {
   return await SpendingAnalyzer.analyzePersonality();
@@ -41,7 +42,7 @@ class SpendingPersonalityCard extends ConsumerWidget {
                 child: InkWell(
                   onTap: () {
                     HapticFeedback.mediumImpact();
-                    context.push('/spending-personality');
+                    context.push(AppRoutes.spendingPersonality);
                   },
                   borderRadius: BorderRadius.circular(20),
                   child: Padding(

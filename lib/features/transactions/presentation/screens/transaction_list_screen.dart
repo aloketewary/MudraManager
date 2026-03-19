@@ -22,6 +22,7 @@ import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/shared/widgets/speed_dial_fab.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 
 final _dateHeaderFormatter = DateFormat.yMMMMd();
 
@@ -1057,7 +1058,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
         await relatedTx.account.load();
       }
       result = await context.push(
-        '/transfer',
+        AppRoutes.transfer,
         extra: {
           'amount': transaction.amount.toStringAsFixed(2),
           'note': transaction.description,
@@ -1070,7 +1071,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
       );
     } else {
       result = await context.push(
-        '/add-transaction',
+        AppRoutes.addTransaction,
         extra: {'transaction': transaction},
       );
     }

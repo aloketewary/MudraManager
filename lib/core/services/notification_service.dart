@@ -8,6 +8,7 @@ import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/models/notification_record.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -392,11 +393,11 @@ class NotificationService {
 
   static void _handleNotificationTap(String? payload) {
     if (payload == 'statistics' && _context != null) {
-      _context!.go('/statistics');
+      _context!.go(AppRoutes.statistics);
     } else if (payload == 'home' && _context != null) {
-      _context!.go('/home');
+      _context!.go(AppRoutes.home);
     } else if (payload == 'achievements' && _context != null) {
-      _context!.go('/achievements');
+      _context!.go(AppRoutes.achievements);
     }
   }
 

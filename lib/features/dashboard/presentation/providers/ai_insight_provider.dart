@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
 import 'package:mudra_manager/features/sms/data/sms_activity_service.dart';
 import 'package:mudra_manager/features/sms/presentation/screens/sms_activity_screen.dart';
@@ -75,7 +76,7 @@ List<AiInsight> _generateInsights(DashboardData data, int smsPendingCount) {
         iconType: IconType.sms,
         generatedAt: now,
         actionLabel: 'Review',
-        actionRoute: '/sms-activity',
+        actionRoute: AppRoutes.smsActivity,
         priority: score,
       ),
     );
@@ -107,7 +108,7 @@ List<AiInsight> _generateInsights(DashboardData data, int smsPendingCount) {
                 iconType: IconType.info,
                 generatedAt: now,
                 actionLabel: 'View Bills',
-                actionRoute: '/recurring-transactions',
+                actionRoute: AppRoutes.recurringTransactions,
                 priority: score,
               )
             : AiInsight(
@@ -118,7 +119,7 @@ List<AiInsight> _generateInsights(DashboardData data, int smsPendingCount) {
                 iconType: IconType.info,
                 generatedAt: now,
                 actionLabel: 'View Bills',
-                actionRoute: '/recurring-transactions',
+                actionRoute: AppRoutes.recurringTransactions,
                 priority: score,
               ),
       );
@@ -149,7 +150,7 @@ List<AiInsight> _generateInsights(DashboardData data, int smsPendingCount) {
           iconType: IconType.budget,
           generatedAt: now,
           actionLabel: 'Review Budgets',
-          actionRoute: '/budget-dashboard',
+          actionRoute: AppRoutes.budgetDashboard,
           priority: 75,
         ),
       );
@@ -164,7 +165,7 @@ List<AiInsight> _generateInsights(DashboardData data, int smsPendingCount) {
           iconType: IconType.budget,
           generatedAt: now,
           actionLabel: 'View Details',
-          actionRoute: '/budget-dashboard',
+          actionRoute: AppRoutes.budgetDashboard,
           priority: 50,
         ),
       );
@@ -186,7 +187,7 @@ List<AiInsight> _generateInsights(DashboardData data, int smsPendingCount) {
         iconType: IconType.warning,
         generatedAt: now,
         actionLabel: 'View Budget',
-        actionRoute: '/budget-dashboard',
+        actionRoute: AppRoutes.budgetDashboard,
         priority: score,
       ),
     );
@@ -324,7 +325,7 @@ List<AiInsight> _generateInsights(DashboardData data, int smsPendingCount) {
           iconType: IconType.spending,
           generatedAt: now,
           actionLabel: 'View Stats',
-          actionRoute: '/statistics',
+          actionRoute: AppRoutes.statistics,
           priority: 45,
         ),
       );
@@ -385,7 +386,7 @@ List<AiInsight> _generateInsights(DashboardData data, int smsPendingCount) {
             iconType: IconType.savings,
             generatedAt: now,
             actionLabel: 'View Pattern',
-            actionRoute: '/statistics',
+            actionRoute: AppRoutes.statistics,
             priority: 30,
           ),
         );
@@ -406,7 +407,7 @@ List<AiInsight> _generateInsights(DashboardData data, int smsPendingCount) {
         iconType: IconType.info,
         generatedAt: now,
         actionLabel: 'Add Transaction',
-        actionRoute: '/add-transaction',
+        actionRoute: AppRoutes.addTransaction,
         priority: 10,
       ),
     );
