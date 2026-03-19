@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/widgets/dashboard_widget_plugin.dart';
 import 'package:mudra_manager/core/widgets/dashboard_widget_registry.dart';
@@ -73,13 +74,12 @@ class _DashboardCustomizeScreenState
   }
 
   Future<void> _restoreDefaults() async {
-  HapticFeedback.mediumImpact();
-  final service = ref.read(widgetPreferencesServiceProvider);
-  await service.resetToDefaults();
-  ref.invalidate(widgetPreferencesProvider);
-  setState(() => _initialized = false);
-}
-
+    HapticFeedback.mediumImpact();
+    final service = ref.read(widgetPreferencesServiceProvider);
+    await service.resetToDefaults();
+    ref.invalidate(widgetPreferencesProvider);
+    setState(() => _initialized = false);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -230,6 +230,30 @@ class _DashboardCustomizeScreenState
                   style: textTheme.bodySmall?.copyWith(
                     color: color.onSurfaceVariant,
                   ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Icon(LucideIcons.sparkles, size: 14, color: accent),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Smart ordering',
+                      style: textTheme.labelMedium?.copyWith(
+                        color: color.onSurfaceVariant,
+                      ),
+                    ),
+                    const Spacer(),
+                    Switch(
+                      value: ref.watch(smartOrderEnabledProvider),
+                      onChanged: (v) {
+                        SharedPrefsUtil.instance.setString(
+                          'smart_order_enabled',
+                          v.toString(),
+                        );
+                        ref.invalidate(smartOrderEnabledProvider);
+                      },
+                    ),
+                  ],
                 ),
               ],
             ),

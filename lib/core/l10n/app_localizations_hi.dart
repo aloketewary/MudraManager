@@ -515,7 +515,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get profile_weAreNotStoringInfoText =>
-      'हम कोई डेटा संग्रहीत नहीं कर रहे हैं, सारा डेटा आपके डिवाइस में है!';
+      'आपका सारा डेटा इसी डिवाइस पर सुरक्षित रहता है। न कोई सर्वर, न क्लाउड, न ही कोई ट्रैकिंग।';
 
   @override
   String get profile_saveButtonText => 'सहेजें';

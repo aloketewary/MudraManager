@@ -18,7 +18,6 @@ class BackgroundTaskManager {
   static Future<void> initialize() async {
     await Workmanager().initialize(callbackDispatcher);
     await _scheduleDailyTask();
-    // Run tasks immediately on app start
     await _runAllTasks();
   }
 
@@ -40,25 +39,21 @@ class BackgroundTaskManager {
 
   static Future<void> _runAllTasks() async {
     try {
-      final isarService = IsarService();
-      final isar = await isarService.getInstance();
-      final gamificationService = GamificationService(isar, AppLog(getLogger(), 'GamificationService'));
+      final isar = await IsarService().getInstance();
+      final gamificationService = GamificationService(
+        isar,
+        AppLog(getLogger(), 'GamificationService'),
+      );
 
-      await Future.wait([
-        // Process recurring transactions
-        RecurringTransactionService(isarService, gamificationService).processRecurringTransactions(),
-        // Check and show summaries
-        SummaryScheduler.checkAndShowSummaries(),
-        // Bill reminders and pending transactions
-        BillService.scheduleBillReminders(),
-        BillService.createPendingTransactionsForDueBills(),
-        // Record daily balance snapshots
-        BalanceHistoryService.instance.recordDailySnapshots(),
-        // Run smart notification checks
-        SmartNotificationService.instance.runSmartChecks(),
-        // Cleanup old SMS hashes
-        SmsHashCleanupService.cleanupOldHashes(),
-      ]);
+      // Run sequentially to avoid concurrent write transaction stalls
+      await RecurringTransactionService(IsarService(), gamificationService)
+          .processRecurringTransactions();
+      await SummaryScheduler.checkAndShowSummaries();
+      await BillService.scheduleBillReminders();
+      await BillService.createPendingTransactionsForDueBills();
+      await BalanceHistoryService.instance.recordDailySnapshots();
+      await SmartNotificationService.instance.runSmartChecks();
+      await SmsHashCleanupService.cleanupOldHashes();
 
       _log.i('All background tasks completed');
     } catch (e) {

@@ -31,12 +31,11 @@ import 'package:mudra_manager/features/category/data/category_provider.dart';
 import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
 import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
 import 'package:mudra_manager/features/sms/data/recurring_detector_service.dart';
-import 'package:mudra_manager/features/sms/data/sms_activity_service.dart';
 import 'package:mudra_manager/features/sms/presentation/screens/sms_activity_screen.dart';
 import 'package:mudra_manager/features/transactions/data/tag_provider.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
+import 'package:mudra_manager/features/transactions/presentation/providers/smart_defaults_provider.dart';
 import 'package:mudra_manager/features/trip/data/trip_provider.dart';
-import 'package:mudra_manager/shared/widgets/adaptive_text.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/shared/widgets/simple_calculator.dart';
 
@@ -89,6 +88,7 @@ class _AddEditTransactionScreenState
   final _accountScrollController = ScrollController();
   final _categoryScrollController = ScrollController();
   final _subcategoryScrollController = ScrollController();
+  bool _smartDefaultsApplied = false;
 
   @override
   void initState() {
@@ -110,7 +110,6 @@ class _AddEditTransactionScreenState
     if (widget.smsActivity != null && _selectedAccount == null) {
       _matchSmsAccount();
     }
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_isEditing) _amountFocus.requestFocus();
     });
@@ -220,6 +219,26 @@ class _AddEditTransactionScreenState
       });
     });
 
+    // Auto-apply smart defaults (once) for new transactions
+    if (!_isEditing && widget.smsActivity == null && !_smartDefaultsApplied) {
+      final defaultsAsync = ref.watch(smartDefaultsProvider(_isExpense));
+      defaultsAsync.whenData((d) {
+        if (_smartDefaultsApplied) return;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted || _smartDefaultsApplied) return;
+          _smartDefaultsApplied = true;
+          setState(() {
+            if (d.suggestedAccount != null && _selectedAccount == null) {
+              _selectedAccount = d.suggestedAccount;
+            }
+            if (d.suggestedCategory != null && _selectedCategory == null) {
+              _selectedCategory = d.suggestedCategory;
+            }
+          });
+        });
+      });
+    }
+
     final accentColor = _isExpense ? color.error : color.primary;
 
     return Scaffold(
@@ -264,6 +283,7 @@ class _AddEditTransactionScreenState
                             setState(() {
                               _isExpense = true;
                               _selectedCategory = null;
+                              _smartDefaultsApplied = false;
                             });
                           },
                           child: AnimatedContainer(
@@ -320,6 +340,7 @@ class _AddEditTransactionScreenState
                             setState(() {
                               _isExpense = false;
                               _selectedCategory = null;
+                              _smartDefaultsApplied = false;
                             });
                           },
                           child: AnimatedContainer(
@@ -545,6 +566,99 @@ class _AddEditTransactionScreenState
                             ],
                           ),
                         ),
+                        if (!_isEditing && widget.smsActivity == null)
+                          Consumer(
+                            builder: (context, ref, _) {
+                              final defaults =
+                                  ref.watch(smartDefaultsProvider(_isExpense));
+                              return defaults.maybeWhen(
+                                data: (d) {
+                                  if (d.suggestedCategory == null) {
+                                    return const SizedBox.shrink();
+                                  }
+                                  return Padding(
+                                    padding: EdgeInsets.only(
+                                      top: spacing.elementGap,
+                                    ),
+                                    child: InkWell(
+                                      onTap: () {
+                                        HapticFeedback.selectionClick();
+                                        setState(() {
+                                          _selectedCategory =
+                                              d.suggestedCategory;
+                                          if (d.suggestedAccount != null &&
+                                              _selectedAccount == null) {
+                                            _selectedAccount =
+                                                d.suggestedAccount;
+                                          }
+                                          if (d.suggestedAmount != null &&
+                                              _amountController.text.isEmpty) {
+                                            _amountController.text = d
+                                                .suggestedAmount!
+                                                .toStringAsFixed(0);
+                                          }
+                                        });
+                                      },
+                                      borderRadius: BorderRadius.circular(
+                                        spacing.radiusSmall,
+                                      ),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 8,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: color.primaryContainer
+                                              .withValues(alpha: 0.3),
+                                          borderRadius: BorderRadius.circular(
+                                            spacing.radiusSmall,
+                                          ),
+                                          border: Border.all(
+                                            color: color.primary
+                                                .withValues(alpha: 0.2),
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              LucideIcons.sparkles,
+                                              size: 14,
+                                              color: color.primary,
+                                            ),
+                                            const SizedBox(width: 6),
+                                            Flexible(
+                                              child: Text(
+                                                d.reason ??
+                                                    'Suggested: ${d.suggestedCategory!.name}',
+                                                style: textTheme.labelSmall
+                                                    ?.copyWith(
+                                                  color: color.primary,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              'Tap to apply',
+                                              style: textTheme.labelSmall
+                                                  ?.copyWith(
+                                                color: color.primary
+                                                    .withValues(alpha: 0.6),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                                orElse: () => const SizedBox.shrink(),
+                              );
+                            },
+                          ),
                       ],
                     ),
                   ),
@@ -552,7 +666,9 @@ class _AddEditTransactionScreenState
                   // ── Account selector ──
                   Consumer(
                     builder: (context, ref, _) {
-                      final accountsAsync = ref.watch(accountsProvider);
+                      final accountsAsync =
+                          ref.watch(frequencySortedAccountsProvider);
+
                       return accountsAsync.when(
                         data: (accounts) {
                           // Auto-scroll to selected account
@@ -738,18 +854,15 @@ class _AddEditTransactionScreenState
                   // ── Category selector ──
                   Consumer(
                     builder: (context, ref, _) {
-                      final categoriesAsync = ref.watch(categoryListProvider);
+                      final type = _isExpense
+                          ? CategoryType.expense
+                          : CategoryType.income;
+                      final categoriesAsync =
+                          ref.watch(frequencySortedCategoriesProvider(type));
                       return categoriesAsync.when(
                         data: (categories) {
                           final parents = categories
-                              .where(
-                                (c) =>
-                                    (_isExpense
-                                        ? c.categoryType == CategoryType.expense
-                                        : c.categoryType ==
-                                            CategoryType.income) &&
-                                    c.parentCategory.value == null,
-                              )
+                              .where((c) => c.parentCategory.value == null)
                               .toList();
 
                           final expanded = _expandedParent(parents);
@@ -1128,7 +1241,25 @@ class _AddEditTransactionScreenState
                             );
                             if (pick != null) {
                               HapticFeedback.lightImpact();
-                              setState(() => _selectedDate = pick);
+                              // Preserve current time for today, use noon for past dates
+                              final withTime = DateUtils.isSameDay(pick, now)
+                                  ? DateTime(
+                                      pick.year,
+                                      pick.month,
+                                      pick.day,
+                                      now.hour,
+                                      now.minute,
+                                      now.second,
+                                    )
+                                  : DateTime(
+                                      pick.year,
+                                      pick.month,
+                                      pick.day,
+                                      12,
+                                      0,
+                                      0,
+                                    );
+                              setState(() => _selectedDate = withTime);
                             }
                           },
                           borderRadius:

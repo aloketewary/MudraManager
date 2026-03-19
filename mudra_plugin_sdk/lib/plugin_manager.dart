@@ -13,7 +13,10 @@ class PluginManager {
   final Map<String, PluginPriority> _pluginPriorities = {};
   PluginErrorCallback? onError;
 
-  void register(MudraPlugin plugin, {PluginPriority priority = PluginPriority.normal}) {
+  void register(
+    MudraPlugin plugin, {
+    PluginPriority priority = PluginPriority.normal,
+  }) {
     if (_plugins.containsKey(plugin.id)) {
       throw Exception('Plugin ${plugin.id} already registered');
     }
@@ -54,14 +57,14 @@ class PluginManager {
     final active = _plugins.values
         .where((p) => _pluginStatus[p.id] == true)
         .toList();
-    
+
     // Sort by priority
     active.sort((a, b) {
       final priorityA = _pluginPriorities[a.id] ?? PluginPriority.normal;
       final priorityB = _pluginPriorities[b.id] ?? PluginPriority.normal;
       return priorityB.index.compareTo(priorityA.index);
     });
-    
+
     return active;
   }
 
@@ -155,6 +158,16 @@ class PluginManager {
     for (final p in getActivePlugins()) {
       try {
         p.onLowBalance(e);
+      } catch (error) {
+        onError?.call(p.id, error);
+      }
+    }
+  }
+
+  void emitDailySummary(DailySummaryEvent e) {
+    for (final p in getActivePlugins()) {
+      try {
+        p.onDailySummary(e);
       } catch (error) {
         onError?.call(p.id, error);
       }

@@ -1040,7 +1040,7 @@ abstract class AppLocalizations {
   /// This is text of We are not storing
   ///
   /// In en, this message translates to:
-  /// **'We are not storing any data, all data is in your device!'**
+  /// **'All your data lives on this device. No servers, no cloud, no tracking.'**
   String get profile_weAreNotStoringInfoText;
 
   /// This is text of save button

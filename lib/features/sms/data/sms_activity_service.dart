@@ -133,7 +133,8 @@ class SmsActivityService {
       final manualCount = duplicates.whereType<Transaction>().length;
       final smsCount = duplicates.whereType<SmsActivity>().length;
       _log.w(
-          'Potential duplicate detected: $smsCount SMS + $manualCount manual transactions');
+        'Potential duplicate detected: $smsCount SMS + $manualCount manual transactions',
+      );
     } else if (activity.confidence! < 60) {
       activity.status = ActivityStatus.needsReview;
       _log.i('Low confidence (${activity.confidence}%), needs review');
@@ -149,13 +150,13 @@ class SmsActivityService {
       );
 
       if (matchResult != null) {
-        // Auto-approve and create transaction
         final transaction = Transaction()
           ..amount = activity.amount ?? 0
           ..date = safeDate
           ..description = activity.body
           ..isExpense = !(activity.isIncome == true)
-          ..isTransfer = false;
+          ..isTransfer = false
+          ..isFromSms = true;
 
         transaction.account.value = matchResult.account;
         transaction.category.value = matchResult.category;
@@ -165,19 +166,18 @@ class SmsActivityService {
           await transaction.account.save();
           await transaction.category.save();
 
+          // Set smsActivityId after transaction has an ID
+          transaction.smsActivityId = activity.id;
+          await isar.transactions.put(transaction);
+
           activity.status = ActivityStatus.approved;
           activity.transactionId = transaction.id;
           await isar.smsActivitys.put(activity);
         });
 
-        transaction.isFromSms = true;
-        transaction.smsActivityId = activity.id;
-        await isar.writeTxn(() async {
-          await isar.transactions.put(transaction);
-        });
-
         _log.i(
-            'Auto-approved with confidence ${activity.confidence}% -> Transaction ${transaction.id}');
+          'Auto-approved with confidence ${activity.confidence}% -> Transaction ${transaction.id}',
+        );
         return activity;
       } else {
         activity.status = ActivityStatus.pending;
@@ -247,8 +247,12 @@ class SmsActivityService {
 
     // Extract potential merchant names (3-15 chars, alphabetic)
     final potentialKeywords = words
-        .where((w) =>
-            w.length >= 3 && w.length <= 15 && RegExp(r'^[a-z]+$').hasMatch(w))
+        .where(
+          (w) =>
+              w.length >= 3 &&
+              w.length <= 15 &&
+              RegExp(r'^[a-z]+$').hasMatch(w),
+        )
         .toList();
 
     if (potentialKeywords.isEmpty) return;
@@ -266,7 +270,8 @@ class SmsActivityService {
         await isar.categorys.put(category);
       });
       _log.i(
-          'Learned new keywords for ${category.name}: ${newKeywords.join(", ")}');
+        'Learned new keywords for ${category.name}: ${newKeywords.join(", ")}',
+      );
     }
   }
 

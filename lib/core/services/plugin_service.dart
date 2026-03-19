@@ -66,7 +66,8 @@ class PluginService {
     _availablePlugins['com.mudra.savings_milestone'] = SavingsMilestonePlugin();
     _availablePlugins['com.mudra.category_alert'] = CategoryAlertPlugin();
     _availablePlugins['com.mudra.low_balance_alert'] = LowBalanceAlertPlugin();
-    _availablePlugins['com.mudra.credit_card_reminder'] = CreditCardReminderPlugin();
+    _availablePlugins['com.mudra.credit_card_reminder'] =
+        CreditCardReminderPlugin();
   }
 
   Future<void> _loadEnabledPlugins(
@@ -176,6 +177,14 @@ class PluginService {
     _manager.emitLowBalance(LowBalanceEvent(accountName, balance, threshold));
     for (final plugin in _manager.getActivePlugins()) {
       _analytics.trackEvent(plugin.id, 'low_balance');
+    }
+  }
+
+  void emitDailySummary() {
+    if (_activePlugins.isEmpty) return;
+    _manager.emitDailySummary(DailySummaryEvent(DateTime.now()));
+    for (final pluginId in _activePlugins.keys) {
+      _analytics.trackEvent(pluginId, 'daily_summary');
     }
   }
 

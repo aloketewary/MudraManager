@@ -1,6 +1,5 @@
 import 'package:mudra_manager/plugins/notification_plugin.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
-import 'package:mudra_manager/features/marketplace/services/marketplace_service.dart';
 
 class LargeExpensePlugin extends NotificationPlugin {
   @override
@@ -27,7 +26,7 @@ class LargeExpensePlugin extends NotificationPlugin {
 
   @override
   String getTitle(Transaction transaction) {
-    return '⚠️ Large Expense Alert';
+    return '₹${transaction.amount.toStringAsFixed(2)} on ${transaction.category.value?.name ?? "something"} — just making sure you meant to';
   }
 
   @override

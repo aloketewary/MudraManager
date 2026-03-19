@@ -67,10 +67,10 @@ List<AiInsight> _generateInsights(DashboardData data, int smsPendingCount) {
     final score = 90 + (smsPendingCount.clamp(0, 10));
     candidates.add(
       AiInsight(
-        title: 'SMS Transactions Pending',
+        title: 'You\'ve got mail 📩',
         message:
             '$smsPendingCount transaction${smsPendingCount > 1 ? 's' : ''} '
-            'need${smsPendingCount == 1 ? 's' : ''} your approval',
+            'picked up from SMS — quick review?',
         type: 'warning',
         iconType: IconType.sms,
         generatedAt: now,
@@ -96,20 +96,31 @@ List<AiInsight> _generateInsights(DashboardData data, int smsPendingCount) {
     }).length;
 
     if (dueIn3Days > 0) {
-      // Due tomorrow = 85, due in 2-3 days = 70
       final score = dueTomorrow > 0 ? 85 : 70;
       candidates.add(
-        AiInsight(
-          title: dueTomorrow > 0 ? 'Bills Due Tomorrow' : 'Bills Due Soon',
-          message: '$dueIn3Days bill${dueIn3Days > 1 ? 's' : ''} due '
-              '${dueTomorrow > 0 ? 'by tomorrow' : 'in the next 3 days'}',
-          type: dueTomorrow > 0 ? 'warning' : 'info',
-          iconType: IconType.info,
-          generatedAt: now,
-          actionLabel: 'View Bills',
-          actionRoute: '/recurring-transactions',
-          priority: score,
-        ),
+        dueTomorrow > 0
+            ? AiInsight(
+                title: 'Heads up — bills incoming',
+                message:
+                    '$dueIn3Days bill${dueIn3Days > 1 ? 's' : ''} due by tomorrow, don\'t forget!',
+                type: 'warning',
+                iconType: IconType.info,
+                generatedAt: now,
+                actionLabel: 'View Bills',
+                actionRoute: '/recurring-transactions',
+                priority: score,
+              )
+            : AiInsight(
+                title: 'Bills coming up',
+                message:
+                    '$dueIn3Days bill${dueIn3Days > 1 ? 's' : ''} due in the next few days',
+                type: 'info',
+                iconType: IconType.info,
+                generatedAt: now,
+                actionLabel: 'View Bills',
+                actionRoute: '/recurring-transactions',
+                priority: score,
+              ),
       );
     }
   }
@@ -131,8 +142,9 @@ List<AiInsight> _generateInsights(DashboardData data, int smsPendingCount) {
       // Exceeded is more urgent than near-limit
       candidates.add(
         AiInsight(
-          title: 'Budget Exceeded',
-          message: '$count budget${count > 1 ? 's' : ''} exceeded this month',
+          title: 'Oops, over budget',
+          message:
+              '$count budget${count > 1 ? 's' : ''} went over this month — worth a look',
           type: 'warning',
           iconType: IconType.budget,
           generatedAt: now,
@@ -145,8 +157,9 @@ List<AiInsight> _generateInsights(DashboardData data, int smsPendingCount) {
       final count = nearLimit.length;
       candidates.add(
         AiInsight(
-          title: 'Budget Nearing Limit',
-          message: '$count budget${count > 1 ? 's are' : ' is'} past 80%',
+          title: 'Getting close...',
+          message:
+              '$count budget${count > 1 ? 's' : ''} past 80% — still time to rein it in',
           type: 'tip',
           iconType: IconType.budget,
           generatedAt: now,
@@ -166,9 +179,9 @@ List<AiInsight> _generateInsights(DashboardData data, int smsPendingCount) {
     final score = 60 + (ratio.clamp(0, 0.5) * 40).toInt();
     candidates.add(
       AiInsight(
-        title: 'Spending Alert',
+        title: 'Spending outpacing income',
         message:
-            'You\'ve spent ₹${deficit.toStringAsFixed(0)} more than income',
+            'You\'re ₹${deficit.toStringAsFixed(0)} over your income this month — might want to slow down',
         type: 'warning',
         iconType: IconType.warning,
         generatedAt: now,
@@ -179,25 +192,26 @@ List<AiInsight> _generateInsights(DashboardData data, int smsPendingCount) {
     );
   }
 
-  // High spending today (spike detection)
+  // High spending today — compare to personal baseline
   if (data.transactions.isNotEmpty && now.day > 1) {
     final today = DateTime(now.year, now.month, now.day);
     final todayExpenses = data.transactions
         .where(
           (t) =>
               t.isExpense &&
+              !t.isTransfer &&
               DateTime(t.date.year, t.date.month, t.date.day) == today,
         )
         .fold<double>(0, (sum, t) => sum + t.amount);
 
     if (todayExpenses > 0) {
       final avgDaily = data.totalExpense / now.day;
-      if (todayExpenses > avgDaily * 2) {
+      if (todayExpenses > avgDaily * 1.5) {
         candidates.add(
           AiInsight(
-            title: 'High Spending Today',
+            title: 'Spending spike today',
             message:
-                '₹${todayExpenses.toStringAsFixed(0)} spent today — above your daily average',
+                'You usually spend ₹${avgDaily.toStringAsFixed(0)}/day. Today\'s already ₹${todayExpenses.toStringAsFixed(0)}.',
             type: 'warning',
             iconType: IconType.spending,
             generatedAt: now,
@@ -208,48 +222,174 @@ List<AiInsight> _generateInsights(DashboardData data, int smsPendingCount) {
     }
   }
 
-  // ────────────────────────────────────────────
-  // POSITIVE — celebrate wins (lower priority)
-  // ────────────────────────────────────────────
+  // ── Weekend vs usual weekend ──
+  if (data.transactions.isNotEmpty &&
+      (now.weekday == DateTime.saturday || now.weekday == DateTime.sunday)) {
+    final todayDate = DateTime(now.year, now.month, now.day);
 
-  // Good savings
-  if (data.totalIncome > data.totalExpense && data.totalIncome > 0) {
-    final savings = data.totalIncome - data.totalExpense;
-    final rate = (savings / data.totalIncome * 100).toInt();
-    // Higher savings rate = slightly higher priority, but still low
-    final score = 20 + (rate.clamp(0, 50) ~/ 5);
-    candidates.add(
-      AiInsight(
-        title: rate >= 30 ? 'Excellent Savings!' : 'Great Job!',
-        message: 'Saved ₹${savings.toStringAsFixed(0)} ($rate%) this month',
-        type: 'success',
-        iconType: IconType.success,
-        generatedAt: now,
-        actionLabel: 'Add to Goal',
-        actionRoute: '/goal-screen',
-        priority: score,
-      ),
-    );
+    // This weekend's spend (Sat + Sun so far)
+    final weekendStart = now.weekday == DateTime.sunday
+        ? todayDate.subtract(const Duration(days: 1))
+        : todayDate;
+    final weekendSpend = data.transactions
+        .where(
+          (t) =>
+              t.isExpense &&
+              !t.isTransfer &&
+              !t.date.isBefore(weekendStart) &&
+              !t.date.isAfter(now),
+        )
+        .fold<double>(0, (s, t) => s + t.amount);
+
+    if (weekendSpend <= 0) {
+      // skip — nothing spent yet
+    } else {
+      // Average weekend spend (last 8 weekends = ~60 days)
+      final sixtyDaysAgo = todayDate.subtract(const Duration(days: 60));
+      final pastWeekendTxns = data.transactions.where(
+        (t) =>
+            t.isExpense &&
+            !t.isTransfer &&
+            t.date.isAfter(sixtyDaysAgo) &&
+            t.date.isBefore(weekendStart) &&
+            (t.date.weekday == DateTime.saturday ||
+                t.date.weekday == DateTime.sunday),
+      );
+      final pastWeekendTotal =
+          pastWeekendTxns.fold<double>(0, (s, t) => s + t.amount);
+
+      // Count past weekends
+      int weekendCount = 0;
+      var d = sixtyDaysAgo;
+      while (d.isBefore(weekendStart)) {
+        if (d.weekday == DateTime.saturday) weekendCount++;
+        d = d.add(const Duration(days: 1));
+      }
+
+      if (weekendCount >= 2) {
+        final avgWeekend = pastWeekendTotal / weekendCount;
+        if (avgWeekend > 0 && weekendSpend > avgWeekend * 1.3) {
+          candidates.add(
+            AiInsight(
+              title: 'Weekend spending alert',
+              message:
+                  'You usually spend ₹${avgWeekend.toStringAsFixed(0)} on weekends. This one\'s already ₹${weekendSpend.toStringAsFixed(0)}.',
+              type: 'warning',
+              iconType: IconType.spending,
+              generatedAt: now,
+              priority: 60,
+            ),
+          );
+        }
+      }
+    }
   }
 
-  // Goals near completion
-  if (data.goals.isNotEmpty) {
-    final active = data.goals.where((g) => g.isActive);
-    final nearDone = active.where((g) => g.progressPercent >= 0.8).length;
-    if (nearDone > 0) {
+// ── Money Leak Detection ──
+  if (data.transactions.isNotEmpty && now.day >= 14) {
+    final startOfMonth = DateTime(now.year, now.month, 1);
+    final monthExpenses = data.transactions
+        .where(
+          (t) =>
+              t.isExpense &&
+              !t.isTransfer &&
+              t.date.isAfter(startOfMonth.subtract(const Duration(days: 1))),
+        )
+        .toList();
+
+    // Group by category: count + total
+    final catStats = <String, ({int count, double total})>{};
+    for (final t in monthExpenses) {
+      final name = t.category.value?.name ?? 'Other';
+      final prev = catStats[name] ?? (count: 0, total: 0.0);
+      catStats[name] = (count: prev.count + 1, total: prev.total + t.amount);
+    }
+
+    // "Leak" = high frequency (5+/month), low avg amount (< 15% of daily avg)
+    final dailyAvg = data.totalExpense / now.day;
+    final leaks = catStats.entries.where((e) {
+      final avgTxn = e.value.total / e.value.count;
+      return e.value.count >= 5 && avgTxn < dailyAvg * 0.15;
+    }).toList()
+      ..sort((a, b) => b.value.total.compareTo(a.value.total));
+
+    if (leaks.isNotEmpty) {
+      final top = leaks.first;
       candidates.add(
         AiInsight(
-          title: 'Almost There!',
+          title: 'Quiet money leak 💧',
           message:
-              '$nearDone goal${nearDone > 1 ? 's are' : ' is'} 80%+ complete',
-          type: 'success',
-          iconType: IconType.goal,
+              '${top.key}: ${top.value.count} times this month, ₹${top.value.total.toStringAsFixed(0)} total — small hits add up',
+          type: 'tip',
+          iconType: IconType.spending,
           generatedAt: now,
-          actionLabel: 'View Goals',
-          actionRoute: '/goal-screen',
-          priority: 30,
+          actionLabel: 'View Stats',
+          actionRoute: '/statistics',
+          priority: 45,
         ),
       );
+    }
+  }
+
+  // ── Best Day to Save ──
+  if (data.transactions.isNotEmpty && now.day >= 14) {
+    final ninetyDaysAgo = now.subtract(const Duration(days: 90));
+    final recentExpenses = data.transactions.where(
+      (t) => t.isExpense && !t.isTransfer && t.date.isAfter(ninetyDaysAgo),
+    );
+
+    if (recentExpenses.length >= 20) {
+      final days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      final byDay = List.filled(7, 0.0);
+      final countByDay = List.filled(7, 0);
+
+      for (final t in recentExpenses) {
+        final idx = t.date.weekday - 1;
+        byDay[idx] += t.amount;
+        countByDay[idx]++;
+      }
+
+      // Find lowest-spend day (by average)
+      int bestIdx = 0;
+      double bestAvg = double.infinity;
+      for (int i = 0; i < 7; i++) {
+        if (countByDay[i] == 0) continue;
+        final avg = byDay[i] / countByDay[i];
+        if (avg < bestAvg) {
+          bestAvg = avg;
+          bestIdx = i;
+        }
+      }
+
+      // Find highest-spend day for contrast
+      int worstIdx = 0;
+      double worstAvg = 0;
+      for (int i = 0; i < 7; i++) {
+        if (countByDay[i] == 0) continue;
+        final avg = byDay[i] / countByDay[i];
+        if (avg > worstAvg) {
+          worstAvg = avg;
+          worstIdx = i;
+        }
+      }
+
+      // Replace the existing "Best Day to Save" block:
+      if (worstAvg > bestAvg * 1.3) {
+        final potentialSaving = (worstAvg - bestAvg);
+        candidates.add(
+          AiInsight(
+            title: '${days[worstIdx]}s cost you the most',
+            message:
+                '₹${worstAvg.toStringAsFixed(0)} avg on ${days[worstIdx]}s vs ₹${bestAvg.toStringAsFixed(0)} on ${days[bestIdx]}s — that\'s ₹${potentialSaving.toStringAsFixed(0)} you could keep',
+            type: 'tip',
+            iconType: IconType.savings,
+            generatedAt: now,
+            actionLabel: 'View Pattern',
+            actionRoute: '/statistics',
+            priority: 30,
+          ),
+        );
+      }
     }
   }
 
@@ -260,8 +400,8 @@ List<AiInsight> _generateInsights(DashboardData data, int smsPendingCount) {
   if (data.transactions.isEmpty) {
     candidates.add(
       AiInsight(
-        title: 'Get Started',
-        message: 'Add your first transaction to start tracking',
+        title: 'Let\'s get started!',
+        message: 'Add your first transaction — it only takes a sec',
         type: 'info',
         iconType: IconType.info,
         generatedAt: now,

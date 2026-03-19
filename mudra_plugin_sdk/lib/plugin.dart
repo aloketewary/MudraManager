@@ -9,10 +9,10 @@ abstract class MudraPlugin {
 
   MudraApi? _api;
   PluginConfig? _config;
-  
+
   void setApi(MudraApi api) => _api = api;
   MudraApi get api => _api!;
-  
+
   void setConfig(PluginConfig config) => _config = config;
   PluginConfig? get config => _config;
 
@@ -27,4 +27,5 @@ abstract class MudraPlugin {
   void onTransfer(TransferEvent event) {}
   void onRecurring(RecurringEvent event) {}
   void onLowBalance(LowBalanceEvent event) {}
+  void onDailySummary(DailySummaryEvent event) {}
 }

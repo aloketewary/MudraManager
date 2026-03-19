@@ -73,11 +73,26 @@ final dashboardDataProvider =
     debounceTimer?.cancel();
   });
 
+  Future<List<Transaction>> getRecentTransactions(Isar isar) async {
+    final cutoff = DateTime.now().subtract(const Duration(days: 93));
+    final txns = await isar.transactions
+        .where()
+        .dateBetween(cutoff, DateTime.now())
+        .sortByDateDesc()
+        .findAll();
+    // Load links for the ones we'll need
+    for (final t in txns) {
+      await t.category.load();
+      await t.account.load();
+    }
+    return txns;
+  }
+
   Future<DashboardData> fetchData() async {
     try {
       // Fetch all data in parallel
       final results = await Future.wait([
-        ref.read(transactionProvider).getAll(),
+        getRecentTransactions(isar),
         ref.read(accountsProvider.future),
         accountService.getAccountBalanceMap(),
         budgetService.watchBudgetsWithProgress().first,
@@ -191,10 +206,7 @@ final dashboardDataProvider =
 final dashboardTransactionsProvider = Provider<List<Transaction>>((ref) {
   return ref.watch(
     dashboardDataProvider.select(
-      (asyncValue) => asyncValue.maybeWhen(
-        data: (data) => data.transactions,
-        orElse: () => <Transaction>[],
-      ),
+      (asyncValue) => asyncValue.valueOrNull?.transactions ?? <Transaction>[],
     ),
   );
 });
@@ -202,10 +214,7 @@ final dashboardTransactionsProvider = Provider<List<Transaction>>((ref) {
 final dashboardAccountsProvider = Provider<List<Account>>((ref) {
   return ref.watch(
     dashboardDataProvider.select(
-      (asyncValue) => asyncValue.maybeWhen(
-        data: (data) => data.accounts,
-        orElse: () => <Account>[],
-      ),
+      (asyncValue) => asyncValue.valueOrNull?.accounts ?? <Account>[],
     ),
   );
 });
@@ -213,10 +222,8 @@ final dashboardAccountsProvider = Provider<List<Account>>((ref) {
 final dashboardAccountBalancesProvider = Provider<Map<int, double>>((ref) {
   return ref.watch(
     dashboardDataProvider.select(
-      (asyncValue) => asyncValue.maybeWhen(
-        data: (data) => data.accountBalances,
-        orElse: () => <int, double>{},
-      ),
+      (asyncValue) =>
+          asyncValue.valueOrNull?.accountBalances ?? <int, double>{},
     ),
   );
 });
@@ -224,10 +231,7 @@ final dashboardAccountBalancesProvider = Provider<Map<int, double>>((ref) {
 final dashboardBudgetsProvider = Provider<List<BudgetWithProgress>>((ref) {
   return ref.watch(
     dashboardDataProvider.select(
-      (asyncValue) => asyncValue.maybeWhen(
-        data: (data) => data.budgets,
-        orElse: () => <BudgetWithProgress>[],
-      ),
+      (asyncValue) => asyncValue.valueOrNull?.budgets ?? <BudgetWithProgress>[],
     ),
   );
 });
@@ -236,10 +240,8 @@ final dashboardRecurringExpensesProvider =
     Provider<List<RecurringTransaction>>((ref) {
   return ref.watch(
     dashboardDataProvider.select(
-      (asyncValue) => asyncValue.maybeWhen(
-        data: (data) => data.recurringExpenses,
-        orElse: () => <RecurringTransaction>[],
-      ),
+      (asyncValue) =>
+          asyncValue.valueOrNull?.recurringExpenses ?? <RecurringTransaction>[],
     ),
   );
 });
@@ -247,10 +249,7 @@ final dashboardRecurringExpensesProvider =
 final dashboardTotalBalanceProvider = Provider<double>((ref) {
   return ref.watch(
     dashboardDataProvider.select(
-      (asyncValue) => asyncValue.maybeWhen(
-        data: (data) => data.totalBalance,
-        orElse: () => 0.0,
-      ),
+      (asyncValue) => asyncValue.valueOrNull?.totalBalance ?? 0.0,
     ),
   );
 });
@@ -258,10 +257,7 @@ final dashboardTotalBalanceProvider = Provider<double>((ref) {
 final dashboardNetWorthProvider = Provider<double>((ref) {
   return ref.watch(
     dashboardDataProvider.select(
-      (asyncValue) => asyncValue.maybeWhen(
-        data: (data) => data.netWorth,
-        orElse: () => 0.0,
-      ),
+      (asyncValue) => asyncValue.valueOrNull?.netWorth ?? 0.0,
     ),
   );
 });
@@ -269,10 +265,7 @@ final dashboardNetWorthProvider = Provider<double>((ref) {
 final dashboardIncomeProvider = Provider<double>((ref) {
   return ref.watch(
     dashboardDataProvider.select(
-      (asyncValue) => asyncValue.maybeWhen(
-        data: (data) => data.totalIncome,
-        orElse: () => 0.0,
-      ),
+      (asyncValue) => asyncValue.valueOrNull?.totalIncome ?? 0.0,
     ),
   );
 });
@@ -280,10 +273,7 @@ final dashboardIncomeProvider = Provider<double>((ref) {
 final dashboardExpenseProvider = Provider<double>((ref) {
   return ref.watch(
     dashboardDataProvider.select(
-      (asyncValue) => asyncValue.maybeWhen(
-        data: (data) => data.totalExpense,
-        orElse: () => 0.0,
-      ),
+      (asyncValue) => asyncValue.valueOrNull?.totalExpense ?? 0.0,
     ),
   );
 });
@@ -291,10 +281,7 @@ final dashboardExpenseProvider = Provider<double>((ref) {
 final dashboardGoalsProvider = Provider<List<Goal>>((ref) {
   return ref.watch(
     dashboardDataProvider.select(
-      (asyncValue) => asyncValue.maybeWhen(
-        data: (data) => data.goals,
-        orElse: () => <Goal>[],
-      ),
+      (asyncValue) => asyncValue.valueOrNull?.goals ?? <Goal>[],
     ),
   );
 });

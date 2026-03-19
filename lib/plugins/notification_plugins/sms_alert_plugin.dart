@@ -25,7 +25,7 @@ class SmsAlertPlugin extends NotificationPlugin {
 
   @override
   String getTitle(Transaction transaction) {
-    return '💰 Money Received';
+    return '₹${transaction.amount.toStringAsFixed(2)} just landed in ${transaction.account.value?.name ?? "your account"}';
   }
 
   @override

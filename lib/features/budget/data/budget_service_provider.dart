@@ -25,42 +25,42 @@ final budgetStreamProvider = StreamProvider.autoDispose<List<Budget>>((ref) {
 });
 
 final budgetWithProgressProvider =
-    StreamProvider.autoDispose<List<(Budget, double, DateTime, DateTime)>>((ref) async* {
-      final budgetService = ref.watch(budgetServiceProvider);
-      final isar = await ref.read(isarServiceProvider).getInstance();
+    StreamProvider.autoDispose<List<(Budget, double, DateTime, DateTime)>>(
+        (ref) async* {
+  final budgetService = ref.watch(budgetServiceProvider);
+  final isar = await ref.read(isarServiceProvider).getInstance();
 
-      await for (final budgets
-          in isar.budgets
-              .where()
-              .isArchivedEqualTo(false)
-              .watch(fireImmediately: true)) {
-        final List<(Budget, double, DateTime, DateTime)> result = [];
-        final now = DateTime.now();
-        for (final budget in budgets) {
-          // Filter out expired one-time budgets
-          if (budget.recurrence == BudgetRecurrence.none &&
-              budget.endDate.isBefore(
-                DateTime(now.year, now.month, now.day, 23, 59, 59),
-              )) {
-            continue;
-          }
-
-          final (s, e) = budget.getCurrentPeriodRange(now);
-          final spent = await budgetService.calculateSpentAmount(
-            budget,
-            start: s,
-            end: e,
-          );
-          result.add((budget, spent, s, e));
-        }
-        yield result;
+  await for (final budgets in isar.budgets
+      .where()
+      .isArchivedEqualTo(false)
+      .watch(fireImmediately: true)) {
+    final List<(Budget, double, DateTime, DateTime)> result = [];
+    final now = DateTime.now();
+    for (final budget in budgets) {
+      // Filter out expired one-time budgets
+      if (budget.recurrence == BudgetRecurrence.none &&
+          budget.endDate.isBefore(
+            DateTime(now.year, now.month, now.day, 23, 59, 59),
+          )) {
+        continue;
       }
-    });
+
+      final (s, e) = budget.getCurrentPeriodRange(now);
+      final spent = await budgetService.calculateSpentAmount(
+        budget,
+        start: s,
+        end: e,
+      );
+      result.add((budget, spent, s, e));
+    }
+    yield result;
+  }
+});
 
 final budgetsWithProgressProvider =
     StreamProvider.autoDispose<List<BudgetWithProgress>>((ref) {
-      return ref.watch(budgetServiceProvider).watchBudgetsWithProgress();
-    });
+  return ref.watch(budgetServiceProvider).watchBudgetsWithProgress();
+});
 
 class BudgetService {
   final IsarService isarService;
@@ -107,34 +107,65 @@ class BudgetService {
 
   Stream<List<BudgetWithProgress>> watchBudgetsWithProgress() async* {
     final isar = await isarService.getInstance();
-    await for (final budgets
-        in isar.budgets
-            .where()
-            .isArchivedEqualTo(false)
-            .watch(fireImmediately: true)) {
-      final List<BudgetWithProgress> list = [];
+    await for (final budgets in isar.budgets
+        .where()
+        .isArchivedEqualTo(false)
+        .watch(fireImmediately: true)) {
       final now = DateTime.now();
+
+      // ── 1. Load all links in parallel per budget ──
+      await Future.wait(
+        budgets.map((b) async {
+          await b.categories.load();
+          await b.allocations.load();
+          await Future.wait(b.allocations.map((a) => a.category.load()));
+        }),
+      );
+
+      // ── 2. Find widest date range across all budgets ──
+      DateTime earliest = now;
+      DateTime latest = now;
+      final budgetRanges = <int, (DateTime, DateTime)>{};
       for (final budget in budgets) {
-        // Calculate current range
         final (s, e) = budget.getCurrentPeriodRange(now);
+        budgetRanges[budget.id] = (s, e);
+        if (s.isBefore(earliest)) earliest = s;
+        if (e.isAfter(latest)) latest = e;
+      }
 
-        // 1) load linked categories & allocations
-        await budget.categories.load();
-        await budget.allocations.load();
+      // ── 3. Single query: all expenses in the widest range ──
+      final allExpenses = await isar.transactions
+          .filter()
+          .isExpenseEqualTo(true)
+          .dateBetween(earliest, latest)
+          .findAll();
 
-        // 2) total spent across all linked categories
+      // Pre-load category links for filtering
+      await Future.wait(allExpenses.map((t) => t.category.load()));
+
+      // ── 4. Index by category ID for O(1) lookup ──
+      final expensesByCat = <int, List<Transaction>>{};
+      for (final t in allExpenses) {
+        final catId = t.category.value?.id;
+        if (catId == null) continue;
+        expensesByCat.putIfAbsent(catId, () => []).add(t);
+      }
+
+      // ── 5. Compute per-budget with zero additional queries ──
+      final List<BudgetWithProgress> list = [];
+      for (final budget in budgets) {
+        final (s, e) = budgetRanges[budget.id]!;
+
         double totalSpent = 0;
         final catSpendings = <CategorySpending>[];
+
         for (final alloc in budget.allocations) {
-          await alloc.category.load();
           final cat = alloc.category.value!;
-          final spent = await isar.transactions
-              .filter()
-              .isExpenseEqualTo(true)
-              .dateBetween(s, e)
-              .category((q) => q.idEqualTo(cat.id))
-              .amountProperty()
-              .sum();
+          final catTxns = expensesByCat[cat.id] ?? [];
+          final spent = catTxns
+              .where((t) => !t.date.isBefore(s) && !t.date.isAfter(e))
+              .fold<double>(0.0, (sum, t) => sum + t.amount);
+
           totalSpent += spent;
           catSpendings.add(
             CategorySpending(
@@ -145,7 +176,6 @@ class BudgetService {
           );
         }
 
-        // Emit budget event if exceeded
         if (totalSpent > budget.amount) {
           PluginService().emitBudget(totalSpent, budget.amount);
         }
@@ -167,13 +197,14 @@ class BudgetService {
   Future<void> save(Budget bud) async {
     final isar = await isarService.getInstance();
     final isNew = bud.id == Isar.autoIncrement;
-    await isar.writeTxnSync(() async {
-      // 1) Put budget and save its category & allocation links in one go:
-      isar.budgets.putSync(bud, saveLinks: true);
-
-      // 2) Put each allocation (and save its own links):
+    await isar.writeTxn(() async {
+      await isar.budgets.put(bud);
+      await bud.categories.save();
+      await bud.allocations.save();
       for (final alloc in bud.allocations) {
-        isar.budgetCategoryAllocations.putSync(alloc, saveLinks: true);
+        await isar.budgetCategoryAllocations.put(alloc);
+        await alloc.category.save();
+        await alloc.budget.save();
       }
     });
     log.i('Budget saved: ${bud.name}');

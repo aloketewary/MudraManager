@@ -1,3 +1,4 @@
+import 'package:go_router/go_router.dart';
 import 'package:mudra_manager/core/services/plugin_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -59,7 +60,7 @@ void backgroundMessageHandler(SmsMessage message) async {
     }
 
     // Process the SMS
-    SmsProcessorService.instance.parseAndSaveTransaction(
+    await SmsProcessorService.instance.parseAndSaveTransaction(
       body: message.body!,
       address: message.address!,
       sender: message.address,
@@ -169,13 +170,31 @@ void backgroundCallback(Uri? uri) async {
   }
 }
 
-class MudraManagerApp extends ConsumerWidget {
+class MudraManagerApp extends ConsumerStatefulWidget {
   final bool showOnboarding;
 
   const MudraManagerApp({super.key, required this.showOnboarding});
+  @override
+  ConsumerState<MudraManagerApp> createState() => _MudraManagerAppState();
+}
+
+class _MudraManagerAppState extends ConsumerState<MudraManagerApp> {
+  late final GoRouter _router;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  void initState() {
+    super.initState();
+    _router = AppRouter.router(widget.showOnboarding);
+  }
+
+  @override
+  void dispose() {
+    _router.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final appThemeMode = ref.watch(themeModeProvider);
     final appTheme = AppTheme.instance;
     final appColorTheme = ref.watch(themeNotifierProvider);
@@ -200,7 +219,6 @@ class MudraManagerApp extends ConsumerWidget {
           amoledScheme = appColorTheme.amoledColorScheme();
         }
 
-        final router = AppRouter.router(showOnboarding);
         return MaterialApp.router(
           title: 'Mudra Manager',
           theme: appTheme.buildTheme(lightScheme),
@@ -215,7 +233,7 @@ class MudraManagerApp extends ConsumerWidget {
           },
           debugShowCheckedModeBanner: false,
           scaffoldMessengerKey: SnackbarService.scaffoldMessengerKey,
-          routerConfig: router,
+          routerConfig: _router,
           locale: ref.watch(localeProvider),
           supportedLocales: AppLocalizations.supportedLocales,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -269,12 +287,18 @@ Future<void> setupSmsListener() async {
       telephony.listenIncomingSms(
         onNewMessage: (SmsMessage message) {
           try {
-            SmsProcessorService.instance.parseAndSaveTransaction(
+            // Fire-and-forget is acceptable here since we're in a listener callback,
+            // but we log errors properly now
+            SmsProcessorService.instance
+                .parseAndSaveTransaction(
               body: message.body ?? '',
               address: message.address ?? '',
               sender: message.address ?? '',
               timestamp: message.date ?? DateTime.now().millisecondsSinceEpoch,
-            );
+            )
+                .catchError((e, stackTrace) {
+              log.e('Error processing foreground SMS', e, stackTrace);
+            });
           } catch (e, stackTrace) {
             log.e('Error processing foreground SMS', e, stackTrace);
           }

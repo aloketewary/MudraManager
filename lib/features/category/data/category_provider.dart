@@ -9,7 +9,8 @@ import 'package:mudra_manager/features/gamification/models/gamification_enum.dar
 import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
 import 'package:mudra_manager/features/gamification/services/gamification_service.dart';
 
-final categoryListProvider = FutureProvider.autoDispose<List<Category>>((ref) async {
+final categoryListProvider =
+    FutureProvider.autoDispose<List<Category>>((ref) async {
   final isar = await ref.watch(isarServiceProvider).getInstance();
   final categories = await isar.categorys.where().findAll();
   for (final category in categories) {
@@ -18,7 +19,8 @@ final categoryListProvider = FutureProvider.autoDispose<List<Category>>((ref) as
   return categories;
 });
 
-final incomeCategoriesProvider = FutureProvider.autoDispose<List<Category>>((ref) async {
+final incomeCategoriesProvider =
+    FutureProvider.autoDispose<List<Category>>((ref) async {
   final isar = await ref.watch(isarServiceProvider).getInstance();
   final categories = await isar.categorys
       .filter()
@@ -30,7 +32,8 @@ final incomeCategoriesProvider = FutureProvider.autoDispose<List<Category>>((ref
   return categories;
 });
 
-final expenseCategoriesProvider = FutureProvider.autoDispose<List<Category>>((ref) async {
+final expenseCategoriesProvider =
+    FutureProvider.autoDispose<List<Category>>((ref) async {
   final isar = await ref.watch(isarServiceProvider).getInstance();
   final categories = await isar.categorys
       .filter()
@@ -47,6 +50,69 @@ final categoryServiceProvider = Provider((ref) {
   final log = ref.getLogger('CategoryService');
   final gamificationService = ref.watch(gamificationServiceProvider);
   return CategoryService(isar, log, gamificationService);
+});
+
+/// Categories sorted by usage frequency (most-used first).
+/// Falls back to alphabetical for unused categories.
+final frequencySortedCategoriesProvider = FutureProvider.autoDispose
+    .family<List<Category>, CategoryType>((ref, type) async {
+  final isar = await ref.watch(isarServiceProvider).getInstance();
+
+  final categories =
+      await isar.categorys.filter().categoryTypeEqualTo(type).findAll();
+
+  for (final cat in categories) {
+    await cat.parentCategory.load();
+  }
+
+  // Count transactions per category (last 90 days for recency bias)
+  final cutoff = DateTime.now().subtract(const Duration(days: 90));
+  final counts = <int, int>{};
+  for (final cat in categories) {
+    counts[cat.id] = await isar.transactions
+        .filter()
+        .category((q) => q.idEqualTo(cat.id))
+        .dateGreaterThan(cutoff)
+        .count();
+  }
+
+  // Parents first, sorted by aggregate count (parent + children)
+  final parents =
+      categories.where((c) => c.parentCategory.value == null).toList();
+  final children =
+      categories.where((c) => c.parentCategory.value != null).toList();
+
+  int parentScore(Category p) {
+    final childIds = children
+        .where((c) => c.parentCategory.value?.id == p.id)
+        .map((c) => c.id);
+    return (counts[p.id] ?? 0) +
+        childIds.fold<int>(0, (sum, id) => sum + (counts[id] ?? 0));
+  }
+
+  parents.sort((a, b) => parentScore(b).compareTo(parentScore(a)));
+
+  // Sort children within each parent by frequency too
+  for (final parent in parents) {
+    final subs = children
+        .where((c) => c.parentCategory.value?.id == parent.id)
+        .toList()
+      ..sort((a, b) => (counts[b.id] ?? 0).compareTo(counts[a.id] ?? 0));
+    // Replace in-place ordering isn't needed — we'll use this when building UI
+  }
+
+  // Rebuild full list: parents (freq-sorted) + their children (freq-sorted)
+  final sorted = <Category>[];
+  for (final p in parents) {
+    sorted.add(p);
+    final subs = children
+        .where((c) => c.parentCategory.value?.id == p.id)
+        .toList()
+      ..sort((a, b) => (counts[b.id] ?? 0).compareTo(counts[a.id] ?? 0));
+    sorted.addAll(subs);
+  }
+
+  return sorted;
 });
 
 class CategoryService {

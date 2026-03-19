@@ -4,7 +4,7 @@ import 'package:mudra_manager/features/dashboard/plugin/ai_insight_widget_plugin
 import 'package:mudra_manager/features/dashboard/plugin/budget_overview_widget_plugin.dart';
 import 'package:mudra_manager/features/dashboard/plugin/cash_flow_widget_plugin.dart';
 import 'package:mudra_manager/features/dashboard/plugin/goals_widget_plugin.dart';
-import 'package:mudra_manager/features/dashboard/plugin/net_worth_widget_plugin.dart';
+import 'package:mudra_manager/features/dashboard/plugin/hero_moment_widget_plugin.dart';
 import 'package:mudra_manager/features/dashboard/plugin/quick_actions_widget_plugin.dart';
 import 'package:mudra_manager/features/dashboard/plugin/recent_transactions_widget_plugin.dart';
 import 'package:mudra_manager/features/dashboard/plugin/recurring_expenses_widget_plugin.dart';
@@ -22,6 +22,9 @@ import 'package:mudra_manager/features/dashboard/plugin/recurring_expenses_widge
 /// 8. Recent Transactions (7) - Latest activity
 class DashboardWidgetRegistry {
   static final List<DashboardWidgetPlugin> _widgets = [
+    // Hero moment — instant value
+    HeroMomentWidgetPlugin(),
+
     // Essential widgets (always visible by default)
     AiInsightWidgetPlugin(), // Order 0 - Smart insights at top
     AccountsWidgetPlugin(), // Order 1 - Account balances

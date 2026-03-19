@@ -267,6 +267,7 @@ class ExpandableFabState extends State<ExpandableFab>
           height: _height,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Container(
                 padding: const EdgeInsets.all(5),
@@ -277,11 +278,15 @@ class ExpandableFabState extends State<ExpandableFab>
                 child: Icon(icon, size: 16, color: accentColor),
               ),
               const SizedBox(width: 6),
-              Text(
-                label,
-                style: textTheme.labelMedium?.copyWith(
-                  color: color.onSurface,
-                  fontWeight: FontWeight.w600,
+              Flexible(
+                child: Text(
+                  label,
+                  style: textTheme.labelMedium?.copyWith(
+                    color: color.onSurface,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],

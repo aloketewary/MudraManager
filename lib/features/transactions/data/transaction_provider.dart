@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/services/plugin_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
@@ -5,10 +6,10 @@ import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
-import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
 import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
+import 'package:mudra_manager/features/gamification/services/gamification_service.dart';
 import 'package:mudra_manager/features/transactions/presentation/widgets/transaction_group.dart';
 
 // Refresh notifier to force provider updates
@@ -129,11 +130,13 @@ final sectionedTransactionsByDateRangeProvider = FutureProvider.autoDispose
   );
 
   final transactions = await ref.watch(
-    transactionsByDateRangeProvider((
-      start: startDate,
-      end: endDate,
-      type: arg.type,
-    )).future,
+    transactionsByDateRangeProvider(
+      (
+        start: startDate,
+        end: endDate,
+        type: arg.type,
+      ),
+    ).future,
   );
 
   if (transactions.isEmpty) return [];
@@ -261,13 +264,14 @@ final transactionCountsProvider = FutureProvider.autoDispose<Map<Id, int>>((
 class TransactionService {
   final IsarService isarService;
   final AppLog log;
-  final gamificationService;
+  final GamificationService? gamificationService;
 
   TransactionService(this.isarService, this.log, this.gamificationService);
 
   Future<void> addTransaction(Transaction txn) async {
     log.d(
-        'Adding transaction: ${txn.isExpense ? "Expense" : "Income"} of ₹${txn.amount}');
+      'Adding transaction: ${txn.isExpense ? "Expense" : "Income"} of ₹${txn.amount}',
+    );
     log.d('Transaction date: ${txn.date}');
     log.d('Transaction account: ${txn.account.value?.name}');
     log.d('Transaction category: ${txn.category.value?.name}');
@@ -303,18 +307,21 @@ class TransactionService {
     final saved = await isar.transactions.get(txn.id);
     if (saved != null) {
       log.d(
-          'Verified: Transaction ${txn.id} exists in DB with date: ${saved.date}');
+        'Verified: Transaction ${txn.id} exists in DB with date: ${saved.date}',
+      );
     } else {
       log.e('ERROR: Transaction ${txn.id} not found in DB after save!');
     }
 
     // Track gamification
-    await gamificationService.track(GamificationEvent.transactionAdded);
+    await gamificationService?.track(GamificationEvent.transactionAdded);
+    await gamificationService?.track(GamificationEvent.transactionTrackedToday);
+
     if (txn.isTransfer) {
-      await gamificationService.track(GamificationEvent.transferCompleted);
+      await gamificationService?.track(GamificationEvent.transferCompleted);
     }
     if (txn.tags.isNotEmpty) {
-      await gamificationService.track(GamificationEvent.tagUsed);
+      await gamificationService?.track(GamificationEvent.tagUsed);
     }
   }
 
@@ -419,11 +426,13 @@ class TransactionService {
       ..isTransfer = true
       ..account.value = to;
     if (toId != null) credit.id = toId;
-    await isar.writeTxnSync(() async {
+    await isar.writeTxn(() async {
       debit.related.value = credit;
       credit.related.value = debit;
-      isar.transactions.putSync(debit, saveLinks: true);
-      isar.transactions.putSync(credit, saveLinks: true);
+      await isar.transactions.put(debit);
+      await isar.transactions.put(credit);
+      await debit.related.save();
+      await credit.related.save();
       await debit.category.save();
       await debit.account.save();
       await credit.category.save();
@@ -431,16 +440,9 @@ class TransactionService {
     });
     log.i('Transfer completed successfully');
 
-    // Track gamification
-    await gamificationService.track(GamificationEvent.transferCompleted);
+    await gamificationService?.track(GamificationEvent.transferCompleted);
 
-    // Emit transfer event to plugins
-    PluginService().emitTransfer(
-      from.name,
-      to.name,
-      amount,
-      date,
-    );
+    PluginService().emitTransfer(from.name, to.name, amount, date);
   }
 
   Future<List<Transaction>> getByDateRange(DateTime start, DateTime end) async {

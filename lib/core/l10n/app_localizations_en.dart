@@ -515,7 +515,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profile_weAreNotStoringInfoText =>
-      'We are not storing any data, all data is in your device!';
+      'All your data lives on this device. No servers, no cloud, no tracking.';
 
   @override
   String get profile_saveButtonText => 'save';

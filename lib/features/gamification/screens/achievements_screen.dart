@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:confetti/confetti.dart';
@@ -63,180 +64,154 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
     final spacing = ref.watch(spacingProvider);
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     levelAsync.whenData((level) => _checkLevelUp(level));
 
     return Stack(
       children: [
         Scaffold(
-          appBar: AppBar(
-            title: const Text('Achievements'),
-            actions: [
-              if (_filterCategory != null)
-                IconButton(
-                  icon: const Icon(LucideIcons.x, size: 20),
-                  onPressed: () => setState(() => _filterCategory = null),
-                ),
-              IconButton(
-                icon: Icon(
-                  _filterCategory != null
-                      ? LucideIcons.listTodo
-                      : LucideIcons.listFilter,
-                  size: 20,
-                ),
-                onPressed: () => _showFilterSheet(color, textTheme),
-              ),
-            ],
-          ),
           body: achievementsAsync.when(
             data: (achievements) {
-              var visible = achievements.where((a) => a.isVisible).toList();
-              if (_filterCategory != null) {
-                visible = visible
-                    .where((a) => a.category == _filterCategory)
-                    .toList();
-              }
+              final allVisible =
+                  achievements.where((a) => a.isVisible).toList();
+              final visible = _filterCategory != null
+                  ? allVisible
+                      .where((a) => a.category == _filterCategory)
+                      .toList()
+                  : allVisible;
               final unlocked = visible.where((a) => a.isUnlocked).toList();
               final locked = visible.where((a) => !a.isUnlocked).toList();
 
-              return ListView(
-                padding: EdgeInsets.symmetric(
-                  horizontal: spacing.cardHorizontal,
-                  vertical: spacing.cardVertical,
-                ),
-                children: [
-                  // ── LEVEL HERO ──
-                  levelAsync.when(
-                    data: (level) => level != null
-                        ? _buildLevelHero(
-                            level,
-                            color,
-                            textTheme,
-                            spacing,
-                            isDark,
-                          )
-                        : const SizedBox.shrink(),
-                    loading: () => const SizedBox.shrink(),
-                    error: (_, __) => const SizedBox.shrink(),
-                  ),
-                  const SizedBox(height: 16),
+              // Recently unlocked for trophy shelf
+              final recentUnlocked = allVisible
+                  .where((a) => a.isUnlocked && a.unlockedAt != null)
+                  .toList()
+                ..sort((a, b) => b.unlockedAt!.compareTo(a.unlockedAt!));
 
-                  // ── STAT PILLS ──
-                  levelAsync.when(
-                    data: (level) => _buildStatPills(
-                      unlocked.length,
-                      locked.length,
-                      level?.totalXP ?? 0,
-                      color,
-                      textTheme,
-                    ),
-                    loading: () => const SizedBox.shrink(),
-                    error: (_, __) => const SizedBox.shrink(),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // ── STREAKS ──
-                  streaksAsync.when(
-                    data: (streaks) => streaks.isNotEmpty
-                        ? _buildStreaksCard(
-                            streaks,
-                            color,
-                            textTheme,
-                            spacing,
-                          )
-                        : const SizedBox.shrink(),
-                    loading: () => const SizedBox.shrink(),
-                    error: (_, __) => const SizedBox.shrink(),
-                  ),
-                  if (streaksAsync.valueOrNull?.isNotEmpty == true)
-                    const SizedBox(height: 20),
-
-                  // ── FILTER CHIP ──
-                  if (_filterCategory != null) ...[
-                    Padding(
-                      padding: const EdgeInsets.only(left: 4, bottom: 8),
-                      child: Row(
-                        children: [
-                          Chip(
-                            label: Text(
-                              _categoryLabel(_filterCategory!),
-                              style: textTheme.labelSmall
-                                  ?.copyWith(fontWeight: FontWeight.w600),
-                            ),
-                            avatar: Icon(
-                              _categoryIcon(_filterCategory!),
-                              size: 14,
-                            ),
-                            deleteIcon: const Icon(LucideIcons.x, size: 14),
-                            onDeleted: () => setState(
-                              () => _filterCategory = null,
-                            ),
-                            visualDensity: VisualDensity.compact,
-                          ),
-                          const Spacer(),
-                          Text(
-                            '${visible.length} badge${visible.length == 1 ? '' : 's'}',
-                            style: textTheme.bodySmall?.copyWith(
-                              color: color.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
+              return CustomScrollView(
+                slivers: [
+                  // ── SLIVER APP BAR ──
+                  SliverAppBar(
+                    expandedHeight: 260,
+                    pinned: true,
+                    title: const Text('Achievements'),
+                    flexibleSpace: FlexibleSpaceBar(
+                      background: levelAsync.when(
+                        data: (level) => level != null
+                            ? _RankHeader(
+                                level: level,
+                                color: color,
+                                textTheme: textTheme,
+                              )
+                            : const SizedBox.shrink(),
+                        loading: () => const SizedBox.shrink(),
+                        error: (_, __) => const SizedBox.shrink(),
                       ),
                     ),
-                  ],
+                  ),
 
-                  // ── UNLOCKED ──
-                  if (unlocked.isNotEmpty) ...[
-                    _buildSectionHeader(
-                      'Unlocked',
-                      '${unlocked.length}',
-                      color,
-                      textTheme,
+                  // ── BODY ──
+                  SliverPadding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: spacing.cardHorizontal,
+                      vertical: spacing.cardVertical,
                     ),
-                    const SizedBox(height: 10),
-                    _buildAchievementGrid(unlocked),
-                    const SizedBox(height: 20),
-                  ],
+                    sliver: SliverList(
+                      delegate: SliverChildListDelegate([
+                        // ── TROPHY SHELF ──
+                        if (recentUnlocked.isNotEmpty) ...[
+                          _buildTrophyShelf(recentUnlocked, color, textTheme),
+                          const SizedBox(height: 20),
+                        ],
 
-                  // ── IN PROGRESS ──
-                  if (locked.isNotEmpty) ...[
-                    _buildSectionHeader(
-                      'In Progress',
-                      '${locked.length}',
-                      color,
-                      textTheme,
-                    ),
-                    const SizedBox(height: 10),
-                    _buildAchievementGrid(locked),
-                  ],
-
-                  // ── EMPTY STATE ──
-                  if (visible.isEmpty)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 64),
-                      child: Column(
-                        children: [
-                          Icon(
-                            LucideIcons.trophy,
-                            size: 48,
-                            color:
-                                color.onSurfaceVariant.withValues(alpha: 0.4),
+                        // ── STAT PILLS ──
+                        levelAsync.when(
+                          data: (level) => _buildStatPills(
+                            unlocked.length,
+                            locked.length,
+                            level?.totalXP ?? 0,
+                            color,
+                            textTheme,
                           ),
-                          const SizedBox(height: 12),
-                          Text(
-                            _filterCategory != null
-                                ? 'No ${_categoryLabel(_filterCategory!).toLowerCase()} badges yet'
-                                : 'No achievements yet',
-                            style: textTheme.bodyLarge?.copyWith(
-                              color: color.onSurfaceVariant,
+                          loading: () => const SizedBox.shrink(),
+                          error: (_, __) => const SizedBox.shrink(),
+                        ),
+                        const SizedBox(height: 20),
+
+                        // ── STREAKS ──
+                        streaksAsync.when(
+                          data: (streaks) => streaks.isNotEmpty
+                              ? _buildStreaksCard(
+                                  streaks,
+                                  color,
+                                  textTheme,
+                                  spacing,
+                                )
+                              : const SizedBox.shrink(),
+                          loading: () => const SizedBox.shrink(),
+                          error: (_, __) => const SizedBox.shrink(),
+                        ),
+                        if (streaksAsync.valueOrNull?.isNotEmpty == true)
+                          const SizedBox(height: 20),
+
+                        // ── CATEGORY CHIPS ──
+                        _buildCategoryChips(color, textTheme),
+                        const SizedBox(height: 16),
+
+                        // ── UNLOCKED ──
+                        if (unlocked.isNotEmpty) ...[
+                          _buildSectionHeader(
+                            'Unlocked',
+                            '${unlocked.length}',
+                            color,
+                            textTheme,
+                          ),
+                          const SizedBox(height: 10),
+                          _buildAchievementGrid(unlocked),
+                          const SizedBox(height: 20),
+                        ],
+
+                        // ── IN PROGRESS ──
+                        if (locked.isNotEmpty) ...[
+                          _buildSectionHeader(
+                            'In Progress',
+                            '${locked.length}',
+                            color,
+                            textTheme,
+                          ),
+                          const SizedBox(height: 10),
+                          _buildAchievementGrid(locked),
+                        ],
+
+                        // ── EMPTY STATE ──
+                        if (visible.isEmpty)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 64),
+                            child: Column(
+                              children: [
+                                Icon(
+                                  LucideIcons.trophy,
+                                  size: 48,
+                                  color: color.onSurfaceVariant
+                                      .withValues(alpha: 0.4),
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  _filterCategory != null
+                                      ? 'No ${_categoryLabel(_filterCategory!).toLowerCase()} badges yet'
+                                      : 'No achievements yet',
+                                  style: textTheme.bodyLarge?.copyWith(
+                                    color: color.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
-                    ),
 
-                  const SizedBox(height: 24),
+                        const SizedBox(height: 24),
+                      ]),
+                    ),
+                  ),
                 ],
               );
             },
@@ -268,133 +243,127 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
     );
   }
 
-  // ── LEVEL HERO ──
-  Widget _buildLevelHero(
-    UserLevel level,
+  // ── TROPHY SHELF ──
+  Widget _buildTrophyShelf(
+    List<Achievement> recentUnlocked,
     ColorScheme color,
     TextTheme textTheme,
-    AppSpacing spacing,
-    bool isDark,
   ) {
-    final rank = FinanceRank.getRankForLevel(level.level);
-    final accent = color.primary;
-
-    return Container(
-      padding: EdgeInsets.all(spacing.cardInner + 4),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            accent.withValues(alpha: isDark ? 0.2 : 0.12),
-            accent.withValues(alpha: isDark ? 0.08 : 0.04),
-          ],
+    final items = recentUnlocked.take(10).toList();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader(
+          'Trophy Shelf',
+          '${items.length}',
+          color,
+          textTheme,
         ),
-        border: Border.all(color: accent.withValues(alpha: 0.3)),
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              TweenAnimationBuilder<double>(
-                duration: const Duration(milliseconds: 800),
-                curve: Curves.easeOutBack,
-                tween: Tween(begin: 0.0, end: 1.0),
-                builder: (context, value, child) =>
-                    Transform.scale(scale: value, child: child),
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: accent.withValues(alpha: 0.2),
-                      width: 2,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: accent.withValues(alpha: 0.1),
-                        blurRadius: 20,
-                        spreadRadius: 3,
+        const SizedBox(height: 10),
+        SizedBox(
+          height: 80,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: items.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            itemBuilder: (context, index) {
+              final a = items[index];
+              final accent = _categoryAccent(a.category);
+              return Column(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: accent.withValues(alpha: 0.1),
+                      border: Border.all(
+                        color: accent.withValues(alpha: 0.3),
+                        width: 1.5,
                       ),
-                    ],
-                  ),
-                  child: CircleAvatar(
-                    radius: 30,
-                    backgroundColor: color.surface.withValues(alpha: 0.8),
-                    child: Image.asset(
-                      'assets/icons/medals/${rank.icon}.png',
-                      width: 36,
-                      height: 36,
+                      boxShadow: [
+                        BoxShadow(
+                          color: accent.withValues(alpha: 0.12),
+                          blurRadius: 10,
+                          spreadRadius: 1,
+                        ),
+                      ],
                     ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      rank.name,
-                      style: textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: accent,
+                    child: ClipOval(
+                      child: Image.asset(
+                        'assets/icons/20/${a.icon}.png',
                       ),
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Level ${level.level} · ${level.totalXP} XP',
-                      style: textTheme.bodySmall?.copyWith(
+                  ),
+                  const SizedBox(height: 4),
+                  SizedBox(
+                    width: 52,
+                    child: Text(
+                      a.title,
+                      style: textTheme.labelSmall?.copyWith(
+                        fontSize: 9,
                         color: color.onSurfaceVariant,
                       ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          // XP progress
-          Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    '${level.currentXP} / ${level.xpForNextLevel} XP',
-                    style: textTheme.labelSmall?.copyWith(
-                      color: color.onSurfaceVariant,
-                    ),
-                  ),
-                  Text(
-                    '${(level.progressPercent * 100).toInt()}%',
-                    style: textTheme.labelSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: accent,
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
-              ),
-              const SizedBox(height: 6),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: TweenAnimationBuilder<double>(
-                  duration: const Duration(milliseconds: 800),
-                  curve: Curves.easeOut,
-                  tween: Tween(begin: 0, end: level.progressPercent),
-                  builder: (_, value, __) => LinearProgressIndicator(
-                    value: value,
-                    minHeight: 6,
-                    backgroundColor: accent.withValues(alpha: 0.12),
-                    valueColor: AlwaysStoppedAnimation(accent),
-                  ),
-                ),
-              ),
-            ],
+              );
+            },
           ),
+        ),
+      ],
+    );
+  }
+
+  // ── CATEGORY CHIPS (replaces bottom sheet filter) ──
+  Widget _buildCategoryChips(ColorScheme color, TextTheme textTheme) {
+    return SizedBox(
+      height: 36,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        children: [
+          _categoryChip(null, 'All', LucideIcons.layoutGrid, color, textTheme),
+          const SizedBox(width: 8),
+          ...AchievementCategory.values.map((cat) {
+            return Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: _categoryChip(
+                cat,
+                _categoryLabel(cat),
+                _categoryIcon(cat),
+                color,
+                textTheme,
+              ),
+            );
+          }),
         ],
       ),
+    );
+  }
+
+  Widget _categoryChip(
+    AchievementCategory? cat,
+    String label,
+    IconData icon,
+    ColorScheme color,
+    TextTheme textTheme,
+  ) {
+    final selected = _filterCategory == cat;
+    return FilterChip(
+      selected: selected,
+      showCheckmark: false,
+      avatar: Icon(icon, size: 14),
+      label: Text(
+        label,
+        style: textTheme.labelSmall?.copyWith(
+          fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
+        ),
+      ),
+      visualDensity: VisualDensity.compact,
+      onSelected: (_) => setState(() => _filterCategory = cat),
     );
   }
 
@@ -411,6 +380,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
         _statPill(
           '$unlocked',
           'Unlocked',
+          LucideIcons.trophy,
           const Color(0xFF4CAF50),
           color,
           textTheme,
@@ -419,12 +389,20 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
         _statPill(
           '$inProgress',
           'In Progress',
+          LucideIcons.loader,
           const Color(0xFFFF9800),
           color,
           textTheme,
         ),
         const SizedBox(width: 8),
-        _statPill('$totalXP', 'Total XP', color.primary, color, textTheme),
+        _statPill(
+          '$totalXP',
+          'Total XP',
+          LucideIcons.sparkles,
+          color.primary,
+          color,
+          textTheme,
+        ),
       ],
     );
   }
@@ -432,6 +410,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
   Widget _statPill(
     String value,
     String label,
+    IconData icon,
     Color accent,
     ColorScheme color,
     TextTheme textTheme,
@@ -445,6 +424,8 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
         ),
         child: Column(
           children: [
+            Icon(icon, size: 14, color: accent),
+            const SizedBox(height: 4),
             Text(
               value,
               style: textTheme.titleSmall?.copyWith(
@@ -613,7 +594,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
         crossAxisCount: 2,
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
-        childAspectRatio: 0.85,
+        childAspectRatio: 0.95,
       ),
       itemCount: items.length,
       itemBuilder: (context, index) {
@@ -634,82 +615,22 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
     );
   }
 
-  // ── FILTER SHEET ──
-  void _showFilterSheet(ColorScheme color, TextTheme textTheme) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) => Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: color.onSurfaceVariant.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Filter by Category',
-              style:
-                  textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            ...[
-              null,
-              ...AchievementCategory.values,
-            ].map((cat) {
-              final selected = _filterCategory == cat;
-              final label = cat == null ? 'All' : _categoryLabel(cat);
-              return ListTile(
-                dense: true,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                selected: selected,
-                selectedTileColor: color.primaryContainer,
-                leading: Icon(
-                  cat == null ? LucideIcons.list : _categoryIcon(cat),
-                  size: 20,
-                  color: selected
-                      ? color.onPrimaryContainer
-                      : color.onSurfaceVariant,
-                ),
-                title: Text(
-                  label,
-                  style: textTheme.bodyLarge?.copyWith(
-                    fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
-                    color:
-                        selected ? color.onPrimaryContainer : color.onSurface,
-                  ),
-                ),
-                trailing: selected
-                    ? Icon(
-                        LucideIcons.check,
-                        size: 18,
-                        color: color.onPrimaryContainer,
-                      )
-                    : null,
-                onTap: () {
-                  setState(() => _filterCategory = cat);
-                  Navigator.pop(ctx);
-                },
-              );
-            }),
-            const SizedBox(height: 8),
-          ],
-        ),
-      ),
-    );
+  // ── HELPERS ──
+  Color _categoryAccent(AchievementCategory cat) {
+    switch (cat) {
+      case AchievementCategory.budgeting:
+        return const Color(0xFF2196F3);
+      case AchievementCategory.saving:
+        return const Color(0xFF4CAF50);
+      case AchievementCategory.tracking:
+        return const Color(0xFF9C27B0);
+      case AchievementCategory.milestone:
+        return const Color(0xFFFF9800);
+      case AchievementCategory.engagement:
+        return const Color(0xFFE53935);
+    }
   }
 
-  // ── HELPERS ──
   String _categoryLabel(AchievementCategory cat) {
     switch (cat) {
       case AchievementCategory.budgeting:
@@ -739,4 +660,180 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
         return LucideIcons.flame;
     }
   }
+}
+
+// ══════════════════════════════════════════════════════════════
+// RANK HEADER — the SliverAppBar flexibleSpace background
+// ══════════════════════════════════════════════════════════════
+
+class _RankHeader extends StatelessWidget {
+  final UserLevel level;
+  final ColorScheme color;
+  final TextTheme textTheme;
+
+  const _RankHeader({
+    required this.level,
+    required this.color,
+    required this.textTheme,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final rank = FinanceRank.getRankForLevel(level.level);
+    final accent = color.primary;
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            accent.withValues(alpha: 0.15),
+            accent.withValues(alpha: 0.03),
+          ],
+        ),
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.only(top: 56),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // ── XP RING + MEDAL ──
+              TweenAnimationBuilder<double>(
+                duration: const Duration(milliseconds: 900),
+                curve: Curves.easeOutBack,
+                tween: Tween(begin: 0.0, end: 1.0),
+                builder: (context, scale, child) =>
+                    Transform.scale(scale: scale, child: child),
+                child: SizedBox(
+                  width: 100,
+                  height: 100,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      // XP arc ring
+                      TweenAnimationBuilder<double>(
+                        duration: const Duration(milliseconds: 1000),
+                        curve: Curves.easeOut,
+                        tween: Tween(begin: 0, end: level.progressPercent),
+                        builder: (_, progress, __) => CustomPaint(
+                          size: const Size(100, 100),
+                          painter: _XpRingPainter(
+                            progress: progress,
+                            trackColor: accent.withValues(alpha: 0.12),
+                            progressColor: accent,
+                          ),
+                        ),
+                      ),
+                      // Medal icon
+                      Container(
+                        width: 72,
+                        height: 72,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: color.surface,
+                          boxShadow: [
+                            BoxShadow(
+                              color: accent.withValues(alpha: 0.1),
+                              blurRadius: 16,
+                              spreadRadius: 2,
+                            ),
+                          ],
+                        ),
+                        child: Center(
+                          child: Image.asset(
+                            'assets/icons/medals/${rank.icon}.png',
+                            width: 40,
+                            height: 40,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                rank.name,
+                style: textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: accent,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                'Level ${level.level}',
+                style: textTheme.bodySmall?.copyWith(
+                  color: color.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '${level.currentXP} / ${level.xpForNextLevel} XP',
+                style: textTheme.labelSmall?.copyWith(
+                  color: color.onSurfaceVariant.withValues(alpha: 0.7),
+                  fontSize: 11,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── CIRCULAR XP RING PAINTER ──
+
+class _XpRingPainter extends CustomPainter {
+  final double progress;
+  final Color trackColor;
+  final Color progressColor;
+
+  _XpRingPainter({
+    required this.progress,
+    required this.trackColor,
+    required this.progressColor,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 2 - 4;
+    const strokeWidth = 5.0;
+
+    // Track
+    canvas.drawCircle(
+      center,
+      radius,
+      Paint()
+        ..color = trackColor
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = strokeWidth,
+    );
+
+    // Progress arc
+    if (progress > 0) {
+      final rect = Rect.fromCircle(center: center, radius: radius);
+      canvas.drawArc(
+        rect,
+        -pi / 2, // start from top
+        2 * pi * progress,
+        false,
+        Paint()
+          ..color = progressColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = strokeWidth
+          ..strokeCap = StrokeCap.round,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_XpRingPainter old) =>
+      old.progress != progress ||
+      old.trackColor != trackColor ||
+      old.progressColor != progressColor;
 }

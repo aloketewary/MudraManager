@@ -141,7 +141,7 @@ class HomePageState extends ConsumerState<HomePage>
 
     return PopScope(
       canPop: _selectedIndex == 0,
-      onPopInvokedWithResult: (didPop, result) {
+      onPopInvokedWithResult: (didPop, result) async {
         if (!didPop && _selectedIndex != 0) {
           _onTabSelected(0);
         }

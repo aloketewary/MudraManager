@@ -624,7 +624,7 @@
   "@profile_phoneControllerHintText": {
     "description": "This is text of Enter your phone number"
   },
-  "profile_weAreNotStoringInfoText": "हम कोई डेटा संग्रहीत नहीं कर रहे हैं, सारा डेटा आपके डिवाइस में है!",
+  "profile_weAreNotStoringInfoText": "आपका सारा डेटा इसी डिवाइस पर सुरक्षित रहता है। न कोई सर्वर, न क्लाउड, न ही कोई ट्रैकिंग।",
   "@profile_weAreNotStoringInfoText": {
     "description": "This is text of We are not storing"
   },

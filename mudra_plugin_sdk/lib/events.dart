@@ -59,3 +59,8 @@ class LowBalanceEvent {
 
   LowBalanceEvent(this.accountName, this.balance, this.threshold);
 }
+
+class DailySummaryEvent {
+  final DateTime date;
+  DailySummaryEvent(this.date);
+}

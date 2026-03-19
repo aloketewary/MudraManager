@@ -26,6 +26,8 @@ class _NotificationSettingsScreenState
   TimeOfDay _streakReminderTime = const TimeOfDay(hour: 20, minute: 0);
   int _weeklyDay = DateTime.sunday;
   bool _loaded = false;
+  bool _reEngagementEnabled = true;
+  bool _smartAlertsEnabled = true;
 
   @override
   void initState() {
@@ -41,11 +43,11 @@ class _NotificationSettingsScreenState
     ]);
     if (!mounted) return;
     final prefs = results[0] as SharedPreferences;
+    _reEngagementEnabled = prefs.getBool('re_engagement_enabled') ?? true;
     setState(() {
       _dailySummaryEnabled = prefs.getBool('daily_summary_enabled') ?? false;
       _weeklySummaryEnabled = prefs.getBool('weekly_summary_enabled') ?? true;
-      _streakReminderEnabled =
-          prefs.getBool('streak_reminder_enabled') ?? true;
+      _streakReminderEnabled = prefs.getBool('streak_reminder_enabled') ?? true;
       _weeklyDay = prefs.getInt('weekly_summary_day') ?? DateTime.sunday;
       _reminderTime =
           (results[1] as TimeOfDay?) ?? const TimeOfDay(hour: 9, minute: 0);
@@ -87,12 +89,36 @@ class _NotificationSettingsScreenState
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('streak_reminder_enabled', enabled);
     if (enabled) {
+      SnackbarService.success('Come-back Nudges enabled');
+    } else {
+      SnackbarService.success('Come-back Nudges disabled');
+    }
+    setState(() => _reEngagementEnabled = enabled);
+  }
+
+  Future<void> _toggleReEngagement(bool enabled) async {
+    HapticFeedback.mediumImpact();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('re_engagement_enabled', enabled);
+    if (enabled) {
       SnackbarService.success('Streak reminder enabled');
     } else {
       await NotificationService.cancelStreakReminder();
       SnackbarService.success('Streak reminder disabled');
     }
     setState(() => _streakReminderEnabled = enabled);
+  }
+
+  Future<void> _toggleSmartAlerts(bool enabled) async {
+    HapticFeedback.mediumImpact();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('smart_alerts_enabled', enabled);
+    if (enabled) {
+      SnackbarService.success('Smart alerts enabled');
+    } else {
+      SnackbarService.success('Smart alerts disabled');
+    }
+    setState(() => _smartAlertsEnabled = enabled);
   }
 
   Future<void> _selectTime() async {
@@ -169,9 +195,8 @@ class _NotificationSettingsScreenState
                   _getDayName(d),
                   style: textTheme.bodyLarge?.copyWith(
                     fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
-                    color: selected
-                        ? color.onPrimaryContainer
-                        : color.onSurface,
+                    color:
+                        selected ? color.onPrimaryContainer : color.onSurface,
                   ),
                 ),
                 onTap: () => Navigator.pop(ctx, d),
@@ -232,16 +257,15 @@ class _NotificationSettingsScreenState
                 Container(
                   padding: EdgeInsets.all(spacing.cardInner),
                   decoration: BoxDecoration(
-                    borderRadius:
-                        BorderRadius.circular(spacing.radiusMedium),
+                    borderRadius: BorderRadius.circular(spacing.radiusMedium),
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
                         color.primary.withValues(
-                            alpha: isDark ? 0.2 : 0.12,),
-                        color.primaryContainer
-                            .withValues(alpha: 0.4),
+                          alpha: isDark ? 0.2 : 0.12,
+                        ),
+                        color.primaryContainer.withValues(alpha: 0.4),
                       ],
                     ),
                     border: Border.all(
@@ -259,8 +283,7 @@ class _NotificationSettingsScreenState
                         child: Container(
                           padding: const EdgeInsets.all(14),
                           decoration: BoxDecoration(
-                            color:
-                                color.primary.withValues(alpha: 0.15),
+                            color: color.primary.withValues(alpha: 0.15),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
@@ -334,7 +357,8 @@ class _NotificationSettingsScreenState
                           HapticFeedback.mediumImpact();
                           await NotificationService.showDailySummary();
                           SnackbarService.success(
-                              'Test notification sent',);
+                            'Test notification sent',
+                          );
                         },
                         color: color,
                         textTheme: textTheme,
@@ -346,7 +370,10 @@ class _NotificationSettingsScreenState
 
                 // ── STREAK REMINDER ──
                 _buildSectionHeader(
-                    'Streak Reminder', color, textTheme,),
+                  'Streak Reminder',
+                  color,
+                  textTheme,
+                ),
                 const SizedBox(height: 10),
                 _buildGroupedCard(
                   color: color,
@@ -380,7 +407,10 @@ class _NotificationSettingsScreenState
 
                 // ── WEEKLY SUMMARY ──
                 _buildSectionHeader(
-                    'Weekly Summary', color, textTheme,),
+                  'Weekly Summary',
+                  color,
+                  textTheme,
+                ),
                 const SizedBox(height: 10),
                 _buildGroupedCard(
                   color: color,
@@ -390,8 +420,7 @@ class _NotificationSettingsScreenState
                     _buildToggleRow(
                       icon: LucideIcons.calendarRange,
                       title: 'Weekly Summary',
-                      subtitle:
-                          'Every ${_getDayName(_weeklyDay)} at 9:00 AM',
+                      subtitle: 'Every ${_getDayName(_weeklyDay)} at 9:00 AM',
                       value: _weeklySummaryEnabled,
                       onChanged: _toggleWeeklySummary,
                       color: color,
@@ -415,7 +444,8 @@ class _NotificationSettingsScreenState
                           HapticFeedback.mediumImpact();
                           await NotificationService.showWeeklySummary();
                           SnackbarService.success(
-                              'Test notification sent',);
+                            'Test notification sent',
+                          );
                         },
                         color: color,
                         textTheme: textTheme,
@@ -423,14 +453,54 @@ class _NotificationSettingsScreenState
                     ],
                   ],
                 ),
+                const SizedBox(
+                  height: 16,
+                ),
+                _buildGroupedCard(
+                  color: color,
+                  textTheme: textTheme,
+                  spacing: spacing,
+                  children: [
+                    _buildToggleRow(
+                      icon: LucideIcons.userCheck,
+                      title: 'Come-back Nudges',
+                      subtitle:
+                          'Gentle reminders if you haven\'t opened the app',
+                      value: _reEngagementEnabled,
+                      onChanged: _toggleReEngagement,
+                      color: color,
+                      textTheme: textTheme,
+                    ),
+                  ],
+                ),
+                const SizedBox(
+                  height: 16,
+                ),
+                _buildGroupedCard(
+                  color: color,
+                  textTheme: textTheme,
+                  spacing: spacing,
+                  children: [
+                    _buildToggleRow(
+                      icon: LucideIcons.brain,
+                      title: 'Smart Alerts',
+                      subtitle:
+                          'Budget warnings, spending spikes, bill reminders',
+                      value: _smartAlertsEnabled,
+                      onChanged: _toggleSmartAlerts,
+                      color: color,
+                      textTheme: textTheme,
+                    ),
+                  ],
+                ),
+
                 const SizedBox(height: 24),
 
                 // ── INFO ──
                 Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    borderRadius:
-                        BorderRadius.circular(spacing.radiusMedium),
+                    borderRadius: BorderRadius.circular(spacing.radiusMedium),
                     color: color.primary.withValues(alpha: 0.06),
                     border: Border.all(
                       color: color.primary.withValues(alpha: 0.15),
@@ -439,8 +509,11 @@ class _NotificationSettingsScreenState
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(LucideIcons.info, color: color.primary,
-                          size: 18,),
+                      Icon(
+                        LucideIcons.info,
+                        color: color.primary,
+                        size: 18,
+                      ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
@@ -454,6 +527,7 @@ class _NotificationSettingsScreenState
                     ],
                   ),
                 ),
+                SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
               ],
             ),
     );
@@ -581,8 +655,8 @@ class _NotificationSettingsScreenState
             Expanded(
               child: Text(
                 title,
-                style: textTheme.bodyLarge
-                    ?.copyWith(fontWeight: FontWeight.w500),
+                style:
+                    textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500),
               ),
             ),
             if (trailing != null)
@@ -594,8 +668,11 @@ class _NotificationSettingsScreenState
                 ),
               ),
             const SizedBox(width: 8),
-            Icon(Icons.chevron_right,
-                color: color.onSurfaceVariant, size: 20,),
+            Icon(
+              Icons.chevron_right,
+              color: color.onSurfaceVariant,
+              size: 20,
+            ),
           ],
         ),
       ),

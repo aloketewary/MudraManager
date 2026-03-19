@@ -48,6 +48,7 @@ class BackupService {
   static Future<String?> createEncryptedBackup(
     String password, {
     bool includeAttachments = true,
+    bool interactive = true,
   }) async {
     try {
       final isar = Isar.getInstance();
@@ -57,51 +58,55 @@ class BackupService {
         return null;
       }
 
-    final dbData = await exportAll(isar);
-    final settings = await SharedPrefsUtil.instance.exportAll();
-    final recordCount = dbData.values.fold<int>(
-      0,
-      (sum, list) => sum + list.length,
-    );
-
-    final content = jsonEncode({
-      'db': dbData,
-      'settings': settings,
-      'includeAttachments': includeAttachments,
-      'version': '1.0',
-      'timestamp': DateTime.now().toIso8601String(),
-    });
-
-    final key = _deriveKey(password);
-    final iv = encrypt.IV.fromSecureRandom(16);
-    final encrypter = encrypt.Encrypter(encrypt.AES(key));
-    final encrypted = encrypter.encrypt(content, iv: iv);
-
-    final hash = sha256.convert(utf8.encode(content)).toString();
-    final finalData = jsonEncode({
-      'data': encrypted.base64,
-      'iv': iv.base64,
-      'hash': hash,
-    });
-
-    final dateTime = DateTime.now();
-    final filePath = await saveBackupFile(utf8.encode(finalData), dateTime);
-
-    if (filePath != null) {
-      final fileSize = File(filePath).lengthSync();
-      await _saveBackupMetadata(
-        isar,
-        dateTime,
-        fileSize,
-        filePath,
-        includeAttachments,
-        recordCount,
+      final dbData = await exportAll(isar);
+      final settings = await SharedPrefsUtil.instance.exportAll();
+      final recordCount = dbData.values.fold<int>(
+        0,
+        (sum, list) => sum + list.length,
       );
-      await SharedPrefsUtil.instance.saveBackupDate(dateTime);
-      _log.i('Backup created: $filePath ($recordCount records)');
-    }
 
-    return filePath;
+      final content = jsonEncode({
+        'db': dbData,
+        'settings': settings,
+        'includeAttachments': includeAttachments,
+        'version': '1.0',
+        'timestamp': DateTime.now().toIso8601String(),
+      });
+
+      final key = _deriveKey(password);
+      final iv = encrypt.IV.fromSecureRandom(16);
+      final encrypter = encrypt.Encrypter(encrypt.AES(key));
+      final encrypted = encrypter.encrypt(content, iv: iv);
+
+      final hash = sha256.convert(utf8.encode(content)).toString();
+      final finalData = jsonEncode({
+        'data': encrypted.base64,
+        'iv': iv.base64,
+        'hash': hash,
+      });
+
+      final dateTime = DateTime.now();
+      final filePath = await saveBackupFile(
+        utf8.encode(finalData),
+        dateTime,
+        interactive: interactive,
+      );
+
+      if (filePath != null) {
+        final fileSize = File(filePath).lengthSync();
+        await _saveBackupMetadata(
+          isar,
+          dateTime,
+          fileSize,
+          filePath,
+          includeAttachments,
+          recordCount,
+        );
+        await SharedPrefsUtil.instance.saveBackupDate(dateTime);
+        _log.i('Backup created: $filePath ($recordCount records)');
+      }
+
+      return filePath;
     } catch (e, stackTrace) {
       _log.e('Backup creation failed', e, stackTrace);
       SnackbarService.error('Backup failed: ${e.toString()}');
@@ -161,7 +166,9 @@ class BackupService {
       return 'success';
     } catch (e, stackTrace) {
       _log.e('Restore failed', e, stackTrace);
-      SnackbarService.error('Restore failed: Invalid password or corrupted file');
+      SnackbarService.error(
+        'Restore failed: Invalid password or corrupted file',
+      );
       return null;
     }
   }
@@ -225,14 +232,12 @@ class BackupService {
 
     // Backup Tags
     final tags = await isar.tags.where().findAll();
-    backupData['Tag'] = tags
-        .map((tag) => TagBackup.fromTag(tag).toBackupJson())
-        .toList();
+    backupData['Tag'] =
+        tags.map((tag) => TagBackup.fromTag(tag).toBackupJson()).toList();
 
     // Backup Recurring Transactions
-    final recurringTransactions = await isar.recurringTransactions
-        .where()
-        .findAll();
+    final recurringTransactions =
+        await isar.recurringTransactions.where().findAll();
     backupData['RecurringTransaction'] = recurringTransactions
         .map(
           (rt) => RecurringTransactionBackup.fromRecurringTransaction(
@@ -242,9 +247,8 @@ class BackupService {
         .toList();
 
     // Backup Notification Records
-    final notificationRecords = await isar.notificationRecords
-        .where()
-        .findAll();
+    final notificationRecords =
+        await isar.notificationRecords.where().findAll();
     backupData['NotificationRecord'] = notificationRecords
         .map(
           (nr) => NotificationRecordBackup.fromNotificationRecord(
@@ -252,8 +256,6 @@ class BackupService {
           ).toBackupJson(),
         )
         .toList();
-
-
 
     // Backup User Profiles (assuming you have this collection)
     final userProfiles = await isar.userProfiles.where().findAll();
@@ -263,9 +265,8 @@ class BackupService {
 
     // Backup Goals
     final goals = await isar.goals.where().findAll();
-    backupData['Goal'] = goals
-        .map((goal) => GoalBackup.fromGoal(goal).toBackupJson())
-        .toList();
+    backupData['Goal'] =
+        goals.map((goal) => GoalBackup.fromGoal(goal).toBackupJson()).toList();
 
     // Backup Budgets
     final budgets = await isar.budgets.where().findAll();
@@ -274,9 +275,8 @@ class BackupService {
         .toList();
 
     // Backup Budget Category Allocations
-    final budgetCategoryAllocations = await isar.budgetCategoryAllocations
-        .where()
-        .findAll();
+    final budgetCategoryAllocations =
+        await isar.budgetCategoryAllocations.where().findAll();
     backupData['BudgetCategoryAllocation'] = budgetCategoryAllocations
         .map(
           (bca) => BudgetCategoryAllocationBackup.fromBudgetCategoryAllocation(
@@ -299,9 +299,8 @@ class BackupService {
 
     // Backup Streaks
     final streaks = await isar.streaks.where().findAll();
-    backupData['Streak'] = streaks
-        .map((s) => StreakBackup.fromStreak(s).toBackupJson())
-        .toList();
+    backupData['Streak'] =
+        streaks.map((s) => StreakBackup.fromStreak(s).toBackupJson()).toList();
 
     // Backup User Levels
     final userLevels = await isar.userLevels.where().findAll();
@@ -309,7 +308,9 @@ class BackupService {
         .map((ul) => UserLevelBackup.fromUserLevel(ul).toBackupJson())
         .toList();
 
-    _log.i('DB export completed: ${backupData.values.fold<int>(0, (sum, list) => sum + list.length)} records');
+    _log.i(
+      'DB export completed: ${backupData.values.fold<int>(0, (sum, list) => sum + list.length)} records',
+    );
     return backupData;
   }
 
@@ -551,11 +552,16 @@ class BackupService {
 
   static Future<String?> saveBackupFile(
     Uint8List content,
-    DateTime dateTime,
-  ) async {
-    final userDir = await pickBackupFolder();
-    final dir = await getApplicationDocumentsDirectory();
-    final directory = userDir ?? dir;
+    DateTime dateTime, {
+    bool interactive = true,
+  }) async {
+    final Directory directory;
+    if (interactive) {
+      final userDir = await pickBackupFolder();
+      directory = userDir ?? await getApplicationDocumentsDirectory();
+    } else {
+      directory = await getApplicationDocumentsDirectory();
+    }
     final fileName =
         '${_backupFileName}_${DateFormat('yyyyMMdd_HHmmss').format(dateTime)}$_backupFileNameExtension';
     final file = File('${directory.path}/$fileName');

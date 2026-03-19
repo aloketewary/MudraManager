@@ -624,7 +624,7 @@
   "@profile_phoneControllerHintText": {
     "description": "This is text of Enter your phone number"
   },
-  "profile_weAreNotStoringInfoText": "We are not storing any data, all data is in your device!",
+  "profile_weAreNotStoringInfoText": "All your data lives on this device. No servers, no cloud, no tracking.",
   "@profile_weAreNotStoringInfoText": {
     "description": "This is text of We are not storing"
   },

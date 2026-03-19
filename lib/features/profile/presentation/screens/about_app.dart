@@ -107,7 +107,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        'Your data is encrypted locally. We never sell your financial information.',
+                        'Everything stays on your device. No accounts, no cloud, no data collection. Your finances are yours alone.',
                         style: textTheme.bodySmall?.copyWith(
                           color: color.onSurfaceVariant,
                           height: 1.4,
@@ -206,7 +206,8 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                  'You\'re on the latest version ${info?.version ?? '1.0.0'}',),
+                                'You\'re on the latest version ${info?.version ?? '1.0.0'}',
+                              ),
                               behavior: SnackBarBehavior.floating,
                             ),
                           );

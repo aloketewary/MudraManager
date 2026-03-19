@@ -1,5 +1,7 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/features/gamification/models/achievement.dart';
@@ -9,7 +11,7 @@ class AchievementCard extends StatelessWidget {
 
   const AchievementCard({super.key, required this.achievement});
 
-  Color _categoryAccent(ColorScheme color) {
+  Color _categoryAccent() {
     switch (achievement.category) {
       case AchievementCategory.budgeting:
         return const Color(0xFF2196F3);
@@ -29,13 +31,14 @@ class AchievementCard extends StatelessWidget {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final isUnlocked = achievement.isUnlocked;
-    final accent = _categoryAccent(color);
+    final accent = _categoryAccent();
     final progress = achievement.target > 0
         ? (achievement.progress / achievement.target).clamp(0.0, 1.0)
         : 0.0;
 
     return Card(
-      elevation: 0,
+      elevation: isUnlocked ? 2 : 0,
+      shadowColor: isUnlocked ? accent.withValues(alpha: 0.3) : null,
       margin: EdgeInsets.zero,
       color: isUnlocked ? null : color.surfaceContainerLow,
       shape: RoundedRectangleBorder(
@@ -43,14 +46,14 @@ class AchievementCard extends StatelessWidget {
         side: BorderSide(
           color: isUnlocked
               ? accent.withValues(alpha: 0.4)
-              : color.outlineVariant.withValues(alpha: 0.5),
+              : color.outlineVariant.withValues(alpha: 0.4),
         ),
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () {
           HapticFeedback.lightImpact();
-          _showDetail(context, color, textTheme, accent);
+          _showShowcase(context);
         },
         borderRadius: BorderRadius.circular(16),
         child: Container(
@@ -60,28 +63,87 @@ class AchievementCard extends StatelessWidget {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      accent.withValues(alpha: 0.12),
+                      accent.withValues(alpha: 0.14),
                       accent.withValues(alpha: 0.04),
                     ],
                   ),
                 )
               : null,
-          padding: const EdgeInsets.all(14),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
           child: Column(
             children: [
               const Spacer(),
 
-              // ── BADGE ICON ──
-              _BadgeIcon(
-                icon: achievement.icon,
-                isUnlocked: isUnlocked,
-                accent: accent,
-                color: color,
+              // ── BADGE with PROGRESS RING ──
+              SizedBox(
+                width: 64,
+                height: 64,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    CustomPaint(
+                      size: const Size(64, 64),
+                      painter: _ProgressRingPainter(
+                        progress: isUnlocked ? 1.0 : progress,
+                        trackColor: isUnlocked
+                            ? accent.withValues(alpha: 0.2)
+                            : color.onSurfaceVariant.withValues(alpha: 0.08),
+                        progressColor:
+                            isUnlocked ? accent : accent.withValues(alpha: 0.5),
+                        strokeWidth: 3,
+                      ),
+                    ),
+                    if (isUnlocked)
+                      Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: accent.withValues(alpha: 0.2),
+                              blurRadius: 16,
+                              spreadRadius: 2,
+                            ),
+                          ],
+                        ),
+                      ),
+                    Image.asset(
+                      'assets/icons/100/${achievement.icon}.png',
+                      width: 34,
+                      height: 34,
+                      color: isUnlocked
+                          ? null
+                          : color.onSurfaceVariant.withValues(alpha: 0.25),
+                    ),
+                    if (!isUnlocked)
+                      Positioned(
+                        right: 6,
+                        bottom: 6,
+                        child: Container(
+                          padding: const EdgeInsets.all(3),
+                          decoration: BoxDecoration(
+                            color: color.surface,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color:
+                                  color.outlineVariant.withValues(alpha: 0.3),
+                            ),
+                          ),
+                          child: Icon(
+                            LucideIcons.lock,
+                            size: 10,
+                            color:
+                                color.onSurfaceVariant.withValues(alpha: 0.5),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
 
-              const Spacer(),
+              const SizedBox(height: 10),
 
-              // ── TITLE ──
               Text(
                 achievement.title,
                 style: textTheme.labelLarge?.copyWith(
@@ -94,14 +156,13 @@ class AchievementCard extends StatelessWidget {
               ),
               const SizedBox(height: 2),
 
-              // ── DESCRIPTION ──
               Text(
                 achievement.description,
                 style: textTheme.labelSmall?.copyWith(
-                  color: isUnlocked
-                      ? color.onSurfaceVariant
-                      : color.onSurfaceVariant.withValues(alpha: 0.6),
+                  color: color.onSurfaceVariant
+                      .withValues(alpha: isUnlocked ? 0.8 : 0.55),
                   fontSize: 10,
+                  height: 1.3,
                 ),
                 textAlign: TextAlign.center,
                 maxLines: 2,
@@ -110,7 +171,6 @@ class AchievementCard extends StatelessWidget {
 
               const Spacer(),
 
-              // ── BOTTOM: XP or PROGRESS ──
               if (isUnlocked)
                 Container(
                   padding:
@@ -143,7 +203,7 @@ class AchievementCard extends StatelessWidget {
                         value: progress,
                         minHeight: 4,
                         backgroundColor:
-                            color.onSurfaceVariant.withValues(alpha: 0.1),
+                            color.onSurfaceVariant.withValues(alpha: 0.08),
                         valueColor: AlwaysStoppedAnimation(
                           accent.withValues(alpha: 0.6),
                         ),
@@ -153,7 +213,7 @@ class AchievementCard extends StatelessWidget {
                     Text(
                       '${achievement.progress} / ${achievement.target}',
                       style: textTheme.labelSmall?.copyWith(
-                        color: color.onSurfaceVariant.withValues(alpha: 0.6),
+                        color: color.onSurfaceVariant.withValues(alpha: 0.55),
                         fontSize: 10,
                         fontWeight: FontWeight.w600,
                       ),
@@ -167,191 +227,49 @@ class AchievementCard extends StatelessWidget {
     );
   }
 
-  // ── DETAIL SHEET ──
-  void _showDetail(
-    BuildContext context,
-    ColorScheme color,
-    TextTheme textTheme,
-    Color accent,
-  ) {
-    final isUnlocked = achievement.isUnlocked;
-
-    showModalBottomSheet(
+  // ── SHOWCASE DIALOG ──
+  void _showShowcase(BuildContext context) {
+    showGeneralDialog(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Drag handle
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                margin: const EdgeInsets.only(top: 12, bottom: 24),
-                decoration: BoxDecoration(
-                  color: color.onSurfaceVariant.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-
-            // Badge icon large
-            Container(
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: isUnlocked
-                      ? accent.withValues(alpha: 0.3)
-                      : color.outlineVariant.withValues(alpha: 0.3),
-                  width: 2,
-                ),
-                boxShadow: isUnlocked
-                    ? [
-                        BoxShadow(
-                          color: accent.withValues(alpha: 0.15),
-                          blurRadius: 24,
-                          spreadRadius: 4,
-                        ),
-                      ]
-                    : null,
-              ),
-              child: CircleAvatar(
-                radius: 40,
-                backgroundColor: isUnlocked
-                    ? accent.withValues(alpha: 0.1)
-                    : color.surfaceContainerLow,
-                child: Image.asset(
-                  'assets/icons/100/${achievement.icon}.png',
-                  width: 48,
-                  height: 48,
-                  color: isUnlocked
-                      ? null
-                      : color.onSurfaceVariant.withValues(alpha: 0.3),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Title
-            Text(
-              achievement.title,
-              style: textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              achievement.description,
-              style: textTheme.bodyMedium?.copyWith(
-                color: color.onSurfaceVariant,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 20),
-
-            // Info row
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _infoPill(
-                  isUnlocked ? 'Unlocked' : 'In Progress',
-                  isUnlocked
-                      ? const Color(0xFF4CAF50)
-                      : const Color(0xFFFF9800),
-                  color,
-                  textTheme,
-                ),
-                const SizedBox(width: 8),
-                _infoPill(
-                  '+${achievement.rewardXP} XP',
-                  accent,
-                  color,
-                  textTheme,
-                ),
-                const SizedBox(width: 8),
-                _infoPill(
-                  _categoryLabel(achievement.category),
-                  accent,
-                  color,
-                  textTheme,
-                ),
-              ],
-            ),
-
-            // Progress bar for locked
-            if (!isUnlocked) ...[
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: LinearProgressIndicator(
-                        value: achievement.target > 0
-                            ? achievement.progress / achievement.target
-                            : 0,
-                        minHeight: 8,
-                        backgroundColor:
-                            color.onSurfaceVariant.withValues(alpha: 0.1),
-                        valueColor: AlwaysStoppedAnimation(accent),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    '${achievement.progress}/${achievement.target}',
-                    style: textTheme.labelMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: accent,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-
-            // Unlock date
-            if (isUnlocked && achievement.unlockedAt != null) ...[
-              const SizedBox(height: 16),
-              Text(
-                'Unlocked ${DateFormat('MMM dd, yyyy').format(achievement.unlockedAt!)}',
-                style: textTheme.bodySmall?.copyWith(
-                  color: color.onSurfaceVariant,
-                ),
-              ),
-            ],
-
-            const SizedBox(height: 24),
-          ],
-        ),
-      ),
+      barrierDismissible: true,
+      barrierLabel: 'Dismiss',
+      barrierColor: Colors.black.withValues(alpha: 0.7),
+      transitionDuration: const Duration(milliseconds: 300),
+      transitionBuilder: (_, anim, __, child) {
+        return FadeTransition(
+          opacity: anim,
+          child: child,
+        );
+      },
+      pageBuilder: (context, _, __) {
+        return _AchievementShowcase(achievement: achievement);
+      },
     );
   }
+}
 
-  Widget _infoPill(
-    String label,
-    Color accent,
-    ColorScheme color,
-    TextTheme textTheme,
-  ) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: accent.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        label,
-        style: textTheme.labelSmall?.copyWith(
-          color: accent,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
+// ══════════════════════════════════════════════════════════════
+// FULL-SCREEN TRANSPARENT SHOWCASE
+// ══════════════════════════════════════════════════════════════
+
+class _AchievementShowcase extends StatelessWidget {
+  final Achievement achievement;
+
+  const _AchievementShowcase({required this.achievement});
+
+  Color _categoryAccent() {
+    switch (achievement.category) {
+      case AchievementCategory.budgeting:
+        return const Color(0xFF2196F3);
+      case AchievementCategory.saving:
+        return const Color(0xFF4CAF50);
+      case AchievementCategory.tracking:
+        return const Color(0xFF9C27B0);
+      case AchievementCategory.milestone:
+        return const Color(0xFFFF9800);
+      case AchievementCategory.engagement:
+        return const Color(0xFFE53935);
+    }
   }
 
   String _categoryLabel(AchievementCategory cat) {
@@ -368,78 +286,290 @@ class AchievementCard extends StatelessWidget {
         return 'Engage';
     }
   }
-}
-
-// ── BADGE ICON WITH GLOW ──
-
-class _BadgeIcon extends StatelessWidget {
-  final String icon;
-  final bool isUnlocked;
-  final Color accent;
-  final ColorScheme color;
-
-  const _BadgeIcon({
-    required this.icon,
-    required this.isUnlocked,
-    required this.accent,
-    required this.color,
-  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(3),
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: isUnlocked
-              ? accent.withValues(alpha: 0.3)
-              : color.outlineVariant.withValues(alpha: 0.3),
-          width: 1.5,
-        ),
-        boxShadow: isUnlocked
-            ? [
-                BoxShadow(
-                  color: accent.withValues(alpha: 0.15),
-                  blurRadius: 16,
-                  spreadRadius: 2,
-                ),
-              ]
-            : null,
-      ),
-      child: CircleAvatar(
-        radius: 30,
-        backgroundColor: isUnlocked
-            ? accent.withValues(alpha: 0.1)
-            : color.surfaceContainerHighest.withValues(alpha: 0.5),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Image.asset(
-              'assets/icons/100/$icon.png',
-              width: 36,
-              height: 36,
-              color: isUnlocked
-                  ? null
-                  : color.onSurfaceVariant.withValues(alpha: 0.25),
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final isUnlocked = achievement.isUnlocked;
+    final accent = _categoryAccent();
+    final progress = achievement.target > 0
+        ? (achievement.progress / achievement.target).clamp(0.0, 1.0)
+        : 0.0;
+    final remaining = achievement.target - achievement.progress;
+
+    return GestureDetector(
+      onTap: () => Navigator.of(context).pop(),
+      behavior: HitTestBehavior.opaque,
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 40),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // ── LARGE BADGE with GLOW + RING ──
+                SizedBox(
+                  width: 140,
+                  height: 140,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      // Outer glow
+                      if (isUnlocked)
+                        Container(
+                          width: 140,
+                          height: 140,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: accent.withValues(alpha: 0.35),
+                                blurRadius: 50,
+                                spreadRadius: 10,
+                              ),
+                              BoxShadow(
+                                color: accent.withValues(alpha: 0.15),
+                                blurRadius: 80,
+                                spreadRadius: 20,
+                              ),
+                            ],
+                          ),
+                        ),
+
+                      // Progress ring
+                      CustomPaint(
+                        size: const Size(140, 140),
+                        painter: _ProgressRingPainter(
+                          progress: isUnlocked ? 1.0 : progress,
+                          trackColor: isUnlocked
+                              ? accent.withValues(alpha: 0.25)
+                              : Colors.white.withValues(alpha: 0.1),
+                          progressColor: isUnlocked
+                              ? accent
+                              : accent.withValues(alpha: 0.7),
+                          strokeWidth: 5,
+                        ),
+                      ),
+
+                      // Icon circle
+                      Container(
+                        width: 110,
+                        height: 110,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: isUnlocked
+                              ? accent.withValues(alpha: 0.12)
+                              : Colors.white.withValues(alpha: 0.06),
+                        ),
+                        child: Center(
+                          child: Image.asset(
+                            'assets/icons/100/${achievement.icon}.png',
+                            width: 64,
+                            height: 64,
+                            color: isUnlocked
+                                ? null
+                                : Colors.white.withValues(alpha: 0.3),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+                    .animate()
+                    .scale(
+                      begin: const Offset(0.5, 0.5),
+                      end: const Offset(1.0, 1.0),
+                      duration: 500.ms,
+                      curve: Curves.elasticOut,
+                    )
+                    .then()
+                    .shimmer(
+                      duration: 1500.ms,
+                      color: isUnlocked
+                          ? accent.withValues(alpha: 0.3)
+                          : Colors.white.withValues(alpha: 0.1),
+                    ),
+
+                const SizedBox(height: 28),
+
+                // ── TITLE ──
+                Text(
+                  achievement.title,
+                  style: textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                  textAlign: TextAlign.center,
+                )
+                    .animate()
+                    .fadeIn(delay: 200.ms, duration: 400.ms)
+                    .slideY(begin: 0.3, end: 0),
+
+                const SizedBox(height: 8),
+
+                // ── DESCRIPTION ──
+                Text(
+                  achievement.description,
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: Colors.white.withValues(alpha: 0.7),
+                  ),
+                  textAlign: TextAlign.center,
+                )
+                    .animate()
+                    .fadeIn(delay: 300.ms, duration: 400.ms)
+                    .slideY(begin: 0.3, end: 0),
+
+                const SizedBox(height: 24),
+
+                // ── INFO PILLS ──
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  alignment: WrapAlignment.center,
+                  children: [
+                    _showcasePill(
+                      _categoryLabel(achievement.category),
+                      accent,
+                    ),
+                    _showcasePill(
+                      '+${achievement.rewardXP} XP',
+                      accent,
+                    ),
+                    if (isUnlocked && achievement.unlockedAt != null)
+                      _showcasePill(
+                        DateFormat('MMM dd, yyyy')
+                            .format(achievement.unlockedAt!),
+                        Colors.white.withValues(alpha: 0.5),
+                      ),
+                    if (!isUnlocked)
+                      _showcasePill(
+                        '$remaining more to go',
+                        Colors.white.withValues(alpha: 0.5),
+                      ),
+                  ],
+                )
+                    .animate()
+                    .fadeIn(delay: 400.ms, duration: 400.ms)
+                    .slideY(begin: 0.2, end: 0),
+
+                // ── PROGRESS BAR for locked ──
+                if (!isUnlocked) ...[
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: 200,
+                    child: Column(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: LinearProgressIndicator(
+                            value: progress,
+                            minHeight: 6,
+                            backgroundColor:
+                                Colors.white.withValues(alpha: 0.1),
+                            valueColor: AlwaysStoppedAnimation(accent),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          '${achievement.progress} / ${achievement.target}',
+                          style: textTheme.labelSmall?.copyWith(
+                            color: Colors.white.withValues(alpha: 0.5),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ).animate().fadeIn(delay: 500.ms, duration: 400.ms),
+                ],
+
+                const SizedBox(height: 32),
+
+                // ── TAP TO DISMISS hint ──
+                Text(
+                  'Tap anywhere to close',
+                  style: textTheme.labelSmall?.copyWith(
+                    color: Colors.white.withValues(alpha: 0.3),
+                  ),
+                ).animate().fadeIn(delay: 600.ms, duration: 400.ms),
+              ],
             ),
-            if (!isUnlocked)
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: color.surface.withValues(alpha: 0.4),
-                ),
-                child: Icon(
-                  LucideIcons.lock,
-                  size: 16,
-                  color: color.onSurfaceVariant.withValues(alpha: 0.5),
-                ),
-              ),
-          ],
+          ),
         ),
       ),
     );
   }
+
+  Widget _showcasePill(String label, Color accent) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: accent.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: accent.withValues(alpha: 0.25),
+        ),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: accent,
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+}
+
+// ── PROGRESS RING PAINTER ──
+
+class _ProgressRingPainter extends CustomPainter {
+  final double progress;
+  final Color trackColor;
+  final Color progressColor;
+  final double strokeWidth;
+
+  _ProgressRingPainter({
+    required this.progress,
+    required this.trackColor,
+    required this.progressColor,
+    required this.strokeWidth,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = (size.width - strokeWidth) / 2;
+
+    canvas.drawCircle(
+      center,
+      radius,
+      Paint()
+        ..color = trackColor
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = strokeWidth,
+    );
+
+    if (progress > 0) {
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: radius),
+        -pi / 2,
+        2 * pi * progress,
+        false,
+        Paint()
+          ..color = progressColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = strokeWidth
+          ..strokeCap = StrokeCap.round,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_ProgressRingPainter old) =>
+      old.progress != progress ||
+      old.trackColor != trackColor ||
+      old.progressColor != progressColor;
 }

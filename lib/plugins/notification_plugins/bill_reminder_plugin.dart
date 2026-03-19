@@ -25,7 +25,7 @@ class BillReminderPlugin extends NotificationPlugin {
 
   @override
   String getTitle(Transaction transaction) {
-    return '🔔 Bill Reminder';
+    return 'You\'ve got a payment due soon';
   }
 
   @override

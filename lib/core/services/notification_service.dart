@@ -69,8 +69,7 @@ class NotificationService {
         FlutterLocalNotificationsPlugin();
     flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin
-        >()
+            AndroidFlutterLocalNotificationsPlugin>()
         ?.requestNotificationsPermission();
   }
 
@@ -83,8 +82,8 @@ class NotificationService {
 
     await _plugin.zonedSchedule(
       0,
-      '📊 Daily Summary',
-      'Tap to view your spending summary and statistics',
+      '📊 Your day in numbers',
+      'Here\'s how yesterday went — take a quick look',
       scheduledDate,
       const NotificationDetails(
         android: AndroidNotificationDetails(
@@ -123,8 +122,8 @@ class NotificationService {
     if (transactions.isEmpty) {
       await showLocalNotification(
         id: 100,
-        title: '📊 Yesterday\'s Summary',
-        body: 'No transactions recorded yesterday',
+        title: '📊 Quiet day yesterday',
+        body: 'Nothing recorded — either a zero-spend win or time to catch up!',
         payload: 'statistics',
       );
       return;
@@ -163,8 +162,7 @@ class NotificationService {
           .filter()
           .account((q) => q.idEqualTo(acc.id))
           .findAll();
-      final balance =
-          acc.initialBalance +
+      final balance = acc.initialBalance +
           txs.fold<double>(
             0,
             (sum, tx) => sum + (tx.isExpense ? -tx.amount : tx.amount),
@@ -173,13 +171,11 @@ class NotificationService {
     }
 
     final body =
-        '💸 Spent: ₹${totalSpent.toStringAsFixed(0)} | '
-        '💰 Income: ₹${totalIncome.toStringAsFixed(0)}\n'
-        '🏆 Top: $topCategory | Balance: ₹${totalBalance.toStringAsFixed(0)}';
-
+        'Spent ₹${totalSpent.toStringAsFixed(0)} · Earned ₹${totalIncome.toStringAsFixed(0)}\n'
+        'Most went to $topCategory · Balance: ₹${totalBalance.toStringAsFixed(0)}';
     await showLocalNotification(
       id: 100,
-      title: '📊 Yesterday\'s Summary',
+      title: '📊 Here\'s yesterday',
       body: body,
       payload: 'statistics',
     );
@@ -210,8 +206,8 @@ class NotificationService {
 
     await _plugin.zonedSchedule(
       2,
-      '📅 Weekly Summary',
-      'Tap to view your week\'s spending and statistics',
+      '📅 Your week wrapped up',
+      'Let\'s see how the week went — tap to check',
       scheduledDate,
       const NotificationDetails(
         android: AndroidNotificationDetails(
@@ -238,64 +234,82 @@ class NotificationService {
     if (isar == null) return;
 
     final now = DateTime.now();
-    final startOfWeek = now.subtract(Duration(days: now.weekday % 7));
-    final startDate = DateTime(
-      startOfWeek.year,
-      startOfWeek.month,
-      startOfWeek.day,
-    );
-    final endDate = startDate.add(const Duration(days: 7));
+    // This week: Mon–now
+    final startOfWeek = DateTime(now.year, now.month, now.day)
+        .subtract(Duration(days: now.weekday - 1));
+    final endOfWeek = now;
 
-    final transactions = await isar.transactions
+    // Last week: same span
+    final startOfLastWeek = startOfWeek.subtract(const Duration(days: 7));
+    final endOfLastWeek = startOfWeek;
+
+    final thisWeekTxns = await isar.transactions
         .filter()
-        .dateBetween(startDate, endDate)
+        .isExpenseEqualTo(true)
+        .isTransferEqualTo(false)
+        .dateBetween(startOfWeek, endOfWeek)
         .findAll();
 
-    if (transactions.isEmpty) {
+    final lastWeekTxns = await isar.transactions
+        .filter()
+        .isExpenseEqualTo(true)
+        .isTransferEqualTo(false)
+        .dateBetween(startOfLastWeek, endOfLastWeek)
+        .findAll();
+
+    final thisWeekTotal = thisWeekTxns.fold<double>(0, (s, t) => s + t.amount);
+    final lastWeekTotal = lastWeekTxns.fold<double>(0, (s, t) => s + t.amount);
+
+    if (thisWeekTotal <= 0) {
       await showLocalNotification(
         id: 101,
-        title: '📅 Weekly Summary',
-        body: 'No transactions this week',
+        title: '📅 Week in review',
+        body: 'Zero expenses this week — that\'s impressive 💪',
+        payload: 'statistics',
+      );
+      await _logToDatabase(
+        '📅 Weekly Summary',
+        'No expenses this week — great discipline! 💪',
+        'weekly_summary',
       );
       return;
     }
 
-    double totalSpent = 0;
-    double totalIncome = 0;
-    final categorySpending = <String, double>{};
+    // Top category
+    final catSpend = <String, double>{};
+    for (final t in thisWeekTxns) {
+      await t.category.load();
+      final name = t.category.value?.name ?? 'Other';
+      catSpend[name] = (catSpend[name] ?? 0) + t.amount;
+    }
+    final topEntry =
+        catSpend.entries.reduce((a, b) => a.value > b.value ? a : b);
+    final topPct = (topEntry.value / thisWeekTotal * 100).toStringAsFixed(0);
 
-    for (final tx in transactions) {
-      if (tx.isTransfer) continue;
-
-      if (tx.isExpense) {
-        totalSpent += tx.amount;
-        final cat = tx.category.value;
-        if (cat != null) {
-          categorySpending[cat.name] =
-              (categorySpending[cat.name] ?? 0) + tx.amount;
-        }
+    // Week-over-week
+    String trend;
+    if (lastWeekTotal <= 0) {
+      trend = 'Your first full week!';
+    } else {
+      final change = ((thisWeekTotal - lastWeekTotal) / lastWeekTotal * 100);
+      if (change > 0) {
+        trend = 'Up ${change.toStringAsFixed(0)}% from last week';
       } else {
-        totalIncome += tx.amount;
+        trend =
+            'Down ${change.abs().toStringAsFixed(0)}% from last week — nice!';
       }
     }
 
-    String topCategory = 'None';
-    if (categorySpending.isNotEmpty) {
-      topCategory = categorySpending.entries
-          .reduce((a, b) => a.value > b.value ? a : b)
-          .key;
-    }
-
-    final body =
-        '💸 Spent: ₹${totalSpent.toStringAsFixed(0)} | '
-        '💰 Income: ₹${totalIncome.toStringAsFixed(0)}\n'
-        '🏆 Top Category: $topCategory | ${transactions.length} transactions';
-
+    final body = 'You spent ₹${thisWeekTotal.toStringAsFixed(0)}\n'
+        '$topPct% on ${topEntry.key}\n'
+        '$trend';
     await showLocalNotification(
       id: 101,
-      title: '📅 This Week\'s Summary',
+      title: '📅 Your week in review',
       body: body,
+      payload: 'statistics',
     );
+    await _logToDatabase('📅 Your week in review', body, 'weekly_summary');
   }
 
   static Future<void> _saveReminderTime(TimeOfDay time) async {
@@ -452,8 +466,8 @@ class NotificationService {
 
     await _plugin.zonedSchedule(
       3,
-      '🔥 Don\'t Break Your Streak!',
-      'You have a $currentStreak-day streak. Check in today to keep it going!',
+      '🔥 $currentStreak days and counting!',
+      'Don\'t let today be the day it resets — just open the app',
       scheduledDate,
       const NotificationDetails(
         android: AndroidNotificationDetails(
@@ -482,34 +496,50 @@ class NotificationService {
   static Future<void> showAchievementUnlocked(String title, int xp) async {
     await showLocalNotification(
       id: 200,
-      title: '🏆 Achievement Unlocked!',
-      body: '$title (+$xp XP)',
+      title: '🏆 Nice one!',
+      body: '$title — that\'s +$xp XP for you',
       payload: 'achievements',
     );
-    await _logToDatabase('🏆 Achievement Unlocked!', '$title (+$xp XP)', 'achievement');
+    await _logToDatabase(
+      '🏆 Nice one!',
+      '$title — that\'s +$xp XP for you',
+      'achievement',
+    );
   }
 
   static Future<void> showLevelUp(int newLevel) async {
     await showLocalNotification(
       id: 201,
-      title: '🎉 Level Up!',
-      body: 'Congratulations! You are now Level $newLevel',
+      title: '🎉 Level $newLevel!',
+      body: 'You just leveled up — keep going!',
       payload: 'achievements',
     );
-    await _logToDatabase('🎉 Level Up!', 'Congratulations! You are now Level $newLevel', 'level_up');
+    await _logToDatabase(
+      '🎉 Level Up!',
+      'Congratulations! You are now Level $newLevel',
+      'level_up',
+    );
   }
 
   static Future<void> showStreakMilestone(int days) async {
     await showLocalNotification(
       id: 202,
-      title: '🔥 Streak Milestone!',
-      body: 'Amazing! You have a $days-day streak',
+      title: '🔥 $days days straight!',
+      body: 'That\'s dedication — your streak is on fire',
       payload: 'achievements',
     );
-    await _logToDatabase('🔥 Streak Milestone!', 'Amazing! You have a $days-day streak', 'streak');
+    await _logToDatabase(
+      '🔥 Streak Milestone!',
+      'Amazing! You have a $days-day streak',
+      'streak',
+    );
   }
 
-  static Future<void> _logToDatabase(String title, String body, String type) async {
+  static Future<void> _logToDatabase(
+    String title,
+    String body,
+    String type,
+  ) async {
     final isar = Isar.getInstance();
     if (isar == null) return;
     final record = NotificationRecord()
@@ -517,7 +547,9 @@ class NotificationService {
       ..body = body
       ..timestamp = DateTime.now()
       ..isRead = false
-      ..type = type;
+      ..type = type
+      ..priority = NotificationPriority.normal
+      ..category = NotificationCategory.system;
     await isar.writeTxn(() => isar.notificationRecords.put(record));
   }
 }

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/features/analytics/data/analytics_provider.dart';
 import 'package:mudra_manager/features/analytics/data/net_worth_service.dart';
 import 'package:mudra_manager/features/analytics/data/personality_archetype.dart';
@@ -40,7 +41,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
             ),
           )
         : ref.watch(statsProvider(_period));
-
+    final spacing = ref.watch(spacingProvider);
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final isGuestMode = ref.watch(guestModeProvider);
@@ -61,12 +62,15 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                 automaticallyImplyLeading: false,
                 titleSpacing: 0,
                 title: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: spacing.cardHorizontal,
+                    vertical: spacing.cardVertical,
+                  ),
                   child: PeriodCalendarSelector(
                     selectedPeriod: _selectedPeriod,
                     customStart: _customStart,
                     customEnd: _customEnd,
+                    spacing: spacing,
                     onChanged: (period, start, end) {
                       setState(() {
                         _selectedPeriod = period;
@@ -93,27 +97,50 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                 )
               else
                 SliverPadding(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: spacing.cardHorizontal,
+                    vertical: spacing.cardVertical,
+                  ),
                   sliver: SliverList(
                     delegate: SliverChildListDelegate([
                       // ZONE 1: THE PULSE (4-Card Grid)
-                      _buildPulseZone(d, color, textTheme, isGuestMode),
-                      const SizedBox(height: 32),
+                      _buildPulseZone(
+                        d,
+                        color,
+                        textTheme,
+                        isGuestMode,
+                        spacing,
+                      ),
+                      SizedBox(height: spacing.sectionGap),
 
                       // ZONE 2: THE NARRATIVE (Tabbed Charts)
-                      _buildNarrativeZone(d, color, textTheme),
-                      const SizedBox(height: 32),
+                      _buildNarrativeZone(d, color, textTheme, spacing),
+                      SizedBox(height: spacing.sectionGap),
 
                       // ZONE 3: THE INTELLIGENCE (Insights & Actions)
-                      _buildIntelligenceZone(d, color, textTheme, isGuestMode),
-                      const SizedBox(height: 32),
+                      _buildIntelligenceZone(
+                        d,
+                        color,
+                        textTheme,
+                        isGuestMode,
+                        spacing,
+                      ),
+                      SizedBox(height: spacing.sectionGap),
 
                       // ZONE 4: FINANCIAL HEALTH
-                      _buildFinancialHealthZone(color, textTheme),
-                      const SizedBox(height: 32),
+                      _buildFinancialHealthZone(
+                        color,
+                        textTheme,
+                        spacing,
+                      ),
+                      SizedBox(height: spacing.sectionGap),
 
                       // ZONE 5: SPENDING PERSONALITY
-                      _buildSpendingPersonalityZone(color, textTheme),
+                      _buildSpendingPersonalityZone(
+                        color,
+                        textTheme,
+                        spacing,
+                      ),
                       const SizedBox(height: 100),
                     ]),
                   ),
@@ -122,7 +149,10 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
           );
         },
         loading: () => Padding(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.symmetric(
+            horizontal: spacing.cardHorizontal,
+            vertical: spacing.cardVertical,
+          ),
           child: Column(
             children: [
               SkeletonLoader(
@@ -218,6 +248,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
     ColorScheme color,
     TextTheme textTheme,
     bool isGuestMode,
+    AppSpacing spacing,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -226,7 +257,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
           'Overview',
           style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: spacing.sectionGap),
         Row(
           children: [
             Expanded(
@@ -239,9 +270,10 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                 color,
                 textTheme,
                 isGuestMode,
+                spacing,
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: spacing.elementGap),
             Expanded(
               child: _buildPulseCard(
                 'Expense',
@@ -252,15 +284,17 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                 color,
                 textTheme,
                 isGuestMode,
+                spacing,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: spacing.elementGap),
         _NetWorthCard(
           isGuestMode: isGuestMode,
           savingsRate: d.savingsRate,
           savingsSpots: d.savingsSpots,
+          spacing: spacing,
         ),
       ],
     );
@@ -274,7 +308,8 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
     List<FlSpot> sparkline,
     ColorScheme color,
     TextTheme textTheme,
-    bool isGuestMode, {
+    bool isGuestMode,
+    AppSpacing spacing, {
     bool isPercentage = false,
   }) {
     return _PulseCard(
@@ -285,6 +320,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
       sparkline: sparkline,
       isGuestMode: isGuestMode,
       isPercentage: isPercentage,
+      spacing: spacing,
     );
   }
 
@@ -293,6 +329,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
     StatsData d,
     ColorScheme color,
     TextTheme textTheme,
+    AppSpacing spacing,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -301,17 +338,17 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
           'Trends',
           style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: spacing.sectionGap),
         Container(
           decoration: BoxDecoration(
             color: color.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(spacing.radiusMedium),
           ),
           child: Column(
             children: [
               // Tab Switcher
               Padding(
-                padding: const EdgeInsets.all(8),
+                padding: EdgeInsets.all(spacing.elementGap),
                 child: Row(
                   children: [
                     Expanded(
@@ -320,15 +357,17 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                         0,
                         color,
                         textTheme,
+                        spacing,
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: spacing.elementGap),
                     Expanded(
                       child: _buildTabButton(
                         'Spending by Day',
                         1,
                         color,
                         textTheme,
+                        spacing,
                       ),
                     ),
                   ],
@@ -336,7 +375,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
               ),
               // Tab Content
               Padding(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(spacing.sectionGap),
                 child: _selectedTab == 0
                     ? _build12MonthChart(color, textTheme)
                     : _buildSpendingByDayChart(color, textTheme),
@@ -353,15 +392,16 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
     int index,
     ColorScheme color,
     TextTheme textTheme,
+    AppSpacing spacing,
   ) {
     final isSelected = _selectedTab == index;
     return GestureDetector(
       onTap: () => setState(() => _selectedTab = index),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
+        padding: EdgeInsets.symmetric(vertical: spacing.cardVertical),
         decoration: BoxDecoration(
           color: isSelected ? color.primaryContainer : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(spacing.radiusMedium),
           border: Border.all(
             color: isSelected ? Colors.transparent : color.outlineVariant,
             width: 1,
@@ -548,6 +588,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
     ColorScheme color,
     TextTheme textTheme,
     bool isGuestMode,
+    AppSpacing spacing,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -556,7 +597,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
           'Insights',
           style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: spacing.sectionGap),
         // Spending Prediction Banner
         Consumer(
           builder: (context, ref, child) {
@@ -565,8 +606,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
               data: (predicted) {
                 if (predicted <= 0) return const SizedBox.shrink();
                 return Container(
-                  padding: const EdgeInsets.all(20),
-                  margin: const EdgeInsets.only(bottom: 16),
+                  padding: EdgeInsets.all(spacing.cardInner),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
@@ -574,12 +614,12 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                         color.secondaryContainer,
                       ],
                     ),
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(spacing.radiusMedium),
                   ),
                   child: Row(
                     children: [
                       Icon(Icons.trending_up, color: color.primary, size: 32),
-                      const SizedBox(width: 16),
+                      SizedBox(width: spacing.elementGap),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -590,7 +630,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                                 color: color.onPrimaryContainer,
                               ),
                             ),
-                            const SizedBox(height: 4),
+                            SizedBox(height: spacing.elementGap),
                             CurrencyText(
                               amount: predicted,
                               style: textTheme.headlineSmall
@@ -623,9 +663,10 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                   Icons.trending_up,
                   color,
                   textTheme,
+                  spacing,
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: spacing.elementGap),
               Expanded(
                 child: _buildInsightCard(
                   'Daily Average',
@@ -633,11 +674,12 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                   Icons.calendar_today,
                   color,
                   textTheme,
+                  spacing,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: spacing.elementGap),
         ],
 
         // Category Trends (Top 5)
@@ -652,9 +694,16 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
 
                 return Card(
                   elevation: 0,
+                  margin: const EdgeInsets.only(),
                   color: color.surfaceContainerLow,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                    side: BorderSide(
+                      color: color.outlineVariant.withValues(alpha: 0.5),
+                    ),
+                  ),
                   child: Padding(
-                    padding: const EdgeInsets.all(20),
+                    padding: EdgeInsets.all(spacing.cardInner),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -779,23 +828,31 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
     IconData icon,
     ColorScheme color,
     TextTheme textTheme,
+    AppSpacing spacing,
   ) {
     return Card(
       elevation: 0,
+      margin: EdgeInsets.only(top: spacing.elementGap),
       color: color.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        side: BorderSide(
+          color: color.outlineVariant.withValues(alpha: 0.5),
+        ),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(spacing.cardInner),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Icon(icon, color: color.primary, size: 24),
-            const SizedBox(height: 12),
+            SizedBox(height: spacing.elementGap),
             Text(
               label,
               style:
                   textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: spacing.elementGap),
             Text(
               value,
               style:
@@ -809,7 +866,11 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
     );
   }
 
-  Widget _buildFinancialHealthZone(ColorScheme color, TextTheme textTheme) {
+  Widget _buildFinancialHealthZone(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
     return Consumer(
       builder: (context, ref, child) {
         final healthAsync = ref.watch(financialHealthProvider);
@@ -837,7 +898,14 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                 const SizedBox(height: 16),
                 Card(
                   elevation: 0,
+                  margin: const EdgeInsets.only(),
                   color: color.surfaceContainerLow,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                    side: BorderSide(
+                      color: color.outlineVariant.withValues(alpha: 0.5),
+                    ),
+                  ),
                   child: InkWell(
                     onTap: () {
                       HapticFeedback.mediumImpact();
@@ -1059,6 +1127,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
   Widget _buildSpendingPersonalityZone(
     ColorScheme color,
     TextTheme textTheme,
+    AppSpacing spacing,
   ) {
     return Consumer(
       builder: (context, ref, child) {
@@ -1082,7 +1151,14 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                 const SizedBox(height: 16),
                 Card(
                   elevation: 0,
+                  margin: const EdgeInsets.only(),
                   color: color.surfaceContainerLow,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                    side: BorderSide(
+                      color: color.outlineVariant.withValues(alpha: 0.5),
+                    ),
+                  ),
                   child: InkWell(
                     onTap: () {
                       HapticFeedback.mediumImpact();
@@ -1329,17 +1405,18 @@ class _NetWorthCard extends ConsumerWidget {
   final bool isGuestMode;
   final double savingsRate;
   final List<FlSpot> savingsSpots;
+  final AppSpacing spacing;
 
   const _NetWorthCard({
     required this.isGuestMode,
     required this.savingsRate,
     required this.savingsSpots,
+    required this.spacing,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final color = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
     final totalBalanceAsync = ref.watch(totalAccountBalanceProvider);
     final historyAsync = ref.watch(netWorthHistoryProvider);
 
@@ -1364,9 +1441,10 @@ class _NetWorthCard extends ConsumerWidget {
                 icon: Icons.account_balance_wallet,
                 sparkline: netWorthSpots,
                 isGuestMode: isGuestMode,
+                spacing: spacing,
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: spacing.elementGap),
             Expanded(
               child: _PulseCard(
                 label: 'Savings',
@@ -1376,6 +1454,7 @@ class _NetWorthCard extends ConsumerWidget {
                 sparkline: savingsSpots,
                 isGuestMode: isGuestMode,
                 isPercentage: true,
+                spacing: spacing,
               ),
             ),
           ],
@@ -1395,6 +1474,7 @@ class _PulseCard extends StatelessWidget {
   final List<FlSpot> sparkline;
   final bool isGuestMode;
   final bool isPercentage;
+  final AppSpacing spacing;
 
   const _PulseCard({
     required this.label,
@@ -1404,6 +1484,7 @@ class _PulseCard extends StatelessWidget {
     required this.sparkline,
     required this.isGuestMode,
     this.isPercentage = false,
+    required this.spacing,
   });
 
   @override
@@ -1413,7 +1494,14 @@ class _PulseCard extends StatelessWidget {
 
     return Card(
       elevation: 0,
+      margin: const EdgeInsets.only(),
       color: color.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        side: BorderSide(
+          color: color.outlineVariant.withValues(alpha: 0.5),
+        ),
+      ),
       clipBehavior: Clip.antiAlias,
       child: Stack(
         children: [
@@ -1457,7 +1545,7 @@ class _PulseCard extends StatelessWidget {
               ),
             ),
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(spacing.cardInner),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

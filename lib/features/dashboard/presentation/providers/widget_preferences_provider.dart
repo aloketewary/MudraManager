@@ -3,8 +3,10 @@ import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/dashboard_widget_preference.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
+import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/core/widgets/dashboard_widget_plugin.dart';
 import 'package:mudra_manager/core/widgets/dashboard_widget_registry.dart';
+import 'package:mudra_manager/features/dashboard/presentation/providers/smart_order_provider.dart';
 
 /// Service for managing widget preferences
 class WidgetPreferencesService {
@@ -140,48 +142,57 @@ final widgetPreferencesProvider =
 });
 
 /// Cached provider for ordered widgets - prevents unnecessary rebuilds
+final smartOrderEnabledProvider = Provider<bool>((ref) {
+  // Default: ON. User can toggle in customize screen.
+  final prefs = SharedPrefsUtil.instance;
+  return prefs.getString('smart_order_enabled') != 'false';
+});
+
 final orderedDashboardWidgetsProvider =
     Provider<List<DashboardWidgetPlugin>>((ref) {
   final preferencesAsync = ref.watch(widgetPreferencesProvider);
+  final smartEnabled = ref.watch(smartOrderEnabledProvider);
+  final smartScores =
+      smartEnabled ? ref.watch(smartWidgetScoresProvider) : <String, double>{};
 
   return preferencesAsync.when(
     data: (preferences) {
-      // Create a map of preferences
       final prefMap = {for (var pref in preferences) pref.widgetId: pref};
-
-      // Get all widgets
       final widgets = DashboardWidgetRegistry.widgets;
 
-      // Filter visible widgets
       final visibleWidgets = widgets.where((widget) {
         final pref = prefMap[widget.id];
-        final isVisible = pref?.visible ?? widget.defaultVisible;
-        return isVisible;
+        return pref?.visible ?? widget.defaultVisible;
       }).toList();
 
-      // Sort by order (pinned first, then by order)
       visibleWidgets.sort((a, b) {
         final prefA = prefMap[a.id];
         final prefB = prefMap[b.id];
 
-        // Pinned widgets first
+        // Pinned widgets ALWAYS first (user intent > AI)
         final pinnedA = prefA?.pinned ?? false;
         final pinnedB = prefB?.pinned ?? false;
-
         if (pinnedA && !pinnedB) return -1;
         if (!pinnedA && pinnedB) return 1;
 
-        // Then by order
+        // Smart order: use scores
+        if (smartEnabled && smartScores.isNotEmpty) {
+          final scoreA = smartScores[a.id] ?? 0;
+          final scoreB = smartScores[b.id] ?? 0;
+          // Higher score = higher position
+          final cmp = scoreB.compareTo(scoreA);
+          if (cmp != 0) return cmp;
+        }
+
+        // Fallback: manual order
         final orderA = prefA?.order ?? a.defaultOrder;
         final orderB = prefB?.order ?? b.defaultOrder;
-
         return orderA.compareTo(orderB);
       });
 
       return visibleWidgets;
     },
     loading: () {
-      // Return default order while loading
       final widgets = DashboardWidgetRegistry.widgets
           .where((w) => w.defaultVisible)
           .toList();

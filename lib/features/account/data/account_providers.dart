@@ -24,7 +24,28 @@ final allAccountsProvider = FutureProvider.autoDispose((ref) async {
   return await isar.accounts.where().findAll();
 });
 
-final balanceVisibilityProvider = StateProvider.autoDispose<bool>((ref) => true);
+final balanceVisibilityProvider =
+    StateProvider.autoDispose<bool>((ref) => true);
+
+// Add this new provider:
+final frequencySortedAccountsProvider =
+    FutureProvider.autoDispose<List<Account>>((ref) async {
+  final accounts = await ref.watch(accountsProvider.future);
+  final isar = await ref.watch(isarServiceProvider).getInstance();
+
+  final cutoff = DateTime.now().subtract(const Duration(days: 30));
+  final counts = <int, int>{};
+  for (final acc in accounts) {
+    counts[acc.id] = await isar.transactions
+        .filter()
+        .account((q) => q.idEqualTo(acc.id))
+        .dateGreaterThan(cutoff)
+        .count();
+  }
+
+  return accounts.toList()
+    ..sort((a, b) => (counts[b.id] ?? 0).compareTo(counts[a.id] ?? 0));
+});
 
 class AccountsService {
   final IsarService isarService;
@@ -67,44 +88,35 @@ class AccountsService {
 
   Future<Map<int, double>> getAccountBalanceMap() async {
     final isar = await isarService.getInstance();
+    final accounts =
+        await isar.accounts.filter().isActiveEqualTo(true).findAll();
+    if (accounts.isEmpty) return {};
 
-    final accounts = await isar.accounts
-        .filter()
-        .isActiveEqualTo(true)
-        .findAll();
-    if (accounts.isEmpty) return <int, double>{};
+    // Run all queries in parallel instead of sequentially
+    final futures = accounts.map((acc) async {
+      final results = await Future.wait([
+        isar.transactions
+            .filter()
+            .account((q) => q.idEqualTo(acc.id))
+            .isExpenseEqualTo(false)
+            .amountProperty()
+            .sum(),
+        isar.transactions
+            .filter()
+            .account((q) => q.idEqualTo(acc.id))
+            .isExpenseEqualTo(true)
+            .amountProperty()
+            .sum(),
+      ]);
+      final income = results[0];
+      final expense = results[1];
+      final balance = acc.accountType == AccountType.creditCard
+          ? acc.initialBalance + expense - income
+          : acc.initialBalance + income - expense;
+      return MapEntry(acc.id, balance);
+    });
 
-    // Fetch all transactions once and group by account in memory
-    final allTransactions = await isar.transactions.where().findAll();
-    final transactionsByAccount = <int, List<Transaction>>{};
-    
-    for (final tx in allTransactions) {
-      final accountId = tx.account.value?.id;
-      if (accountId != null) {
-        transactionsByAccount.putIfAbsent(accountId, () => []).add(tx);
-      }
-    }
-
-    final balanceMap = <int, double>{};
-    for (final account in accounts) {
-      final transactions = transactionsByAccount[account.id] ?? [];
-      
-      var income = 0.0;
-      var expense = 0.0;
-      for (final tx in transactions) {
-        if (tx.isExpense) {
-          expense += tx.amount;
-        } else {
-          income += tx.amount;
-        }
-      }
-
-      final balance = account.accountType == AccountType.creditCard
-          ? account.initialBalance + expense - income
-          : account.initialBalance + income - expense;
-      balanceMap[account.id] = balance;
-    }
-
-    return balanceMap;
+    final entries = await Future.wait(futures);
+    return Map.fromEntries(entries);
   }
 }

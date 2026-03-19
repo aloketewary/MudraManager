@@ -510,25 +510,43 @@ class _NotificationPageState extends ConsumerState<NotificationPage> {
   ) {
     HapticFeedback.mediumImpact();
     notificationService.readNotification(record: n);
+
     if (n.actionData != null) {
       try {
         final data = jsonDecode(n.actionData!) as Map<String, dynamic>;
-        final actionType = data['type'] as String?;
-        if (actionType == 'settle_up' && n.tripId != null) {
-          context.push('/trip-detail', extra: n.tripId);
-        } else if (actionType == 'view_expense' &&
-            n.expenseId != null &&
-            n.tripId != null) {
-          context.push(
-            '/expense-detail',
-            extra: {'expenseId': n.expenseId, 'tripId': n.tripId},
-          );
-        } else if (actionType == 'view_budget') {
-          context.push('/budget-dashboard');
+        switch (data['type'] as String?) {
+          case 'settle_up':
+            if (n.tripId != null) context.push('/trip-detail', extra: n.tripId);
+          case 'view_expense':
+            if (n.expenseId != null && n.tripId != null) {
+              context.push('/expense-detail',
+                  extra: {'expenseId': n.expenseId, 'tripId': n.tripId});
+            }
+          case 'view_budget':
+            context.push('/budget-dashboard');
+          case 'view_bills':
+            context.push('/recurring-transactions');
+          case 'view_accounts':
+            context.push('/manage-accounts');
+          case 'view_sms':
+            context.push('/sms-activity');
+          case 'view_goals':
+            context.push('/goal-screen');
         }
       } catch (_) {}
+    } else {
+      // Fallback: route by notification category
+      switch (n.category) {
+        case NotificationCategory.budget:
+          context.push('/budget-dashboard');
+        case NotificationCategory.trip:
+          if (n.tripId != null) context.push('/trip-detail', extra: n.tripId);
+        case NotificationCategory.financial:
+          context.push('/statistics');
+        default:
+          break;
+      }
     }
-    notificationService.deleteNotification(n);
   }
 
   void _handleSecondaryAction(

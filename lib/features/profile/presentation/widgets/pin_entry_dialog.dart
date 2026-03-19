@@ -1,18 +1,17 @@
-import 'package:go_router/go_router.dart';
 import 'dart:math';
 import 'package:flutter/material.dart';
 
 class PinEntryDialog extends StatefulWidget {
   /// Length of the PIN to collect
   final int length;
-  const PinEntryDialog({Key? key, this.length = 4}) : super(key: key);
+  const PinEntryDialog({super.key, this.length = 4});
 
   @override
   State<PinEntryDialog> createState() => _PinEntryDialogState();
 }
 
 class _PinEntryDialogState extends State<PinEntryDialog> {
-  late List<int> _keys;      // randomized digits 0–9
+  late List<int> _keys; // randomized digits 0–9
   final List<String> _input = [];
 
   @override
@@ -30,9 +29,8 @@ class _PinEntryDialogState extends State<PinEntryDialog> {
     if (_input.length >= widget.length) return;
     setState(() => _input.add(digit.toString()));
     if (_input.length == widget.length) {
-      // PIN complete
       Future.delayed(const Duration(milliseconds: 200), () {
-        context.pop(_input.join());
+        if (mounted) Navigator.of(context).pop(_input.join());
       });
     }
   }
@@ -44,8 +42,8 @@ class _PinEntryDialogState extends State<PinEntryDialog> {
 
   @override
   Widget build(BuildContext context) {
-    var textTheme = Theme.of(context).textTheme;
-    var color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final color = Theme.of(context).colorScheme;
     return Dialog(
       insetPadding: const EdgeInsets.symmetric(horizontal: 40, vertical: 80),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -110,10 +108,17 @@ class _PinEntryDialogState extends State<PinEntryDialog> {
   }
 
   Widget _buildKey(Object label, VoidCallback onTap) {
-    var color = Theme.of(context).colorScheme;
+    final color = Theme.of(context).colorScheme;
     Widget child;
     if (label is String) {
-      child = Text(label, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: color.onSecondaryContainer));
+      child = Text(
+        label,
+        style: TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+          color: color.onSecondaryContainer,
+        ),
+      );
     } else {
       child = label as Widget;
     }
@@ -121,7 +126,11 @@ class _PinEntryDialogState extends State<PinEntryDialog> {
     return Material(
       color: color.onSecondary.withAlpha(80),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      child: InkWell(onTap: onTap, borderRadius: BorderRadius.circular(8), child: Center(child: child)),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Center(child: child),
+      ),
     );
   }
 }

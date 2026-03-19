@@ -17,4 +17,5 @@ enum GamificationEvent {
   expenseSplit,
   reconciliationDone,
   zeroSpendDay,
+  transactionTrackedToday,
 }

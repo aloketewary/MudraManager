@@ -106,7 +106,33 @@ class _SmsImportSettingsScreenState
                   ],
                 ),
                 SizedBox(height: spacing.sectionGap),
-
+                Container(
+                  padding: EdgeInsets.all(spacing.cardInner),
+                  margin: EdgeInsets.only(bottom: spacing.cardVertical),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                    color: const Color(0xFF009688).withValues(alpha: 0.08),
+                    border: Border.all(
+                      color: const Color(0xFF009688).withValues(alpha: 0.2),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(LucideIcons.shieldCheck,
+                          color: Color(0xFF009688), size: 20,),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'SMS is read locally on your device to detect transactions. Nothing is uploaded or shared — ever.',
+                          style: textTheme.bodySmall?.copyWith(
+                            color: color.onSurfaceVariant,
+                            height: 1.4,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 // ── TOOLS ──
                 _buildSectionHeader('Tools', color, textTheme),
                 SizedBox(height: spacing.sectionGap),

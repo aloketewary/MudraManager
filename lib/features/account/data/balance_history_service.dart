@@ -13,7 +13,8 @@ class BalanceHistoryService {
   BalanceHistoryService._();
 
   Future<void> recordDailySnapshots() async {
-    final isar = await IsarService.initIsar();
+    final isar = await IsarService().getInstance();
+
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
@@ -25,7 +26,10 @@ class BalanceHistoryService {
           .filter()
           .account((q) => q.idEqualTo(account.id))
           .and()
-          .dateBetween(today, DateTime(now.year, now.month, now.day, 23, 59, 59))
+          .dateBetween(
+            today,
+            DateTime(now.year, now.month, now.day, 23, 59, 59),
+          )
           .findFirst();
 
       if (existingSnapshot != null) continue;
@@ -62,11 +66,15 @@ class BalanceHistoryService {
     }
   }
 
-  Future<List<BalanceSnapshot>> getBalanceHistory(int accountId,
-      {DateTime? startDate, DateTime? endDate}) async {
+  Future<List<BalanceSnapshot>> getBalanceHistory(
+    int accountId, {
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
     final isar = await IsarService.initIsar();
 
-    final start = startDate ?? DateTime.now().subtract(const Duration(days: 30));
+    final start =
+        startDate ?? DateTime.now().subtract(const Duration(days: 30));
     final end = endDate ?? DateTime.now();
 
     return await isar.balanceSnapshots

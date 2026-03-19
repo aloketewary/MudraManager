@@ -16,7 +16,7 @@ import 'package:mudra_manager/features/sms/data/sms_activity_service.dart';
 class SmsProcessorService {
   static final SmsProcessorService instance = SmsProcessorService._();
   static final AppLog _log = AppLog(getLogger(), 'SmsProcessorService');
-  
+
   bool _autoApprovalEnabled = true;
 
   SmsProcessorService._();
@@ -57,7 +57,7 @@ class SmsProcessorService {
     }
   }
 
-  void parseAndSaveTransaction({
+  Future<void> parseAndSaveTransaction({
     required String body,
     required String address,
     String? sender,

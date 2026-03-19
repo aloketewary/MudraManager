@@ -8,13 +8,17 @@ import 'package:mudra_manager/core/logging/logger_provider.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/core/services/card_interaction_tracker.dart';
+import 'package:mudra_manager/core/services/notification_service.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
+import 'package:mudra_manager/core/widgets/dashboard_widget_plugin.dart';
 import 'package:mudra_manager/features/budget/data/budget_alert_provider.dart';
 import 'package:mudra_manager/features/budget/data/budget_alert_service.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/widget_preferences_provider.dart';
 import 'package:mudra_manager/features/profile/data/help_guide_provider.dart';
 import 'package:mudra_manager/shared/widgets/budget_alert_banner.dart';
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 
 class DashboardHome extends ConsumerStatefulWidget {
   const DashboardHome({super.key});
@@ -25,8 +29,9 @@ class DashboardHome extends ConsumerStatefulWidget {
 
 class _DashboardHomeState extends ConsumerState<DashboardHome> {
   final AppLog log = AppLog(getLogger(), 'DashBoardHome');
+  static bool _hasAnimatedOnce = false;
   int _revealedCount = 0;
-  bool _allRevealed = false;
+  bool _allRevealed = _hasAnimatedOnce;
 
   @override
   void initState() {
@@ -36,6 +41,10 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
 
   Future<void> _performDailyCheckIn() async {
     if (!mounted) return;
+
+    // Always cancel streak reminder when user opens the app
+    await NotificationService.cancelStreakReminder();
+
     final prefs = SharedPrefsUtil.instance;
     final lastCheckIn = prefs.getLastDailyCheckIn();
     final now = DateTime.now();
@@ -60,22 +69,69 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
       if (!mounted) return;
       setState(() {
         _revealedCount++;
-        if (_revealedCount >= total) _allRevealed = true;
+        if (_revealedCount >= total) {
+          _allRevealed = true;
+          _hasAnimatedOnce = true;
+        }
       });
     });
   }
 
+  Widget _buildTrackedWidget(
+    BuildContext context,
+    WidgetRef ref,
+    DashboardWidgetPlugin widget,
+  ) {
+    // Hero moment is auto-dismiss, not tappable for navigation
+    if (widget.id == 'hero_moment') return widget.build(context, ref);
+
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: () {
+        CardInteractionTracker.recordTap(widget.id);
+        widget.onTap(context, ref);
+      },
+      child: AbsorbPointer(
+        // Let the card's own InkWell handle visual feedback
+        absorbing: false,
+        child: widget.build(context, ref),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final dashboardAsync = ref.watch(dashboardDataProvider);
     final widgets = ref.watch(orderedDashboardWidgetsProvider);
     final alerts = ref.watch(budgetAlertsProvider);
     final hasSeenHelp = ref.watch(hasSeenHelpGuideProvider);
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    // Once all revealed, skip stagger logic on rebuilds
+    // Gate: show a single cohesive loading state until core data is ready
+    if (!dashboardAsync.hasValue) {
+      return const Scaffold(
+        body: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Column(
+                children: [
+                  SizedBox(height: 8),
+                  AccountCardSkeleton(),
+                  SizedBox(height: 8),
+                  BudgetCardSkeleton(),
+                  SizedBox(height: 8),
+                  DashboardCardSkeleton(),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Data is ready — stagger only once
     if (!_allRevealed && _revealedCount == 0 && widgets.isNotEmpty) {
-      // Kick off the first reveal
       _revealNext(widgets.length);
     }
 
@@ -93,22 +149,14 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
           key: const PageStorageKey('dashboard_scroll'),
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
-            // Help banner
             if (!hasSeenHelp) SliverToBoxAdapter(child: _HelpBanner()),
-
-            // Alert banners
             if (!hasSeenHelp && alerts.isNotEmpty)
-              SliverToBoxAdapter(
-                child: _AlertBanner(alerts: alerts),
-              ),
-
+              SliverToBoxAdapter(child: _AlertBanner(alerts: alerts)),
             SliverList(
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
                   final widget = widgets[index];
-
                   if (index < visibleCount) {
-                    // Reveal next after this one builds
                     if (index == visibleCount - 1 && !_allRevealed) {
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         _revealNext(widgets.length);
@@ -116,17 +164,14 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                     }
                     return _StaggeredEntry(
                       key: ValueKey(widget.id),
-                      child: widget.build(context, ref),
+                      child: _buildTrackedWidget(context, ref, widget),
                     );
                   }
-
-                  // Placeholder for not-yet-revealed widgets
                   return const SizedBox.shrink();
                 },
                 childCount: widgets.length,
               ),
             ),
-
             if (widgets.isEmpty)
               SliverFillRemaining(
                 hasScrollBody: false,
@@ -144,16 +189,14 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                         const SizedBox(height: 16),
                         Text(
                           'No cards enabled',
-                          style: textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: textTheme.titleLarge
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           'Enable dashboard cards to see your financial overview',
-                          style: textTheme.bodyMedium?.copyWith(
-                            color: color.onSurfaceVariant,
-                          ),
+                          style: textTheme.bodyMedium
+                              ?.copyWith(color: color.onSurfaceVariant),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 24),
@@ -167,12 +210,29 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                   ),
                 ),
               ),
-
-            // Bottom spacing
-            if (widgets.isNotEmpty)
-              const SliverToBoxAdapter(
-                child: SizedBox(height: 100),
+            if (widgets.isNotEmpty) ...[
+              SliverToBoxAdapter(
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: TextButton.icon(
+                      onPressed: () => context.push('/dashboard-customize'),
+                      icon: Icon(
+                        LucideIcons.settings2,
+                        size: 16,
+                        color: color.onSurfaceVariant,
+                      ),
+                      label: Text(
+                        'Customize Dashboard',
+                        style: textTheme.labelMedium
+                            ?.copyWith(color: color.onSurfaceVariant),
+                      ),
+                    ),
+                  ),
+                ),
               ),
+              const SliverToBoxAdapter(child: SizedBox(height: 100)),
+            ],
           ],
         ),
       ),
@@ -292,7 +352,11 @@ class _HelpBanner extends ConsumerWidget {
                     color: accent.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(spacing.radiusMedium),
                   ),
-                  child: Icon(LucideIcons.badgeQuestionMark, color: accent, size: 20),
+                  child: Icon(
+                    LucideIcons.badgeQuestionMark,
+                    color: accent,
+                    size: 20,
+                  ),
                 ),
                 const SizedBox(width: 14),
                 Expanded(

@@ -87,8 +87,10 @@ class _QuickAddTransactionSheetState
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final accountsAsync = ref.watch(accountsProvider);
-    final categoriesAsync = ref.watch(categoryListProvider);
+    final accountsAsync = ref.watch(frequencySortedAccountsProvider);
+
+    final type = _isExpense ? CategoryType.expense : CategoryType.income;
+    final categoriesAsync = ref.watch(frequencySortedCategoriesProvider(type));
 
     return Container(
       padding: EdgeInsets.only(
@@ -168,57 +170,67 @@ class _QuickAddTransactionSheetState
           Text('Account', style: textTheme.labelLarge),
           const SizedBox(height: 8),
           accountsAsync.when(
-            data: (accounts) => SizedBox(
-              height: 60,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: accounts.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 8),
-                itemBuilder: (_, i) {
-                  final acc = accounts[i];
-                  final selected = _selectedAccount?.id == acc.id;
-                  return GestureDetector(
-                    onTap: () => setState(() => _selectedAccount = acc),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: selected
-                            ? color.primaryContainer
-                            : color.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(12),
-                        border: selected
-                            ? Border.all(color: color.primary, width: 2)
-                            : null,
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.account_balance_wallet,
-                            size: 20,
-                            color: selected
-                                ? color.onPrimaryContainer
-                                : color.onSurface,
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            acc.name,
-                            style: textTheme.labelSmall?.copyWith(
+            data: (accounts) {
+              // Auto-select most-used account
+              if (_selectedAccount == null && accounts.isNotEmpty) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted && _selectedAccount == null) {
+                    setState(() => _selectedAccount = accounts.first);
+                  }
+                });
+              }
+              return SizedBox(
+                height: 60,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: accounts.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 8),
+                  itemBuilder: (_, i) {
+                    final acc = accounts[i];
+                    final selected = _selectedAccount?.id == acc.id;
+                    return GestureDetector(
+                      onTap: () => setState(() => _selectedAccount = acc),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: selected
+                              ? color.primaryContainer
+                              : color.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(12),
+                          border: selected
+                              ? Border.all(color: color.primary, width: 2)
+                              : null,
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.account_balance_wallet,
+                              size: 20,
                               color: selected
                                   ? color.onPrimaryContainer
                                   : color.onSurface,
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: 4),
+                            Text(
+                              acc.name,
+                              style: textTheme.labelSmall?.copyWith(
+                                color: selected
+                                    ? color.onPrimaryContainer
+                                    : color.onSurface,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  );
-                },
-              ),
-            ),
+                    );
+                  },
+                ),
+              );
+            },
             loading: () => const SizedBox(
               height: 60,
               child: Center(child: CircularProgressIndicator()),
@@ -236,14 +248,16 @@ class _QuickAddTransactionSheetState
           categoriesAsync.when(
             data: (categories) {
               final filtered = categories
-                  .where(
-                    (c) =>
-                        (_isExpense
-                            ? c.categoryType == CategoryType.expense
-                            : c.categoryType == CategoryType.income) &&
-                        c.parentCategory.value == null,
-                  )
+                  .where((c) => c.parentCategory.value == null)
                   .toList();
+              // Auto-select most-used category
+              if (_selectedCategory == null && filtered.isNotEmpty) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted && _selectedCategory == null) {
+                    setState(() => _selectedCategory = filtered.first);
+                  }
+                });
+              }
               return SizedBox(
                 height: 80,
                 child: ListView.separated(

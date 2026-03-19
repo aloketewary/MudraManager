@@ -31,7 +31,7 @@ class AchievementUnlockListener {
                 _shownAchievements.add(achievement.key);
                 Future.delayed(const Duration(milliseconds: 500), () {
                   if (context.mounted) {
-                    _showAchievementDialog(context, achievement);
+                    _showAchievementShowcase(context, achievement);
                   }
                 });
               }
@@ -42,18 +42,21 @@ class AchievementUnlockListener {
     );
   }
 
-  void _showAchievementDialog(BuildContext context, Achievement achievement) {
+  void _showAchievementShowcase(BuildContext context, Achievement achievement) {
     if (!context.mounted) return;
 
-    showDialog(
+    showGeneralDialog(
       context: context,
-      barrierDismissible: false,
-      builder: (context) => AchievementUnlockDialog(
-        title: achievement.title,
-        description: achievement.description,
-        icon: achievement.icon,
-        xpReward: achievement.rewardXP,
-      ),
+      barrierDismissible: true,
+      barrierLabel: 'Dismiss',
+      barrierColor: Colors.black.withValues(alpha: 0.75),
+      transitionDuration: const Duration(milliseconds: 300),
+      transitionBuilder: (_, anim, __, child) {
+        return FadeTransition(opacity: anim, child: child);
+      },
+      pageBuilder: (_, __, ___) {
+        return AchievementUnlockDialog(achievement: achievement);
+      },
     );
   }
 

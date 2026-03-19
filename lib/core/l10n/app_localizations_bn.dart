@@ -519,7 +519,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get profile_weAreNotStoringInfoText =>
-      'আমরা কোনো ডেটা সংরক্ষণ করছি না, সব ডেটা আপনার ডিভাইসে আছে!';
+      'আপনার সমস্ত ডেটা এই ডিভাইসেই সংরক্ষিত থাকে। কোনো সার্ভার নেই, কোনো ক্লাউড নেই, কোনো ট্র্যাকিংও নেই।';
 
   @override
   String get profile_saveButtonText => 'সংরক্ষণ করুন';

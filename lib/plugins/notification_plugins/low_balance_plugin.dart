@@ -36,7 +36,7 @@ class LowBalancePlugin extends NotificationPlugin {
 
   @override
   String getTitle(Transaction transaction) {
-    return '⚠️ Low Balance Alert';
+    return 'Might want to check your balance';
   }
 
   @override

@@ -156,7 +156,7 @@
   "profile_emailControllerHintText": "আপনার ইমেল লিখুন",
   "profile_phoneControllerText": "ফোন",
   "profile_phoneControllerHintText": "আপনার ফোন নম্বর লিখুন",
-  "profile_weAreNotStoringInfoText": "আমরা কোনো ডেটা সংরক্ষণ করছি না, সব ডেটা আপনার ডিভাইসে আছে!",
+  "profile_weAreNotStoringInfoText": "আপনার সমস্ত ডেটা এই ডিভাইসেই সংরক্ষিত থাকে। কোনো সার্ভার নেই, কোনো ক্লাউড নেই, কোনো ট্র্যাকিংও নেই।",
   "profile_saveButtonText": "সংরক্ষণ করুন",
   "profile_editUserProfileAppTitle": "ব্যবহারকারী প্রোফাইল সম্পাদনা করুন",
   "pendingTranx_reviewPendingTransactionsScreenTitle": "মুলতুবি লেনদেন",

@@ -378,7 +378,7 @@ class _SecuritySettingsScreenState
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          'Your PIN is stored securely on-device. Digits are randomized on entry for enhanced security. Biometric unlock requires PIN to be enabled first.',
+                          'Your PIN is stored securely on this device — it never touches a server. Digits are randomized on entry for extra protection.',
                           style: textTheme.bodySmall?.copyWith(
                             color: color.onSurfaceVariant,
                             height: 1.4,

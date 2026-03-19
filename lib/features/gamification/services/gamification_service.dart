@@ -191,90 +191,67 @@ class GamificationService {
   Future<void> track(GamificationEvent event) async {
     switch (event) {
       case GamificationEvent.transactionAdded:
-        await _increment('first_transaction');
-        await _increment('transaction_10');
-        await _increment('transaction_50');
-        await _increment('transaction_100');
-        await _increment('transaction_500');
+        await _incrementAll([
+          'first_transaction',
+          'transaction_10',
+          'transaction_50',
+          'transaction_100',
+          'transaction_500',
+        ]);
         break;
-
       case GamificationEvent.dailyCheckIn:
         await _handleDailyStreak();
         break;
-
       case GamificationEvent.goalCompleted:
-        await _increment('goal_completed');
+        await _incrementAll(['goal_completed']);
         break;
-
       case GamificationEvent.goalCreated:
-        await _increment('first_goal');
+        await _incrementAll(['first_goal']);
         break;
-
       case GamificationEvent.budgetCreated:
-        await _increment('first_budget');
+        await _incrementAll(['first_budget']);
         break;
-
       case GamificationEvent.smsTransactionApproved:
-        await _increment('sms_10');
-        await _increment('sms_50');
+        await _incrementAll(['sms_10', 'sms_50']);
         break;
-
       case GamificationEvent.categoryCreated:
-        await _increment('category_5');
-        await _increment('category_10');
+        await _incrementAll(['category_5', 'category_10']);
         break;
-
       case GamificationEvent.accountCreated:
-        await _increment('account_3');
-        await _increment('account_5');
+        await _incrementAll(['account_3', 'account_5']);
         break;
-
       case GamificationEvent.transferCompleted:
-        await _increment('transfer_10');
-        await _increment('transfer_50');
+        await _incrementAll(['transfer_10', 'transfer_50']);
         break;
-
       case GamificationEvent.recurringTransactionCreated:
-        await _increment('recurring_5');
-        await _increment('recurring_10');
+        await _incrementAll(['recurring_5', 'recurring_10']);
         break;
-
       case GamificationEvent.tagUsed:
-        await _increment('tag_5');
-        await _increment('tag_25');
+        await _incrementAll(['tag_5', 'tag_25']);
         break;
-
       case GamificationEvent.analyticsViewed:
-        await _increment('analytics_10');
+        await _incrementAll(['analytics_10']);
         break;
-
       case GamificationEvent.reportExported:
-        await _increment('export_first');
+        await _incrementAll(['export_first']);
         break;
-
       case GamificationEvent.tripCreated:
-        await _increment('trip_first');
-        await _increment('trip_5');
+        await _incrementAll(['trip_first', 'trip_5']);
         break;
-
       case GamificationEvent.backupCreated:
-        await _increment('first_backup');
-        await _increment('backup_10');
+        await _incrementAll(['first_backup', 'backup_10']);
         break;
-
       case GamificationEvent.expenseSplit:
-        await _increment('first_split');
-        await _increment('split_20');
+        await _incrementAll(['first_split', 'split_20']);
         break;
-
       case GamificationEvent.reconciliationDone:
-        await _increment('reconcile_first');
-        await _increment('reconcile_50');
+        await _incrementAll(['reconcile_first', 'reconcile_50']);
         break;
-
       case GamificationEvent.zeroSpendDay:
-        await _increment('zero_spend_1');
-        await _increment('zero_spend_10');
+        await _incrementAll(['zero_spend_1', 'zero_spend_10']);
+        break;
+      case GamificationEvent.transactionTrackedToday:
+        await _handleTrackingStreak();
         break;
     }
   }
@@ -318,7 +295,7 @@ class GamificationService {
       await _addXP(achievement.rewardXP, 'Achievement: ${achievement.title}');
       log.i('🏆 Achievement Unlocked: ${achievement.title}');
       SnackbarService.success(
-        '🏆 ${achievement.title} unlocked! +${achievement.rewardXP} XP',
+        '🏆 ${achievement.title} — nice, +${achievement.rewardXP} XP!',
       );
       NotificationService.showAchievementUnlocked(
         achievement.title,
@@ -334,57 +311,150 @@ class GamificationService {
     }
   }
 
-  Future<void> _increment(String key, [int amount = 1]) async {
-    var achievement =
-        await isar.achievements.filter().keyEqualTo(key).findFirst();
+  Future<void> _incrementAll(List<String> keys, [int amount = 1]) async {
+    final toSave = <Achievement>[];
+    final newlyUnlocked = <Achievement>[];
 
-    if (achievement == null) {
-      achievement = _clone(_getAchievementDefinition(key));
-      await isar.writeTxn(() => isar.achievements.put(achievement!));
-    }
+    for (final key in keys) {
+      var achievement =
+          await isar.achievements.filter().keyEqualTo(key).findFirst();
 
-    // Check if this achievement is locked in a series
-    if (achievement.series != null &&
-        achievement.seriesOrder != null &&
-        achievement.seriesOrder! > 1) {
-      // Check if previous in series is unlocked
-      final previous = await isar.achievements
-          .filter()
-          .seriesEqualTo(achievement.series)
-          .seriesOrderEqualTo(achievement.seriesOrder! - 1)
-          .findFirst();
+      achievement ??= _clone(_getAchievementDefinition(key));
 
-      if (previous == null || !previous.isUnlocked) {
-        // Previous not unlocked, skip this achievement
-        return;
+      // Check series lock
+      if (achievement.series != null &&
+          achievement.seriesOrder != null &&
+          achievement.seriesOrder! > 1) {
+        final previous = await isar.achievements
+            .filter()
+            .seriesEqualTo(achievement.series)
+            .seriesOrderEqualTo(achievement.seriesOrder! - 1)
+            .findFirst();
+        if (previous == null || !previous.isUnlocked) continue;
+      }
+
+      final wasUnlocked = achievement.isUnlocked;
+      achievement.progress += amount;
+      toSave.add(achievement);
+
+      if (!wasUnlocked && achievement.progress >= achievement.target) {
+        achievement.unlockedAt = DateTime.now();
+        newlyUnlocked.add(achievement);
       }
     }
 
-    final wasUnlocked = achievement.isUnlocked;
-    achievement.progress += amount;
+    if (toSave.isNotEmpty) {
+      await isar.writeTxn(() async {
+        await isar.achievements.putAll(toSave);
+      });
+    }
 
-    await isar.writeTxn(() => isar.achievements.put(achievement!));
-
-    if (!wasUnlocked && achievement.progress >= achievement.target) {
-      achievement.unlockedAt = DateTime.now();
-      await isar.writeTxn(() => isar.achievements.put(achievement!));
+    // Handle rewards outside the write transaction
+    for (final achievement in newlyUnlocked) {
       await _addXP(achievement.rewardXP, 'Achievement: ${achievement.title}');
       log.i('🏆 Achievement Unlocked: ${achievement.title}');
       SnackbarService.success(
-        '🏆 ${achievement.title} unlocked! +${achievement.rewardXP} XP',
+        '🏆 ${achievement.title} — nice, +${achievement.rewardXP} XP!',
       );
+
       NotificationService.showAchievementUnlocked(
         achievement.title,
         achievement.rewardXP,
       );
-
-      // Unlock next in series
       if (achievement.series != null) {
         await _unlockNextInSeries(
           achievement.series!,
           achievement.seriesOrder ?? 0,
         );
       }
+    }
+  }
+
+  Future<void> _handleTrackingStreak() async {
+    final now = DateTime.now();
+    final streak =
+        await isar.streaks.filter().typeEqualTo('tracking').findFirst() ??
+            (Streak()
+              ..type = 'tracking'
+              ..currentCount = 0
+              ..longestCount = 0
+              ..lastChecked = null
+              ..lastUpdated = now);
+
+    if (streak.lastChecked != null && _isSameDay(streak.lastChecked!, now)) {
+      return; // already counted today
+    }
+
+    if (streak.lastChecked != null &&
+        _isConsecutiveDay(streak.lastChecked!, now)) {
+      streak.currentCount++;
+    } else {
+      streak.currentCount = 1;
+    }
+
+    if (streak.currentCount > streak.longestCount) {
+      streak.longestCount = streak.currentCount;
+    }
+
+    streak.lastChecked = now;
+    streak.lastUpdated = now;
+
+    await isar.writeTxn(() => isar.streaks.put(streak));
+
+    if (streak.currentCount >= 3) {
+      await _setProgress('tracking_streak_3', streak.currentCount);
+    }
+    if (streak.currentCount >= 7) {
+      await _setProgress('tracking_streak_7', streak.currentCount);
+    }
+    if (streak.currentCount >= 30) {
+      await _setProgress('tracking_streak_30', streak.currentCount);
+    }
+  }
+
+  Future<void> _checkMonthlyBudgetCompletion() async {
+    final now = DateTime.now();
+    // Only run on the 1st (checking previous month)
+    if (now.day != 1) return;
+
+    final lastMonth = DateTime(now.year, now.month - 1, 1);
+    final lastMonthEnd = DateTime(now.year, now.month, 0, 23, 59, 59);
+
+    final budgets =
+        await isar.budgets.filter().isArchivedEqualTo(false).findAll();
+
+    if (budgets.isEmpty) return;
+
+    bool allUnderBudget = true;
+    for (final budget in budgets) {
+      await budget.categories.load();
+      await budget.allocations.load();
+      final (s, e) = budget.getCurrentPeriodRange(lastMonth);
+
+      // Only check budgets that were active last month
+      if (s.isAfter(lastMonthEnd) || e.isBefore(lastMonth)) continue;
+
+      double totalSpent = 0;
+      for (final alloc in budget.allocations) {
+        await alloc.category.load();
+        if (alloc.category.value == null) continue;
+        totalSpent += await isar.transactions
+            .filter()
+            .isExpenseEqualTo(true)
+            .dateBetween(s, e)
+            .category((q) => q.idEqualTo(alloc.category.value!.id))
+            .amountProperty()
+            .sum();
+      }
+
+      if (totalSpent > budget.amount) {
+        allUnderBudget = false;
+        break;
+      }
+    }
+
+    if (allUnderBudget) {
+      await _incrementAll(['budget_month_complete']);
     }
   }
 
@@ -402,36 +472,12 @@ class GamificationService {
 
   void _onLevelUp(int newLevel, int gainedLevels) {
     log.d('🎉 Level Up! New Level: $newLevel');
-    SnackbarService.success('🎉 Level Up! You are now Level $newLevel!');
+    SnackbarService.success('🎉 Level $newLevel! You just leveled up!');
     NotificationService.showLevelUp(newLevel);
   }
 
   Achievement _getAchievementDefinition(String key) {
     return AchievementRegistry.all[key]!;
-  }
-
-  Future<void> _unlock(Achievement ach, Achievement def) async {
-    ach.progress = def.target;
-    ach.unlockedAt = DateTime.now();
-
-    await _addXP(def.rewardXP, 'Achievement: ${ach.title}');
-
-    await isar.writeTxn(() => isar.achievements.put(ach));
-
-    print('🏆 Unlocked: ${ach.title}');
-  }
-
-  Future<Achievement> _getOrCreate(Achievement def) async {
-    final existing =
-        await isar.achievements.filter().keyEqualTo(def.key).findFirst();
-
-    if (existing != null) return existing;
-
-    final fresh = _clone(def);
-
-    await isar.writeTxn(() => isar.achievements.put(fresh));
-
-    return fresh;
   }
 
   Achievement _clone(Achievement def) {
@@ -742,11 +788,12 @@ class GamificationService {
     // -------------------------------
     // 3. Check budget adherence (async, don't await)
     // -------------------------------
-    _checkBudgetAdherence();
+    await _checkBudgetAdherence();
+    await _checkMonthlyBudgetCompletion();
     // Check zero-spend yesterday
     await _checkZeroSpendDay(now);
 
-// Check savings streak
+    // Check savings streak
     await _checkSavingsStreak(now);
 
     log.i('🎉 Check-in complete: Day $newStreak, +$xp XP');
