@@ -5,7 +5,10 @@ import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 
 enum AppThemeMode { system, light, dark, amoled }
 
-final highContrastModeProvider = StateNotifierProvider<HighContrastNotifier, bool>((ref) => HighContrastNotifier());
+final highContrastModeProvider =
+    StateNotifierProvider<HighContrastNotifier, bool>(
+  (ref) => HighContrastNotifier(),
+);
 
 class HighContrastNotifier extends StateNotifier<bool> {
   HighContrastNotifier() : super(false) {
@@ -25,13 +28,13 @@ class HighContrastNotifier extends StateNotifier<bool> {
 
 final themeModeProvider =
     StateNotifierProvider<ThemeModeNotifier, AppThemeMode>(
-      (ref) => ThemeModeNotifier(),
-    );
+  (ref) => ThemeModeNotifier(),
+);
 
 final themeNotifierProvider =
     StateNotifierProvider<ThemeNotifier, AppColorTheme>(
-      (ref) => ThemeNotifier(),
-    );
+  (ref) => ThemeNotifier(),
+);
 
 class ThemeModeNotifier extends StateNotifier<AppThemeMode> {
   static const _key = 'theme_mode';
@@ -58,19 +61,33 @@ class ThemeModeNotifier extends StateNotifier<AppThemeMode> {
 }
 
 class ThemeNotifier extends StateNotifier<AppColorTheme> {
-  ThemeNotifier() : super(AppColorTheme.dynamic) {
+  static const _key = 'selected_theme';
+
+  ThemeNotifier() : super(AppColorTheme.finance) {
     _loadTheme();
   }
 
   Future<void> _loadTheme() async {
     final prefs = await SharedPreferences.getInstance();
-    final index = prefs.getInt('selected_theme') ?? 0;
-    state = AppColorTheme.values[index];
+    final name = prefs.getString(_key);
+    if (name != null) {
+      state = AppColorTheme.values.firstWhere(
+        (e) => e.name == name,
+        orElse: () => AppColorTheme.finance,
+      );
+    }
   }
 
   Future<void> setTheme(AppColorTheme theme) async {
     state = theme;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('selected_theme', theme.index);
+    await prefs.setString(_key, theme.name);
+  }
+
+  /// Revert to free theme when Pro expires.
+  Future<void> enforceFreeTheme() async {
+    if (state.isPro) {
+      await setTheme(AppColorTheme.finance);
+    }
   }
 }

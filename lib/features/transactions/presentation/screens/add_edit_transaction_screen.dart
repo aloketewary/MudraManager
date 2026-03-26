@@ -12,6 +12,7 @@ import 'package:mudra_manager/core/db/models/tag.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/models/trip.dart';
 import 'package:mudra_manager/core/db/models/sms_activity.dart';
+import 'package:mudra_manager/core/entitlement/entitlement_feature.dart';
 import 'package:mudra_manager/core/extension/account_type_extenstion.dart';
 import 'package:mudra_manager/core/extension/localization_extenstion.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
@@ -23,6 +24,7 @@ import 'package:mudra_manager/core/services/notification_service.dart';
 import 'package:mudra_manager/core/services/widget_service.dart';
 import 'package:mudra_manager/core/utils/icon_helper.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
+import 'package:mudra_manager/features/account/data/account_access_provider.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/budget/data/budget_alert_provider.dart';
 import 'package:mudra_manager/features/budget/data/budget_alert_service.dart';
@@ -672,6 +674,10 @@ class _AddEditTransactionScreenState
 
                       return accountsAsync.when(
                         data: (accounts) {
+                          final unlockedIds = ref
+                                  .watch(unlockedAccountIdsProvider)
+                                  .valueOrNull ??
+                              {};
                           // Auto-scroll to selected account
                           if (_selectedAccount != null) {
                             final idx = accounts.indexWhere(
@@ -738,10 +744,80 @@ class _AddEditTransactionScreenState
                                 child: ListView.separated(
                                   controller: _accountScrollController,
                                   scrollDirection: Axis.horizontal,
-                                  itemCount: accounts.length,
+                                  itemCount: accounts.length + 1,
                                   separatorBuilder: (_, __) =>
                                       SizedBox(width: spacing.elementGap),
                                   itemBuilder: (context, index) {
+                                    if (index == accounts.length) {
+                                      return GestureDetector(
+                                        onTap: () async {
+                                          final result =
+                                              await context.push<bool>(
+                                            '/manage-accounts/add',
+                                            extra: widget.smsActivity != null
+                                                ? {
+                                                    'accountNumber': widget
+                                                        .smsActivity!.account,
+                                                    'bankName': widget
+                                                        .smsActivity!.fromBank,
+                                                  }
+                                                : null,
+                                          );
+                                          if (result == true) {
+                                            ref.invalidate(accountsProvider);
+                                            ref.invalidate(allAccountsProvider);
+                                            ref.invalidate(
+                                              frequencySortedAccountsProvider,
+                                            );
+                                            // Re-fetch balance map
+                                            ref
+                                                .read(accountServiceProvider)
+                                                .getAccountBalanceMap()
+                                                .then((val) {
+                                              if (mounted) {
+                                                setState(
+                                                  () => _balanceMap = val,
+                                                );
+                                              }
+                                            });
+                                          }
+                                        },
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 14,
+                                            vertical: 8,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: color.surfaceContainerHigh,
+                                            borderRadius: BorderRadius.circular(
+                                              spacing.radiusMedium,
+                                            ),
+                                            border: Border.all(
+                                              color: color.outlineVariant
+                                                  .withValues(alpha: 0.2),
+                                            ),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(
+                                                Icons.add,
+                                                size: 16,
+                                                color: color.onSurfaceVariant,
+                                              ),
+                                              const SizedBox(width: 6),
+                                              Text(
+                                                ctxt.common_addLabel,
+                                                style: textTheme.labelMedium
+                                                    ?.copyWith(
+                                                  color: color.onSurfaceVariant,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    }
                                     final account = accounts[index];
                                     final isSelected =
                                         _selectedAccount?.id == account.id;
@@ -751,10 +827,19 @@ class _AddEditTransactionScreenState
                                     );
                                     final balance = _balanceMap[account.id] ??
                                         account.initialBalance;
+                                    final isLocked =
+                                        !unlockedIds.contains(account.id);
 
                                     return GestureDetector(
                                       onTap: () {
                                         HapticFeedback.selectionClick();
+                                        if (isLocked) {
+                                          _showUnlockPrompt(
+                                            accounts.length -
+                                                unlockedIds.length,
+                                          );
+                                          return;
+                                        }
                                         setState(
                                           () => _selectedAccount = account,
                                         );
@@ -769,7 +854,12 @@ class _AddEditTransactionScreenState
                                         decoration: BoxDecoration(
                                           color: isSelected
                                               ? acColor.withValues(alpha: 0.1)
-                                              : color.surfaceContainerHighest,
+                                              : isLocked
+                                                  ? color
+                                                      .surfaceContainerHighest
+                                                      .withValues(alpha: 0.5)
+                                                  : color
+                                                      .surfaceContainerHighest,
                                           borderRadius: BorderRadius.circular(
                                             spacing.radiusMedium,
                                           ),
@@ -834,6 +924,15 @@ class _AddEditTransactionScreenState
                                                 ),
                                               ],
                                             ),
+                                            if (isLocked) ...[
+                                              const SizedBox(width: 6),
+                                              Icon(
+                                                LucideIcons.lock,
+                                                size: 14,
+                                                color: color.onSurfaceVariant
+                                                    .withValues(alpha: 0.4),
+                                              ),
+                                            ],
                                           ],
                                         ),
                                       ),
@@ -1115,12 +1214,87 @@ class _AddEditTransactionScreenState
                                             controller:
                                                 _subcategoryScrollController,
                                             scrollDirection: Axis.horizontal,
-                                            itemCount: children.length,
+                                            itemCount: children.length + 1,
                                             separatorBuilder: (_, __) =>
                                                 SizedBox(
                                               width: spacing.elementGap,
                                             ),
                                             itemBuilder: (context, index) {
+                                              if (index == children.length) {
+                                                return GestureDetector(
+                                                  onTap: () async {
+                                                    final result = await context
+                                                        .push<bool>(
+                                                      AppRoutes.addCategory,
+                                                      extra: {
+                                                        'parent': expanded,
+                                                        'type': _isExpense
+                                                            ? CategoryType
+                                                                .expense
+                                                            : CategoryType
+                                                                .income,
+                                                      },
+                                                    );
+                                                    if (result == true) {
+                                                      ref.invalidate(
+                                                        frequencySortedCategoriesProvider,
+                                                      );
+                                                      ref.invalidate(
+                                                        categoryListProvider,
+                                                      );
+                                                      ref.invalidate(
+                                                        selectableCategoriesProvider,
+                                                      );
+                                                    }
+                                                  },
+                                                  child: Container(
+                                                    padding: const EdgeInsets
+                                                        .symmetric(
+                                                      horizontal: 12,
+                                                      vertical: 6,
+                                                    ),
+                                                    decoration: BoxDecoration(
+                                                      color: color
+                                                          .surfaceContainerHigh,
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                        spacing.radiusSmall,
+                                                      ),
+                                                      border: Border.all(
+                                                        color: color
+                                                            .outlineVariant
+                                                            .withValues(
+                                                          alpha: 0.15,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    child: Row(
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      children: [
+                                                        Icon(
+                                                          Icons.add,
+                                                          size: 14,
+                                                          color: color
+                                                              .onSurfaceVariant,
+                                                        ),
+                                                        const SizedBox(
+                                                          width: 6,
+                                                        ),
+                                                        Text(
+                                                          'Add',
+                                                          style: textTheme
+                                                              .labelMedium
+                                                              ?.copyWith(
+                                                            color: color
+                                                                .onSurfaceVariant,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                );
+                                              }
                                               final sub = children[index];
                                               final subColor = Color(
                                                 sub.colorValue ??
@@ -1445,6 +1619,17 @@ class _AddEditTransactionScreenState
       SnackbarService.error(ctxt.transaction_selectOneAccountErrorText);
       return;
     }
+
+    final unlocked =
+        await ref.read(isAccountUnlockedProvider(_selectedAccount!.id).future);
+    if (!unlocked) {
+      SnackbarService.error(
+        'This account is locked. Upgrade to Pro to use it.',
+      );
+      setState(() => _saving = false);
+      return;
+    }
+
     if (_selectedCategory == null) {
       SnackbarService.error(ctxt.transaction_selectOneCategoryErrorText);
       return;
@@ -2062,5 +2247,57 @@ class _AddEditTransactionScreenState
     if (alerts.isNotEmpty) {
       ref.read(budgetAlertsProvider.notifier).addAlerts(alerts);
     }
+  }
+
+  void _showUnlockPrompt(int lockedCount) {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(LucideIcons.lock, size: 32, color: color.primary),
+            const SizedBox(height: 12),
+            Text(
+              'Unlock all $lockedCount accounts with Pro',
+              style:
+                  textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Free plan includes ${FreeTierLimits.maxAccounts} accounts. Upgrade to use all your accounts.',
+              style:
+                  textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            FilledButton(
+              onPressed: () {
+                ctx.pop();
+                context.push(AppRoutes.upgrade);
+              },
+              style: FilledButton.styleFrom(
+                minimumSize: const Size(double.infinity, 48),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text(
+                'See Pro Plans',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

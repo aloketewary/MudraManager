@@ -3,13 +3,13 @@ import '../sms_parser_plugin.dart';
 class KotakSmsParserPlugin extends SmsParserPlugin {
   @override
   String get id => 'kotak_sms_parser';
-  
+
   @override
   String get name => 'Kotak Bank SMS Parser';
-  
+
   @override
-  String get version => '1.0.0';
-  
+  String get version => '1.0.1';
+
   @override
   String get bankName => 'KOTAK';
 
@@ -31,12 +31,18 @@ class KotakSmsParserPlugin extends SmsParserPlugin {
     final amountRegex = RegExp(r'Rs\.?\s*(\d+(?:,\d+)*(?:\.\d{2})?)');
     final accountRegex = RegExp(r'A/c\s*[xX]*(\d{4})');
     final typeRegex = RegExp(r'(debited|credited)', caseSensitive: false);
-    final balanceRegex = RegExp(r'Avl\s*Bal[:\s]*Rs\.?\s*(\d+(?:,\d+)*(?:\.\d{2})?)');
+    final balanceRegex =
+        RegExp(r'Avl\s*Bal[:\s]*Rs\.?\s*(\d+(?:,\d+)*(?:\.\d{2})?)');
 
     final amount = _extractAmount(amountRegex, body);
     final account = accountRegex.firstMatch(body)?.group(1);
     final type = typeRegex.firstMatch(body)?.group(1)?.toLowerCase();
     final balance = _extractAmount(balanceRegex, body);
+    final bodyLower = body.toLowerCase();
+    final isLikelyTransfer = bodyLower.contains('neft') ||
+        bodyLower.contains('imps') ||
+        bodyLower.contains('rtgs') ||
+        bodyLower.contains('transfer');
 
     if (amount == null) return null;
 
@@ -45,6 +51,7 @@ class KotakSmsParserPlugin extends SmsParserPlugin {
       isIncome: type == 'credited',
       account: account,
       balance: balance,
+      isLikelyTransfer: isLikelyTransfer,
     );
   }
 

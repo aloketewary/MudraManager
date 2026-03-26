@@ -1,99 +1,88 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
+import 'package:mudra_manager/core/providers/collection_watchers.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 
-final historicalBalanceProvider =
-    FutureProvider.autoDispose<List<double>>((ref) async {
-  final isar = ref.watch(isarServiceProvider);
-  final db = await isar.getInstance();
+class HistoricalData {
+  final List<double> balances; // 7 days
+  final List<double> income; // 6 days
+  final List<double> expense; // 6 days
 
+  const HistoricalData({
+    required this.balances,
+    required this.income,
+    required this.expense,
+  });
+}
+
+final _historicalDataProvider =
+    FutureProvider.autoDispose<HistoricalData>((ref) async {
+  ref.watch(transactionChangeProvider);
+  final db = await ref.watch(isarServiceProvider).getInstance();
   final now = DateTime.now();
-  final last7Days = <double>[];
+  final today = DateTime(now.year, now.month, now.day);
 
-  for (int i = 6; i >= 0; i--) {
-    final date = now.subtract(Duration(days: i));
-    final startOfDay = DateTime(date.year, date.month, date.day);
-    final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);
+  // Single query: all non-transfer transactions ever
+  final allTxns = await db.transactions
+      .where()
+      .dateBetween(DateTime.fromMillisecondsSinceEpoch(0), now)
+      .findAll();
 
-    final txns = await db.transactions
-        .where()
-        .dateBetween(DateTime.fromMillisecondsSinceEpoch(0), endOfDay)
-        .findAll();
+  // Running balance up to each of the last 7 days
+  final balances = List.filled(7, 0.0);
+  // Per-day income/expense for last 6 days
+  final dailyIncome = List.filled(6, 0.0);
+  final dailyExpense = List.filled(6, 0.0);
 
-    double balance = 0;
-    for (var txn in txns) {
-      if (!txn.isExpense && !txn.isTransfer) {
-        balance += txn.amount;
-      } else if (txn.isExpense && !txn.isTransfer) {
-        balance -= txn.amount;
+  for (final txn in allTxns) {
+    if (txn.isTransfer) continue;
+
+    final amount = txn.isExpense ? -txn.amount : txn.amount;
+
+    // Balance: accumulate for each day this txn falls on or before
+    final txnDay = DateTime(txn.date.year, txn.date.month, txn.date.day);
+    for (int i = 0; i < 7; i++) {
+      final day = today.subtract(Duration(days: 6 - i));
+      if (!txnDay.isAfter(day)) {
+        balances[i] += amount;
       }
     }
 
-    last7Days.add(balance);
+    // Income/Expense: bucket into the specific day
+    final dayDiff = today.difference(txnDay).inDays;
+    if (dayDiff >= 0 && dayDiff < 6) {
+      final idx = 5 - dayDiff;
+      if (txn.isExpense) {
+        dailyExpense[idx] += txn.amount;
+      } else {
+        dailyIncome[idx] += txn.amount;
+      }
+    }
   }
 
-  return last7Days;
+  return HistoricalData(
+    balances: balances,
+    income: dailyIncome,
+    expense: dailyExpense,
+  );
+});
+
+// Derived providers — zero extra computation
+final historicalBalanceProvider =
+    FutureProvider.autoDispose<List<double>>((ref) async {
+  final data = await ref.watch(_historicalDataProvider.future);
+  return data.balances;
 });
 
 final historicalIncomeProvider =
     FutureProvider.autoDispose<List<double>>((ref) async {
-  final isar = ref.watch(isarServiceProvider);
-  final db = await isar.getInstance();
-
-  final now = DateTime.now();
-  final last6Days = <double>[];
-
-  for (int i = 5; i >= 0; i--) {
-    final date = now.subtract(Duration(days: i));
-    final startOfDay = DateTime(date.year, date.month, date.day);
-    final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);
-
-    final txns = await db.transactions
-        .where()
-        .dateBetween(startOfDay, endOfDay)
-        .findAll();
-
-    double income = 0;
-    for (var txn in txns) {
-      if (!txn.isExpense && !txn.isTransfer) {
-        income += txn.amount;
-      }
-    }
-
-    last6Days.add(income);
-  }
-
-  return last6Days;
+  final data = await ref.watch(_historicalDataProvider.future);
+  return data.income;
 });
 
 final historicalExpenseProvider =
     FutureProvider.autoDispose<List<double>>((ref) async {
-  final isar = ref.watch(isarServiceProvider);
-  final db = await isar.getInstance();
-
-  final now = DateTime.now();
-  final last6Days = <double>[];
-
-  for (int i = 5; i >= 0; i--) {
-    final date = now.subtract(Duration(days: i));
-    final startOfDay = DateTime(date.year, date.month, date.day);
-    final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);
-
-    final txns = await db.transactions
-        .where()
-        .dateBetween(startOfDay, endOfDay)
-        .findAll();
-
-    double expense = 0;
-    for (var txn in txns) {
-      if (txn.isExpense && !txn.isTransfer) {
-        expense += txn.amount;
-      }
-    }
-
-    last6Days.add(expense);
-  }
-
-  return last6Days;
+  final data = await ref.watch(_historicalDataProvider.future);
+  return data.expense;
 });

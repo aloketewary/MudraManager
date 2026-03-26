@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/providers/collection_watchers.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/services/plugin_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,9 +12,6 @@ import 'package:mudra_manager/features/gamification/models/gamification_enum.dar
 import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
 import 'package:mudra_manager/features/gamification/services/gamification_service.dart';
 import 'package:mudra_manager/features/transactions/presentation/widgets/transaction_group.dart';
-
-// Refresh notifier to force provider updates
-final transactionRefreshProvider = StateProvider<int>((ref) => 0);
 
 final transactionProvider = Provider<TransactionService>((ref) {
   final isarService = ref.watch(isarServiceProvider);
@@ -89,7 +87,7 @@ final sectionedTransactionsProvider = FutureProvider.autoDispose
   ref,
   arg,
 ) async {
-  ref.watch(transactionRefreshProvider);
+  ref.watch(transactionChangeProvider);
   final transactions = await ref.watch(
     transactionsByMonthAndTypeProvider(arg).future,
   );
@@ -114,7 +112,7 @@ final sectionedTransactionsProvider = FutureProvider.autoDispose
 final sectionedTransactionsByDateRangeProvider = FutureProvider.autoDispose
     .family<List<TxListEntry>, ({DateTime start, DateTime end, String type})>(
         (ref, arg) async {
-  ref.watch(transactionRefreshProvider);
+  ref.watch(transactionChangeProvider);
   final startDate = DateTime(
     arg.start.year,
     arg.start.month,
@@ -161,7 +159,7 @@ final sectionedTransactionsByDateRangeProvider = FutureProvider.autoDispose
 
 final allSectionedTransactionsProvider = FutureProvider.autoDispose
     .family<List<TxListEntry>, String>((ref, type) async {
-  ref.watch(transactionRefreshProvider);
+  ref.watch(transactionChangeProvider);
   final service = ref.watch(transactionProvider);
 
   List<Transaction> transactions;

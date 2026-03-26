@@ -8,6 +8,7 @@ import 'package:home_widget/home_widget.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/db/models/notification_record.dart';
 import 'package:mudra_manager/core/db/models/user_profile.dart';
+import 'package:mudra_manager/core/entitlement/entitlement_provider.dart';
 import 'package:mudra_manager/core/extension/localization_extenstion.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
@@ -136,6 +137,7 @@ class HomePageState extends ConsumerState<HomePage>
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(themeEntitlementGuardProvider);
     final profileAsync = ref.watch(userProfileProvider);
     final ctxt = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -301,25 +303,65 @@ class HomePageState extends ConsumerState<HomePage>
               label: 'Insights',
             ),
             NavigationDestination(
-              icon: SvgPicture.asset(
-                'assets/logo/nav/outline/profile.svg',
-                colorFilter: ColorFilter.mode(
-                  isDark ? Colors.white : Colors.black,
-                  BlendMode.srcIn,
-                ),
+              icon: Consumer(
+                builder: (context, ref, _) {
+                  final isPro = ref.watch(isProProvider).valueOrNull ?? false;
+                  return Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      SvgPicture.asset(
+                        'assets/logo/nav/outline/profile.svg',
+                        colorFilter: ColorFilter.mode(
+                          isDark ? Colors.white : Colors.black,
+                          BlendMode.srcIn,
+                        ),
+                      ),
+                      if (isPro)
+                        const Positioned(
+                          right: -4,
+                          top: -4,
+                          child: Icon(
+                            LucideIcons.crown,
+                            size: 10,
+                            color: Color(0xFFD4AF37),
+                          ),
+                        ),
+                    ],
+                  );
+                },
               ),
-              selectedIcon: SvgPicture.asset(
-                'assets/logo/nav/solid/profile.svg',
-                colorFilter: ColorFilter.mode(
-                  isDark ? Colors.white : Colors.black,
-                  BlendMode.srcIn,
-                ),
-              ).animate(target: _selectedIndex == 4 ? 1 : 0).scale(
-                    begin: const Offset(0.9, 0.9),
-                    end: const Offset(1, 1),
-                    curve: Curves.easeOutCubic,
-                    duration: 250.ms,
-                  ),
+              selectedIcon: Consumer(
+                builder: (context, ref, _) {
+                  final isPro = ref.watch(isProProvider).valueOrNull ?? false;
+                  return Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      SvgPicture.asset(
+                        'assets/logo/nav/solid/profile.svg',
+                        colorFilter: ColorFilter.mode(
+                          isDark ? Colors.white : Colors.black,
+                          BlendMode.srcIn,
+                        ),
+                      ).animate(target: _selectedIndex == 4 ? 1 : 0).scale(
+                            begin: const Offset(0.9, 0.9),
+                            end: const Offset(1, 1),
+                            curve: Curves.easeOutCubic,
+                            duration: 250.ms,
+                          ),
+                      if (isPro)
+                        const Positioned(
+                          right: -4,
+                          top: -4,
+                          child: Icon(
+                            LucideIcons.crown,
+                            size: 10,
+                            color: Color(0xFFD4AF37),
+                          ),
+                        ),
+                    ],
+                  );
+                },
+              ),
               label: ctxt.profile_screen_title,
             ),
           ],
@@ -337,6 +379,7 @@ class HomePageState extends ConsumerState<HomePage>
                 ),
                 TransactionListScreen(
                   key: transactionListKey,
+                  isTabActive: _selectedIndex == 1,
                   onScrollChanged: (isScrollingDown) {
                     if (isScrollingDown) {
                       _fabController.reverse();
@@ -354,7 +397,7 @@ class HomePageState extends ConsumerState<HomePage>
               ExpandableFab(
                 key: _speedDialKey,
                 visibilityController: _fabController,
-                padding: const EdgeInsets.only(bottom: 96),
+                padding: const EdgeInsets.only(bottom: 16),
               ),
           ],
         ),
@@ -378,80 +421,83 @@ class HomePageState extends ConsumerState<HomePage>
       case 0:
         return AppBar(
           automaticallyImplyLeading: false,
-          title: Row(
-            children: [
-              profileAsync.when(
-                data: (profile) => SizedBox(
-                  width: 32,
-                  height: 32,
-                  child: ClipOval(
-                    child: BoringAvatar(
-                      name: profile?.name ?? 'User',
-                      palette: BoringAvatarPalette([
-                        color.primary,
-                        color.tertiary,
-                        color.primaryContainer,
-                        color.tertiaryContainer,
-                      ]),
-                      type: BoringAvatarType.beam,
+          title: GestureDetector(
+            onTap: () => _onTabSelected(4),
+            child: Row(
+              children: [
+                profileAsync.when(
+                  data: (profile) => SizedBox(
+                    width: 32,
+                    height: 32,
+                    child: ClipOval(
+                      child: BoringAvatar(
+                        name: profile?.name ?? 'User',
+                        palette: BoringAvatarPalette([
+                          color.primary,
+                          color.tertiary,
+                          color.primaryContainer,
+                          color.tertiaryContainer,
+                        ]),
+                        type: BoringAvatarType.beam,
+                      ),
+                    ),
+                  ),
+                  loading: () => Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: color.surfaceContainerHighest,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  error: (_, __) => Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: color.surfaceContainerHighest,
+                      shape: BoxShape.circle,
                     ),
                   ),
                 ),
-                loading: () => Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: color.surfaceContainerHighest,
-                    shape: BoxShape.circle,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      profileAsync.when(
+                        data: (profile) => AnimatedGreeting(
+                          greeting: '${ctxt.translate(greeting)},',
+                          name: profile?.name ?? 'Awesome User',
+                          greetingStyle: textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w400,
+                          ),
+                          nameStyle: textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        loading: () => AdaptiveText(
+                          '${ctxt.translate(greeting)},',
+                          style: textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w400,
+                          ),
+                          maxLines: 1,
+                        ),
+                        error: (_, __) => AdaptiveText(
+                          '${ctxt.translate(greeting)},',
+                          style: textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w400,
+                          ),
+                          maxLines: 1,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                error: (_, __) => Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: color.surfaceContainerHighest,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    profileAsync.when(
-                      data: (profile) => AnimatedGreeting(
-                        greeting: '${ctxt.translate(greeting)},',
-                        name: profile?.name ?? 'Awesome User',
-                        greetingStyle: textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w400,
-                        ),
-                        nameStyle: textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      loading: () => AdaptiveText(
-                        '${ctxt.translate(greeting)},',
-                        style: textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w400,
-                        ),
-                        maxLines: 1,
-                      ),
-                      error: (_, __) => AdaptiveText(
-                        '${ctxt.translate(greeting)},',
-                        style: textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w400,
-                        ),
-                        maxLines: 1,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
           actions: [
-             Padding(
+            Padding(
               padding: EdgeInsets.symmetric(horizontal: spacing.cardHorizontal),
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.end,

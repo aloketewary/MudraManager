@@ -6,7 +6,7 @@ class PaytmSmsParserPlugin extends SmsParserPlugin {
   @override
   String get name => 'Paytm SMS Parser';
   @override
-  String get version => '1.0.0';
+  String get version => '1.0.1';
   @override
   String get bankName => 'PAYTM';
 
@@ -24,12 +24,18 @@ class PaytmSmsParserPlugin extends SmsParserPlugin {
     if (!_hasTransactionKeywords(body)) return null;
 
     final amountRegex = RegExp(r'Rs\.?\s*(\d+(?:,\d+)*(?:\.\d{2})?)');
-    final typeRegex = RegExp(r'(sent|received|credited|debited)', caseSensitive: false);
+    final typeRegex =
+        RegExp(r'(sent|received|credited|debited)', caseSensitive: false);
     final merchantRegex = RegExp(r'(?:to|from)\s+([^\s]+)');
 
     final amount = _extractAmount(amountRegex, body);
     final type = typeRegex.firstMatch(body)?.group(1)?.toLowerCase();
     final merchant = merchantRegex.firstMatch(body)?.group(1);
+    final bodyLower = body.toLowerCase();
+    final isLikelyTransfer = bodyLower.contains('neft') ||
+        bodyLower.contains('imps') ||
+        bodyLower.contains('rtgs') ||
+        bodyLower.contains('transfer');
 
     if (amount == null) return null;
 
@@ -38,6 +44,7 @@ class PaytmSmsParserPlugin extends SmsParserPlugin {
       isIncome: type == 'received' || type == 'credited',
       transactionType: 'UPI',
       merchant: merchant,
+      isLikelyTransfer: isLikelyTransfer,
     );
   }
 
@@ -66,7 +73,7 @@ class PhonePeSmsParserPlugin extends SmsParserPlugin {
   @override
   String get name => 'PhonePe SMS Parser';
   @override
-  String get version => '1.0.0';
+  String get version => '1.0.1';
   @override
   String get bankName => 'PHONEPE';
 
@@ -93,6 +100,11 @@ class PhonePeSmsParserPlugin extends SmsParserPlugin {
     final amount = _extractAmount(amountRegex, body);
     final type = typeRegex.firstMatch(body)?.group(1)?.toLowerCase();
     final merchant = merchantRegex.firstMatch(body)?.group(1);
+    final bodyLower = body.toLowerCase();
+    final isLikelyTransfer = bodyLower.contains('neft') ||
+        bodyLower.contains('imps') ||
+        bodyLower.contains('rtgs') ||
+        bodyLower.contains('transfer');
 
     if (amount == null) return null;
 
@@ -101,6 +113,7 @@ class PhonePeSmsParserPlugin extends SmsParserPlugin {
       isIncome: type == 'received',
       transactionType: 'UPI',
       merchant: merchant,
+      isLikelyTransfer: isLikelyTransfer,
     );
   }
 
@@ -129,7 +142,7 @@ class GpaySmsParserPlugin extends SmsParserPlugin {
   @override
   String get name => 'Google Pay SMS Parser';
   @override
-  String get version => '1.0.0';
+  String get version => '1.0.1';
   @override
   String get bankName => 'GPAY';
 
@@ -156,6 +169,9 @@ class GpaySmsParserPlugin extends SmsParserPlugin {
     final amount = _extractAmount(amountRegex, body);
     final type = typeRegex.firstMatch(body)?.group(1)?.toLowerCase();
     final merchant = merchantRegex.firstMatch(body)?.group(1);
+    final bodyLower = body.toLowerCase();
+    final isLikelyTransfer =
+        bodyLower.contains('transfer') || bodyLower.contains('sent to bank');
 
     if (amount == null) return null;
 
@@ -164,6 +180,7 @@ class GpaySmsParserPlugin extends SmsParserPlugin {
       isIncome: type == 'received',
       transactionType: 'UPI',
       merchant: merchant,
+      isLikelyTransfer: isLikelyTransfer,
     );
   }
 

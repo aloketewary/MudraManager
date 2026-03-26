@@ -3,14 +3,18 @@ import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
+import 'package:mudra_manager/core/entitlement/entitlement_provider.dart';
+import 'package:mudra_manager/core/providers/collection_watchers.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
 import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
 import 'package:mudra_manager/features/gamification/services/gamification_service.dart';
+import 'package:mudra_manager/features/marketplace/services/marketplace_service.dart';
 
 final categoryListProvider =
     FutureProvider.autoDispose<List<Category>>((ref) async {
+  ref.watch(categoryChangeProvider);
   final isar = await ref.watch(isarServiceProvider).getInstance();
   final categories = await isar.categorys.where().findAll();
   for (final category in categories) {
@@ -19,8 +23,22 @@ final categoryListProvider =
   return categories;
 });
 
+final selectableCategoriesProvider = FutureProvider.autoDispose
+    .family<List<Category>, CategoryType>((ref, type) async {
+  final all = await ref.watch(frequencySortedCategoriesProvider(type).future);
+  final hasAccess = await ref.watch(hasFullAccessProvider.future);
+  if (hasAccess) return all;
+
+  final marketplace = MarketplaceService();
+  return all.where((c) {
+    if (c.packId == null) return true; // user-created or default
+    return marketplace.isPluginEnabledSync(c.packId!);
+  }).toList();
+});
+
 final incomeCategoriesProvider =
     FutureProvider.autoDispose<List<Category>>((ref) async {
+  ref.watch(categoryChangeProvider);
   final isar = await ref.watch(isarServiceProvider).getInstance();
   final categories = await isar.categorys
       .filter()
@@ -34,6 +52,7 @@ final incomeCategoriesProvider =
 
 final expenseCategoriesProvider =
     FutureProvider.autoDispose<List<Category>>((ref) async {
+  ref.watch(categoryChangeProvider);
   final isar = await ref.watch(isarServiceProvider).getInstance();
   final categories = await isar.categorys
       .filter()
@@ -56,6 +75,7 @@ final categoryServiceProvider = Provider((ref) {
 /// Falls back to alphabetical for unused categories.
 final frequencySortedCategoriesProvider = FutureProvider.autoDispose
     .family<List<Category>, CategoryType>((ref, type) async {
+  ref.watch(categoryChangeProvider);
   final isar = await ref.watch(isarServiceProvider).getInstance();
 
   final categories =

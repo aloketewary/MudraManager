@@ -112,7 +112,7 @@ class BillsScreen extends ConsumerWidget {
         loading: () => ListView.builder(
           padding: const EdgeInsets.all(16),
           itemCount: 4,
-          itemBuilder: (context, index) => const SkeletonListTile(),
+          itemBuilder: (context, index) => const TransactionCardSkeleton(),
         ),
         error: (e, _) => Center(child: Text('Error: $e')),
       ),

@@ -100,7 +100,7 @@ class ExpandableFabState extends State<ExpandableFab>
         Positioned(
           left: 0,
           right: 0,
-          bottom: widget.padding.bottom,
+          bottom: widget.padding.bottom + MediaQuery.of(context).padding.bottom,
           child: _buildVisibilityWrapper(
             child: Center(
               child: AnimatedBuilder(

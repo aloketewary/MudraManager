@@ -27,7 +27,7 @@ class CategorySelector extends ConsumerWidget {
     final ctxt = AppLocalizations.of(context)!;
 
     return ref
-        .watch(categoryListProvider)
+        .watch(selectableCategoriesProvider(categoryType))
         .when(
           data: (categories) {
             final filtered = categories

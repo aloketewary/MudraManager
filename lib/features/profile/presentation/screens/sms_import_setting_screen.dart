@@ -12,6 +12,7 @@ import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/core/utils/transaction_msg_util.dart';
+import 'package:mudra_manager/features/dashboard/presentation/providers/permission_provider.dart';
 import 'package:mudra_manager/features/sms/data/sms_processor_service.dart';
 import 'package:mudra_manager/features/sms/presentation/screens/sms_activity_screen.dart';
 import 'package:mudra_manager/features/transactions/data/pending_transaction_prodiver.dart';
@@ -34,6 +35,7 @@ class _SmsImportSettingsScreenState
   final TransactionUtil _transactionUtil = TransactionUtil();
   bool _permissionGranted = false;
   bool _loaded = false;
+  int _permissionDisableTapCount = 0;
 
   @override
   void initState() {
@@ -46,10 +48,6 @@ class _SmsImportSettingsScreenState
       });
     });
   }
-
-  int get _activeCount =>
-      (_permissionGranted ? 1 : 0) +
-      (_smsImportEnabled && _permissionGranted ? 1 : 0);
 
   @override
   Widget build(BuildContext context) {
@@ -119,8 +117,11 @@ class _SmsImportSettingsScreenState
                   ),
                   child: Row(
                     children: [
-                      const Icon(LucideIcons.shieldCheck,
-                          color: Color(0xFF009688), size: 20,),
+                      const Icon(
+                        LucideIcons.shieldCheck,
+                        color: Color(0xFF009688),
+                        size: 20,
+                      ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
@@ -576,40 +577,6 @@ class _SmsImportSettingsScreenState
       ],
     );
   }
-
-  // ── HANDLERS ──
-
-  Future<void> _handlePermissionToggle(bool on) async {
-    HapticFeedback.mediumImpact();
-    if (on) {
-      final confirmed = await _showSmsPermissionDisclosure(context);
-      if (confirmed != true) return;
-
-      final permission = await Permission.sms.request();
-      if (permission.isGranted) {
-        setState(() => _permissionGranted = true);
-        SnackbarService.success('SMS permission granted');
-      } else {
-        SnackbarService.error('SMS permission denied');
-      }
-    } else {
-      SnackbarService.info('Please disable in system settings');
-    }
-  }
-
-  Future<void> _handleAutoImportToggle(bool on) async {
-    HapticFeedback.mediumImpact();
-    setState(() => _smsImportEnabled = on);
-    SharedPrefsUtil.instance.setSmsImportEnabled(on);
-    if (on) {
-      await setupSmsListener();
-      if (!mounted) return;
-      SnackbarService.success('Auto import enabled');
-    } else {
-      SnackbarService.info('Auto import disabled');
-    }
-  }
-
   // ── BOTTOM SHEETS ──
 
   Future<bool?> _showSmsPermissionDisclosure(BuildContext context) {
@@ -1038,6 +1005,8 @@ class _SmsImportSettingsScreenState
         ref.invalidate(pendingTxnServiceProvider);
         ref.invalidate(pendingTxnDataProvider);
         ref.invalidate(transactionProvider);
+        ref.invalidate(smsActivityProvider);
+        ref.invalidate(pendingCountProvider);
       }
     } catch (e) {
       debugPrint('Error scanning SMS: $e');
@@ -1065,5 +1034,43 @@ class _SmsImportSettingsScreenState
   String _generateSmsHash(String address, int? date, String body) {
     final input = '$address|$date|$body';
     return sha256.convert(utf8.encode(input)).toString();
+  }
+
+  Future<void> _handlePermissionToggle(bool on) async {
+    HapticFeedback.mediumImpact();
+    if (on) {
+      final confirmed = await _showSmsPermissionDisclosure(context);
+      if (confirmed != true) return;
+
+      final permission = await Permission.sms.request();
+      if (permission.isGranted) {
+        setState(() => _permissionGranted = true);
+        ref.invalidate(smsPermissionGrantedProvider);
+        SnackbarService.success('SMS permission granted');
+      } else {
+        SnackbarService.error('SMS permission denied');
+      }
+    } else {
+      _permissionDisableTapCount++;
+      if (_permissionDisableTapCount >= 2) {
+        openAppSettings();
+      } else {
+        SnackbarService.info('Tap again to open system settings');
+      }
+    }
+  }
+
+  Future<void> _handleAutoImportToggle(bool on) async {
+    HapticFeedback.mediumImpact();
+    setState(() => _smsImportEnabled = on);
+    SharedPrefsUtil.instance.setSmsImportEnabled(on);
+    ref.invalidate(smsPermissionGrantedProvider);
+    if (on) {
+      await setupSmsListener();
+      if (!mounted) return;
+      SnackbarService.success('Auto import enabled');
+    } else {
+      SnackbarService.info('Auto import disabled');
+    }
   }
 }

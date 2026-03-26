@@ -74,4 +74,7 @@ abstract class AppRoutes {
   static const achievements = '/achievements';
   static const marketplace = '/marketplace';
   static const creditCardReminders = '/credit-card-reminders';
+
+  // Upgrade
+  static const upgrade = '/upgrade';
 }

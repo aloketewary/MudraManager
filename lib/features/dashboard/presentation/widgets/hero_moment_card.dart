@@ -249,9 +249,10 @@ class _HeroMomentCardState extends ConsumerState<HeroMomentCard>
             ),
             child: Card(
               elevation: 0,
+              margin: const EdgeInsets.only(),
               color: color.surfaceContainerLow,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(spacing.radiusMedium),
               ),
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -262,7 +263,8 @@ class _HeroMomentCardState extends ConsumerState<HeroMomentCard>
                       height: 48,
                       decoration: BoxDecoration(
                         color: accent.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius:
+                            BorderRadius.circular(spacing.radiusMedium),
                       ),
                       alignment: Alignment.center,
                       child: Icon(hero.icon, color: accent, size: 24),

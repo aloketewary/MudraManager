@@ -114,12 +114,42 @@ class SmsActivityService {
       ..balance = parsed?.balance
       ..merchant = parsed?.merchant ??
           CategoryMatcherService.detectMerchant(body, categories)
+      ..isLikelyTransfer = parsed?.isLikelyTransfer ?? false
       ..paymentType = CategoryMatcherService.detectPaymentType(body);
 
     // Calculate confidence
     activity.confidence = _calculateConfidence(activity);
 
-    // Check for duplicates (within 5 minutes) - use safeDate for comparison
+    // ── 1. Check for transfer pair (opposite direction, same amount, different account, within 15 min)
+    final transferPair = await _findTransferPair(activity);
+    if (transferPair != null) {
+      // Link both activities as a transfer pair
+      activity.isLikelyTransfer = true;
+      activity.pairedActivityId = transferPair.id;
+      activity.status = ActivityStatus.pending;
+      activity.transactionType = 'Transfer';
+
+      await isar.writeTxn(() async {
+        await isar.smsActivitys.put(activity);
+        // Update the paired activity too
+        transferPair.isLikelyTransfer = true;
+        transferPair.pairedActivityId = activity.id;
+        transferPair.transactionType = 'Transfer';
+        // If the pair was marked as duplicate, upgrade it to pending
+        if (transferPair.status == ActivityStatus.duplicate) {
+          transferPair.status = ActivityStatus.pending;
+          transferPair.isPotentialDuplicate = false;
+        }
+        await isar.smsActivitys.put(transferPair);
+      });
+
+      _log.i(
+        'Transfer pair detected: ${activity.id} <-> ${transferPair.id} (₹${activity.amount})',
+      );
+      return activity;
+    }
+
+    // ── 2. Check for duplicates (same direction, same amount, within 5 min)
     final duplicates = await _findPotentialDuplicates(
       activity,
       const Duration(minutes: 5),
@@ -337,6 +367,67 @@ class SmsActivityService {
       toAccount: activity.toAccount,
       fromBank: activity.fromBank,
     );
+  }
+
+  /// Finds a matching opposite-direction SMS that forms a transfer pair.
+  /// e.g. A/c X9684 debited Rs.5000 + Card X1234 credited Rs.5000 within 15 min
+  Future<SmsActivity?> _findTransferPair(SmsActivity activity) async {
+    if (activity.amount == null || activity.isIncome == null) return null;
+    if (activity.account == null || activity.account!.isEmpty) return null;
+
+    final isar = await _getIsar();
+    final window = const Duration(days: 1);
+    final startTime = activity.date.subtract(window);
+    final endTime = activity.date.add(window);
+
+    // Look for opposite direction, same amount, different account
+    final candidates = await isar.smsActivitys
+        .filter()
+        .dateBetween(startTime, endTime)
+        .and()
+        .amountEqualTo(activity.amount)
+        .and()
+        .isIncomeEqualTo(!activity.isIncome!) // opposite direction
+        .and()
+        .not()
+        .smsHashEqualTo(activity.smsHash)
+        .and()
+        .not()
+        .accountEqualTo(activity.account) // different account
+        .and()
+        .pairedActivityIdIsNull() // not already paired
+        .findAll();
+
+    if (candidates.isEmpty) return null;
+
+    // Prefer candidates that are also flagged as transfer
+    final transferCandidates =
+        candidates.where((c) => c.isLikelyTransfer == true).toList();
+    return transferCandidates.isNotEmpty
+        ? transferCandidates.first
+        : candidates.first;
+  }
+
+  Future<void> approveTransferPair(
+    int activityId1,
+    int activityId2,
+    int transactionId,
+  ) async {
+    final isar = await _getIsar();
+    await isar.writeTxn(() async {
+      final a1 = await isar.smsActivitys.get(activityId1);
+      final a2 = await isar.smsActivitys.get(activityId2);
+      if (a1 != null) {
+        a1.status = ActivityStatus.approved;
+        a1.transactionId = transactionId;
+        await isar.smsActivitys.put(a1);
+      }
+      if (a2 != null) {
+        a2.status = ActivityStatus.approved;
+        a2.transactionId = transactionId;
+        await isar.smsActivitys.put(a2);
+      }
+    });
   }
 }
 

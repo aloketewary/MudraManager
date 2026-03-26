@@ -25,11 +25,24 @@ class QuickActionButton extends ConsumerWidget {
             Flexible(
               child: _DashboardActionButton(
                 label: 'Add Expense',
-                icon: LucideIcons.circlePlus,
-                onTap: () => context.push(AppRoutes.addTransaction),
-                color: color.primary,
+                icon: LucideIcons.trendingDown,
+                onTap: () => context
+                    .push(AppRoutes.addTransaction, extra: {'isIncome': false}),
+                color: color.error,
                 isLeft: true,
                 isRight: true,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Flexible(
+              child: _DashboardActionButton(
+                label: 'Add Income',
+                icon: LucideIcons.trendingUp,
+                onTap: () => context
+                    .push(AppRoutes.addTransaction, extra: {'isIncome': true}),
+                color: color.primary,
+                isLeft: false,
+                isRight: false,
               ),
             ),
             const SizedBox(height: 8),
@@ -50,13 +63,24 @@ class QuickActionButton extends ConsumerWidget {
             Expanded(
               child: _DashboardActionButton(
                 label: 'Add Expense',
-                icon: LucideIcons.circlePlus,
-                onTap: () => context.push(AppRoutes.addTransaction),
-                color: color.primary,
+                icon: LucideIcons.trendingDown,
+                onTap: () => context
+                    .push(AppRoutes.addTransaction, extra: {'isIncome': false}),
+                color: color.error,
                 isLeft: true,
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 4),
+            Expanded(
+              child: _DashboardActionButton(
+                label: 'Add Income',
+                icon: LucideIcons.trendingUp,
+                onTap: () => context
+                    .push(AppRoutes.addTransaction, extra: {'isIncome': true}),
+                color: color.primary,
+              ),
+            ),
+            const SizedBox(width: 4),
             Expanded(
               child: _DashboardActionButton(
                 label: ctxt.dashboard_add_transfer_text,

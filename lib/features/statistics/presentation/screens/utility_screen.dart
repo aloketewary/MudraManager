@@ -322,172 +322,181 @@ class UtilityScreenState extends ConsumerState<UtilityScreen> {
     final textTheme = Theme.of(context).textTheme;
 
     if (_isLoading) {
-      return CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 280,
-            pinned: true,
-            backgroundColor: color.surface,
-            flexibleSpace: LayoutBuilder(
-              builder: (context, constraints) {
-                final expandRatio = (constraints.maxHeight - kToolbarHeight) /
-                    (280 - kToolbarHeight);
-                return FlexibleSpaceBar(
-                  titlePadding: EdgeInsets.zero,
-                  centerTitle: false,
-                  title: Opacity(
-                    opacity: 1 - expandRatio.clamp(0.0, 1.0),
-                    child: Container(
-                      alignment: Alignment.centerLeft,
-                      padding: const EdgeInsets.only(left: 16, bottom: 16),
-                      child: Text(
-                        'Utilities',
-                        style: textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                  background: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          color.primaryContainer,
-                          color.secondaryContainer,
-                        ],
-                      ),
-                    ),
-                    child: SafeArea(
-                      child: Opacity(
-                        opacity: expandRatio.clamp(0.0, 1.0),
-                        child: Padding(
-                          padding: const EdgeInsets.all(24),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: color.surface.withValues(alpha: 0.9),
-                                  borderRadius: BorderRadius.circular(20),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color:
-                                          Colors.black.withValues(alpha: 0.1),
-                                      blurRadius: 20,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                  ],
-                                ),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(12),
-                                      decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                          colors: [
-                                            color.primary,
-                                            color.primary
-                                                .withValues(alpha: 0.7),
-                                          ],
-                                        ),
-                                        borderRadius: BorderRadius.circular(16),
-                                      ),
-                                      child: Icon(
-                                        LucideIcons.layoutGrid,
-                                        color: color.onPrimary,
-                                        size: 32,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 16),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            'Utilities',
-                                            style: textTheme.headlineSmall
-                                                ?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                              color: color.onSurface,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            'Powerful tools for your finances',
-                                            style:
-                                                textTheme.bodyMedium?.copyWith(
-                                              color: color.onSurfaceVariant,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const Spacer(),
-                              SkeletonLoader(
-                                width: 200,
-                                height: 32,
-                                borderRadius:
-                                    BorderRadius.circular(spacing.radiusMedium),
-                              ),
-                            ],
+      return RefreshIndicator(
+        onRefresh: () async {
+          ref.invalidate(priorityAlertProvider);
+          setState(() => _isLoading = true);
+          await _loadPreferences();
+        },
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            SliverAppBar(
+              expandedHeight: 280,
+              pinned: true,
+              backgroundColor: color.surface,
+              flexibleSpace: LayoutBuilder(
+                builder: (context, constraints) {
+                  final expandRatio = (constraints.maxHeight - kToolbarHeight) /
+                      (280 - kToolbarHeight);
+                  return FlexibleSpaceBar(
+                    titlePadding: EdgeInsets.zero,
+                    centerTitle: false,
+                    title: Opacity(
+                      opacity: 1 - expandRatio.clamp(0.0, 1.0),
+                      child: Container(
+                        alignment: Alignment.centerLeft,
+                        padding: const EdgeInsets.only(left: 16, bottom: 16),
+                        child: Text(
+                          'Utilities',
+                          style: textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
                     ),
-                  ),
-                );
-              },
-            ),
-          ),
-          SliverPadding(
-            padding: EdgeInsets.all(spacing.cardHorizontalMax),
-            sliver: SliverGrid(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 1.0,
+                    background: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            color.primaryContainer,
+                            color.secondaryContainer,
+                          ],
+                        ),
+                      ),
+                      child: SafeArea(
+                        child: Opacity(
+                          opacity: expandRatio.clamp(0.0, 1.0),
+                          child: Padding(
+                            padding: const EdgeInsets.all(24),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: color.surface.withValues(alpha: 0.9),
+                                    borderRadius: BorderRadius.circular(20),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color:
+                                            Colors.black.withValues(alpha: 0.1),
+                                        blurRadius: 20,
+                                        offset: const Offset(0, 4),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(12),
+                                        decoration: BoxDecoration(
+                                          gradient: LinearGradient(
+                                            colors: [
+                                              color.primary,
+                                              color.primary
+                                                  .withValues(alpha: 0.7),
+                                            ],
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(16),
+                                        ),
+                                        child: Icon(
+                                          LucideIcons.layoutGrid,
+                                          color: color.onPrimary,
+                                          size: 32,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 16),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Utilities',
+                                              style: textTheme.headlineSmall
+                                                  ?.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                                color: color.onSurface,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              'Powerful tools for your finances',
+                                              style: textTheme.bodyMedium
+                                                  ?.copyWith(
+                                                color: color.onSurfaceVariant,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const Spacer(),
+                                SkeletonLoader(
+                                  width: 200,
+                                  height: 32,
+                                  borderRadius: BorderRadius.circular(
+                                      spacing.radiusMedium),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) => Card(
-                  color: color.surfaceContainerHighest,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        SkeletonLoader(
-                          width: 48,
-                          height: 48,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        const Spacer(),
-                        const SkeletonLoader(
-                          width: double.infinity,
-                          height: 16,
-                        ),
-                        const SizedBox(height: 8),
-                        const SkeletonLoader(
-                          width: 100,
-                          height: 12,
-                        ),
-                      ],
+            ),
+            SliverPadding(
+              padding: EdgeInsets.all(spacing.cardHorizontalMax),
+              sliver: SliverGrid(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: 1.0,
+                ),
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) => Card(
+                    color: color.surfaceContainerHighest,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SkeletonLoader(
+                            width: 48,
+                            height: 48,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          const Spacer(),
+                          const SkeletonLoader(
+                            width: double.infinity,
+                            height: 16,
+                          ),
+                          const SizedBox(height: 8),
+                          const SkeletonLoader(
+                            width: 100,
+                            height: 12,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
+                  childCount: 4,
                 ),
-                childCount: 4,
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       );
     }
 
@@ -706,7 +715,13 @@ class UtilityScreenState extends ConsumerState<UtilityScreen> {
                       childCount: visibleItems.length - 4,
                     ),
                   ),
-                const SliverToBoxAdapter(child: SizedBox(height: 100)),
+                SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: MediaQuery.of(context).padding.bottom +
+                        kBottomNavigationBarHeight +
+                        16,
+                  ),
+                ),
               ],
             ),
     );

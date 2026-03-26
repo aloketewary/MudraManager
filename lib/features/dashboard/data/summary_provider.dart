@@ -1,11 +1,12 @@
-// lib/providers/summary_provider.dart
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/core/providers/collection_watchers.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 
-final incomeExpenseSummaryProvider = FutureProvider.autoDispose<Map<String, double>>((
+final incomeExpenseSummaryProvider =
+    FutureProvider.autoDispose<Map<String, double>>((
   ref,
 ) async {
+  ref.watch(transactionChangeProvider);
   final txnService = ref.watch(transactionProvider);
   final txns = await txnService.getAllForDashBoard();
 

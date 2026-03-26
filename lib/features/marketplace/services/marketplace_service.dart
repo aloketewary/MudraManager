@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/db/isar_service.dart';
+import 'package:mudra_manager/core/entitlement/entitlement_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/plugin_metadata.dart';
 import 'package:mudra_manager/features/category/data/category_management_service.dart';
@@ -51,6 +53,7 @@ class MarketplaceService {
     'indusind_sms_parser',
     'idfc_sms_parser',
     'aubank_sms_parser',
+    'rbl_sms_parser',
   };
 
   static const _defaultEnabledIds = {
@@ -93,24 +96,33 @@ class MarketplaceService {
     return result;
   }
 
-  Future<void> togglePlugin(String pluginId, bool enabled) async {
+  Future<bool> togglePlugin(String pluginId, bool enabled) async {
     if (pluginId == 'standard_excel_export' ||
         pluginId == 'standard_pdf_export') {
-      return;
+      return false;
+    }
+
+    if (enabled) {
+      final plugin = _allPlugins.firstWhere((p) => p.id == pluginId);
+      if (plugin.isPro) {
+        final entitlement = EntitlementService(IsarService());
+        if (!await entitlement.isPro() &&
+            !await entitlement.isInTrialPeriod()) {
+          return false;
+        }
+      }
     }
 
     final prefs = await _prefs;
     await prefs.setBool('plugin_$pluginId', enabled);
     _enabledCache[pluginId] = enabled;
 
-    // Handle category pack install/remove
     if (CategoryPackRegistry.isPack(pluginId)) {
       if (enabled) {
         await CategoryManagementService.installPack(pluginId);
       } else {
         final enabledPacks = await _getEnabledPackIds();
         await CategoryManagementService.removePack(pluginId, enabledPacks);
-        // If no packs remain enabled, clear all categories
         if (enabledPacks.isEmpty) {
           await CategoryManagementService.clearAll();
         }
@@ -124,6 +136,8 @@ class MarketplaceService {
     if (!enabled) {
       await clearPluginConfig(pluginId);
     }
+
+    return true;
   }
 
   // ── All plugins defined inline ──
@@ -278,6 +292,18 @@ class MarketplaceService {
       packageUrl: 'bundled',
       group: PluginGroup.smsParser,
     ),
+    PluginMetadata(
+      id: 'rbl_sms_parser',
+      name: 'RBL Bank',
+      version: '1.0.0',
+      description: 'Parse RBL Bank SMS messages',
+      author: 'Mudra Team',
+      iconUrl: 'assets/logo/banks/rbl.svg',
+      downloads: 0,
+      rating: 5.0,
+      packageUrl: 'bundled',
+      group: PluginGroup.smsParser,
+    ),
 
     // ── Export Templates ──
     PluginMetadata(
@@ -315,6 +341,7 @@ class MarketplaceService {
       rating: 5.0,
       packageUrl: 'bundled',
       group: PluginGroup.exportTemplate,
+      isPro: true,
     ),
     PluginMetadata(
       id: 'business_pdf_export',
@@ -327,6 +354,7 @@ class MarketplaceService {
       rating: 5.0,
       packageUrl: 'bundled',
       group: PluginGroup.exportTemplate,
+      isPro: true,
     ),
 
     // ── Notifications ──
@@ -496,6 +524,7 @@ class MarketplaceService {
       rating: 5.0,
       packageUrl: 'bundled',
       group: PluginGroup.categoryManagement,
+      isPro: true,
     ),
     PluginMetadata(
       id: 'com.mudra.pack.family',
@@ -508,6 +537,7 @@ class MarketplaceService {
       rating: 5.0,
       packageUrl: 'bundled',
       group: PluginGroup.categoryManagement,
+      isPro: true,
     ),
     PluginMetadata(
       id: 'com.mudra.pack.freelancer',
@@ -520,6 +550,7 @@ class MarketplaceService {
       rating: 5.0,
       packageUrl: 'bundled',
       group: PluginGroup.categoryManagement,
+      isPro: true,
     ),
     PluginMetadata(
       id: 'com.mudra.pack.foodie',
@@ -532,6 +563,7 @@ class MarketplaceService {
       rating: 5.0,
       packageUrl: 'bundled',
       group: PluginGroup.categoryManagement,
+      isPro: true,
     ),
     PluginMetadata(
       id: 'com.mudra.pack.traveller',
@@ -544,6 +576,7 @@ class MarketplaceService {
       rating: 5.0,
       packageUrl: 'bundled',
       group: PluginGroup.categoryManagement,
+      isPro: true,
     ),
     PluginMetadata(
       id: 'com.mudra.pack.health',
@@ -556,6 +589,7 @@ class MarketplaceService {
       rating: 5.0,
       packageUrl: 'bundled',
       group: PluginGroup.categoryManagement,
+      isPro: true,
     ),
     PluginMetadata(
       id: 'com.mudra.pack.indian_north',
@@ -568,6 +602,7 @@ class MarketplaceService {
       rating: 5.0,
       packageUrl: 'bundled',
       group: PluginGroup.categoryManagement,
+      isPro: true,
     ),
     PluginMetadata(
       id: 'com.mudra.pack.indian_south',
@@ -580,6 +615,7 @@ class MarketplaceService {
       rating: 5.0,
       packageUrl: 'bundled',
       group: PluginGroup.categoryManagement,
+      isPro: true,
     ),
     PluginMetadata(
       id: 'com.mudra.pack.indian_east',
@@ -592,6 +628,7 @@ class MarketplaceService {
       rating: 5.0,
       packageUrl: 'bundled',
       group: PluginGroup.categoryManagement,
+      isPro: true,
     ),
     PluginMetadata(
       id: 'com.mudra.pack.indian_west',
@@ -604,6 +641,7 @@ class MarketplaceService {
       rating: 5.0,
       packageUrl: 'bundled',
       group: PluginGroup.categoryManagement,
+      isPro: true,
     ),
     PluginMetadata(
       id: 'com.mudra.pack.business',
@@ -616,6 +654,7 @@ class MarketplaceService {
       rating: 5.0,
       packageUrl: 'bundled',
       group: PluginGroup.categoryManagement,
+      isPro: true,
     ),
     PluginMetadata(
       id: 'com.mudra.pack.investor',
@@ -628,6 +667,7 @@ class MarketplaceService {
       rating: 5.0,
       packageUrl: 'bundled',
       group: PluginGroup.categoryManagement,
+      isPro: true,
     ),
     PluginMetadata(
       id: 'com.mudra.pack.pet_owner',
@@ -640,6 +680,7 @@ class MarketplaceService {
       rating: 5.0,
       packageUrl: 'bundled',
       group: PluginGroup.categoryManagement,
+      isPro: true,
     ),
     PluginMetadata(
       id: 'com.mudra.pack.couple',
@@ -652,6 +693,7 @@ class MarketplaceService {
       rating: 5.0,
       packageUrl: 'bundled',
       group: PluginGroup.categoryManagement,
+      isPro: true,
     ),
 
     // ── Utilities ──
@@ -666,6 +708,7 @@ class MarketplaceService {
       rating: 5.0,
       packageUrl: 'bundled',
       group: PluginGroup.utility,
+      isPro: true,
     ),
   ];
 
@@ -747,5 +790,17 @@ class MarketplaceService {
         }
       }
     } catch (_) {}
+  }
+
+  /// Disable all Pro-only plugins (call on Pro revocation/expiry).
+  Future<void> disableProPlugins() async {
+    final prefs = await _prefs;
+    for (final plugin in _allPlugins.where((p) => p.isPro)) {
+      if (_enabledCache[plugin.id] == true) {
+        await prefs.setBool('plugin_${plugin.id}', false);
+        _enabledCache[plugin.id] = false;
+        // Don't remove category packs — soft-lock instead
+      }
+    }
   }
 }

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/user_profile.dart';
+import 'package:mudra_manager/core/entitlement/entitlement_provider.dart';
 import 'package:mudra_manager/core/extension/localization_extenstion.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
@@ -134,6 +135,8 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
       }
 
       SharedPrefsUtil.instance.setOnboardingComplete();
+      // Stamp install date for trial period
+      await ref.read(entitlementServiceProvider).stampInstallDate();
 
       if (mounted) {
         context.go(AppRoutes.home);

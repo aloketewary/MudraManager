@@ -1,5 +1,3 @@
-// lib/features/sms/presentation/screens/sms_activity_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,6 +10,7 @@ import 'package:mudra_manager/core/db/models/sms_activity.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/core/utils/refresh_helper.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/sms/data/sms_activity_service.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
@@ -20,10 +19,12 @@ import 'package:mudra_manager/core/router/app_routes.dart';
 
 final smsActivityProvider =
     FutureProvider.autoDispose<List<SmsActivity>>((ref) async {
+  ref.watch(smsRefreshProvider);
   return await SmsActivityService.instance.getAllActivities();
 });
 
 final pendingCountProvider = FutureProvider.autoDispose<int>((ref) async {
+  ref.watch(smsRefreshProvider);
   return await SmsActivityService.instance.getPendingCount();
 });
 
@@ -69,109 +70,125 @@ class _SmsActivityScreenState extends ConsumerState<SmsActivityScreen> {
               ? activities
               : activities.where((a) => a.status == _filterStatus).toList();
 
-          return CustomScrollView(
-            slivers: [
-              // ── HERO SUMMARY ──
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    spacing.cardHorizontal,
-                    spacing.cardVertical,
-                    spacing.cardHorizontal,
-                    0,
-                  ),
-                  child: _buildHeroCard(
-                    activities,
-                    pendingCount.valueOrNull ?? 0,
-                    color,
-                    textTheme,
-                    spacing,
-                    isDark,
-                  ),
-                ),
-              ),
-
-              // ── FILTER CHIP (when active) ──
-              if (_filterStatus != null)
+          return RefreshIndicator(
+            onRefresh: () => RefreshHelper.withMinDuration(() async {
+              ref.invalidate(smsActivityProvider);
+              ref.invalidate(pendingCountProvider);
+            }),
+            child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                // ── HERO SUMMARY ──
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: EdgeInsets.fromLTRB(
                       spacing.cardHorizontal,
-                      12,
+                      spacing.cardVertical,
                       spacing.cardHorizontal,
                       0,
                     ),
-                    child: Row(
-                      children: [
-                        Chip(
-                          label: Text(
-                            _statusLabel(_filterStatus!),
-                            style: textTheme.labelSmall?.copyWith(
-                              fontWeight: FontWeight.w600,
+                    child: _buildHeroCard(
+                      activities,
+                      pendingCount.valueOrNull ?? 0,
+                      color,
+                      textTheme,
+                      spacing,
+                      isDark,
+                    ),
+                  ),
+                ),
+
+                // ── FILTER CHIP (when active) ──
+                if (_filterStatus != null)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        spacing.cardHorizontal,
+                        12,
+                        spacing.cardHorizontal,
+                        0,
+                      ),
+                      child: Row(
+                        children: [
+                          Chip(
+                            label: Text(
+                              _statusLabel(_filterStatus!),
+                              style: textTheme.labelSmall?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            avatar: Icon(
+                              _statusIcon(_filterStatus!),
+                              size: 14,
+                            ),
+                            deleteIcon: const Icon(LucideIcons.x, size: 14),
+                            onDeleted: () =>
+                                setState(() => _filterStatus = null),
+                            visualDensity: VisualDensity.compact,
+                          ),
+                          const Spacer(),
+                          Text(
+                            '${filtered.length} result${filtered.length == 1 ? '' : 's'}',
+                            style: textTheme.bodySmall?.copyWith(
+                              color: color.onSurfaceVariant,
                             ),
                           ),
-                          avatar: Icon(
-                            _statusIcon(_filterStatus!),
-                            size: 14,
-                          ),
-                          deleteIcon: const Icon(LucideIcons.x, size: 14),
-                          onDeleted: () => setState(() => _filterStatus = null),
-                          visualDensity: VisualDensity.compact,
-                        ),
-                        const Spacer(),
-                        Text(
-                          '${filtered.length} result${filtered.length == 1 ? '' : 's'}',
-                          style: textTheme.bodySmall?.copyWith(
-                            color: color.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
 
-              // ── EMPTY STATE ──
-              if (filtered.isEmpty)
-                SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          LucideIcons.inbox,
-                          size: 48,
-                          color: color.onSurfaceVariant.withValues(alpha: 0.4),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          _filterStatus != null
-                              ? 'No ${_statusLabel(_filterStatus!).toLowerCase()} activities'
-                              : 'No SMS activities yet',
-                          style: textTheme.bodyLarge?.copyWith(
-                            color: color.onSurfaceVariant,
+                // ── EMPTY STATE ──
+                if (filtered.isEmpty)
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            LucideIcons.inbox,
+                            size: 48,
+                            color:
+                                color.onSurfaceVariant.withValues(alpha: 0.4),
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 12),
+                          Text(
+                            _filterStatus != null
+                                ? 'No ${_statusLabel(_filterStatus!).toLowerCase()} activities'
+                                : 'No SMS activities yet',
+                            style: textTheme.bodyLarge?.copyWith(
+                              color: color.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
 
-              // ── ACTIVITY LIST ──
-              if (filtered.isNotEmpty)
-                SliverPadding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: spacing.cardHorizontal,
-                    vertical: spacing.cardVertical,
+                // ── ACTIVITY LIST ──
+                if (filtered.isNotEmpty)
+                  SliverPadding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: spacing.cardHorizontal,
+                      vertical: spacing.cardVertical,
+                    ),
+                    sliver: SliverList.separated(
+                      itemCount: filtered.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 8),
+                      itemBuilder: (context, index) =>
+                          _ActivityCard(activity: filtered[index]),
+                    ),
                   ),
-                  sliver: SliverList.separated(
-                    itemCount: filtered.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 8),
-                    itemBuilder: (context, index) =>
-                        _ActivityCard(activity: filtered[index]),
+                SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: MediaQuery.of(context).padding.bottom +
+                        kBottomNavigationBarHeight +
+                        16,
                   ),
                 ),
-            ],
+              ],
+            ),
           );
         },
         loading: () => ListView.builder(
@@ -570,6 +587,11 @@ class _ActivityCard extends ConsumerWidget {
                           _StatusChip(
                             label: activity.transactionType!,
                             color: color.tertiary,
+                          ),
+                        if (activity.isLikelyTransfer == true)
+                          const _StatusChip(
+                            label: 'TRANSFER',
+                            color: Color(0xFF2196F3),
                           ),
                       ],
                     ),
@@ -1010,6 +1032,41 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                       ),
                     ),
                   ),
+                if (widget.activity.isLikelyTransfer == true &&
+                    widget.activity.pairedActivityId != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2196F3).withValues(alpha: 0.08),
+                        borderRadius:
+                            BorderRadius.circular(spacing.radiusMedium),
+                        border: Border.all(
+                          color: const Color(0xFF2196F3).withValues(alpha: 0.2),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            LucideIcons.arrowLeftRight,
+                            color: Color(0xFF2196F3),
+                            size: 18,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              'This looks like a transfer between your accounts. Approving will open the transfer screen.',
+                              style: textTheme.bodySmall?.copyWith(
+                                color: color.onSurfaceVariant,
+                                height: 1.4,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
 
                 Row(
                   children: [
@@ -1076,25 +1133,97 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: FilledButton.icon(
-                        onPressed: () {
+                        onPressed: () async {
                           HapticFeedback.mediumImpact();
                           context.pop();
-                          final transaction = Transaction.create(
-                            date: widget.activity.date,
-                            amount: widget.activity.amount ?? 0,
-                            isExpense: widget.activity.isIncome != true,
-                            description: widget.activity.body,
-                          );
-                          context.push(
-                            AppRoutes.addTransaction,
-                            extra: {
-                              'transaction': transaction,
-                              'smsActivity': widget.activity,
-                            },
-                          );
+
+                          if (widget.activity.isLikelyTransfer == true) {
+                            // Try to pre-match accounts
+                            Account? fromAccount;
+                            Account? toAccount;
+
+                            if (widget.activity.pairedActivityId != null) {
+                              final isar = await ref
+                                  .read(isarServiceProvider)
+                                  .getInstance();
+                              final pair = await isar.smsActivitys
+                                  .get(widget.activity.pairedActivityId!);
+                              final accounts = await isar.accounts
+                                  .filter()
+                                  .isActiveEqualTo(true)
+                                  .findAll();
+
+                              final thisAcc = accounts
+                                  .where(
+                                    (a) =>
+                                        a.accountNumber != null &&
+                                        a.accountNumber!.endsWith(
+                                          widget.activity.account ?? '',
+                                        ),
+                                  )
+                                  .firstOrNull;
+                              final pairAcc = pair == null
+                                  ? null
+                                  : accounts
+                                      .where(
+                                        (a) =>
+                                            a.accountNumber != null &&
+                                            a.accountNumber!
+                                                .endsWith(pair.account ?? ''),
+                                      )
+                                      .firstOrNull;
+
+                              if (widget.activity.isIncome == true) {
+                                toAccount = thisAcc;
+                                fromAccount = pairAcc;
+                              } else {
+                                fromAccount = thisAcc;
+                                toAccount = pairAcc;
+                              }
+                            }
+
+                            if (!context.mounted) return;
+                            context.push(
+                              AppRoutes.transfer,
+                              extra: {
+                                'initialAmount':
+                                    widget.activity.amount?.toString(),
+                                'initialNote':
+                                    'SMS: ${widget.activity.merchant ?? widget.activity.sender}',
+                                'initialDate': widget.activity.date,
+                                if (fromAccount != null)
+                                  'initialFromAccount': fromAccount,
+                                if (toAccount != null)
+                                  'initialToAccount': toAccount,
+                              },
+                            );
+                          } else {
+                            final transaction = Transaction.create(
+                              date: widget.activity.date,
+                              amount: widget.activity.amount ?? 0,
+                              isExpense: widget.activity.isIncome != true,
+                              description: widget.activity.body,
+                            );
+                            context.push(
+                              AppRoutes.addTransaction,
+                              extra: {
+                                'transaction': transaction,
+                                'smsActivity': widget.activity,
+                              },
+                            );
+                          }
                         },
-                        icon: const Icon(LucideIcons.check, size: 16),
-                        label: const Text('Approve'),
+                        icon: Icon(
+                          widget.activity.isLikelyTransfer == true
+                              ? LucideIcons.arrowLeftRight
+                              : LucideIcons.check,
+                          size: 16,
+                        ),
+                        label: Text(
+                          widget.activity.isLikelyTransfer == true
+                              ? 'Transfer'
+                              : 'Approve',
+                        ),
                         style: FilledButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(

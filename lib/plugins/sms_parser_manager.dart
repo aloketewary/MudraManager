@@ -1,3 +1,5 @@
+import 'package:mudra_manager/plugins/sms_parsers/rbl_sms_parser.dart';
+
 import 'sms_parser_plugin.dart';
 import 'sms_parsers/hdfc_sms_parser.dart';
 import 'sms_parsers/icici_sms_parser.dart';
@@ -33,6 +35,7 @@ class SmsParserManager {
       IndusIndSmsParserPlugin(),
       IdfcSmsParserPlugin(),
       AuBankSmsParserPlugin(),
+      RblSmsParserPlugin(),
     ];
 
     for (final parser in parsers) {

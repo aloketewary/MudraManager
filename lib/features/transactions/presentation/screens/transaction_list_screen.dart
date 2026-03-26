@@ -12,6 +12,7 @@ import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/dialog_utils.dart';
 import 'package:mudra_manager/core/utils/icon_helper.dart';
+import 'package:mudra_manager/core/utils/refresh_helper.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 import 'package:mudra_manager/features/transactions/presentation/widgets/transaction_card.dart';
@@ -29,11 +30,13 @@ final _dateHeaderFormatter = DateFormat.yMMMMd();
 class TransactionListScreen extends ConsumerStatefulWidget {
   final bool showAppBar;
   final Function(bool isScrollingDown)? onScrollChanged;
+  final bool isTabActive;
 
   const TransactionListScreen({
     super.key,
     this.showAppBar = false,
     this.onScrollChanged,
+    this.isTabActive = true,
   });
 
   @override
@@ -171,7 +174,6 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
   Widget build(BuildContext context) {
     super.build(context);
     final spacing = ref.watch(spacingProvider);
-    final textTheme = Theme.of(context).textTheme;
     final ctxt = AppLocalizations.of(context)!;
 
     return widget.showAppBar
@@ -267,12 +269,19 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
         // ── Transaction list ──
         Expanded(
           child: sectionedAsync.when(
-            data: (sectioned) => _buildTransactionList(
-              sectioned,
-              color,
-              textTheme,
-              ctxt,
-              spacing,
+            data: (sectioned) => RefreshIndicator(
+              onRefresh: () => RefreshHelper.withMinDuration(() async {
+                ref.invalidate(allSectionedTransactionsProvider(_filter));
+                ref.invalidate(sectionedTransactionsProvider);
+                ref.invalidate(sectionedTransactionsByDateRangeProvider);
+              }),
+              child: _buildTransactionList(
+                sectioned,
+                color,
+                textTheme,
+                ctxt,
+                spacing,
+              ),
             ),
             loading: () => ListView.builder(
               itemCount: 5,
@@ -437,7 +446,6 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                     _displayLimit = 50;
                     _clearCache();
                   });
-                  ref.read(transactionRefreshProvider.notifier).state++;
                 } else {
                   setState(() {
                     _showCalendar = !_showCalendar;
@@ -589,7 +597,6 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                   _focusedDay = _selectedDate;
                   _clearCache();
                 });
-                ref.read(transactionRefreshProvider.notifier).state++;
               },
             ),
             if (!isSameMonth(_selectedDate, DateTime.now()))
@@ -604,7 +611,6 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                     _focusedDay = DateTime.now();
                     _clearCache();
                   });
-                  ref.read(transactionRefreshProvider.notifier).state++;
                 },
               )
             else
@@ -635,7 +641,6 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                         _focusedDay = _selectedDate;
                         _clearCache();
                       });
-                      ref.read(transactionRefreshProvider.notifier).state++;
                     },
             ),
           ],
@@ -655,7 +660,6 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                 _displayLimit = 50;
                 _clearCache();
               });
-              ref.read(transactionRefreshProvider.notifier).state++;
             },
           ),
         ],
@@ -716,9 +720,6 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                                 _showMonthPicker = false;
                                 _clearCache();
                               });
-                              ref
-                                  .read(transactionRefreshProvider.notifier)
-                                  .state++;
                             },
                       borderRadius: BorderRadius.circular(spacing.radiusMedium),
                       child: Container(
@@ -855,7 +856,6 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
               _showCalendar = false;
               _clearCache();
             });
-            ref.read(transactionRefreshProvider.notifier).state++;
           }
         },
         onRangeSelected: (start, end, focusedDay) {
@@ -867,7 +867,6 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
             _clearCache();
             if (start != null && end != null) _showCalendar = false;
           });
-          ref.read(transactionRefreshProvider.notifier).state++;
         },
         onFormatChanged: (format) => setState(() => _calendarFormat = format),
         onPageChanged: (focusedDay) {
@@ -878,9 +877,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
               _clearCache();
             }
           });
-          if (_rangeSelectionMode == RangeSelectionMode.toggledOff) {
-            ref.read(transactionRefreshProvider.notifier).state++;
-          }
+          if (_rangeSelectionMode == RangeSelectionMode.toggledOff) {}
         },
         enabledDayPredicate: (day) => !day.isAfter(DateTime.now()),
         calendarStyle: CalendarStyle(
@@ -989,10 +986,16 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
       future: _tripNamesFuture,
       builder: (context, tripNamesSnapshot) {
         final tripNames = tripNamesSnapshot.data ?? {};
+        bool peekShown = false;
 
         return ListView.builder(
           key: const PageStorageKey('transactionList'),
           controller: _scrollController,
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).padding.bottom +
+                kBottomNavigationBarHeight +
+                16,
+          ),
           itemCount: displayItems.length + (hasMore ? 1 : 0),
           itemBuilder: (context, index) {
             if (index == displayItems.length) {
@@ -1024,6 +1027,10 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
             final isRecurring =
                 transaction.recurringTransactionSource.value != null;
             final tripName = tripNames[transaction.id];
+            final isFirstTransaction = !peekShown && entry is TxItem;
+            if (isFirstTransaction) peekShown = true;
+            final int firstTxIndex =
+                displayItems.indexWhere((e) => e is TxItem);
 
             return TransactionCard(
               category: transaction.category.value,
@@ -1039,6 +1046,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
               isRecurring: isRecurring,
               onEdit: () => _onEditTransaction(transaction),
               onRemove: () => _onRemoveTransaction(transaction, ctxt),
+              enablePeek: index == firstTxIndex && widget.isTabActive,
             );
           },
         );
@@ -1158,7 +1166,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
         final lastHeader =
             filtered.isEmpty ? null : filtered.whereType<TxHeader>().lastOrNull;
         if (lastHeader == null ||
-            lastHeader.group.year != currentDate!.year ||
+            lastHeader.group.year != currentDate.year ||
             lastHeader.group.month != currentDate.month ||
             lastHeader.group.day != currentDate.day) {
           filtered.add(TxHeader(currentDate));
@@ -1256,9 +1264,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                                 _filter = value!;
                                 _clearCache();
                               });
-                              ref
-                                  .read(transactionRefreshProvider.notifier)
-                                  .state++;
+
                               setModalState(() {});
                             },
                           ),

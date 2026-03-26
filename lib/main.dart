@@ -1,4 +1,6 @@
 import 'package:go_router/go_router.dart';
+import 'package:mudra_manager/core/entitlement/billing_provider.dart';
+import 'package:mudra_manager/core/entitlement/entitlement_service.dart';
 import 'package:mudra_manager/core/services/plugin_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -20,6 +22,7 @@ import 'package:mudra_manager/core/utils/error_handler.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
+import 'package:mudra_manager/features/marketplace/services/marketplace_service.dart';
 import 'package:mudra_manager/features/sms/data/sms_processor_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:another_telephony/telephony.dart';
@@ -82,6 +85,8 @@ void main() async {
   ]);
   final sharedPrefs = await SharedPreferences.getInstance();
   SharedPrefsUtil.init(sharedPrefs);
+  sharedPrefs.remove('has_seen_swipe_peek');
+  debugPrint('🔍 PEEK: cleared has_seen_swipe_peek');
 
   log.i('App starting...');
 
@@ -120,10 +125,44 @@ Future<void> _initializeBackgroundServices(ProviderContainer container) async {
     if (isar != null) {
       log.i('✅ Isar initialized');
 
-           // Seed category keywords
+      // Seed category keywords
       await safeExecute(() async {
         await CategorySeeder.seedDefaultKeywords(isar);
         log.i('✅ Category keywords seeded');
+      });
+
+      // Snapshot grandfathered counts for entitlement system
+      await safeExecute(() async {
+        final entitlement =
+            EntitlementService(container.read(isarServiceProvider));
+        await entitlement.snapshotGrandfatheredCounts();
+        log.i('✅ Entitlement grandfathering complete');
+      });
+
+      // Stamp install date for existing users (no-op if already stamped)
+      await safeExecute(() async {
+        final entitlement =
+            EntitlementService(container.read(isarServiceProvider));
+        await entitlement.stampInstallDate();
+        log.i('✅ Install date stamped');
+      });
+
+      await safeExecute(() async {
+        final entitlement =
+            EntitlementService(container.read(isarServiceProvider));
+        final isPro = await entitlement.isPro();
+        final inTrial = await entitlement.isInTrialPeriod();
+        if (!isPro && !inTrial) {
+          await MarketplaceService().disableProPlugins();
+          log.i('✅ Pro plugins disabled (trial expired)');
+        }
+      });
+
+      // Initialize billing service
+      await safeExecute(() async {
+        final billing = container.read(billingServiceProvider);
+        await billing.initialize();
+        log.i('✅ Billing service initialized');
       });
 
       // Sync category icons from pack definitions
@@ -131,7 +170,6 @@ Future<void> _initializeBackgroundServices(ProviderContainer container) async {
         await CategorySeeder.seedCategoryIcons(isar);
         log.i('✅ Category icons synced');
       });
-
     } else {
       log.e('❌ Isar initialization failed');
       return;

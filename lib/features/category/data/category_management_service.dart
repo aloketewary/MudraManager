@@ -28,7 +28,7 @@ class CategoryManagementService {
     await isar.writeTxn(() async {
       for (final def in parents) {
         if (existingNames.contains(def.name)) continue;
-        final cat = def.toCategory();
+        final cat = def.toCategory()..packId = packId;
         await isar.categorys.put(cat);
         existingNames.add(def.name);
         nameToCategory[def.name] = cat;
@@ -36,7 +36,7 @@ class CategoryManagementService {
 
       for (final def in children) {
         if (existingNames.contains(def.name)) continue;
-        final cat = def.toCategory();
+        final cat = def.toCategory()..packId = packId;
         final parentCat = nameToCategory[def.parent];
         final hasParent = parentCat != null;
 

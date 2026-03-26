@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/dashboard_widget_preference.dart';
+import 'package:mudra_manager/core/entitlement/entitlement_provider.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/core/widgets/dashboard_widget_plugin.dart';
@@ -143,8 +144,9 @@ final widgetPreferencesProvider =
 
 /// Cached provider for ordered widgets - prevents unnecessary rebuilds
 final smartOrderEnabledProvider = Provider<bool>((ref) {
-  // Default: ON. User can toggle in customize screen.
   final prefs = SharedPrefsUtil.instance;
+  final isPro = ref.watch(isProProvider).valueOrNull ?? false;
+  if (!isPro) return false;
   return prefs.getString('smart_order_enabled') != 'false';
 });
 

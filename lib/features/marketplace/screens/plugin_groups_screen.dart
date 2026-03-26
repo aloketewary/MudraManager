@@ -2,17 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/entitlement/entitlement_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/core/utils/icon_helper.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/core/widgets/skeleton_loader.dart';
+import 'package:mudra_manager/features/marketplace/models/plugin_metadata.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/features/category/data/category_provider.dart';
+import 'package:mudra_manager/features/marketplace/services/marketplace_service.dart';
+import 'package:mudra_manager/shared/widgets/pro_gate.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/plugin_metadata.dart';
-import '../services/marketplace_service.dart';
 
 final pluginGroupsProvider = FutureProvider((ref) async {
   final service = ref.watch(marketplaceServiceProvider);
@@ -105,7 +109,7 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
         loading: () => ListView.builder(
           padding: const EdgeInsets.all(16),
           itemCount: 6,
-          itemBuilder: (_, __) => const SkeletonListTile(),
+          itemBuilder: (_, __) => const TransactionCardSkeleton(),
         ),
         error: (err, _) => Center(child: Text('Error: $err')),
         data: (grouped) {
@@ -469,6 +473,48 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
+                              )
+                            else if (plugin.isPro)
+                              Consumer(
+                                builder: (context, ref, _) {
+                                  final hasAccess = ref
+                                          .watch(hasFullAccessProvider)
+                                          .valueOrNull ??
+                                      false;
+                                  if (hasAccess) {
+                                    return Switch(
+                                      value: isEnabled,
+                                      onChanged: (val) async {
+                                        HapticFeedback.mediumImpact();
+                                        await ref
+                                            .read(pluginStatesProvider.notifier)
+                                            .togglePlugin(plugin.id, val);
+                                        if (plugin.group ==
+                                            PluginGroup.categoryManagement) {
+                                          ref.invalidate(categoryListProvider);
+                                          ref.invalidate(
+                                            expenseCategoriesProvider,
+                                          );
+                                          ref.invalidate(
+                                            incomeCategoriesProvider,
+                                          );
+                                        }
+                                        SnackbarService.info(
+                                          val
+                                              ? '${plugin.name} enabled'
+                                              : '${plugin.name} disabled',
+                                        );
+                                      },
+                                    );
+                                  }
+                                  return GestureDetector(
+                                    onTap: () {
+                                      HapticFeedback.mediumImpact();
+                                      context.push(AppRoutes.upgrade);
+                                    },
+                                    child: const ProBadge(),
+                                  );
+                                },
                               )
                             else
                               Switch(

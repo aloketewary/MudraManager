@@ -5,6 +5,7 @@ import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
+import 'package:mudra_manager/core/providers/collection_watchers.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 
 class StatsData {
@@ -40,10 +41,11 @@ class StatsData {
 }
 
 // 2. The provider - OPTIMIZED:
-final statsProvider = FutureProvider.family<StatsData, String>((
+final statsProvider = FutureProvider.autoDispose.family<StatsData, String>((
   ref,
   period,
 ) async {
+  ref.watch(transactionChangeProvider);
   final isar = await ref.watch(isarServiceProvider).getInstance();
   final now = DateTime.now();
   DateTime start;
@@ -140,7 +142,8 @@ final statsProvider = FutureProvider.family<StatsData, String>((
       final monthExpense = dailyExpense[month]?[0] ?? 0;
       incomeSpots.add(FlSpot((month - 1).toDouble(), monthIncome));
       expenseSpots.add(FlSpot((month - 1).toDouble(), monthExpense));
-      savingsSpots.add(FlSpot((month - 1).toDouble(), monthIncome - monthExpense));
+      savingsSpots
+          .add(FlSpot((month - 1).toDouble(), monthIncome - monthExpense));
     }
   } else if (period == 'Today') {
     for (int hour = 0; hour < 24; hour++) {
@@ -173,17 +176,15 @@ final statsProvider = FutureProvider.family<StatsData, String>((
   // Calculate category trends for last 12 months
   final Map<Category, List<FlSpot>> categoryTrends = {};
   final trendStart = DateTime(now.year, now.month - 11, 1);
-  final expenseTxns = allTxns
-      .where((t) => t.isExpense && t.date.isAfter(trendStart))
-      .toList();
+  final expenseTxns =
+      allTxns.where((t) => t.isExpense && t.date.isAfter(trendStart)).toList();
 
   for (final cat in cats.where((c) => c.categoryType == CategoryType.expense)) {
     final monthlyData = <int, double>{};
     for (final txn in expenseTxns) {
       txn.category.loadSync();
       if (txn.category.value?.id == cat.id) {
-        final monthIndex =
-            (txn.date.year - trendStart.year) * 12 +
+        final monthIndex = (txn.date.year - trendStart.year) * 12 +
             (txn.date.month - trendStart.month);
         monthlyData[monthIndex] = (monthlyData[monthIndex] ?? 0) + txn.amount;
       }
@@ -214,7 +215,7 @@ final statsProvider = FutureProvider.family<StatsData, String>((
 });
 
 // Custom date range stats provider - optimized
-final customStatsProvider = FutureProvider.family<StatsData, String>((
+final customStatsProvider = FutureProvider.autoDispose.family<StatsData, String>((
   ref,
   dateKey,
 ) async {
@@ -289,17 +290,15 @@ final customStatsProvider = FutureProvider.family<StatsData, String>((
   final Map<Category, List<FlSpot>> categoryTrends = {};
   final now = DateTime.now();
   final trendStart = DateTime(now.year, now.month - 11, 1);
-  final expenseTxns = allTxns
-      .where((t) => t.isExpense && t.date.isAfter(trendStart))
-      .toList();
+  final expenseTxns =
+      allTxns.where((t) => t.isExpense && t.date.isAfter(trendStart)).toList();
 
   for (final cat in cats.where((c) => c.categoryType == CategoryType.expense)) {
     final monthlyData = <int, double>{};
     for (final txn in expenseTxns) {
       txn.category.loadSync();
       if (txn.category.value?.id == cat.id) {
-        final monthIndex =
-            (txn.date.year - trendStart.year) * 12 +
+        final monthIndex = (txn.date.year - trendStart.year) * 12 +
             (txn.date.month - trendStart.month);
         monthlyData[monthIndex] = (monthlyData[monthIndex] ?? 0) + txn.amount;
       }
@@ -330,7 +329,10 @@ final customStatsProvider = FutureProvider.family<StatsData, String>((
 });
 
 // Total account balance provider
-final totalAccountBalanceProvider = FutureProvider<double>((ref) async {
+final totalAccountBalanceProvider =
+    FutureProvider.autoDispose<double>((ref) async {
+  ref.watch(transactionChangeProvider);
+  ref.watch(accountChangeProvider);
   final isar = await ref.watch(isarServiceProvider).getInstance();
   final accounts = await isar.collection<Account>().where().findAll();
 
@@ -341,8 +343,7 @@ final totalAccountBalanceProvider = FutureProvider<double>((ref) async {
         .account((q) => q.idEqualTo(account.id))
         .findAll();
 
-    final balance =
-        account.initialBalance +
+    final balance = account.initialBalance +
         transactions.fold<double>(
           0,
           (sum, txn) => sum + (txn.isExpense ? -txn.amount : txn.amount),

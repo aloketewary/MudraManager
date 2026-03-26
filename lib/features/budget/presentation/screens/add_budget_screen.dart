@@ -8,6 +8,7 @@ import 'package:mudra_manager/core/db/models/budget.dart';
 import 'package:mudra_manager/core/db/models/budget_category_allocation.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/budget_type.dart';
+import 'package:mudra_manager/core/entitlement/entitlement_provider.dart';
 import 'package:mudra_manager/core/extension/case_extention.dart';
 import 'package:mudra_manager/core/extension/localization_extenstion.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
@@ -131,6 +132,16 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
   }
 
   Future<void> _save() async {
+    // ── Entitlement check (new budgets only) ──
+    if (widget.existing == null) {
+      final canCreate = await ref.read(canCreateBudgetProvider.future);
+      if (!canCreate) {
+        SnackbarService.warning(
+          'Free plan allows up to 2 budgets. Upgrade to Pro for unlimited.',
+        );
+        return;
+      }
+    }
     if (!_formKey.currentState!.validate()) return;
     final ctxt = AppLocalizations.of(context)!;
 

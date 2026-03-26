@@ -146,7 +146,7 @@ class ManageCategoriesScreen extends ConsumerWidget {
         loading: () => ListView.builder(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
           itemCount: 6,
-          itemBuilder: (_, __) => const SkeletonListTile(),
+          itemBuilder: (_, __) => const TransactionCardSkeleton(),
         ),
         error: (err, _) => Center(child: Text('Error: $err')),
       ),
@@ -368,8 +368,14 @@ class _CategoryRowState extends State<_CategoryRow> {
         InkWell(
           onTap: () {
             HapticFeedback.lightImpact();
-            _showContextSheet(context, widget.category, color, textTheme,
-                onEdit: widget.onEdit, onDelete: widget.onDelete);
+            _showContextSheet(
+              context,
+              widget.category,
+              color,
+              textTheme,
+              onEdit: widget.onEdit,
+              onDelete: widget.onDelete,
+            );
           },
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),

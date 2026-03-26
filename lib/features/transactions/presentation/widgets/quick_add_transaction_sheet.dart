@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
+import 'package:mudra_manager/core/entitlement/entitlement_feature.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/core/services/widget_service.dart';
 import 'package:mudra_manager/core/utils/icon_helper.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
+import 'package:mudra_manager/features/account/data/account_access_provider.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/category/data/category_provider.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
@@ -188,43 +193,77 @@ class _QuickAddTransactionSheetState
                   itemBuilder: (_, i) {
                     final acc = accounts[i];
                     final selected = _selectedAccount?.id == acc.id;
+                    final unlockedIds = ref.watch(unlockedAccountIdsProvider);
+                    final isUnlocked =
+                        unlockedIds.valueOrNull?.contains(acc.id) ?? true;
+
                     return GestureDetector(
-                      onTap: () => setState(() => _selectedAccount = acc),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: selected
-                              ? color.primaryContainer
-                              : color.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(12),
-                          border: selected
-                              ? Border.all(color: color.primary, width: 2)
-                              : null,
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.account_balance_wallet,
-                              size: 20,
-                              color: selected
-                                  ? color.onPrimaryContainer
-                                  : color.onSurface,
+                      onTap: () {
+                        if (isUnlocked) {
+                          setState(() => _selectedAccount = acc);
+                        } else {
+                          HapticFeedback.mediumImpact();
+                          _showUnlockPrompt(context, accounts.length);
+                        }
+                      },
+                      child: Stack(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              acc.name,
-                              style: textTheme.labelSmall?.copyWith(
-                                color: selected
-                                    ? color.onPrimaryContainer
-                                    : color.onSurface,
+                            decoration: BoxDecoration(
+                              color: selected
+                                  ? color.primaryContainer
+                                  : isUnlocked
+                                      ? color.surfaceContainerHighest
+                                      : color.surfaceContainerHighest
+                                          .withValues(alpha: 0.5),
+                              borderRadius: BorderRadius.circular(12),
+                              border: selected
+                                  ? Border.all(color: color.primary, width: 2)
+                                  : null,
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.account_balance_wallet,
+                                  size: 20,
+                                  color: isUnlocked
+                                      ? (selected
+                                          ? color.onPrimaryContainer
+                                          : color.onSurface)
+                                      : color.onSurfaceVariant
+                                          .withValues(alpha: 0.4),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  acc.name,
+                                  style: textTheme.labelSmall?.copyWith(
+                                    color: isUnlocked
+                                        ? (selected
+                                            ? color.onPrimaryContainer
+                                            : color.onSurface)
+                                        : color.onSurfaceVariant
+                                            .withValues(alpha: 0.4),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (!isUnlocked)
+                            Positioned(
+                              top: 4,
+                              right: 4,
+                              child: Icon(
+                                LucideIcons.lock,
+                                size: 10,
+                                color: color.primary,
                               ),
                             ),
-                          ],
-                        ),
+                        ],
                       ),
                     );
                   },
@@ -350,6 +389,84 @@ class _QuickAddTransactionSheetState
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showUnlockPrompt(BuildContext context, int totalAccounts) {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: color.onSurfaceVariant.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Icon(LucideIcons.lock, size: 40, color: color.primary),
+              const SizedBox(height: 16),
+              Text(
+                'Unlock all $totalAccounts accounts',
+                style:
+                    textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Free plan includes ${FreeTierLimits.maxAccounts} accounts. '
+                'Upgrade to Pro to use all your accounts.',
+                style: textTheme.bodyMedium
+                    ?.copyWith(color: color.onSurfaceVariant),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: FilledButton(
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    Navigator.pop(context); // close quick add too
+                    context.push(AppRoutes.upgrade);
+                  },
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(LucideIcons.sparkles, size: 18),
+                      SizedBox(width: 8),
+                      Text(
+                        'Upgrade to Pro',
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: Text(
+                  'Maybe later',
+                  style: textTheme.bodyMedium
+                      ?.copyWith(color: color.onSurfaceVariant),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

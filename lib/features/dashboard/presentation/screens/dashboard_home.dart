@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,11 +12,13 @@ import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/services/card_interaction_tracker.dart';
 import 'package:mudra_manager/core/services/notification_service.dart';
+import 'package:mudra_manager/core/utils/refresh_helper.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/core/widgets/dashboard_widget_plugin.dart';
 import 'package:mudra_manager/features/budget/data/budget_alert_provider.dart';
 import 'package:mudra_manager/features/budget/data/budget_alert_service.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
+import 'package:mudra_manager/features/dashboard/presentation/providers/permission_provider.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/widget_preferences_provider.dart';
 import 'package:mudra_manager/features/profile/data/help_guide_provider.dart';
 import 'package:mudra_manager/shared/widgets/budget_alert_banner.dart';
@@ -140,12 +144,12 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
 
     return Scaffold(
       body: RefreshIndicator(
-        onRefresh: () async {
+        onRefresh: () => RefreshHelper.withMinDuration(() async {
           ref.invalidate(dashboardDataProvider);
           for (final widget in widgets) {
             await widget.refresh(ref);
           }
-        },
+        }),
         child: CustomScrollView(
           key: const PageStorageKey('dashboard_scroll'),
           physics: const AlwaysScrollableScrollPhysics(),
@@ -153,6 +157,7 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
             if (!hasSeenHelp) SliverToBoxAdapter(child: _HelpBanner()),
             if (!hasSeenHelp && alerts.isNotEmpty)
               SliverToBoxAdapter(child: _AlertBanner(alerts: alerts)),
+            SliverToBoxAdapter(child: _SmsSetupBanner()),
             SliverList(
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
@@ -202,7 +207,8 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                         ),
                         const SizedBox(height: 24),
                         FilledButton.icon(
-                          onPressed: () => context.push(AppRoutes.dashboardCustomize),
+                          onPressed: () =>
+                              context.push(AppRoutes.dashboardCustomize),
                           icon: const Icon(LucideIcons.plus),
                           label: const Text('Enable Cards'),
                         ),
@@ -217,7 +223,8 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                   child: Padding(
                     padding: const EdgeInsets.only(top: 8),
                     child: TextButton.icon(
-                      onPressed: () => context.push(AppRoutes.dashboardCustomize),
+                      onPressed: () =>
+                          context.push(AppRoutes.dashboardCustomize),
                       icon: Icon(
                         LucideIcons.settings2,
                         size: 16,
@@ -232,7 +239,13 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                   ),
                 ),
               ),
-              const SliverToBoxAdapter(child: SizedBox(height: 100)),
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: MediaQuery.of(context).padding.bottom +
+                      kBottomNavigationBarHeight +
+                      16,
+                ),
+              ),
             ],
           ],
         ),
@@ -391,6 +404,198 @@ class _HelpBanner extends ConsumerWidget {
                   onTap: () async {
                     await SharedPrefsUtil.instance.setHasSeenHelpGuide(true);
                     ref.read(hasSeenHelpGuideProvider.notifier).state = true;
+                  },
+                  child: Icon(
+                    LucideIcons.x,
+                    size: 18,
+                    color: color.onSurfaceVariant.withValues(alpha: 0.6),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SmsSetupBanner extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (!Platform.isAndroid) return const SizedBox.shrink();
+
+    final granted = ref.watch(smsPermissionGrantedProvider);
+    if (granted.isLoading) return const SizedBox.shrink();
+
+    final isGranted = granted.valueOrNull == true;
+    final autoImportOn = SharedPrefsUtil.instance.getSmsImportEnabled();
+
+    // ── ACTIVE: both permission + auto-import ──
+    if (isGranted && autoImportOn) {
+      return _buildStatusPill(
+        context,
+        ref,
+        label: 'SMS Import Active',
+        accent: const Color(0xFF4CAF50),
+      );
+    }
+
+    // ── PARTIAL: permission granted, auto-import off ──
+    if (isGranted && !autoImportOn) {
+      return _buildStatusPill(
+        context,
+        ref,
+        label: 'Auto Transactions from SMS Paused',
+        accent: const Color(0xFFFFC107),
+      );
+    }
+
+    // ── INACTIVE: no permission ──
+    final dismissed = SharedPrefsUtil.instance.getSmsbannerDismiss();
+    if (dismissed) return const SizedBox.shrink();
+
+    return _buildSetupBanner(context, ref);
+  }
+
+  Widget _buildStatusPill(
+    BuildContext context,
+    WidgetRef ref, {
+    required String label,
+    required Color accent,
+  }) {
+    final spacing = ref.watch(spacingProvider);
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: spacing.cardHorizontal,
+        vertical: spacing.cardVertical,
+      ),
+      child: GestureDetector(
+        onTap: () {
+          HapticFeedback.mediumImpact();
+          context.push(AppRoutes.smsImport);
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(spacing.radiusMedium),
+            color: accent.withValues(alpha: isDark ? 0.15 : 0.08),
+            border: Border.all(color: accent.withValues(alpha: 0.25)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: accent,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                label,
+                style: textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: accent,
+                ),
+              ),
+              const Spacer(),
+              Icon(
+                LucideIcons.chevronRight,
+                size: 16,
+                color: color.onSurfaceVariant.withValues(alpha: 0.5),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSetupBanner(BuildContext context, WidgetRef ref) {
+    final spacing = ref.watch(spacingProvider);
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    const accent = Color(0xFFFF9800);
+
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: spacing.cardHorizontal,
+        vertical: spacing.cardVertical,
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(spacing.radiusMedium),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              accent.withValues(alpha: isDark ? 0.2 : 0.12),
+              accent.withValues(alpha: isDark ? 0.08 : 0.04),
+            ],
+          ),
+          border: Border.all(color: accent.withValues(alpha: 0.3)),
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(spacing.radiusMedium),
+          onTap: () {
+            HapticFeedback.mediumImpact();
+            context.push(AppRoutes.smsImport);
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: accent.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                  ),
+                  child: const Icon(
+                    LucideIcons.messageSquare,
+                    color: accent,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Enable SMS Import',
+                        style: textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: color.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Auto-track transactions from bank messages',
+                        style: textTheme.bodySmall?.copyWith(
+                          color: color.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  LucideIcons.chevronRight,
+                  size: 18,
+                  color: color.onSurfaceVariant,
+                ),
+                const SizedBox(width: 4),
+                GestureDetector(
+                  onTap: () {
+                    SharedPrefsUtil.instance.setSmsBannerDismiss();
+                    ref.invalidate(smsPermissionGrantedProvider);
                   },
                   child: Icon(
                     LucideIcons.x,

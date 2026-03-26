@@ -1,0 +1,157 @@
+{
+  "version": "1.0.0",
+  "producer": "Java AppCAT CLI",
+  "metadata": {
+    "analysisStartTime": "2026-02-02T18:53:56.166885Z",
+    "analysisEndTime": "2026-02-02T18:57:26.172798Z",
+    "status": "completed",
+    "privacyMode": "Protected",
+    "privacyModeHelpUrl": "https://aka.ms/appcat-privacy-mode",
+    "targetIds": [
+      "azure-appservice",
+      "azure-container-apps",
+      "azure-aks"
+    ],
+    "targetDisplayNames": [
+      "Azure App Service",
+      "Azure Container Apps",
+      "Azure Kubernetes Service"
+    ],
+    "capabilities": [],
+    "os": [],
+    "id": "1770058436166",
+    "name": "Report_202602030023",
+    "domains": [
+      "cloud-readiness",
+      "java-upgrade"
+    ],
+    "mode": "issue-only"
+  },
+  "summary": {
+    "totalProjects": 1,
+    "totalIssues": 2,
+    "totalIncidents": 2,
+    "totalEffort": 4,
+    "charts": {
+      "severity": {
+        "mandatory": 1,
+        "optional": 1,
+        "potential": 0,
+        "information": 0
+      },
+      "category": {
+        "containerization": 1,
+        "remote-communication": 1
+      }
+    },
+    "security": {}
+  },
+  "projects": [
+    {
+      "path": ".",
+      "issues": 2,
+      "storyPoints": 4,
+      "properties": {
+        "appName": "mudra_manager",
+        "jdkVersion": "Unknown",
+        "frameworks": null,
+        "languages": [
+          "Java"
+        ],
+        "tools": null
+      },
+      "incidents": [
+        {
+          "ruleId": "hardcoded-urls-00001",
+          "incidentId": "82aa38ac-2624-4fdf-9002-5d5148f515e7",
+          "location": "devtools_options.yaml",
+          "locationKind": "File",
+          "line": 2,
+          "column": 0,
+          "targets": {
+            "azure-aks": {
+              "effort": 3,
+              "severity": "optional"
+            },
+            "azure-appservice": {
+              "effort": 3,
+              "severity": "optional"
+            },
+            "azure-container-apps": {
+              "effort": 3,
+              "severity": "optional"
+            }
+          },
+          "labels": [
+            "type=violation",
+            "ruleset=cloud-readiness"
+          ]
+        },
+        {
+          "ruleId": "dockerfile-00000",
+          "incidentId": "c3382e65-c00d-4285-9198-1a7a444b4586",
+          "location": "",
+          "locationKind": "",
+          "targets": {
+            "azure-aks": {
+              "effort": 1,
+              "severity": "mandatory"
+            },
+            "azure-container-apps": {
+              "effort": 1,
+              "severity": "mandatory"
+            }
+          },
+          "labels": [
+            "type=violation",
+            "ruleset=cloud-readiness"
+          ]
+        }
+      ]
+    }
+  ],
+  "rules": {
+    "dockerfile-00000": {
+      "id": "dockerfile-00000",
+      "description": "No Dockerfile was found in the project. This suggests the application may not yet be containerized. \nConsider creating a Dockerfile to enable container-based replatforming to Azure services such as Azure Container Apps or AKS.",
+      "title": "No Dockerfile found",
+      "severity": "mandatory",
+      "effort": 1,
+      "links": [
+        {
+          "url": "https://www.baeldung.com/java-dockerize-app",
+          "title": "Dockerizing a Java Application"
+        }
+      ],
+      "labels": [
+        "target=azure-aks",
+        "target=azure-container-apps",
+        "capability=containerization",
+        "source",
+        "domain=cloud-readiness",
+        "category=containerization",
+        "containerization",
+        "os=windows",
+        "os=linux"
+      ]
+    },
+    "hardcoded-urls-00001": {
+      "id": "hardcoded-urls-00001",
+      "description": "This patterns verifies in source code and configuration files the presence of hardcoded URLs using the HTTP protocol (HTTP/HTTPS). This URL would need to be replaced by the new resource's URL during the Cloud migration, if any change occured.",
+      "title": "Avoid using hardcoded URLs (HTTP protocol) in source code",
+      "severity": "optional",
+      "effort": 3,
+      "labels": [
+        "target=azure-aks",
+        "target=azure-container-apps",
+        "target=azure-appservice",
+        "source",
+        "domain=cloud-readiness",
+        "category=remote-communication",
+        "os=windows",
+        "os=linux"
+      ]
+    }
+  },
+  "security": []
+}

@@ -10,36 +10,106 @@ class PaymentType {
 
 class CategoryMatcherService {
   static String? detectMerchant(String smsBody, List<Category> categories) {
-    final bodyLower = smsBody.toLowerCase();
-    
-    // Check all categories for keyword matches
-    for (final category in categories) {
-      if (category.keywords == null) continue;
-      for (final keyword in category.keywords!) {
-        if (bodyLower.contains(keyword.toLowerCase())) {
-          return keyword; // Return the matched keyword as merchant name
-        }
-      }
-    }
+    // Extract actual merchant/payee name from SMS patterns
+    final merchant = _extractMerchantFromSms(smsBody);
+    if (merchant != null) return merchant;
+
+    // No keyword-based fallback — substring matching produces false positives
     return null;
+  }
+
+  static String? _extractMerchantFromSms(String smsBody) {
+    // UPI VPA pattern: "to VPA suraj@okaxis" → extract name part
+    final vpaMatch = RegExp(
+      r'(?:to|from)\s+VPA\s+([a-zA-Z0-9._]+)@',
+      caseSensitive: false,
+    ).firstMatch(smsBody);
+    if (vpaMatch != null) {
+      return _humanizeName(vpaMatch.group(1)!);
+    }
+
+    // "to/from Name" pattern for UPI — captures multi-word names
+    // e.g. "paid to Suraj Mondal" or "received from Suraj Mondal"
+    final nameMatch = RegExp(
+      r'(?:paid\s+to|sent\s+to|received\s+from|transferred\s+to|from)\s+([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+){0,3})',
+    ).firstMatch(smsBody);
+    if (nameMatch != null) {
+      final name = nameMatch.group(1)!.trim();
+      // Filter out common false positives
+      if (!_isNoiseName(name)) return name;
+    }
+
+    // "at MERCHANT" pattern for card/POS
+    // e.g. "debited at Amazon" or "spent at Swiggy"
+    final atMatch = RegExp(
+      r'(?:at|At)\s+([A-Za-z][A-Za-z0-9\s&\-]{2,30})(?:\s+on|\s+Ref|\.|\s*$)',
+    ).firstMatch(smsBody);
+    if (atMatch != null) {
+      final name = atMatch.group(1)!.trim();
+      if (!_isNoiseName(name)) return name;
+    }
+
+    return null;
+  }
+
+  static final _noiseNames = {
+    'bank',
+    'a/c',
+    'account',
+    'inr',
+    'rs',
+    'upi',
+    'neft',
+    'imps',
+    'rtgs',
+    'ref',
+    'avl',
+    'bal',
+    'your',
+    'the',
+    'for',
+  };
+
+  static bool _isNoiseName(String name) {
+    return name.length < 2 ||
+        _noiseNames.contains(name.toLowerCase()) ||
+        RegExp(r'^\d+$').hasMatch(name);
+  }
+
+  static String _humanizeName(String vpaId) {
+    // "suraj.mondal" → "Suraj Mondal"
+    return vpaId
+        .replaceAll(RegExp(r'[._]'), ' ')
+        .trim()
+        .split(RegExp(r'\s+'))
+        .map(
+          (w) => w.isEmpty
+              ? w
+              : '${w[0].toUpperCase()}${w.substring(1).toLowerCase()}',
+        )
+        .join(' ');
   }
 
   static String? detectPaymentType(String smsBody) {
     final bodyLower = smsBody.toLowerCase();
-    
+
     if (bodyLower.contains('upi') || bodyLower.contains('vpa')) {
       return PaymentType.upi;
     }
-    if (bodyLower.contains('card') || bodyLower.contains('credit') || bodyLower.contains('debit')) {
+    if (bodyLower.contains('card') ||
+        bodyLower.contains('credit') ||
+        bodyLower.contains('debit')) {
       return PaymentType.card;
     }
     if (bodyLower.contains('netbanking') || bodyLower.contains('net banking')) {
       return PaymentType.netBanking;
     }
-    if (bodyLower.contains('wallet') || bodyLower.contains('paytm') || bodyLower.contains('phonepe')) {
+    if (bodyLower.contains('wallet') ||
+        bodyLower.contains('paytm') ||
+        bodyLower.contains('phonepe')) {
       return PaymentType.wallet;
     }
-    
+
     return null;
   }
 
@@ -50,37 +120,39 @@ class CategoryMatcherService {
   ) {
     final bodyLower = smsBody.toLowerCase();
     final type = isIncome ? CategoryType.income : CategoryType.expense;
-    
+
     // Filter by type
-    final validCategories = categories.where((c) => c.categoryType == type).toList();
-    
+    final validCategories =
+        categories.where((c) => c.categoryType == type).toList();
+
     // Keyword matching with scoring (prioritize longer, more specific keywords)
     Category? bestMatch;
     int maxScore = 0;
-    
+
     for (final category in validCategories) {
       if (category.keywords == null || category.keywords!.isEmpty) continue;
-      
+
       int score = 0;
       for (final keyword in category.keywords!) {
         final keywordLower = keyword.toLowerCase();
         if (bodyLower.contains(keywordLower)) {
           // Longer keywords = more specific = higher score
           score += keywordLower.length * 2;
-          
+
           // Bonus for exact word match (not just substring)
-          if (RegExp(r'\b' + RegExp.escape(keywordLower) + r'\b').hasMatch(bodyLower)) {
+          if (RegExp(r'\b' + RegExp.escape(keywordLower) + r'\b')
+              .hasMatch(bodyLower)) {
             score += 10;
           }
         }
       }
-      
+
       if (score > maxScore) {
         maxScore = score;
         bestMatch = category;
       }
     }
-    
+
     return bestMatch;
   }
 }

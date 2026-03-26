@@ -15,6 +15,7 @@ class ParsedSms {
   final String? transactionType;
   final String? merchant;
   final double? balance;
+  final bool isLikelyTransfer;
 
   ParsedSms({
     required this.amount,
@@ -23,5 +24,6 @@ class ParsedSms {
     this.transactionType,
     this.merchant,
     this.balance,
+    this.isLikelyTransfer = false,
   });
 }

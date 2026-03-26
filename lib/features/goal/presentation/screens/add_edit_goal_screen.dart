@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/db/models/goal.dart';
+import 'package:mudra_manager/core/entitlement/entitlement_provider.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/icon_helper.dart';
@@ -79,6 +80,16 @@ class _AddEditGoalScreenState extends ConsumerState<AddEditGoalScreen> {
   }
 
   Future<void> _saveGoal() async {
+    // ── Entitlement check (new goals only) ──
+    if (widget.goal == null) {
+      final canCreate = await ref.read(canCreateGoalProvider.future);
+      if (!canCreate) {
+        SnackbarService.warning(
+          'Free plan allows up to 2 goals. Upgrade to Pro for unlimited.',
+        );
+        return;
+      }
+    }
     if (!_formKey.currentState!.validate()) return;
 
     final goal = widget.goal ?? Goal();

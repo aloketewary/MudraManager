@@ -24,6 +24,8 @@ class Category {
 
   List<String>? keywords;
 
+  String? packId;
+
   // Isar requires a default constructor
   Category();
 

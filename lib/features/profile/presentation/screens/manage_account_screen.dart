@@ -9,7 +9,9 @@ import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/dialog_utils.dart';
+import 'package:mudra_manager/core/utils/refresh_helper.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
+import 'package:mudra_manager/features/account/data/account_access_provider.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/account/presentation/screens/balance_history_screen.dart';
 import 'package:mudra_manager/features/account/presentation/screens/reconciliation_screen.dart';
@@ -100,65 +102,80 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
 
           final totalBalance = _balanceMap.values.fold(0.0, (a, b) => a + b);
 
-          return ListView(
-            padding: EdgeInsets.symmetric(
-              horizontal: spacing.cardHorizontal,
-              vertical: spacing.cardVertical,
-            ),
-            children: [
-              _buildSummaryCard(
-                totalBalance,
-                activeAccounts.length,
-                color,
-                textTheme,
-                spacing,
+          return RefreshIndicator(
+            onRefresh: () => RefreshHelper.withMinDuration(() async {
+              ref.invalidate(allAccountsProvider);
+              ref.invalidate(accountsProvider);
+              final balances =
+                  await ref.read(accountServiceProvider).getAccountBalanceMap();
+              if (mounted) setState(() => _balanceMap = balances);
+            }),
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: EdgeInsets.symmetric(
+                horizontal: spacing.cardHorizontal,
+                vertical: spacing.cardVertical,
               ),
-              SizedBox(height: spacing.sectionGap),
-
-              // Active grouped sections
-              ...grouped.entries.map((entry) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildTypeHeader(entry.key, color, textTheme),
-                    const SizedBox(height: 8),
-                    _buildAccountGroup(
-                      entry.value,
-                      false,
-                      activeAccounts.length,
-                      color,
-                      textTheme,
-                      ctxt,
-                      spacing,
-                    ),
-                    const SizedBox(height: 20),
-                  ],
-                );
-              }),
-
-              // Archived section
-              if (archivedAccounts.isNotEmpty) ...[
-                const SizedBox(height: 4),
-                _buildArchivedHeader(color, textTheme),
-                const SizedBox(height: 8),
-                _buildAccountGroup(
-                  archivedAccounts,
-                  true,
+              children: [
+                _buildSummaryCard(
+                  totalBalance,
                   activeAccounts.length,
                   color,
                   textTheme,
-                  ctxt,
                   spacing,
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: spacing.sectionGap),
+
+                // Active grouped sections
+                ...grouped.entries.map((entry) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildTypeHeader(entry.key, color, textTheme),
+                      const SizedBox(height: 8),
+                      _buildAccountGroup(
+                        entry.value,
+                        false,
+                        activeAccounts.length,
+                        color,
+                        textTheme,
+                        ctxt,
+                        spacing,
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+                  );
+                }),
+
+                // Archived section
+                if (archivedAccounts.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  _buildArchivedHeader(color, textTheme),
+                  const SizedBox(height: 8),
+                  _buildAccountGroup(
+                    archivedAccounts,
+                    true,
+                    activeAccounts.length,
+                    color,
+                    textTheme,
+                    ctxt,
+                    spacing,
+                  ),
+                  const SizedBox(height: 20),
+                ],
+                SizedBox(
+                  height: MediaQuery.of(context).padding.bottom +
+                      kBottomNavigationBarHeight +
+                      16,
+                ),
               ],
-            ],
+            ),
           );
         },
         loading: () => ListView.builder(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
           itemCount: 5,
-          itemBuilder: (context, index) => const SkeletonListTile(),
+          itemBuilder: (context, index) => const TransactionCardSkeleton(),
         ),
         error: (err, stack) => Center(child: Text('Error: $err')),
       ),
@@ -398,6 +415,26 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
                                   ? color.onSurfaceVariant
                                   : (balance >= 0 ? accountColor : color.error),
                             ),
+                          ),
+                          Consumer(
+                            builder: (context, ref, _) {
+                              final unlockedIds =
+                                  ref.watch(unlockedAccountIdsProvider);
+                              final isUnlocked = unlockedIds.valueOrNull
+                                      ?.contains(account.id) ??
+                                  true;
+                              if (isUnlocked || isArchived) {
+                                return const SizedBox.shrink();
+                              }
+                              return Padding(
+                                padding: const EdgeInsets.only(left: 4),
+                                child: Icon(
+                                  LucideIcons.lock,
+                                  size: 12,
+                                  color: color.primary,
+                                ),
+                              );
+                            },
                           ),
                           const SizedBox(width: 4),
                           Icon(

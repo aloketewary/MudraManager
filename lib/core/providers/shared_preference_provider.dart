@@ -16,6 +16,14 @@ class SharedPrefsUtil {
     instance = SharedPrefsUtil._(prefs);
   }
 
+  static const _accountDisplayStyleKey = 'account_display_style';
+
+  String getAccountDisplayStyle() =>
+      _prefs.getString(_accountDisplayStyleKey) ?? 'carousel';
+
+  Future<void> setAccountDisplayStyle(String style) =>
+      _prefs.setString(_accountDisplayStyleKey, style);
+
   // Save onboarding completion
   void setOnboardingComplete() {
     _prefs.setBool('onboarding_complete', true);
@@ -155,5 +163,13 @@ class SharedPrefsUtil {
 
   Future<void> setHighContrastMode(bool enabled) async {
     await _prefs.setBool('high_contrast_mode', enabled);
+  }
+
+  Future<void> setSmsBannerDismiss() async{
+    await _prefs.setBool('sms_banner_dismissed', true);
+  }
+
+  bool getSmsbannerDismiss() {
+    return _prefs.getBool('sms_banner_dismissed') ?? false;
   }
 }

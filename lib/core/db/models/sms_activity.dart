@@ -30,6 +30,8 @@ class SmsActivity {
   String? paymentType;
   String? transactionType; // UPI, Card, ATM, NEFT, etc.
   double? balance; // Available balance after transaction
+  bool? isLikelyTransfer;
+  int? pairedActivityId;
 
   @Index(unique: true)
   late String smsHash;

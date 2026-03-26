@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/core/utils/refresh_helper.dart';
 import 'package:mudra_manager/features/trip/data/trip_provider.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/db/models/trip.dart';
@@ -158,174 +159,195 @@ class TripsScreen extends ConsumerWidget {
           final hasInsight = trips.isNotEmpty;
 
           if (trips.isEmpty) {
-            return CustomScrollView(
+            return RefreshIndicator(
+              onRefresh: () => RefreshHelper.withMinDuration(() async {
+                ref.invalidate(allTripsProvider);
+              }),
+              child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  _buildAppBar(
+                    context,
+                    textTheme,
+                    color,
+                    null,
+                    showInfo: true,
+                  ),
+                  SliverFillRemaining(
+                    child: Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(spacing.cardHorizontalMax),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(32),
+                              decoration: BoxDecoration(
+                                color: color.surfaceContainerHighest,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                LucideIcons.plane,
+                                size: 64,
+                                color: color.onSurfaceVariant
+                                    .withValues(alpha: 0.5),
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                            Text(
+                              'No trips yet',
+                              style: textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Create your first trip to split expenses',
+                              style: textTheme.bodyMedium?.copyWith(
+                                color: color.onSurfaceVariant,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 24),
+                            FilledButton.icon(
+                              onPressed: () {
+                                HapticFeedback.mediumImpact();
+                                context.push(AppRoutes.createTrip);
+                              },
+                              icon: const Icon(LucideIcons.plus),
+                              label: const Text('Create Trip'),
+                              style: FilledButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 24,
+                                  vertical: 12,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  SliverToBoxAdapter(
+                    child: SizedBox(
+                      height: MediaQuery.of(context).padding.bottom +
+                          kBottomNavigationBarHeight +
+                          16,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return RefreshIndicator(
+            onRefresh: () => RefreshHelper.withMinDuration(() async {
+              ref.invalidate(allTripsProvider);
+            }),
+            child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
                 _buildAppBar(
                   context,
                   textTheme,
                   color,
-                  null,
+                  hasInsight ? insight : null,
                   showInfo: true,
                 ),
-                SliverFillRemaining(
-                  child: Center(
+                if (activeTrip != null) ...[
+                  SliverToBoxAdapter(
                     child: Padding(
-                      padding: EdgeInsets.all(spacing.cardHorizontalMax),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      padding: EdgeInsets.fromLTRB(
+                        spacing.cardHorizontal,
+                        spacing.sectionGap,
+                        spacing.cardHorizontal,
+                        spacing.elementGap,
+                      ),
+                      child: Row(
                         children: [
                           Container(
-                            padding: const EdgeInsets.all(32),
+                            width: 8,
+                            height: 8,
                             decoration: BoxDecoration(
-                              color: color.surfaceContainerHighest,
+                              color: color.primary,
                               shape: BoxShape.circle,
                             ),
-                            child: Icon(
-                              LucideIcons.plane,
-                              size: 64,
-                              color:
-                                  color.onSurfaceVariant.withValues(alpha: 0.5),
-                            ),
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(width: 8),
                           Text(
-                            'No trips yet',
-                            style: textTheme.titleLarge?.copyWith(
+                            'ACTIVE TRIP',
+                            style: textTheme.labelMedium?.copyWith(
                               fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Create your first trip to split expenses',
-                            style: textTheme.bodyMedium?.copyWith(
-                              color: color.onSurfaceVariant,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 24),
-                          FilledButton.icon(
-                            onPressed: () {
-                              HapticFeedback.mediumImpact();
-                              context.push(AppRoutes.createTrip);
-                            },
-                            icon: const Icon(LucideIcons.plus),
-                            label: const Text('Create Trip'),
-                            style: FilledButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 24,
-                                vertical: 12,
-                              ),
+                              color: color.primary,
+                              letterSpacing: 0.5,
                             ),
                           ),
                         ],
                       ),
                     ),
                   ),
-                ),
-              ],
-            );
-          }
-
-          return CustomScrollView(
-            slivers: [
-              _buildAppBar(
-                context,
-                textTheme,
-                color,
-                hasInsight ? insight : null,
-                showInfo: true,
-              ),
-              if (activeTrip != null) ...[
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      spacing.cardHorizontal,
-                      spacing.sectionGap,
-                      spacing.cardHorizontal,
-                      spacing.elementGap,
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            color: color.primary,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'ACTIVE TRIP',
-                          style: textTheme.labelMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: color.primary,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: spacing.cardHorizontal,
-                      vertical: spacing.cardVertical,
-                    ),
-                    child: _buildTripCard(
-                      context,
-                      ref,
-                      activeTrip,
-                      color,
-                      textTheme,
-                      spacing,
-                      isActive: true,
-                    ),
-                  ),
-                ),
-              ],
-              if (archivedTrips.isNotEmpty) ...[
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: spacing.cardHorizontal,
-                      vertical: spacing.cardVertical,
-                    ),
-                    child: Text(
-                      'TRIP ARCHIVE',
-                      style: textTheme.labelMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: color.onSurfaceVariant,
-                        letterSpacing: 0.5,
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: spacing.cardHorizontal,
+                        vertical: spacing.cardVertical,
+                      ),
+                      child: _buildTripCard(
+                        context,
+                        ref,
+                        activeTrip,
+                        color,
+                        textTheme,
+                        spacing,
+                        isActive: true,
                       ),
                     ),
                   ),
-                ),
-                SliverPadding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: spacing.cardHorizontal,
-                  ),
-                  sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) => Padding(
-                        padding: EdgeInsets.only(bottom: spacing.cardVertical,),
-                        child: _buildTripCard(
-                          context,
-                          ref,
-                          archivedTrips[index],
-                          color,
-                          textTheme,
-                          spacing,
+                ],
+                if (archivedTrips.isNotEmpty) ...[
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: spacing.cardHorizontal,
+                        vertical: spacing.cardVertical,
+                      ),
+                      child: Text(
+                        'TRIP ARCHIVE',
+                        style: textTheme.labelMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: color.onSurfaceVariant,
+                          letterSpacing: 0.5,
                         ),
                       ),
-                      childCount: archivedTrips.length,
                     ),
                   ),
-                ),
+                  SliverPadding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: spacing.cardHorizontal,
+                    ),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) => Padding(
+                          padding: EdgeInsets.only(
+                            bottom: spacing.cardVertical,
+                          ),
+                          child: _buildTripCard(
+                            context,
+                            ref,
+                            archivedTrips[index],
+                            color,
+                            textTheme,
+                            spacing,
+                          ),
+                        ),
+                        childCount: archivedTrips.length,
+                      ),
+                    ),
+                  ),
+                ],
+                const SliverToBoxAdapter(child: SizedBox(height: 100)),
               ],
-              const SliverToBoxAdapter(child: SizedBox(height: 100)),
-            ],
+            ),
           );
         },
         loading: () => CustomScrollView(

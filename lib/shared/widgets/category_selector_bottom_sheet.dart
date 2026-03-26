@@ -48,7 +48,11 @@ class _CategorySelectorBottomSheetState
 
   @override
   Widget build(BuildContext context) {
-    final categoriesAsync = ref.watch(categoryListProvider);
+    final categoriesAsync = ref.watch(
+      selectableCategoriesProvider(
+        widget.isExpense ? CategoryType.expense : CategoryType.income,
+      ),
+    );
     final textTheme = Theme.of(context).textTheme;
     final color = Theme.of(context).colorScheme;
 
@@ -111,15 +115,7 @@ class _CategorySelectorBottomSheetState
           Expanded(
             child: categoriesAsync.when(
               data: (categories) {
-                final filtered = categories
-                    .where(
-                      (c) =>
-                          (widget.isExpense &&
-                              c.categoryType == CategoryType.expense) ||
-                          (!widget.isExpense &&
-                              c.categoryType == CategoryType.income),
-                    )
-                    .toList();
+                final filtered = categories;
 
                 if (filtered.isEmpty) {
                   return Center(
@@ -132,15 +128,14 @@ class _CategorySelectorBottomSheetState
 
                 final displayCategories = _selectedParent == null
                     ? filtered
-                          .where((c) => c.parentCategory.value == null)
-                          .toList()
+                        .where((c) => c.parentCategory.value == null)
+                        .toList()
                     : filtered
-                          .where(
-                            (c) =>
-                                c.parentCategory.value?.id ==
-                                _selectedParent!.id,
-                          )
-                          .toList();
+                        .where(
+                          (c) =>
+                              c.parentCategory.value?.id == _selectedParent!.id,
+                        )
+                        .toList();
 
                 return GridView.builder(
                   controller: scrollController,
@@ -160,8 +155,7 @@ class _CategorySelectorBottomSheetState
                   itemCount: displayCategories.length,
                   itemBuilder: (context, index) {
                     final category = displayCategories[index];
-                    final hasSubcategories =
-                        _selectedParent == null &&
+                    final hasSubcategories = _selectedParent == null &&
                         filtered.any(
                           (c) => c.parentCategory.value?.id == category.id,
                         );

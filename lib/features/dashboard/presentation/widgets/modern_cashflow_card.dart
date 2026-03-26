@@ -9,6 +9,7 @@ import 'package:mudra_manager/core/extension/localization_extenstion.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/filter_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 import 'package:mudra_manager/core/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/features/dashboard/data/historical_data_provider.dart';
@@ -159,9 +160,12 @@ class _ModernCashFlowCardState extends ConsumerState<ModernCashFlowCard> {
     double previousValue,
   ) {
     final ctxt = AppLocalizations.of(context)!;
-    final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final brightness = Theme.of(context).brightness;
     final labelText = isExpense ? 'Expense' : 'Income';
+    final accent = isExpense
+        ? FinanceColors.expenseColor(brightness)
+        : FinanceColors.incomeColor(brightness);
 
     return SizedBox(
       height: 170,
@@ -174,9 +178,7 @@ class _ModernCashFlowCardState extends ConsumerState<ModernCashFlowCard> {
           child: Card(
             margin: EdgeInsets.zero,
             elevation: 0,
-            color:
-                (isExpense ? color.tertiaryContainer : color.primaryContainer)
-                    .withValues(alpha: 0.6),
+            color: accent.withValues(alpha: 0.12),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.horizontal(
                 left: isExpense ? Radius.zero : const Radius.circular(12),
@@ -193,17 +195,13 @@ class _ModernCashFlowCardState extends ConsumerState<ModernCashFlowCard> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       CircleAvatar(
-                        backgroundColor:
-                            (isExpense ? color.tertiary : color.primary)
-                                .withValues(
-                          alpha: 0.15,
-                        ),
+                        backgroundColor: accent.withValues(alpha: 0.15),
                         child: Icon(
                           isExpense
                               ? LucideIcons.arrowUp
                               : LucideIcons.arrowDown,
                           size: 16,
-                          color: (isExpense ? color.tertiary : color.primary),
+                          color: accent,
                         ),
                       ),
                       const SizedBox(width: 6.0),
@@ -214,7 +212,7 @@ class _ModernCashFlowCardState extends ConsumerState<ModernCashFlowCard> {
                             .toUpperCase(),
                         textAlign: TextAlign.left,
                         style: textTheme.labelMedium?.copyWith(
-                          color: (isExpense ? color.tertiary : color.primary),
+                          color: accent,
                           fontWeight: FontWeight.bold,
                         ),
                         overflow: TextOverflow.ellipsis,
@@ -235,8 +233,7 @@ class _ModernCashFlowCardState extends ConsumerState<ModernCashFlowCard> {
                             child: AnimatedBalance(
                               value: amount,
                               style: textTheme.headlineLarge?.copyWith(
-                                color:
-                                    isExpense ? color.tertiary : color.primary,
+                                color: accent,
                                 fontWeight: FontWeight.bold,
                               ),
                               fixedStringLength: 0,
@@ -264,7 +261,11 @@ class _ModernCashFlowCardState extends ConsumerState<ModernCashFlowCard> {
   }
 
   Widget _buildSparklingLineChart(bool isExpense) {
-    final color = Theme.of(context).colorScheme;
+    final brightness = Theme.of(context).brightness;
+    final accent = isExpense
+        ? FinanceColors.expenseColor(brightness)
+        : FinanceColors.incomeColor(brightness);
+
     return Positioned.fill(
       child: Consumer(
         builder: (context, ref, child) {
@@ -273,10 +274,7 @@ class _ModernCashFlowCardState extends ConsumerState<ModernCashFlowCard> {
           );
           return historyAsync.when(
             data: (history) {
-              if (history.isEmpty) {
-                return const SizedBox();
-              }
-              // If all values are zero, show a flat line at bottom
+              if (history.isEmpty) return const SizedBox();
               if (history.every((v) => v == 0)) {
                 final spots = history.asMap().entries.map((e) {
                   return FlSpot(e.key.toDouble(), 10.0);
@@ -291,14 +289,12 @@ class _ModernCashFlowCardState extends ConsumerState<ModernCashFlowCard> {
                       LineChartBarData(
                         spots: spots,
                         isCurved: true,
-                        color: (isExpense ? color.tertiary : color.primary)
-                            .withValues(alpha: 0.15),
+                        color: accent.withValues(alpha: 0.15),
                         barWidth: 2,
                         dotData: const FlDotData(show: false),
                         belowBarData: BarAreaData(
                           show: true,
-                          color: (isExpense ? color.tertiary : color.primary)
-                              .withValues(alpha: 0.05),
+                          color: accent.withValues(alpha: 0.05),
                         ),
                       ),
                     ],
@@ -323,14 +319,12 @@ class _ModernCashFlowCardState extends ConsumerState<ModernCashFlowCard> {
                     LineChartBarData(
                       spots: spots,
                       isCurved: true,
-                      color: (isExpense ? color.tertiary : color.primary)
-                          .withValues(alpha: 0.15),
+                      color: accent.withValues(alpha: 0.15),
                       barWidth: 2,
                       dotData: const FlDotData(show: false),
                       belowBarData: BarAreaData(
                         show: true,
-                        color: (isExpense ? color.tertiary : color.primary)
-                            .withValues(alpha: 0.05),
+                        color: accent.withValues(alpha: 0.05),
                       ),
                     ),
                   ],

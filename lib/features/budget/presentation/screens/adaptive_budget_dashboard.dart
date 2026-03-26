@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/core/utils/refresh_helper.dart';
 import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
@@ -76,46 +77,34 @@ class _AdaptiveBudgetDashboardState
               )
               .toList();
 
-          return CustomScrollView(
-            slivers: [
-              // Modern SliverAppBar
-              _buildSliverAppBar(
-                remaining,
-                totalBudget,
-                color,
-                textTheme,
-                context,
-                spacing,
-              ),
-
-              // Quick Stats Cards
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: spacing.cardHorizontal,
-                    vertical: spacing.cardVertical,
-                  ),
-                  child: _buildQuickStats(
-                    totalSpent,
-                    safeToSpendDaily.toDouble(),
-                    daysLeft,
-                    color,
-                    textTheme,
-                    spacing,
-                  ),
+          return RefreshIndicator(
+            onRefresh: () => RefreshHelper.withMinDuration(() async {
+              ref.invalidate(budgetsWithProgressProvider);
+            }),
+            child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                // Modern SliverAppBar
+                _buildSliverAppBar(
+                  remaining,
+                  totalBudget,
+                  color,
+                  textTheme,
+                  context,
+                  spacing,
                 ),
-              ),
 
-              // Burn Rate Alert
-              if (projectedSpend > totalBudget)
+                // Quick Stats Cards
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: EdgeInsets.symmetric(
                       horizontal: spacing.cardHorizontal,
+                      vertical: spacing.cardVertical,
                     ),
-                    child: _buildBurnRateAlert(
-                      projectedSpend,
-                      totalBudget,
+                    child: _buildQuickStats(
+                      totalSpent,
+                      safeToSpendDaily.toDouble(),
+                      daysLeft,
                       color,
                       textTheme,
                       spacing,
@@ -123,77 +112,99 @@ class _AdaptiveBudgetDashboardState
                   ),
                 ),
 
-              SliverToBoxAdapter(child: SizedBox(height: spacing.elementGap)),
+                // Burn Rate Alert
+                if (projectedSpend > totalBudget)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: spacing.cardHorizontal,
+                      ),
+                      child: _buildBurnRateAlert(
+                        projectedSpend,
+                        totalBudget,
+                        color,
+                        textTheme,
+                        spacing,
+                      ),
+                    ),
+                  ),
 
-              // Budget Tiers
-              if (fixed.isNotEmpty) ...[
-                _buildSectionHeader(
-                  'Fixed (Essential)',
-                  LucideIcons.shield,
-                  color.primary,
-                  textTheme,
-                  spacing,
-                ),
-                _buildBudgetList(
-                  fixed,
-                  color,
-                  textTheme,
-                  spacing,
+                SliverToBoxAdapter(child: SizedBox(height: spacing.elementGap)),
+
+                // Budget Tiers
+                if (fixed.isNotEmpty) ...[
+                  _buildSectionHeader(
+                    'Fixed (Essential)',
+                    LucideIcons.shield,
+                    color.primary,
+                    textTheme,
+                    spacing,
+                  ),
+                  _buildBudgetList(
+                    fixed,
+                    color,
+                    textTheme,
+                    spacing,
+                  ),
+                ],
+
+                if (variable.isNotEmpty) ...[
+                  _buildSectionHeader(
+                    'Variable (Discretionary)',
+                    LucideIcons.trendingUp,
+                    Colors.orange,
+                    textTheme,
+                    spacing,
+                  ),
+                  _buildBudgetList(
+                    variable,
+                    color,
+                    textTheme,
+                    spacing,
+                  ),
+                ],
+
+                if (goals.isNotEmpty) ...[
+                  _buildSectionHeader(
+                    'Goals (Savings)',
+                    LucideIcons.goal,
+                    Colors.green,
+                    textTheme,
+                    spacing,
+                  ),
+                  _buildBudgetList(
+                    goals,
+                    color,
+                    textTheme,
+                    spacing,
+                  ),
+                ],
+
+                if (other.isNotEmpty) ...[
+                  _buildSectionHeader(
+                    'Other',
+                    LucideIcons.octagon,
+                    color.primary,
+                    textTheme,
+                    spacing,
+                  ),
+                  _buildBudgetList(
+                    other,
+                    color,
+                    textTheme,
+                    spacing,
+                  ),
+                ],
+
+                SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: MediaQuery.of(context).padding.bottom +
+                        kBottomNavigationBarHeight +
+                        16,
+                  ),
                 ),
               ],
-
-              if (variable.isNotEmpty) ...[
-                _buildSectionHeader(
-                  'Variable (Discretionary)',
-                  LucideIcons.trendingUp,
-                  Colors.orange,
-                  textTheme,
-                  spacing,
-                ),
-                _buildBudgetList(
-                  variable,
-                  color,
-                  textTheme,
-                  spacing,
-                ),
-              ],
-
-              if (goals.isNotEmpty) ...[
-                _buildSectionHeader(
-                  'Goals (Savings)',
-                  LucideIcons.goal,
-                  Colors.green,
-                  textTheme,
-                  spacing,
-                ),
-                _buildBudgetList(
-                  goals,
-                  color,
-                  textTheme,
-                  spacing,
-                ),
-              ],
-
-              if (other.isNotEmpty) ...[
-                _buildSectionHeader(
-                  'Other',
-                  LucideIcons.octagon,
-                  color.primary,
-                  textTheme,
-                  spacing,
-                ),
-                _buildBudgetList(
-                  other,
-                  color,
-                  textTheme,
-                  spacing,
-                ),
-              ],
-
-              SliverToBoxAdapter(
-                child: SizedBox(height: spacing.sectionGap * 5),
-              ),
-            ],
+            ),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),

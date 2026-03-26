@@ -1,13 +1,14 @@
 import 'dart:async';
+import 'package:async/async.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
+import 'package:mudra_manager/core/db/models/budget.dart';
 import 'package:mudra_manager/core/db/models/goal.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
 import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
-import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 
@@ -41,13 +42,14 @@ class DashboardData {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is DashboardData &&
-          runtimeType == other.runtimeType &&
+          totalIncome == other.totalIncome &&
+          totalExpense == other.totalExpense &&
+          totalBalance == other.totalBalance &&
+          netWorth == other.netWorth &&
           transactions.length == other.transactions.length &&
           accounts.length == other.accounts.length &&
           budgets.length == other.budgets.length &&
-          goals.length == other.goals.length &&
-          totalIncome == other.totalIncome &&
-          totalExpense == other.totalExpense;
+          goals.length == other.goals.length;
 
   @override
   int get hashCode =>
@@ -56,7 +58,8 @@ class DashboardData {
       budgets.length.hashCode ^
       goals.length.hashCode ^
       totalIncome.hashCode ^
-      totalExpense.hashCode;
+      totalExpense.hashCode ^
+      netWorth.hashCode;
 }
 
 // Main dashboard provider with debouncing
@@ -172,9 +175,16 @@ final dashboardDataProvider =
 
   // Watch for changes with debouncing
   final controller = StreamController<DashboardData>();
+// Replace the single subscription block with:
+  final mergedStream = StreamGroup.merge([
+    isar.transactions.watchLazy(fireImmediately: false),
+    isar.accounts.watchLazy(fireImmediately: false),
+    isar.budgets.watchLazy(fireImmediately: false),
+    isar.goals.watchLazy(fireImmediately: false),
+    isar.recurringTransactions.watchLazy(fireImmediately: false),
+  ]);
 
-  final subscription =
-      isar.transactions.watchLazy(fireImmediately: false).listen((_) {
+  final subscription = mergedStream.listen((_) {
     debounceTimer?.cancel();
     debounceTimer = Timer(const Duration(milliseconds: 300), () async {
       try {

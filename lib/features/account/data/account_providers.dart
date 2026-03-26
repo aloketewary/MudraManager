@@ -3,12 +3,14 @@ import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
+import 'package:mudra_manager/core/providers/collection_watchers.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 
 final accountsProvider = FutureProvider.autoDispose((ref) async {
-  final isarService = ref.watch(isarServiceProvider);
-  final isar = await isarService.getInstance();
+  ref.watch(accountChangeProvider);
+  ref.watch(transactionChangeProvider);
+  final isar = await ref.watch(isarServiceProvider).getInstance();
   return await isar.accounts.filter().isActiveEqualTo(true).findAll();
 });
 

@@ -17,8 +17,15 @@ import 'package:mudra_manager/features/profile/presentation/widgets/icon_picker_
 
 class AddEditCategoryScreen extends ConsumerStatefulWidget {
   final Category? existing;
+  final Category? initialParent;
+  final CategoryType? initialType;
 
-  const AddEditCategoryScreen({super.key, this.existing});
+  const AddEditCategoryScreen({
+    super.key,
+    this.existing,
+    this.initialParent,
+    this.initialType,
+  });
 
   @override
   ConsumerState<AddEditCategoryScreen> createState() =>
@@ -63,6 +70,10 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
     _selectedColor = widget.existing?.colorValue != null
         ? Color(widget.existing!.colorValue!)
         : const Color(0xFF2196F3);
+    _selectedType = widget.existing?.categoryType ??
+        widget.initialType ??
+        CategoryType.expense;
+    _selectedParent = widget.initialParent;
     _loadParentCategory();
   }
 

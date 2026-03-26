@@ -1,9 +1,12 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_boring_avatars/flutter_boring_avatars.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/entitlement/entitlement_products.dart';
+import 'package:mudra_manager/core/entitlement/entitlement_provider.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
@@ -14,10 +17,9 @@ import 'package:mudra_manager/features/budget/data/budget_service_provider.dart'
 import 'package:mudra_manager/features/category/data/category_provider.dart';
 import 'package:mudra_manager/features/profile/data/user_profile_provider.dart';
 import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
+import 'package:mudra_manager/shared/widgets/pro_gate.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/features/marketplace/services/marketplace_service.dart';
-import 'package:mudra_manager/core/theme/theme_provider.dart';
-import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 
 final lowBalancePluginProvider = FutureProvider.autoDispose((ref) async {
@@ -33,8 +35,6 @@ class ProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
-  bool _achievementsExpanded = false;
-
   @override
   Widget build(BuildContext context) {
     final spacing = ref.watch(spacingProvider);
@@ -115,7 +115,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 // ── ACHIEVEMENTS ──
                 _buildAchievementsCard(color, textTheme, spacing),
                 const SizedBox(height: 24),
-
+                // ── SUBSCRIPTION STATUS ──
+                _buildSubscriptionCard(color, textTheme, spacing, isDark),
                 // ── CORE SETTINGS ──
                 _buildSectionHeader('Core Settings', color, textTheme),
                 const SizedBox(height: 10),
@@ -189,6 +190,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       'Dashboard Layout',
                       'Customize widgets & cards',
                       () => context.push(AppRoutes.dashboardCustomize),
+                      trailing: const ProBadge(),
                     ),
                     _SettingItem(
                       Icons.extension_outlined,
@@ -222,8 +224,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 32),
 
+                const SizedBox(height: 32),
+                if (kDebugMode) ...[
+                  _buildSectionHeader('🛠 Debug', color, textTheme),
+                  const SizedBox(height: 10),
+                  _buildDebugEntitlementCard(color, textTheme, spacing),
+                  const SizedBox(height: 24),
+                ],
                 // ── LOGOUT ──
                 Center(
                   child: TextButton.icon(
@@ -244,6 +252,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
                 const SizedBox(height: 80),
               ]),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: MediaQuery.of(context).padding.bottom +
+                  kBottomNavigationBarHeight +
+                  16,
             ),
           ),
         ],
@@ -272,6 +287,426 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       ),
       error: (e, _) => Center(child: Text('Error: $e')),
     );
+  }
+
+  Widget _buildDebugEntitlementCard(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
+    return Consumer(
+      builder: (context, ref, _) {
+        final isProAsync = ref.watch(isProProvider);
+        final isPro = isProAsync.valueOrNull ?? false;
+
+        return Card(
+          elevation: 0,
+          margin: EdgeInsets.zero,
+          color: color.surfaceContainerLow,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(spacing.radiusMedium),
+            side: BorderSide(
+              color: color.outlineVariant.withValues(alpha: 0.5),
+            ),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            children: [
+              // Status row
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: (isPro ? const Color(0xFF10B981) : color.error)
+                            .withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(
+                        isPro ? LucideIcons.shieldCheck : LucideIcons.shieldOff,
+                        color: isPro ? const Color(0xFF10B981) : color.error,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Text(
+                        isPro ? 'Pro Active' : 'Free Tier',
+                        style: textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Divider(
+                height: 1,
+                indent: 58,
+                color: color.outlineVariant.withValues(alpha: 0.4),
+              ),
+              // Grant Pro
+              InkWell(
+                onTap: isPro
+                    ? null
+                    : () async {
+                        HapticFeedback.mediumImpact();
+                        await ref.read(entitlementServiceProvider).grantPro(
+                              source: 'debug',
+                              productId: EntitlementProducts.lifetime,
+                              purchaseToken:
+                                  'dbg_${DateTime.now().millisecondsSinceEpoch}',
+                            );
+                        ref.invalidate(isProProvider);
+                        ref.invalidate(proPlanInfoProvider);
+                        SnackbarService.success('✅ Pro granted (debug)');
+                      },
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: color.primary.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(
+                          LucideIcons.crown,
+                          color: color.primary,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Text(
+                        'Grant Pro (Lifetime)',
+                        style: textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.w500,
+                          color: isPro ? color.onSurfaceVariant : null,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Divider(
+                height: 1,
+                indent: 58,
+                color: color.outlineVariant.withValues(alpha: 0.4),
+              ),
+              // Grant Pro with 1-min expiry
+              InkWell(
+                onTap: isPro
+                    ? null
+                    : () async {
+                        HapticFeedback.mediumImpact();
+                        await ref.read(entitlementServiceProvider).grantPro(
+                              source: 'debug',
+                              productId:
+                                  '${EntitlementProducts.subscription}_${EntitlementProducts.monthlyPlan}',
+                              purchaseToken:
+                                  'dbg_${DateTime.now().millisecondsSinceEpoch}',
+                              expiresAt: DateTime.now()
+                                  .add(const Duration(minutes: 1)),
+                            );
+                        ref.invalidate(isProProvider);
+                        ref.invalidate(proPlanInfoProvider);
+                        SnackbarService.success(
+                          '✅ Pro granted — expires in 1 min',
+                        );
+                      },
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color:
+                              const Color(0xFFFF9800).withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(
+                          LucideIcons.timer,
+                          color: Color(0xFFFF9800),
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Text(
+                        'Grant Pro (1 min expiry)',
+                        style: textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.w500,
+                          color: isPro ? color.onSurfaceVariant : null,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Divider(
+                height: 1,
+                indent: 58,
+                color: color.outlineVariant.withValues(alpha: 0.4),
+              ),
+              // Revoke Pro
+              InkWell(
+                onTap: !isPro
+                    ? null
+                    : () async {
+                        HapticFeedback.mediumImpact();
+                        await ref.read(entitlementServiceProvider).revokePro();
+                        ref.invalidate(isProProvider);
+                        ref.invalidate(proPlanInfoProvider);
+                        SnackbarService.success('🔒 Pro revoked');
+                      },
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: color.error.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child:
+                            Icon(LucideIcons.ban, color: color.error, size: 20),
+                      ),
+                      const SizedBox(width: 14),
+                      Text(
+                        'Revoke Pro',
+                        style: textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.w500,
+                          color: !isPro ? color.onSurfaceVariant : null,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildHeroBadges(
+    dynamic profile,
+    ColorScheme color,
+    TextTheme textTheme,
+  ) {
+    final streak = ref.watch(dailyStreakProvider);
+    final memberSince = profile?.createdAt;
+    ref.watch(proPlanInfoProvider);
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (streak != null && streak.currentCount > 0) ...[
+          const SizedBox(width: 8),
+          _heroBadge(
+            icon: LucideIcons.flame,
+            label: '${streak.currentCount} day streak',
+            badgeColor: const Color(0xFFFF9800),
+            color: color,
+            textTheme: textTheme,
+          ),
+        ],
+        if (memberSince != null) ...[
+          const SizedBox(width: 8),
+          _heroBadge(
+            icon: LucideIcons.calendar,
+            label: _formatMemberSince(memberSince),
+            badgeColor: color.primary,
+            color: color,
+            textTheme: textTheme,
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildSubscriptionCard(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    bool isDark,
+  ) {
+    return Consumer(
+      builder: (context, ref, _) {
+        final planAsync = ref.watch(proPlanInfoProvider);
+
+        return planAsync.when(
+          data: (info) {
+            const gold = Color(0xFFD4AF37);
+            final accent = info.isPro
+                ? gold
+                : info.isTrial
+                    ? const Color(0xFF10B981) // green for trial
+                    : color.primary;
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 24),
+              child: GestureDetector(
+                onTap: () {
+                  HapticFeedback.mediumImpact();
+                  context.push(AppRoutes.upgrade);
+                },
+                child: Container(
+                  padding: EdgeInsets.all(spacing.cardInner),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        accent.withValues(alpha: isDark ? 0.2 : 0.12),
+                        accent.withValues(alpha: isDark ? 0.08 : 0.04),
+                      ],
+                    ),
+                    border: Border.all(
+                      color: accent.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: accent.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          info.isPro
+                              ? LucideIcons.crown
+                              : info.isTrial
+                                  ? LucideIcons.gift
+                                  : LucideIcons.sparkles,
+                          color: accent,
+                          size: 24,
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Text(
+                                  info.isPro
+                                      ? info.label
+                                      : info.isTrial
+                                          ? 'Full Access'
+                                          : 'Upgrade to Pro',
+                                  style: textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                if (info.isTrial) ...[
+                                  const SizedBox(width: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF10B981)
+                                          .withValues(alpha: 0.15),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      '${info.trialDaysRemaining}d LEFT',
+                                      style: textTheme.labelSmall?.copyWith(
+                                        color: const Color(0xFF10B981),
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 9,
+                                        letterSpacing: 0.5,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                                if (info.isPro) ...[
+                                  const SizedBox(width: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: gold.withValues(alpha: 0.15),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      'ACTIVE',
+                                      style: textTheme.labelSmall?.copyWith(
+                                        color: gold,
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 9,
+                                        letterSpacing: 0.5,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              _subscriptionSubtitle(info),
+                              style: textTheme.bodySmall?.copyWith(
+                                color: color.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Icon(
+                        LucideIcons.chevronRight,
+                        color: accent,
+                        size: 20,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+          loading: () => const SizedBox.shrink(),
+          error: (_, __) => const SizedBox.shrink(),
+        );
+      },
+    );
+  }
+
+  String _subscriptionSubtitle(ProPlanInfo info) {
+    if (info.isTrial) {
+      final days = info.trialDaysRemaining ?? 0;
+      if (days > 30) return 'Full access — enjoy all features!';
+      if (days > 7) return 'Full access — $days days remaining';
+      if (days > 0) return 'Full access ends in $days days';
+      return 'Trial ended — upgrade to keep all features';
+    }
+    if (!info.isPro) return 'Unlimited accounts, analytics & more';
+
+    if (info.plan == ProPlan.lifetime) return 'Thank you for your support ❤️';
+
+    if (info.expiresAt != null) {
+      final days = info.expiresAt!.difference(DateTime.now()).inDays;
+      if (days < 0) return 'Expired — tap to renew';
+      if (days == 0) return 'Expires today';
+      if (days == 1) return 'Renews tomorrow';
+      return 'Renews in $days days';
+    }
+
+    return 'Active subscription';
   }
 
   // ── HERO BACKGROUND ──
@@ -461,39 +896,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           },
           orElse: () => const SizedBox.shrink(),
         ),
-      ],
-    );
-  }
-
-  Widget _buildHeroBadges(
-    dynamic profile,
-    ColorScheme color,
-    TextTheme textTheme,
-  ) {
-    final streak = ref.watch(dailyStreakProvider);
-    final memberSince = profile?.createdAt;
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        if (streak != null && streak.currentCount > 0) ...[
-          _heroBadge(
-            icon: LucideIcons.flame,
-            label: '${streak.currentCount} day streak',
-            badgeColor: const Color(0xFFFF9800),
-            color: color,
-            textTheme: textTheme,
-          ),
-          const SizedBox(width: 8),
-        ],
-        if (memberSince != null)
-          _heroBadge(
-            icon: LucideIcons.calendar,
-            label: _formatMemberSince(memberSince),
-            badgeColor: color.primary,
-            color: color,
-            textTheme: textTheme,
-          ),
       ],
     );
   }
@@ -821,11 +1223,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              item.title,
-                              style: textTheme.bodyLarge?.copyWith(
-                                fontWeight: FontWeight.w500,
-                              ),
+                            Row(
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    item.title,
+                                    style: textTheme.bodyLarge?.copyWith(
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                                if (item.trailing != null) item.trailing!,
+                              ],
                             ),
                             Text(
                               item.subtitle,
@@ -882,12 +1291,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         'Backup & Restore',
         'Manage your data',
         () => context.push(AppRoutes.backupRestore),
+        trailing: const ProBadge(),
       ),
       _SettingItem(
         LucideIcons.fileText,
         'Monthly Recap',
         'View & download monthly report',
         () => context.push(AppRoutes.monthlyRecap),
+        trailing: const ProBadge(),
       ),
     ];
 
@@ -941,270 +1352,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         ),
       ),
     );
-  }
-
-  void _showThemeModeSheet(ColorScheme color, TextTheme textTheme) {
-    HapticFeedback.mediumImpact();
-    final ctxt = AppLocalizations.of(context)!;
-    final currentTheme = ref.read(themeModeProvider);
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) => Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: color.onSurfaceVariant.withValues(alpha: 0.4),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Select Theme Mode',
-              style:
-                  textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            ...AppThemeMode.values.map((mode) {
-              final isSelected = currentTheme == mode;
-              String label;
-              IconData icon;
-              switch (mode) {
-                case AppThemeMode.light:
-                  label = ctxt.app_settings_theme_mode_light;
-                  icon = Icons.light_mode;
-                  break;
-                case AppThemeMode.dark:
-                  label = ctxt.app_settings_theme_mode_dark;
-                  icon = Icons.dark_mode;
-                  break;
-                case AppThemeMode.amoled:
-                  label = ctxt.app_settings_theme_mode_amoled;
-                  icon = Icons.circle;
-                  break;
-                case AppThemeMode.system:
-                  label = ctxt.app_settings_theme_mode_system_default;
-                  icon = Icons.phone_android;
-                  break;
-              }
-              return Card(
-                elevation: 0,
-                color: isSelected
-                    ? color.primaryContainer
-                    : color.surfaceContainerHighest,
-                child: ListTile(
-                  title: Text(label),
-                  leading: Icon(
-                    icon,
-                    color:
-                        isSelected ? color.onPrimaryContainer : color.onSurface,
-                  ),
-                  trailing: isSelected
-                      ? Icon(Icons.check, color: color.onPrimaryContainer)
-                      : null,
-                  onTap: () {
-                    HapticFeedback.mediumImpact();
-                    ref.read(themeModeProvider.notifier).setTheme(mode);
-                    context.pop();
-                  },
-                ),
-              );
-            }),
-            const SizedBox(height: 16),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showAccessibilitySheet(ColorScheme color, TextTheme textTheme) {
-    HapticFeedback.mediumImpact();
-    final prefs = SharedPrefsUtil.instance;
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) => StatefulBuilder(
-        builder: (context, setModalState) {
-          final currentHighContrast = prefs.getHighContrastMode();
-          return Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: color.onSurfaceVariant.withValues(alpha: 0.4),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Accessibility Options',
-                  style: textTheme.titleLarge
-                      ?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 16),
-                Card(
-                  elevation: 0,
-                  color: color.surfaceContainerHighest,
-                  child: SwitchListTile(
-                    title: const Text('High Contrast Mode'),
-                    subtitle: const Text('Improves readability for low vision'),
-                    value: currentHighContrast,
-                    onChanged: (val) {
-                      HapticFeedback.mediumImpact();
-                      prefs.setHighContrastMode(val);
-                      ref.read(highContrastModeProvider.notifier).set(val);
-                      setModalState(() {});
-                      setState(() {});
-                    },
-                  ),
-                ),
-                const SizedBox(height: 16),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  void _showThresholdBottomSheet(
-    BuildContext context,
-    WidgetRef ref,
-    ColorScheme color,
-    TextTheme textTheme,
-  ) async {
-    final prefsService = SharedPrefsUtil.instance;
-    final currentThreshold = prefsService.getLowBalanceThreshold();
-    final controller = TextEditingController(
-      text: currentThreshold.toStringAsFixed(2),
-    );
-
-    final newThreshold = await showModalBottomSheet<double>(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(ctx).viewInsets.bottom,
-            left: 24,
-            right: 24,
-            top: 16,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: color.onSurfaceVariant.withValues(alpha: 0.4),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(height: 24),
-              Icon(
-                Icons.account_balance_wallet_outlined,
-                size: 48,
-                color: color.primary,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Set Low Balance Threshold',
-                style: textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Get notified when account balance falls below this amount',
-                style: textTheme.bodyMedium?.copyWith(
-                  color: color.onSurfaceVariant,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              TextField(
-                controller: controller,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                autofocus: true,
-                decoration: InputDecoration(
-                  labelText: 'Threshold Amount',
-                  prefixText: '₹ ',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  filled: true,
-                  fillColor:
-                      color.surfaceContainerHighest.withValues(alpha: 0.3),
-                ),
-              ),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () {
-                        HapticFeedback.mediumImpact();
-                        context.pop();
-                      },
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text('Cancel'),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: FilledButton(
-                      onPressed: () {
-                        final value = double.tryParse(controller.text.trim());
-                        if (value != null) context.pop(value);
-                      },
-                      style: FilledButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text('Save'),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-            ],
-          ),
-        );
-      },
-    );
-
-    if (newThreshold != null && context.mounted) {
-      prefsService.setLowBalanceThreshold(newThreshold);
-      SnackbarService.success(
-        'Threshold updated to ₹${newThreshold.toStringAsFixed(2)}',
-      );
-    }
   }
 
   void _showLogoutBottomSheet(
@@ -1309,6 +1456,13 @@ class _SettingItem {
   final String title;
   final String subtitle;
   final VoidCallback onTap;
+  final Widget? trailing;
 
-  _SettingItem(this.icon, this.title, this.subtitle, this.onTap);
+  _SettingItem(
+    this.icon,
+    this.title,
+    this.subtitle,
+    this.onTap, {
+    this.trailing,
+  });
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
@@ -9,6 +10,7 @@ import 'package:mudra_manager/core/extension/account_type_extenstion.dart';
 import 'package:mudra_manager/core/extension/case_extention.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/utils/icon_helper.dart';
 import 'package:mudra_manager/core/utils/string_util.dart';
 import 'package:mudra_manager/shared/widgets/adaptive_text.dart';
@@ -33,6 +35,7 @@ class TransactionCard extends ConsumerStatefulWidget {
   final String? tripName;
   final int? index;
   final bool isRecurring;
+  final bool enablePeek;
 
   const TransactionCard({
     super.key,
@@ -50,6 +53,7 @@ class TransactionCard extends ConsumerStatefulWidget {
     this.tripName,
     this.index,
     this.isRecurring = false,
+    this.enablePeek = false,
   });
 
   @override
@@ -61,6 +65,7 @@ class _TransactionCardState extends ConsumerState<TransactionCard>
   late AnimationController _scaleController;
   late Animation<double> _scaleAnimation;
   late double displayAmount;
+  bool _expanded = false;
 
   @override
   void initState() {
@@ -73,6 +78,9 @@ class _TransactionCardState extends ConsumerState<TransactionCard>
       CurvedAnimation(parent: _scaleController, curve: Curves.easeInOut),
     );
   }
+
+  bool get _hasDetails =>
+      (widget.description?.isNotEmpty == true) || widget.tags.isNotEmpty;
 
   @override
   void dispose() {
@@ -92,9 +100,16 @@ class _TransactionCardState extends ConsumerState<TransactionCard>
     widget.related?.account.load();
 
     final card = SwipeActionWrapper(
+      enablePeek: widget.enablePeek,
       onEdit: widget.onEdit,
       onDelete: widget.onRemove,
       child: GestureDetector(
+        onTap: _hasDetails
+            ? () {
+                HapticFeedback.lightImpact();
+                setState(() => _expanded = !_expanded);
+              }
+            : null,
         onTapDown: (_) => _scaleController.forward(),
         onTapUp: (_) => _scaleController.reverse(),
         onTapCancel: () => _scaleController.reverse(),
@@ -193,60 +208,143 @@ class _TransactionCardState extends ConsumerState<TransactionCard>
                       widget.isTransfer
                           ? buildTransferCard()
                           : buildNormalCard(),
-                      if (widget.description?.isNotEmpty == true ||
-                          widget.tags.isNotEmpty) ...[
-                        const SizedBox(height: 12),
-                        if (widget.description?.isNotEmpty == true)
-                          Text(
-                            widget.description!.length > 80
-                                ? '${widget.description!.substring(0, 80)}...'
-                                : widget.description!,
-                            style: textTheme.bodySmall?.copyWith(
-                              color: color.onSurfaceVariant,
-                              fontStyle: FontStyle.italic,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        if (widget.tags.isNotEmpty) ...[
-                          const SizedBox(height: 8),
-                          Wrap(
-                            spacing: 6,
-                            runSpacing: 6,
-                            children: widget.tags
-                                .map(
-                                  (tag) => Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: color.secondaryContainer,
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(
-                                          Icons.tag,
-                                          size: 12,
-                                          color: color.onSecondaryContainer,
+                      if (_hasDetails)
+                        AnimatedSize(
+                          duration: const Duration(milliseconds: 200),
+                          curve: Curves.easeOutCubic,
+                          alignment: Alignment.topCenter,
+                          child: _expanded &&
+                                  (widget.description?.isNotEmpty == true ||
+                                      widget.tags.isNotEmpty)
+                              ? AnimatedOpacity(
+                                  opacity: _expanded ? 1.0 : 0.0,
+                                  duration: const Duration(milliseconds: 200),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 10,
                                         ),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          tag.name,
-                                          style: textTheme.labelSmall?.copyWith(
-                                            color: color.onSecondaryContainer,
+                                        child: Container(
+                                          height: 1,
+                                          decoration: BoxDecoration(
+                                            gradient: LinearGradient(
+                                              colors: [
+                                                color.outlineVariant
+                                                    .withValues(alpha: 0.0),
+                                                color.outlineVariant
+                                                    .withValues(alpha: 0.4),
+                                                color.outlineVariant
+                                                    .withValues(alpha: 0.0),
+                                              ],
+                                            ),
                                           ),
                                         ),
-                                      ],
-                                    ),
+                                      ),
+                                      if (widget.description?.isNotEmpty ==
+                                          true)
+                                        Container(
+                                          width: double.infinity,
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 8,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: color.surfaceContainerHighest
+                                                .withValues(alpha: 0.4),
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                          ),
+                                          child: Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Icon(
+                                                Icons.notes_rounded,
+                                                size: 14,
+                                                color: color.onSurfaceVariant
+                                                    .withValues(alpha: 0.6),
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Expanded(
+                                                child: Text(
+                                                  widget.description!,
+                                                  style: textTheme.bodySmall
+                                                      ?.copyWith(
+                                                    color:
+                                                        color.onSurfaceVariant,
+                                                    height: 1.4,
+                                                  ),
+                                                  maxLines: 3,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      if (widget.description?.isNotEmpty ==
+                                              true &&
+                                          widget.tags.isNotEmpty)
+                                        const SizedBox(height: 8),
+                                      if (widget.tags.isNotEmpty)
+                                        Wrap(
+                                          spacing: 6,
+                                          runSpacing: 6,
+                                          children: widget.tags
+                                              .map(
+                                                (tag) => Container(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                    horizontal: 8,
+                                                    vertical: 4,
+                                                  ),
+                                                  decoration: BoxDecoration(
+                                                    color: color
+                                                        .secondaryContainer
+                                                        .withValues(
+                                                      alpha: 0.5,
+                                                    ),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                      8,
+                                                    ),
+                                                  ),
+                                                  child: Row(
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    children: [
+                                                      Icon(
+                                                        Icons.tag,
+                                                        size: 12,
+                                                        color: color
+                                                            .onSecondaryContainer,
+                                                      ),
+                                                      const SizedBox(
+                                                        width: 4,
+                                                      ),
+                                                      Text(
+                                                        tag.name,
+                                                        style: textTheme
+                                                            .labelSmall
+                                                            ?.copyWith(
+                                                          color: color
+                                                              .onSecondaryContainer,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              )
+                                              .toList(),
+                                        ),
+                                    ],
                                   ),
                                 )
-                                .toList(),
-                          ),
-                        ],
-                      ],
+                              : const SizedBox.shrink(),
+                        ),
                     ],
                   ),
                 ),
@@ -261,12 +359,14 @@ class _TransactionCardState extends ConsumerState<TransactionCard>
       return card
           .animate()
           .fadeIn(
-              delay: Duration(milliseconds: widget.index! * 30),
-              duration: 250.ms)
+            delay: Duration(milliseconds: widget.index! * 30),
+            duration: 250.ms,
+          )
           .slideX(
-              begin: 0.1,
-              delay: Duration(milliseconds: widget.index! * 30),
-              duration: 250.ms);
+            begin: 0.1,
+            delay: Duration(milliseconds: widget.index! * 30),
+            duration: 250.ms,
+          );
     }
     return card;
   }
@@ -315,6 +415,24 @@ class _TransactionCardState extends ConsumerState<TransactionCard>
                   maxLines: 1,
                 ),
               ),
+              if (_hasDetails)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      AnimatedRotation(
+                        turns: _expanded ? 0.5 : 0.0,
+                        duration: const Duration(milliseconds: 200),
+                        child: Icon(
+                          Icons.expand_more,
+                          size: 14,
+                          color: color.onSurfaceVariant.withValues(alpha: 0.4),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
             ],
           ),
         ),
@@ -330,7 +448,9 @@ class _TransactionCardState extends ConsumerState<TransactionCard>
               isExpense: widget.isExpense,
               style: textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w700,
-                color: widget.isExpense ? color.error : color.primary,
+                color: widget.isExpense
+                    ? FinanceColors.expenseColor(Theme.of(context).brightness)
+                    : FinanceColors.incomeColor(Theme.of(context).brightness),
               ),
               maxLines: 1,
             ),
@@ -370,7 +490,9 @@ class _TransactionCardState extends ConsumerState<TransactionCard>
                     child: Icon(
                       related?.account.value?.accountType.icon,
                       size: 16,
-                      color: color.primary,
+                      color: FinanceColors.transferColor(
+                        Theme.of(context).brightness,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),

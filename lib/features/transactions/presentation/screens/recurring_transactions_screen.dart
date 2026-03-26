@@ -121,7 +121,7 @@ class RecurringTransactionsScreen extends ConsumerWidget {
         loading: () => ListView.builder(
           padding: const EdgeInsets.all(16).copyWith(bottom: 80),
           itemCount: 4,
-          itemBuilder: (context, index) => const SkeletonListTile(),
+          itemBuilder: (context, index) => const TransactionCardSkeleton(),
         ),
         error: (_, __) =>
             const Center(child: Text('Error loading recurring transactions')),

@@ -1,17 +1,20 @@
-// lib/features/profile/presentation/screens/appearance_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/extension/localization_extenstion.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/l10n_provider.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
+import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/theme/theme_provider.dart';
+import 'package:mudra_manager/features/dashboard/presentation/providers/account_display_style_provider.dart';
 import 'package:mudra_manager/features/marketplace/services/marketplace_service.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
+import 'package:mudra_manager/shared/widgets/pro_gate.dart';
 
 final _guestModePluginProvider = FutureProvider.autoDispose((ref) async {
   return await MarketplaceService().isPluginEnabled('com.mudra.guest_mode');
@@ -63,7 +66,17 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
           const SizedBox(height: 10),
           _buildThemeModeCard(color, textTheme, spacing, currentTheme),
           const SizedBox(height: 24),
-
+          // ── COLOR THEME ──
+          _buildSectionHeader('Color Theme', color, textTheme),
+          const SizedBox(height: 10),
+          _buildColorThemeCard(color, textTheme, spacing),
+          const SizedBox(height: 24),
+          _buildAccountStyleRow(color, textTheme),
+          Divider(
+            height: 1,
+            indent: 58,
+            color: color.outlineVariant.withValues(alpha: 0.4),
+          ),
           // ── DISPLAY ──
           _buildSectionHeader('Display', color, textTheme),
           const SizedBox(height: 10),
@@ -181,6 +194,141 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildAccountStyleRow(ColorScheme color, TextTheme textTheme) {
+    final current = ref.watch(accountDisplayStyleProvider);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.primary.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(LucideIcons.layoutDashboard,
+                color: color.primary, size: 20),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Account Style',
+                    style: textTheme.bodyLarge
+                        ?.copyWith(fontWeight: FontWeight.w500)),
+                const SizedBox(height: 8),
+                SegmentedButton<AccountDisplayStyle>(
+                  segments: const [
+                    ButtonSegment(
+                      value: AccountDisplayStyle.carousel,
+                      icon: Icon(LucideIcons.galleryHorizontalEnd, size: 16),
+                      label: Text('Cards'),
+                    ),
+                    ButtonSegment(
+                      value: AccountDisplayStyle.stack,
+                      icon: Icon(LucideIcons.layers, size: 16),
+                      label: Text('Stack'),
+                    ),
+                    ButtonSegment(
+                      value: AccountDisplayStyle.bento,
+                      icon: Icon(LucideIcons.layoutGrid, size: 16),
+                      label: Text('Bento'),
+                    ),
+                  ],
+                  selected: {current},
+                  onSelectionChanged: (s) {
+                    HapticFeedback.mediumImpact();
+                    ref.read(accountDisplayStyleProvider.notifier).set(s.first);
+                  },
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildColorThemeCard(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
+    final currentColorTheme = ref.watch(themeNotifierProvider);
+
+    return Card(
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      color: color.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        side: BorderSide(
+          color: color.outlineVariant.withValues(alpha: 0.5),
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.mediumImpact();
+          context.push(AppRoutes.themePicker);
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: currentColorTheme.seedColor.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Container(
+                  width: 20,
+                  height: 20,
+                  decoration: BoxDecoration(
+                    color: currentColorTheme.seedColor,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          currentColorTheme.label,
+                          style: textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        if (currentColorTheme.isPro) const ProBadge(),
+                      ],
+                    ),
+                    Text(
+                      currentColorTheme.subtitle,
+                      style: textTheme.bodySmall?.copyWith(
+                        color: color.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.chevron_right,
+                color: color.onSurfaceVariant,
+                size: 20,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

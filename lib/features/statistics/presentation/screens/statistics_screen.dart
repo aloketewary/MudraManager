@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/entitlement/entitlement_feature.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/features/analytics/data/analytics_provider.dart';
 import 'package:mudra_manager/features/analytics/data/net_worth_service.dart';
@@ -14,6 +15,7 @@ import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/shared/widgets/period_calendar_selector.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
+import 'package:mudra_manager/shared/widgets/pro_gate.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 
@@ -52,101 +54,118 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
         data: (d) {
           final hasData =
               d.income > 0 || d.expense > 0 || d.categoryData.isNotEmpty;
-          return CustomScrollView(
-            slivers: [
-              // Sticky Period Selector
-              SliverAppBar(
-                pinned: true,
-                backgroundColor: color.surface,
-                elevation: 0,
-                toolbarHeight: 80,
-                automaticallyImplyLeading: false,
-                titleSpacing: 0,
-                title: Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: spacing.cardHorizontal,
-                    vertical: spacing.cardVertical,
-                  ),
-                  child: PeriodCalendarSelector(
-                    selectedPeriod: _selectedPeriod,
-                    customStart: _customStart,
-                    customEnd: _customEnd,
-                    spacing: spacing,
-                    onChanged: (period, start, end) {
-                      setState(() {
-                        _selectedPeriod = period;
-                        _customStart = start;
-                        _customEnd = end;
-                        _period = period == PeriodType.day
-                            ? 'Today'
-                            : period == PeriodType.week
-                                ? 'Week'
-                                : period == PeriodType.month
-                                    ? 'Month'
-                                    : period == PeriodType.year
-                                        ? 'Year'
-                                        : 'Custom';
-                      });
-                    },
-                  ),
-                ),
-              ),
-              if (!hasData)
-                SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: _buildEmptyState(color, textTheme),
-                )
-              else
-                SliverPadding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: spacing.cardHorizontal,
-                    vertical: spacing.cardVertical,
-                  ),
-                  sliver: SliverList(
-                    delegate: SliverChildListDelegate([
-                      // ZONE 1: THE PULSE (4-Card Grid)
-                      _buildPulseZone(
-                        d,
-                        color,
-                        textTheme,
-                        isGuestMode,
-                        spacing,
-                      ),
-                      SizedBox(height: spacing.sectionGap),
-
-                      // ZONE 2: THE NARRATIVE (Tabbed Charts)
-                      _buildNarrativeZone(d, color, textTheme, spacing),
-                      SizedBox(height: spacing.sectionGap),
-
-                      // ZONE 3: THE INTELLIGENCE (Insights & Actions)
-                      _buildIntelligenceZone(
-                        d,
-                        color,
-                        textTheme,
-                        isGuestMode,
-                        spacing,
-                      ),
-                      SizedBox(height: spacing.sectionGap),
-
-                      // ZONE 4: FINANCIAL HEALTH
-                      _buildFinancialHealthZone(
-                        color,
-                        textTheme,
-                        spacing,
-                      ),
-                      SizedBox(height: spacing.sectionGap),
-
-                      // ZONE 5: SPENDING PERSONALITY
-                      _buildSpendingPersonalityZone(
-                        color,
-                        textTheme,
-                        spacing,
-                      ),
-                      const SizedBox(height: 100),
-                    ]),
+          return RefreshIndicator(
+            onRefresh: () async {
+              ref.invalidate(statsProvider(_period));
+              ref.invalidate(customStatsProvider);
+              ref.invalidate(monthlyExpenseTrendsProvider);
+              ref.invalidate(spendingByDayProvider);
+              ref.invalidate(categoryTrendsProvider);
+              ref.invalidate(financialHealthProvider);
+              ref.invalidate(predictedSpendingProvider);
+            },
+            child: CustomScrollView(
+              slivers: [
+                // Sticky Period Selector
+                SliverAppBar(
+                  pinned: true,
+                  backgroundColor: color.surface,
+                  elevation: 0,
+                  toolbarHeight: 80,
+                  automaticallyImplyLeading: false,
+                  titleSpacing: 0,
+                  title: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: spacing.cardHorizontal,
+                      vertical: spacing.cardVertical,
+                    ),
+                    child: PeriodCalendarSelector(
+                      selectedPeriod: _selectedPeriod,
+                      customStart: _customStart,
+                      customEnd: _customEnd,
+                      spacing: spacing,
+                      onChanged: (period, start, end) {
+                        setState(() {
+                          _selectedPeriod = period;
+                          _customStart = start;
+                          _customEnd = end;
+                          _period = period == PeriodType.day
+                              ? 'Today'
+                              : period == PeriodType.week
+                                  ? 'Week'
+                                  : period == PeriodType.month
+                                      ? 'Month'
+                                      : period == PeriodType.year
+                                          ? 'Year'
+                                          : 'Custom';
+                        });
+                      },
+                    ),
                   ),
                 ),
-            ],
+                if (!hasData)
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: _buildEmptyState(color, textTheme),
+                  )
+                else
+                  SliverPadding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: spacing.cardHorizontal,
+                      vertical: spacing.cardVertical,
+                    ),
+                    sliver: SliverList(
+                      delegate: SliverChildListDelegate([
+                        // ZONE 1: THE PULSE (4-Card Grid)
+                        _buildPulseZone(
+                          d,
+                          color,
+                          textTheme,
+                          isGuestMode,
+                          spacing,
+                        ),
+                        SizedBox(height: spacing.sectionGap),
+
+                        // ZONE 2: THE NARRATIVE (Tabbed Charts)
+                        _buildNarrativeZone(d, color, textTheme, spacing),
+                        SizedBox(height: spacing.sectionGap),
+
+                        // ZONE 3: THE INTELLIGENCE (Insights & Actions)
+                        _buildIntelligenceZone(
+                          d,
+                          color,
+                          textTheme,
+                          isGuestMode,
+                          spacing,
+                        ),
+                        SizedBox(height: spacing.sectionGap),
+
+                        // ZONE 4: FINANCIAL HEALTH
+                        _buildFinancialHealthZone(
+                          color,
+                          textTheme,
+                          spacing,
+                        ),
+                        SizedBox(height: spacing.sectionGap),
+
+                        // ZONE 5: SPENDING PERSONALITY
+                        _buildSpendingPersonalityZone(
+                          color,
+                          textTheme,
+                          spacing,
+                        ),
+                      ]),
+                    ),
+                  ),
+                SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: MediaQuery.of(context).padding.bottom +
+                        kBottomNavigationBarHeight +
+                        16,
+                  ),
+                ),
+              ],
+            ),
           );
         },
         loading: () => Padding(
@@ -897,169 +916,176 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Card(
-                  elevation: 0,
-                  margin: const EdgeInsets.only(),
-                  color: color.surfaceContainerLow,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                    side: BorderSide(
-                      color: color.outlineVariant.withValues(alpha: 0.5),
+                ProCardGate(
+                  feature: ProFeature.advancedAnalytics,
+                  borderRadius: spacing.radiusMedium,
+                  child: Card(
+                    elevation: 0,
+                    margin: const EdgeInsets.only(),
+                    color: color.surfaceContainerLow,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                      side: BorderSide(
+                        color: color.outlineVariant.withValues(alpha: 0.5),
+                      ),
                     ),
-                  ),
-                  child: InkWell(
-                    onTap: () {
-                      HapticFeedback.mediumImpact();
-                      context.push(AppRoutes.financialHealth);
-                    },
-                    borderRadius: BorderRadius.circular(12),
-                    child: Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        children: [
-                          // Score ring + rating
-                          Row(
-                            children: [
-                              TweenAnimationBuilder<double>(
-                                duration: const Duration(milliseconds: 1500),
-                                curve: Curves.easeOutCubic,
-                                tween: Tween(
-                                  begin: 0.0,
-                                  end: health.score / 100,
-                                ),
-                                builder: (context, value, child) {
-                                  return Stack(
-                                    alignment: Alignment.center,
-                                    children: [
-                                      SizedBox(
-                                        width: 72,
-                                        height: 72,
-                                        child: CircularProgressIndicator(
-                                          value: value,
-                                          strokeWidth: 6,
-                                          strokeCap: StrokeCap.round,
-                                          backgroundColor: scoreColor
-                                              .withValues(alpha: 0.15),
-                                          valueColor: AlwaysStoppedAnimation(
-                                            scoreColor,
-                                          ),
-                                        ),
-                                      ),
-                                      Text(
-                                        '${(value * 100).toInt()}',
-                                        style:
-                                            textTheme.headlineSmall?.copyWith(
-                                          fontWeight: FontWeight.w900,
-                                          color: scoreColor,
-                                        ),
-                                      ),
-                                    ],
-                                  );
-                                },
-                              ),
-                              const SizedBox(width: 20),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 10,
-                                        vertical: 4,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color:
-                                            scoreColor.withValues(alpha: 0.12),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Text(
-                                        health.rating,
-                                        style: textTheme.labelLarge?.copyWith(
-                                          color: scoreColor,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    if (health.insights.isNotEmpty)
-                                      Text(
-                                        health.insights.first,
-                                        style: textTheme.bodyMedium?.copyWith(
-                                          color: color.onSurfaceVariant,
-                                        ),
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                  ],
-                                ),
-                              ),
-                              Icon(
-                                LucideIcons.chevronRight,
-                                color: color.onSurfaceVariant,
-                                size: 20,
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 20),
-                          // Metric bars
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _buildHealthMetric(
-                                  label: 'Savings Rate',
-                                  value: health.savingsRate,
-                                  maxValue: 100,
-                                  suffix: '%',
-                                  barColor: const Color(0xFF4CAF50),
-                                  color: color,
-                                  textTheme: textTheme,
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: _buildHealthMetric(
-                                  label: 'Expense Ratio',
-                                  value: health.expenseRatio,
-                                  maxValue: 100,
-                                  suffix: '%',
-                                  barColor: health.expenseRatio > 80
-                                      ? const Color(0xFFF44336)
-                                      : const Color(0xFFFF9800),
-                                  color: color,
-                                  textTheme: textTheme,
-                                ),
-                              ),
-                            ],
-                          ),
-                          // Additional insights
-                          if (health.insights.length > 1) ...[
-                            const SizedBox(height: 16),
-                            ...health.insights.skip(1).take(2).map(
-                                  (insight) => Padding(
-                                    padding: const EdgeInsets.only(bottom: 8),
-                                    child: Row(
+                    child: InkWell(
+                      onTap: () {
+                        HapticFeedback.mediumImpact();
+                        context.push(AppRoutes.financialHealth);
+                      },
+                      borderRadius: BorderRadius.circular(12),
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          children: [
+                            // Score ring + rating
+                            Row(
+                              children: [
+                                TweenAnimationBuilder<double>(
+                                  duration: const Duration(milliseconds: 1500),
+                                  curve: Curves.easeOutCubic,
+                                  tween: Tween(
+                                    begin: 0.0,
+                                    end: health.score / 100,
+                                  ),
+                                  builder: (context, value, child) {
+                                    return Stack(
+                                      alignment: Alignment.center,
                                       children: [
-                                        Icon(
-                                          LucideIcons.lightbulb,
-                                          size: 14,
-                                          color: color.primary,
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          child: Text(
-                                            insight,
-                                            style:
-                                                textTheme.bodySmall?.copyWith(
-                                              color: color.onSurfaceVariant,
+                                        SizedBox(
+                                          width: 72,
+                                          height: 72,
+                                          child: CircularProgressIndicator(
+                                            value: value,
+                                            strokeWidth: 6,
+                                            strokeCap: StrokeCap.round,
+                                            backgroundColor: scoreColor
+                                                .withValues(alpha: 0.15),
+                                            valueColor: AlwaysStoppedAnimation(
+                                              scoreColor,
                                             ),
                                           ),
                                         ),
+                                        Text(
+                                          '${(value * 100).toInt()}',
+                                          style:
+                                              textTheme.headlineSmall?.copyWith(
+                                            fontWeight: FontWeight.w900,
+                                            color: scoreColor,
+                                          ),
+                                        ),
                                       ],
-                                    ),
+                                    );
+                                  },
+                                ),
+                                const SizedBox(width: 20),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 10,
+                                          vertical: 4,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: scoreColor.withValues(
+                                            alpha: 0.12,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        child: Text(
+                                          health.rating,
+                                          style: textTheme.labelLarge?.copyWith(
+                                            color: scoreColor,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      if (health.insights.isNotEmpty)
+                                        Text(
+                                          health.insights.first,
+                                          style: textTheme.bodyMedium?.copyWith(
+                                            color: color.onSurfaceVariant,
+                                          ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                    ],
                                   ),
                                 ),
+                                Icon(
+                                  LucideIcons.chevronRight,
+                                  color: color.onSurfaceVariant,
+                                  size: 20,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 20),
+                            // Metric bars
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _buildHealthMetric(
+                                    label: 'Savings Rate',
+                                    value: health.savingsRate,
+                                    maxValue: 100,
+                                    suffix: '%',
+                                    barColor: const Color(0xFF4CAF50),
+                                    color: color,
+                                    textTheme: textTheme,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: _buildHealthMetric(
+                                    label: 'Expense Ratio',
+                                    value: health.expenseRatio,
+                                    maxValue: 100,
+                                    suffix: '%',
+                                    barColor: health.expenseRatio > 80
+                                        ? const Color(0xFFF44336)
+                                        : const Color(0xFFFF9800),
+                                    color: color,
+                                    textTheme: textTheme,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            // Additional insights
+                            if (health.insights.length > 1) ...[
+                              const SizedBox(height: 16),
+                              ...health.insights.skip(1).take(2).map(
+                                    (insight) => Padding(
+                                      padding: const EdgeInsets.only(bottom: 8),
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            LucideIcons.lightbulb,
+                                            size: 14,
+                                            color: color.primary,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: Text(
+                                              insight,
+                                              style:
+                                                  textTheme.bodySmall?.copyWith(
+                                                color: color.onSurfaceVariant,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                            ],
                           ],
-                        ],
+                        ),
                       ),
                     ),
                   ),
@@ -1150,110 +1176,115 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Card(
-                  elevation: 0,
-                  margin: const EdgeInsets.only(),
-                  color: color.surfaceContainerLow,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                    side: BorderSide(
-                      color: color.outlineVariant.withValues(alpha: 0.5),
+                ProCardGate(
+                  feature: ProFeature.advancedAnalytics,
+                  borderRadius: spacing.radiusMedium,
+                  child: Card(
+                    elevation: 0,
+                    margin: const EdgeInsets.only(),
+                    color: color.surfaceContainerLow,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                      side: BorderSide(
+                        color: color.outlineVariant.withValues(alpha: 0.5),
+                      ),
                     ),
-                  ),
-                  child: InkWell(
-                    onTap: () {
-                      HapticFeedback.mediumImpact();
-                      context.push(AppRoutes.spendingPersonality);
-                    },
-                    borderRadius: BorderRadius.circular(12),
-                    child: Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Archetype header
-                          Row(
-                            children: [
-                              Container(
-                                width: 56,
-                                height: 56,
-                                decoration: BoxDecoration(
-                                  color:
-                                      archetype.color.withValues(alpha: 0.12),
-                                  borderRadius: BorderRadius.circular(16),
+                    child: InkWell(
+                      onTap: () {
+                        HapticFeedback.mediumImpact();
+                        context.push(AppRoutes.spendingPersonality);
+                      },
+                      borderRadius: BorderRadius.circular(12),
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Archetype header
+                            Row(
+                              children: [
+                                Container(
+                                  width: 56,
+                                  height: 56,
+                                  decoration: BoxDecoration(
+                                    color:
+                                        archetype.color.withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: Icon(
+                                    archetype.icon,
+                                    color: archetype.color,
+                                    size: 28,
+                                  ),
                                 ),
-                                child: Icon(
-                                  archetype.icon,
-                                  color: archetype.color,
-                                  size: 28,
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      archetype.name,
-                                      style: textTheme.titleLarge?.copyWith(
-                                        fontWeight: FontWeight.bold,
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        archetype.name,
+                                        style: textTheme.titleLarge?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      archetype.tagline,
-                                      style: textTheme.bodyMedium?.copyWith(
-                                        color: archetype.color,
-                                        fontWeight: FontWeight.w500,
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        archetype.tagline,
+                                        style: textTheme.bodyMedium?.copyWith(
+                                          color: archetype.color,
+                                          fontWeight: FontWeight.w500,
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              Icon(
-                                LucideIcons.chevronRight,
-                                color: color.onSurfaceVariant,
-                                size: 20,
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 20),
-                          // Trait pills
-                          // Replace the Wrap(...) block inside _buildSpendingPersonalityZone with:
-                          const SizedBox(height: 16),
-                          Column(
-                            children: [
-                              _buildTraitRow(
-                                icon: LucideIcons.tag,
-                                label: data.topCategory,
-                                subtitle: 'Top Category',
-                                color: color,
-                                textTheme: textTheme,
-                              ),
-                              _buildTraitRow(
-                                icon: LucideIcons.calendar,
-                                label: data.spendingPattern,
-                                subtitle: 'Pattern',
-                                color: color,
-                                textTheme: textTheme,
-                              ),
-                              _buildTraitRow(
-                                icon: LucideIcons.brain,
-                                label: data.behaviorType,
-                                subtitle: 'Behavior',
-                                color: color,
-                                textTheme: textTheme,
-                              ),
-                              _buildTraitRow(
-                                icon: LucideIcons.trendingUp,
-                                label: data.spendingTrend,
-                                subtitle: 'Trend',
-                                color: color,
-                                textTheme: textTheme,
-                              ),
-                            ],
-                          ),
-                        ],
+                                Icon(
+                                  LucideIcons.chevronRight,
+                                  color: color.onSurfaceVariant,
+                                  size: 20,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 20),
+                            // Trait pills
+                            // Replace the Wrap(...) block inside _buildSpendingPersonalityZone with:
+                            const SizedBox(height: 16),
+                            Column(
+                              children: [
+                                _buildTraitRow(
+                                  icon: LucideIcons.tag,
+                                  label: data.topCategory,
+                                  subtitle: 'Top Category',
+                                  color: color,
+                                  textTheme: textTheme,
+                                ),
+                                _buildTraitRow(
+                                  icon: LucideIcons.calendar,
+                                  label: data.spendingPattern,
+                                  subtitle: 'Pattern',
+                                  color: color,
+                                  textTheme: textTheme,
+                                ),
+                                _buildTraitRow(
+                                  icon: LucideIcons.brain,
+                                  label: data.behaviorType,
+                                  subtitle: 'Behavior',
+                                  color: color,
+                                  textTheme: textTheme,
+                                ),
+                                _buildTraitRow(
+                                  icon: LucideIcons.trendingUp,
+                                  label: data.spendingTrend,
+                                  subtitle: 'Trend',
+                                  color: color,
+                                  textTheme: textTheme,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),

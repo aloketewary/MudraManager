@@ -83,6 +83,13 @@
       "version": "1.0.0",
       "bank": "AU",
       "enabled": true
+    },
+    {
+      "id": "rbl_sms_parser",
+      "name": "RBL Bank SMS Parser",
+      "version": "1.0.0",
+      "bank": "RBL",
+      "enabled": true
     }
   ]
 }

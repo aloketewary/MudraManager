@@ -11,6 +11,7 @@ import flutter_local_notifications
 import flutter_native_timezone_latest
 import flutter_secure_storage_macos
 import google_sign_in_ios
+import in_app_purchase_storekit
 import in_app_review
 import isar_community_flutter_libs
 import local_auth_darwin
@@ -27,6 +28,7 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   FlutterNativeTimezoneLatestPlugin.register(with: registry.registrar(forPlugin: "FlutterNativeTimezoneLatestPlugin"))
   FlutterSecureStoragePlugin.register(with: registry.registrar(forPlugin: "FlutterSecureStoragePlugin"))
   FLTGoogleSignInPlugin.register(with: registry.registrar(forPlugin: "FLTGoogleSignInPlugin"))
+  InAppPurchasePlugin.register(with: registry.registrar(forPlugin: "InAppPurchasePlugin"))
   InAppReviewPlugin.register(with: registry.registrar(forPlugin: "InAppReviewPlugin"))
   IsarFlutterLibsPlugin.register(with: registry.registrar(forPlugin: "IsarFlutterLibsPlugin"))
   LocalAuthPlugin.register(with: registry.registrar(forPlugin: "LocalAuthPlugin"))

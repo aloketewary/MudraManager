@@ -83,6 +83,7 @@ class BankSmsParser {
     if (s.contains('PAYTM')) return 'PAYTM';
     if (s.contains('PHONEPE') || s.contains('PHPEPE')) return 'PHONEPE';
     if (s.contains('GPAY') || s.contains('GOOGLE')) return 'GPAY';
+    if (s.contains('RBL')) return 'RBL';
     return null;
   }
  static bool _hasTransactionKeywords(String body) {

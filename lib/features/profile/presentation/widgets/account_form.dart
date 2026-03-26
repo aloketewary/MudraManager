@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
+import 'package:mudra_manager/core/entitlement/entitlement_provider.dart';
 import 'package:mudra_manager/core/extension/account_type_extenstion.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
@@ -134,19 +135,37 @@ class _AccountFormState extends ConsumerState<AccountForm> {
             vertical: spacing.cardVertical,
           ),
           children: [
-            _buildHeroPreview(color, textTheme, spacing,),
+            _buildHeroPreview(
+              color,
+              textTheme,
+              spacing,
+            ),
             SizedBox(height: spacing.sectionGap),
             _sectionLabel('Account Type', textTheme),
-            SizedBox(height: spacing.sectionGap,),
-            _buildTypeGrid(color, textTheme, spacing,),
+            SizedBox(
+              height: spacing.sectionGap,
+            ),
+            _buildTypeGrid(
+              color,
+              textTheme,
+              spacing,
+            ),
             SizedBox(height: spacing.sectionGap),
             _sectionLabel('Details', textTheme),
             SizedBox(height: spacing.sectionGap),
-            _buildDetailsCard(color, textTheme, spacing,),
+            _buildDetailsCard(
+              color,
+              textTheme,
+              spacing,
+            ),
             SizedBox(height: spacing.sectionGap),
             _sectionLabel('Color', textTheme),
             SizedBox(height: spacing.sectionGap),
-            _buildColorSection(color, textTheme, spacing,),
+            _buildColorSection(
+              color,
+              textTheme,
+              spacing,
+            ),
           ],
         ),
       ),
@@ -154,7 +173,11 @@ class _AccountFormState extends ConsumerState<AccountForm> {
   }
 
   // ── HERO PREVIEW (live) ──
-  Widget _buildHeroPreview(ColorScheme color, TextTheme textTheme, AppSpacing spacing,) {
+  Widget _buildHeroPreview(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
     final name = _nameController.text.trim();
     final number = _accountNumberController.text.trim();
     final balance = double.tryParse(_balanceController.text) ?? 0.0;
@@ -281,7 +304,11 @@ class _AccountFormState extends ConsumerState<AccountForm> {
   }
 
   // ── ACCOUNT TYPE GRID (2×3) ──
-  Widget _buildTypeGrid(ColorScheme color, TextTheme textTheme, AppSpacing spacing,) {
+  Widget _buildTypeGrid(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
     return GridView.count(
       crossAxisCount: 3,
       shrinkWrap: true,
@@ -335,7 +362,11 @@ class _AccountFormState extends ConsumerState<AccountForm> {
   }
 
   // ── DETAILS CARD ──
-  Widget _buildDetailsCard(ColorScheme color, TextTheme textTheme, AppSpacing spacing,) {
+  Widget _buildDetailsCard(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
     final isCreditCard = _selectedType == AccountType.creditCard;
 
     return Card(
@@ -374,7 +405,9 @@ class _AccountFormState extends ConsumerState<AccountForm> {
             indent: 48,
             color: color.outlineVariant.withValues(alpha: 0.3),
           ),
-          SizedBox(height: spacing.elementGap,),
+          SizedBox(
+            height: spacing.elementGap,
+          ),
           TextFormField(
             controller: _accountNumberController,
             keyboardType: TextInputType.number,
@@ -409,7 +442,9 @@ class _AccountFormState extends ConsumerState<AccountForm> {
             indent: 48,
             color: color.outlineVariant.withValues(alpha: 0.3),
           ),
-          SizedBox(height: spacing.elementGap,),
+          SizedBox(
+            height: spacing.elementGap,
+          ),
           TextFormField(
             controller: _balanceController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -440,7 +475,11 @@ class _AccountFormState extends ConsumerState<AccountForm> {
   }
 
   // ── COLOR SECTION ──
-  Widget _buildColorSection(ColorScheme color, TextTheme textTheme, AppSpacing spacing,) {
+  Widget _buildColorSection(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
     return Card(
       elevation: 0,
       color: color.surfaceContainerLow,
@@ -552,6 +591,17 @@ class _AccountFormState extends ConsumerState<AccountForm> {
   }
 
   Future<void> _saveAccount(Id? id) async {
+    // ── Entitlement check (new accounts only) ──
+    if (!_isEditing) {
+      final canCreate = await ref.read(canCreateAccountProvider.future);
+      if (!canCreate) {
+        SnackbarService.warning(
+          'Free plan allows up to 3 accounts. Upgrade to Pro for unlimited.',
+        );
+        return;
+      }
+    }
+
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _saving = true);

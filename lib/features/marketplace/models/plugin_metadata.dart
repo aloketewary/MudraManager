@@ -27,6 +27,7 @@ class PluginMetadata {
   final PluginGroup group;
   final List<PluginConfigOption>? configOptions;
   final List<String>? permissions;
+  final bool isPro;
 
   PluginMetadata({
     required this.id,
@@ -41,6 +42,7 @@ class PluginMetadata {
     required this.group,
     this.configOptions,
     this.permissions,
+    this.isPro = false,
   });
 
   factory PluginMetadata.fromJson(Map<String, dynamic> json) => PluginMetadata(

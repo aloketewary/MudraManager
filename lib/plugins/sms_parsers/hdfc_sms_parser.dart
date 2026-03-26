@@ -3,13 +3,13 @@ import '../sms_parser_plugin.dart';
 class HdfcSmsParserPlugin extends SmsParserPlugin {
   @override
   String get id => 'hdfc_sms_parser';
-  
+
   @override
   String get name => 'HDFC Bank SMS Parser';
-  
+
   @override
-  String get version => '1.0.0';
-  
+  String get version => '1.0.1';
+
   @override
   String get bankName => 'HDFC';
 
@@ -32,8 +32,10 @@ class HdfcSmsParserPlugin extends SmsParserPlugin {
     final accountRegex = RegExp(r'A/c\s*[xX]*(\d{4})');
     final typeRegex = RegExp(r'(debited|credited)', caseSensitive: false);
     final vpaRegex = RegExp(r'to\s+VPA\s+([^\s\.]+)');
-    final merchantRegex = RegExp(r'(?:at|to)\s+([A-Z][A-Z0-9\s]{2,30})(?:\s+on|\.|$)');
-    final balanceRegex = RegExp(r'Avl\s*Bal[:\s]*Rs\.?\s*(\d+(?:,\d+)*(?:\.\d{2})?)');
+    final merchantRegex =
+        RegExp(r'(?:at|to)\s+([A-Z][A-Z0-9\s]{2,30})(?:\s+on|\.|$)');
+    final balanceRegex =
+        RegExp(r'Avl\s*Bal[:\s]*Rs\.?\s*(\d+(?:,\d+)*(?:\.\d{2})?)');
 
     final amount = _extractAmount(amountRegex, body);
     final account = accountRegex.firstMatch(body)?.group(1);
@@ -41,6 +43,11 @@ class HdfcSmsParserPlugin extends SmsParserPlugin {
     final vpa = vpaRegex.firstMatch(body)?.group(1);
     final merchant = vpa ?? _extractMerchantName(merchantRegex, body);
     final balance = _extractAmount(balanceRegex, body);
+    final bodyLower = body.toLowerCase();
+    final isLikelyTransfer = bodyLower.contains('neft') ||
+        bodyLower.contains('imps') ||
+        bodyLower.contains('rtgs') ||
+        bodyLower.contains('transfer');
 
     if (amount == null) return null;
 
@@ -51,6 +58,7 @@ class HdfcSmsParserPlugin extends SmsParserPlugin {
       transactionType: vpa != null ? 'UPI' : 'Card',
       merchant: merchant,
       balance: balance,
+      isLikelyTransfer: isLikelyTransfer,
     );
   }
 

@@ -3,13 +3,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/entitlement/entitlement_provider.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/core/widgets/dashboard_widget_plugin.dart';
 import 'package:mudra_manager/core/widgets/dashboard_widget_registry.dart';
 import 'package:mudra_manager/core/db/models/dashboard_widget_preference.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/widget_preferences_provider.dart';
+import 'package:mudra_manager/shared/widgets/pro_gate.dart';
 
 class DashboardCustomizeScreen extends ConsumerStatefulWidget {
   const DashboardCustomizeScreen({super.key});
@@ -232,28 +236,39 @@ class _DashboardCustomizeScreenState
                   ),
                 ),
                 const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Icon(LucideIcons.sparkles, size: 14, color: accent),
-                    const SizedBox(width: 6),
-                    Text(
-                      'Smart ordering',
-                      style: textTheme.labelMedium?.copyWith(
-                        color: color.onSurfaceVariant,
-                      ),
-                    ),
-                    const Spacer(),
-                    Switch(
-                      value: ref.watch(smartOrderEnabledProvider),
-                      onChanged: (v) {
-                        SharedPrefsUtil.instance.setString(
-                          'smart_order_enabled',
-                          v.toString(),
-                        );
-                        ref.invalidate(smartOrderEnabledProvider);
-                      },
-                    ),
-                  ],
+                Consumer(
+                  builder: (context, ref, _) {
+                    final isPro = ref.watch(isProProvider).valueOrNull ?? false;
+                    return Row(
+                      children: [
+                        Icon(LucideIcons.sparkles, size: 14, color: accent),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Smart ordering',
+                          style: textTheme.labelMedium?.copyWith(
+                            color: color.onSurfaceVariant,
+                          ),
+                        ),
+                        if (!isPro) ...[
+                          const SizedBox(width: 6),
+                          const ProBadge(),
+                        ],
+                        const Spacer(),
+                        Switch(
+                          value: isPro && ref.watch(smartOrderEnabledProvider),
+                          onChanged: isPro
+                              ? (v) {
+                                  SharedPrefsUtil.instance.setString(
+                                    'smart_order_enabled',
+                                    v.toString(),
+                                  );
+                                  ref.invalidate(smartOrderEnabledProvider);
+                                }
+                              : (_) => context.push(AppRoutes.upgrade),
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ],
             ),

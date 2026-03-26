@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mudra_manager/core/db/models/category.dart';
+import 'package:mudra_manager/core/entitlement/entitlement_feature.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
@@ -48,10 +50,12 @@ import 'package:mudra_manager/features/trip/presentation/screens/edit_trip_scree
 import 'package:mudra_manager/features/trip/presentation/screens/expense_detail_screen.dart';
 import 'package:mudra_manager/features/trip/presentation/screens/trip_detail_screen.dart';
 import 'package:mudra_manager/features/trip/presentation/screens/trips_screen.dart';
+import 'package:mudra_manager/features/upgrade/presentation/screens/upgrade_screen.dart';
 import 'package:mudra_manager/plugins/credit_card_reminder_settings.dart';
 import 'package:mudra_manager/shared/screens/notification_page_screen.dart';
 import 'package:mudra_manager/features/gamification/screens/achievements_screen.dart';
 import 'package:mudra_manager/features/marketplace/screens/plugin_groups_screen.dart';
+import 'package:mudra_manager/shared/widgets/pro_gate.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -63,7 +67,8 @@ class AppRouter {
         redirect: (context, state) {
           final isOnboardingComplete =
               SharedPrefsUtil.instance.isOnboardingComplete();
-          final isOnOnboardingPage = state.matchedLocation == AppRoutes.onboarding;
+          final isOnOnboardingPage =
+              state.matchedLocation == AppRoutes.onboarding;
           final isOnAccountSetupPage =
               state.matchedLocation == AppRoutes.accountSetup;
 
@@ -164,7 +169,10 @@ class AppRouter {
               ),
               GoRoute(
                 path: AppRoutes.dashboardCustomize,
-                builder: (context, state) => const DashboardCustomizeScreen(),
+                builder: (context, state) => const ProGate(
+                  feature: ProFeature.dashboardCustomize,
+                  child: DashboardCustomizeScreen(),
+                ),
               ),
               GoRoute(
                 path: AppRoutes.commandCenter,
@@ -196,8 +204,12 @@ class AppRouter {
               ),
               GoRoute(
                 path: AppRoutes.backupRestore,
-                builder: (context, state) => const BackupRestoreScreen(),
+                builder: (context, state) => const ProGate(
+                  feature: ProFeature.cloudBackup,
+                  child: BackupRestoreScreen(),
+                ),
               ),
+
               GoRoute(
                 path: AppRoutes.about,
                 builder: (context, state) => const AboutScreen(),
@@ -232,7 +244,11 @@ class AppRouter {
                 path: AppRoutes.addCategory,
                 builder: (context, state) {
                   final extra = state.extra as Map<String, dynamic>?;
-                  return AddEditCategoryScreen(existing: extra?['category']);
+                  return AddEditCategoryScreen(
+                    existing: extra?['category'],
+                    initialParent: extra?['parent'] as Category?,
+                    initialType: extra?['type'] as CategoryType?,
+                  );
                 },
               ),
               GoRoute(
@@ -329,19 +345,31 @@ class AppRouter {
               ),
               GoRoute(
                 path: AppRoutes.analytics,
-                builder: (context, state) => const AnalyticsScreen(),
+                builder: (context, state) => const ProGate(
+                  feature: ProFeature.advancedAnalytics,
+                  child: AnalyticsScreen(),
+                ),
               ),
               GoRoute(
                 path: AppRoutes.financialHealth,
-                builder: (context, state) => const FinancialHealthScreen(),
+                builder: (context, state) => const ProGate(
+                  feature: ProFeature.advancedAnalytics,
+                  child: FinancialHealthScreen(),
+                ),
               ),
               GoRoute(
                 path: AppRoutes.spendingPersonality,
-                builder: (context, state) => const SpendingPersonalityScreen(),
+                builder: (context, state) => const ProGate(
+                  feature: ProFeature.spendingPersonality,
+                  child: SpendingPersonalityScreen(),
+                ),
               ),
               GoRoute(
                 path: AppRoutes.netWorth,
-                builder: (context, state) => const NetWorthScreen(),
+                builder: (context, state) => const ProGate(
+                  feature: ProFeature.netWorth,
+                  child: NetWorthScreen(),
+                ),
               ),
               GoRoute(
                 path: AppRoutes.achievements,
@@ -351,7 +379,10 @@ class AppRouter {
                 path: AppRoutes.monthlyRecap,
                 builder: (context, state) {
                   final month = state.extra as DateTime?;
-                  return MonthlyRecapScreen(month: month);
+                  return ProGate(
+                    feature: ProFeature.monthlyRecap,
+                    child: MonthlyRecapScreen(month: month),
+                  );
                 },
               ),
               GoRoute(
@@ -366,6 +397,10 @@ class AppRouter {
               GoRoute(
                 path: AppRoutes.appearance,
                 builder: (context, state) => const AppearanceScreen(),
+              ),
+              GoRoute(
+                path: AppRoutes.upgrade,
+                builder: (context, state) => const UpgradeScreen(),
               ),
             ],
           ),

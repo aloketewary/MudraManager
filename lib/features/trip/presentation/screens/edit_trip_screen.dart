@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/db/models/trip.dart';
+import 'package:mudra_manager/core/entitlement/entitlement_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/dialog_utils.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
@@ -176,7 +177,15 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
       SnackbarService.error('Add at least one participant');
       return;
     }
-
+    if (!isEditMode) {
+      final canCreate = await ref.read(canCreateTripProvider.future);
+      if (!canCreate) {
+        SnackbarService.warning(
+          'Free plan allows 1 active trip. Upgrade to Pro for unlimited.',
+        );
+        return;
+      }
+    }
     HapticFeedback.mediumImpact();
 
     final budget = _budgetController.text.trim().isEmpty

@@ -58,7 +58,7 @@ class _BudgetDashboardState extends ConsumerState<BudgetDashboard> {
             loading: () => ListView.builder(
               padding: const EdgeInsets.all(16).copyWith(bottom: 80),
               itemCount: 3,
-              itemBuilder: (context, index) => const SkeletonCard(),
+              itemBuilder: (context, index) => const TransactionCardSkeleton(),
             ),
             error: (e, _) => Center(child: Text('Error: $e')),
           ),

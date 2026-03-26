@@ -1,41 +1,53 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/core/providers/collection_watchers.dart';
 import 'package:mudra_manager/features/analytics/data/advanced_analytics_service.dart';
 import 'package:mudra_manager/features/dashboard/data/status_data_provider.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 
-final analyticsServiceProvider = Provider<AdvancedAnalyticsService>((ref) {
+final analyticsServiceProvider =
+    Provider.autoDispose<AdvancedAnalyticsService>((ref) {
   final txnService = ref.watch(transactionProvider);
   return AdvancedAnalyticsService(txnService);
 });
 
-final predictedSpendingProvider = FutureProvider<double>((ref) async {
+final predictedSpendingProvider =
+    FutureProvider.autoDispose<double>((ref) async {
+  ref.watch(transactionChangeProvider);
   final service = ref.watch(analyticsServiceProvider);
   return await service.predictMonthlySpending();
 });
 
-final financialHealthProvider = FutureProvider<FinancialHealthScore>((
+final financialHealthProvider =
+    FutureProvider.autoDispose<FinancialHealthScore>((
   ref,
 ) async {
+  ref.watch(transactionChangeProvider);
   final service = ref.watch(analyticsServiceProvider);
   final totalBalance = await ref.watch(totalAccountBalanceProvider.future);
   return await service.calculateHealthScore(totalBalance);
 });
 
-final categoryTrendsProvider = FutureProvider<Map<String, CategoryTrend>>((
+final categoryTrendsProvider =
+    FutureProvider.autoDispose<Map<String, CategoryTrend>>((
   ref,
 ) async {
+  ref.watch(transactionChangeProvider);
   final service = ref.watch(analyticsServiceProvider);
   return await service.getCategoryTrends();
 });
 
-final spendingByDayProvider = FutureProvider<Map<String, double>>((ref) async {
+final spendingByDayProvider =
+    FutureProvider.autoDispose<Map<String, double>>((ref) async {
+  ref.watch(transactionChangeProvider);
   final service = ref.watch(analyticsServiceProvider);
   return await service.getSpendingByDayOfWeek();
 });
 
-final monthlyExpenseTrendsProvider = FutureProvider<Map<String, List<double>>>((
+final monthlyExpenseTrendsProvider =
+    FutureProvider.autoDispose<Map<String, List<double>>>((
   ref,
 ) async {
+  ref.watch(transactionChangeProvider);
   final transactionService = ref.watch(transactionProvider);
   final transactions = await transactionService.getAllForDashBoard();
   final now = DateTime.now();
@@ -54,7 +66,8 @@ final monthlyExpenseTrendsProvider = FutureProvider<Map<String, List<double>>>((
     for (var tx in monthTxns) {
       final categoryName = tx.category.value?.name ?? 'Uncategorized';
       if (!categoryMonthlyData.containsKey(categoryName)) {
-        categoryMonthlyData[categoryName] = List<double>.generate(12, (_) => 0.0);
+        categoryMonthlyData[categoryName] =
+            List<double>.generate(12, (_) => 0.0);
       }
       categoryMonthlyData[categoryName]![11 - i] += tx.amount;
     }

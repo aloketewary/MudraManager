@@ -1,116 +1,96 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:mudra_manager/core/theme/design_tokens.dart';
 
-class SkeletonLoader extends StatefulWidget {
+class SkeletonLoader extends StatelessWidget {
   final double? width;
-  final double height;
+  final double? height;
   final BorderRadius? borderRadius;
+  final EdgeInsets? margin;
 
   const SkeletonLoader({
     super.key,
     this.width,
     this.height = 16,
     this.borderRadius,
+    this.margin,
   });
 
   @override
-  State<SkeletonLoader> createState() => _SkeletonLoaderState();
-}
-
-class _SkeletonLoaderState extends State<SkeletonLoader>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1500),
-    )..repeat();
-    _animation = Tween<double>(begin: -1, end: 2).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return AnimatedBuilder(
-      animation: _animation,
-      builder: (context, child) {
-        return Container(
-          width: widget.width,
-          height: widget.height,
-          decoration: BoxDecoration(
-            borderRadius: widget.borderRadius ?? BorderRadius.circular(4),
-            gradient: LinearGradient(
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-              colors: [
-                colorScheme.surfaceContainerHighest.withOpacity(0.3),
-                colorScheme.surfaceContainerHighest.withOpacity(0.6),
-                colorScheme.surfaceContainerHighest.withOpacity(0.3),
-              ],
-              stops: [
-                _animation.value - 0.3,
-                _animation.value,
-                _animation.value + 0.3,
-              ].map((e) => e.clamp(0.0, 1.0)).toList(),
-            ),
-          ),
+    final color = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      width: width,
+      height: height,
+      margin: margin,
+      decoration: BoxDecoration(
+        color: isDark
+            ? color.surfaceContainerHighest
+            : color.surfaceContainerHighest.withValues(alpha: 0.6),
+        borderRadius: borderRadius ?? DesignTokens.borderRadiusSmall,
+      ),
+    ).animate(onComplete: (controller) => controller.repeat()).shimmer(
+          duration: 1500.ms,
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.08)
+              : Colors.white.withValues(alpha: 0.6),
         );
-      },
-    );
   }
 }
 
-class SkeletonCard extends StatelessWidget {
-  const SkeletonCard({super.key});
+class TransactionCardSkeleton extends StatelessWidget {
+  const TransactionCardSkeleton({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme;
+
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: const EdgeInsets.symmetric(
+        horizontal: DesignTokens.spacing16,
+        vertical: DesignTokens.spacing8,
+      ),
+      elevation: 0,
+      color: color.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: DesignTokens.borderRadiusMedium,
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(DesignTokens.spacing16),
         child: Row(
           children: [
             SkeletonLoader(
-              width: 40,
-              height: 40,
-              borderRadius: BorderRadius.circular(20),
+              width: 48,
+              height: 48,
+              borderRadius: BorderRadius.circular(12),
             ),
-            const SizedBox(width: 12),
-            Expanded(
+            const SizedBox(width: DesignTokens.spacing16),
+            const Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SkeletonLoader(
                     width: double.infinity,
                     height: 16,
-                    borderRadius: BorderRadius.circular(4),
+                    margin: EdgeInsets.only(bottom: DesignTokens.spacing8),
                   ),
-                  const SizedBox(height: 8),
-                  SkeletonLoader(
-                    width: 120,
-                    height: 14,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
+                  SkeletonLoader(width: 120, height: 14),
                 ],
               ),
             ),
-            const SizedBox(width: 12),
-            SkeletonLoader(
-              width: 80,
-              height: 20,
-              borderRadius: BorderRadius.circular(4),
+            const SizedBox(width: DesignTokens.spacing16),
+            const Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                SkeletonLoader(
+                  width: 80,
+                  height: 20,
+                  margin: EdgeInsets.only(bottom: DesignTokens.spacing4),
+                ),
+                SkeletonLoader(width: 60, height: 12),
+              ],
             ),
           ],
         ),
@@ -119,103 +99,196 @@ class SkeletonCard extends StatelessWidget {
   }
 }
 
-class SkeletonListTile extends StatelessWidget {
-  const SkeletonListTile({super.key});
+class AccountCardSkeleton extends StatelessWidget {
+  const AccountCardSkeleton({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: SkeletonLoader(
-        width: 40,
-        height: 40,
-        borderRadius: BorderRadius.circular(20),
+    final color = Theme.of(context).colorScheme;
+
+    return Container(
+      height: 250,
+      margin: const EdgeInsets.symmetric(
+        horizontal: DesignTokens.spacing16,
+        vertical: DesignTokens.spacing8,
       ),
-      title: SkeletonLoader(
-        width: double.infinity,
-        height: 16,
-        borderRadius: BorderRadius.circular(4),
+      padding: const EdgeInsets.all(DesignTokens.spacing24),
+      decoration: BoxDecoration(
+        color: color.surfaceContainerHighest,
+        borderRadius: DesignTokens.borderRadiusLarge,
       ),
-      subtitle: Padding(
-        padding: const EdgeInsets.only(top: 8),
-        child: SkeletonLoader(
-          width: 150,
-          height: 14,
-          borderRadius: BorderRadius.circular(4),
-        ),
-      ),
-      trailing: SkeletonLoader(
-        width: 60,
-        height: 20,
-        borderRadius: BorderRadius.circular(4),
+      child: const Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          SkeletonLoader(width: 150, height: 24),
+          SkeletonLoader(width: 200, height: 40),
+          SkeletonLoader(width: 180, height: 16),
+        ],
       ),
     );
   }
 }
 
-class SkeletonDashboardCard extends StatelessWidget {
-  const SkeletonDashboardCard({super.key});
+class BudgetCardSkeleton extends StatelessWidget {
+  const BudgetCardSkeleton({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.all(16),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    final color = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: DesignTokens.spacing16,
+        vertical: DesignTokens.spacing8,
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(DesignTokens.spacing16),
+        decoration: BoxDecoration(
+          color: color.surfaceContainerLow,
+          borderRadius: DesignTokens.borderRadiusLarge,
+        ),
+        child: Row(
           children: [
             SkeletonLoader(
-              width: 120,
-              height: 16,
-              borderRadius: BorderRadius.circular(4),
+              width: 60,
+              height: 60,
+              borderRadius: BorderRadius.circular(30),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(width: DesignTokens.spacing16),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SkeletonLoader(
+                    width: 120,
+                    height: 16,
+                    margin: EdgeInsets.only(bottom: DesignTokens.spacing12),
+                  ),
+                  SkeletonLoader(
+                    width: double.infinity,
+                    height: 10,
+                    margin: EdgeInsets.only(bottom: DesignTokens.spacing8),
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: SkeletonLoader(width: 80, height: 14),
+                      ),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: SkeletonLoader(width: 80, height: 14),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class DashboardCardSkeleton extends StatelessWidget {
+  const DashboardCardSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 16),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 8),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: color.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          children: [
             SkeletonLoader(
-              width: 200,
-              height: 32,
-              borderRadius: BorderRadius.circular(4),
+              width: 60,
+              height: 60,
+              borderRadius: BorderRadius.circular(30),
             ),
-            const SizedBox(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            const SizedBox(width: 16),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SkeletonLoader(
+                    width: 100,
+                    height: 16,
+                    margin: EdgeInsets.only(bottom: 12),
+                  ),
+                  SkeletonLoader(
+                    width: double.infinity,
+                    height: 10,
+                    margin: EdgeInsets.only(bottom: 8),
+                  ),
+                  Row(
                     children: [
-                      SkeletonLoader(
-                        width: 80,
-                        height: 14,
-                        borderRadius: BorderRadius.circular(4),
+                      Expanded(
+                        child: SkeletonLoader(width: 70, height: 14),
                       ),
-                      const SizedBox(height: 8),
-                      SkeletonLoader(
-                        width: 100,
-                        height: 20,
-                        borderRadius: BorderRadius.circular(4),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: SkeletonLoader(width: 70, height: 14),
                       ),
                     ],
                   ),
-                ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SkeletonLoader(
-                        width: 80,
-                        height: 14,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      const SizedBox(height: 8),
-                      SkeletonLoader(
-                        width: 100,
-                        height: 20,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ],
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class PersonalityCardSkeleton extends StatelessWidget {
+  const PersonalityCardSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 16),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 8),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: color.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          children: [
+            SkeletonLoader(
+              width: 64,
+              height: 64,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            const SizedBox(width: 16),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SkeletonLoader(
+                    width: 140,
+                    height: 16,
+                    margin: EdgeInsets.only(bottom: 8),
                   ),
-                ),
-              ],
+                  SkeletonLoader(
+                    width: double.infinity,
+                    height: 14,
+                  ),
+                ],
+              ),
             ),
           ],
         ),

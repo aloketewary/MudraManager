@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mudra_manager/core/entitlement/entitlement_feature.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
 import 'package:mudra_manager/features/analytics/data/net_worth_service.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
+import 'package:mudra_manager/shared/widgets/pro_gate.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
@@ -44,217 +46,224 @@ class NetWorthCard extends ConsumerWidget {
 
         if (totalBalance == 0) return const SizedBox.shrink();
 
-        return Padding(
-          padding: EdgeInsets.symmetric(horizontal: globalPadding, vertical: 8),
-          child: Card(
-            elevation: 0,
-            color: color.primaryContainer,
-            child: InkWell(
-              onTap: () {
-                HapticFeedback.mediumImpact();
-                context.push(AppRoutes.netWorth);
-              },
-              borderRadius: BorderRadius.circular(20),
-              child: Stack(
-                children: [
-                  // Background chart
-                  Positioned.fill(
-                    child: historyAsync.when(
-                      data: (history) => _buildMiniChart(history, color),
-                      loading: () => const SizedBox.shrink(),
-                      error: (_, __) => const SizedBox.shrink(),
+        return ProCardGate(
+          feature: ProFeature.netWorth,
+          borderRadius: 20,
+          child: Padding(
+            padding:
+                EdgeInsets.symmetric(horizontal: globalPadding, vertical: 8),
+            child: Card(
+              elevation: 0,
+              color: color.primaryContainer,
+              child: InkWell(
+                onTap: () {
+                  HapticFeedback.mediumImpact();
+                  context.push(AppRoutes.netWorth);
+                },
+                borderRadius: BorderRadius.circular(20),
+                child: Stack(
+                  children: [
+                    // Background chart
+                    Positioned.fill(
+                      child: historyAsync.when(
+                        data: (history) => _buildMiniChart(history, color),
+                        loading: () => const SizedBox.shrink(),
+                        error: (_, __) => const SizedBox.shrink(),
+                      ),
                     ),
-                  ),
-                  // Content
-                  Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Header
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: color.primary.withValues(alpha: 0.2),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Icon(
-                                Icons.account_balance,
-                                size: 20,
-                                color: color.onPrimaryContainer,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Text(
-                              'Net Worth',
-                              style: textTheme.titleMedium?.copyWith(
-                                color: color.onPrimaryContainer
-                                    .withValues(alpha: 0.8),
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const Spacer(),
-                            Icon(
-                              Icons.chevron_right,
-                              color: color.onPrimaryContainer
-                                  .withValues(alpha: 0.6),
-                              size: 20,
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-
-                        // Net Worth Amount
-                        TweenAnimationBuilder<double>(
-                          duration: const Duration(milliseconds: 1500),
-                          curve: Curves.easeOutCubic,
-                          tween: Tween(begin: 0.0, end: totalBalance),
-                          builder: (context, value, child) {
-                            return CurrencyText(
-                              amount: value,
-                              style: textTheme.displaySmall?.copyWith(
-                                fontWeight: FontWeight.w900,
-                                color: color.onPrimaryContainer,
-                                fontSize: 36,
-                              ),
-                              showSign: false,
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 12),
-
-                        // Metrics Row
-                        netWorthDataAsync.when(
-                          data: (netWorthData) {
-                            final displayMonthlyChange =
-                                GuestModeUtil.applyGuestMode(
-                              netWorthData.monthlyChange,
-                              isGuestMode,
-                            );
-                            final displayAssets = GuestModeUtil.applyGuestMode(
-                              netWorthData.totalAssets,
-                              isGuestMode,
-                            );
-                            final displayLiabilities =
-                                GuestModeUtil.applyGuestMode(
-                              netWorthData.totalLiabilities,
-                              isGuestMode,
-                            );
-
-                            return Column(
-                              children: [
-                                // Monthly change
-                                Row(
-                                  children: [
-                                    Icon(
-                                      displayMonthlyChange >= 0
-                                          ? Icons.trending_up
-                                          : Icons.trending_down,
-                                      size: 16,
-                                      color: displayMonthlyChange >= 0
-                                          ? const Color(0xFF4CAF50)
-                                          : const Color(0xFFF44336),
-                                    ),
-                                    const SizedBox(width: 6),
-                                    CurrencyText(
-                                      amount: displayMonthlyChange.abs(),
-                                      style: textTheme.bodyMedium?.copyWith(
-                                        color: color.onPrimaryContainer
-                                            .withValues(alpha: 0.9),
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                      showSign: false,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      'this month',
-                                      style: textTheme.bodySmall?.copyWith(
-                                        color: color.onPrimaryContainer
-                                            .withValues(alpha: 0.7),
-                                      ),
-                                    ),
-                                    const Spacer(),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 4,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: savingsRate >= 20
-                                            ? const Color(0xFF4CAF50)
-                                                .withValues(alpha: 0.2)
-                                            : color.onPrimaryContainer
-                                                .withValues(alpha: 0.1),
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Text(
-                                        '${savingsRate.toStringAsFixed(0)}% savings',
-                                        style: textTheme.labelSmall?.copyWith(
-                                          color: color.onPrimaryContainer,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 12),
-
-                                // Assets vs Liabilities
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: _MetricChip(
-                                        label: 'Assets',
-                                        amount: displayAssets,
-                                        icon: Icons.arrow_upward,
-                                        color: const Color(0xFF4CAF50),
-                                        textTheme: textTheme,
-                                        colorScheme: color,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: _MetricChip(
-                                        label: 'Liabilities',
-                                        amount: displayLiabilities,
-                                        icon: Icons.arrow_downward,
-                                        color: const Color(0xFFF44336),
-                                        textTheme: textTheme,
-                                        colorScheme: color,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            );
-                          },
-                          loading: () => Row(
+                    // Content
+                    Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Header
+                          Row(
                             children: [
-                              Icon(
-                                Icons.trending_up,
-                                size: 16,
-                                color: color.onPrimaryContainer
-                                    .withValues(alpha: 0.5),
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                '${savingsRate.toStringAsFixed(1)}% savings rate',
-                                style: textTheme.bodySmall?.copyWith(
-                                  color: color.onPrimaryContainer
-                                      .withValues(alpha: 0.7),
-                                  fontWeight: FontWeight.w500,
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: color.primary.withValues(alpha: 0.2),
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
+                                child: Icon(
+                                  Icons.account_balance,
+                                  size: 20,
+                                  color: color.onPrimaryContainer,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                'Net Worth',
+                                style: textTheme.titleMedium?.copyWith(
+                                  color: color.onPrimaryContainer
+                                      .withValues(alpha: 0.8),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const Spacer(),
+                              Icon(
+                                Icons.chevron_right,
+                                color: color.onPrimaryContainer
+                                    .withValues(alpha: 0.6),
+                                size: 20,
                               ),
                             ],
                           ),
-                          error: (_, __) => const SizedBox.shrink(),
-                        ),
-                      ],
+                          const SizedBox(height: 16),
+
+                          // Net Worth Amount
+                          TweenAnimationBuilder<double>(
+                            duration: const Duration(milliseconds: 1500),
+                            curve: Curves.easeOutCubic,
+                            tween: Tween(begin: 0.0, end: totalBalance),
+                            builder: (context, value, child) {
+                              return CurrencyText(
+                                amount: value,
+                                style: textTheme.displaySmall?.copyWith(
+                                  fontWeight: FontWeight.w900,
+                                  color: color.onPrimaryContainer,
+                                  fontSize: 36,
+                                ),
+                                showSign: false,
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 12),
+
+                          // Metrics Row
+                          netWorthDataAsync.when(
+                            data: (netWorthData) {
+                              final displayMonthlyChange =
+                                  GuestModeUtil.applyGuestMode(
+                                netWorthData.monthlyChange,
+                                isGuestMode,
+                              );
+                              final displayAssets =
+                                  GuestModeUtil.applyGuestMode(
+                                netWorthData.totalAssets,
+                                isGuestMode,
+                              );
+                              final displayLiabilities =
+                                  GuestModeUtil.applyGuestMode(
+                                netWorthData.totalLiabilities,
+                                isGuestMode,
+                              );
+
+                              return Column(
+                                children: [
+                                  // Monthly change
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        displayMonthlyChange >= 0
+                                            ? Icons.trending_up
+                                            : Icons.trending_down,
+                                        size: 16,
+                                        color: displayMonthlyChange >= 0
+                                            ? const Color(0xFF4CAF50)
+                                            : const Color(0xFFF44336),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      CurrencyText(
+                                        amount: displayMonthlyChange.abs(),
+                                        style: textTheme.bodyMedium?.copyWith(
+                                          color: color.onPrimaryContainer
+                                              .withValues(alpha: 0.9),
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                        showSign: false,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        'this month',
+                                        style: textTheme.bodySmall?.copyWith(
+                                          color: color.onPrimaryContainer
+                                              .withValues(alpha: 0.7),
+                                        ),
+                                      ),
+                                      const Spacer(),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 4,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: savingsRate >= 20
+                                              ? const Color(0xFF4CAF50)
+                                                  .withValues(alpha: 0.2)
+                                              : color.onPrimaryContainer
+                                                  .withValues(alpha: 0.1),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                        ),
+                                        child: Text(
+                                          '${savingsRate.toStringAsFixed(0)}% savings',
+                                          style: textTheme.labelSmall?.copyWith(
+                                            color: color.onPrimaryContainer,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 12),
+
+                                  // Assets vs Liabilities
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: _MetricChip(
+                                          label: 'Assets',
+                                          amount: displayAssets,
+                                          icon: Icons.arrow_upward,
+                                          color: const Color(0xFF4CAF50),
+                                          textTheme: textTheme,
+                                          colorScheme: color,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: _MetricChip(
+                                          label: 'Liabilities',
+                                          amount: displayLiabilities,
+                                          icon: Icons.arrow_downward,
+                                          color: const Color(0xFFF44336),
+                                          textTheme: textTheme,
+                                          colorScheme: color,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              );
+                            },
+                            loading: () => Row(
+                              children: [
+                                Icon(
+                                  Icons.trending_up,
+                                  size: 16,
+                                  color: color.onPrimaryContainer
+                                      .withValues(alpha: 0.5),
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  '${savingsRate.toStringAsFixed(1)}% savings rate',
+                                  style: textTheme.bodySmall?.copyWith(
+                                    color: color.onPrimaryContainer
+                                        .withValues(alpha: 0.7),
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            error: (_, __) => const SizedBox.shrink(),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -266,7 +275,9 @@ class NetWorthCard extends ConsumerWidget {
   }
 
   Widget _buildMiniChart(
-      List<NetWorthHistoryPoint> history, ColorScheme color) {
+    List<NetWorthHistoryPoint> history,
+    ColorScheme color,
+  ) {
     if (history.isEmpty) return const SizedBox.shrink();
 
     final spots = history
