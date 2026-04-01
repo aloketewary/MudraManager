@@ -273,5 +273,13 @@
   "onboard_InsightsAndAnalytics": "ইনসাইটস ও অ্যানালিটিক্স",
   "onboard_InsightsAndAnalyticsDesc": "বিস্তারিত চার্ট, ট্রেন্ড এবং স্মার্ট ইনসাইটস দিয়ে আপনার খরচের অভ্যাস বুঝুন।",
   "onboard_SecureAndPrivate": "সুরক্ষিত ও ব্যক্তিগত",
-  "onboard_SecureAndPrivateDesc": "আপনার ডেটা আপনার ডিভাইসে থাকে। কোনো ক্লাউড নেই, কোনো ট্র্যাকিং নেই।"
+  "onboard_SecureAndPrivateDesc": "আপনার ডেটা আপনার ডিভাইসে থাকে। কোনো ক্লাউড নেই, কোনো ট্র্যাকিং নেই।",
+  "onboard_SmartAutoTracking": "Smart Auto Tracking",
+  "@onboard_SmartAutoTracking": {
+    "description": "Auto-detect transactions from notifications"
+  },
+  "onboard_SmartAutoTrackingDesc": "Automatically detect and import transactions from your bank notifications.",
+  "@onboard_SmartAutoTrackingDesc": {
+    "description": "Description for auto tracking onboarding page"
+  }
 }

@@ -161,8 +161,8 @@ class NetWorthCard extends ConsumerWidget {
                                             : Icons.trending_down,
                                         size: 16,
                                         color: displayMonthlyChange >= 0
-                                            ? const Color(0xFF4CAF50)
-                                            : const Color(0xFFF44336),
+                                            ? color.primary
+                                            : color.error,
                                       ),
                                       const SizedBox(width: 6),
                                       CurrencyText(
@@ -190,7 +190,7 @@ class NetWorthCard extends ConsumerWidget {
                                         ),
                                         decoration: BoxDecoration(
                                           color: savingsRate >= 20
-                                              ? const Color(0xFF4CAF50)
+                                              ? color.primary
                                                   .withValues(alpha: 0.2)
                                               : color.onPrimaryContainer
                                                   .withValues(alpha: 0.1),
@@ -217,7 +217,7 @@ class NetWorthCard extends ConsumerWidget {
                                           label: 'Assets',
                                           amount: displayAssets,
                                           icon: Icons.arrow_upward,
-                                          color: const Color(0xFF4CAF50),
+                                          color: color.primary,
                                           textTheme: textTheme,
                                           colorScheme: color,
                                         ),
@@ -228,7 +228,7 @@ class NetWorthCard extends ConsumerWidget {
                                           label: 'Liabilities',
                                           amount: displayLiabilities,
                                           icon: Icons.arrow_downward,
-                                          color: const Color(0xFFF44336),
+                                          color: color.error,
                                           textTheme: textTheme,
                                           colorScheme: color,
                                         ),

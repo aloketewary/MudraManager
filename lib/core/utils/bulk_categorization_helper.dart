@@ -1,6 +1,4 @@
-import 'package:mudra_manager/core/db/models/category_rule.dart';
 import 'package:mudra_manager/core/services/category_rule_service.dart';
-import 'package:mudra_manager/core/utils/category_matcher.dart';
 import 'package:mudra_manager/core/utils/transaction_msg_util.dart';
 
 /// Helper for bulk categorization of pending transactions

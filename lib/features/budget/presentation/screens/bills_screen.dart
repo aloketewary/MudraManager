@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/models/recurring_bill.dart';
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/core/utils/dialog_utils.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/budget/data/bill_service.dart';
@@ -135,7 +136,7 @@ class BillsScreen extends ConsumerWidget {
     final billColor = isOverdue
         ? color.error
         : isDueSoon
-        ? const Color(0xFFFF9800)
+        ? color.tertiary
         : color.primary;
 
     return Card(
@@ -251,7 +252,7 @@ class BillsScreen extends ConsumerWidget {
                 onSelected: (value) async {
                   if (value == 'paid') {
                     await BillService.markBillAsPaid(bill.id);
-                    SnackbarService.success('Bill marked as paid');
+                    SnackbarService.success(BuddyMessages.billPaid);
                   } else if (value == 'delete') {
                     final confirmed = await DialogUtils.showDeleteConfirmation(
                       context,
@@ -263,7 +264,7 @@ class BillsScreen extends ConsumerWidget {
                       await isar.writeTxn(
                         () => isar.recurringBills.delete(bill.id),
                       );
-                      SnackbarService.success('Bill deleted');
+                      SnackbarService.success(BuddyMessages.billDeleted);
                     }
                   }
                 },
@@ -441,7 +442,7 @@ class BillsScreen extends ConsumerWidget {
                             onPressed: () async {
                               if (nameController.text.isEmpty ||
                                   amountController.text.isEmpty) {
-                                SnackbarService.error('Please fill all fields');
+                                SnackbarService.error(BuddyMessages.fillAllFields);
                                 return;
                               }
 
@@ -458,7 +459,7 @@ class BillsScreen extends ConsumerWidget {
                               );
 
                               Navigator.pop(context);
-                              SnackbarService.success('Bill added');
+                              SnackbarService.success(BuddyMessages.billAdded);
                             },
                             style: FilledButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 16),

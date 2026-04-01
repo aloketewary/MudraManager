@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
@@ -221,13 +222,13 @@ class _ApproveTransactionSheetState extends State<ApproveTransactionSheet> {
                   if (_selectedCategory != null && _selectedAccount != null) {
                     final amount = double.tryParse(_amountController.text);
                     if (amount == null || amount <= 0) {
-                      SnackbarService.warning('Enter valid amount');
+                      SnackbarService.warning(BuddyMessages.enterAmount);
                       return;
                     }
                     Navigator.pop(context);
                     widget.onApprove(_selectedAccount!, _selectedCategory!, _selectedDate, amount);
                   } else {
-                    SnackbarService.warning('Select Account & Category');
+                    SnackbarService.warning(BuddyMessages.selectAccountAndCategory);
                   }
                 }
               },

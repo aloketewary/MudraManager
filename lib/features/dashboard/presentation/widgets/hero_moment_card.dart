@@ -151,7 +151,7 @@ final heroMomentProvider = Provider<HeroMoment?>((ref) {
     return const HeroMoment(
       icon: LucideIcons.sparkles,
       message: 'Zero spent today — your wallet thanks you ✨',
-      accentColor: Color(0xFF2196F3),
+      accentColor: const Color(0xFF2196F3),
     );
   }
 
@@ -172,7 +172,7 @@ final heroMomentProvider = Provider<HeroMoment?>((ref) {
     return const HeroMoment(
       icon: LucideIcons.shieldCheck,
       message: 'Your data never leaves this device — 100% offline, 100% yours',
-      accentColor: Color(0xFF009688),
+      accentColor: const Color(0xFF009688),
     );
   }
 

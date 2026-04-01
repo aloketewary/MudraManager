@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -47,7 +48,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
       );
       SnackbarService.success('Recap PDF saved');
     } catch (e) {
-      SnackbarService.error('Failed to generate PDF: $e');
+      SnackbarService.error(BuddyMessages.exportFailed('$e'));
     } finally {
       if (mounted) setState(() => _downloading = false);
     }
@@ -159,7 +160,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
                         _summaryTile(
                           'Income',
                           data.totalIncome,
-                          const Color(0xFF10B981),
+                          color.primary,
                           color,
                           textTheme,
                           spacing,
@@ -287,7 +288,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
                         color,
                         textTheme,
                         spacing,
-                        accent: const Color(0xFF10B981),
+                        accent: color.primary,
                       ),
                       SizedBox(height: spacing.sectionGap),
                     ],
@@ -348,7 +349,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
                       const SizedBox(height: 10),
                       _buildTopTransactions(
                         data.topIncomeTransactions,
-                        const Color(0xFF10B981),
+                        color.primary,
                         color,
                         textTheme,
                         spacing,
@@ -455,7 +456,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
               data.totalIncome,
               data.prevMonthIncome,
               data.incomeChange,
-              const Color(0xFF10B981),
+              color.primary,
               textTheme,
               color,
             ),
@@ -502,7 +503,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
     // For expense, up is bad; for income/savings, up is good
     final isExpenseLabel = label == 'Expense';
     final changeColor = (isUp && !isExpenseLabel) || (!isUp && isExpenseLabel)
-        ? const Color(0xFF10B981)
+        ? color.primary
         : color.error;
     return Expanded(
       child: Column(
@@ -629,7 +630,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
                   '${data.currentStreak} days',
                   color,
                   textTheme,
-                  accent: const Color(0xFFFF9800),
+                  accent: color.tertiary,
                 ),
                 SizedBox(width: spacing.elementGap),
                 _highlightChip(
@@ -638,7 +639,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
                   '${data.longestStreak} days',
                   color,
                   textTheme,
-                  accent: const Color(0xFFFF9800),
+                  accent: color.tertiary,
                 ),
               ],
             ),
@@ -1137,7 +1138,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
           final b = entry.value;
           final isLast = entry.key == data.budgetDetails.length - 1;
           final pct = b.percentage.clamp(0, 150);
-          final barColor = b.overBudget ? color.error : const Color(0xFF10B981);
+          final barColor = b.overBudget ? color.error : color.primary;
           return Column(
             children: [
               Padding(

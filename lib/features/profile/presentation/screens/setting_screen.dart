@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 // lib/features/profile/presentation/screens/setting_screen.dart
 
 import 'package:flutter/material.dart';
@@ -52,7 +53,7 @@ class _SecuritySettingsScreenState
     if (on) {
       final ok = await auth.authenticateBiometric();
       if (!ok) {
-        SnackbarService.error('Biometric authentication failed');
+        SnackbarService.error(BuddyMessages.biometricFailed);
         return;
       }
     }
@@ -71,12 +72,12 @@ class _SecuritySettingsScreenState
       );
       if (pin == null || pin.length < 4) return;
       await auth.setPin(pin);
-      SnackbarService.success('PIN enabled');
+      SnackbarService.success(BuddyMessages.toggledOn('PIN'));
     } else {
       await auth.clearPin();
       await auth.setBiometricEnabled(false);
       setState(() => _bioEnabled = false);
-      SnackbarService.success('PIN disabled');
+      SnackbarService.success(BuddyMessages.toggledOff('PIN'));
     }
     setState(() => _pinEnabled = on);
   }
@@ -92,7 +93,7 @@ class _SecuritySettingsScreenState
     );
     if (current == null) return;
     if (!await auth.validatePin(current)) {
-      SnackbarService.error('Incorrect PIN');
+      SnackbarService.error(BuddyMessages.incorrectPin);
       return;
     }
 
@@ -106,7 +107,7 @@ class _SecuritySettingsScreenState
     if (newPin == null || newPin.length < 4) return;
 
     await auth.setPin(newPin);
-    SnackbarService.success('PIN changed');
+    SnackbarService.success(BuddyMessages.settingsSaved);
   }
 
   int get _securityScore {
@@ -132,9 +133,9 @@ class _SecuritySettingsScreenState
       case 0:
         return color.error;
       case 1:
-        return const Color(0xFFFF9800);
+        return color.tertiary;
       default:
-        return const Color(0xFF4CAF50);
+        return color.primary;
     }
   }
 

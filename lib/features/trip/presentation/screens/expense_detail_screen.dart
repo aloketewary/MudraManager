@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_boring_avatars/flutter_boring_avatars.dart';
@@ -72,8 +73,8 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
         final tripTxn = trip.transactions
             .where((t) => t.id == widget.expenseId)
             .firstOrNull;
-        final expense = tripTxn?.transaction.value;
-        if (tripTxn == null || expense == null) {
+        final resolvedAmount = tripTxn?.resolvedAmount;
+        if (tripTxn == null || resolvedAmount == null) {
           return Scaffold(
             appBar: AppBar(title: const Text('Not Found')),
             body: const Center(child: Text('Expense not found')),
@@ -83,9 +84,13 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
         _initializeData(tripTxn, trip);
 
         final amount =
-            GuestModeUtil.applyGuestMode(expense.amount, isGuestMode);
+            GuestModeUtil.applyGuestMode(resolvedAmount, isGuestMode);
         final paidBy = tripTxn.paidBy.value;
-        final category = expense.category.value?.name ?? 'Uncategorized';
+        final category = tripTxn.transaction.value?.category.value?.name
+            ?? tripTxn.splitExpense.value?.description
+            ?? 'Uncategorized';
+        final expenseDate = tripTxn.resolvedDate ?? DateTime.now();
+        final expenseDescription = tripTxn.resolvedDescription;
         final perPerson = _selectedParticipants.isNotEmpty
             ? amount / _selectedParticipants.length
             : 0.0;
@@ -131,7 +136,7 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
               _buildAmountHero(
                 amount,
                 category,
-                expense.date,
+                expenseDate,
                 spacing,
                 color,
                 textTheme,
@@ -140,7 +145,7 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
               // Info card
               _buildInfoCard(
                 paidBy: paidBy,
-                description: expense.description,
+                description: expenseDescription,
                 spacing: spacing,
                 color: color,
                 textTheme: textTheme,
@@ -504,7 +509,7 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
   // ─── SPLIT EDIT + ACTIONS ───
 
   void _editSplit(Trip trip, TripTransaction tripTxn) {
-    final amount = tripTxn.transaction.value?.amount ?? 0.0;
+    final amount = tripTxn.resolvedAmount ?? 0.0;
     final controllers = <int, TextEditingController>{};
     for (var p in _selectedParticipants) {
       controllers[p.id] = TextEditingController(
@@ -824,7 +829,7 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
         );
     ref.invalidate(tripByIdProvider(widget.tripId));
 
-    SnackbarService.success('Expense deleted');
+    SnackbarService.success(BuddyMessages.txnDeleted);
     if (mounted) context.pop();
   }
 }

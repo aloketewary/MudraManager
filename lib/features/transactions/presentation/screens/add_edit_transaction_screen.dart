@@ -22,6 +22,7 @@ import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/services/notification_service.dart';
 import 'package:mudra_manager/core/services/widget_service.dart';
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/core/utils/icon_helper.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/account/data/account_access_provider.dart';
@@ -92,6 +93,10 @@ class _AddEditTransactionScreenState
   final _categoryScrollController = ScrollController();
   final _subcategoryScrollController = ScrollController();
   bool _smartDefaultsApplied = false;
+  bool _accountScrolled = false;
+  bool _categoryScrolled = false;
+  static final _notificationsPlugin = FlutterLocalNotificationsPlugin();
+  ProviderSubscription? _tripSubscription;
 
   @override
   void initState() {
@@ -108,13 +113,75 @@ class _AddEditTransactionScreenState
     _selectedCategory = widget.transaction?.category.value;
     _isExpense = widget.transaction?.isExpense ?? !widget.initialIsIncome;
 
-    selectedTags.addAll(widget.transaction?.tags.toList() ?? []);
-
+    if (widget.transaction != null) {
+      _loadEditTags();
+    }
     if (widget.smsActivity != null && _selectedAccount == null) {
       _matchSmsAccount();
     }
+    if (widget.smsActivity != null && !_isEditing) {
+      final sms = widget.smsActivity!;
+      if (sms.amount != null && _amountController.text.isEmpty) {
+        _amountController.text = sms.amount!.toStringAsFixed(2);
+      }
+      if (sms.isIncome != null) _isExpense = !sms.isIncome!;
+      final smsDate = sms.date;
+      final now = DateTime.now();
+      _selectedDate = smsDate.isAfter(now) ? now : smsDate;
+      if (sms.body.isNotEmpty && _descController.text.isEmpty) {
+        _descController.text = sms.body;
+      }
+    }
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!_isEditing) _amountFocus.requestFocus();
+      if (!_isEditing) {
+        _amountFocus.requestFocus();
+        if (widget.smsActivity == null) {
+          _applySmartDefaults();
+        }
+      }
+    });
+    // In initState:
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _tripSubscription = ref.listenManual(allTripsProvider, (_, next) {
+        next.whenData((trips) {
+          if (_tripManuallyCleared || _selectedTrip != null) return;
+          final activeTrip = trips.where((t) => t.isActive && t.isTrip).firstOrNull;
+          if (activeTrip != null && mounted) {
+            setState(() {
+              _selectedTrip = activeTrip;
+              _selectedParticipants = activeTrip.participants.toList();
+              _paidBy = activeTrip.participants.firstOrNull;
+            });
+          }
+        });
+      });
+    });
+  }
+
+  Future<void> _applySmartDefaults() async {
+    if (_smartDefaultsApplied || !mounted) return;
+    final d = await ref.read(smartDefaultsProvider(_isExpense).future);
+    if (!mounted) return;
+    _smartDefaultsApplied = true;
+    setState(() {
+      if (d.suggestedAccount != null && _selectedAccount == null) {
+        _selectedAccount = d.suggestedAccount;
+      }
+      if (d.suggestedCategory != null && _selectedCategory == null) {
+        _selectedCategory = d.suggestedCategory;
+      }
+    });
+  }
+
+  Future<void> _loadEditTags() async {
+    final isar = await ref.read(isarServiceProvider).getInstance();
+    final txn = await isar.transactions.get(widget.transaction!.id);
+    if (txn == null || !mounted) return;
+    await txn.tags.load();
+    setState(() {
+      selectedTags.addAll(txn.tags.toList());
     });
   }
 
@@ -144,7 +211,9 @@ class _AddEditTransactionScreenState
   }
 
   @override
+  @override
   void dispose() {
+    _tripSubscription?.close();
     _amountController.dispose();
     _descController.dispose();
     _amountFocus.dispose();
@@ -203,45 +272,6 @@ class _AddEditTransactionScreenState
     final ctxt = AppLocalizations.of(context)!;
     final spacing = ref.watch(spacingProvider);
 
-    // Auto-load active trip
-    ref.listen(allTripsProvider, (previous, next) {
-      next.whenData((trips) {
-        if (_tripManuallyCleared || _selectedTrip != null) return;
-        final activeTrip = trips.where((t) => t.isActive).firstOrNull;
-        if (activeTrip != null) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              setState(() {
-                _selectedTrip = activeTrip;
-                _selectedParticipants = activeTrip.participants.toList();
-                _paidBy = activeTrip.participants.firstOrNull;
-              });
-            }
-          });
-        }
-      });
-    });
-
-    // Auto-apply smart defaults (once) for new transactions
-    if (!_isEditing && widget.smsActivity == null && !_smartDefaultsApplied) {
-      final defaultsAsync = ref.watch(smartDefaultsProvider(_isExpense));
-      defaultsAsync.whenData((d) {
-        if (_smartDefaultsApplied) return;
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (!mounted || _smartDefaultsApplied) return;
-          _smartDefaultsApplied = true;
-          setState(() {
-            if (d.suggestedAccount != null && _selectedAccount == null) {
-              _selectedAccount = d.suggestedAccount;
-            }
-            if (d.suggestedCategory != null && _selectedCategory == null) {
-              _selectedCategory = d.suggestedCategory;
-            }
-          });
-        });
-      });
-    }
-
     final accentColor = _isExpense ? color.error : color.primary;
 
     return Scaffold(
@@ -256,7 +286,9 @@ class _AddEditTransactionScreenState
           },
         ),
         title: Text(
-          _isExpense ? 'Add Expense' : 'Add Income',
+          _isEditing
+              ? 'Edit Transaction'
+              : (_isExpense ? 'Add Expense' : 'Add Income'),
           style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
       ),
@@ -526,7 +558,6 @@ class _AddEditTransactionScreenState
                               ),
                             ),
                           ),
-                          onChanged: (_) => setState(() {}),
                         ),
                         // Quick amounts
                         Padding(
@@ -679,7 +710,8 @@ class _AddEditTransactionScreenState
                                   .valueOrNull ??
                               {};
                           // Auto-scroll to selected account
-                          if (_selectedAccount != null) {
+                          if (_selectedAccount != null && !_accountScrolled) {
+                            _accountScrolled = true;
                             final idx = accounts.indexWhere(
                               (a) => a.id == _selectedAccount!.id,
                             );
@@ -982,7 +1014,8 @@ class _AddEditTransactionScreenState
                               : <Category>[];
 
                           // Auto-scroll parent row
-                          if (_selectedCategory != null) {
+                          if (_selectedCategory != null && !_categoryScrolled) {
+                            _categoryScrolled = true;
                             final parentId =
                                 _selectedCategory!.parentCategory.value?.id ??
                                     _selectedCategory!.id;
@@ -1397,11 +1430,12 @@ class _AddEditTransactionScreenState
                   ),
                   SizedBox(height: spacing.sectionGap),
 
-                  // ── Date & Note row ──
+                  // ── Date & Time row ──
                   Row(
                     children: [
                       // Date chip
                       Expanded(
+                        flex: 3,
                         child: InkWell(
                           onTap: () async {
                             final now = DateTime.now();
@@ -1416,25 +1450,15 @@ class _AddEditTransactionScreenState
                             );
                             if (pick != null) {
                               HapticFeedback.lightImpact();
-                              // Preserve current time for today, use noon for past dates
-                              final withTime = DateUtils.isSameDay(pick, now)
-                                  ? DateTime(
-                                      pick.year,
-                                      pick.month,
-                                      pick.day,
-                                      now.hour,
-                                      now.minute,
-                                      now.second,
-                                    )
-                                  : DateTime(
-                                      pick.year,
-                                      pick.month,
-                                      pick.day,
-                                      12,
-                                      0,
-                                      0,
-                                    );
-                              setState(() => _selectedDate = withTime);
+                              setState(() {
+                                _selectedDate = DateTime(
+                                  pick.year,
+                                  pick.month,
+                                  pick.day,
+                                  _selectedDate.hour,
+                                  _selectedDate.minute,
+                                );
+                              });
                             }
                           },
                           borderRadius:
@@ -1465,12 +1489,69 @@ class _AddEditTransactionScreenState
                                   child: Text(
                                     DateFormat('MMM dd, yyyy')
                                         .format(_selectedDate),
-                                    style: textTheme.bodyMedium?.copyWith(
-                                      fontWeight: FontWeight.w500,
-                                    ),
+                                    style: textTheme.bodyMedium
+                                        ?.copyWith(fontWeight: FontWeight.w500),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: spacing.elementGap),
+                      // Time chip
+                      Expanded(
+                        flex: 2,
+                        child: InkWell(
+                          onTap: () async {
+                            final picked = await showTimePicker(
+                              context: context,
+                              initialTime:
+                                  TimeOfDay.fromDateTime(_selectedDate),
+                            );
+                            if (picked != null) {
+                              HapticFeedback.lightImpact();
+                              setState(() {
+                                _selectedDate = DateTime(
+                                  _selectedDate.year,
+                                  _selectedDate.month,
+                                  _selectedDate.day,
+                                  picked.hour,
+                                  picked.minute,
+                                );
+                              });
+                            }
+                          },
+                          borderRadius:
+                              BorderRadius.circular(spacing.radiusMedium),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 14,
+                            ),
+                            decoration: BoxDecoration(
+                              color: color.surfaceContainerHighest,
+                              borderRadius:
+                                  BorderRadius.circular(spacing.radiusMedium),
+                              border: Border.all(
+                                color:
+                                    color.outlineVariant.withValues(alpha: 0.2),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  LucideIcons.clock,
+                                  size: 16,
+                                  color: color.onSurfaceVariant,
+                                ),
+                                const SizedBox(width: 10),
+                                Text(
+                                  DateFormat('hh:mm a').format(_selectedDate),
+                                  style: textTheme.bodyMedium
+                                      ?.copyWith(fontWeight: FontWeight.w500),
                                 ),
                               ],
                             ),
@@ -1607,31 +1688,28 @@ class _AddEditTransactionScreenState
   }
 
   Future<void> _saveTransaction() async {
-    final ctxt = AppLocalizations.of(context)!;
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     if (_amountController.text.isEmpty ||
         double.tryParse(_amountController.text) == null) {
-      SnackbarService.error(ctxt.transaction_enterValidAmountError);
+      SnackbarService.error(BuddyMessages.invalidAmount);
       return;
     }
     if (_selectedAccount == null) {
-      SnackbarService.error(ctxt.transaction_selectOneAccountErrorText);
+      SnackbarService.error(BuddyMessages.pickAccount);
       return;
     }
 
     final unlocked =
         await ref.read(isAccountUnlockedProvider(_selectedAccount!.id).future);
     if (!unlocked) {
-      SnackbarService.error(
-        'This account is locked. Upgrade to Pro to use it.',
-      );
+      SnackbarService.error(BuddyMessages.accountLocked);
       setState(() => _saving = false);
       return;
     }
 
     if (_selectedCategory == null) {
-      SnackbarService.error(ctxt.transaction_selectOneCategoryErrorText);
+      SnackbarService.error(BuddyMessages.pickCategory);
       return;
     }
 
@@ -1645,13 +1723,12 @@ class _AddEditTransactionScreenState
         description: _descController.text,
       );
 
-      if (widget.transaction?.id != null) {
+      if (_isEditing && widget.transaction!.id != Isar.autoIncrement) {
         txn.id = widget.transaction!.id;
       }
 
       txn.account.value = _selectedAccount;
       txn.category.value = _selectedCategory;
-      txn.tags.clear();
       txn.tags.addAll(selectedTags);
 
       await ref.read(transactionProvider).addTransaction(txn);
@@ -1719,8 +1796,8 @@ class _AddEditTransactionScreenState
         context.pop(true);
         SnackbarService.success(
           widget.transaction == null
-              ? 'Transaction added successfully'
-              : 'Transaction updated successfully',
+              ? BuddyMessages.txnAdded
+              : BuddyMessages.txnUpdated,
         );
       }
     } finally {
@@ -1779,7 +1856,8 @@ class _AddEditTransactionScreenState
                       await isar.tags.put(tag);
                     });
                     if (mounted) {
-                      sheetContext?.pop();
+                      setState(() => selectedTags.add(tag));
+                      sheetContext.pop();
                       ref.invalidate(tagListProvider);
                     }
                   }
@@ -2149,8 +2227,9 @@ class _AddEditTransactionScreenState
   void _showTripSelector() {
     final tripsAsync = ref.read(allTripsProvider);
 
-    tripsAsync.whenData((trips) {
+    tripsAsync.whenData((allTrips) {
       if (!mounted) return;
+      final trips = allTrips.where((t) => t.isTrip).toList();
 
       showModalBottomSheet(
         context: context,
@@ -2189,7 +2268,9 @@ class _AddEditTransactionScreenState
                     trip.isActive ? Icons.luggage : Icons.luggage_outlined,
                   ),
                   title: Text(trip.name),
-                  subtitle: trip.isActive ? const Text('Active') : null,
+                  subtitle: Text(
+                    trip.isActive ? 'Active' : 'Inactive',
+                  ),
                   selected: _selectedTrip?.id == trip.id,
                   onTap: () {
                     setState(() {
@@ -2236,11 +2317,9 @@ class _AddEditTransactionScreenState
 
   Future<void> _checkBudgetAlerts(Transaction txn) async {
     if (!txn.isExpense || txn.isTransfer) return;
-
-    final notificationsPlugin = FlutterLocalNotificationsPlugin();
     final alertService = BudgetAlertService(
       ref.read(isarServiceProvider),
-      notificationsPlugin,
+      _notificationsPlugin,
     );
 
     final alerts = await alertService.checkBudgetsAfterTransaction(txn);

@@ -63,7 +63,12 @@ class TripsScreen extends ConsumerWidget {
     final today = DateTime(now.year, now.month, now.day);
 
     // Check for active trip
-    final activeTrip = trips.where((t) => t.isActive).firstOrNull;
+    final activeTrip = trips.where((t) {
+      if (!t.isActive) return false;
+      final start =
+          DateTime(t.startDate.year, t.startDate.month, t.startDate.day);
+      return !today.isBefore(start); // today >= startDate
+    }).firstOrNull;
     if (activeTrip != null) {
       final daysLeft = activeTrip.endDate.difference(today).inDays;
       if (daysLeft >= 0) {
@@ -150,286 +155,277 @@ class TripsScreen extends ConsumerWidget {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    return Scaffold(
-      body: tripsAsync.when(
-        data: (trips) {
-          final activeTrip = trips.where((t) => t.isActive).firstOrNull;
-          final archivedTrips = trips.where((t) => !t.isActive).toList();
-          final insight = _getHeaderInsight(trips, color);
-          final hasInsight = trips.isNotEmpty;
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        body: tripsAsync.when(
+          data: (allItems) {
+            final trips = allItems.where((t) => t.isTrip).toList();
+            final splits = allItems.where((t) => !t.isTrip).toList();
+            final insight = _getHeaderInsight(trips, color);
 
-          if (trips.isEmpty) {
-            return RefreshIndicator(
-              onRefresh: () => RefreshHelper.withMinDuration(() async {
-                ref.invalidate(allTripsProvider);
-              }),
-              child: CustomScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                slivers: [
-                  _buildAppBar(
-                    context,
-                    textTheme,
-                    color,
-                    null,
-                    showInfo: true,
-                  ),
-                  SliverFillRemaining(
-                    child: Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(spacing.cardHorizontalMax),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(32),
-                              decoration: BoxDecoration(
-                                color: color.surfaceContainerHighest,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                LucideIcons.plane,
-                                size: 64,
-                                color: color.onSurfaceVariant
-                                    .withValues(alpha: 0.5),
-                              ),
-                            ),
-                            const SizedBox(height: 24),
-                            Text(
-                              'No trips yet',
-                              style: textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Create your first trip to split expenses',
-                              style: textTheme.bodyMedium?.copyWith(
-                                color: color.onSurfaceVariant,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 24),
-                            FilledButton.icon(
-                              onPressed: () {
-                                HapticFeedback.mediumImpact();
-                                context.push(AppRoutes.createTrip);
-                              },
-                              icon: const Icon(LucideIcons.plus),
-                              label: const Text('Create Trip'),
-                              style: FilledButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 24,
-                                  vertical: 12,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: SizedBox(
-                      height: MediaQuery.of(context).padding.bottom +
-                          kBottomNavigationBarHeight +
-                          16,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          return RefreshIndicator(
-            onRefresh: () => RefreshHelper.withMinDuration(() async {
-              ref.invalidate(allTripsProvider);
-            }),
-            child: CustomScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              slivers: [
+            return NestedScrollView(
+              headerSliverBuilder: (context, innerBoxIsScrolled) => [
                 _buildAppBar(
                   context,
                   textTheme,
                   color,
-                  hasInsight ? insight : null,
+                  allItems.isNotEmpty ? insight : null,
                   showInfo: true,
                 ),
-                if (activeTrip != null) ...[
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: EdgeInsets.fromLTRB(
-                        spacing.cardHorizontal,
-                        spacing.sectionGap,
-                        spacing.cardHorizontal,
-                        spacing.elementGap,
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 8,
-                            height: 8,
-                            decoration: BoxDecoration(
-                              color: color.primary,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'ACTIVE TRIP',
-                            style: textTheme.labelMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: color.primary,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ],
-                      ),
+                SliverPersistentHeader(
+                  pinned: true,
+                  delegate: _TabBarDelegate(
+                    TabBar(
+                      tabs: [
+                        Tab(text: 'Trips (${trips.length})'),
+                        Tab(text: 'Splits (${splits.length})'),
+                      ],
                     ),
+                    color.surface,
                   ),
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: spacing.cardHorizontal,
-                        vertical: spacing.cardVertical,
-                      ),
-                      child: _buildTripCard(
-                        context,
-                        ref,
-                        activeTrip,
-                        color,
-                        textTheme,
-                        spacing,
-                        isActive: true,
-                      ),
-                    ),
-                  ),
-                ],
-                if (archivedTrips.isNotEmpty) ...[
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: spacing.cardHorizontal,
-                        vertical: spacing.cardVertical,
-                      ),
-                      child: Text(
-                        'TRIP ARCHIVE',
-                        style: textTheme.labelMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: color.onSurfaceVariant,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ),
-                  ),
-                  SliverPadding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: spacing.cardHorizontal,
-                    ),
-                    sliver: SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) => Padding(
-                          padding: EdgeInsets.only(
-                            bottom: spacing.cardVertical,
-                          ),
-                          child: _buildTripCard(
-                            context,
-                            ref,
-                            archivedTrips[index],
-                            color,
-                            textTheme,
-                            spacing,
-                          ),
-                        ),
-                        childCount: archivedTrips.length,
-                      ),
-                    ),
-                  ),
-                ],
-                const SliverToBoxAdapter(child: SizedBox(height: 100)),
+                ),
               ],
-            ),
-          );
-        },
-        loading: () => CustomScrollView(
-          slivers: [
-            _buildLoadingAppBar(context, textTheme, color, spacing),
-            SliverPadding(
-              padding: EdgeInsets.all(spacing.cardHorizontalMax),
-              sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) => Padding(
-                    padding: EdgeInsets.only(bottom: spacing.cardVertical),
-                    child: Card(
-                      color: color.surfaceContainerHighest,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Row(
-                          children: [
-                            SkeletonLoader(
-                              width: 48,
-                              height: 48,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            const SizedBox(width: 16),
-                            const Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  SkeletonLoader(
-                                      width: double.infinity, height: 16),
-                                  SizedBox(height: 8),
-                                  SkeletonLoader(width: 150, height: 12),
-                                ],
+              body: TabBarView(
+                children: [
+                  _buildListView(
+                    context,
+                    ref,
+                    trips,
+                    spacing,
+                    color,
+                    textTheme,
+                    isTrip: true,
+                  ),
+                  _buildListView(
+                    context,
+                    ref,
+                    splits,
+                    spacing,
+                    color,
+                    textTheme,
+                    isTrip: false,
+                  ),
+                ],
+              ),
+            );
+          },
+          loading: () => CustomScrollView(
+            slivers: [
+              _buildLoadingAppBar(context, textTheme, color, spacing),
+              SliverPadding(
+                padding: EdgeInsets.all(spacing.cardHorizontalMax),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) => Padding(
+                      padding: EdgeInsets.only(bottom: spacing.cardVertical),
+                      child: Card(
+                        color: color.surfaceContainerHighest,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Row(
+                            children: [
+                              SkeletonLoader(
+                                width: 48,
+                                height: 48,
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                            ),
-                            const SizedBox(width: 12),
-                            const SkeletonLoader(width: 70, height: 24),
-                          ],
+                              const SizedBox(width: 16),
+                              const Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    SkeletonLoader(
+                                      width: double.infinity,
+                                      height: 16,
+                                    ),
+                                    SizedBox(height: 8),
+                                    SkeletonLoader(width: 150, height: 12),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              const SkeletonLoader(width: 70, height: 24),
+                            ],
+                          ),
                         ),
                       ),
                     ),
+                    childCount: 4,
                   ),
-                  childCount: 4,
                 ),
               ),
+            ],
+          ),
+          error: (e, _) => Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(32),
+                  decoration: BoxDecoration(
+                    color: color.errorContainer,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    LucideIcons.circleAlert,
+                    size: 64,
+                    color: color.error,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'Error loading trips',
+                  style: textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '$e',
+                  style: textTheme.bodySmall?.copyWith(
+                    color: color.onSurfaceVariant,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
-          ],
+          ),
         ),
-        error: (e, _) => Center(
+      ),
+    );
+  }
+
+  Widget _buildListView(
+    BuildContext context,
+    WidgetRef ref,
+    List<Trip> items,
+    AppSpacing spacing,
+    ColorScheme color,
+    TextTheme textTheme, {
+    required bool isTrip,
+  }) {
+    if (items.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: EdgeInsets.all(spacing.cardHorizontalMax),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
                 padding: const EdgeInsets.all(32),
                 decoration: BoxDecoration(
-                  color: color.errorContainer,
+                  color: color.surfaceContainerHighest,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  LucideIcons.circleAlert,
+                  isTrip ? LucideIcons.plane : LucideIcons.split,
                   size: 64,
-                  color: color.error,
+                  color: color.onSurfaceVariant.withValues(alpha: 0.5),
                 ),
               ),
               const SizedBox(height: 24),
               Text(
-                'Error loading trips',
-                style: textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                isTrip ? 'No trips yet' : 'No split groups yet',
+                style:
+                    textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(
-                '$e',
-                style: textTheme.bodySmall?.copyWith(
-                  color: color.onSurfaceVariant,
-                ),
+                isTrip
+                    ? 'Create a trip to track travel expenses'
+                    : 'Split bills with friends without a trip',
+                style: textTheme.bodyMedium
+                    ?.copyWith(color: color.onSurfaceVariant),
                 textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              FilledButton.icon(
+                onPressed: () {
+                  HapticFeedback.mediumImpact();
+                  context.push(AppRoutes.createTrip, extra: {'isTrip': isTrip});
+                },
+                icon: const Icon(LucideIcons.plus),
+                label: Text(isTrip ? 'Create Trip' : 'Create Split Group'),
               ),
             ],
           ),
         ),
+      );
+    }
+
+    final active = items.where((t) => t.isActive).toList();
+    final archived = items.where((t) => !t.isActive).toList();
+
+    return ListView(
+      padding: EdgeInsets.symmetric(
+        horizontal: spacing.cardHorizontal,
+        vertical: spacing.cardVertical,
       ),
+      children: [
+        if (active.isNotEmpty) ...[
+          _buildTypeHeader(
+            isTrip ? 'ACTIVE' : 'ONGOING',
+            isTrip ? LucideIcons.plane : LucideIcons.split,
+            color.primary,
+            textTheme,
+          ),
+          SizedBox(height: spacing.elementGap),
+          ...active.map(
+            (t) => Padding(
+              padding: EdgeInsets.only(bottom: spacing.cardVertical),
+              child: _buildTripCard(
+                context,
+                ref,
+                t,
+                color,
+                textTheme,
+                spacing,
+                isActive: true,
+              ),
+            ),
+          ),
+          SizedBox(height: spacing.sectionGap),
+        ],
+        if (archived.isNotEmpty) ...[
+          _buildTypeHeader(
+            'ARCHIVE',
+            LucideIcons.archive,
+            color.onSurfaceVariant,
+            textTheme,
+          ),
+          SizedBox(height: spacing.elementGap),
+          ...archived.map(
+            (t) => Padding(
+              padding: EdgeInsets.only(bottom: spacing.cardVertical),
+              child: _buildTripCard(context, ref, t, color, textTheme, spacing),
+            ),
+          ),
+        ],
+        const SizedBox(height: 100),
+      ],
+    );
+  }
+
+  Widget _buildTypeHeader(
+    String label,
+    IconData icon,
+    Color iconColor,
+    TextTheme textTheme,
+  ) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: iconColor),
+        const SizedBox(width: 8),
+        Text(
+          label,
+          style: textTheme.labelMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: iconColor,
+            letterSpacing: 1.2,
+          ),
+        ),
+      ],
     );
   }
 
@@ -451,10 +447,13 @@ class TripsScreen extends ConsumerWidget {
         IconButton(
           onPressed: () {
             HapticFeedback.mediumImpact();
-            context.push(AppRoutes.createTrip);
+            // Use the current tab index to decide
+            final tabIndex = DefaultTabController.of(context).index;
+            context
+                .push(AppRoutes.createTrip, extra: {'isTrip': tabIndex == 0});
           },
           icon: const Icon(LucideIcons.plus),
-          tooltip: 'New Trip',
+          tooltip: 'New',
         ),
         if (showInfo)
           IconButton(
@@ -466,6 +465,12 @@ class TripsScreen extends ConsumerWidget {
             tooltip: 'Info',
           ),
       ],
+      title: Text(
+        'Trips & Split',
+        style: textTheme.titleLarge?.copyWith(
+          fontWeight: FontWeight.bold,
+        ),
+      ),
       flexibleSpace: LayoutBuilder(
         builder: (context, constraints) {
           final expandRatio = (constraints.maxHeight - kToolbarHeight) /
@@ -473,19 +478,6 @@ class TripsScreen extends ConsumerWidget {
           return FlexibleSpaceBar(
             titlePadding: EdgeInsets.zero,
             centerTitle: false,
-            title: Opacity(
-              opacity: 1 - expandRatio.clamp(0.0, 1.0),
-              child: Container(
-                alignment: Alignment.centerLeft,
-                padding: const EdgeInsets.only(left: 16, bottom: 16),
-                child: Text(
-                  'Trips & Split',
-                  style: textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
             background: hasInsight
                 ? Container(
                     decoration: BoxDecoration(
@@ -660,6 +652,7 @@ class TripsScreen extends ConsumerWidget {
     final status = _getTripStatus(trip.startDate, trip.endDate, trip.isActive);
     final statusColor = _getStatusColor(status, color);
     final statusIcon = _getStatusIcon(status);
+    final isSplit = !trip.isTrip;
 
     return Card(
       elevation: 0,
@@ -712,6 +705,24 @@ class TripsScreen extends ConsumerWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
+                    if (isSplit)
+                      Row(
+                        children: [
+                          Icon(
+                            LucideIcons.users,
+                            size: 14,
+                            color: color.onSurfaceVariant,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${trip.participants.length} participants',
+                            style: textTheme.bodySmall?.copyWith(
+                              color: color.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      )
+                    else
                     Row(
                       children: [
                         Icon(
@@ -783,7 +794,10 @@ class TripsScreen extends ConsumerWidget {
   }
 
   void _showInfoSheet(
-      BuildContext context, ColorScheme color, TextTheme textTheme) {
+    BuildContext context,
+    ColorScheme color,
+    TextTheme textTheme,
+  ) {
     showModalBottomSheet(
       context: context,
       backgroundColor: color.surface,
@@ -847,4 +861,25 @@ class TripsScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+class _TabBarDelegate extends SliverPersistentHeaderDelegate {
+  final TabBar tabBar;
+  final Color backgroundColor;
+
+  _TabBarDelegate(this.tabBar, this.backgroundColor);
+
+  @override
+  double get minExtent => tabBar.preferredSize.height;
+  @override
+  double get maxExtent => tabBar.preferredSize.height;
+
+  @override
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Container(color: backgroundColor, child: tabBar);
+  }
+
+  @override
+  bool shouldRebuild(_TabBarDelegate oldDelegate) => false;
 }

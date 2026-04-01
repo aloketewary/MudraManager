@@ -129,7 +129,7 @@ class BalanceHistoryScreen extends ConsumerWidget {
   ) {
     final isPositive = change >= 0;
     final changeColor =
-        isPositive ? const Color(0xFF4CAF50) : const Color(0xFFF44336);
+        isPositive ? color.primary : color.error;
 
     return Container(
       width: double.infinity,
@@ -249,7 +249,7 @@ class BalanceHistoryScreen extends ConsumerWidget {
             'Highest',
             GuestModeUtil.applyGuestMode(highest, isGuestMode),
             LucideIcons.arrowUp,
-            const Color(0xFF4CAF50),
+            color.primary,
             color,
             textTheme,
           ),
@@ -260,7 +260,7 @@ class BalanceHistoryScreen extends ConsumerWidget {
             'Lowest',
             GuestModeUtil.applyGuestMode(lowest, isGuestMode),
             LucideIcons.arrowDown,
-            const Color(0xFFF44336),
+            color.error,
             color,
             textTheme,
           ),
@@ -271,7 +271,7 @@ class BalanceHistoryScreen extends ConsumerWidget {
             'Average',
             GuestModeUtil.applyGuestMode(avg, isGuestMode),
             LucideIcons.minus,
-            const Color(0xFF2196F3),
+            color.secondary,
             color,
             textTheme,
           ),

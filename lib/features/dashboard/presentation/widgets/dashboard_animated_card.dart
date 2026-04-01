@@ -116,13 +116,6 @@ class _AnimatedAccountCard extends State<AnimatedAccountCard> {
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: widget.accentColor.withValues(alpha: 0.4),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
       ),
       child: Stack(
         children: [

@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mudra_manager/core/entitlement/billing_provider.dart';
+import 'package:mudra_manager/core/entitlement/entitlement_provider.dart';
 import 'package:mudra_manager/core/entitlement/entitlement_service.dart';
 import 'package:mudra_manager/core/services/plugin_service.dart';
 import 'package:flutter/material.dart';
@@ -18,63 +20,17 @@ import 'package:mudra_manager/core/services/notification_service.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/theme/app_theme.dart';
 import 'package:mudra_manager/core/theme/theme_provider.dart';
+import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/utils/error_handler.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
 import 'package:mudra_manager/features/marketplace/services/marketplace_service.dart';
-import 'package:mudra_manager/features/sms/data/sms_processor_service.dart';
+import 'package:mudra_manager/features/sms/data/notification_listener_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:another_telephony/telephony.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:responsive_framework/responsive_framework.dart';
-
-export 'main.dart' show setupSmsListener;
-
-final Telephony telephony = Telephony.instance;
-
-// IMPORTANT: This must be a top-level function
-@pragma('vm:entry-point')
-void backgroundMessageHandler(SmsMessage message) async {
-  try {
-    final log = AppLog(getLogger(), 'SMS-BG');
-
-    // Check if message has required data
-    if (message.body == null || message.address == null) {
-      log.w('Background SMS received with null data, skipping');
-      return;
-    }
-
-    log.i('Background SMS received from: ${message.address}');
-
-    // Ensure SharedPreferences is initialized
-    try {
-      SharedPrefsUtil.instance.getSmsImportEnabled();
-    } catch (e) {
-      // Not initialized, initialize it
-      final sharedPrefs = await SharedPreferences.getInstance();
-      SharedPrefsUtil.init(sharedPrefs);
-    }
-
-    // Check if SMS import is enabled
-    if (!SharedPrefsUtil.instance.getSmsImportEnabled()) {
-      log.i('SMS import disabled, skipping background processing');
-      return;
-    }
-
-    // Process the SMS
-    await SmsProcessorService.instance.parseAndSaveTransaction(
-      body: message.body!,
-      address: message.address!,
-      sender: message.address,
-      timestamp: message.date ?? DateTime.now().millisecondsSinceEpoch,
-    );
-  } catch (e, stackTrace) {
-    // Silent fail - don't crash the app
-    final log = AppLog(getLogger(), 'SMS-BG');
-    log.e('Error processing background SMS', e, stackTrace);
-  }
-}
 
 void main() async {
   final log = AppLog(getLogger(), 'Main');
@@ -85,8 +41,11 @@ void main() async {
   ]);
   final sharedPrefs = await SharedPreferences.getInstance();
   SharedPrefsUtil.init(sharedPrefs);
-  sharedPrefs.remove('has_seen_swipe_peek');
-  debugPrint('🔍 PEEK: cleared has_seen_swipe_peek');
+  NotificationListenerBridge.instance.initialize();
+  if (kDebugMode) {
+    sharedPrefs.remove('has_seen_swipe_peek');
+    debugPrint('🔍 PEEK: cleared has_seen_swipe_peek');
+  }
 
   log.i('App starting...');
 
@@ -98,9 +57,6 @@ void main() async {
 
   final completed = SharedPrefsUtil.instance.isOnboardingComplete();
 
-  // Setup SMS listener AFTER SharedPreferences is initialized
-  await setupSmsListener();
-
   final container = ProviderContainer();
   // Move heavy operations to background
   _initializeBackgroundServices(container);
@@ -111,6 +67,14 @@ void main() async {
       child: MudraManagerApp(showOnboarding: !completed),
     ),
   );
+}
+
+void invalidateEntitlementsFromRef(Ref ref) {
+  ref.invalidate(isProProvider);
+  ref.invalidate(proPlanInfoProvider);
+  ref.invalidate(hasFullAccessProvider);
+  ref.invalidate(isInTrialProvider);
+  ref.invalidate(trialDaysRemainingProvider);
 }
 
 // Background initialization to prevent UI blocking
@@ -240,6 +204,9 @@ class _MudraManagerAppState extends ConsumerState<MudraManagerApp> {
 
   @override
   Widget build(BuildContext context) {
+    final activeTone = ref.watch(tonePackProvider);
+    Tone.sync(activeTone);
+
     final appThemeMode = ref.watch(themeModeProvider);
     final appTheme = AppTheme.instance;
     final appColorTheme = ref.watch(themeNotifierProvider);
@@ -310,53 +277,5 @@ class _MudraManagerAppState extends ConsumerState<MudraManagerApp> {
         );
       },
     );
-  }
-}
-
-Future<void> setupSmsListener() async {
-  final log = AppLog(getLogger(), 'SMS');
-
-  try {
-    if (!SharedPrefsUtil.instance.getSmsImportEnabled()) {
-      log.i('SMS import disabled');
-      return;
-    }
-
-    final telephony = Telephony.instance;
-
-    final bool? permissionsGranted = await telephony.requestSmsPermissions;
-
-    if (permissionsGranted == true) {
-      log.i('Setting up SMS listener...');
-
-      telephony.listenIncomingSms(
-        onNewMessage: (SmsMessage message) {
-          try {
-            // Fire-and-forget is acceptable here since we're in a listener callback,
-            // but we log errors properly now
-            SmsProcessorService.instance
-                .parseAndSaveTransaction(
-              body: message.body ?? '',
-              address: message.address ?? '',
-              sender: message.address ?? '',
-              timestamp: message.date ?? DateTime.now().millisecondsSinceEpoch,
-            )
-                .catchError((e, stackTrace) {
-              log.e('Error processing foreground SMS', e, stackTrace);
-            });
-          } catch (e, stackTrace) {
-            log.e('Error processing foreground SMS', e, stackTrace);
-          }
-        },
-        onBackgroundMessage: backgroundMessageHandler,
-        listenInBackground: true,
-      );
-
-      log.i('SMS listener setup complete');
-    } else {
-      log.w('SMS permissions not granted');
-    }
-  } catch (e, stackTrace) {
-    log.e('Error setting up SMS listener', e, stackTrace);
   }
 }

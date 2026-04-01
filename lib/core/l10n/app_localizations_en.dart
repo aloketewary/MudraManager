@@ -839,10 +839,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sms_clearAllTooltip => 'Clear All';
 
   @override
-  String get sms_importedFromSmsDescription => 'Imported from SMS';
+  String get sms_importedFromSmsDescription => 'Auto-imported';
 
   @override
-  String get sms_selectAtLeastOneMessage => 'Please select at least one SMS';
+  String get sms_selectAtLeastOneMessage =>
+      'Please select at least one transaction';
 
   @override
   String get dashboard_allTimeLabel => 'All Time';
@@ -889,4 +890,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get onboard_SecureAndPrivateDesc =>
       'Your data stays on your device. No cloud, no tracking — just encrypted local storage.';
+
+  @override
+  String get onboard_SmartAutoTracking => 'Smart Auto Tracking';
+
+  @override
+  String get onboard_SmartAutoTrackingDesc =>
+      'Automatically detect and import transactions from your bank notifications.';
 }

@@ -1,17 +1,14 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:isar_community/isar.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
-import 'package:mudra_manager/core/db/models/transaction.dart';
-import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
-import 'package:mudra_manager/core/utils/guest_mode_util.dart';
+import 'package:mudra_manager/core/utils/snackbar_service.dart';
+import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/account/data/reconciliation_service.dart';
-import 'package:mudra_manager/core/db/models/reconciliation_status.dart';
-import 'package:mudra_manager/features/account/presentation/screens/missing_transaction_screen.dart';
-import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
+import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 
 class ReconciliationScreen extends ConsumerStatefulWidget {
@@ -25,448 +22,276 @@ class ReconciliationScreen extends ConsumerStatefulWidget {
 }
 
 class _ReconciliationScreenState extends ConsumerState<ReconciliationScreen> {
-  late Future<List<Transaction>> _transactionsFuture;
+  final _balanceController = TextEditingController();
+  double? _calculatedBalance;
+  bool _saving = false;
 
   @override
   void initState() {
     super.initState();
-    _transactionsFuture = _fetchTransactions();
+    _loadCalculatedBalance();
   }
 
-  Future<List<Transaction>> _fetchTransactions() async {
-    final isar = await ref.read(isarServiceProvider).getInstance();
-    return isar.transactions
-        .filter()
-        .account((q) => q.idEqualTo(widget.account.id))
-        .sortByDateDesc()
-        .findAll();
-  }
-
-  void _loadTransactions() {
-    setState(() {
-      _transactionsFuture = _fetchTransactions();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final isGuestMode = ref.watch(guestModeProvider);
-    final spacing = ref.watch(spacingProvider);
-    final reconciliationService = ref.watch(reconciliationServiceProvider);
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Reconcile ${widget.account.name}'),
-        actions: [
-          IconButton(
-            onPressed: () async {
-              HapticFeedback.mediumImpact();
-              final result = await Navigator.push<bool>(
-                context,
-                MaterialPageRoute(
-                  builder: (_) =>
-                      MissingTransactionScreen(account: widget.account),
-                ),
-              );
-              if (result == true) _loadTransactions();
-            },
-            icon: const Icon(Icons.add),
-            tooltip: 'Missing Transaction',
-          ),
-        ],
-      ),
-      body: FutureBuilder<List<Transaction>>(
-        future: _transactionsFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No transactions to reconcile'));
-          }
-
-          final transactions = snapshot.data!;
-
-          return ListView.builder(
-            padding: EdgeInsets.fromLTRB(
-              spacing.cardHorizontal,
-              spacing.cardVertical,
-              spacing.cardHorizontal,
-              80,
-            ),
-            itemCount: transactions.length,
-            itemBuilder: (context, index) {
-              final tx = transactions[index];
-              return _TransactionReconcileCard(
-                transaction: tx,
-                isGuestMode: isGuestMode,
-                spacing: spacing,
-                onVerify: () async {
-                  await reconciliationService.verifyTransaction(tx.id);
-                  _loadTransactions();
-                },
-                onMarkDiscrepancy: (bankAmount, notes) async {
-                  await reconciliationService.markDiscrepancy(
-                    tx.id,
-                    bankAmount,
-                    notes: notes,
-                  );
-                  _loadTransactions();
-                },
-              );
-            },
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _TransactionReconcileCard extends ConsumerStatefulWidget {
-  final Transaction transaction;
-  final bool isGuestMode;
-  final AppSpacing spacing;
-  final VoidCallback onVerify;
-  final Function(double, String) onMarkDiscrepancy;
-
-  const _TransactionReconcileCard({
-    required this.transaction,
-    required this.isGuestMode,
-    required this.spacing,
-    required this.onVerify,
-    required this.onMarkDiscrepancy,
-  });
-
-  @override
-  ConsumerState<_TransactionReconcileCard> createState() =>
-      _TransactionReconcileCardState();
-}
-
-class _TransactionReconcileCardState
-    extends ConsumerState<_TransactionReconcileCard> {
-  late TextEditingController _bankAmountController;
-  late TextEditingController _notesController;
-  bool _showDiscrepancyForm = false;
-  ReconciliationStatus? _status;
-
-  @override
-  void initState() {
-    super.initState();
-    _bankAmountController = TextEditingController();
-    _notesController = TextEditingController();
-    _loadStatus();
-  }
-
-  void _loadStatus() async {
-    final status = await ref
+  Future<void> _loadCalculatedBalance() async {
+    final balance = await ref
         .read(reconciliationServiceProvider)
-        .getReconciliationStatus(widget.transaction.id);
-    if (mounted) setState(() => _status = status);
+        .getCalculatedBalance(widget.account.id);
+    if (mounted) setState(() => _calculatedBalance = balance);
   }
 
   @override
   void dispose() {
-    _bankAmountController.dispose();
-    _notesController.dispose();
+    _balanceController.dispose();
     super.dispose();
+  }
+
+  double? get _enteredBalance => double.tryParse(_balanceController.text);
+
+  double? get _difference {
+    final entered = _enteredBalance;
+    if (entered == null || _calculatedBalance == null) return null;
+    return entered - _calculatedBalance!;
+  }
+
+  Future<void> _reconcile() async {
+    final entered = _enteredBalance;
+    if (entered == null) {
+      SnackbarService.error('Enter a valid balance');
+      return;
+    }
+
+    setState(() => _saving = true);
+    try {
+      final service = ref.read(reconciliationServiceProvider);
+      final adj = await service.reconcileBalance(
+        account: widget.account,
+        actualBalance: entered,
+      );
+
+      ref.invalidate(transactionProvider);
+      ref.invalidate(accountsProvider);
+
+      if (mounted) {
+        if (adj.abs() < 0.01) {
+          SnackbarService.success('Balance already matches!');
+        } else {
+          SnackbarService.success('Balance adjusted by ${adj > 0 ? "+" : ""}${adj.toStringAsFixed(2)}');
+        }
+        Navigator.pop(context, true);
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _saving = false);
+        SnackbarService.error(BuddyMessages.genericError);
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final spacing = widget.spacing;
-    final displayAmount = GuestModeUtil.applyGuestMode(
-      widget.transaction.amount,
-      widget.isGuestMode,
-    );
+    final spacing = ref.watch(spacingProvider);
+    final diff = _difference;
 
-    final statusColor = _status == null
-        ? Colors.transparent
-        : switch (_status!.state) {
-            ReconciliationState.verified => const Color(0xFF4CAF50),
-            ReconciliationState.discrepancy => const Color(0xFFF44336),
-            ReconciliationState.unrecognized => color.tertiary,
-            ReconciliationState.pending => color.onSurfaceVariant,
-          };
-
-    return Container(
-      margin: EdgeInsets.only(bottom: spacing.elementGap + 4),
-      decoration: BoxDecoration(
-        color: color.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        border: Border.all(
-          color: color.outlineVariant.withValues(alpha: 0.3),
-        ),
-      ),
-      child: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.all(spacing.cardInner),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return Scaffold(
+      appBar: AppBar(title: Text('Reconcile ${widget.account.name}')),
+      body: _calculatedBalance == null
+          ? const Center(child: CircularProgressIndicator())
+          : ListView(
+              padding: EdgeInsets.all(spacing.cardInner + 8),
               children: [
-                // Top row: icon + description + amount
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: (widget.transaction.isExpense
-                                ? color.error
-                                : color.primary)
-                            .withValues(alpha: 0.12),
-                        borderRadius:
-                            BorderRadius.circular(spacing.radiusSmall),
-                      ),
-                      child: Icon(
-                        widget.transaction.isExpense
-                            ? LucideIcons.arrowUpRight
-                            : LucideIcons.arrowDownLeft,
-                        size: 18,
-                        color: widget.transaction.isExpense
-                            ? color.error
-                            : color.primary,
-                      ),
+                // Info card
+                Container(
+                  padding: EdgeInsets.all(spacing.cardInner),
+                  decoration: BoxDecoration(
+                    color: color.primaryContainer.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                    border: Border.all(
+                      color: color.primary.withValues(alpha: 0.3),
                     ),
-                    SizedBox(width: spacing.elementGap + 4),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            widget.transaction.description ?? 'Transaction',
-                            style: textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          SizedBox(height: spacing.cardVerticalMin / 2),
-                          Text(
-                            widget.transaction.date.toString().split('.')[0],
-                            style: textTheme.bodySmall?.copyWith(
-                              color: color.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(width: spacing.elementGap),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        CurrencyText(
-                          amount: displayAmount,
-                          style: textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: widget.transaction.isExpense
-                                ? color.error
-                                : color.primary,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(LucideIcons.info, color: color.primary, size: 20),
+                      SizedBox(width: spacing.elementGap),
+                      Expanded(
+                        child: Text(
+                          'Enter the current balance shown in your bank app or passbook. We\'ll adjust the difference automatically.',
+                          style: textTheme.bodySmall?.copyWith(
+                            color: color.onPrimaryContainer,
                           ),
                         ),
-                        if (_status != null) ...[
-                          SizedBox(height: spacing.cardVerticalMin),
-                          _buildStatusBadge(color, textTheme, spacing),
-                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: spacing.sectionGap + 8),
+
+                // Calculated balance
+                Container(
+                  padding: EdgeInsets.all(spacing.cardInner),
+                  decoration: BoxDecoration(
+                    color: color.surfaceContainerLow,
+                    borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                    border: Border.all(
+                      color: color.outlineVariant.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Balance in App',
+                        style: textTheme.titleSmall?.copyWith(
+                          color: color.onSurfaceVariant,
+                        ),
+                      ),
+                      CurrencyText(
+                        amount: _calculatedBalance!,
+                        style: textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                        compact: false,
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: spacing.sectionGap),
+
+                // Actual balance input
+                TextFormField(
+                  controller: _balanceController,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  style: textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                  decoration: InputDecoration(
+                    labelText: 'Actual Bank Balance',
+                    hintText: '0.00',
+                    prefixIcon: const Icon(Icons.account_balance, size: 22),
+                    border: OutlineInputBorder(
+                      borderRadius:
+                          BorderRadius.circular(spacing.radiusMedium),
+                    ),
+                  ),
+                  onChanged: (_) => setState(() {}),
+                ),
+                SizedBox(height: spacing.sectionGap),
+
+                // Difference display
+                if (diff != null)
+                  Container(
+                    padding: EdgeInsets.all(spacing.cardInner),
+                    decoration: BoxDecoration(
+                      color: diff.abs() < 0.01
+                          ? color.primary.withValues(alpha: 0.1)
+                          : color.errorContainer.withValues(alpha: 0.3),
+                      borderRadius:
+                          BorderRadius.circular(spacing.radiusMedium),
+                      border: Border.all(
+                        color: diff.abs() < 0.01
+                            ? color.primary.withValues(alpha: 0.4)
+                            : color.error.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              diff.abs() < 0.01
+                                  ? LucideIcons.circleCheck
+                                  : LucideIcons.arrowLeftRight,
+                              size: 18,
+                              color: diff.abs() < 0.01
+                                  ? color.primary
+                                  : color.error,
+                            ),
+                            SizedBox(width: spacing.elementGap),
+                            Text(
+                              diff.abs() < 0.01
+                                  ? 'Balanced!'
+                                  : 'Difference',
+                              style: textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: diff.abs() < 0.01
+                                    ? color.primary
+                                    : color.error,
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (diff.abs() >= 0.01)
+                          CurrencyText(
+                            amount: diff.abs(),
+                            showSign: true,
+                            isExpense: diff < 0,
+                            style: textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: diff > 0
+                                  ? color.primary
+                                  : color.error,
+                            ),
+                            compact: false,
+                          ),
                       ],
                     ),
-                  ],
-                ),
-                SizedBox(height: spacing.elementGap + 4),
-                // Action buttons
-                Row(
-                  children: [
-                    Expanded(
-                      child: _ActionChip(
-                        icon: LucideIcons.circleCheck,
-                        label: 'Verify',
-                        chipColor: const Color(0xFF4CAF50),
-                        surfaceColor: color.surfaceContainerLow,
-                        textTheme: textTheme,
-                        spacing: spacing,
-                        onTap: widget.onVerify,
-                      ),
+                  ),
+
+                if (diff != null && diff.abs() >= 0.01) ...[
+                  SizedBox(height: spacing.elementGap),
+                  Text(
+                    diff > 0
+                        ? 'An income adjustment of ${diff.toStringAsFixed(2)} will be added.'
+                        : 'An expense adjustment of ${diff.abs().toStringAsFixed(2)} will be added.',
+                    style: textTheme.bodySmall?.copyWith(
+                      color: color.onSurfaceVariant,
                     ),
-                    SizedBox(width: spacing.elementGap),
-                    Expanded(
-                      child: _ActionChip(
-                        icon: LucideIcons.triangleAlert,
-                        label: 'Discrepancy',
-                        chipColor: const Color(0xFFF44336),
-                        surfaceColor: color.surfaceContainerLow,
-                        textTheme: textTheme,
-                        spacing: spacing,
-                        onTap: () => setState(
-                          () => _showDiscrepancyForm = !_showDiscrepancyForm,
-                        ),
-                      ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+
+                SizedBox(height: spacing.sectionGap + 16),
+
+                // Reconcile button
+                FilledButton.icon(
+                  onPressed: _saving || _enteredBalance == null
+                      ? null
+                      : () {
+                          HapticFeedback.mediumImpact();
+                          _reconcile();
+                        },
+                  icon: _saving
+                      ? const SizedBox(
+                          height: 18,
+                          width: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Icon(LucideIcons.check),
+                  label: Text(
+                    diff != null && diff.abs() < 0.01
+                        ? 'Confirm Balance'
+                        : 'Adjust & Reconcile',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  style: FilledButton.styleFrom(
+                    padding: EdgeInsets.symmetric(vertical: spacing.cardInner),
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(spacing.radiusMedium),
                     ),
-                  ],
+                    minimumSize: const Size(double.infinity, 52),
+                  ),
                 ),
               ],
             ),
-          ),
-          // Discrepancy form
-          if (_showDiscrepancyForm)
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.fromLTRB(
-                spacing.cardInner,
-                0,
-                spacing.cardInner,
-                spacing.cardInner,
-              ),
-              child: Column(
-                children: [
-                  Divider(
-                    color: color.outlineVariant.withValues(alpha: 0.3),
-                    height: 1,
-                  ),
-                  SizedBox(height: spacing.elementGap + 4),
-                  TextField(
-                    controller: _bankAmountController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: 'Bank Amount',
-                      border: OutlineInputBorder(
-                        borderRadius:
-                            BorderRadius.circular(spacing.radiusSmall),
-                      ),
-                      prefixIcon: const Icon(Icons.currency_rupee, size: 18),
-                      isDense: true,
-                    ),
-                  ),
-                  SizedBox(height: spacing.elementGap),
-                  TextField(
-                    controller: _notesController,
-                    decoration: InputDecoration(
-                      labelText: 'Notes',
-                      border: OutlineInputBorder(
-                        borderRadius:
-                            BorderRadius.circular(spacing.radiusSmall),
-                      ),
-                      hintText: 'Describe the discrepancy',
-                      isDense: true,
-                    ),
-                    maxLines: 2,
-                  ),
-                  SizedBox(height: spacing.elementGap),
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton(
-                      onPressed: () {
-                        final bankAmount = double.tryParse(
-                          _bankAmountController.text,
-                        );
-                        if (bankAmount == null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Enter a valid bank amount'),
-                              behavior: SnackBarBehavior.floating,
-                            ),
-                          );
-                          return;
-                        }
-                        widget.onMarkDiscrepancy(
-                          bankAmount,
-                          _notesController.text,
-                        );
-                        setState(() => _showDiscrepancyForm = false);
-                        _bankAmountController.clear();
-                        _notesController.clear();
-                      },
-                      child: const Text('Save Discrepancy'),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatusBadge(
-    ColorScheme color,
-    TextTheme textTheme,
-    AppSpacing spacing,
-  ) {
-    final (label, badgeColor) = switch (_status!.state) {
-      ReconciliationState.verified => ('✓ Verified', color.primary),
-      ReconciliationState.discrepancy => ('⚠ Discrepancy', color.error),
-      ReconciliationState.unrecognized => ('? Unrecognized', color.tertiary),
-      ReconciliationState.pending => ('⏳ Pending', color.onSurfaceVariant),
-    };
-
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: spacing.elementGap,
-        vertical: spacing.cardVerticalMin,
-      ),
-      decoration: BoxDecoration(
-        color: badgeColor.withValues(alpha: 0.2),
-        borderRadius: BorderRadius.circular(spacing.radiusSmall / 2),
-      ),
-      child: Text(
-        label,
-        style: textTheme.labelSmall?.copyWith(
-          color: badgeColor,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-  }
-}
-
-class _ActionChip extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color chipColor;
-  final Color surfaceColor;
-  final TextTheme textTheme;
-  final AppSpacing spacing;
-  final VoidCallback onTap;
-
-  const _ActionChip({
-    required this.icon,
-    required this.label,
-    required this.chipColor,
-    required this.surfaceColor,
-    required this.textTheme,
-    required this.spacing,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: chipColor.withValues(alpha: 0.08),
-      borderRadius: BorderRadius.circular(spacing.radiusSmall),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(spacing.radiusSmall),
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            vertical: spacing.elementGap + 2,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 16, color: chipColor),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: textTheme.labelMedium?.copyWith(
-                  color: chipColor,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

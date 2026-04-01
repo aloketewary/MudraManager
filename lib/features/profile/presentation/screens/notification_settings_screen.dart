@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 // lib/features/profile/presentation/screens/notification_settings_screen.dart
 
 import 'package:flutter/material.dart';
@@ -63,10 +64,10 @@ class _NotificationSettingsScreenState
     await prefs.setBool('daily_summary_enabled', enabled);
     if (enabled) {
       await NotificationService.scheduleDailyReminder(_reminderTime);
-      SnackbarService.success('Daily summary enabled');
+      SnackbarService.success(BuddyMessages.toggledOn('Daily summary'));
     } else {
       await NotificationService.cancelReminder();
-      SnackbarService.success('Daily summary disabled');
+      SnackbarService.success(BuddyMessages.toggledOff('Daily summary'));
     }
     setState(() => _dailySummaryEnabled = enabled);
   }
@@ -77,9 +78,9 @@ class _NotificationSettingsScreenState
     await prefs.setBool('weekly_summary_enabled', enabled);
     if (enabled) {
       await NotificationService.scheduleWeeklySummary(_weeklyDay);
-      SnackbarService.success('Weekly summary enabled');
+      SnackbarService.success(BuddyMessages.toggledOn('Weekly summary'));
     } else {
-      SnackbarService.success('Weekly summary disabled');
+      SnackbarService.success(BuddyMessages.toggledOff('Weekly summary'));
     }
     setState(() => _weeklySummaryEnabled = enabled);
   }
@@ -89,9 +90,9 @@ class _NotificationSettingsScreenState
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('streak_reminder_enabled', enabled);
     if (enabled) {
-      SnackbarService.success('Come-back Nudges enabled');
+      SnackbarService.success(BuddyMessages.toggledOn('Come-back Nudges'));
     } else {
-      SnackbarService.success('Come-back Nudges disabled');
+      SnackbarService.success(BuddyMessages.toggledOff('Come-back Nudges'));
     }
     setState(() => _reEngagementEnabled = enabled);
   }
@@ -101,10 +102,10 @@ class _NotificationSettingsScreenState
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('re_engagement_enabled', enabled);
     if (enabled) {
-      SnackbarService.success('Streak reminder enabled');
+      SnackbarService.success(BuddyMessages.toggledOn('Streak reminder'));
     } else {
       await NotificationService.cancelStreakReminder();
-      SnackbarService.success('Streak reminder disabled');
+      SnackbarService.success(BuddyMessages.toggledOff('Streak reminder'));
     }
     setState(() => _streakReminderEnabled = enabled);
   }
@@ -114,9 +115,9 @@ class _NotificationSettingsScreenState
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('smart_alerts_enabled', enabled);
     if (enabled) {
-      SnackbarService.success('Smart alerts enabled');
+      SnackbarService.success(BuddyMessages.toggledOn('Smart alerts'));
     } else {
-      SnackbarService.success('Smart alerts disabled');
+      SnackbarService.success(BuddyMessages.toggledOff('Smart alerts'));
     }
     setState(() => _smartAlertsEnabled = enabled);
   }
@@ -130,7 +131,7 @@ class _NotificationSettingsScreenState
     setState(() => _reminderTime = time);
     if (_dailySummaryEnabled) {
       await NotificationService.scheduleDailyReminder(time);
-      SnackbarService.success('Reminder time updated');
+      SnackbarService.success(BuddyMessages.reminderUpdated);
     }
   }
 
@@ -142,7 +143,7 @@ class _NotificationSettingsScreenState
     if (time == null) return;
     setState(() => _streakReminderTime = time);
     await NotificationService.saveStreakReminderTime(time);
-    SnackbarService.success('Streak reminder time updated');
+    SnackbarService.success(BuddyMessages.reminderUpdated);
   }
 
   Future<void> _selectWeeklyDay() async {
@@ -214,7 +215,7 @@ class _NotificationSettingsScreenState
     setState(() => _weeklyDay = day);
     if (_weeklySummaryEnabled) {
       await NotificationService.scheduleWeeklySummary(day);
-      SnackbarService.success('Weekly day updated');
+      SnackbarService.success(BuddyMessages.settingsSaved);
     }
   }
 
@@ -388,7 +389,7 @@ class _NotificationSettingsScreenState
                       onChanged: _toggleStreakReminder,
                       color: color,
                       textTheme: textTheme,
-                      iconColor: const Color(0xFFFF9800),
+                      iconColor: color.tertiary,
                     ),
                     if (_streakReminderEnabled) ...[
                       _divider(color),

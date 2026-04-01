@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -369,7 +370,7 @@ class _BillControlCenterScreenState
                                 'Due This Week',
                                 '${dueSoonBills.length} bills • ₹${dueSoonTotal.toStringAsFixed(0)}',
                                 LucideIcons.clock,
-                                const Color(0xFFFFA726),
+                                colorScheme.tertiary,
                                 colorScheme,
                                 textTheme,
                                 spacing,
@@ -645,7 +646,7 @@ class _BillControlCenterScreenState
       statusText = '${daysUntil.abs()} days overdue';
       statusIcon = LucideIcons.circleAlert;
     } else if (isDueSoon) {
-      statusColor = const Color(0xFFFFA726);
+      statusColor = colorScheme.tertiary;
       statusText = daysUntil == 0
           ? 'Due today'
           : daysUntil == 1
@@ -883,7 +884,7 @@ class _BillControlCenterScreenState
       }
     } catch (e) {
       if (mounted) {
-        SnackbarService.error('Error marking bill as paid: ${e.toString()}');
+        SnackbarService.error(BuddyMessages.errorWith('$e'));
       }
     }
   }

@@ -284,7 +284,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
               child: _buildPulseCard(
                 'Income',
                 d.income,
-                const Color(0xFF4CAF50),
+                color.primary,
                 Icons.arrow_upward,
                 d.incomeSpots,
                 color,
@@ -298,7 +298,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
               child: _buildPulseCard(
                 'Expense',
                 d.expense,
-                const Color(0xFFF44336),
+                color.error,
                 Icons.arrow_downward,
                 d.expenseSpots,
                 color,
@@ -769,8 +769,8 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                                                 decoration: BoxDecoration(
                                                   color: (trend.changePercent >
                                                               0
-                                                          ? Colors.red
-                                                          : Colors.green)
+                                                          ? color.error
+                                                          : color.primary)
                                                       .withValues(alpha: 0.1),
                                                   borderRadius:
                                                       BorderRadius.circular(12),
@@ -786,8 +786,8 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                                                       color:
                                                           trend.changePercent >
                                                                   0
-                                                              ? Colors.red
-                                                              : Colors.green,
+                                                              ? color.error
+                                                              : color.primary,
                                                     ),
                                                     const SizedBox(width: 2),
                                                     Text(
@@ -797,8 +797,8 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                                                         color:
                                                             trend.changePercent >
                                                                     0
-                                                                ? Colors.red
-                                                                : Colors.green,
+                                                                ? color.error
+                                                                : color.primary,
                                                         fontWeight:
                                                             FontWeight.w600,
                                                       ),
@@ -899,12 +899,12 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
             if (health.score == 0) return const SizedBox.shrink();
 
             final scoreColor = health.score >= 80
-                ? const Color(0xFF4CAF50)
+                ? color.primary
                 : health.score >= 60
-                    ? const Color(0xFF2196F3)
+                    ? color.secondary
                     : health.score >= 40
-                        ? const Color(0xFFFF9800)
-                        : const Color(0xFFF44336);
+                        ? color.tertiary
+                        : color.error;
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1035,7 +1035,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                                     value: health.savingsRate,
                                     maxValue: 100,
                                     suffix: '%',
-                                    barColor: const Color(0xFF4CAF50),
+                                    barColor: color.primary,
                                     color: color,
                                     textTheme: textTheme,
                                   ),
@@ -1048,8 +1048,8 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                                     maxValue: 100,
                                     suffix: '%',
                                     barColor: health.expenseRatio > 80
-                                        ? const Color(0xFFF44336)
-                                        : const Color(0xFFFF9800),
+                                        ? color.error
+                                        : color.tertiary,
                                     color: color,
                                     textTheme: textTheme,
                                   ),
@@ -1352,11 +1352,11 @@ class _MonthlyTrendChart extends StatelessWidget {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final colors = [
-      const Color(0xFF6366F1),
-      const Color(0xFF8B5CF6),
-      const Color(0xFFEC4899),
-      const Color(0xFF10B981),
-      const Color(0xFFF59E0B),
+      color.primary,
+      color.secondary,
+      color.tertiary,
+      color.error,
+      color.primaryContainer,
     ];
 
     return SizedBox(

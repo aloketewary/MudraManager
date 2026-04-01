@@ -45,7 +45,7 @@ class Transaction {
 
   /// Indicates if this transaction was created from SMS auto-import
   bool? isFromSms;
-  
+
   /// Link to SMS activity if created from SMS
   int? smsActivityId;
 
@@ -85,9 +85,10 @@ class Transaction {
     required this.amount,
     required this.isExpense,
     this.description,
-    this.isTransfer = false
+    this.isTransfer = false,
   });
 
-  factory Transaction.fromJson(Map<String, dynamic> json) => _$TransactionFromJson(json);
+  factory Transaction.fromJson(Map<String, dynamic> json) =>
+      _$TransactionFromJson(json);
   Map<String, dynamic> toJson() => _$TransactionToJson(this);
 }

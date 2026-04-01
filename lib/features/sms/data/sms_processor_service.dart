@@ -1,40 +1,54 @@
+import 'package:mudra_manager/core/db/models/sms_activity.dart';
 import 'package:mudra_manager/core/services/plugin_service.dart';
+import 'package:mudra_manager/core/utils/utils.dart';
 import 'package:mudra_manager/plugins/sms_parser_manager.dart';
 import 'package:mudra_manager/plugins/sms_parser_plugin.dart';
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
-import 'package:isar_community/isar.dart';
-import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
-import 'package:mudra_manager/core/utils/string_util.dart';
 import 'package:mudra_manager/core/utils/transaction_msg_util.dart';
 import 'package:mudra_manager/features/sms/data/sms_activity_service.dart';
+
+enum ParseResult { approved, pending, needsReview, duplicate, skipped, error }
 
 class SmsProcessorService {
   static final SmsProcessorService instance = SmsProcessorService._();
   static final AppLog _log = AppLog(getLogger(), 'SmsProcessorService');
 
-  bool _autoApprovalEnabled = true;
-
   SmsProcessorService._();
 
-  void setAutoApproval(bool enabled) {
-    _autoApprovalEnabled = enabled;
-    _log.i('Auto-approval ${enabled ? "enabled" : "disabled"}');
-  }
+  Future<SmsActivity> processSmsForSaving(
+    TransactionInfo sms,
+    int timestamp,
+  ) async {
+    final notifTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
+    DateTime transactionDate;
 
-  bool get isAutoApprovalEnabled => _autoApprovalEnabled;
-
-  Future<void> processSmsForSaving(TransactionInfo sms, int timestamp) async {
-    final transactionDate =
-        sms.transactionTime ?? DateTime.fromMillisecondsSinceEpoch(timestamp);
+    if (sms.transactionTime != null) {
+      final parsed = sms.transactionTime!;
+      // If parser got a date but time is midnight, it likely only parsed the date.
+      // Use the notification timestamp's time instead.
+      if (parsed.hour == 0 && parsed.minute == 0 && parsed.second == 0) {
+        transactionDate = DateTime(
+          parsed.year,
+          parsed.month,
+          parsed.day,
+          notifTime.hour,
+          notifTime.minute,
+          notifTime.second,
+        );
+      } else {
+        transactionDate = parsed;
+      }
+    } else {
+      transactionDate = notifTime;
+    }
 
     try {
-      // Add to SMS Activity for tracking
-      await SmsActivityService.instance.addActivity(
+      final activity = await SmsActivityService.instance.addActivity(
         sender: sms.sender,
         body: sms.body,
         date: transactionDate,
@@ -48,70 +62,91 @@ class SmsProcessorService {
         category: sms.typeOfTransaction?.name,
       );
 
-      // Emit SMS event to plugins
       PluginService().emitSms(sms.sender, sms.body);
-
-      _log.i('SMS processed and added to activity, sender: ${sms.sender}');
+      _log.i(
+        'Auto Import processed and added to activity, sender: ${sms.sender}',
+      );
+      return activity;
     } catch (e) {
       _log.e('Failed to process SMS transaction', e);
+      rethrow;
     }
   }
 
-  Future<void> parseAndSaveTransaction({
+  Future<ParseResult> parseAndSaveTransaction({
     required String body,
     required String address,
     String? sender,
     required int timestamp,
   }) async {
     if (!checkForTransactionalMessage(body)) {
-      _log.i('SMS filtered out (not transactional) sender: $address');
-      return;
+      _log.i('Message filtered out (not transactional) sender: $address');
+      return ParseResult.skipped;
     }
 
-    final smsHash = generateSmsHash(address, timestamp, body);
+    final smsHash = generateSmsHash(address, body);
 
     if (SharedPrefsUtil.instance.isAlreadyProcessed(smsHash)) {
       _log.i(
-        'SMS already processed, skipping... sender: $address hash: $smsHash',
+        'Message already processed, skipping... sender: $address hash: $smsHash',
       );
-      return;
+      return ParseResult.skipped;
     }
 
     SharedPrefsUtil.instance.storeProcessedHash(smsHash);
 
-    // Try plugin-based parsing first
-    final parsedSms = await SmsParserManager.instance.parseSms(address, body);
-    if (parsedSms != null) {
-      _log.i('SMS parsed by plugin, sender: $address');
-      _processPluginParsedSms(parsedSms, address, timestamp, smsHash);
-      return;
+    try {
+      SmsActivity activity;
+
+      // Try plugin-based parsing first
+      final parsedSms = await SmsParserManager.instance.parseSms(address, body);
+      if (parsedSms != null) {
+        _log.i('Auto Import parsed by plugin, sender: $address');
+        activity = await _processPluginParsedSms(
+          parsedSms,
+          address,
+          timestamp,
+          smsHash,
+          body,
+        );
+      } else {
+        // Fallback to legacy parsing
+        final transactionUtil = TransactionUtil();
+        final transactionInfo = transactionUtil.getTransactionInfo(
+          body,
+          address,
+          sender,
+          smsHash,
+        );
+        _log.i('Auto Import Parsed by legacy parser, sender: $address');
+        activity = await processSmsForSaving(transactionInfo, timestamp);
+      }
+
+      return switch (activity.status) {
+        ActivityStatus.approved => ParseResult.approved,
+        ActivityStatus.duplicate => ParseResult.duplicate,
+        ActivityStatus.needsReview => ParseResult.needsReview,
+        _ => ParseResult.pending,
+      };
+    } catch (e) {
+      _log.e('Failed to parse and save transaction', e);
+      return ParseResult.error;
     }
-
-    // Fallback to legacy parsing
-    final transactionUtil = TransactionUtil();
-    final transactionInfo = transactionUtil.getTransactionInfo(
-      body,
-      address,
-      sender,
-      smsHash,
-    );
-    _log.i('SMS Parsed by legacy parser, sender: $address');
-
-    processSmsForSaving(transactionInfo, timestamp);
   }
 
-  Future<void> _processPluginParsedSms(
+  Future<SmsActivity> _processPluginParsedSms(
     ParsedSms parsedSms,
     String sender,
     int timestamp,
     String smsHash,
+    String body,
   ) async {
     final transactionDate = DateTime.fromMillisecondsSinceEpoch(timestamp);
 
     try {
-      await SmsActivityService.instance.addActivity(
+      final activity = await SmsActivityService.instance.addActivity(
         sender: sender,
-        body: '',
+        body: body,
         date: transactionDate,
         smsHash: smsHash,
         amount: parsedSms.amount,
@@ -124,21 +159,16 @@ class SmsProcessorService {
       );
 
       PluginService().emitSms(sender, '');
-      _log.i('Plugin-parsed SMS processed, sender: $sender');
+      _log.i('Plugin-parsed Auto Import processed, sender: $sender');
+      return activity;
     } catch (e) {
       _log.e('Failed to process plugin-parsed SMS', e);
+      rethrow;
     }
   }
 
-  String generateSmsHash(String address, int timestamp, String body) {
-    final input = '$address|$timestamp|$body';
+  String generateSmsHash(String address, String body) {
+    final input = '$address|$body';
     return sha256.convert(utf8.encode(input)).toString();
-  }
-
-  Future<Isar> getIsarInstance() async {
-    if (Isar.instanceNames.isEmpty) {
-      return await IsarService.initIsar();
-    }
-    return Isar.getInstance()!;
   }
 }

@@ -238,7 +238,7 @@ class _DashboardCustomizeScreenState
                 const SizedBox(height: 8),
                 Consumer(
                   builder: (context, ref, _) {
-                    final isPro = ref.watch(isProProvider).valueOrNull ?? false;
+                    final isPro = ref.watch(hasFullAccessProvider).valueOrNull ?? false;
                     return Row(
                       children: [
                         Icon(LucideIcons.sparkles, size: 14, color: accent),

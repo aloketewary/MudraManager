@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/entitlement/entitlement_products.dart';
 import 'package:mudra_manager/core/entitlement/entitlement_provider.dart';
+import 'package:mudra_manager/core/extension/localization_extenstion.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
@@ -19,13 +20,7 @@ import 'package:mudra_manager/features/profile/data/user_profile_provider.dart';
 import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
 import 'package:mudra_manager/shared/widgets/pro_gate.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
-import 'package:mudra_manager/features/marketplace/services/marketplace_service.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
-
-final lowBalancePluginProvider = FutureProvider.autoDispose((ref) async {
-  return await MarketplaceService()
-      .isPluginEnabled('com.mudra.low_balance_alert');
-});
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -169,8 +164,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     _SettingItem(
                       LucideIcons.palette,
                       'Appearance',
-                      'Theme, language & display',
+                      'Theme, tone & display',
                       () => context.push(AppRoutes.appearance),
+                    ),
+                    _SettingItem(
+                      LucideIcons.languages,
+                      'Language',
+                      Locale(SharedPrefsUtil.instance.getLanguage()).displayName(),
+                      () => context.push(AppRoutes.chooseLanguage),
                     ),
                   ],
                 ),
@@ -186,14 +187,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   spacing,
                   items: [
                     _SettingItem(
-                      Icons.dashboard_customize_outlined,
+                      LucideIcons.layoutDashboard,
                       'Dashboard Layout',
                       'Customize widgets & cards',
                       () => context.push(AppRoutes.dashboardCustomize),
                       trailing: const ProBadge(),
                     ),
                     _SettingItem(
-                      Icons.extension_outlined,
+                      LucideIcons.arrowLeftRight,
+                      'Import & Export',
+                      'Excel import & export',
+                      () => context.push(AppRoutes.importExport),
+                    ),
+                    _SettingItem(
+                      LucideIcons.puzzle,
                       'Plugins',
                       'Manage extensions',
                       () => context.push(AppRoutes.marketplace),
@@ -321,13 +328,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: (isPro ? const Color(0xFF10B981) : color.error)
+                        color: (isPro ? color.primary : color.error)
                             .withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Icon(
                         isPro ? LucideIcons.shieldCheck : LucideIcons.shieldOff,
-                        color: isPro ? const Color(0xFF10B981) : color.error,
+                        color: isPro ? color.primary : color.error,
                         size: 20,
                       ),
                     ),
@@ -356,12 +363,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         HapticFeedback.mediumImpact();
                         await ref.read(entitlementServiceProvider).grantPro(
                               source: 'debug',
-                              productId: EntitlementProducts.lifetime,
+                              productId: EntitlementProducts.yearlyPlan,
                               purchaseToken:
                                   'dbg_${DateTime.now().millisecondsSinceEpoch}',
                             );
-                        ref.invalidate(isProProvider);
-                        ref.invalidate(proPlanInfoProvider);
+                        invalidateEntitlements(ref);
                         SnackbarService.success('✅ Pro granted (debug)');
                       },
                 child: Padding(
@@ -383,7 +389,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ),
                       const SizedBox(width: 14),
                       Text(
-                        'Grant Pro (Lifetime)',
+                        'Grant Pro (yearly)',
                         style: textTheme.bodyLarge?.copyWith(
                           fontWeight: FontWeight.w500,
                           color: isPro ? color.onSurfaceVariant : null,
@@ -428,12 +434,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           color:
-                              const Color(0xFFFF9800).withValues(alpha: 0.12),
+                              color.tertiary.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: const Icon(
+                        child: Icon(
                           LucideIcons.timer,
-                          color: Color(0xFFFF9800),
+                          color: color.tertiary,
                           size: 20,
                         ),
                       ),
@@ -515,7 +521,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           _heroBadge(
             icon: LucideIcons.flame,
             label: '${streak.currentCount} day streak',
-            badgeColor: const Color(0xFFFF9800),
+            badgeColor: color.tertiary,
             color: color,
             textTheme: textTheme,
           ),
@@ -546,11 +552,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
         return planAsync.when(
           data: (info) {
-            const gold = Color(0xFFD4AF37);
             final accent = info.isPro
-                ? gold
+                ? color.tertiary
                 : info.isTrial
-                    ? const Color(0xFF10B981) // green for trial
+                    ? color.primary
                     : color.primary;
 
             return Padding(
@@ -619,14 +624,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                       vertical: 2,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFF10B981)
+                                      color: color.primary
                                           .withValues(alpha: 0.15),
                                       borderRadius: BorderRadius.circular(4),
                                     ),
                                     child: Text(
                                       '${info.trialDaysRemaining}d LEFT',
                                       style: textTheme.labelSmall?.copyWith(
-                                        color: const Color(0xFF10B981),
+                                        color: color.primary,
                                         fontWeight: FontWeight.w800,
                                         fontSize: 9,
                                         letterSpacing: 0.5,
@@ -642,13 +647,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                       vertical: 2,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: gold.withValues(alpha: 0.15),
+                                      color: accent.withValues(alpha: 0.15),
                                       borderRadius: BorderRadius.circular(4),
                                     ),
                                     child: Text(
                                       'ACTIVE',
                                       style: textTheme.labelSmall?.copyWith(
-                                        color: gold,
+                                        color: accent,
                                         fontWeight: FontWeight.w800,
                                         fontSize: 9,
                                         letterSpacing: 0.5,
@@ -696,8 +701,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     }
     if (!info.isPro) return 'Unlimited accounts, analytics & more';
 
-    if (info.plan == ProPlan.lifetime) return 'Thank you for your support ❤️';
-
     if (info.expiresAt != null) {
       final days = info.expiresAt!.difference(DateTime.now()).inDays;
       if (days < 0) return 'Expired — tap to renew';
@@ -705,7 +708,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       if (days == 1) return 'Renews tomorrow';
       return 'Renews in $days days';
     }
-
     return 'Active subscription';
   }
 
@@ -742,14 +744,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 height: 160,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color:
-                          color.primary.withValues(alpha: isDark ? 0.15 : 0.08),
-                      blurRadius: 80,
-                      spreadRadius: 40,
-                    ),
-                  ],
                 ),
               ),
             ),
@@ -1013,7 +1007,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   'Best Streak',
                   color,
                   textTheme,
-                  accentColor: const Color(0xFFFF9800),
+                accentColor: color.tertiary,
                 ),
               ),
             ],
@@ -1281,9 +1275,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         () => context.push(AppRoutes.notificationSettings),
       ),
       _SettingItem(
-        Icons.sms,
-        'SMS Import',
-        'Auto-import transactions',
+        LucideIcons.bellRing,
+        'Auto Import',
+        'Auto-import from bank notifications',
         () => context.push(AppRoutes.smsImport),
       ),
       _SettingItem(
@@ -1380,7 +1374,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              const Icon(Icons.logout, size: 48, color: Colors.redAccent),
+              Icon(Icons.logout, size: 48, color: color.error),
               const SizedBox(height: 16),
               Text(
                 'Logout',
@@ -1431,7 +1425,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       },
                       style: FilledButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
-                        backgroundColor: Colors.redAccent,
+                        backgroundColor: color.error,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),

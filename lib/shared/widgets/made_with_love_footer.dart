@@ -104,7 +104,7 @@ class _MadeWithLoveFooterState extends State<MadeWithLoveFooter>
                   child: Container(
                     padding: EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.red.withValues(alpha: 0.1),
+                      color: color.error.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
                     child: Text('❤️', style: TextStyle(fontSize: 24)),

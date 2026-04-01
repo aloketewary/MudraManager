@@ -21,6 +21,9 @@ class Trip {
 
   double? budget;
 
+  /// true = travel trip, false = split-only group
+  late bool isTrip;
+
   late DateTime createdAt;
 
   final participants = IsarLinks<TripParticipant>();
@@ -35,6 +38,7 @@ class Trip {
     required this.endDate,
     this.isActive = true,
     this.budget,
+    this.isTrip = true,
   }) : createdAt = DateTime.now();
 }
 
@@ -52,10 +56,32 @@ class TripParticipant {
 }
 
 @collection
+class SplitExpense {
+  Id id = Isar.autoIncrement;
+
+  late double amount;
+  String? description;
+  late DateTime date;
+
+  SplitExpense();
+
+  SplitExpense.create({
+    required this.amount,
+    this.description,
+    required this.date,
+  });
+}
+
+@collection
 class TripTransaction {
   Id id = Isar.autoIncrement;
 
+  /// Link to a main ledger transaction (used for trips).
   final transaction = IsarLink<Transaction>();
+
+  /// Link to a group-only split expense (used for split groups).
+  final splitExpense = IsarLink<SplitExpense>();
+
   final paidBy = IsarLink<TripParticipant>();
 
   @enumerated
@@ -73,6 +99,18 @@ class TripTransaction {
     required this.participantIds,
     required this.splitAmounts,
   }) : addedAt = DateTime.now();
+
+  /// Returns the amount from whichever source is linked.
+  double? get resolvedAmount =>
+      transaction.value?.amount ?? splitExpense.value?.amount;
+
+  /// Returns the description from whichever source is linked.
+  String? get resolvedDescription =>
+      transaction.value?.description ?? splitExpense.value?.description;
+
+  /// Returns the date from whichever source is linked.
+  DateTime? get resolvedDate =>
+      transaction.value?.date ?? splitExpense.value?.date;
 }
 
 enum SplitType { equal, percentage, custom, unequal }
@@ -96,5 +134,5 @@ class Settlement {
   Settlement();
 
   Settlement.create({required this.amount, this.isSettled = false})
-    : createdAt = DateTime.now();
+      : createdAt = DateTime.now();
 }

@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter_boring_avatars/flutter_boring_avatars.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
@@ -357,7 +358,7 @@ class _EditUserProfileScreenState extends ConsumerState<EditUserProfileScreen> {
               .saveProfile(updatedProfile);
           ref.invalidate(userProfileProvider);
           if (context.mounted) {
-            SnackbarService.success('Profile updated successfully');
+            SnackbarService.success(BuddyMessages.settingsSaved);
             context.pop();
           }
         }

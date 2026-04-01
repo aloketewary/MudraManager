@@ -48,6 +48,10 @@ class SharedPrefsUtil {
     final hashes = _prefs.getStringList('processed_sms_hashes') ?? [];
     if (!hashes.contains(hash)) {
       hashes.add(hash);
+      // FIFO eviction: keep only the last 500 hashes
+      if (hashes.length > 500) {
+        hashes.removeRange(0, hashes.length - 500);
+      }
       _prefs.setStringList('processed_sms_hashes', hashes);
     }
   }

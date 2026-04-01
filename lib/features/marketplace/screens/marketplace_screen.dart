@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:mudra_manager/core/utils/utils.dart';
 import 'package:mudra_manager/core/widgets/skeleton_loader.dart';
@@ -288,7 +289,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                         _service.updatePluginConfig(pluginId, config.key, value);
                         setState(() {});
                         Navigator.pop(ctx);
-                        SnackbarService.success('Configuration updated');
+                        SnackbarService.success(BuddyMessages.settingsSaved);
                       }
                     },
                     style: FilledButton.styleFrom(

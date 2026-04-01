@@ -1,14 +1,8 @@
-/// SMART CATEGORY LEARNING - INTEGRATION GUIDE
-/// 
-/// This file shows how to integrate the smart category learning system
-/// into your transaction flow.
-
-import 'package:mudra_manager/core/db/models/category_rule.dart';
 import 'package:mudra_manager/core/services/category_rule_service.dart';
 import 'package:mudra_manager/core/utils/transaction_msg_util.dart';
 
 /// Example 1: When adding a new transaction from SMS
-/// 
+///
 /// Call this in your SMS processing or transaction add screen
 Future<void> exampleAddTransactionWithSuggestion({
   required TransactionInfo txnInfo,
@@ -17,7 +11,7 @@ Future<void> exampleAddTransactionWithSuggestion({
 }) async {
   // Get smart category suggestion
   final suggestedCategoryId = await ruleService.suggestCategory(txnInfo);
-  
+
   if (suggestedCategoryId != null) {
     // Show suggestion to user
     onSuggestion(suggestedCategoryId);
@@ -29,7 +23,7 @@ Future<void> exampleAddTransactionWithSuggestion({
 }
 
 /// Example 2: When user selects a category
-/// 
+///
 /// Call this after user confirms the category selection
 Future<void> exampleLearnFromUserChoice({
   required TransactionInfo txnInfo,
@@ -38,31 +32,31 @@ Future<void> exampleLearnFromUserChoice({
 }) async {
   // Learn from user's choice
   await ruleService.learnFromCategorization(txnInfo, selectedCategoryId);
-  
+
   // The system will now remember this pattern for future transactions
 }
 
 /// Example 3: Complete flow in a transaction add screen
-/// 
+///
 /// This shows the full integration in your UI
 class TransactionAddScreenExample {
   final CategoryRuleService ruleService;
-  
+
   TransactionAddScreenExample(this.ruleService);
-  
+
   Future<void> handleNewTransaction(TransactionInfo txnInfo) async {
     // Step 1: Get suggestion
     final suggestedCategoryId = await ruleService.suggestCategory(txnInfo);
-    
+
     String? finalCategoryId;
-    
+
     if (suggestedCategoryId != null) {
       // Step 2: Show suggestion dialog
       final userAccepted = await showSuggestionDialog(
         suggestedCategoryId: suggestedCategoryId,
         recipientName: txnInfo.account?.sendTo ?? txnInfo.account?.bankName,
       );
-      
+
       if (userAccepted) {
         finalCategoryId = suggestedCategoryId;
       } else {
@@ -73,16 +67,16 @@ class TransactionAddScreenExample {
       // Step 3: No suggestion, show category picker
       finalCategoryId = await showCategoryPicker();
     }
-    
+
     if (finalCategoryId != null) {
       // Step 4: Save transaction with category
       await saveTransaction(txnInfo, finalCategoryId);
-      
+
       // Step 5: Learn from this categorization
       await ruleService.learnFromCategorization(txnInfo, finalCategoryId);
     }
   }
-  
+
   // Mock methods - replace with your actual UI
   Future<bool> showSuggestionDialog({
     required String suggestedCategoryId,
@@ -92,19 +86,20 @@ class TransactionAddScreenExample {
     // Return true if user accepts, false if they want to choose different
     return true;
   }
-  
+
   Future<String?> showCategoryPicker() async {
     // Show your category picker UI
     return null;
   }
-  
-  Future<void> saveTransaction(TransactionInfo txnInfo, String categoryId) async {
+
+  Future<void> saveTransaction(
+      TransactionInfo txnInfo, String categoryId) async {
     // Save to database
   }
 }
 
 /// Example 4: Periodic cleanup (optional)
-/// 
+///
 /// Run this monthly to clean up old unused rules
 Future<void> examplePeriodicCleanup(CategoryRuleService ruleService) async {
   await ruleService.cleanupOldRules(daysOld: 180); // 6 months

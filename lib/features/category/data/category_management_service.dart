@@ -1,6 +1,7 @@
 import 'package:isar_community/isar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
+import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/plugins/category_packs/category_pack.dart';
 
 class CategoryManagementService {
@@ -56,7 +57,7 @@ class CategoryManagementService {
 
   /// Remove categories owned by a pack.
   /// Only removes categories that are NOT shared with other enabled packs.
-  static Future<void> removePack(
+    static Future<void> removePack(
     String packId,
     Set<String> enabledPackIds,
   ) async {
@@ -66,7 +67,6 @@ class CategoryManagementService {
     final isar = Isar.getInstance();
     if (isar == null) return;
 
-    // Collect names owned by other enabled packs (don't delete shared ones)
     final protectedNames = <String>{};
     for (final otherId in enabledPackIds) {
       if (otherId == packId) continue;
@@ -84,8 +84,26 @@ class CategoryManagementService {
           .filter()
           .anyOf(toRemove, (q, name) => q.nameEqualTo(name))
           .findAll();
-      if (cats.isNotEmpty) {
-        await isar.categorys.deleteAll(cats.map((c) => c.id).toList());
+      if (cats.isEmpty) return;
+
+      // Only delete categories that have NO transactions linked
+      final idsToDelete = <int>[];
+      for (final cat in cats) {
+        final txCount = await isar.transactions
+            .filter()
+            .category((q) => q.idEqualTo(cat.id))
+            .count();
+        if (txCount == 0) {
+          idsToDelete.add(cat.id);
+        } else {
+          // Detach from pack so it becomes a user-owned category
+          cat.packId = null;
+          await isar.categorys.put(cat);
+        }
+      }
+
+      if (idsToDelete.isNotEmpty) {
+        await isar.categorys.deleteAll(idsToDelete);
       }
     });
   }
@@ -98,14 +116,31 @@ class CategoryManagementService {
   }
 
   /// Remove all categories when no packs are enabled.
-  static Future<void> clearAll() async {
+    static Future<void> clearAll() async {
     final isar = Isar.getInstance();
     if (isar == null) return;
 
     await isar.writeTxn(() async {
-      await isar.categorys.clear();
+      final allCats = await isar.categorys.where().findAll();
+      final idsToDelete = <int>[];
+      for (final cat in allCats) {
+        final txCount = await isar.transactions
+            .filter()
+            .category((q) => q.idEqualTo(cat.id))
+            .count();
+        if (txCount == 0) {
+          idsToDelete.add(cat.id);
+        } else {
+          cat.packId = null;
+          await isar.categorys.put(cat);
+        }
+      }
+      if (idsToDelete.isNotEmpty) {
+        await isar.categorys.deleteAll(idsToDelete);
+      }
     });
   }
+
 }
 
 final categoryManagementServiceProvider =

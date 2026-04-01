@@ -145,8 +145,8 @@ final widgetPreferencesProvider =
 /// Cached provider for ordered widgets - prevents unnecessary rebuilds
 final smartOrderEnabledProvider = Provider<bool>((ref) {
   final prefs = SharedPrefsUtil.instance;
-  final isPro = ref.watch(isProProvider).valueOrNull ?? false;
-  if (!isPro) return false;
+  final hasAccess = ref.watch(hasFullAccessProvider).valueOrNull ?? false;
+  if (!hasAccess) return false;
   return prefs.getString('smart_order_enabled') != 'false';
 });
 

@@ -41,7 +41,7 @@ class _ThemePickerScreenState extends ConsumerState<ThemePickerScreen> {
     final textTheme = Theme.of(context).textTheme;
     final color = Theme.of(context).colorScheme;
     final ctxt = AppLocalizations.of(context)!;
-    final isPro = ref.watch(isProProvider).valueOrNull ?? false;
+    final isPro = ref.watch(hasFullAccessProvider).valueOrNull ?? false;
 
     // Separate free and pro themes
     final freeThemes = AppColorTheme.values.where((t) => !t.isPro).toList();

@@ -1077,6 +1077,14 @@
   "onboard_InsightsAndAnalytics": "इनसाइट्स और एनालिटिक्स",
   "onboard_InsightsAndAnalyticsDesc": "विस्तृत चार्ट, ट्रेंड और स्मार्ट इनसाइट्स से अपनी खर्च की आदतें समझें।",
   "onboard_SecureAndPrivate": "सुरक्षित और निजी",
-  "onboard_SecureAndPrivateDesc": "आपका डेटा आपके डिवाइस पर रहता है। कोई क्लाउड नहीं, कोई ट्रैकिंग नहीं।"
+  "onboard_SecureAndPrivateDesc": "आपका डेटा आपके डिवाइस पर रहता है। कोई क्लाउड नहीं, कोई ट्रैकिंग नहीं।",
+  "onboard_SmartAutoTracking": "Smart Auto Tracking",
+  "@onboard_SmartAutoTracking": {
+    "description": "Auto-detect transactions from notifications"
+  },
+  "onboard_SmartAutoTrackingDesc": "Automatically detect and import transactions from your bank notifications.",
+  "@onboard_SmartAutoTrackingDesc": {
+    "description": "Description for auto tracking onboarding page"
+  }
 
 }

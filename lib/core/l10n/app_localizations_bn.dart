@@ -897,4 +897,11 @@ class AppLocalizationsBn extends AppLocalizations {
   @override
   String get onboard_SecureAndPrivateDesc =>
       'আপনার ডেটা আপনার ডিভাইসে থাকে। কোনো ক্লাউড নেই, কোনো ট্র্যাকিং নেই।';
+
+  @override
+  String get onboard_SmartAutoTracking => 'Smart Auto Tracking';
+
+  @override
+  String get onboard_SmartAutoTrackingDesc =>
+      'Automatically detect and import transactions from your bank notifications.';
 }

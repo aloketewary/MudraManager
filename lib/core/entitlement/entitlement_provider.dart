@@ -66,10 +66,10 @@ final canCreateTripProvider = FutureProvider.autoDispose<bool>((ref) {
   return ref.watch(entitlementServiceProvider).canCreateTrip();
 });
 
-/// Watches Pro status and reverts to free theme if Pro expires.
+/// Watches Pro/trial status and reverts to free theme if access expires.
 final themeEntitlementGuardProvider = Provider.autoDispose<void>((ref) {
-  final isPro = ref.watch(isProProvider).valueOrNull ?? true;
-  if (!isPro) {
+  final hasAccess = ref.watch(hasFullAccessProvider).valueOrNull ?? true;
+  if (!hasAccess) {
     final currentTheme = ref.read(themeNotifierProvider);
     if (currentTheme.isPro) {
       Future.microtask(() {
@@ -97,7 +97,7 @@ final hasFullAccessProvider = FutureProvider.autoDispose<bool>((ref) async {
   return inTrial;
 });
 
-enum ProPlan { free, trial, monthly, yearly, lifetime }
+enum ProPlan { free, trial, monthly, yearly }
 
 class ProPlanInfo {
   final ProPlan plan;
@@ -115,7 +115,6 @@ class ProPlanInfo {
         ProPlan.trial => 'Full Access',
         ProPlan.monthly => 'Pro Monthly',
         ProPlan.yearly => 'Pro Yearly',
-        ProPlan.lifetime => 'Pro Lifetime',
       };
 
   IconData get icon => switch (plan) {
@@ -124,7 +123,8 @@ class ProPlanInfo {
         _ => LucideIcons.crown,
       };
 
-  bool get isPro => plan != ProPlan.free && plan != ProPlan.trial;
+  bool get isPro => plan == ProPlan.monthly || plan == ProPlan.yearly;
+
   bool get isTrial => plan == ProPlan.trial;
   bool get hasFullAccess => plan != ProPlan.free;
 }
@@ -154,9 +154,22 @@ final proPlanInfoProvider =
     _ when productId.contains(EntitlementProducts.monthlyPlan) =>
       ProPlan.monthly,
     _ when productId.contains(EntitlementProducts.yearlyPlan) => ProPlan.yearly,
-    EntitlementProducts.lifetime => ProPlan.lifetime,
-    _ => ProPlan.lifetime, // debug grants default to lifetime
+    _ => ProPlan.yearly,
   };
 
   return ProPlanInfo(plan: plan, expiresAt: expiresConfig?.dateValue);
 });
+
+/// Invalidates all entitlement-related providers.
+/// Call after any purchase, restore, or revoke.
+void invalidateEntitlements(WidgetRef ref) {
+  ref.invalidate(isProProvider);
+  ref.invalidate(proPlanInfoProvider);
+  ref.invalidate(hasFullAccessProvider);
+  ref.invalidate(isInTrialProvider);
+  ref.invalidate(trialDaysRemainingProvider);
+  ref.invalidate(canCreateAccountProvider);
+  ref.invalidate(canCreateBudgetProvider);
+  ref.invalidate(canCreateGoalProvider);
+  ref.invalidate(canCreateTripProvider);
+}

@@ -20,9 +20,8 @@ class BankSmsParser {
   }
 
   static ParsedSms? _parseLegacy(String sender, String body) {
-
-    // Filter out promotional SMS
-    if (_isPromotionalSms(body)) {
+    // If body has clear transaction signals, skip promo filter
+    if (!_hasTransactionKeywords(body) && _isPromotionalSms(body)) {
       _log.i('Rejected promotional SMS from $sender');
       return null;
     }
@@ -86,18 +85,20 @@ class BankSmsParser {
     if (s.contains('RBL')) return 'RBL';
     return null;
   }
- static bool _hasTransactionKeywords(String body) {
+
+  static bool _hasTransactionKeywords(String body) {
     final bodyLower = body.toLowerCase();
     final transactionKeywords = [
       'debited',
       'credited',
       'spent',
       'received',
-      'recieved', // Common misspelling
+      'recieved',
       'paid',
       'withdrawn',
       'sent',
       'transferred',
+      'added',
     ];
     return transactionKeywords.any((keyword) => bodyLower.contains(keyword));
   }
@@ -106,21 +107,28 @@ class BankSmsParser {
     // Generic fallback parser
     if (!_hasTransactionKeywords(body)) return null;
 
-    final amountRegex = RegExp(r'(?:Rs\.?|INR|₹)\s*(\d+(?:,\d+)*(?:\.\d{2})?)');
-    final accountRegex = RegExp(r'(?:A/c|Card|a/c)\s*[xX]*(\d{4})');
+    final amountRegex =
+        RegExp(r'(?:Rs\.?\s*(?:INR\s*)?|INR\s*|₹\s*)([\d,]+(?:\.\d{2})?)');
+    final accountRegex = RegExp(
+      r'(?:A/c|account|card)\s*(?:ending\s*)?[xX]*([\dxX]{4})',
+      caseSensitive: false,
+    );
 
     // Check for transfer patterns (money going OUT)
     final transferOutRegex = RegExp(
-        r'(?:received|transferred|sent).*from\s+(?:your\s+)?(?:A/c|a/c)',
-        caseSensitive: false);
+      r'(?:received|transferred|sent).*from\s+(?:your\s+)?(?:A/c|a/c)',
+      caseSensitive: false,
+    );
     final transferInRegex = RegExp(
-        r'(?:received|credited).*(?:to|in)\s+(?:your\s+)?(?:A/c|a/c)',
-        caseSensitive: false);
+      r'(?:received|credited).*(?:to|in)\s+(?:your\s+)?(?:A/c|a/c)',
+      caseSensitive: false,
+    );
 
     // Standard debit/credit patterns
     final typeRegex = RegExp(
-        r'(debited|credited|spent|received|paid|withdrawn)',
-        caseSensitive: false);
+      r'(debited|credited|spent|received|paid|withdrawn|added)',
+      caseSensitive: false,
+    );
 
     final amount = _extractAmount(amountRegex, body);
     final account = accountRegex.firstMatch(body)?.group(1);
@@ -136,7 +144,7 @@ class BankSmsParser {
     } else {
       // Fall back to standard keywords
       final type = typeRegex.firstMatch(body)?.group(1)?.toLowerCase();
-      isIncome = type == 'credited' || type == 'received';
+      isIncome = type == 'credited' || type == 'received' || type == 'added';
     }
 
     if (amount == null) return null;
@@ -169,11 +177,12 @@ class BankSmsParser {
         .trim()
         .replaceAll(RegExp(r'\s+'), ' ') // Multiple spaces to single
         .replaceAll(
-            RegExp(r'[^a-zA-Z0-9\s@\-]'), '') // Remove special chars except @-
+          RegExp(r'[^a-zA-Z0-9\s@\-]'),
+          '',
+        ) // Remove special chars except @-
         .trim();
 
     // Return null if too short or empty
     return cleaned.length >= 2 ? cleaned : null;
   }
 }
-

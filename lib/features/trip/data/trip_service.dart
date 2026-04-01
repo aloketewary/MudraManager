@@ -41,6 +41,12 @@ class TripService {
     final trip = await isar.trips.get(id);
     await trip?.participants.load();
     await trip?.transactions.load();
+    for (final tripTxn in trip?.transactions ?? <TripTransaction>[]) {
+      await tripTxn.transaction.load();
+      await tripTxn.splitExpense.load();
+      await tripTxn.paidBy.load();
+      await tripTxn.transaction.value?.category.load();
+    }
     return trip;
   }
 
@@ -74,6 +80,38 @@ class TripService {
     });
   }
 
+  Future<void> addSplitExpenseToTrip(
+    int tripId,
+    SplitExpense expense,
+    int paidById,
+    SplitType splitType,
+    List<int> participantIds,
+    List<double> splitAmounts,
+  ) async {
+    final isar = await isarService.getInstance();
+    await isar.writeTxn(() async {
+      await isar.splitExpenses.put(expense);
+
+      final tripTxn = TripTransaction.create(
+        splitType: splitType,
+        participantIds: participantIds,
+        splitAmounts: splitAmounts,
+      );
+      tripTxn.splitExpense.value = expense;
+      final paidBy = await isar.tripParticipants.get(paidById);
+      if (paidBy != null) {
+        tripTxn.paidBy.value = paidBy;
+      }
+      await isar.tripTransactions.put(tripTxn);
+      await tripTxn.splitExpense.save();
+      await tripTxn.paidBy.save();
+
+      final trip = await isar.trips.get(tripId);
+      trip?.transactions.add(tripTxn);
+      await trip?.transactions.save();
+    });
+  }
+
   Future<Map<String, Map<String, double>>> calculateSettlements(
     int tripId,
   ) async {
@@ -89,14 +127,14 @@ class TripService {
 
     for (var tripTxn in trip.transactions.toList()) {
       await tripTxn.transaction.load();
+      await tripTxn.splitExpense.load();
       await tripTxn.paidBy.load();
 
-      final txn = tripTxn.transaction.value;
+      final amount = tripTxn.resolvedAmount;
       final paidBy = tripTxn.paidBy.value;
 
-      if (txn == null || paidBy == null) continue;
+      if (amount == null || paidBy == null) continue;
 
-      final amount = txn.amount;
       final paidById = paidBy.id;
 
       balances[paidById] = (balances[paidById] ?? 0) + amount;
@@ -152,6 +190,10 @@ class TripService {
 
       await trip.transactions.load();
       for (var tripTxn in trip.transactions) {
+        await tripTxn.splitExpense.load();
+        if (tripTxn.splitExpense.value != null) {
+          await isar.splitExpenses.delete(tripTxn.splitExpense.value!.id);
+        }
         await isar.tripTransactions.delete(tripTxn.id);
       }
 
@@ -171,6 +213,17 @@ class TripService {
       if (trip == null) return;
 
       await trip.transactions.load();
+      final tripTxn = trip.transactions
+          .where((t) => t.id == tripTransactionId)
+          .firstOrNull;
+
+      if (tripTxn != null) {
+        await tripTxn.splitExpense.load();
+        if (tripTxn.splitExpense.value != null) {
+          await isar.splitExpenses.delete(tripTxn.splitExpense.value!.id);
+        }
+      }
+
       trip.transactions.removeWhere((t) => t.id == tripTransactionId);
       await trip.transactions.save();
 

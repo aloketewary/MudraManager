@@ -92,6 +92,7 @@ class EntitlementService {
 
   Future<bool> canCreateBudget() async {
     if (await isPro()) return true;
+    if (await isInTrialPeriod()) return true;
     final count = await _countCollection<Budget>();
     final gf = await _grandfathered(_Keys.gfBudgets);
     return count < FreeTierLimits.maxBudgets.clamp(gf, 999);
@@ -99,6 +100,7 @@ class EntitlementService {
 
   Future<bool> canCreateGoal() async {
     if (await isPro()) return true;
+    if (await isInTrialPeriod()) return true;
     final count = await _countCollection<Goal>();
     final gf = await _grandfathered(_Keys.gfGoals);
     return count < FreeTierLimits.maxGoals.clamp(gf, 999);
@@ -106,6 +108,7 @@ class EntitlementService {
 
   Future<bool> canCreateTrip() async {
     if (await isPro()) return true;
+    if (await isInTrialPeriod()) return true;
     final isar = await _isarService.getInstance();
     final activeTrips = await isar.trips.filter().isActiveEqualTo(true).count();
     return activeTrips < FreeTierLimits.maxActiveTrips;

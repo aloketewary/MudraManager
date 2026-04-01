@@ -214,10 +214,10 @@ class ProBadge extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isPro = ref.watch(isProProvider);
+    final hasAccess = ref.watch(hasFullAccessProvider);
 
-    return isPro.when(
-      data: (pro) => pro
+    return hasAccess.when(
+      data: (access) => access
           ? const SizedBox.shrink()
           : Container(
               margin: const EdgeInsets.only(left: 6),

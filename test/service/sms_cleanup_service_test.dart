@@ -23,8 +23,8 @@ void main() {
 
       final remaining =
           SharedPrefsUtil.instance.getStringList('processed_sms_hashes') ?? [];
-      expect(remaining.length, SmsHashCleanupService.maxHashCount);
-      expect(remaining.first, 'hash_500'); // Should keep last 1000
+      expect(remaining.length, 500);
+      expect(remaining.first, 'hash_1000'); // Should keep last 500
     });
 
     test('cleanupOldHashes does nothing when under limit', () async {

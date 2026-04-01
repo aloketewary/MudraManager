@@ -1,10 +1,10 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:isar_community/isar.dart';
@@ -54,7 +54,7 @@ class BackupService {
       final isar = Isar.getInstance();
       if (isar == null) {
         _log.e('Isar instance not available');
-        SnackbarService.error('Database not initialized');
+        SnackbarService.error(BuddyMessages.genericError);
         return null;
       }
 
@@ -109,7 +109,7 @@ class BackupService {
       return filePath;
     } catch (e, stackTrace) {
       _log.e('Backup creation failed', e, stackTrace);
-      SnackbarService.error('Backup failed: ${e.toString()}');
+      SnackbarService.error(BuddyMessages.backupFailed);
       return null;
     }
   }
@@ -134,7 +134,7 @@ class BackupService {
       }
 
       if (result.files.first.extension != 'mudra') {
-        SnackbarService.error('Invalid file type, select `.mudra` file');
+        SnackbarService.error(BuddyMessages.invalidBackupFile);
         return null;
       }
 
@@ -151,7 +151,7 @@ class BackupService {
 
       final hash = sha256.convert(utf8.encode(decrypted)).toString();
       if (hash != backupData['hash']) {
-        SnackbarService.error('Backup file corrupted or tampered');
+        SnackbarService.error(BuddyMessages.corruptBackup);
         return null;
       }
 

@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -258,13 +259,13 @@ class _MissingTransactionScreenState
       ref.invalidate(accountServiceProvider);
 
       if (mounted) {
-        SnackbarService.success('Missing transaction added');
+        SnackbarService.success(BuddyMessages.txnAdded);
         Navigator.pop(context, true);
       }
     } catch (e) {
       if (mounted) {
         setState(() => _saving = false);
-        SnackbarService.error('Failed to add transaction');
+        SnackbarService.error(BuddyMessages.txnFailed);
       }
     }
   }

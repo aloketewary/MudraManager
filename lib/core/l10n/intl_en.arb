@@ -1032,13 +1032,13 @@
   "@sms_clearAllTooltip": {
     "description": "Tooltip for clear all button"
   },
-  "sms_importedFromSmsDescription": "Imported from SMS",
+  "sms_importedFromSmsDescription": "Auto-imported",
   "@sms_importedFromSmsDescription": {
-    "description": "Description for SMS imported transactions"
+    "description": "Description for auto imported transactions"
   },
-  "sms_selectAtLeastOneMessage": "Please select at least one SMS",
+  "sms_selectAtLeastOneMessage": "Please select at least one transaction",
   "@sms_selectAtLeastOneMessage": {
-    "description": "Warning message to select at least one SMS"
+    "description": "Warning message to select at least one transaction"
   },
   "dashboard_allTimeLabel": "All Time",
   "@dashboard_allTimeLabel": {
@@ -1095,5 +1095,13 @@
   "onboard_SecureAndPrivateDesc": "Your data stays on your device. No cloud, no tracking — just encrypted local storage.",
   "@onboard_SecureAndPrivateDesc": {
     "description": "Description for security onboarding page"
+  },
+  "onboard_SmartAutoTracking": "Smart Auto Tracking",
+  "@onboard_SmartAutoTracking": {
+    "description": "Auto-detect transactions from notifications"
+  },
+  "onboard_SmartAutoTrackingDesc": "Automatically detect and import transactions from your bank notifications.",
+  "@onboard_SmartAutoTrackingDesc": {
+    "description": "Description for auto tracking onboarding page"
   }
 }

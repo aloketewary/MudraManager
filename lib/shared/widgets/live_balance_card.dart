@@ -20,12 +20,12 @@ class LiveBalanceCard extends StatelessWidget {
       return Card(
         margin: const EdgeInsets.all(16),
         elevation: 0,
-        color: Colors.green.withValues(alpha: 0.1),
+        color: color.primary.withValues(alpha: 0.1),
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: Row(
             children: [
-              Icon(Icons.check_circle, color: Colors.green, size: 32),
+              Icon(Icons.check_circle, color: color.primary, size: 32),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
@@ -35,13 +35,13 @@ class LiveBalanceCard extends StatelessWidget {
                       'All Settled Up!',
                       style: textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: Colors.green,
+                        color: color.primary,
                       ),
                     ),
                     Text(
                       'No pending balances',
                       style: textTheme.bodySmall?.copyWith(
-                        color: Colors.green.shade700,
+                        color: color.primary,
                       ),
                     ),
                   ],
@@ -83,14 +83,14 @@ class LiveBalanceCard extends StatelessWidget {
                       CircleAvatar(
                         radius: 16,
                         backgroundColor: pb.isOwed
-                            ? Colors.green.withValues(alpha: 0.2)
-                            : Colors.red.withValues(alpha: 0.2),
+                            ? color.primary.withValues(alpha: 0.2)
+                            : color.error.withValues(alpha: 0.2),
                         child: Text(
                           pb.participant.name[0].toUpperCase(),
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
-                            color: pb.isOwed ? Colors.green : Colors.red,
+                            color: pb.isOwed ? color.primary : color.error,
                           ),
                         ),
                       ),
@@ -113,7 +113,7 @@ class LiveBalanceCard extends StatelessWidget {
                                 minHeight: 6,
                                 backgroundColor: color.surface,
                                 valueColor: AlwaysStoppedAnimation(
-                                  pb.isOwed ? Colors.green : Colors.red,
+                                  pb.isOwed ? color.primary : color.error,
                                 ),
                               ),
                             ),
@@ -125,7 +125,7 @@ class LiveBalanceCard extends StatelessWidget {
                         '${pb.isOwed ? '+' : '-'}₹${pb.amount.toStringAsFixed(0)}',
                         style: textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: pb.isOwed ? Colors.green : Colors.red,
+                          color: pb.isOwed ? color.primary : color.error,
                         ),
                       ),
                     ],

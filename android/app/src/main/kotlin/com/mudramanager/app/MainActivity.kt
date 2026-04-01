@@ -12,6 +12,7 @@ class MainActivity: FlutterFragmentActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         
+        // Existing widget channel
         methodChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
         methodChannel?.setMethodCallHandler { call, result ->
             if (call.method == "getWidgetAction") {
@@ -22,9 +23,38 @@ class MainActivity: FlutterFragmentActivity() {
             }
         }
         
-        // Check initial intent
         handleIntent(intent)
+
+        // Notification listener channel
+        val notifChannel = MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            "com.mudramanager.app/notifications"
+        )
+        TransactionNotificationListener.methodChannel = notifChannel
+
+        notifChannel.setMethodCallHandler { call, result ->
+            when (call.method) {
+                "isListenerEnabled" -> {
+                    val enabled = android.provider.Settings.Secure.getString(
+                        contentResolver,
+                        "enabled_notification_listeners"
+                    )?.contains(packageName) == true
+                    result.success(enabled)
+                }
+                "openListenerSettings" -> {
+                    startActivity(Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"))
+                    result.success(null)
+                }
+                "drainQueue" -> {
+                    val queued = TransactionNotificationListener.drainQueue(applicationContext)
+                    result.success(queued)
+                }
+                else -> result.notImplemented()
+            }
+        }
+
     }
+
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
@@ -38,4 +68,5 @@ class MainActivity: FlutterFragmentActivity() {
             methodChannel?.invokeMethod("widgetAction", action)
         }
     }
+
 }

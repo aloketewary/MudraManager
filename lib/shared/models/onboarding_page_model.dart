@@ -22,9 +22,9 @@ const onboardingData = [
   ),
   // 2. SMS auto-import — key differentiator
   OnboardingPage(
-    title: 'onboard_SmartSmsTracking',
-    description: 'onboard_SmartSmsTrackingDesc',
-    icon: LucideIcons.messageSquare,
+    title: 'onboard_SmartAutoTracking',
+    description: 'onboard_SmartAutoTrackingDesc',
+    icon: LucideIcons.bellRing,
   ),
   // 3. Budgets & Goals
   OnboardingPage(

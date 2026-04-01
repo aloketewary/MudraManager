@@ -120,7 +120,7 @@ class FinancialHealthCard extends ConsumerWidget {
                                     'Savings',
                                     '${health.savingsRate.toStringAsFixed(1)}%',
                                     LucideIcons.piggyBank,
-                                    const Color(0xFF4CAF50),
+                                    color.primary,
                                     color,
                                     textTheme,
                                   ),
@@ -131,7 +131,7 @@ class FinancialHealthCard extends ConsumerWidget {
                                     'Spending',
                                     '${health.expenseRatio.toStringAsFixed(1)}%',
                                     LucideIcons.shoppingCart,
-                                    const Color(0xFFFF9800),
+                                    color.tertiary,
                                     color,
                                     textTheme,
                                   ),
@@ -263,10 +263,10 @@ class FinancialHealthCard extends ConsumerWidget {
   }
 
   Color _getScoreColor(int score, ColorScheme color) {
-    if (score >= 80) return const Color(0xFF4CAF50);
-    if (score >= 60) return const Color(0xFF2196F3);
-    if (score >= 40) return const Color(0xFFFF9800);
-    return const Color(0xFFF44336);
+    if (score >= 80) return color.primary;
+    if (score >= 60) return color.secondary;
+    if (score >= 40) return color.tertiary;
+    return color.error;
   }
 }
 

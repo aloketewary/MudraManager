@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
+import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,6 +24,8 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
   String _selectedPlan = EntitlementProducts.yearlyPlan;
   bool _purchasing = false;
   late final BillingService _billing;
+  final _confettiController =
+      ConfettiController(duration: const Duration(seconds: 3));
 
   @override
   void initState() {
@@ -33,27 +37,25 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
   @override
   void dispose() {
     _billing.onPurchaseUpdate = null;
+    _confettiController.dispose();
     super.dispose();
   }
 
   void _onPurchaseUpdate(PurchaseStatus status, String? error) {
     if (!mounted) return;
-
     setState(() => _purchasing = false);
 
     switch (status) {
       case PurchaseStatus.purchased:
       case PurchaseStatus.restored:
-        // Invalidate pro status so all watchers refresh
-        ref.invalidate(isProProvider);
-        SnackbarService.success('Welcome to Mudra Manager Pro! 🎉');
-        if (mounted) context.pop();
+        invalidateEntitlements(ref);
+        _confettiController.play();
+        _showSuccessSheet();
         break;
       case PurchaseStatus.error:
         SnackbarService.error(error ?? 'Purchase failed. Please try again.');
         break;
       case PurchaseStatus.canceled:
-        // Silent — user cancelled intentionally
         break;
       case PurchaseStatus.pending:
         SnackbarService.info(
@@ -61,6 +63,75 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
         );
         break;
     }
+  }
+
+  void _showSuccessSheet() {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    showModalBottomSheet(
+      context: context,
+      isDismissible: false,
+      enableDrag: false,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  colors: [
+                    color.primary.withValues(alpha: 0.15),
+                    color.tertiary.withValues(alpha: 0.08),
+                  ],
+                ),
+              ),
+              child: Icon(LucideIcons.crown, size: 48, color: color.primary),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Welcome to Pro! 🎉',
+              style: textTheme.headlineSmall
+                  ?.copyWith(fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'All features are now unlocked. Thank you for your support!',
+              style:
+                  textTheme.bodyMedium?.copyWith(color: color.onSurfaceVariant),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 28),
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: FilledButton(
+                onPressed: () {
+                  HapticFeedback.mediumImpact();
+                  ctx.pop();
+                  context.pop(); // close upgrade screen
+                },
+                style: FilledButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                child: const Text(
+                  'Start Exploring',
+                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -73,45 +144,73 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
     final billing = ref.watch(billingServiceProvider);
 
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 280,
-            pinned: true,
-            leading: IconButton(
-              icon: const Icon(LucideIcons.x),
-              onPressed: () {
-                HapticFeedback.mediumImpact();
-                context.pop();
-              },
-            ),
-            flexibleSpace: FlexibleSpaceBar(
-              background: _buildHero(color, textTheme, isDark),
-            ),
-          ),
-          SliverPadding(
-            padding: EdgeInsets.symmetric(
-              horizontal: spacing.cardHorizontal,
-              vertical: spacing.cardVertical,
-            ),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                ...isProAsync.when(
-                  data: (isPro) => isPro
-                      ? _buildProStatusContent(color, textTheme, spacing)
-                      : _buildFreeUserContent(
-                          color,
-                          textTheme,
-                          spacing,
-                          billing,
-                        ),
-                  loading: () =>
-                      [const Center(child: CircularProgressIndicator())],
-                  error: (_, __) =>
-                      _buildFreeUserContent(color, textTheme, spacing, billing),
+      body: Stack(
+        children: [
+          CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                expandedHeight: 280,
+                pinned: true,
+                leading: IconButton(
+                  icon: const Icon(LucideIcons.x),
+                  onPressed: () {
+                    HapticFeedback.mediumImpact();
+                    context.pop();
+                  },
                 ),
-                const SizedBox(height: 80),
-              ]),
+                flexibleSpace: FlexibleSpaceBar(
+                  background: _buildHero(color, textTheme, isDark),
+                ),
+              ),
+              SliverPadding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: spacing.cardHorizontal,
+                  vertical: spacing.cardVertical,
+                ),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    ...isProAsync.when(
+                      data: (isPro) => isPro
+                          ? _buildProStatusContent(color, textTheme, spacing)
+                          : _buildFreeUserContent(
+                              color,
+                              textTheme,
+                              spacing,
+                              billing,
+                            ),
+                      loading: () =>
+                          [const Center(child: CircularProgressIndicator())],
+                      error: (_, __) => _buildFreeUserContent(
+                        color,
+                        textTheme,
+                        spacing,
+                        billing,
+                      ),
+                    ),
+                    const SizedBox(height: 80),
+                  ]),
+                ),
+              ),
+            ],
+          ),
+          Align(
+            alignment: Alignment.topCenter,
+            child: ConfettiWidget(
+              confettiController: _confettiController,
+              blastDirectionality: BlastDirectionality.explosive,
+              shouldLoop: false,
+              numberOfParticles: 30,
+              maxBlastForce: 20,
+              minBlastForce: 8,
+              emissionFrequency: 0.05,
+              gravity: 0.2,
+              colors: [
+                color.primary,
+                color.tertiary,
+                color.tertiary,
+                color.primary,
+                color.error,
+              ],
             ),
           ),
         ],
@@ -176,14 +275,14 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
                                 vertical: 3,
                               ),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF4CAF50)
+                                color: color.primary
                                     .withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
                                 'ACTIVE',
                                 style: textTheme.labelSmall?.copyWith(
-                                  color: const Color(0xFF4CAF50),
+                                  color: color.primary,
                                   fontWeight: FontWeight.w800,
                                   fontSize: 10,
                                   letterSpacing: 0.5,
@@ -264,10 +363,11 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
       _buildSectionLabel('Choose your plan', color, textTheme),
       const SizedBox(height: 12),
       _buildPlanCard(
-        id: EntitlementProducts.yearlyPlan, // was yearlySubscription
+        id: EntitlementProducts.yearlyPlan,
         label: 'Yearly',
-        fallbackPrice: '₹299/year',
-        savings: 'Save 47%',
+        fallbackPrice: '₹199/year',
+        savings: 'Save 43%',
+        perMonth: '₹16.6/mo',
         billing: billing,
         color: color,
         textTheme: textTheme,
@@ -277,23 +377,13 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
       _buildPlanCard(
         id: EntitlementProducts.monthlyPlan,
         label: 'Monthly',
-        fallbackPrice: '₹49/month',
+        fallbackPrice: '₹29/month',
         billing: billing,
         color: color,
         textTheme: textTheme,
         spacing: spacing,
       ),
-      const SizedBox(height: 10),
-      _buildPlanCard(
-        id: EntitlementProducts.lifetime,
-        label: 'Lifetime',
-        fallbackPrice: '₹999 once',
-        savings: 'Best value',
-        billing: billing,
-        color: color,
-        textTheme: textTheme,
-        spacing: spacing,
-      ),
+
       const SizedBox(height: 28),
 
       // CTA
@@ -364,18 +454,13 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
   }
 
   String _proStatusSubtitle(ProPlanInfo info) {
-    if (info.plan == ProPlan.lifetime) {
-      return 'Lifetime access — forever yours ❤️';
-    }
-
     if (info.expiresAt != null) {
       final days = info.expiresAt!.difference(DateTime.now()).inDays;
-      if (days < 0) return 'Expired';
+      if (days < 0) return 'Expired — tap to renew';
       if (days == 0) return 'Renews today';
       if (days == 1) return 'Renews tomorrow';
       return 'Renews in $days days';
     }
-
     return 'Active subscription';
   }
 
@@ -466,14 +551,14 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
                                   vertical: 6,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF10B981)
+                                  color: color.primary
                                       .withValues(alpha: 0.15),
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Text(
                                   '🎁 ${info.trialDaysRemaining} days of full access remaining',
                                   style: textTheme.labelMedium?.copyWith(
-                                    color: const Color(0xFF10B981),
+                                    color: color.primary,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -581,6 +666,7 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
     required String label,
     required String fallbackPrice,
     String? savings,
+    String? perMonth,
     required BillingService billing,
     required ColorScheme color,
     required TextTheme textTheme,
@@ -649,6 +735,13 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
                       color: color.onSurfaceVariant,
                     ),
                   ),
+                  if (perMonth != null)
+                    Text(
+                      perMonth,
+                      style: textTheme.labelSmall?.copyWith(
+                        color: color.onSurfaceVariant.withValues(alpha: 0.7),
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -680,32 +773,22 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
   }
 
   // ── ACTIONS ──
-
   Future<void> _handlePurchase() async {
     HapticFeedback.mediumImpact();
     final billing = ref.read(billingServiceProvider);
 
     if (!billing.isAvailable) {
-      SnackbarService.error('Google Play is not available on this device.');
+      SnackbarService.error(BuddyMessages.playNotAvailable);
       return;
     }
 
     setState(() => _purchasing = true);
+    billing.setSelectedBasePlan(_selectedPlan);
 
-    final isLifetime = _selectedPlan == EntitlementProducts.lifetime;
-    final productId = isLifetime
-        ? EntitlementProducts.lifetime
-        : EntitlementProducts.subscription;
-
-    // Tell billing which base plan was selected (for subscription)
-    if (!isLifetime) {
-      billing.setSelectedBasePlan(_selectedPlan);
-    }
-
-    final started = await billing.buy(productId);
+    final started = await billing.buy(EntitlementProducts.subscription);
     if (!started && mounted) {
       setState(() => _purchasing = false);
-      SnackbarService.error('Could not start purchase. Please try again.');
+      SnackbarService.error(BuddyMessages.purchaseFailed);
     }
   }
 
@@ -714,22 +797,21 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
     final billing = ref.read(billingServiceProvider);
 
     if (!billing.isAvailable) {
-      SnackbarService.error('Google Play is not available on this device.');
+      SnackbarService.error(BuddyMessages.playNotAvailable);
       return;
     }
 
     setState(() => _purchasing = true);
     await billing.restorePurchases();
-
-    // Give the stream a moment to deliver restored purchases
     await Future.delayed(const Duration(seconds: 3));
 
     if (mounted) {
       setState(() => _purchasing = false);
+      invalidateEntitlements(ref);
       final isPro = await ref.read(isProProvider.future);
       if (isPro) {
-        SnackbarService.success('Purchases restored! Welcome back 🎉');
-        if (mounted) context.pop();
+        _confettiController.play();
+        _showSuccessSheet();
       } else {
         SnackbarService.info('No previous purchases found.');
       }

@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -48,7 +49,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
   void _nextStep() {
     if (_step == 0) {
       if (_nameController.text.trim().isEmpty) {
-        SnackbarService.error('Name is required');
+        SnackbarService.error(BuddyMessages.categoryNameRequired);
         return;
       }
       HapticFeedback.lightImpact();
@@ -91,13 +92,13 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
       if (data != null) {
         SharedPrefsUtil.instance.setOnboardingComplete();
         if (mounted) {
-          SnackbarService.success('Backup restored successfully');
+          SnackbarService.success(BuddyMessages.restoreSuccess);
           context.go(AppRoutes.home);
         }
       }
     } catch (e) {
       if (mounted) {
-        SnackbarService.error('Restore failed: $e');
+        SnackbarService.error(BuddyMessages.restoreFailed);
       }
     } finally {
       if (mounted) {
@@ -143,7 +144,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
       }
     } catch (e) {
       if (mounted) {
-        SnackbarService.error('Setup failed: $e');
+        SnackbarService.error(BuddyMessages.genericError);
       }
     } finally {
       if (mounted) {
@@ -469,12 +470,12 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: const Color(0xFF4CAF50).withValues(alpha: 0.25),
+                  color: color.primary.withValues(alpha: 0.25),
                   width: 2.5,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF4CAF50)
+                    color: color.primary
                         .withValues(alpha: isDark ? 0.15 : 0.12),
                     blurRadius: 40,
                     spreadRadius: 8,
@@ -489,17 +490,17 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      const Color(0xFF4CAF50)
+                      color.primary
                           .withValues(alpha: isDark ? 0.2 : 0.14),
-                      const Color(0xFF4CAF50)
+                      color.primary
                           .withValues(alpha: isDark ? 0.08 : 0.05),
                     ],
                   ),
                 ),
-                child: const Icon(
+                child: Icon(
                   LucideIcons.wallet,
                   size: 48,
-                  color: Color(0xFF4CAF50),
+                  color: color.primary,
                 ),
               ),
             ),
@@ -544,9 +545,9 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                     controller: _accountController,
                     decoration: InputDecoration(
                       hintText: 'e.g., Cash, Bank',
-                      icon: const Icon(
+                      icon: Icon(
                         LucideIcons.wallet,
-                        color: Color(0xFF4CAF50),
+                        color: color.primary,
                         size: 20,
                       ),
                       border: InputBorder.none,
@@ -572,9 +573,9 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                     controller: _balanceController,
                     decoration: InputDecoration(
                       hintText: '0',
-                      icon: const Icon(
+                      icon: Icon(
                         LucideIcons.indianRupee,
-                        color: Color(0xFF4CAF50),
+                        color: color.primary,
                         size: 20,
                       ),
                       border: InputBorder.none,
@@ -650,12 +651,12 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: const Color(0xFF9C27B0).withValues(alpha: 0.25),
+                color: color.tertiary.withValues(alpha: 0.25),
                 width: 2.5,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF9C27B0)
+                  color: color.tertiary
                       .withValues(alpha: isDark ? 0.15 : 0.12),
                   blurRadius: 40,
                   spreadRadius: 8,
@@ -670,17 +671,17 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    const Color(0xFF9C27B0)
+                    color.tertiary
                         .withValues(alpha: isDark ? 0.2 : 0.14),
-                    const Color(0xFF9C27B0)
+                    color.tertiary
                         .withValues(alpha: isDark ? 0.08 : 0.05),
                   ],
                 ),
               ),
-              child: const Icon(
+              child: Icon(
                 LucideIcons.layoutGrid,
                 size: 48,
-                color: Color(0xFF9C27B0),
+                color: color.tertiary,
               ),
             ),
           ),

@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
@@ -379,7 +380,7 @@ class _InvestmentPortfolioScreenState extends ConsumerState<InvestmentPortfolioS
                               SnackbarService.info('Holding added successfully');
                               if (mounted) context.pop();
                             } catch (e) {
-                              SnackbarService.error('Error: $e');
+                              SnackbarService.error(BuddyMessages.errorWith('$e'));
                             }
                           },
                           child: const Text('Add'),

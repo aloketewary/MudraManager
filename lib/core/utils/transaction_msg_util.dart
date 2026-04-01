@@ -1,6 +1,3 @@
-import 'dart:convert';
-
-import 'package:crypto/crypto.dart';
 import 'package:intl/intl.dart';
 
 class TransactionUtil {
@@ -23,7 +20,9 @@ class TransactionUtil {
   ];
   static const trnKeywords = ['debited', 'credited', 'payment', 'spent'];
 
-  static final creditPattern = RegExp(r'credited|credit|deposited|received');
+  static final creditPattern =
+      RegExp(r'credited|credit|deposited|received|added');
+
   static final debitPattern = RegExp(
     r'debited|debit|deducted|sent|paid|withdrawn',
   );
@@ -86,8 +85,7 @@ class TransactionUtil {
     info.money = getMoneySpentFromWords(processedWords);
     info.balance = getBalanceFromProcessed(fullProcessed);
 
-    final isValid =
-        [
+    final isValid = [
           info.balance,
           info.money,
           info.account?.no,
@@ -107,18 +105,20 @@ class TransactionUtil {
       // Try without dot
       index = words.indexOf('rs');
     }
-    
+
     // Try "refund of 118" or "amount of 118" pattern
     if (index == -1) {
       final ofIndex = words.indexOf('of');
       if (ofIndex != -1 && ofIndex + 1 < words.length) {
-        final amount = words[ofIndex + 1].replaceAll(',', '').replaceAll(RegExp(r'[^\d.]+$'), '');
+        final amount = words[ofIndex + 1]
+            .replaceAll(',', '')
+            .replaceAll(RegExp(r'[^\d.]+$'), '');
         if (!_isNotNumeric(amount)) {
           return amount;
         }
       }
     }
-    
+
     if (index == -1 || index + 1 >= words.length) return '';
 
     String amount = words[index + 1].replaceAll(',', '');
@@ -142,8 +142,7 @@ class TransactionUtil {
     final account = AccountDetails();
 
     // Extract bank name from message, sender, or address
-    account.bankName =
-        _extractBankName(fullProcessed) ??
+    account.bankName = _extractBankName(fullProcessed) ??
         _extractBankName(sender) ??
         _extractBankName(address);
 
@@ -345,17 +344,19 @@ class TransactionUtil {
     try {
       if (monthNameRegex.hasMatch(dateOnlyMsg.toLowerCase())) {
         final match = monthNameRegex.firstMatch(dateOnlyMsg.toLowerCase())!;
-        final monthStr = match.group(1)!.substring(0, 1).toUpperCase() + match.group(1)!.substring(1);
+        final monthStr = match.group(1)!.substring(0, 1).toUpperCase() +
+            match.group(1)!.substring(1);
         final day = match.group(2)!;
         final year = match.group(3)!;
         var hour = int.parse(match.group(4)!);
         final minute = match.group(5)!;
         final ampm = match.group(6)?.toLowerCase();
-        
+
         if (ampm == 'pm' && hour < 12) hour += 12;
         if (ampm == 'am' && hour == 12) hour = 0;
-        
-        return DateFormat('MMM d yyyy H m').parse('$monthStr $day $year $hour $minute');
+
+        return DateFormat('MMM d yyyy H m')
+            .parse('$monthStr $day $year $hour $minute');
       } else if (dateTimeRegex.hasMatch(dateOnlyMsg)) {
         final match = dateTimeRegex.stringMatch(dateOnlyMsg)!;
         final parts = match.trim().split(' ')..removeWhere((e) => e.isEmpty);
@@ -472,8 +473,7 @@ bool checkForTransactionalMessage(String? body) {
   }
 
   // Exclude government/tax notifications
-  final isGovtNotification =
-      lower.contains('itr') ||
+  final isGovtNotification = lower.contains('itr') ||
       lower.contains('income tax') ||
       lower.contains('pan:') ||
       lower.contains('cpc');
@@ -481,8 +481,8 @@ bool checkForTransactionalMessage(String? body) {
   if (isGovtNotification) return false;
 
   // Exclude loyalty points and rewards
-  final isLoyaltyPoints =
-      lower.contains('points') && (lower.contains('wallet') || lower.contains('reward')) ||
+  final isLoyaltyPoints = (lower.contains('points') &&
+          (lower.contains('wallet') || lower.contains('reward'))) ||
       lower.contains('cashback points') ||
       lower.contains('reward points') ||
       lower.contains('loyalty points');
@@ -490,166 +490,109 @@ bool checkForTransactionalMessage(String? body) {
   if (isLoyaltyPoints) return false;
 
   // Must have transaction keywords
-  final hasTrn =
-      lower.contains('debit') ||
+  final hasConfirmedTrn = lower.contains('debited') ||
+      lower.contains('credited') ||
       lower.contains('spent') ||
+      lower.contains('paid') ||
+      lower.contains('withdrawn');
+
+  final hasTrn = hasConfirmedTrn ||
+      (lower.contains('added') && RegExp(r'rs\.?|inr').hasMatch(lower)) ||
+      lower.contains('debit') ||
       lower.contains('credit') ||
       lower.contains('sent') ||
-      lower.contains('paid') ||
       lower.contains('transfer') ||
       lower.contains('received') ||
-      lower.contains('contribution') && RegExp(r'rs\.?\s*\d|inr\s*\d').hasMatch(lower) ||
-      lower.contains('successful') && RegExp(r'rs\.?\s*\d|inr\s*\d').hasMatch(lower);
+      (lower.contains('contribution') &&
+          RegExp(r'rs\.?\s*\d|inr\s*\d').hasMatch(lower)) ||
+      (lower.contains('successful') &&
+          RegExp(r'rs\.?\s*\d|inr\s*\d').hasMatch(lower));
 
   if (!hasTrn) return false;
 
   // Exclude promotional/marketing messages with links
-  final isPromo =
-      lower.contains('explore now') ||
-      lower.contains('plans starting') ||
-      lower.contains('get ') && lower.contains('gb') ||
-      lower.contains('offer') && lower.contains('http') ||
-      lower.contains('upgrade') && lower.contains('http') ||
-      lower.contains('subscribe') ||
-      lower.contains('click here') ||
-      lower.contains('please click') ||
-      lower.contains('visit') && lower.contains('http') ||
-      lower.contains('download app') ||
-      lower.contains('to know more') ||
-      lower.contains('facility') && lower.contains('enabled') ||
-      lower.contains('loan') && lower.contains('enabled') ||
-      lower.contains('shop for') && lower.contains('get') ||
-      lower.contains('get best deals');
+  final isPromo = !hasConfirmedTrn &&
+      (lower.contains('explore now') ||
+          lower.contains('plans starting') ||
+          (lower.contains('get ') && lower.contains('gb')) ||
+          (lower.contains('offer') && lower.contains('http')) ||
+          (lower.contains('upgrade') && lower.contains('http')) ||
+          lower.contains('subscribe') ||
+          lower.contains('click here') ||
+          lower.contains('please click') ||
+          (lower.contains('visit') && lower.contains('http')) ||
+          lower.contains('download app') ||
+          lower.contains('to know more') ||
+          (lower.contains('facility') && lower.contains('enabled')) ||
+          (lower.contains('loan') && lower.contains('enabled')) ||
+          (lower.contains('shop for') && lower.contains('get')) ||
+          lower.contains('get best deals'));
 
   // Exclude data usage alerts (in English and regional languages)
-  final isDataAlert =
-      lower.contains('data limit') ||
+  final isDataAlert = lower.contains('data limit') ||
       lower.contains('data usage') ||
       lower.contains('high speed data') ||
       lower.contains('data balance') ||
       lower.contains('data pack') ||
       lower.contains('data running low') ||
       lower.contains('data carry-forward') ||
-      lower.contains('consumed') && lower.contains('data') ||
+      (lower.contains('consumed') && lower.contains('data')) ||
       lower.contains('track usage') ||
-      lower.contains('validity') && !lower.contains('successful') ||
-      lower.contains('recharge') && !lower.contains('successful') && !RegExp(r'rs\.?\s*\d|inr\s*\d').hasMatch(lower) ||
-      lower.contains('talktime') && !lower.contains('successful') ||
+      (lower.contains('validity') && !lower.contains('successful')) ||
+      (lower.contains('recharge') &&
+          !lower.contains('successful') &&
+          !RegExp(r'rs\.?\s*\d|inr\s*\d').hasMatch(lower)) ||
+      (lower.contains('talktime') && !lower.contains('successful')) ||
       lower.contains('mb left') ||
       lower.contains('gb left') ||
       lower.contains('expires on') ||
-      lower.contains('unlimited pack') && !RegExp(r'rs\.?\s*\d|inr\s*\d').hasMatch(lower) ||
-      lower.contains('welcome back') && lower.contains('pack');
+      (lower.contains('unlimited pack') &&
+          !RegExp(r'rs\.?\s*\d|inr\s*\d').hasMatch(lower)) ||
+      (lower.contains('welcome back') && lower.contains('pack'));
 
-  // Exclude future/pending transactions
-  final isFuture =
-      lower.contains('will be debited') ||
-      lower.contains('will be credited') ||
-      lower.contains('to be debited') ||
-      lower.contains('to be credited') ||
-      lower.contains('request') ||
-      lower.contains('pending') ||
-      lower.contains('authorization') ||
-      lower.contains('hold') ||
-      lower.contains('mandate') && lower.contains('created') ||
-      lower.contains('autopay') && lower.contains('created');
+  // Exclude future/pending transactions — but NOT if the message has confirmed transaction keywords
+  final isFuture = !hasConfirmedTrn &&
+      (lower.contains('will be debited') ||
+          lower.contains('will be credited') ||
+          lower.contains('to be debited') ||
+          lower.contains('to be credited') ||
+          lower.contains('request') ||
+          lower.contains('pending') ||
+          lower.contains('authorization') ||
+          lower.contains('hold') ||
+          (lower.contains('mandate') && lower.contains('created')) ||
+          (lower.contains('autopay') && lower.contains('created')));
 
-  // Exclude bill reminders and due payments
-  final isBillReminder =
-      lower.contains('due') ||
-      lower.contains('pay by') ||
-      lower.contains('payment due') ||
-      lower.contains('bill due') ||
-      lower.contains('minimum due') ||
-      lower.contains('total due') ||
-      lower.contains('outstanding') ||
-      lower.contains('overdue') ||
-      lower.contains('reminder');
+  // Exclude bill reminders — but NOT if the message has confirmed transaction keywords
+  final isBillReminder = !hasConfirmedTrn &&
+      (lower.contains('due') ||
+          lower.contains('pay by') ||
+          lower.contains('payment due') ||
+          lower.contains('bill due') ||
+          lower.contains('minimum due') ||
+          lower.contains('total due') ||
+          lower.contains('outstanding') ||
+          lower.contains('overdue') ||
+          lower.contains('reminder'));
 
   // Exclude payment receipts/confirmations (only if no amount or purely informational)
-  final isReceipt =
-      lower.contains('payment receipt') && !RegExp(r'rs\.?\s*\d|inr\s*\d').hasMatch(lower) ||
-      lower.contains('download the') && lower.contains('receipt') && !RegExp(r'rs\.?\s*\d|inr\s*\d').hasMatch(lower);
+  final isReceipt = (lower.contains('payment receipt') &&
+          !RegExp(r'rs\.?\s*\d|inr\s*\d').hasMatch(lower)) ||
+      (lower.contains('download the') &&
+          lower.contains('receipt') &&
+          !RegExp(r'rs\.?\s*\d|inr\s*\d').hasMatch(lower));
 
   // Exclude OTP and verification messages
-  final isOTP =
-      lower.contains('otp') ||
+  final isOTP = lower.contains('otp') ||
       lower.contains('verification code') ||
       lower.contains('verify') ||
       lower.contains('consented') ||
-      lower.contains('consent') && lower.contains('share');
+      (lower.contains('consent') && lower.contains('share'));
 
-  return !isPromo && !isDataAlert && !isFuture && !isBillReminder && !isReceipt && !isOTP;
-}
-
-String generateSmsHash(String address, int? date, String body) {
-  final input = '$address|$date|$body';
-  return sha256.convert(utf8.encode(input)).toString();
-}
-
-/// Detects and marks internal transfers between user's own accounts
-/// Call this after loading all transactions to identify transfer pairs
-List<TransactionInfo> detectInternalTransfers(List<TransactionInfo> transactions) {
-  final List<TransactionInfo> result = List.from(transactions);
-  
-  for (int i = 0; i < result.length; i++) {
-    final txn = result[i];
-    if (txn.isInternalTransfer || txn.money == null || txn.money!.isEmpty) continue;
-    
-    // Look for matching opposite transaction on same date
-    for (int j = i + 1; j < result.length; j++) {
-      final other = result[j];
-      if (other.isInternalTransfer || other.money == null || other.money!.isEmpty) continue;
-      
-      // Check if amounts match
-      if (txn.money != other.money) continue;
-      
-      // Check if one is debit and other is credit
-      final isOpposite = 
-          (txn.typeOfTransaction == TransactionType.debited && 
-           other.typeOfTransaction == TransactionType.credited) ||
-          (txn.typeOfTransaction == TransactionType.credited && 
-           other.typeOfTransaction == TransactionType.debited);
-      
-      if (!isOpposite) continue;
-      
-      // Check if on same date
-      if (txn.transactionTime != null && other.transactionTime != null) {
-        final sameDate = 
-            txn.transactionTime!.year == other.transactionTime!.year &&
-            txn.transactionTime!.month == other.transactionTime!.month &&
-            txn.transactionTime!.day == other.transactionTime!.day;
-        
-        if (sameDate) {
-          result[i] = TransactionInfo(
-            account: txn.account,
-            balance: txn.balance,
-            money: txn.money,
-            typeOfTransaction: txn.typeOfTransaction,
-            transactionTime: txn.transactionTime,
-            address: txn.address,
-            sender: txn.sender,
-            body: txn.body,
-            smsHash: txn.smsHash,
-            isInternalTransfer: true,
-          );
-          result[j] = TransactionInfo(
-            account: other.account,
-            balance: other.balance,
-            money: other.money,
-            typeOfTransaction: other.typeOfTransaction,
-            transactionTime: other.transactionTime,
-            address: other.address,
-            sender: other.sender,
-            body: other.body,
-            smsHash: other.smsHash,
-            isInternalTransfer: true,
-          );
-          break;
-        }
-      }
-    }
-  }
-  
-  return result;
+  return !isPromo &&
+      !isDataAlert &&
+      !isFuture &&
+      !isBillReminder &&
+      !isReceipt &&
+      !isOTP;
 }

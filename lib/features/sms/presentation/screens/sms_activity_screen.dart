@@ -7,7 +7,6 @@ import 'package:isar_community/isar.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/sms_activity.dart';
-import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/refresh_helper.dart';
@@ -37,8 +36,28 @@ class SmsActivityScreen extends ConsumerStatefulWidget {
   ConsumerState<SmsActivityScreen> createState() => _SmsActivityScreenState();
 }
 
-class _SmsActivityScreenState extends ConsumerState<SmsActivityScreen> {
+class _SmsActivityScreenState extends ConsumerState<SmsActivityScreen>
+    with WidgetsBindingObserver {
   ActivityStatus? _filterStatus;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      ref.read(smsRefreshProvider.notifier).state++;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +70,7 @@ class _SmsActivityScreenState extends ConsumerState<SmsActivityScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('SMS Activity'),
+        title: const Text('Transaction Activity'),
         actions: [
           IconButton(
             icon: Icon(
@@ -156,7 +175,7 @@ class _SmsActivityScreenState extends ConsumerState<SmsActivityScreen> {
                           Text(
                             _filterStatus != null
                                 ? 'No ${_statusLabel(_filterStatus!).toLowerCase()} activities'
-                                : 'No SMS activities yet',
+                                : 'No activities yet',
                             style: textTheme.bodyLarge?.copyWith(
                               color: color.onSurfaceVariant,
                             ),
@@ -256,7 +275,7 @@ class _SmsActivityScreenState extends ConsumerState<SmsActivityScreen> {
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
-                    LucideIcons.messageSquare,
+                    LucideIcons.bellRing,
                     color: color.primary,
                     size: 28,
                   ),
@@ -268,7 +287,7 @@ class _SmsActivityScreenState extends ConsumerState<SmsActivityScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '${all.length} Messages',
+                      '${all.length} Transactions',
                       style: textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
                         color: color.primary,
@@ -295,7 +314,7 @@ class _SmsActivityScreenState extends ConsumerState<SmsActivityScreen> {
               _statPill(
                 '$approved',
                 'Approved',
-                const Color(0xFF4CAF50),
+                color.primary,
                 color,
                 textTheme,
               ),
@@ -303,7 +322,7 @@ class _SmsActivityScreenState extends ConsumerState<SmsActivityScreen> {
               _statPill(
                 '$pendingCount',
                 'Pending',
-                const Color(0xFFFF9800),
+                color.tertiary,
                 color,
                 textTheme,
               ),
@@ -476,13 +495,13 @@ class _SmsActivityScreenState extends ConsumerState<SmsActivityScreen> {
       case ActivityStatus.pending:
         return color.tertiary;
       case ActivityStatus.approved:
-        return const Color(0xFF4CAF50);
+        return color.primary;
       case ActivityStatus.duplicate:
         return color.error;
       case ActivityStatus.rejected:
         return color.onSurfaceVariant;
       case ActivityStatus.needsReview:
-        return const Color(0xFFFF9800);
+        return color.tertiary;
     }
   }
 }
@@ -589,9 +608,9 @@ class _ActivityCard extends ConsumerWidget {
                             color: color.tertiary,
                           ),
                         if (activity.isLikelyTransfer == true)
-                          const _StatusChip(
+                          _StatusChip(
                             label: 'TRANSFER',
-                            color: Color(0xFF2196F3),
+                            color: color.secondary,
                           ),
                       ],
                     ),
@@ -608,7 +627,7 @@ class _ActivityCard extends ConsumerWidget {
                   compact: true,
                   style: textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: isIncome ? const Color(0xFF4CAF50) : color.error,
+                    color: isIncome ? color.primary : color.error,
                   ),
                 ),
             ],
@@ -635,13 +654,13 @@ class _ActivityCard extends ConsumerWidget {
       case ActivityStatus.pending:
         return color.tertiary;
       case ActivityStatus.approved:
-        return const Color(0xFF4CAF50);
+        return color.primary;
       case ActivityStatus.duplicate:
         return color.error;
       case ActivityStatus.rejected:
         return color.onSurfaceVariant;
       case ActivityStatus.needsReview:
-        return const Color(0xFFFF9800);
+        return color.tertiary;
     }
   }
 
@@ -703,9 +722,9 @@ class _ConfidenceBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = confidence >= 80
-        ? const Color(0xFF4CAF50)
+        ? color.primary
         : confidence >= 60
-            ? const Color(0xFFFF9800)
+            ? color.tertiary
             : color.error;
 
     return Text(
@@ -843,7 +862,7 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                       compact: false,
                       style: textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: isIncome ? const Color(0xFF4CAF50) : color.error,
+                        color: isIncome ? color.primary : color.error,
                       ),
                     ),
                 ],
@@ -969,18 +988,18 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                     child: Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFF9800).withValues(alpha: 0.08),
+                        color: color.tertiary.withValues(alpha: 0.08),
                         borderRadius:
                             BorderRadius.circular(spacing.radiusMedium),
                         border: Border.all(
-                          color: const Color(0xFFFF9800).withValues(alpha: 0.2),
+                          color: color.tertiary.withValues(alpha: 0.2),
                         ),
                       ),
                       child: Row(
                         children: [
-                          const Icon(
+                          Icon(
                             LucideIcons.triangleAlert,
-                            color: Color(0xFFFF9800),
+                            color: color.tertiary,
                             size: 18,
                           ),
                           const SizedBox(width: 10),
@@ -1039,18 +1058,18 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                     child: Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF2196F3).withValues(alpha: 0.08),
+                        color: color.secondary.withValues(alpha: 0.08),
                         borderRadius:
                             BorderRadius.circular(spacing.radiusMedium),
                         border: Border.all(
-                          color: const Color(0xFF2196F3).withValues(alpha: 0.2),
+                          color: color.secondary.withValues(alpha: 0.2),
                         ),
                       ),
                       child: Row(
                         children: [
-                          const Icon(
+                          Icon(
                             LucideIcons.arrowLeftRight,
-                            color: Color(0xFF2196F3),
+                            color: color.secondary,
                             size: 18,
                           ),
                           const SizedBox(width: 10),
@@ -1135,7 +1154,8 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                       child: FilledButton.icon(
                         onPressed: () async {
                           HapticFeedback.mediumImpact();
-                          context.pop();
+                          final navigator = GoRouter.of(context);
+                          Navigator.pop(context); // close sheet
 
                           if (widget.activity.isLikelyTransfer == true) {
                             // Try to pre-match accounts
@@ -1183,13 +1203,13 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                             }
 
                             if (!context.mounted) return;
-                            context.push(
+                            navigator.push(
                               AppRoutes.transfer,
                               extra: {
                                 'initialAmount':
                                     widget.activity.amount?.toString(),
                                 'initialNote':
-                                    'SMS: ${widget.activity.merchant ?? widget.activity.sender}',
+                                    'Auto: ${widget.activity.merchant ?? widget.activity.sender}',
                                 'initialDate': widget.activity.date,
                                 if (fromAccount != null)
                                   'initialFromAccount': fromAccount,
@@ -1198,17 +1218,11 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                               },
                             );
                           } else {
-                            final transaction = Transaction.create(
-                              date: widget.activity.date,
-                              amount: widget.activity.amount ?? 0,
-                              isExpense: widget.activity.isIncome != true,
-                              description: widget.activity.body,
-                            );
-                            context.push(
+                            navigator.push(
                               AppRoutes.addTransaction,
                               extra: {
-                                'transaction': transaction,
                                 'smsActivity': widget.activity,
+                                'isIncome': widget.activity.isIncome == true,
                               },
                             );
                           }

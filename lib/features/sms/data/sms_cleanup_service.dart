@@ -1,33 +1,29 @@
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
-import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SmsHashCleanupService {
-  static const int maxHashCount = 1000;
-  static const int retentionDays = 90;
+  static const int _maxHashCount = 500;
   static final AppLog _log = AppLog(getLogger(), 'SmsHashCleanupService');
 
-  /// Cleanup old SMS hashes to prevent unbounded growth
   static Future<void> cleanupOldHashes() async {
     try {
-      final prefs = SharedPrefsUtil.instance;
+      final prefs = await SharedPreferences.getInstance();
       final hashes = prefs.getStringList('processed_sms_hashes') ?? [];
 
-      if (hashes.length > maxHashCount) {
-        final trimmed = hashes.sublist(hashes.length - maxHashCount);
+      if (hashes.length > _maxHashCount) {
+        final trimmed = hashes.sublist(hashes.length - _maxHashCount);
         await prefs.setStringList('processed_sms_hashes', trimmed);
-
-        _log.i('Cleaned up ${hashes.length - maxHashCount} old SMS hashes');
+        _log.i('Cleaned up ${hashes.length - _maxHashCount} old SMS hashes');
       }
     } catch (e) {
       _log.e('Failed to cleanup SMS hashes', e);
     }
   }
 
-  /// Clear all processed hashes (for manual re-scan)
   static Future<void> clearAllHashes() async {
     try {
-      final prefs = SharedPrefsUtil.instance;
+      final prefs = await SharedPreferences.getInstance();
       await prefs.setStringList('processed_sms_hashes', []);
       _log.i('Cleared all SMS hashes');
     } catch (e) {
@@ -35,9 +31,12 @@ class SmsHashCleanupService {
     }
   }
 
-  /// Get count of processed SMS
-  static int getProcessedCount() {
-    final prefs = SharedPrefsUtil.instance;
-    return (prefs.getStringList('processed_sms_hashes') ?? []).length;
+  static Future<int> getProcessedCount() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return (prefs.getStringList('processed_sms_hashes') ?? []).length;
+    } catch (_) {
+      return 0;
+    }
   }
 }

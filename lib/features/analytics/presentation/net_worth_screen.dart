@@ -264,7 +264,7 @@ class NetWorthScreen extends ConsumerWidget {
               'Total Assets',
               data.totalAssets,
               LucideIcons.circleArrowUp,
-              const Color(0xFF10B981),
+              color.primary,
               color,
               textTheme,
               spacing,
@@ -276,7 +276,7 @@ class NetWorthScreen extends ConsumerWidget {
               'Total Liabilities',
               data.totalLiabilities,
               LucideIcons.circleArrowDown,
-              const Color(0xFFEF4444),
+              color.error,
               color,
               textTheme,
               spacing,
@@ -382,7 +382,7 @@ class NetWorthScreen extends ConsumerWidget {
                   child: Container(
                     height: 8,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF10B981),
+                      color: color.primary,
                       borderRadius: BorderRadius.horizontal(
                         left: Radius.circular(spacing.elementGap * 0.5),
                       ),
@@ -396,7 +396,7 @@ class NetWorthScreen extends ConsumerWidget {
                   child: Container(
                     height: 8,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFEF4444),
+                      color: color.error,
                       borderRadius: BorderRadius.horizontal(
                         right: Radius.circular(spacing.elementGap * 0.5),
                       ),
@@ -412,7 +412,7 @@ class NetWorthScreen extends ConsumerWidget {
                 _buildLegendItem(
                   'Assets',
                   total > 0 ? (totalAssets / total * 100) : 0,
-                  const Color(0xFF10B981),
+                  color.primary,
                   textTheme,
                   color,
                   spacing,
@@ -420,7 +420,7 @@ class NetWorthScreen extends ConsumerWidget {
                 _buildLegendItem(
                   'Liabilities',
                   total > 0 ? (totalLiabilities / total * 100) : 0,
-                  const Color(0xFFEF4444),
+                  color.error,
                   textTheme,
                   color,
                   spacing,
@@ -472,7 +472,7 @@ class NetWorthScreen extends ConsumerWidget {
   }) {
     if (items.isEmpty) return const SizedBox.shrink();
     final itemColor =
-        isAsset ? const Color(0xFF10B981) : const Color(0xFFEF4444);
+        isAsset ? color.primary : color.error;
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: spacing.sectionGap),

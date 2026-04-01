@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/db/models/trip.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/dialog_utils.dart';
 import 'package:mudra_manager/features/trip/data/trip_provider.dart';
@@ -61,25 +64,44 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
     final key = 'settled_${widget.tripId}';
     final data = prefs.getString(key);
     if (data != null && data.isNotEmpty) {
-      final items = data.split('|');
-      final Map<String, DateTime> dates = {};
-      for (var item in items) {
-        final parts = item.split(':');
-        if (parts.length >= 2) {
-          final settlementKey = parts[0];
-          final dateStr = parts.sublist(1).join(':');
+      try {
+        final Map<String, dynamic> decoded = Map<String, dynamic>.from(
+          json.decode(data) as Map,
+        );
+        final Map<String, DateTime> dates = {};
+        for (final entry in decoded.entries) {
           try {
-            dates[settlementKey] = DateTime.parse(dateStr);
-          } catch (e) {
-            // Ignore parse errors
+            dates[entry.key] = DateTime.parse(entry.value as String);
+          } catch (_) {}
+        }
+        if (mounted) {
+          setState(() {
+            _settledKeys = dates.keys.toSet();
+            _settledDates = dates;
+          });
+        }
+      } catch (_) {
+        // Migrate from old delimiter format
+        final items = data.split('|');
+        final Map<String, DateTime> dates = {};
+        for (var item in items) {
+          final parts = item.split(':');
+          if (parts.length >= 2) {
+            final settlementKey = parts[0];
+            final dateStr = parts.sublist(1).join(':');
+            try {
+              dates[settlementKey] = DateTime.parse(dateStr);
+            } catch (_) {}
           }
         }
-      }
-      if (mounted) {
-        setState(() {
-          _settledKeys = dates.keys.toSet();
-          _settledDates = dates;
-        });
+        if (mounted) {
+          setState(() {
+            _settledKeys = dates.keys.toSet();
+            _settledDates = dates;
+          });
+          // Re-save in JSON format
+          _saveSettledData();
+        }
       }
     }
   }
@@ -87,10 +109,10 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
   Future<void> _saveSettledData() async {
     final prefs = await SharedPreferences.getInstance();
     final key = 'settled_${widget.tripId}';
-    final data = _settledDates.entries
-        .map((e) => '${e.key}:${e.value.toIso8601String()}')
-        .join('|');
-    await prefs.setString(key, data);
+    final data = _settledDates.map(
+      (k, v) => MapEntry(k, v.toIso8601String()),
+    );
+    await prefs.setString(key, json.encode(data));
   }
 
   @override
@@ -122,14 +144,27 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
         final transactionsList = trip.transactions.toList();
         double totalSpent = 0;
         for (var tripTxn in transactionsList) {
-          final txn = tripTxn.transaction.value;
-          if (txn != null) totalSpent += txn.amount;
+          final amount = tripTxn.resolvedAmount;
+          if (amount != null) totalSpent += amount;
         }
         final budget =
             trip.budget ?? (totalSpent > 0 ? totalSpent * 1.2 : 10000);
         final budgetUsed = totalSpent / budget;
 
         return Scaffold(
+          floatingActionButton: !trip.isTrip && trip.isActive
+              ? FloatingActionButton.extended(
+                  onPressed: () {
+                    HapticFeedback.mediumImpact();
+                    context.push(
+                      AppRoutes.addTripTransaction,
+                      extra: trip.id,
+                    );
+                  },
+                  icon: const Icon(LucideIcons.plus),
+                  label: const Text('Split Expense'),
+                )
+              : null,
           body: NestedScrollView(
             headerSliverBuilder: (context, innerBoxIsScrolled) {
               return [
@@ -162,9 +197,11 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                         } else if (value == 'end') {
                           final confirm = await DialogUtils.showConfirmation(
                             context,
-                            title: 'End Trip',
-                            message: 'Mark this trip as completed?',
-                            confirmText: 'End Trip',
+                            title: trip.isTrip ? 'End Trip' : 'End Group',
+                            message: trip.isTrip
+                                ? 'Mark this trip as completed?'
+                                : 'Mark this group as completed?',
+                            confirmText: trip.isTrip ? 'End Trip' : 'End Group',
                             icon: LucideIcons.circleCheck,
                           );
                           if (confirm == true) {
@@ -179,9 +216,10 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                           final confirm =
                               await DialogUtils.showDeleteConfirmation(
                             context,
-                            title: 'Delete Trip',
-                            message:
-                                'This will delete all trip data. Continue?',
+                            title: trip.isTrip ? 'Delete Trip' : 'Delete Group',
+                            message: trip.isTrip
+                                ? 'This will delete all trip data. Continue?'
+                                : 'This will delete all group data. Continue?',
                           );
                           if (confirm == true) {
                             await ref
@@ -196,24 +234,24 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                         }
                       },
                       itemBuilder: (ctx) => [
-                        const PopupMenuItem(
+                        PopupMenuItem(
                           value: 'edit',
                           child: Row(
                             children: [
-                              Icon(LucideIcons.pencil, size: 18),
-                              SizedBox(width: 12),
-                              Text('Edit Trip'),
+                              const Icon(LucideIcons.pencil, size: 18),
+                              const SizedBox(width: 12),
+                              Text(trip.isTrip ? 'Edit Trip' : 'Edit Group'),
                             ],
                           ),
                         ),
                         if (trip.isActive)
-                          const PopupMenuItem(
+                          PopupMenuItem(
                             value: 'end',
                             child: Row(
                               children: [
-                                Icon(LucideIcons.circleCheck, size: 18),
-                                SizedBox(width: 12),
-                                Text('End Trip'),
+                                const Icon(LucideIcons.circleCheck, size: 18),
+                                const SizedBox(width: 12),
+                                Text(trip.isTrip ? 'End Trip' : 'End Group'),
                               ],
                             ),
                           ),
@@ -228,7 +266,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                               ),
                               const SizedBox(width: 12),
                               Text(
-                                'Delete Trip',
+                                trip.isTrip ? 'Delete Trip' : 'Delete Group',
                                 style: TextStyle(color: color.error),
                               ),
                             ],
@@ -268,6 +306,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
                                     const SizedBox(height: 12),
+                                    if (trip.isTrip)
                                     Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
@@ -353,6 +392,41 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                                           ),
                                       ],
                                     ),
+                                    if (!trip.isTrip && trip.isActive)
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 10,
+                                          vertical: 4,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: color.primary,
+                                          borderRadius: BorderRadius.circular(
+                                            spacing.radiusSmall,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Container(
+                                              width: 6,
+                                              height: 6,
+                                              decoration: BoxDecoration(
+                                                color: color.onPrimary,
+                                                shape: BoxShape.circle,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 6),
+                                            Text(
+                                              'ACTIVE',
+                                              style: textTheme.labelSmall
+                                                  ?.copyWith(
+                                                color: color.onPrimary,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
                                     const SizedBox(height: 16),
                                     Row(
                                       crossAxisAlignment:
@@ -512,7 +586,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
   }
 
   Widget _buildTransactionsTab(
-    trip,
+    Trip trip,
     bool isGuestMode,
     AppSpacing spacing,
     ColorScheme color,
@@ -526,9 +600,10 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
           tripTxn.paidBy.value?.id != _filterParticipantId) {
         return false;
       }
-      if (_filterCategory != null &&
-          tripTxn.transaction.value?.category.value?.name != _filterCategory) {
-        return false;
+      if (_filterCategory != null) {
+        final catName = tripTxn.transaction.value?.category.value?.name
+            ?? tripTxn.splitExpense.value?.description;
+        if (catName != _filterCategory) return false;
       }
       return true;
     }).toList();
@@ -726,7 +801,13 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
         else
           ...filteredTransactions.map((tripTxn) {
             final txn = tripTxn.transaction.value;
+            final splitExp = tripTxn.splitExpense.value;
             final paidBy = tripTxn.paidBy.value;
+            final displayTitle = txn?.category.value?.name
+                ?? splitExp?.description
+                ?? 'Uncategorized';
+            final displayDesc = tripTxn.resolvedDescription;
+            final displayAmount = tripTxn.resolvedAmount ?? 0;
 
             return Dismissible(
               key: Key('trip_txn_${tripTxn.id}'),
@@ -742,18 +823,21 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
               ),
               confirmDismiss: (direction) async {
                 HapticFeedback.mediumImpact();
-                return await DialogUtils.showDeleteConfirmation(
+                final confirmed = await DialogUtils.showDeleteConfirmation(
                   context,
                   title: 'Remove Expense',
-                  message: 'Remove this expense from the trip?',
+                  message: trip.isTrip
+                      ? 'Remove this expense from the trip?'
+                      : 'Remove this expense from the group?',
                   deleteText: 'Remove',
                 );
-              },
-              onDismissed: (direction) async {
-                await ref
-                    .read(tripServiceProvider)
-                    .removeTripTransaction(widget.tripId, tripTxn.id);
-                ref.invalidate(tripByIdProvider(widget.tripId));
+                if (confirmed == true) {
+                  await ref
+                      .read(tripServiceProvider)
+                      .removeTripTransaction(widget.tripId, tripTxn.id);
+                  ref.invalidate(tripByIdProvider(widget.tripId));
+                }
+                return false;
               },
               child: Card(
                 elevation: 0,
@@ -781,7 +865,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                     height: 48,
                     child: ClipOval(
                       child: BoringAvatar(
-                        name: paidBy.name,
+                        name: paidBy?.name ?? 'Unknown',
                         palette: BoringAvatarPalette([
                           color.primary,
                           color.tertiary,
@@ -793,7 +877,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                     ),
                   ),
                   title: Text(
-                    txn?.category.value?.name ?? 'Uncategorized',
+                    displayTitle,
                     style: textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -808,10 +892,9 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                           color: color.onSurfaceVariant,
                         ),
                       ),
-                      if (txn?.description != null &&
-                          txn!.description!.isNotEmpty)
+                      if (displayDesc != null && displayDesc.isNotEmpty && displayDesc != displayTitle)
                         Text(
-                          txn.description!,
+                          displayDesc,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: textTheme.bodySmall?.copyWith(
@@ -823,7 +906,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                   ),
                   trailing: CurrencyText(
                     amount: GuestModeUtil.applyGuestMode(
-                      txn?.amount ?? 0,
+                      displayAmount,
                       isGuestMode,
                     ),
                     fixedLength: 0,
@@ -842,7 +925,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
   }
 
   Widget _buildSettlementsTab(
-    trip,
+    Trip trip,
     bool isGuestMode,
     AppSpacing spacing,
     ColorScheme color,
@@ -953,7 +1036,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
   }
 
   Widget _buildReportTab(
-    trip,
+    Trip? trip,
     bool isGuestMode,
     AppSpacing spacing,
     ColorScheme color,
@@ -970,7 +1053,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
         vertical: spacing.cardVertical,
       ),
       children: [
-        _buildTotalCostCard(data, isGuestMode, spacing, color, textTheme),
+        _buildTotalCostCard(data, isGuestMode, spacing, color, textTheme, trip),
         SizedBox(height: spacing.cardHorizontalMax),
         _buildPerPersonCard(data, isGuestMode, spacing, color, textTheme),
         SizedBox(height: spacing.cardHorizontalMax),
@@ -992,9 +1075,9 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
             child: FilledButton.tonalIcon(
               onPressed: () => _exportTripReport(
                 data: data,
-                tripName: trip.name,
-                startDate: trip.startDate,
-                endDate: trip.endDate,
+                tripName: trip?.name ?? '',
+                startDate: trip?.startDate ?? DateTime.now(),
+                endDate: trip?.endDate ?? DateTime.now(),
                 context: context,
                 color: color,
               ),
@@ -1013,9 +1096,9 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
     );
   }
 
-  _ReportData? _computeReportData(trip) {
-    final transactionsList = trip.transactions.toList();
-    final participants = trip.participants.toList();
+  _ReportData? _computeReportData(Trip? trip) {
+    final transactionsList = trip?.transactions.toList() ?? List.empty();
+    final participants = trip?.participants.toList() ?? List.empty();
     if (transactionsList.isEmpty) return null;
 
     double totalCost = 0;
@@ -1023,16 +1106,18 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
     final Map<int, double> participantSpending = {};
 
     for (var tripTxn in transactionsList) {
-      final txn = tripTxn.transaction.value;
-      if (txn != null) {
-        totalCost += txn.amount;
-        final categoryName = txn.category.value?.name ?? 'Uncategorized';
+      final amount = tripTxn.resolvedAmount;
+      if (amount != null) {
+        totalCost += amount;
+        final categoryName = tripTxn.transaction.value?.category.value?.name
+            ?? tripTxn.splitExpense.value?.description
+            ?? 'Uncategorized';
         categoryTotals[categoryName] =
-            (categoryTotals[categoryName] ?? 0) + txn.amount;
+            (categoryTotals[categoryName] ?? 0) + amount;
         final paidById = tripTxn.paidBy.value?.id;
         if (paidById != null) {
           participantSpending[paidById] =
-              (participantSpending[paidById] ?? 0) + txn.amount;
+              (participantSpending[paidById] ?? 0) + amount;
         }
       }
     }
@@ -1100,6 +1185,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
     AppSpacing spacing,
     ColorScheme color,
     TextTheme textTheme,
+    Trip? trip,
   ) {
     final dailyAvg = data.transactionCount > 0
         ? data.totalCost / data.transactionCount
@@ -1184,7 +1270,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                 ),
                 SizedBox(height: spacing.elementGap),
                 Text(
-                  'Total Trip Cost',
+                  trip?.isTrip == true ? 'Total Trip Cost' : 'Total Group Cost',
                   style: textTheme.bodyMedium?.copyWith(
                     color: color.onPrimaryContainer.withValues(alpha: 0.7),
                     letterSpacing: 0.3,

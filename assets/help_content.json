@@ -121,13 +121,13 @@
   },
   {
     "id": "sms",
-    "title": "SMS Import",
-    "icon": "sms",
-    "shortDescription": "Auto-import transactions from bank SMS",
-    "description": "Automatically detect and parse financial transactions from bank and wallet SMS messages. Review and import with one tap.",
+    "title": "Auto Import",
+    "icon": "notifications",
+    "shortDescription": "Auto-import transactions from bank notifications",
+    "description": "Automatically detect and parse financial transactions from bank and wallet notification messages. Review and import with one tap.",
     "steps": [
-      "Go to Profile → SMS Import",
-      "Grant SMS permission",
+      "Go to Profile → Auto Import",
+      "Grant notification access permission",
       "Enable auto-import",
       "Review pending transactions",
       "Confirm or edit before importing"

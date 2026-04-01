@@ -46,8 +46,8 @@ class BudgetDetailsScreen extends ConsumerWidget {
     final statusColor = pct >= 1.0
         ? color.error
         : pct >= 0.8
-            ? Colors.orange
-            : const Color(0xFF10B981);
+            ? color.tertiary
+            : color.primary;
 
     // Sort categories: over 80% first
     final List<CategorySpending> sortedCategories =
@@ -623,7 +623,7 @@ class BudgetDetailsScreen extends ConsumerWidget {
     final catColor = catPct >= 1.0
         ? color.error
         : catPct >= 0.8
-            ? Colors.orange
+            ? color.tertiary
             : color.tertiary;
     final isOverBudget = catPct >= 0.8;
     final catRemaining = cat.allocated - cat.spent;

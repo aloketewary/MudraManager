@@ -77,4 +77,8 @@ abstract class AppRoutes {
 
   // Upgrade
   static const upgrade = '/upgrade';
+
+  // Import/Export
+  static const importExport = '/import-export';
+  static const importPreview = '/import-preview';
 }

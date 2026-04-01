@@ -270,18 +270,27 @@ class TransactionService {
     log.d(
       'Adding transaction: ${txn.isExpense ? "Expense" : "Income"} of ₹${txn.amount}',
     );
-    log.d('Transaction date: ${txn.date}');
-    log.d('Transaction account: ${txn.account.value?.name}');
-    log.d('Transaction category: ${txn.category.value?.name}');
 
     final isar = await isarService.getInstance();
-    await isar.writeTxn(() async {
-      final id = await isar.transactions.put(txn);
-      log.d('Transaction put returned ID: $id');
-      await txn.category.save();
-      await txn.account.save();
-      await txn.tags.save();
-    });
+
+    // Capture tags BEFORE entering writeTxn — toList() triggers loadSync()
+    // which can't run inside a write transaction
+    final tagsToSave = txn.tags.toList();
+
+    try {
+      await isar.writeTxn(() async {
+        await isar.transactions.put(txn);
+        await txn.category.save();
+        await txn.account.save();
+        await txn.tags.reset();
+        txn.tags.addAll(tagsToSave);
+        await txn.tags.save();
+      });
+    } catch (e) {
+      log.e('Failed to save transaction: ₹${txn.amount}', e);
+      rethrow;
+    }
+
     log.i('Transaction saved successfully with ID: ${txn.id}');
 
     // Emit transaction event to plugins
@@ -301,16 +310,6 @@ class TransactionService {
       }
     }
 
-    // Verify the transaction was saved
-    final saved = await isar.transactions.get(txn.id);
-    if (saved != null) {
-      log.d(
-        'Verified: Transaction ${txn.id} exists in DB with date: ${saved.date}',
-      );
-    } else {
-      log.e('ERROR: Transaction ${txn.id} not found in DB after save!');
-    }
-
     // Track gamification
     await gamificationService?.track(GamificationEvent.transactionAdded);
     await gamificationService?.track(GamificationEvent.transactionTrackedToday);
@@ -318,7 +317,7 @@ class TransactionService {
     if (txn.isTransfer) {
       await gamificationService?.track(GamificationEvent.transferCompleted);
     }
-    if (txn.tags.isNotEmpty) {
+    if (tagsToSave.isNotEmpty) {
       await gamificationService?.track(GamificationEvent.tagUsed);
     }
   }

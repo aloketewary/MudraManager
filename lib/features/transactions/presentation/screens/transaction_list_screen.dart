@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -14,6 +15,7 @@ import 'package:mudra_manager/core/utils/dialog_utils.dart';
 import 'package:mudra_manager/core/utils/icon_helper.dart';
 import 'package:mudra_manager/core/utils/refresh_helper.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
+import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 import 'package:mudra_manager/features/transactions/presentation/widgets/transaction_card.dart';
 import 'package:mudra_manager/features/transactions/presentation/widgets/transaction_group.dart';
@@ -271,9 +273,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
           child: sectionedAsync.when(
             data: (sectioned) => RefreshIndicator(
               onRefresh: () => RefreshHelper.withMinDuration(() async {
-                ref.invalidate(allSectionedTransactionsProvider(_filter));
-                ref.invalidate(sectionedTransactionsProvider);
-                ref.invalidate(sectionedTransactionsByDateRangeProvider);
+                _invalidateTransactionProviders();
               }),
               child: _buildTransactionList(
                 sectioned,
@@ -294,6 +294,15 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
     );
   }
 
+  void _invalidateTransactionProviders() {
+    _clearCache();
+    ref.invalidate(allSectionedTransactionsProvider(_filter));
+    ref.invalidate(sectionedTransactionsProvider);
+    ref.invalidate(sectionedTransactionsByDateRangeProvider);
+    ref.invalidate(transactionProvider);
+    ref.invalidate(accountServiceProvider);
+  }
+
   // ── SEARCH BAR ──
   Widget _buildSearchBar(
     ColorScheme color,
@@ -306,7 +315,8 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
         vertical: spacing.cardVertical,
       ),
       child: Material(
-        elevation: 2,
+        elevation: 0,
+        color: color.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
         child: TextField(
           autofocus: true,
@@ -1084,7 +1094,8 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
       );
     }
     if (result == true && mounted) {
-      setState(() => _clearCache());
+      _invalidateTransactionProviders();
+      setState(() {});
     }
   }
 
@@ -1113,15 +1124,11 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
     }
 
     await ref.read(transactionProvider).deleteTransaction(transaction.id);
-
+    _invalidateTransactionProviders();
     setState(() => _clearCache());
 
-    ref.invalidate(allSectionedTransactionsProvider(_filter));
-    ref.invalidate(transactionProvider);
-    ref.invalidate(allTripsProvider);
-
     if (context.mounted) {
-      SnackbarService.success('Transaction deleted successfully');
+      SnackbarService.success(BuddyMessages.txnDeleted);
     }
   }
 

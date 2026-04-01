@@ -1649,16 +1649,16 @@ abstract class AppLocalizations {
   /// **'Clear All'**
   String get sms_clearAllTooltip;
 
-  /// Description for SMS imported transactions
+  /// Description for auto imported transactions
   ///
   /// In en, this message translates to:
-  /// **'Imported from SMS'**
+  /// **'Auto-imported'**
   String get sms_importedFromSmsDescription;
 
-  /// Warning message to select at least one SMS
+  /// Warning message to select at least one transaction
   ///
   /// In en, this message translates to:
-  /// **'Please select at least one SMS'**
+  /// **'Please select at least one transaction'**
   String get sms_selectAtLeastOneMessage;
 
   /// Label for all time period
@@ -1744,6 +1744,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your data stays on your device. No cloud, no tracking — just encrypted local storage.'**
   String get onboard_SecureAndPrivateDesc;
+
+  /// Auto-detect transactions from notifications
+  ///
+  /// In en, this message translates to:
+  /// **'Smart Auto Tracking'**
+  String get onboard_SmartAutoTracking;
+
+  /// Description for auto tracking onboarding page
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically detect and import transactions from your bank notifications.'**
+  String get onboard_SmartAutoTrackingDesc;
 }
 
 class _AppLocalizationsDelegate

@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
@@ -51,6 +53,8 @@ import 'package:mudra_manager/features/trip/presentation/screens/expense_detail_
 import 'package:mudra_manager/features/trip/presentation/screens/trip_detail_screen.dart';
 import 'package:mudra_manager/features/trip/presentation/screens/trips_screen.dart';
 import 'package:mudra_manager/features/upgrade/presentation/screens/upgrade_screen.dart';
+import 'package:mudra_manager/features/import_export/presentation/screens/import_export_screen.dart';
+import 'package:mudra_manager/features/import_export/presentation/screens/import_preview_screen.dart';
 import 'package:mudra_manager/plugins/credit_card_reminder_settings.dart';
 import 'package:mudra_manager/shared/screens/notification_page_screen.dart';
 import 'package:mudra_manager/features/gamification/screens/achievements_screen.dart';
@@ -305,10 +309,7 @@ class AppRouter {
                 path: AppRoutes.trips,
                 builder: (context, state) => const TripsScreen(),
               ),
-              GoRoute(
-                path: AppRoutes.createTrip,
-                builder: (context, state) => const ManageTripScreen(),
-              ),
+
               GoRoute(
                 path: AppRoutes.tripDetail,
                 builder: (context, state) {
@@ -324,6 +325,13 @@ class AppRouter {
                       ? extra
                       : (extra as Map<String, dynamic>)['tripId'] as int;
                   return AddTripTransactionScreen(tripId: tripId);
+                },
+              ),
+              GoRoute(
+                path: AppRoutes.createTrip,
+                builder: (context, state) {
+                  final extra = state.extra as Map<String, dynamic>?;
+                  return ManageTripScreen(isTrip: extra?['isTrip'] ?? true);
                 },
               ),
               GoRoute(
@@ -401,6 +409,22 @@ class AppRouter {
               GoRoute(
                 path: AppRoutes.upgrade,
                 builder: (context, state) => const UpgradeScreen(),
+              ),
+              GoRoute(
+                path: AppRoutes.importExport,
+                builder: (context, state) => const ImportExportScreen(),
+              ),
+              GoRoute(
+                path: AppRoutes.importPreview,
+                builder: (context, state) {
+                  final bytes = state.extra;
+                  if (bytes is! Uint8List) {
+                    return const Scaffold(
+                      body: Center(child: Text('Invalid file data')),
+                    );
+                  }
+                  return ImportPreviewScreen(fileBytes: bytes);
+                },
               ),
             ],
           ),

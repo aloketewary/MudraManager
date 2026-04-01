@@ -8,6 +8,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/db/models/trip.dart';
 import 'package:mudra_manager/core/entitlement/entitlement_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/core/utils/dialog_utils.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/profile/data/user_profile_provider.dart';
@@ -15,8 +16,13 @@ import 'package:mudra_manager/features/trip/data/trip_provider.dart';
 
 class ManageTripScreen extends ConsumerStatefulWidget {
   final int? tripId;
+  final bool isTrip;
 
-  const ManageTripScreen({super.key, this.tripId});
+  const ManageTripScreen({
+    super.key,
+    this.tripId,
+    this.isTrip = true,
+  });
 
   @override
   ConsumerState<ManageTripScreen> createState() => _ManageTripScreenState();
@@ -34,6 +40,13 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
   bool _isInitialized = false;
 
   bool get isEditMode => widget.tripId != null;
+  late bool _isTrip;
+
+  @override
+  void initState() {
+    super.initState();
+    _isTrip = widget.isTrip;
+  }
 
   @override
   void dispose() {
@@ -53,6 +66,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
     _participants.clear();
     _participants.addAll(trip.participants.toList());
     _isActive = trip.isActive;
+    _isTrip = trip.isTrip;
     _isInitialized = true;
   }
 
@@ -169,42 +183,44 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
 
   Future<void> _saveTrip(Trip? originalTrip) async {
     if (_nameController.text.trim().isEmpty) {
-      SnackbarService.error('Please enter trip name');
+      SnackbarService.error(BuddyMessages.tripNameRequired(_isTrip));
       return;
     }
 
     if (_participants.isEmpty) {
-      SnackbarService.error('Add at least one participant');
+      SnackbarService.error(BuddyMessages.addParticipant);
       return;
     }
     if (!isEditMode) {
       final canCreate = await ref.read(canCreateTripProvider.future);
       if (!canCreate) {
-        SnackbarService.warning(
-          'Free plan allows 1 active trip. Upgrade to Pro for unlimited.',
-        );
+        SnackbarService.warning(BuddyMessages.tripLimitReached(_isTrip));
         return;
       }
     }
     HapticFeedback.mediumImpact();
 
-    final budget = _budgetController.text.trim().isEmpty
-        ? null
-        : double.tryParse(_budgetController.text.trim());
+    final budget = _isTrip && _budgetController.text.trim().isNotEmpty
+        ? double.tryParse(_budgetController.text.trim())
+        : null;
+    // For split groups, use wide date range
+    final startDate = _isTrip ? _startDate : DateTime(2000);
+    final endDate = _isTrip ? _endDate : DateTime(2099);
 
     if (isEditMode && originalTrip != null) {
-      final datesChanged =
-          !DateUtils.isSameDay(_startDate, originalTrip.startDate) ||
-              !DateUtils.isSameDay(_endDate, originalTrip.endDate);
+      final datesChanged = _isTrip &&
+          (!DateUtils.isSameDay(_startDate, originalTrip.startDate) ||
+              !DateUtils.isSameDay(_endDate, originalTrip.endDate));
 
       originalTrip.name = _nameController.text.trim();
       originalTrip.description = _descController.text.trim().isEmpty
           ? null
           : _descController.text.trim();
-      originalTrip.startDate = _startDate;
-      originalTrip.endDate = _endDate;
+      originalTrip.startDate = startDate;
+      originalTrip.endDate = endDate;
       originalTrip.budget = budget;
       originalTrip.isActive = _isActive;
+      originalTrip.isTrip = _isTrip;
 
       await ref.read(tripServiceProvider).updateTrip(
             originalTrip,
@@ -214,22 +230,23 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
 
       ref.invalidate(allTripsProvider);
       ref.invalidate(tripByIdProvider(widget.tripId!));
-      SnackbarService.success('Trip updated successfully');
+      SnackbarService.success(BuddyMessages.tripUpdated(_isTrip));
     } else {
       final trip = Trip.create(
         name: _nameController.text.trim(),
         description: _descController.text.trim().isEmpty
             ? null
             : _descController.text.trim(),
-        startDate: _startDate,
-        endDate: _endDate,
+        startDate: startDate,
+        endDate: endDate,
         budget: budget,
         isActive: _isActive,
+        isTrip: _isTrip,
       );
 
       await ref.read(tripServiceProvider).createTrip(trip, _participants);
       ref.invalidate(allTripsProvider);
-      SnackbarService.success('Trip created successfully!');
+      SnackbarService.success(BuddyMessages.tripCreated(_isTrip));
     }
 
     if (mounted) context.pop();
@@ -238,10 +255,11 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
   Future<void> _finalizeTrip(Trip trip) async {
     final confirm = await DialogUtils.showConfirmation(
       context,
-      title: 'Finalize Trip',
-      message:
-          'This will mark the trip as ended. You can\'t add expenses after this.',
-      confirmText: 'Finalize',
+      title: _isTrip ? 'Finalize Trip' : 'Close Group',
+      message: _isTrip
+          ? 'This will mark the trip as ended. You can\'t add expenses after this.'
+          : 'This will close the group. You can\'t add expenses after this.',
+      confirmText: _isTrip ? 'Finalize' : 'Close',
       icon: LucideIcons.circleCheck,
     );
     if (confirm != true) return;
@@ -253,23 +271,24 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
           clearTransactions: false,
         );
     ref.invalidate(allTripsProvider);
-    SnackbarService.success('Trip finalized');
+    SnackbarService.success(BuddyMessages.tripFinalized(_isTrip));
     if (mounted) context.pop();
   }
 
   Future<void> _deleteTrip(Trip trip) async {
     final confirm = await DialogUtils.showDeleteConfirmation(
       context,
-      title: 'Delete Trip',
-      message:
-          'This will permanently delete the trip and all expenses. Continue?',
+      title: _isTrip ? 'Delete Trip' : 'Delete Group',
+      message: _isTrip
+          ? 'This will permanently delete the trip and all expenses. Continue?'
+          : 'This will permanently delete the group and all split data. Continue?',
       deleteText: 'Delete',
     );
     if (confirm != true) return;
 
     await ref.read(tripServiceProvider).deleteTrip(trip.id);
     ref.invalidate(allTripsProvider);
-    SnackbarService.success('Trip deleted');
+    SnackbarService.success(BuddyMessages.tripDeleted(_isTrip));
     if (mounted) context.pop();
   }
 
@@ -299,8 +318,8 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
         data: (trip) {
           if (trip == null) {
             return Scaffold(
-              appBar: AppBar(title: const Text('Trip Not Found')),
-              body: const Center(child: Text('Trip not found')),
+              appBar: AppBar(title: Text(_isTrip ? 'Trip Not Found' : 'Group Not Found')),
+              body: Center(child: Text(_isTrip ? 'Trip not found' : 'Group not found')),
             );
           }
 
@@ -314,7 +333,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
           return _buildContent(spacing, color, textTheme, trip);
         },
         loading: () => Scaffold(
-          appBar: AppBar(title: const Text('Edit Trip')),
+          appBar: AppBar(title: Text(_isTrip ? 'Edit Trip' : 'Edit Group')),
           body: const Center(child: CircularProgressIndicator()),
         ),
         error: (e, _) => Scaffold(
@@ -337,7 +356,11 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEditMode ? 'Edit Trip' : 'Create Trip'),
+        title: Text(
+          isEditMode
+              ? (_isTrip ? 'Edit Trip' : 'Edit Split Group')
+              : (_isTrip ? 'Create Trip' : 'Create Split Group'),
+        ),
         leading: IconButton(
           icon: const Icon(LucideIcons.x),
           onPressed: () {
@@ -358,6 +381,57 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
       ),
       body: ListView(
         children: [
+          if (!isEditMode)
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                spacing.cardInner,
+                spacing.cardInner,
+                spacing.cardInner,
+                0,
+              ),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: _isTrip
+                      ? color.primaryContainer
+                      : color.tertiaryContainer,
+                  borderRadius:
+                      BorderRadius.circular(spacing.radiusMedium),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      _isTrip ? LucideIcons.plane : LucideIcons.split,
+                      size: 20,
+                      color: _isTrip
+                          ? color.onPrimaryContainer
+                          : color.onTertiaryContainer,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      _isTrip ? 'Travel Trip' : 'Split Group',
+                      style: textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: _isTrip
+                            ? color.onPrimaryContainer
+                            : color.onTertiaryContainer,
+                      ),
+                    ),
+                    const Spacer(),
+                    Icon(
+                      LucideIcons.lock,
+                      size: 14,
+                      color: _isTrip
+                          ? color.onPrimaryContainer.withValues(alpha: 0.5)
+                          : color.onTertiaryContainer.withValues(alpha: 0.5),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           Padding(
             padding: EdgeInsets.all(spacing.cardInner),
             child: Column(
@@ -368,7 +442,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
                     Icon(LucideIcons.info, color: color.primary, size: 20),
                     const SizedBox(width: 8),
                     Text(
-                      'Trip Details',
+                      _isTrip ? 'Trip Details' : 'Group Details',
                       style: textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -379,12 +453,16 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
                 TextField(
                   controller: _nameController,
                   decoration: InputDecoration(
-                    labelText: 'Trip Name',
-                    hintText: 'e.g., Goa Trip 2024',
+                    labelText: _isTrip ? 'Trip Name' : 'Group Name',
+                    hintText: _isTrip
+                        ? 'e.g., Goa Trip 2024'
+                        : 'e.g., Weekend dinner split',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(spacing.radiusMedium),
                     ),
-                    prefixIcon: const Icon(LucideIcons.mapPin),
+                    prefixIcon: Icon(
+                      _isTrip ? LucideIcons.mapPin : LucideIcons.users,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -392,7 +470,9 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
                   controller: _descController,
                   decoration: InputDecoration(
                     labelText: 'Description (Optional)',
-                    hintText: 'Beach vacation with friends',
+                    hintText: _isTrip
+                        ? 'Beach vacation with friends'
+                        : 'Split expenses with friends',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(spacing.radiusMedium),
                     ),
@@ -401,21 +481,23 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
                   maxLines: 2,
                 ),
                 const SizedBox(height: 16),
-                TextField(
-                  controller: _budgetController,
-                  decoration: InputDecoration(
-                    labelText: 'Budget (Optional)',
-                    hintText: 'e.g., 50000',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                if (_isTrip)
+                  TextField(
+                    controller: _budgetController,
+                    decoration: InputDecoration(
+                      labelText: 'Budget (Optional)',
+                      hintText: 'e.g., 50000',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                      ),
+                      prefixIcon: const Icon(LucideIcons.indianRupee),
                     ),
-                    prefixIcon: const Icon(LucideIcons.indianRupee),
+                    keyboardType: TextInputType.number,
                   ),
-                  keyboardType: TextInputType.number,
-                ),
               ],
             ),
           ),
+          if (_isTrip) ...[
           SizedBox(height: spacing.sectionGap),
           Padding(
             padding: EdgeInsets.all(spacing.cardInner),
@@ -576,6 +658,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
               ],
             ),
           ),
+          ],
           SizedBox(height: spacing.sectionGap),
           if (isEditMode)
             Padding(
@@ -588,7 +671,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
                       Icon(LucideIcons.power, color: color.primary, size: 20),
                       const SizedBox(width: 8),
                       Text(
-                        'Active Trip',
+                        _isTrip ? 'Active Trip' : 'Active Group',
                         style: textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -597,7 +680,9 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Mark as active to track expenses in real-time',
+                    _isTrip
+                        ? 'Mark as active to track expenses in real-time'
+                        : 'Mark as active to keep splitting expenses',
                     style: textTheme.bodySmall?.copyWith(
                       color: color.onSurfaceVariant,
                     ),
@@ -827,7 +912,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
                   OutlinedButton.icon(
                     onPressed: () => _finalizeTrip(trip),
                     icon: const Icon(LucideIcons.circleCheck, size: 20),
-                    label: const Text('Finalize Trip'),
+                    label: Text(_isTrip ? 'Finalize Trip' : 'Finalize Group'),
                     style: OutlinedButton.styleFrom(
                       minimumSize: const Size(double.infinity, 48),
                       side: BorderSide(color: color.error),
@@ -838,7 +923,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
                   OutlinedButton.icon(
                     onPressed: () => _deleteTrip(trip),
                     icon: const Icon(LucideIcons.trash2, size: 20),
-                    label: const Text('Delete Trip'),
+                    label: Text(_isTrip ? 'Delete Trip' : 'Delete Group'),
                     style: OutlinedButton.styleFrom(
                       minimumSize: const Size(double.infinity, 48),
                       side: BorderSide(color: color.error),

@@ -51,7 +51,7 @@ class BalanceHistoryService {
           .amountProperty()
           .sum();
 
-      final balance = account.accountType.name == 'creditCard'
+      final balance = account.accountType == AccountType.creditCard
           ? account.initialBalance + expense - income
           : account.initialBalance + income - expense;
 
@@ -89,13 +89,12 @@ class BalanceHistoryService {
   Future<double?> getBalanceOnDate(int accountId, DateTime date) async {
     final isar = await IsarService.initIsar();
 
+    final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);
     final snapshot = await isar.balanceSnapshots
         .filter()
         .account((q) => q.idEqualTo(accountId))
         .and()
-        .dateLessThan(date)
-        .or()
-        .dateEqualTo(date)
+        .dateLessThan(endOfDay, include: true)
         .sortByDateDesc()
         .findFirst();
 

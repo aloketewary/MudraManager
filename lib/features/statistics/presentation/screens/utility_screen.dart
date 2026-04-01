@@ -23,53 +23,62 @@ class UtilityScreenState extends ConsumerState<UtilityScreen> {
   List<String> _seenUtilities = [];
   bool _isLoading = true;
 
-  final List<_UtilityItem> _allUtilities = [
-    _UtilityItem(
-      id: 'trips',
-      title: 'Trips & Split',
-      subtitle: 'Group expenses & settlements',
-      icon: LucideIcons.plane,
-      route: AppRoutes.trips,
-      color: const Color(0xFF6366F1),
-    ),
-    _UtilityItem(
-      id: 'monthly_comparison',
-      title: 'Monthly Comparison',
-      subtitle: 'Current vs last month',
-      icon: LucideIcons.arrowLeftRight,
-      route: AppRoutes.monthlyComparison,
-      color: const Color(0xFF8B5CF6),
-    ),
-    _UtilityItem(
-      id: 'recurring',
-      title: 'Bill Control Center',
-      subtitle: 'Auto-create transactions',
-      icon: LucideIcons.repeat,
-      route: AppRoutes.recurringTransactions,
-      color: const Color(0xFF10B981),
-    ),
-    _UtilityItem(
-      id: 'budgets',
-      title: 'Budgets',
-      subtitle: 'Manage spending limits',
-      icon: LucideIcons.chartPie,
-      route: AppRoutes.budgetDashboard,
-      color: const Color(0xFFEC4899),
-    ),
-    _UtilityItem(
-      id: 'goals',
-      title: 'Goals',
-      subtitle: 'Track savings progress',
-      icon: LucideIcons.target,
-      route: AppRoutes.goalScreen,
-      color: const Color(0xFFF59E0B),
-    ),
-  ];
+  final List<_UtilityItem> _allUtilities = [];
+  bool _utilitiesInitialized = false;
+
+  void _ensureUtilitiesInitialized() {
+    if (_utilitiesInitialized) return;
+    _utilitiesInitialized = true;
+    final cs = Theme.of(context).colorScheme;
+    _allUtilities.addAll([
+      _UtilityItem(
+        id: 'trips',
+        title: 'Trips & Split',
+        subtitle: 'Group expenses & settlements',
+        icon: LucideIcons.plane,
+        route: AppRoutes.trips,
+        color: cs.primary,
+      ),
+      _UtilityItem(
+        id: 'monthly_comparison',
+        title: 'Monthly Comparison',
+        subtitle: 'Current vs last month',
+        icon: LucideIcons.arrowLeftRight,
+        route: AppRoutes.monthlyComparison,
+        color: cs.secondary,
+      ),
+      _UtilityItem(
+        id: 'recurring',
+        title: 'Bill Control Center',
+        subtitle: 'Auto-create transactions',
+        icon: LucideIcons.repeat,
+        route: AppRoutes.recurringTransactions,
+        color: cs.tertiary,
+      ),
+      _UtilityItem(
+        id: 'budgets',
+        title: 'Budgets',
+        subtitle: 'Manage spending limits',
+        icon: LucideIcons.chartPie,
+        route: AppRoutes.budgetDashboard,
+        color: cs.error,
+      ),
+      _UtilityItem(
+        id: 'goals',
+        title: 'Goals',
+        subtitle: 'Track savings progress',
+        icon: LucideIcons.target,
+        route: AppRoutes.goalScreen,
+        color: cs.primary,
+      ),
+    ]);
+  }
 
   @override
-  void initState() {
-    super.initState();
-    _loadPreferences();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _ensureUtilitiesInitialized();
+    if (_isLoading) _loadPreferences();
   }
 
   Future<void> _loadPreferences() async {
@@ -377,16 +386,8 @@ class UtilityScreenState extends ConsumerState<UtilityScreen> {
                                 Container(
                                   padding: const EdgeInsets.all(16),
                                   decoration: BoxDecoration(
-                                    color: color.surface.withValues(alpha: 0.9),
+                                    color: color.surfaceContainerHigh,
                                     borderRadius: BorderRadius.circular(20),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color:
-                                            Colors.black.withValues(alpha: 0.1),
-                                        blurRadius: 20,
-                                        offset: const Offset(0, 4),
-                                      ),
-                                    ],
                                   ),
                                   child: Row(
                                     children: [
@@ -562,9 +563,9 @@ class UtilityScreenState extends ConsumerState<UtilityScreen> {
                         }
 
                         final alertColor = alert.type == AlertType.urgent
-                            ? const Color(0xFFFFAB91)
+                            ? color.error
                             : alert.type == AlertType.warning
-                                ? const Color(0xFFFFD54F)
+                                ? color.tertiary
                                 : color.primary;
 
                         return SliverToBoxAdapter(

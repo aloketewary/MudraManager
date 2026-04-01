@@ -399,7 +399,7 @@ class _TransactionCardState extends ConsumerState<TransactionCard>
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               AdaptiveText(
-                '${widget.category?.name}',
+                widget.category?.name ?? 'Uncategorized',
                 style: textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),

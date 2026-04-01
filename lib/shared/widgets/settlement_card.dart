@@ -236,22 +236,22 @@ class SettlementCard extends StatelessWidget {
                       vertical: spacing.cardVertical,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.green.withValues(alpha: 0.1),
+                      color: color.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.check_circle,
-                          color: Colors.green,
+                          color: color.primary,
                           size: 18,
                         ),
                         const SizedBox(width: 8),
                         Text(
                           'Settled on ${DateFormat.MMMd().format(settledDate!)}',
                           style: textTheme.labelLarge?.copyWith(
-                            color: Colors.green,
+                            color: color.primary,
                             fontWeight: FontWeight.bold,
                           ),
                         ),

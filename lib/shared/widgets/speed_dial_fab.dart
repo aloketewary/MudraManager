@@ -224,7 +224,7 @@ class ExpandableFabState extends State<ExpandableFab>
                         _buildActionItem(
                           icon: LucideIcons.trendingUp,
                           label: 'Income',
-                          accentColor: Colors.green,
+                          accentColor: color.primary,
                           color: color,
                           textTheme: textTheme,
                           onTap: () => _onItemTap(
@@ -236,7 +236,7 @@ class ExpandableFabState extends State<ExpandableFab>
                         _buildActionItem(
                           icon: LucideIcons.arrowLeftRight,
                           label: 'Transfer',
-                          accentColor: Colors.orange,
+                          accentColor: color.tertiary,
                           color: color,
                           textTheme: textTheme,
                           onTap: () => _onItemTap(AppRoutes.transfer),

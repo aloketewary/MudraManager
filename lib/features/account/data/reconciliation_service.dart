@@ -2,10 +2,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
+import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/reconciliation_status.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
+import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
 import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
 import 'package:mudra_manager/features/gamification/services/gamification_service.dart';
@@ -14,20 +16,114 @@ final reconciliationServiceProvider = Provider<ReconciliationService>((ref) {
   final isarService = ref.watch(isarServiceProvider);
   final log = ref.getLogger('ReconciliationService');
   final gamificationService = ref.watch(gamificationServiceProvider);
+  final accountService = ref.watch(accountServiceProvider);
 
-  return ReconciliationService(isarService, log, gamificationService);
+  return ReconciliationService(
+    isarService,
+    log,
+    gamificationService,
+    accountService,
+  );
 });
 
 class ReconciliationService {
   final IsarService _isarService;
   final AppLog _log;
   final GamificationService? _gamificationService;
+  final AccountsService _accountsService;
 
   ReconciliationService(
     this._isarService,
     this._log,
     this._gamificationService,
+    this._accountsService,
   );
+
+  Future<double> getCalculatedBalance(int accountId) {
+    return _accountsService.getAccountBalance(accountId);
+  }
+
+  Future<Category?> _findFallbackCategory(Isar isar, bool isExpense) async {
+    final type = isExpense ? CategoryType.expense : CategoryType.income;
+    final cat = await isar.categorys
+        .filter()
+        .categoryTypeEqualTo(type)
+        .nameContains('Miscellaneous', caseSensitive: false)
+        .findFirst();
+    if (cat != null) return cat;
+    // Fallback: first parent category of matching type
+    return await isar.categorys
+        .filter()
+        .categoryTypeEqualTo(type)
+        .findFirst();
+  }
+
+  /// Creates an adjustment transaction to match the actual bank balance.
+  /// Returns the adjustment amount (positive = income added, negative = expense added).
+  Future<double> reconcileBalance({
+    required Account account,
+    required double actualBalance,
+  }) async {
+    final calculated = await getCalculatedBalance(account.id);
+    final diff = actualBalance - calculated;
+    if (diff.abs() < 0.01) return 0;
+
+    final isar = await _isarService.getInstance();
+    final isExpense = diff < 0;
+    final category = await _findFallbackCategory(isar, isExpense);
+    final txn = Transaction.create(
+      date: DateTime.now(),
+      amount: diff.abs(),
+      isExpense: isExpense,
+      description: 'Balance adjustment (reconciliation)',
+    )
+      ..account.value = account
+      ..category.value = category;
+
+    await isar.writeTxn(() async {
+      await isar.transactions.put(txn);
+      await txn.account.save();
+      await txn.category.save();
+    });
+
+    await _upsertStatus(
+      transactionId: txn.id,
+      state: ReconciliationState.verified,
+      bankAmount: actualBalance,
+      notes: 'Auto-adjustment: ${isExpense ? "-" : "+"}${diff.abs().toStringAsFixed(2)}',
+    );
+
+    _log.i('Reconciled account ${account.id}: adjustment of $diff');
+    await _gamificationService?.track(GamificationEvent.reconciliationDone);
+    return diff;
+  }
+
+  /// Patches existing transactions that have no category (e.g., old reconciliation adjustments).
+  Future<int> patchUncategorizedTransactions() async {
+    try {
+      final isar = await _isarService.getInstance();
+      final orphans = await isar.transactions
+          .filter()
+          .descriptionContains('reconciliation', caseSensitive: false)
+          .findAll();
+
+      int patched = 0;
+      for (final txn in orphans) {
+        await txn.category.load();
+        if (txn.category.value != null) continue;
+        final cat = await _findFallbackCategory(isar, txn.isExpense);
+        if (cat == null) continue;
+        txn.category.value = cat;
+        await isar.writeTxn(() => txn.category.save());
+        patched++;
+      }
+      if (patched > 0) _log.i('Patched $patched uncategorized transactions');
+      return patched;
+    } catch (e, stack) {
+      _log.e('Failed to patch uncategorized transactions', e, stack);
+      return 0;
+    }
+  }
 
   Future<void> verifyTransaction(
     int transactionId, {
@@ -66,16 +162,20 @@ class ReconciliationService {
     try {
       final isar = await _isarService.getInstance();
 
+      final category = await _findFallbackCategory(isar, isExpense);
       final txn = Transaction.create(
         date: date,
         amount: bankAmount,
         isExpense: isExpense,
         description: description ?? 'Missing transaction (reconciliation)',
-      )..account.value = account;
+      )
+        ..account.value = account
+        ..category.value = category;
 
       await isar.writeTxn(() async {
         await isar.transactions.put(txn);
         await txn.account.save();
+        await txn.category.save();
       });
 
       await _upsertStatus(

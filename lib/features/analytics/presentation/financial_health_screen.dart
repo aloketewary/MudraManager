@@ -98,7 +98,7 @@ class FinancialHealthScreen extends ConsumerWidget {
     TextTheme textTheme,
     bool isDark,
   ) {
-    final scoreColor = _getScoreColor(health.score);
+    final scoreColor = _getScoreColor(health.score, color);
     final progress = health.score / 100;
 
     return Container(
@@ -123,15 +123,8 @@ class FinancialHealthScreen extends ConsumerWidget {
               child: Container(
                 width: 200,
                 height: 200,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: scoreColor.withValues(alpha: isDark ? 0.2 : 0.12),
-                      blurRadius: 80,
-                      spreadRadius: 40,
-                    ),
-                  ],
                 ),
               ),
             ),
@@ -201,7 +194,7 @@ class FinancialHealthScreen extends ConsumerWidget {
     ColorScheme color,
     TextTheme textTheme,
   ) {
-    final scoreColor = _getScoreColor(health.score);
+    final scoreColor = _getScoreColor(health.score, color);
 
     return Row(
       children: [
@@ -221,7 +214,7 @@ class FinancialHealthScreen extends ConsumerWidget {
             icon: LucideIcons.piggyBank,
             label: '${health.savingsRate.toStringAsFixed(1)}%',
             subtitle: 'Savings',
-            pillColor: const Color(0xFF4CAF50),
+            pillColor: color.primary,
             color: color,
             textTheme: textTheme,
           ),
@@ -233,8 +226,8 @@ class FinancialHealthScreen extends ConsumerWidget {
             label: '${health.expenseRatio.toStringAsFixed(1)}%',
             subtitle: 'Spending',
             pillColor: health.expenseRatio > 80
-                ? const Color(0xFFF44336)
-                : const Color(0xFFFF9800),
+                ? color.error
+                : color.tertiary,
             color: color,
             textTheme: textTheme,
           ),
@@ -320,28 +313,28 @@ class FinancialHealthScreen extends ConsumerWidget {
         savingsPoints,
         30,
         LucideIcons.piggyBank,
-        const Color(0xFF4CAF50),
+        color.primary,
       ),
       _ScoreComponent(
         'Budget Discipline',
         budgetPoints,
         30,
         LucideIcons.shieldCheck,
-        const Color(0xFF2196F3),
+        color.secondary,
       ),
       _ScoreComponent(
         'Debt Factor',
         debtPoints,
         20,
         LucideIcons.landmark,
-        const Color(0xFF9C27B0),
+        color.tertiary,
       ),
       _ScoreComponent(
         'Emergency Fund',
         emergencyPoints,
         20,
         LucideIcons.heartPulse,
-        const Color(0xFFFF9800),
+        color.primaryContainer,
       ),
     ];
 
@@ -536,7 +529,7 @@ class FinancialHealthScreen extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    _buildTrendBadge(trend.changePercent, textTheme),
+                    _buildTrendBadge(trend.changePercent, textTheme, color),
                   ],
                 ),
               ),
@@ -547,7 +540,11 @@ class FinancialHealthScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildTrendBadge(double changePercent, TextTheme textTheme) {
+  Widget _buildTrendBadge(
+    double changePercent,
+    TextTheme textTheme,
+    ColorScheme color,
+  ) {
     if (changePercent == 0) {
       return SizedBox(
         width: 48,
@@ -560,7 +557,7 @@ class FinancialHealthScreen extends ConsumerWidget {
     }
 
     final isUp = changePercent > 0;
-    final trendColor = isUp ? const Color(0xFFF44336) : const Color(0xFF4CAF50);
+    final trendColor = isUp ? color.error : color.primary;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
@@ -601,10 +598,10 @@ class FinancialHealthScreen extends ConsumerWidget {
         predicted > 0 ? (30 * (100 - health.expenseRatio) / 100).round() : 0;
     final runwayProgress = (daysOfCover / 90).clamp(0.0, 1.0);
     final runwayColor = daysOfCover >= 60
-        ? const Color(0xFF4CAF50)
+        ? color.primary
         : daysOfCover >= 30
-            ? const Color(0xFFFF9800)
-            : const Color(0xFFF44336);
+            ? color.tertiary
+            : color.error;
 
     return Card(
       elevation: 0,
@@ -784,11 +781,11 @@ class FinancialHealthScreen extends ConsumerWidget {
     );
   }
 
-  Color _getScoreColor(int score) {
-    if (score >= 80) return const Color(0xFF4CAF50);
-    if (score >= 60) return const Color(0xFF2196F3);
-    if (score >= 40) return const Color(0xFFFF9800);
-    return const Color(0xFFF44336);
+  Color _getScoreColor(int score, ColorScheme color) {
+    if (score >= 80) return color.primary;
+    if (score >= 60) return color.secondary;
+    if (score >= 40) return color.tertiary;
+    return color.error;
   }
 }
 

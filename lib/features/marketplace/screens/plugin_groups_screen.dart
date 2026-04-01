@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -270,6 +271,7 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
       ),
     );
   }
+
 
   // ── COLLAPSIBLE GROUP ──
   Widget _buildCollapsibleGroup({
@@ -674,7 +676,7 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
                         }
                         if (ctx.mounted) {
                           Navigator.pop(ctx);
-                          SnackbarService.success('Settings saved');
+                          SnackbarService.success(BuddyMessages.settingsSaved);
                         }
                       },
                       style: FilledButton.styleFrom(

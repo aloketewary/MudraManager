@@ -891,4 +891,11 @@ class AppLocalizationsHi extends AppLocalizations {
   @override
   String get onboard_SecureAndPrivateDesc =>
       'आपका डेटा आपके डिवाइस पर रहता है। कोई क्लाउड नहीं, कोई ट्रैकिंग नहीं।';
+
+  @override
+  String get onboard_SmartAutoTracking => 'Smart Auto Tracking';
+
+  @override
+  String get onboard_SmartAutoTrackingDesc =>
+      'Automatically detect and import transactions from your bank notifications.';
 }

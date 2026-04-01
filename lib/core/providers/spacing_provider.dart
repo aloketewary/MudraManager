@@ -13,6 +13,8 @@ class AppSpacing {
   final double cardInner;
   final double sectionGap;
   final double elementGap;
+  final double elementGapMin;
+  final double elementGapUltraMin;
   final double radiusSmall;
   final double radiusMedium;
   final double radiusLarge;
@@ -27,6 +29,8 @@ class AppSpacing {
     this.cardInner = 16.0,
     this.sectionGap = 16.0,
     this.elementGap = 8.0,
+    this.elementGapMin = 4.0,
+    this.elementGapUltraMin = 2.0,
     this.radiusSmall = 8.0,
     this.radiusMedium = 12.0,
     this.radiusLarge = 16.0,
@@ -43,6 +47,8 @@ class AppSpacing {
         cardInner = 22.0,
         sectionGap = 24.0,
         elementGap = 14.0,
+        elementGapMin = 8.0,
+        elementGapUltraMin = 4.0,
         radiusSmall = 10.0,
         radiusMedium = 16.0,
         radiusLarge = 20.0;

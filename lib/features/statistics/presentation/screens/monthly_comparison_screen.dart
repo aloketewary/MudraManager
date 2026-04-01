@@ -915,7 +915,7 @@ class _MonthlyComparisonScreenState
                         ),
                         decoration: BoxDecoration(
                           color: (change < 0
-                                  ? const Color(0xFF10B981)
+                                  ? colorScheme.primary
                                   : colorScheme.error)
                               .withValues(alpha: 0.15),
                           borderRadius:
@@ -929,7 +929,7 @@ class _MonthlyComparisonScreenState
                                   ? LucideIcons.arrowDown
                                   : LucideIcons.arrowUp,
                               color: change < 0
-                                  ? const Color(0xFF10B981)
+                                  ? colorScheme.primary
                                   : colorScheme.error,
                               size: 12,
                             ),
@@ -939,7 +939,7 @@ class _MonthlyComparisonScreenState
                               style: textTheme.bodySmall?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: change < 0
-                                    ? const Color(0xFF10B981)
+                                    ? colorScheme.primary
                                     : colorScheme.error,
                               ),
                             ),
@@ -1305,8 +1305,8 @@ class _ComparisonCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isPositive = percentageChange >= 0;
     final changeColor = title == 'Expense'
-        ? (isPositive ? colorScheme.error : const Color(0xFF10B981))
-        : (isPositive ? const Color(0xFF10B981) : colorScheme.error);
+        ? (isPositive ? colorScheme.error : colorScheme.primary)
+        : (isPositive ? colorScheme.primary : colorScheme.error);
 
     return Container(
       padding: EdgeInsets.all(spacing.cardInner),

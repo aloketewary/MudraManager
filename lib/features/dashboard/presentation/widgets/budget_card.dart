@@ -39,7 +39,7 @@ class BudgetCard extends ConsumerWidget {
         } else if (percent >= 90) {
           progressColor = color.error;
         } else if (percent >= 80) {
-          progressColor = Colors.orange;
+          progressColor = color.tertiary;
         }
 
         return Padding(

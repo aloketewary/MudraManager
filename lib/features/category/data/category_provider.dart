@@ -112,15 +112,6 @@ final frequencySortedCategoriesProvider = FutureProvider.autoDispose
 
   parents.sort((a, b) => parentScore(b).compareTo(parentScore(a)));
 
-  // Sort children within each parent by frequency too
-  for (final parent in parents) {
-    final subs = children
-        .where((c) => c.parentCategory.value?.id == parent.id)
-        .toList()
-      ..sort((a, b) => (counts[b.id] ?? 0).compareTo(counts[a.id] ?? 0));
-    // Replace in-place ordering isn't needed — we'll use this when building UI
-  }
-
   // Rebuild full list: parents (freq-sorted) + their children (freq-sorted)
   final sorted = <Category>[];
   for (final p in parents) {
@@ -151,35 +142,39 @@ class CategoryService {
     await gamificationService?.track(GamificationEvent.categoryCreated);
   }
 
+  /// Returns the number of transactions linked to this category.
+  /// Use this to show a confirmation alert before deletion.
+  Future<int> getLinkedTransactionCount(int id) async {
+    final isar = await isarService.getInstance();
+    return await isar.transactions
+        .filter()
+        .category((q) => q.idEqualTo(id))
+        .count();
+  }
+
+  /// Deletes category and unlinks all its transactions.
+  /// Orphaned transactions will have no category (uncategorized).
+  /// Call [getLinkedTransactionCount] first to show confirmation UI.
   Future<void> deleteCategory(int id) async {
     final isar = await isarService.getInstance();
+    int txCount = 0;
     await isar.writeTxn(() async {
+      final linked = await isar.transactions
+          .filter()
+          .category((q) => q.idEqualTo(id))
+          .findAll();
+      txCount = linked.length;
+      for (final tx in linked) {
+        tx.category.value = null;
+        await tx.category.save();
+      }
       await isar.categorys.delete(id);
     });
-    log.i('Category deleted: $id');
+    log.i('Category $id deleted, $txCount transactions unlinked');
   }
 
   Future<List<Category>> getAllCategories() async {
     final isar = await isarService.getInstance();
     return await isar.categorys.where().findAll();
-  }
-
-  Future<void> deleteCategoryWithTransactions(Id categoryId) async {
-    final isar = await isarService.getInstance();
-    int txCount = 0;
-    await isar.writeTxn(() async {
-      // Delete transactions with that category
-      final related = await isar.transactions
-          .filter()
-          .category((q) => q.idEqualTo(categoryId))
-          .findAll();
-      txCount = related.length;
-
-      await isar.transactions.deleteAll(related.map((e) => e.id).toList());
-
-      // Then delete the category
-      await isar.categorys.delete(categoryId); // adjust to your collection name
-    });
-    log.w('Category deleted with $txCount transactions');
   }
 }

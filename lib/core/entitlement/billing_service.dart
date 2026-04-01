@@ -6,8 +6,6 @@ import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 
-
-
 class BillingService {
   final EntitlementService _entitlementService;
   final _log = AppLog(getLogger(), 'Billing');
@@ -168,20 +166,12 @@ class BillingService {
     final productId = purchase.productID;
     final token = purchase.verificationData.serverVerificationData;
 
-    DateTime? expiresAt;
-    String storedProductId = productId;
+    final basePlan = _resolveBasePlan(purchase);
+    final storedProductId = '${productId}_$basePlan';
 
-    if (EntitlementProducts.isSubscription(productId)) {
-      // Determine base plan from the Google Play purchase details
-      final basePlan = _resolveBasePlan(purchase);
-      storedProductId = '${productId}_$basePlan'; // e.g. "mudra_pro_monthly"
-
-      if (basePlan == EntitlementProducts.monthlyPlan) {
-        expiresAt = DateTime.now().add(const Duration(days: 33));
-      } else {
-        expiresAt = DateTime.now().add(const Duration(days: 370));
-      }
-    }
+    final expiresAt = basePlan == EntitlementProducts.monthlyPlan
+        ? DateTime.now().add(const Duration(days: 33))
+        : DateTime.now().add(const Duration(days: 370));
 
     await _entitlementService.grantPro(
       source: 'play_store',
@@ -189,8 +179,6 @@ class BillingService {
       purchaseToken: token.isNotEmpty ? token : 'local_${purchase.purchaseID}',
       expiresAt: expiresAt,
     );
-
-    _log.i('Pro granted for $storedProductId');
   }
 
   /// Resolve which base plan was purchased.

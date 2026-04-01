@@ -331,6 +331,7 @@ class IconHelper {
       'calendar_event': LucideIcons.calendarDays,
       'bell': LucideIcons.bell,
       'notification': LucideIcons.bellRing,
+      'notifications': LucideIcons.bellRing,
       'alert': LucideIcons.triangleAlert,
       'star': LucideIcons.star,
       'heart': LucideIcons.heart,
@@ -359,6 +360,12 @@ class IconHelper {
       'sms': LucideIcons.messageSquare,
       'backup': LucideIcons.cloudUpload,
       'auto_graph': LucideIcons.chartSpline,
+      'message': LucideIcons.messageSquareText,
+      'clipboard-check': LucideIcons.clipboardCheck,
+      'shield': LucideIcons.shieldCheck,
+      'goal': LucideIcons.target,
+      'trophy': LucideIcons.trophy,
+      'download': LucideIcons.download,
     },
   };
 

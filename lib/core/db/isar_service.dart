@@ -68,6 +68,7 @@ class IsarService {
           TripSchema,
           TripParticipantSchema,
           TripTransactionSchema,
+          SplitExpenseSchema,
           SettlementSchema,
           AchievementSchema,
           StreakSchema,

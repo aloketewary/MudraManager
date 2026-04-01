@@ -106,7 +106,7 @@ class IndusIndSmsParserPlugin extends SmsParserPlugin {
     final merchantRegex = RegExp(r'at\s+(.+?)\s+on');
     // Updated to handle "Avl bal:676767.27" format
     final balanceRegex = RegExp(
-      r'Avl\s*(?:bal|Bal|Lmt)[:\s]*Rs?\.?\s*(\d+(?:,\d+)*(?:\.\d{2})?)',
+      r'Avl\s*(?:bal|Bal|Lmt)[:\s]*(?:Rs?\.?\s*)?(\d+(?:,\d+)*(?:\.\d{1,2})?)',
       caseSensitive: false,
     );
 

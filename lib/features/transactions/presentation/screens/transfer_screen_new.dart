@@ -6,8 +6,6 @@ import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/extension/account_type_extenstion.dart';
-import 'package:mudra_manager/core/l10n/app_localizations.dart';
-import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/services/widget_service.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
@@ -141,7 +139,10 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
       await WidgetService.updateWidget(ref);
 
       if (mounted) {
-        invalidateAll(ref);
+        ref.invalidate(transactionProvider);
+        ref.invalidate(accountServiceProvider);
+        ref.invalidate(allSectionedTransactionsProvider);
+
         SnackbarService.success(
           _isEditing ? 'Transfer updated' : 'Transfer completed',
         );

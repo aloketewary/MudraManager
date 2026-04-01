@@ -217,21 +217,41 @@ class HomePageState extends ConsumerState<HomePage>
                     builder: (context, ref, _) {
                       final activeTrips = ref.watch(activeTripsProvider);
                       return activeTrips.maybeWhen(
-                        data: (trips) => trips.isNotEmpty
-                            ? Positioned(
-                                right: -2,
-                                top: -2,
-                                child: Container(
-                                  width: 8,
-                                  height: 8,
-                                  decoration: BoxDecoration(
-                                    color:
-                                        Theme.of(context).colorScheme.secondary,
-                                    shape: BoxShape.circle,
-                                  ),
+                        data: (trips) {
+                          final now = DateTime.now();
+                          final today = DateTime(now.year, now.month, now.day);
+                          // Only show trips that have actually started
+                          final currentTrips = trips.where((t) {
+                            if (!t.isTrip) return false;
+                            final start = DateTime(
+                              t.startDate.year,
+                              t.startDate.month,
+                              t.startDate.day,
+                            );
+                            return !today.isBefore(start);
+                          }).toList();
+                          if (currentTrips.isEmpty) {
+                            return const SizedBox.shrink();
+                          }
+                          final trip = currentTrips.first;
+                          if (trip.isActive) {
+                            return Positioned(
+                              right: -2,
+                              top: -2,
+                              child: Container(
+                                width: 8,
+                                height: 8,
+                                decoration: BoxDecoration(
+                                  color:
+                                      Theme.of(context).colorScheme.secondary,
+                                  shape: BoxShape.circle,
                                 ),
-                              )
-                            : const SizedBox.shrink(),
+                              ),
+                            );
+                          } else {
+                            return const SizedBox.shrink();
+                          }
+                        },
                         orElse: () => const SizedBox.shrink(),
                       );
                     },
@@ -257,21 +277,33 @@ class HomePageState extends ConsumerState<HomePage>
                     builder: (context, ref, _) {
                       final activeTrips = ref.watch(activeTripsProvider);
                       return activeTrips.maybeWhen(
-                        data: (trips) => trips.isNotEmpty
-                            ? Positioned(
-                                right: -2,
-                                top: -2,
-                                child: Container(
-                                  width: 8,
-                                  height: 8,
-                                  decoration: BoxDecoration(
-                                    color:
-                                        Theme.of(context).colorScheme.secondary,
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                              )
-                            : const SizedBox.shrink(),
+                        data: (trips) {
+                          final now = DateTime.now();
+                          final today = DateTime(now.year, now.month, now.day);
+                          final hasStarted = trips.any((t) {
+                            if (!t.isTrip) return false;
+                            final start = DateTime(
+                              t.startDate.year,
+                              t.startDate.month,
+                              t.startDate.day,
+                            );
+                            return !today.isBefore(start);
+                          });
+                          if (!hasStarted) return const SizedBox.shrink();
+                          return Positioned(
+                            right: -2,
+                            top: -2,
+                            child: Container(
+                              width: 8,
+                              height: 8,
+                              decoration: BoxDecoration(
+                                color:
+                                    Theme.of(context).colorScheme.secondary,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          );
+                        },
                         orElse: () => const SizedBox.shrink(),
                       );
                     },
@@ -371,12 +403,7 @@ class HomePageState extends ConsumerState<HomePage>
             IndexedStack(
               index: _selectedIndex,
               children: [
-                Column(
-                  children: [
-                    _buildActiveTripBanner(),
-                    const Expanded(child: DashboardHome()),
-                  ],
-                ),
+                const DashboardHome(),
                 TransactionListScreen(
                   key: transactionListKey,
                   isTabActive: _selectedIndex == 1,
@@ -504,6 +531,92 @@ class HomePageState extends ConsumerState<HomePage>
                 children: [StreakIndicator()],
               ),
             ),
+            Consumer(
+              builder: (context, ref, _) {
+                final activeTrips = ref.watch(activeTripsProvider);
+                return activeTrips.maybeWhen(
+                  data: (trips) {
+                    if (trips.isEmpty) return const SizedBox.shrink();
+                    final now = DateTime.now();
+                    final today = DateTime(now.year, now.month, now.day);
+
+                    // Find active ongoing trip (started & isTrip)
+                    final ongoingTrip = trips.where((t) {
+                      if (!t.isTrip) return false;
+                      final start = DateTime(t.startDate.year, t.startDate.month, t.startDate.day);
+                      return !today.isBefore(start);
+                    }).firstOrNull;
+
+                    // Find upcoming trip within 7 days
+                    final upcomingTrip = ongoingTrip == null
+                        ? trips.where((t) {
+                            if (!t.isTrip) return false;
+                            final start = DateTime(t.startDate.year, t.startDate.month, t.startDate.day);
+                            final daysUntil = start.difference(today).inDays;
+                            return daysUntil > 0 && daysUntil <= 7;
+                          }).firstOrNull
+                        : null;
+
+                    final trip = ongoingTrip ?? upcomingTrip;
+                    if (trip == null) return const SizedBox.shrink();
+
+                    final isUpcoming = ongoingTrip == null;
+                    final daysUntil = isUpcoming
+                        ? DateTime(trip.startDate.year, trip.startDate.month, trip.startDate.day)
+                            .difference(today)
+                            .inDays
+                        : 0;
+
+                    return InkWell(
+                      onTap: () {
+                        HapticFeedback.mediumImpact();
+                        context.push(AppRoutes.tripDetail, extra: trip.id);
+                      },
+                      borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: spacing.cardHorizontal, vertical: spacing.cardVertical),
+                        decoration: BoxDecoration(
+                          color: isUpcoming
+                              ? color.tertiaryContainer
+                              : color.secondaryContainer,
+                          borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              isUpcoming ? LucideIcons.calendar : LucideIcons.planeTakeoff,
+                              size: 14,
+                              color: isUpcoming
+                                  ? color.onTertiaryContainer
+                                  : color.onSecondaryContainer,
+                            ),
+                            SizedBox(width: spacing.elementGapMin),
+                            ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 72),
+                              child: Text(
+                                isUpcoming
+                                    ? '${daysUntil}d · ${trip.name}'
+                                    : trip.name,
+                                style: textTheme.labelSmall?.copyWith(
+                                  color: isUpcoming
+                                      ? color.onTertiaryContainer
+                                      : color.onSecondaryContainer,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ).animate().fadeIn(duration: 300.ms).slideX(begin: 0.2, end: 0);
+                  },
+                  orElse: () => const SizedBox.shrink(),
+                );
+              },
+            ),
             StreamBuilder<List<NotificationRecord>>(
               stream: notificationService.watchNotifications(),
               builder: (_, snapshot) {
@@ -514,7 +627,7 @@ class HomePageState extends ConsumerState<HomePage>
                   alignment: Alignment.center,
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.notifications_outlined, size: 28),
+                      icon: const Icon(LucideIcons.bell, size: 28),
                       onPressed: () => context.push(AppRoutes.notifications),
                     ),
                     if (count > 0)
@@ -553,7 +666,7 @@ class HomePageState extends ConsumerState<HomePage>
                 );
               },
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: spacing.elementGap),
           ],
         );
       case 1:
@@ -569,12 +682,12 @@ class HomePageState extends ConsumerState<HomePage>
                 HapticFeedback.mediumImpact();
                 transactionListKey.currentState?.toggleSearch();
               },
-              icon: const Icon(Icons.search_rounded),
+              icon: const Icon(LucideIcons.search),
             ),
             IconButton(
               onPressed: () => transactionListKey.currentState
                   ?.showFilterBottomSheet(context, spacing),
-              icon: const Icon(Icons.filter_list_rounded),
+              icon: const Icon(LucideIcons.listFilter),
             ),
           ],
         );
@@ -601,7 +714,7 @@ class HomePageState extends ConsumerState<HomePage>
           ),
           actions: [
             IconButton(
-              icon: const Icon(Icons.save_alt_outlined),
+              icon: const Icon(LucideIcons.download),
               onPressed: () => _showExportDialog(context),
             ),
           ],
@@ -610,86 +723,6 @@ class HomePageState extends ConsumerState<HomePage>
         return null;
     }
     return null;
-  }
-
-  Widget _buildActiveTripBanner() {
-    final activeTripsAsync = ref.watch(activeTripsProvider);
-    final color = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return activeTripsAsync.when(
-      data: (trips) {
-        if (trips.isEmpty) return const SizedBox.shrink();
-        final trip = trips.first;
-        return Container(
-          margin: const EdgeInsets.all(16),
-          child: Material(
-            color: color.secondaryContainer,
-            elevation: 1,
-            shadowColor: color.shadow,
-            borderRadius: BorderRadius.circular(12),
-            child: InkWell(
-              onTap: () {
-                HapticFeedback.mediumImpact();
-                context.push(AppRoutes.tripDetail, extra: trip.id);
-              },
-              borderRadius: BorderRadius.circular(12),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: color.secondary,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Icon(
-                        Icons.flight_takeoff,
-                        color: color.onSecondary,
-                        size: 20,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Trip Mode Active',
-                            style: textTheme.labelSmall?.copyWith(
-                              color: color.onSecondaryContainer,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            trip.name,
-                            style: textTheme.titleSmall?.copyWith(
-                              color: color.onSecondaryContainer,
-                              fontWeight: FontWeight.w600,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                    Icon(
-                      Icons.chevron_right,
-                      color: color.onSecondaryContainer,
-                      size: 20,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-      loading: () => const SizedBox.shrink(),
-      error: (_, __) => const SizedBox.shrink(),
-    );
   }
 
   void initNotification() async {

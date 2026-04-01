@@ -60,7 +60,7 @@ class SpendingPredictionCard extends ConsumerWidget {
     final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
     final projected = dailyRate * daysInMonth;
 
-    final accent = isOver ? const Color(0xFFFF9800) : const Color(0xFF4CAF50);
+    final accent = isOver ? color.tertiary : color.primary;
     final icon = isOver ? LucideIcons.trendingUp : LucideIcons.trendingDown;
 
     return Padding(

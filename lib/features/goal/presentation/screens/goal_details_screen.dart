@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -58,7 +59,7 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
     if (confirmed == true && mounted) {
       await ref.read(goalServiceProvider).deleteGoal(widget.goal.id);
       if (mounted) {
-        SnackbarService.success('Goal deleted successfully');
+        SnackbarService.success(BuddyMessages.goalDeleted);
         context.pop();
       }
     }

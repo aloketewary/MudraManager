@@ -297,7 +297,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
                     separatorBuilder: (_, __) => const SizedBox(width: 16),
                     itemBuilder: (context, index) {
                       final a = items[index];
-                      final accent = _categoryAccent(a.category);
+                      final accent = _categoryAccent(a.category, color);
                       return SizedBox(
                         width: 60,
                         child: Column(
@@ -473,7 +473,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
           '$unlocked',
           'Unlocked',
           LucideIcons.trophy,
-          const Color(0xFF4CAF50),
+          color.primary,
           color,
           textTheme,
         ),
@@ -482,7 +482,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
           '$inProgress',
           'In Progress',
           LucideIcons.loader,
-          const Color(0xFFFF9800),
+          color.tertiary,
           color,
           textTheme,
         ),
@@ -571,8 +571,8 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
                   ? 'Daily Check-in'
                   : 'Budget Adherence';
               final accent = streak.type == 'daily_checkin'
-                  ? const Color(0xFFFF9800)
-                  : const Color(0xFF4CAF50);
+                  ? color.tertiary
+                  : color.primary;
 
               return Column(
                 children: [
@@ -708,18 +708,18 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
   }
 
   // ── HELPERS ──
-  Color _categoryAccent(AchievementCategory cat) {
+  Color _categoryAccent(AchievementCategory cat, ColorScheme color) {
     switch (cat) {
       case AchievementCategory.budgeting:
-        return const Color(0xFF2196F3);
+        return color.secondary;
       case AchievementCategory.saving:
-        return const Color(0xFF4CAF50);
+        return color.primary;
       case AchievementCategory.tracking:
-        return const Color(0xFF9C27B0);
+        return color.tertiary;
       case AchievementCategory.milestone:
-        return const Color(0xFFFF9800);
+        return color.primaryContainer;
       case AchievementCategory.engagement:
-        return const Color(0xFFE53935);
+        return color.error;
     }
   }
 

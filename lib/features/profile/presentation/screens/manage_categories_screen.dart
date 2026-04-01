@@ -123,7 +123,7 @@ class ManageCategoriesScreen extends ConsumerWidget {
                 _buildTypeHeader(
                   'Income',
                   LucideIcons.arrowDownLeft,
-                  const Color(0xFF4CAF50),
+                  color.primary,
                   textTheme,
                 ),
                 const SizedBox(height: 8),
@@ -309,16 +309,30 @@ class ManageCategoriesScreen extends ConsumerWidget {
     Category category,
     AppLocalizations ctxt,
   ) async {
+    final service = ref.read(categoryServiceProvider);
+    final txCount = await service.getLinkedTransactionCount(category.id);
+
+    if (!context.mounted) return;
+
+    final String message;
+    if (txCount > 0) {
+      message =
+          'This will permanently delete "${category.name}" and $txCount linked transaction${txCount == 1 ? '' : 's'}. This action cannot be undone.';
+    } else {
+      message = ctxt.categories_deleteCategoryMessage;
+    }
+
     final shouldDelete = await DialogUtils.showDeleteConfirmation(
       context,
       title: ctxt.categories_deleteCategoryTitle,
-      message: ctxt.categories_deleteCategoryMessage,
+      message: message,
+      deleteText: txCount > 0 ? 'Delete All' : null,
     );
 
     if (shouldDelete == true) {
-      final categoryProvider = ref.read(categoryServiceProvider);
-      categoryProvider.deleteCategoryWithTransactions(category.id);
+      await service.deleteCategory(category.id);
       ref.invalidate(categoryListProvider);
+      ref.invalidate(transactionCountsProvider);
       ref.invalidate(transactionProvider);
       SnackbarService.success(ctxt.categories_categoryDeletedMessage);
     }

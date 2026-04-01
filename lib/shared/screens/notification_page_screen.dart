@@ -7,6 +7,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/db/models/notification_record.dart';
 import 'package:mudra_manager/core/providers/notification_record_service.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 import 'dart:convert';
@@ -138,7 +139,7 @@ class _NotificationPageState extends ConsumerState<NotificationPage> {
                       _FilterType.system => LucideIcons.settings,
                     };
                     return Padding(
-                      padding: const EdgeInsets.only(right: 8),
+                      padding: EdgeInsets.only(right: spacing.elementGap),
                       child: FilterChip(
                         label: Text(label),
                         avatar: Icon(icon, size: 16),
@@ -160,9 +161,9 @@ class _NotificationPageState extends ConsumerState<NotificationPage> {
                 child: !hasData
                     ? NoDataFound(
                         message: _activeFilter == _FilterType.all
-                            ? 'No notifications yet'
-                            : 'No ${_activeFilter.name} notifications',
-                        iconData: Icons.notifications_none_outlined,
+                            ? BuddyMessages.noNotifications
+                            : BuddyMessages.noFilterResults(_activeFilter.name),
+                        iconData: LucideIcons.bellOff,
                       )
                     : ListView.builder(
                         padding: EdgeInsets.symmetric(
@@ -260,7 +261,7 @@ class _NotificationPageState extends ConsumerState<NotificationPage> {
             borderRadius: BorderRadius.circular(spacing.radiusMedium),
           ),
           alignment: Alignment.centerLeft,
-          padding: const EdgeInsets.only(left: 20),
+          padding: EdgeInsets.only(left: spacing.cardInner),
           child: Icon(LucideIcons.archive, color: color.onTertiary),
         ),
         // Swipe left → delete
@@ -270,7 +271,7 @@ class _NotificationPageState extends ConsumerState<NotificationPage> {
             borderRadius: BorderRadius.circular(spacing.radiusMedium),
           ),
           alignment: Alignment.centerRight,
-          padding: const EdgeInsets.only(right: 20),
+          padding: EdgeInsets.only(right: spacing.cardInner),
           child: Icon(LucideIcons.trash2, color: color.onError),
         ),
         confirmDismiss: (direction) async {
@@ -323,7 +324,7 @@ class _NotificationPageState extends ConsumerState<NotificationPage> {
                   children: [
                     // Icon
                     Container(
-                      padding: const EdgeInsets.all(10),
+                      padding: EdgeInsets.all(spacing.cardHorizontal),
                       decoration: BoxDecoration(
                         color: notifColor.withValues(alpha: 0.1),
                         borderRadius:
@@ -363,7 +364,7 @@ class _NotificationPageState extends ConsumerState<NotificationPage> {
                                 ),
                             ],
                           ),
-                          const SizedBox(height: 4),
+                          SizedBox(height: spacing.elementGapMin),
                           Text(
                             n.body,
                             style: textTheme.bodySmall?.copyWith(
@@ -372,7 +373,7 @@ class _NotificationPageState extends ConsumerState<NotificationPage> {
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          const SizedBox(height: 6),
+                          SizedBox(height: spacing.elementGapMin),
                           Text(
                             _formatTimestamp(n.timestamp),
                             style: textTheme.labelSmall?.copyWith(
@@ -403,7 +404,7 @@ class _NotificationPageState extends ConsumerState<NotificationPage> {
                               backgroundColor:
                                   notifColor.withValues(alpha: 0.12),
                               foregroundColor: notifColor,
-                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              padding: EdgeInsets.symmetric(vertical: spacing.cardVertical),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(
                                   spacing.radiusSmall,
@@ -430,7 +431,7 @@ class _NotificationPageState extends ConsumerState<NotificationPage> {
                               notificationService,
                             ),
                             style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              padding: EdgeInsets.symmetric(vertical: spacing.cardVertical),
                               side: BorderSide(
                                 color:
                                     color.outlineVariant.withValues(alpha: 0.3),

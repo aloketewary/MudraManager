@@ -3,14 +3,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:mudra_manager/core/extension/localization_extenstion.dart';
-import 'package:mudra_manager/core/l10n/app_localizations.dart';
-import 'package:mudra_manager/core/providers/l10n_provider.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/theme/theme_provider.dart';
+import 'package:mudra_manager/core/tone/tone_pack.dart';
+import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/account_display_style_provider.dart';
 import 'package:mudra_manager/features/marketplace/services/marketplace_service.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
@@ -28,8 +28,6 @@ class AppearanceScreen extends ConsumerStatefulWidget {
 }
 
 class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
-  static const _betaLanguages = {'bn', 'hi'};
-
   @override
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme;
@@ -37,10 +35,10 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
     final spacing = ref.watch(spacingProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final currentTheme = ref.watch(themeModeProvider);
-    final currentLocale = ref.watch(localeProvider);
     final highContrast = ref.watch(highContrastModeProvider);
     final guestPluginAsync = ref.watch(_guestModePluginProvider);
     final isGuestMode = ref.watch(guestModeProvider);
+    final activeTone = ref.watch(tonePackProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Appearance')),
@@ -57,7 +55,7 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
             spacing,
             isDark,
             currentTheme,
-            currentLocale,
+            activeTone,
           ),
           const SizedBox(height: 24),
 
@@ -90,10 +88,10 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
           ),
           const SizedBox(height: 24),
 
-          // ── LANGUAGE ──
-          _buildSectionHeader('Language', color, textTheme),
+          // ── TONE & VOICE ──
+          _buildSectionHeader('Tone & Voice', color, textTheme),
           const SizedBox(height: 10),
-          _buildLanguageCard(color, textTheme, spacing, currentLocale),
+          _buildToneCard(color, textTheme, spacing, activeTone, ref),
           const SizedBox(height: 24),
 
           // ── INFO CARD ──
@@ -113,8 +111,7 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Theme and language changes apply instantly. '
-                    'Guest mode can be enabled from the Plugins screen.',
+                    'Theme and display changes apply instantly.',
                     style: textTheme.bodySmall?.copyWith(
                       color: color.onSurfaceVariant,
                       height: 1.4,
@@ -136,7 +133,7 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
     AppSpacing spacing,
     bool isDark,
     AppThemeMode currentTheme,
-    Locale currentLocale,
+    TonePack activeTone,
   ) {
     final accent = color.primary;
     return Container(
@@ -184,7 +181,7 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '${currentLocale.displayName()} • '
+                  '${activeTone.name} tone • '
                   '${isDark ? 'Dark' : 'Light'} appearance',
                   style: textTheme.bodySmall?.copyWith(
                     color: color.onSurfaceVariant,
@@ -210,17 +207,22 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
               color: color.primary.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(LucideIcons.layoutDashboard,
-                color: color.primary, size: 20),
+            child: Icon(
+              LucideIcons.layoutDashboard,
+              color: color.primary,
+              size: 20,
+            ),
           ),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Account Style',
-                    style: textTheme.bodyLarge
-                        ?.copyWith(fontWeight: FontWeight.w500)),
+                Text(
+                  'Account Style',
+                  style: textTheme.bodyLarge
+                      ?.copyWith(fontWeight: FontWeight.w500),
+                ),
                 const SizedBox(height: 8),
                 SegmentedButton<AccountDisplayStyle>(
                   segments: const [
@@ -322,7 +324,7 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
                 ),
               ),
               Icon(
-                Icons.chevron_right,
+                LucideIcons.chevronRight,
                 color: color.onSurfaceVariant,
                 size: 20,
               ),
@@ -488,15 +490,15 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
     );
   }
 
-  // ── LANGUAGE CARD ──
-  Widget _buildLanguageCard(
+
+  // ── TONE & VOICE CARD ──
+  Widget _buildToneCard(
     ColorScheme color,
     TextTheme textTheme,
     AppSpacing spacing,
-    Locale currentLocale,
+    TonePack activeTone,
+    WidgetRef ref,
   ) {
-    final locales = AppLocalizations.supportedLocales;
-
     return Card(
       elevation: 0,
       margin: EdgeInsets.zero,
@@ -509,100 +511,133 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
-        children: locales.asMap().entries.map((entry) {
-          final locale = entry.value;
-          final isLast = entry.key == locales.length - 1;
-          final isSelected = currentLocale.languageCode == locale.languageCode;
-          final isBeta = _betaLanguages.contains(locale.languageCode);
+        children: [
+          ...allTonePacks.asMap().entries.map((entry) {
+            final tone = entry.value;
+            final isLast = entry.key == allTonePacks.length - 1;
+            final isSelected = activeTone.id == tone.id;
+            final icon = _toneIcon(tone.id);
 
-          return Column(
-            children: [
-              InkWell(
-                onTap: () {
-                  HapticFeedback.mediumImpact();
-                  LanguageService.changeLanguage(context, ref, locale);
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 14,
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: (isSelected ? color.primary : color.onSurface)
-                              .withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(10),
+            return Column(
+              children: [
+                InkWell(
+                  onTap: () {
+                    HapticFeedback.mediumImpact();
+                    ref.read(tonePackProvider.notifier).select(tone);
+                    SnackbarService.success(
+                      '${tone.name} tone activated',
+                    );
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: (isSelected
+                                    ? color.tertiary
+                                    : color.onSurface)
+                                .withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(
+                            icon,
+                            color: isSelected
+                                ? color.tertiary
+                                : color.onSurfaceVariant,
+                            size: 20,
+                          ),
                         ),
-                        child: Icon(
-                          LucideIcons.languages,
-                          color: isSelected
-                              ? color.primary
-                              : color.onSurfaceVariant,
-                          size: 20,
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Row(
-                          children: [
-                            Text(
-                              locale.displayName(),
-                              style: textTheme.bodyLarge?.copyWith(
-                                fontWeight: isSelected
-                                    ? FontWeight.w600
-                                    : FontWeight.w400,
-                                color: isSelected
-                                    ? color.primary
-                                    : color.onSurface,
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                tone.name,
+                                style: textTheme.bodyLarge?.copyWith(
+                                  fontWeight: isSelected
+                                      ? FontWeight.w600
+                                      : FontWeight.w400,
+                                  color: isSelected
+                                      ? color.tertiary
+                                      : color.onSurface,
+                                ),
                               ),
-                            ),
-                            if (isBeta) ...[
-                              const SizedBox(width: 8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: color.tertiary.withValues(alpha: 0.15),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Text(
-                                  'beta',
-                                  style: textTheme.labelSmall?.copyWith(
-                                    color: color.tertiary,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                              Text(
+                                tone.description,
+                                style: textTheme.bodySmall?.copyWith(
+                                  color: color.onSurfaceVariant,
                                 ),
                               ),
                             ],
-                          ],
+                          ),
                         ),
-                      ),
-                      if (isSelected)
-                        Icon(
-                          LucideIcons.check,
-                          color: color.primary,
-                          size: 20,
-                        ),
-                    ],
+                        if (isSelected)
+                          Icon(
+                            LucideIcons.check,
+                            color: color.tertiary,
+                            size: 20,
+                          ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              if (!isLast)
-                Divider(
-                  height: 1,
-                  indent: 58,
-                  color: color.outlineVariant.withValues(alpha: 0.4),
+                if (!isLast)
+                  Divider(
+                    height: 1,
+                    indent: 58,
+                    color: color.outlineVariant.withValues(alpha: 0.4),
+                  ),
+              ],
+            );
+          }),
+          // Preview
+          Divider(
+            height: 1,
+            color: color.outlineVariant.withValues(alpha: 0.4),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                Icon(
+                  LucideIcons.messageSquareQuote,
+                  size: 16,
+                  color: color.onSurfaceVariant.withValues(alpha: 0.6),
                 ),
-            ],
-          );
-        }).toList(),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    '"${activeTone.txnAdded}"',
+                    style: textTheme.bodySmall?.copyWith(
+                      color: color.onSurfaceVariant,
+                      fontStyle: FontStyle.italic,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
+  }
+
+  IconData _toneIcon(String id) {
+    return switch (id) {
+      'buddy' => LucideIcons.handshake,
+      'professional' => LucideIcons.briefcase,
+      'playful' => LucideIcons.gamepad2,
+      'zen' => LucideIcons.leaf,
+      _ => LucideIcons.messageCircle,
+    };
   }
 
   // ── SHARED BUILDERS ──

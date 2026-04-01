@@ -14,15 +14,17 @@ import 'package:mudra_manager/core/services/card_interaction_tracker.dart';
 import 'package:mudra_manager/core/services/notification_service.dart';
 import 'package:mudra_manager/core/utils/refresh_helper.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
+import 'package:mudra_manager/features/account/data/reconciliation_service.dart';
 import 'package:mudra_manager/core/widgets/dashboard_widget_plugin.dart';
+import 'package:mudra_manager/core/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/features/budget/data/budget_alert_provider.dart';
 import 'package:mudra_manager/features/budget/data/budget_alert_service.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/permission_provider.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/widget_preferences_provider.dart';
 import 'package:mudra_manager/features/profile/data/help_guide_provider.dart';
+import 'package:mudra_manager/features/sms/presentation/screens/sms_activity_screen.dart';
 import 'package:mudra_manager/shared/widgets/budget_alert_banner.dart';
-import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 
 class DashboardHome extends ConsumerStatefulWidget {
@@ -42,6 +44,9 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
   void initState() {
     super.initState();
     Future.delayed(const Duration(milliseconds: 500), _performDailyCheckIn);
+    Future.delayed(const Duration(milliseconds: 1000), () {
+      if (mounted) ref.read(reconciliationServiceProvider).patchUncategorizedTransactions();
+    });
   }
 
   Future<void> _performDailyCheckIn() async {
@@ -112,21 +117,22 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
     final hasSeenHelp = ref.watch(hasSeenHelpGuideProvider);
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
 
     // Gate: show a single cohesive loading state until core data is ready
     if (!dashboardAsync.hasValue) {
-      return const Scaffold(
+      return Scaffold(
         body: CustomScrollView(
           slivers: [
             SliverToBoxAdapter(
               child: Column(
                 children: [
-                  SizedBox(height: 8),
-                  AccountCardSkeleton(),
-                  SizedBox(height: 8),
-                  BudgetCardSkeleton(),
-                  SizedBox(height: 8),
-                  DashboardCardSkeleton(),
+                  SizedBox(height: spacing.elementGap),
+                  const AccountCardSkeleton(),
+                  const QuickActionsSkeleton(),
+                  const CashFlowSkeleton(),
+                  const BudgetCardSkeleton(),
+                  const DashboardCardSkeleton(),
                 ],
               ),
             ),
@@ -157,7 +163,7 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
             if (!hasSeenHelp) SliverToBoxAdapter(child: _HelpBanner()),
             if (!hasSeenHelp && alerts.isNotEmpty)
               SliverToBoxAdapter(child: _AlertBanner(alerts: alerts)),
-            SliverToBoxAdapter(child: _SmsSetupBanner()),
+            SliverToBoxAdapter(child: _AutoImportBanner()),
             SliverList(
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
@@ -357,11 +363,11 @@ class _HelpBanner extends ConsumerWidget {
             context.push(AppRoutes.help);
           },
           child: Padding(
-            padding: const EdgeInsets.all(14),
+            padding: EdgeInsets.all(spacing.cardInner),
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(10),
+                  padding: EdgeInsets.all(spacing.elementGap),
                   decoration: BoxDecoration(
                     color: accent.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(spacing.radiusMedium),
@@ -372,7 +378,7 @@ class _HelpBanner extends ConsumerWidget {
                     size: 20,
                   ),
                 ),
-                const SizedBox(width: 14),
+                SizedBox(width: spacing.elementGap),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -384,7 +390,7 @@ class _HelpBanner extends ConsumerWidget {
                           color: color.onSurface,
                         ),
                       ),
-                      const SizedBox(height: 2),
+                      SizedBox(height: spacing.elementGapUltraMin),
                       Text(
                         'Tap to explore the help guide',
                         style: textTheme.bodySmall?.copyWith(
@@ -399,7 +405,7 @@ class _HelpBanner extends ConsumerWidget {
                   size: 18,
                   color: color.onSurfaceVariant,
                 ),
-                const SizedBox(width: 4),
+                SizedBox(width: spacing.elementGap),
                 GestureDetector(
                   onTap: () async {
                     await SharedPrefsUtil.instance.setHasSeenHelpGuide(true);
@@ -420,7 +426,7 @@ class _HelpBanner extends ConsumerWidget {
   }
 }
 
-class _SmsSetupBanner extends ConsumerWidget {
+class _AutoImportBanner extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (!Platform.isAndroid) return const SizedBox.shrink();
@@ -430,44 +436,118 @@ class _SmsSetupBanner extends ConsumerWidget {
 
     final isGranted = granted.valueOrNull == true;
     final autoImportOn = SharedPrefsUtil.instance.getSmsImportEnabled();
+    final spacing = ref.watch(spacingProvider);
 
-    // ── ACTIVE: both permission + auto-import ──
     if (isGranted && autoImportOn) {
-      return _buildStatusPill(
-        context,
-        ref,
-        label: 'SMS Import Active',
-        accent: const Color(0xFF4CAF50),
-      );
+      final pending = ref.watch(pendingCountProvider).valueOrNull ?? 0;
+      if (pending > 0) {
+        return _buildActiveCard(context, ref, spacing, pending);
+      }
+      return const SizedBox.shrink();
     }
 
-    // ── PARTIAL: permission granted, auto-import off ──
     if (isGranted && !autoImportOn) {
-      return _buildStatusPill(
-        context,
-        ref,
-        label: 'Auto Transactions from SMS Paused',
-        accent: const Color(0xFFFFC107),
-      );
+      return _buildPausedPill(context, ref, spacing);
     }
 
-    // ── INACTIVE: no permission ──
     final dismissed = SharedPrefsUtil.instance.getSmsbannerDismiss();
     if (dismissed) return const SizedBox.shrink();
 
-    return _buildSetupBanner(context, ref);
+    return _buildSetupBanner(context, ref, spacing);
   }
 
-  Widget _buildStatusPill(
+  Widget _buildActiveCard(
     BuildContext context,
-    WidgetRef ref, {
-    required String label,
-    required Color accent,
-  }) {
-    final spacing = ref.watch(spacingProvider);
+    WidgetRef ref,
+    AppSpacing spacing,
+    int pending,
+  ) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final accent = color.tertiary;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: spacing.cardHorizontal,
+        vertical: spacing.cardVertical,
+      ),
+      child: GestureDetector(
+        onTap: () {
+          HapticFeedback.mediumImpact();
+          context
+              .push(pending > 0 ? AppRoutes.smsActivity : AppRoutes.smsImport);
+        },
+        child: Container(
+          padding: EdgeInsets.all(spacing.cardInner),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(spacing.radiusMedium),
+            color: color.tertiaryContainer.withValues(alpha: isDark ? 0.4 : 0.3),
+            border: Border.all(color: accent.withValues(alpha: 0.2)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: accent.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                ),
+                child:
+                    Icon(LucideIcons.bellRing, color: accent, size: 18),
+              ),
+              SizedBox(width: spacing.elementGap + 4),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '$pending pending review',
+                      style: textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: color.onTertiaryContainer,
+                      ),
+                    ),
+                    Text(
+                      'Tap to review transactions',
+                      style: textTheme.bodySmall?.copyWith(
+                        color: color.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: accent.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                ),
+                child: Text(
+                  '$pending',
+                  style: textTheme.labelMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: color.onTertiaryContainer,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPausedPill(
+    BuildContext context,
+    WidgetRef ref,
+    AppSpacing spacing,
+  ) {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final accent = color.tertiary;
 
     return Padding(
       padding: EdgeInsets.symmetric(
@@ -480,10 +560,13 @@ class _SmsSetupBanner extends ConsumerWidget {
           context.push(AppRoutes.smsImport);
         },
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          padding: EdgeInsets.symmetric(
+            horizontal: spacing.cardInner,
+            vertical: spacing.elementGap + 2,
+          ),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(spacing.radiusMedium),
-            color: accent.withValues(alpha: isDark ? 0.15 : 0.08),
+            color: color.tertiaryContainer.withValues(alpha: isDark ? 0.4 : 0.3),
             border: Border.all(color: accent.withValues(alpha: 0.25)),
           ),
           child: Row(
@@ -496,18 +579,26 @@ class _SmsSetupBanner extends ConsumerWidget {
                   shape: BoxShape.circle,
                 ),
               ),
-              const SizedBox(width: 10),
+              SizedBox(width: spacing.elementGap + 2),
               Text(
-                label,
+                'Auto Import Paused',
                 style: textTheme.labelMedium?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: accent,
+                  color: color.onTertiaryContainer,
                 ),
               ),
               const Spacer(),
+              Text(
+                'Enable',
+                style: textTheme.labelSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: color.onSurfaceVariant,
+                ),
+              ),
+              SizedBox(width: spacing.cardVerticalMin),
               Icon(
                 LucideIcons.chevronRight,
-                size: 16,
+                size: 14,
                 color: color.onSurfaceVariant.withValues(alpha: 0.5),
               ),
             ],
@@ -517,12 +608,12 @@ class _SmsSetupBanner extends ConsumerWidget {
     );
   }
 
-  Widget _buildSetupBanner(BuildContext context, WidgetRef ref) {
-    final spacing = ref.watch(spacingProvider);
+  Widget _buildSetupBanner(
+      BuildContext context, WidgetRef ref, AppSpacing spacing) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    const accent = Color(0xFFFF9800);
+    final accent = color.tertiary;
 
     return Padding(
       padding: EdgeInsets.symmetric(
@@ -536,8 +627,8 @@ class _SmsSetupBanner extends ConsumerWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              accent.withValues(alpha: isDark ? 0.2 : 0.12),
-              accent.withValues(alpha: isDark ? 0.08 : 0.04),
+              color.tertiaryContainer.withValues(alpha: isDark ? 0.5 : 0.4),
+              color.tertiaryContainer.withValues(alpha: isDark ? 0.2 : 0.1),
             ],
           ),
           border: Border.all(color: accent.withValues(alpha: 0.3)),
@@ -549,36 +640,33 @@ class _SmsSetupBanner extends ConsumerWidget {
             context.push(AppRoutes.smsImport);
           },
           child: Padding(
-            padding: const EdgeInsets.all(14),
+            padding: EdgeInsets.all(spacing.cardInner),
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(10),
+                  padding: EdgeInsets.all(spacing.elementGap + 2),
                   decoration: BoxDecoration(
                     color: accent.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(spacing.radiusMedium),
                   ),
-                  child: const Icon(
-                    LucideIcons.messageSquare,
-                    color: accent,
-                    size: 20,
-                  ),
+                  child:
+                      Icon(LucideIcons.bellRing, color: accent, size: 20),
                 ),
-                const SizedBox(width: 14),
+                SizedBox(width: spacing.cardInner),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Enable SMS Import',
+                        'Enable Auto Import',
                         style: textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.w700,
                           color: color.onSurface,
                         ),
                       ),
-                      const SizedBox(height: 2),
+                      SizedBox(height: spacing.cardVerticalMin / 2),
                       Text(
-                        'Auto-track transactions from bank messages',
+                        'Auto-track transactions from bank notifications',
                         style: textTheme.bodySmall?.copyWith(
                           color: color.onSurfaceVariant,
                         ),
@@ -591,7 +679,7 @@ class _SmsSetupBanner extends ConsumerWidget {
                   size: 18,
                   color: color.onSurfaceVariant,
                 ),
-                const SizedBox(width: 4),
+                SizedBox(width: spacing.cardVerticalMin),
                 GestureDetector(
                   onTap: () {
                     SharedPrefsUtil.instance.setSmsBannerDismiss();

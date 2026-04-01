@@ -8,11 +8,8 @@ abstract class EntitlementProducts {
   static const String yearlyPlan = 'yearly';
 
   // One-time
-  static const String lifetime = 'mudra_pro_lifetime';
-
   static const Set<String> allProductIds = {
     subscription,
-    lifetime,
   };
 
   /// Quick check: is this a subscription product?

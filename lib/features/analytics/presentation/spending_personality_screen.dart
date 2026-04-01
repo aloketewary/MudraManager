@@ -148,16 +148,8 @@ class SpendingPersonalityScreen extends ConsumerWidget {
               child: Container(
                 width: 180,
                 height: 180,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: archetype.color
-                          .withValues(alpha: isDark ? 0.2 : 0.12),
-                      blurRadius: 80,
-                      spreadRadius: 40,
-                    ),
-                  ],
                 ),
               ),
             ),
@@ -307,14 +299,14 @@ class SpendingPersonalityScreen extends ConsumerWidget {
         isWeekend ? 'Weekend heavy' : 'Weekday heavy',
         isWeekend ? 0.7 : 0.3,
         LucideIcons.calendarDays,
-        isWeekend ? const Color(0xFFFF9800) : const Color(0xFF4CAF50),
+        isWeekend ? color.tertiary : color.primary,
       ),
       _DNAItem(
         'Impulse Score',
         isImpulse ? 'High impulse' : 'Planned',
         isImpulse ? 0.75 : 0.25,
         LucideIcons.zap,
-        isImpulse ? const Color(0xFFF44336) : const Color(0xFF2196F3),
+        isImpulse ? color.error : color.secondary,
       ),
       _DNAItem(
         'Trend Direction',
@@ -326,10 +318,10 @@ class SpendingPersonalityScreen extends ConsumerWidget {
                 : 0.5,
         LucideIcons.activity,
         isIncreasing
-            ? const Color(0xFFF44336)
+            ? color.error
             : isDecreasing
-                ? const Color(0xFF4CAF50)
-                : const Color(0xFF2196F3),
+                ? color.primary
+                : color.secondary,
       ),
     ];
 
@@ -473,7 +465,7 @@ class SpendingPersonalityScreen extends ConsumerWidget {
                               child: Container(
                                 decoration: BoxDecoration(
                                   color: isWeekend
-                                      ? const Color(0xFFFF9800)
+                                      ? color.tertiary
                                       : color.primary,
                                   borderRadius: const BorderRadius.vertical(
                                     top: Radius.circular(4),
@@ -490,7 +482,7 @@ class SpendingPersonalityScreen extends ConsumerWidget {
                       day[0],
                       style: textTheme.labelSmall?.copyWith(
                         color: isWeekend
-                            ? const Color(0xFFFF9800)
+                            ? color.tertiary
                             : color.onSurfaceVariant,
                         fontWeight:
                             isWeekend ? FontWeight.bold : FontWeight.normal,

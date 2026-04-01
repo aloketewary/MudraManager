@@ -536,9 +536,9 @@ class _HelpScreenState extends ConsumerState<HelpScreen> {
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                  color: const Color(0xFFFF9800).withValues(alpha: 0.08),
+                  color: color.tertiary.withValues(alpha: 0.08),
                   border: Border.all(
-                    color: const Color(0xFFFF9800).withValues(alpha: 0.2),
+                    color: color.tertiary.withValues(alpha: 0.2),
                   ),
                 ),
                 child: Column(
@@ -550,10 +550,10 @@ class _HelpScreenState extends ConsumerState<HelpScreen> {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Icon(
+                          Icon(
                             LucideIcons.lightbulb,
                             size: 16,
-                            color: Color(0xFFFF9800),
+                            color: color.tertiary,
                           ),
                           const SizedBox(width: 10),
                           Expanded(

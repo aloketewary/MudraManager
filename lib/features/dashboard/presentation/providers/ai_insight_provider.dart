@@ -1,8 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
-import 'package:mudra_manager/features/sms/data/sms_activity_service.dart';
-import 'package:mudra_manager/features/sms/presentation/screens/sms_activity_screen.dart';
 
 class AiInsight {
   final String title;
@@ -38,23 +36,16 @@ enum IconType {
   sms,
 }
 
-final _smsPendingCountProvider = FutureProvider.autoDispose<int>((ref) async {
-  // Re-fetch when sms activities change
-  ref.watch(smsActivityProvider);
-  return await SmsActivityService.instance.getPendingCount();
-});
-
 final aiInsightProvider = Provider<List<AiInsight>>((ref) {
   final dashboardData = ref.watch(dashboardDataProvider);
-  final smsPendingCount = ref.watch(_smsPendingCountProvider).valueOrNull ?? 0;
 
   return dashboardData.maybeWhen(
-    data: (data) => _generateInsights(data, smsPendingCount),
+    data: (data) => _generateInsights(data),
     orElse: () => [],
   );
 });
 
-List<AiInsight> _generateInsights(DashboardData data, int smsPendingCount) {
+List<AiInsight> _generateInsights(DashboardData data) {
   final candidates = <AiInsight>[];
   final now = DateTime.now();
 
@@ -62,25 +53,7 @@ List<AiInsight> _generateInsights(DashboardData data, int smsPendingCount) {
   // ACTIONABLE — things user must act on NOW
   // ────────────────────────────────────────────
 
-  // Pending SMS — scales with count (user inaction piles up)
-  if (smsPendingCount > 0) {
-    // 90 base + up to 10 bonus for volume
-    final score = 90 + (smsPendingCount.clamp(0, 10));
-    candidates.add(
-      AiInsight(
-        title: 'You\'ve got mail 📩',
-        message:
-            '$smsPendingCount transaction${smsPendingCount > 1 ? 's' : ''} '
-            'picked up from SMS — quick review?',
-        type: 'warning',
-        iconType: IconType.sms,
-        generatedAt: now,
-        actionLabel: 'Review',
-        actionRoute: AppRoutes.smsActivity,
-        priority: score,
-      ),
-    );
-  }
+  // (SMS pending is handled by _AutoImportBanner on dashboard — no duplicate insight needed)
 
   // Bills due — urgency by proximity
   if (data.recurringExpenses.isNotEmpty) {
