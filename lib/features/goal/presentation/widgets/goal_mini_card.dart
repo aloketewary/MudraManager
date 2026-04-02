@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -106,7 +107,7 @@ class GoalMiniCard extends ConsumerWidget {
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, st) => Center(child: Text('Error: $e')),
+          error: (e, st) => Center(child: Text(BuddyMessages.errorWith('$e'))),
         ),
       ],
     );

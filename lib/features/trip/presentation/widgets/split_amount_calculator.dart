@@ -35,7 +35,7 @@ class SplitAmountCalculator extends StatelessWidget {
                   style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 Chip(
-                  label: Text('₹${equalSplit.toStringAsFixed(2)} each'),
+                  label: Text('₹${equalSplit.toStringAsFixed(equalSplit.truncateToDouble() == equalSplit ? 0 : 2)} each'),
                   backgroundColor: color.primaryContainer,
                 ),
               ],

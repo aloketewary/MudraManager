@@ -12,6 +12,7 @@ import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/theme/mudra_manager_avatar_icons.dart';
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
@@ -292,7 +293,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
         ],
       ),
-      error: (e, _) => Center(child: Text('Error: $e')),
+      error: (e, _) => Center(child: Text(BuddyMessages.errorWith('$e'))),
     );
   }
 
@@ -1377,13 +1378,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               Icon(Icons.logout, size: 48, color: color.error),
               const SizedBox(height: 16),
               Text(
-                'Logout',
+                BuddyMessages.logoutTitle,
                 style:
                     textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(
-                'Are you sure you want to logout? All data will be cleared.',
+                BuddyMessages.logoutMessage,
                 style: textTheme.bodyMedium
                     ?.copyWith(color: color.onSurfaceVariant),
                 textAlign: TextAlign.center,
@@ -1403,7 +1404,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text('Cancel'),
+                      child: Text(BuddyMessages.deleteCancel),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -1430,7 +1431,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text('Logout'),
+                      child: Text(BuddyMessages.logoutConfirm),
                     ),
                   ),
                 ],

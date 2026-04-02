@@ -36,7 +36,7 @@ class RecurringTransactionsScreen extends ConsumerWidget {
               try {
                 await ref.read(recurringTransactionServiceProvider).processRecurringTransactions();
                 if (context.mounted) {
-                  SnackbarService.success('Recurring transactions processed! Check your transactions list.');
+                  SnackbarService.success(BuddyMessages.billPaid);
                 }
               } catch (e) {
                 if (context.mounted) {
@@ -104,8 +104,8 @@ class RecurringTransactionsScreen extends ConsumerWidget {
       body: recurringAsync.when(
         data: (recurring) {
           if (recurring.isEmpty) {
-            return const NoDataFound(
-              message: 'No recurring transactions',
+            return NoDataFound(
+              message: BuddyMessages.noRecurring,
               iconData: Icons.repeat,
             );
           }
@@ -125,7 +125,7 @@ class RecurringTransactionsScreen extends ConsumerWidget {
           itemBuilder: (context, index) => const TransactionCardSkeleton(),
         ),
         error: (_, __) =>
-            const Center(child: Text('Error loading recurring transactions')),
+            Center(child: Text(BuddyMessages.genericError)),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {

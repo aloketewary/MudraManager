@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
@@ -202,7 +203,7 @@ class _CategorySelectorBottomSheetState
                 );
               },
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('Error: $e')),
+              error: (e, _) => Center(child: Text(BuddyMessages.errorWith('$e'))),
             ),
           ),
         ],

@@ -37,8 +37,6 @@ class GoalCircularCard extends ConsumerWidget {
         return await DialogUtils.showDeleteConfirmation(
           context,
           title: 'Delete Goal?',
-          message:
-              "Are you sure you want to delete '${goal.name}'? This action cannot be undone.",
         );
       },
       onDismissed: (direction) async {

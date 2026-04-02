@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:math' as math;
 
@@ -281,7 +282,7 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
           ],
         ),
       ),
-      error: (e, _) => Center(child: Text('Error: $e')),
+      error: (e, _) => Center(child: Text(BuddyMessages.errorWith('$e'))),
     );
   }
 

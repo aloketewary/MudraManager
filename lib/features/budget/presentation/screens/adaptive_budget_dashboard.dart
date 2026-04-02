@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -45,8 +46,8 @@ class _AdaptiveBudgetDashboardState
                   ),
                 ],
               ),
-              body: const NoDataFound(
-                message: 'No budgets yet',
+              body: NoDataFound(
+                message: BuddyMessages.noBudgets,
                 iconData: Icons.pie_chart_outline,
               ),
             );
@@ -208,7 +209,7 @@ class _AdaptiveBudgetDashboardState
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) => const Center(child: Text('Error loading budgets')),
+        error: (_, __) => Center(child: Text(BuddyMessages.genericError)),
       ),
     );
   }

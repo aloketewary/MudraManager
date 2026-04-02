@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'dart:io' show Platform;
 
 import 'package:go_router/go_router.dart';
@@ -200,7 +201,7 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'No cards enabled',
+                          BuddyMessages.noData,
                           style: textTheme.titleLarge
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),

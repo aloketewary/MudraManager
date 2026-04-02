@@ -813,7 +813,7 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
         _confettiController.play();
         _showSuccessSheet();
       } else {
-        SnackbarService.info('No previous purchases found.');
+        SnackbarService.info(BuddyMessages.genericError);
       }
     }
   }

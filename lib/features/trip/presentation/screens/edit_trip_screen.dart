@@ -337,8 +337,8 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
           body: const Center(child: CircularProgressIndicator()),
         ),
         error: (e, _) => Scaffold(
-          appBar: AppBar(title: const Text('Error')),
-          body: Center(child: Text('Error: $e')),
+          appBar: AppBar(title: Text(BuddyMessages.genericError)),
+          body: Center(child: Text(BuddyMessages.errorWith('$e'))),
         ),
       );
     }

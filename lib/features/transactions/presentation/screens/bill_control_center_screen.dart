@@ -58,9 +58,9 @@ class _BillControlCenterScreenState
                     ),
                   ],
                 ),
-                const SliverFillRemaining(
+                SliverFillRemaining(
                   child: NoDataFound(
-                    message: 'No bills yet',
+                    message: BuddyMessages.noBills,
                     iconData: LucideIcons.receipt,
                   ),
                 ),
@@ -481,11 +481,11 @@ class _BillControlCenterScreenState
             },
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (_, __) =>
-                const Center(child: Text('Error loading accounts')),
+                Center(child: Text(BuddyMessages.genericError)),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) => const Center(child: Text('Error loading bills')),
+        error: (_, __) => Center(child: Text(BuddyMessages.genericError)),
       ),
     );
   }

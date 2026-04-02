@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
 
 class AiInsight {
@@ -74,9 +75,8 @@ List<AiInsight> _generateInsights(DashboardData data) {
       candidates.add(
         dueTomorrow > 0
             ? AiInsight(
-                title: 'Heads up — bills incoming',
-                message:
-                    '$dueIn3Days bill${dueIn3Days > 1 ? 's' : ''} due by tomorrow, don\'t forget!',
+                title: BuddyMessages.insightBillsDueSoon,
+                message: BuddyMessages.insightBillsDueMessage(dueIn3Days),
                 type: 'warning',
                 iconType: IconType.info,
                 generatedAt: now,
@@ -85,9 +85,8 @@ List<AiInsight> _generateInsights(DashboardData data) {
                 priority: score,
               )
             : AiInsight(
-                title: 'Bills coming up',
-                message:
-                    '$dueIn3Days bill${dueIn3Days > 1 ? 's' : ''} due in the next few days',
+                title: BuddyMessages.insightBillsDueSoon,
+                message: BuddyMessages.insightBillsDueMessage(dueIn3Days),
                 type: 'info',
                 iconType: IconType.info,
                 generatedAt: now,
@@ -116,9 +115,8 @@ List<AiInsight> _generateInsights(DashboardData data) {
       // Exceeded is more urgent than near-limit
       candidates.add(
         AiInsight(
-          title: 'Oops, over budget',
-          message:
-              '$count budget${count > 1 ? 's' : ''} went over this month — worth a look',
+          title: BuddyMessages.insightOverBudget,
+          message: BuddyMessages.insightOverBudgetMessage(count),
           type: 'warning',
           iconType: IconType.budget,
           generatedAt: now,
@@ -131,9 +129,8 @@ List<AiInsight> _generateInsights(DashboardData data) {
       final count = nearLimit.length;
       candidates.add(
         AiInsight(
-          title: 'Getting close...',
-          message:
-              '$count budget${count > 1 ? 's' : ''} past 80% — still time to rein it in',
+          title: BuddyMessages.insightNearBudget,
+          message: BuddyMessages.insightNearBudgetMessage(count),
           type: 'tip',
           iconType: IconType.budget,
           generatedAt: now,
@@ -153,9 +150,8 @@ List<AiInsight> _generateInsights(DashboardData data) {
     final score = 60 + (ratio.clamp(0, 0.5) * 40).toInt();
     candidates.add(
       AiInsight(
-        title: 'Spending outpacing income',
-        message:
-            'You\'re ₹${deficit.toStringAsFixed(0)} over your income this month — might want to slow down',
+        title: BuddyMessages.insightOverspending,
+        message: BuddyMessages.insightOverspendingMessage(deficit.toStringAsFixed(0)),
         type: 'warning',
         iconType: IconType.warning,
         generatedAt: now,
@@ -183,9 +179,11 @@ List<AiInsight> _generateInsights(DashboardData data) {
       if (todayExpenses > avgDaily * 1.5) {
         candidates.add(
           AiInsight(
-            title: 'Spending spike today',
-            message:
-                'You usually spend ₹${avgDaily.toStringAsFixed(0)}/day. Today\'s already ₹${todayExpenses.toStringAsFixed(0)}.',
+            title: BuddyMessages.insightSpendingSpike,
+            message: BuddyMessages.insightSpendingSpikeMessage(
+              avgDaily.toStringAsFixed(0),
+              todayExpenses.toStringAsFixed(0),
+            ),
             type: 'warning',
             iconType: IconType.spending,
             generatedAt: now,
@@ -245,9 +243,11 @@ List<AiInsight> _generateInsights(DashboardData data) {
         if (avgWeekend > 0 && weekendSpend > avgWeekend * 1.3) {
           candidates.add(
             AiInsight(
-              title: 'Weekend spending alert',
-              message:
-                  'You usually spend ₹${avgWeekend.toStringAsFixed(0)} on weekends. This one\'s already ₹${weekendSpend.toStringAsFixed(0)}.',
+              title: BuddyMessages.insightWeekendAlert,
+              message: BuddyMessages.insightWeekendAlertMessage(
+                avgWeekend.toStringAsFixed(0),
+                weekendSpend.toStringAsFixed(0),
+              ),
               type: 'warning',
               iconType: IconType.spending,
               generatedAt: now,
@@ -292,8 +292,11 @@ List<AiInsight> _generateInsights(DashboardData data) {
       candidates.add(
         AiInsight(
           title: 'Quiet money leak 💧',
-          message:
-              '${top.key}: ${top.value.count} times this month, ₹${top.value.total.toStringAsFixed(0)} total — small hits add up',
+          message: BuddyMessages.insightMoneyLeak(
+            top.key,
+            top.value.count,
+            top.value.total.toStringAsFixed(0),
+          ),
           type: 'tip',
           iconType: IconType.spending,
           generatedAt: now,
@@ -353,8 +356,13 @@ List<AiInsight> _generateInsights(DashboardData data) {
         candidates.add(
           AiInsight(
             title: '${days[worstIdx]}s cost you the most',
-            message:
-                '₹${worstAvg.toStringAsFixed(0)} avg on ${days[worstIdx]}s vs ₹${bestAvg.toStringAsFixed(0)} on ${days[bestIdx]}s — that\'s ₹${potentialSaving.toStringAsFixed(0)} you could keep',
+            message: BuddyMessages.insightBestDay(
+              days[worstIdx],
+              worstAvg.toStringAsFixed(0),
+              days[bestIdx],
+              bestAvg.toStringAsFixed(0),
+              potentialSaving.toStringAsFixed(0),
+            ),
             type: 'tip',
             iconType: IconType.savings,
             generatedAt: now,
@@ -374,8 +382,8 @@ List<AiInsight> _generateInsights(DashboardData data) {
   if (data.transactions.isEmpty) {
     candidates.add(
       AiInsight(
-        title: 'Let\'s get started!',
-        message: 'Add your first transaction — it only takes a sec',
+        title: BuddyMessages.insightGetStarted,
+        message: BuddyMessages.insightGetStartedMessage,
         type: 'info',
         iconType: IconType.info,
         generatedAt: now,

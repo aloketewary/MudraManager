@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
-import 'package:mudra_manager/shared/widgets/responseive_layout_builder.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 
 class QuickActionButton extends ConsumerWidget {
@@ -16,146 +15,161 @@ class QuickActionButton extends ConsumerWidget {
     final spacing = ref.watch(spacingProvider);
     final color = Theme.of(context).colorScheme;
     final ctxt = AppLocalizations.of(context)!;
+
+    final actions = [
+      _ActionData(
+        label: 'Add Expense',
+        icon: LucideIcons.trendingDown,
+        color: color.error,
+        onTap: () => context.push(
+          AppRoutes.addTransaction,
+          extra: {'isIncome': false},
+        ),
+      ),
+      _ActionData(
+        label: 'Add Income',
+        icon: LucideIcons.trendingUp,
+        color: color.primary,
+        onTap: () => context.push(
+          AppRoutes.addTransaction,
+          extra: {'isIncome': true},
+        ),
+      ),
+      _ActionData(
+        label: ctxt.dashboard_add_transfer_text,
+        icon: LucideIcons.arrowLeftRight,
+        color: color.tertiary,
+        onTap: () => context.push(AppRoutes.transfer),
+      ),
+    ];
+
     return Container(
       margin: EdgeInsets.symmetric(horizontal: spacing.cardHorizontal),
-      child: ResponsiveLayoutBuilder(
-        columnWidget: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Flexible(
-              child: _DashboardActionButton(
-                label: 'Add Expense',
-                icon: LucideIcons.trendingDown,
-                onTap: () => context
-                    .push(AppRoutes.addTransaction, extra: {'isIncome': false}),
-                color: color.error,
-                isLeft: true,
-                isRight: true,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Flexible(
-              child: _DashboardActionButton(
-                label: 'Add Income',
-                icon: LucideIcons.trendingUp,
-                onTap: () => context
-                    .push(AppRoutes.addTransaction, extra: {'isIncome': true}),
-                color: color.primary,
-                isLeft: false,
-                isRight: false,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Flexible(
-              child: _DashboardActionButton(
-                label: ctxt.dashboard_add_transfer_text,
-                icon: LucideIcons.arrowLeftRight,
-                onTap: () => context.push(AppRoutes.transfer),
-                color: color.tertiary,
-                isRight: true,
-                isLeft: true,
-              ),
-            ),
-          ],
-        ),
-        rowWidget: Row(
-          children: [
-            Expanded(
-              child: _DashboardActionButton(
-                label: 'Add Expense',
-                icon: LucideIcons.trendingDown,
-                onTap: () => context
-                    .push(AppRoutes.addTransaction, extra: {'isIncome': false}),
-                color: color.error,
-                isLeft: true,
-              ),
-            ),
-            const SizedBox(width: 4),
-            Expanded(
-              child: _DashboardActionButton(
-                label: 'Add Income',
-                icon: LucideIcons.trendingUp,
-                onTap: () => context
-                    .push(AppRoutes.addTransaction, extra: {'isIncome': true}),
-                color: color.primary,
-              ),
-            ),
-            const SizedBox(width: 4),
-            Expanded(
-              child: _DashboardActionButton(
-                label: ctxt.dashboard_add_transfer_text,
-                icon: LucideIcons.arrowLeftRight,
-                onTap: () => context.push(AppRoutes.transfer),
-                color: color.tertiary,
-                isRight: true,
-              ),
-            ),
-          ],
-        ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final isNarrow = constraints.maxWidth < 350;
+          final isLargeText =
+              MediaQuery.textScalerOf(context).scale(14) > 18;
+
+          if (isLargeText || isNarrow) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (int i = 0; i < actions.length; i++) ...[
+                  if (i > 0) const SizedBox(height: 8),
+                  _DashboardActionButton(
+                    data: actions[i],
+                    borderRadius: BorderRadius.circular(16),
+                    isRow: true,
+                  ),
+                ],
+              ],
+            );
+          }
+
+          return Row(
+            children: [
+              for (int i = 0; i < actions.length; i++) ...[
+                if (i > 0) const SizedBox(width: 4),
+                Expanded(
+                  child: _DashboardActionButton(
+                    data: actions[i],
+                    borderRadius: BorderRadius.horizontal(
+                      left: Radius.circular(i == 0 ? 16 : 0),
+                      right: Radius.circular(
+                        i == actions.length - 1 ? 16 : 0,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          );
+        },
       ),
     );
   }
 }
 
-class _DashboardActionButton extends StatelessWidget {
+class _ActionData {
   final String label;
   final IconData icon;
   final Color color;
   final VoidCallback onTap;
-  final bool isRight;
-  final bool isLeft;
 
-  const _DashboardActionButton({
+  const _ActionData({
     required this.label,
     required this.icon,
     required this.color,
     required this.onTap,
-    this.isRight = false,
-    this.isLeft = false,
+  });
+}
+
+class _DashboardActionButton extends StatelessWidget {
+  final _ActionData data;
+  final BorderRadius borderRadius;
+  final bool isRow;
+
+  const _DashboardActionButton({
+    required this.data,
+    required this.borderRadius,
+    this.isRow = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
+
     return Material(
-      color: color.withValues(alpha: 0.1),
-      borderRadius: _getBorderRadius(isLeft, isRight),
+      color: data.color.withValues(alpha: 0.1),
+      borderRadius: borderRadius,
       child: InkWell(
         onTap: () {
           HapticFeedback.mediumImpact();
-          onTap();
+          data.onTap();
         },
-        borderRadius: _getBorderRadius(isLeft, isRight),
+        borderRadius: borderRadius,
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          child: Column(
-            children: [
-              Icon(icon, color: color, size: 28),
-              const SizedBox(height: 8),
-              Text(
-                label,
-                style: textTheme.labelSmall?.copyWith(
-                  color: colorScheme.onSurface,
-                  fontWeight: FontWeight.w600,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
+          padding: EdgeInsets.symmetric(
+            vertical: isRow ? 12 : 14,
+            horizontal: isRow ? 16 : 4,
           ),
+          child: isRow
+              ? Row(
+                  children: [
+                    Icon(data.icon, color: data.color, size: 22),
+                    const SizedBox(width: 12),
+                    Text(
+                      data.label,
+                      style: textTheme.labelMedium?.copyWith(
+                        color: colorScheme.onSurface,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                )
+              : Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(data.icon, color: data.color, size: 24),
+                    const SizedBox(height: 6),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        data.label,
+                        style: textTheme.labelSmall?.copyWith(
+                          color: colorScheme.onSurface,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                      ),
+                    ),
+                  ],
+                ),
         ),
       ),
     );
-  }
-
-  BorderRadius? _getBorderRadius(bool isLeft, bool isRight) {
-    if (isLeft && isRight) {
-      return BorderRadius.circular(16);
-    } else if (isLeft) {
-      return const BorderRadius.horizontal(left: Radius.circular(16));
-    } else if (isRight) {
-      return const BorderRadius.horizontal(right: Radius.circular(16));
-    }
-    return null;
   }
 }

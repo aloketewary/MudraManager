@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -80,7 +81,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
         data: (allAccounts) {
           if (allAccounts.isEmpty) {
             return NoDataFound(
-              message: 'No accounts added yet',
+              message: BuddyMessages.noAccounts,
               iconData: Icons.account_balance_wallet_outlined,
               action: ElevatedButton.icon(
                 onPressed: () => context.push('/manage-accounts/add'),
@@ -177,7 +178,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
           itemCount: 5,
           itemBuilder: (context, index) => const TransactionCardSkeleton(),
         ),
-        error: (err, stack) => Center(child: Text('Error: $err')),
+        error: (err, stack) => Center(child: Text(BuddyMessages.errorWith('$err'))),
       ),
     );
   }
@@ -751,8 +752,8 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
   ) async {
     final confirmed = await DialogUtils.showDeleteConfirmation(
       context,
-      title: ctxt.accounts_deleteAccountTitle,
-      message: ctxt.accounts_deleteAccountMessage(account.name),
+      title: BuddyMessages.deleteTitle,
+      message: BuddyMessages.deleteMessage(account.name),
     );
 
     if (confirmed == true) {
@@ -772,7 +773,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
   ) async {
     final confirmed = await DialogUtils.showConfirmation(
       context,
-      title: ctxt.accounts_archiveAccountTitle,
+      title: BuddyMessages.deleteTitle,
       message: ctxt.accounts_archiveAccountMessage(account.name),
       icon: LucideIcons.archive,
     );

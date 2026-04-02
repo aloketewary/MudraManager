@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -48,7 +49,7 @@ class RecurringExpensesScreen extends ConsumerWidget {
                     color: color.onSurfaceVariant,
                   ),
                   SizedBox(height: spacing.cardHorizontal),
-                  Text('No recurring expenses', style: textTheme.titleLarge),
+                  Text(BuddyMessages.noRecurring, style: textTheme.titleLarge),
                   SizedBox(height: spacing.cardHorizontal),
                   Text(
                     'Patterns will be detected automatically',
@@ -156,7 +157,7 @@ class RecurringExpensesScreen extends ConsumerWidget {
             ),
           ),
         ),
-        error: (_, __) => const Center(child: Text('Error loading expenses')),
+        error: (_, __) => Center(child: Text(BuddyMessages.genericError)),
       ),
     );
   }

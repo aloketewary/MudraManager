@@ -56,7 +56,7 @@ class _ReconciliationScreenState extends ConsumerState<ReconciliationScreen> {
   Future<void> _reconcile() async {
     final entered = _enteredBalance;
     if (entered == null) {
-      SnackbarService.error('Enter a valid balance');
+      SnackbarService.error(BuddyMessages.invalidAmount);
       return;
     }
 
@@ -73,7 +73,7 @@ class _ReconciliationScreenState extends ConsumerState<ReconciliationScreen> {
 
       if (mounted) {
         if (adj.abs() < 0.01) {
-          SnackbarService.success('Balance already matches!');
+          SnackbarService.success(BuddyMessages.txnAdded);
         } else {
           SnackbarService.success('Balance adjusted by ${adj > 0 ? "+" : ""}${adj.toStringAsFixed(2)}');
         }

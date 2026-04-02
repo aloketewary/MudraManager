@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -243,7 +244,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
             ),
             const SizedBox(height: 24),
             Text(
-              'No transactions yet',
+              BuddyMessages.noTransactions,
               style: textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
@@ -445,9 +446,9 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
     return trendsAsync.when(
       data: (categoryData) {
         if (categoryData.isEmpty) {
-          return const SizedBox(
+          return SizedBox(
             height: 200,
-            child: Center(child: Text('No data')),
+            child: Center(child: Text(BuddyMessages.noTransactions)),
           );
         }
         final sortedCategories = categoryData.entries.toList()
@@ -471,9 +472,9 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
           ),
         ),
       ),
-      error: (_, __) => const SizedBox(
+      error: (_, __) => SizedBox(
         height: 200,
-        child: Center(child: Text('Error loading data')),
+        child: Center(child: Text(BuddyMessages.genericError)),
       ),
     );
   }
@@ -484,9 +485,9 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
       data: (byDay) {
         final maxSpending = byDay.values.reduce((a, b) => a > b ? a : b);
         if (maxSpending == 0) {
-          return const SizedBox(
+          return SizedBox(
             height: 200,
-            child: Center(child: Text('No data')),
+            child: Center(child: Text(BuddyMessages.noTransactions)),
           );
         }
 
@@ -581,9 +582,9 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
           ),
         ),
       ),
-      error: (_, __) => const SizedBox(
+      error: (_, __) => SizedBox(
         height: 200,
-        child: Center(child: Text('Error loading data')),
+        child: Center(child: Text(BuddyMessages.genericError)),
       ),
     );
   }

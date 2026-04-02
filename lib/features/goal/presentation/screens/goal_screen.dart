@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -42,8 +43,8 @@ class GoalScreen extends ConsumerWidget {
                   ),
                 ],
               ),
-              body: const NoDataFound(
-                message: 'No goals yet',
+              body: NoDataFound(
+                message: BuddyMessages.noGoals,
                 iconData: LucideIcons.goal,
               ),
             );
@@ -411,7 +412,7 @@ class GoalScreen extends ConsumerWidget {
             ],
           ),
         ),
-        error: (_, __) => const Center(child: Text('Error loading goals')),
+        error: (_, __) => Center(child: Text(BuddyMessages.genericError)),
       ),
     );
   }

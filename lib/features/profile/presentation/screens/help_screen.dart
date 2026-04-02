@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -372,7 +373,7 @@ class _HelpScreenState extends ConsumerState<HelpScreen> {
           Icon(LucideIcons.searchX, size: 48, color: color.onSurfaceVariant),
           const SizedBox(height: 16),
           Text(
-            'No results found',
+            BuddyMessages.noFilterResults('search'),
             style: textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
             ),

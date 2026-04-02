@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'dart:convert';
 
 import 'package:fl_chart/fl_chart.dart';
@@ -579,8 +580,8 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
         ),
       ),
       error: (e, _) => Scaffold(
-        appBar: AppBar(title: const Text('Error')),
-        body: Center(child: Text('Error: $e')),
+        appBar: AppBar(title: Text(BuddyMessages.genericError)),
+        body: Center(child: Text(BuddyMessages.errorWith('$e'))),
       ),
     );
   }
@@ -635,7 +636,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
               ),
               const SizedBox(height: 24),
               Text(
-                'No expenses yet',
+                BuddyMessages.noTransactions,
                 style: textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -789,7 +790,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'No expenses match filters',
+                    BuddyMessages.noFilterResults('filter'),
                     style: textTheme.titleMedium?.copyWith(
                       color: color.onSurfaceVariant,
                     ),
@@ -1161,7 +1162,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
             ),
             const SizedBox(height: 24),
             Text(
-              'No data yet',
+              BuddyMessages.noData,
               style: textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
               ),

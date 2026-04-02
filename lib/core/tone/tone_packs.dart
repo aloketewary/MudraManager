@@ -79,6 +79,8 @@ class BuddyTonePack extends TonePack {
   @override String get noCategories => 'No categories yet';
   @override String get noNotifications => 'All quiet here 🤫\nNo notifications yet';
   @override String noFilterResults(String filter) => 'No $filter notifications';
+  @override String get noData => 'Not enough data yet\nKeep tracking to unlock insights';
+  @override String get noRecurring => 'No recurring transactions\nAdd bills to auto-track them';
 
   @override String get exportSuccess => 'Report exported! 📄';
   @override String exportFailed(String error) => 'Export didn\'t work: $error';
@@ -88,6 +90,31 @@ class BuddyTonePack extends TonePack {
 
   @override String errorWith(String detail) => 'Something went wrong: $detail';
   @override String get genericError => 'Oops, something went wrong 😅';
+
+  @override String get deleteTitle => 'Are you sure?';
+  @override String deleteMessage(String? param) => 'This ${param != null ? 'remove $param and': ''}can\'t be undone — want to go ahead?';
+  @override String get deleteConfirm => 'Delete';
+  @override String get deleteCancel => 'Keep it';
+  @override String get logoutTitle => 'Leaving already?';
+  @override String get logoutMessage => 'All your data will be cleared from this device.';
+  @override String get logoutConfirm => 'Logout';
+
+  @override String get insightBillsDueSoon => 'Heads up — bills incoming';
+  @override String insightBillsDueMessage(int count) => '$count bill${count > 1 ? "s" : ""} due soon, don\'t forget!';
+  @override String get insightOverBudget => 'Oops, over budget';
+  @override String insightOverBudgetMessage(int count) => '$count budget${count > 1 ? "s" : ""} went over this month — worth a look';
+  @override String get insightNearBudget => 'Getting close...';
+  @override String insightNearBudgetMessage(int count) => '$count budget${count > 1 ? "s" : ""} past 80% — still time to rein it in';
+  @override String get insightOverspending => 'Spending outpacing income';
+  @override String insightOverspendingMessage(String amount) => 'You\'re ₹$amount over your income this month — might want to slow down';
+  @override String get insightSpendingSpike => 'Spending spike today';
+  @override String insightSpendingSpikeMessage(String avg, String today) => 'You usually spend ₹$avg/day. Today\'s already ₹$today.';
+  @override String get insightWeekendAlert => 'Weekend spending alert';
+  @override String insightWeekendAlertMessage(String avg, String current) => 'You usually spend ₹$avg on weekends. This one\'s already ₹$current.';
+  @override String insightMoneyLeak(String category, int count, String total) => '$category: $count times this month, ₹$total total — small hits add up';
+  @override String insightBestDay(String worst, String wAvg, String best, String bAvg, String saving) => '₹$wAvg avg on ${worst}s vs ₹$bAvg on ${best}s — that\'s ₹$saving you could keep';
+  @override String get insightGetStarted => 'Let\'s get started! 🚀';
+  @override String get insightGetStartedMessage => 'Add your first transaction — it only takes a sec';
 
   @override String singleApproved(String amountStr) => 'Your transaction$amountStr has been tracked. I\'m on it! 💪';
   @override String allApproved(int count, String amountStr) => '$count transaction${count > 1 ? 's' : ''}$amountStr tracked while you were away. No worries, I handled it! 😎';
@@ -174,6 +201,8 @@ class ProfessionalTonePack extends TonePack {
   @override String get noCategories => 'No categories defined.';
   @override String get noNotifications => 'No notifications.';
   @override String noFilterResults(String filter) => 'No $filter notifications found.';
+  @override String get noData => 'Insufficient data.\nContinue recording transactions.';
+  @override String get noRecurring => 'No recurring transactions configured.';
 
   @override String get exportSuccess => 'Report exported.';
   @override String exportFailed(String error) => 'Export failed: $error';
@@ -183,6 +212,31 @@ class ProfessionalTonePack extends TonePack {
 
   @override String errorWith(String detail) => 'Error: $detail';
   @override String get genericError => 'An error occurred.';
+
+  @override String get deleteTitle => 'Confirm Deletion';
+  @override String deleteMessage(String? param) => 'This ${param != null ? 'remove $param ': ''}action is irreversible. Proceed?';
+  @override String get deleteConfirm => 'Delete';
+  @override String get deleteCancel => 'Cancel';
+  @override String get logoutTitle => 'Confirm Logout';
+  @override String get logoutMessage => 'All local data will be erased.';
+  @override String get logoutConfirm => 'Logout';
+
+  @override String get insightBillsDueSoon => 'Upcoming bills';
+  @override String insightBillsDueMessage(int count) => '$count bill${count > 1 ? "s" : ""} due within the next few days.';
+  @override String get insightOverBudget => 'Budget exceeded';
+  @override String insightOverBudgetMessage(int count) => '$count budget${count > 1 ? "s" : ""} exceeded this month.';
+  @override String get insightNearBudget => 'Approaching budget limit';
+  @override String insightNearBudgetMessage(int count) => '$count budget${count > 1 ? "s" : ""} above 80% utilization.';
+  @override String get insightOverspending => 'Expenses exceed income';
+  @override String insightOverspendingMessage(String amount) => 'Expenditure exceeds income by $amount this month.';
+  @override String get insightSpendingSpike => 'Elevated spending today';
+  @override String insightSpendingSpikeMessage(String avg, String today) => 'Daily average: $avg. Today: $today.';
+  @override String get insightWeekendAlert => 'Weekend spending elevated';
+  @override String insightWeekendAlertMessage(String avg, String current) => 'Weekend average: $avg. Current: $current.';
+  @override String insightMoneyLeak(String category, int count, String total) => '$category: $count transactions, $total total this month.';
+  @override String insightBestDay(String worst, String wAvg, String best, String bAvg, String saving) => '$wAvg avg on ${worst}s vs $bAvg on ${best}s. Potential saving: $saving.';
+  @override String get insightGetStarted => 'Get started';
+  @override String get insightGetStartedMessage => 'Record your first transaction to begin tracking.';
 
   @override String singleApproved(String amountStr) => 'Transaction$amountStr recorded automatically.';
   @override String allApproved(int count, String amountStr) => '$count transaction${count > 1 ? 's' : ''}$amountStr processed automatically.';
@@ -269,6 +323,8 @@ class PlayfulTonePack extends TonePack {
   @override String get noCategories => 'No tags unlocked yet! 🏷️';
   @override String get noNotifications => 'Inbox empty! 📭\nAll clear, hero!';
   @override String noFilterResults(String filter) => 'No $filter alerts found!';
+  @override String get noData => 'Need more XP! 🎮\nKeep logging to unlock insights!';
+  @override String get noRecurring => 'No auto-quests set! ⚔️\nAdd recurring bills to automate!';
 
   @override String get exportSuccess => 'Scroll exported! 📜';
   @override String exportFailed(String error) => 'Scroll failed: $error';
@@ -278,6 +334,31 @@ class PlayfulTonePack extends TonePack {
 
   @override String errorWith(String detail) => 'Glitch detected: $detail 🐛';
   @override String get genericError => 'Something glitched! 🐛';
+
+  @override String get deleteTitle => 'Drop this item? 🗑️';
+  @override String deleteMessage(String? param) => '${param != null ? '$param, ': ''}It\'ll be gone forever — no respawns!';
+  @override String get deleteConfirm => 'Destroy';
+  @override String get deleteCancel => 'Nah, keep it';
+  @override String get logoutTitle => 'Rage quit? 🎮';
+  @override String get logoutMessage => 'Your save data on this device will be wiped!';
+  @override String get logoutConfirm => 'Quit';
+
+  @override String get insightBillsDueSoon => 'Boss fights incoming! ⚔️';
+  @override String insightBillsDueMessage(int count) => '$count bill${count > 1 ? "s" : ""} due soon — gear up!';
+  @override String get insightOverBudget => 'Shield broken! 🛡️';
+  @override String insightOverBudgetMessage(int count) => '$count budget${count > 1 ? "s" : ""} busted — time to regroup!';
+  @override String get insightNearBudget => 'Shield cracking... 🛡️';
+  @override String insightNearBudgetMessage(int count) => '$count budget${count > 1 ? "s" : ""} past 80% — tread carefully!';
+  @override String get insightOverspending => 'Gold reserves depleting! 💰';
+  @override String insightOverspendingMessage(String amount) => '$amount over income — slow the spending spree!';
+  @override String get insightSpendingSpike => 'Spending power-up detected! ⚡';
+  @override String insightSpendingSpikeMessage(String avg, String today) => 'Usual daily loot: $avg. Today already $today!';
+  @override String get insightWeekendAlert => 'Weekend raid alert! 🎮';
+  @override String insightWeekendAlertMessage(String avg, String current) => 'Weekend avg: $avg. This one at $current already!';
+  @override String insightMoneyLeak(String category, int count, String total) => '$category: $count hits, $total drained — sneaky loot leak!';
+  @override String insightBestDay(String worst, String wAvg, String best, String bAvg, String saving) => '${worst}s cost $wAvg vs ${best}s at $bAvg — $saving gold to save!';
+  @override String get insightGetStarted => 'Begin your quest! 🎮';
+  @override String get insightGetStartedMessage => 'Log your first transaction to start the adventure!';
 
   @override String singleApproved(String amountStr) => 'Auto-looted$amountStr! I got your back! ⚔️';
   @override String allApproved(int count, String amountStr) => '$count loot${count > 1 ? 's' : ''}$amountStr auto-collected while you were AFK! 🎮';
@@ -364,6 +445,8 @@ class ZenTonePack extends TonePack {
   @override String get noCategories => 'No categories yet.';
   @override String get noNotifications => 'Silence.\nNothing needs attention.';
   @override String noFilterResults(String filter) => 'Nothing in $filter.';
+  @override String get noData => 'Not enough yet.\nIt will come with time.';
+  @override String get noRecurring => 'Nothing recurring.\nAdd when ready.';
 
   @override String get exportSuccess => 'Exported.';
   @override String exportFailed(String error) => 'Export issue: $error';
@@ -373,6 +456,31 @@ class ZenTonePack extends TonePack {
 
   @override String errorWith(String detail) => 'A hiccup: $detail';
   @override String get genericError => 'Something shifted. Try again.';
+
+  @override String get deleteTitle => 'Let go?';
+  @override String deleteMessage(String? param) => 'Once ${param != null ? '$param ': ''}released, it cannot return.';
+  @override String get deleteConfirm => 'Release';
+  @override String get deleteCancel => 'Hold on';
+  @override String get logoutTitle => 'Moving on?';
+  @override String get logoutMessage => 'Your data here will be cleared.';
+  @override String get logoutConfirm => 'Leave';
+
+  @override String get insightBillsDueSoon => 'Bills approaching';
+  @override String insightBillsDueMessage(int count) => '$count bill${count > 1 ? "s" : ""} arriving soon.';
+  @override String get insightOverBudget => 'Over the line';
+  @override String insightOverBudgetMessage(int count) => '$count budget${count > 1 ? "s" : ""} exceeded. Reflect and adjust.';
+  @override String get insightNearBudget => 'Nearing the edge';
+  @override String insightNearBudgetMessage(int count) => '$count budget${count > 1 ? "s" : ""} past 80%. Mindful spending helps.';
+  @override String get insightOverspending => 'Outflow exceeds inflow';
+  @override String insightOverspendingMessage(String amount) => '$amount more spent than earned. A moment to pause.';
+  @override String get insightSpendingSpike => 'A heavier day';
+  @override String insightSpendingSpikeMessage(String avg, String today) => 'Usually $avg/day. Today, $today.';
+  @override String get insightWeekendAlert => 'Weekend spending';
+  @override String insightWeekendAlertMessage(String avg, String current) => 'Usually $avg. This weekend, $current.';
+  @override String insightMoneyLeak(String category, int count, String total) => '$category: $count times, $total. Small streams form rivers.';
+  @override String insightBestDay(String worst, String wAvg, String best, String bAvg, String saving) => '${worst}s: $wAvg. ${best}s: $bAvg. $saving to keep.';
+  @override String get insightGetStarted => 'A fresh start';
+  @override String get insightGetStartedMessage => 'Begin with your first transaction.';
 
   @override String singleApproved(String amountStr) => 'Transaction$amountStr — quietly tracked.';
   @override String allApproved(int count, String amountStr) => '$count transaction${count > 1 ? 's' : ''}$amountStr — all handled in the background.';

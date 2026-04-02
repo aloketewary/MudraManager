@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -69,9 +70,9 @@ class CategorySelector extends ConsumerWidget {
             height: 120,
             child: Center(child: CircularProgressIndicator()),
           ),
-          error: (_, __) => const SizedBox(
+          error: (_, __) => SizedBox(
             height: 120,
-            child: Text('Error loading categories'),
+            child: Text(BuddyMessages.genericError),
           ),
         );
   }

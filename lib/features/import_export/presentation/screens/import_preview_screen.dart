@@ -445,7 +445,7 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
                 );
               },
               loading: () => const LinearProgressIndicator(),
-              error: (_, __) => const Text('Error loading accounts'),
+              error: (_, __) => Text(BuddyMessages.genericError),
             ),
           ],
         ),

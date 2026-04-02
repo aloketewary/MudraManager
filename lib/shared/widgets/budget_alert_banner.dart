@@ -1,5 +1,7 @@
+import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:flutter/material.dart';
 import 'package:mudra_manager/features/budget/data/budget_alert_service.dart';
+import 'package:mudra_manager/shared/widgets/currency_text.dart';
 
 class BudgetAlertBanner extends StatelessWidget {
   final List<BudgetAlert> alerts;
@@ -108,8 +110,8 @@ class BudgetAlertBanner extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Budget: ₹${alert.budget.amount.toStringAsFixed(0)}'),
-            Text('Spent: ₹${alert.spent.toStringAsFixed(0)}'),
+            CurrencyText(amount: alert.budget.amount, prefixText: 'Budget:', compact: false, fixedLength: 0),
+            CurrencyText(amount: alert.spent, prefixText: 'Spent:', compact: false, fixedLength: 0),
             Text('Percentage: ${alert.percentage.toStringAsFixed(1)}%'),
             const SizedBox(height: 16),
             LinearProgressIndicator(

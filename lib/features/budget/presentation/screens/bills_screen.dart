@@ -95,8 +95,8 @@ class BillsScreen extends ConsumerWidget {
       body: billsAsync.when(
         data: (bills) {
           if (bills.isEmpty) {
-            return const NoDataFound(
-              message: 'No bills yet\nAdd your recurring bills to track them',
+            return NoDataFound(
+              message: BuddyMessages.noBills,
               iconData: Icons.receipt_long_outlined,
             );
           }
@@ -115,7 +115,7 @@ class BillsScreen extends ConsumerWidget {
           itemCount: 4,
           itemBuilder: (context, index) => const TransactionCardSkeleton(),
         ),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(BuddyMessages.errorWith('$e'))),
       ),
     );
   }
@@ -257,7 +257,7 @@ class BillsScreen extends ConsumerWidget {
                     final confirmed = await DialogUtils.showDeleteConfirmation(
                       context,
                       title: 'Delete Bill',
-                      message: 'Are you sure you want to delete this bill?',
+                      
                     );
                     if (confirmed == true) {
                       final isar = Isar.getInstance()!;

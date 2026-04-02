@@ -404,7 +404,8 @@ class _NotificationPageState extends ConsumerState<NotificationPage> {
                               backgroundColor:
                                   notifColor.withValues(alpha: 0.12),
                               foregroundColor: notifColor,
-                              padding: EdgeInsets.symmetric(vertical: spacing.cardVertical),
+                              padding: EdgeInsets.symmetric(
+                                  vertical: spacing.cardVertical),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(
                                   spacing.radiusSmall,
@@ -431,7 +432,8 @@ class _NotificationPageState extends ConsumerState<NotificationPage> {
                               notificationService,
                             ),
                             style: OutlinedButton.styleFrom(
-                              padding: EdgeInsets.symmetric(vertical: spacing.cardVertical),
+                              padding: EdgeInsets.symmetric(
+                                  vertical: spacing.cardVertical),
                               side: BorderSide(
                                 color:
                                     color.outlineVariant.withValues(alpha: 0.3),
@@ -472,9 +474,9 @@ class _NotificationPageState extends ConsumerState<NotificationPage> {
     HapticFeedback.mediumImpact();
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
+      builder: (ctx) =>  AlertDialog(
         title: const Text('Clear all notifications?'),
-        content: const Text('This action cannot be undone.'),
+        content: Text(BuddyMessages.deleteMessage(null)),
         actions: [
           TextButton(
             onPressed: () => ctx.pop(),
@@ -518,7 +520,8 @@ class _NotificationPageState extends ConsumerState<NotificationPage> {
         final data = jsonDecode(n.actionData!) as Map<String, dynamic>;
         switch (data['type'] as String?) {
           case 'settle_up':
-            if (n.tripId != null) context.push(AppRoutes.tripDetail, extra: n.tripId);
+            if (n.tripId != null)
+              context.push(AppRoutes.tripDetail, extra: n.tripId);
           case 'view_expense':
             if (n.expenseId != null && n.tripId != null) {
               context.push(AppRoutes.expenseDetail,
@@ -542,7 +545,8 @@ class _NotificationPageState extends ConsumerState<NotificationPage> {
         case NotificationCategory.budget:
           context.push(AppRoutes.budgetDashboard);
         case NotificationCategory.trip:
-          if (n.tripId != null) context.push(AppRoutes.tripDetail, extra: n.tripId);
+          if (n.tripId != null)
+            context.push(AppRoutes.tripDetail, extra: n.tripId);
         case NotificationCategory.financial:
           context.push(AppRoutes.statistics);
         default:

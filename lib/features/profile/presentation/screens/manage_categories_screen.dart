@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,6 +7,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/core/utils/dialog_utils.dart';
 import 'package:mudra_manager/core/utils/icon_helper.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
@@ -49,7 +51,7 @@ class ManageCategoriesScreen extends ConsumerWidget {
           if (categories.isEmpty) {
             return NoDataFound(
               iconData: LucideIcons.tag,
-              message: 'No categories found.',
+              message: BuddyMessages.noCategories,
               action: ElevatedButton.icon(
                 onPressed: () => context.push(AppRoutes.addCategory),
                 icon: const Icon(LucideIcons.plus),
@@ -148,7 +150,7 @@ class ManageCategoriesScreen extends ConsumerWidget {
           itemCount: 6,
           itemBuilder: (_, __) => const TransactionCardSkeleton(),
         ),
-        error: (err, _) => Center(child: Text('Error: $err')),
+        error: (err, _) => Center(child: Text(BuddyMessages.errorWith('$err'))),
       ),
     );
   }
@@ -319,12 +321,12 @@ class ManageCategoriesScreen extends ConsumerWidget {
       message =
           'This will permanently delete "${category.name}" and $txCount linked transaction${txCount == 1 ? '' : 's'}. This action cannot be undone.';
     } else {
-      message = ctxt.categories_deleteCategoryMessage;
+      message = BuddyMessages.deleteMessage(category.name);
     }
 
     final shouldDelete = await DialogUtils.showDeleteConfirmation(
       context,
-      title: ctxt.categories_deleteCategoryTitle,
+      title: BuddyMessages.deleteTitle,
       message: message,
       deleteText: txCount > 0 ? 'Delete All' : null,
     );
@@ -334,7 +336,7 @@ class ManageCategoriesScreen extends ConsumerWidget {
       ref.invalidate(categoryListProvider);
       ref.invalidate(transactionCountsProvider);
       ref.invalidate(transactionProvider);
-      SnackbarService.success(ctxt.categories_categoryDeletedMessage);
+      SnackbarService.success(BuddyMessages.categoryDeleted);
     }
   }
 }

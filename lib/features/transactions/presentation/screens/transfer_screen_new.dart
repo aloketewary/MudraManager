@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -180,7 +181,7 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
         data: (accounts) {
           if (accounts.isEmpty) {
             return Center(
-              child: Text('No accounts available', style: textTheme.bodyLarge),
+              child: Text(BuddyMessages.noAccounts, style: textTheme.bodyLarge),
             );
           }
 
@@ -474,7 +475,7 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(BuddyMessages.errorWith('$e'))),
       ),
     );
   }

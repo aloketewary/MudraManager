@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,6 +8,8 @@ import 'package:isar_community/isar.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/sms_activity.dart';
+import 'package:mudra_manager/core/extension/localization_extenstion.dart';
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/refresh_helper.dart';
@@ -175,7 +178,7 @@ class _SmsActivityScreenState extends ConsumerState<SmsActivityScreen>
                           Text(
                             _filterStatus != null
                                 ? 'No ${_statusLabel(_filterStatus!).toLowerCase()} activities'
-                                : 'No activities yet',
+                                : BuddyMessages.noTransactions,
                             style: textTheme.bodyLarge?.copyWith(
                               color: color.onSurfaceVariant,
                             ),
@@ -222,7 +225,7 @@ class _SmsActivityScreenState extends ConsumerState<SmsActivityScreen>
             ),
           ),
         ),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(BuddyMessages.errorWith('$e'))),
       ),
     );
   }
@@ -297,7 +300,7 @@ class _SmsActivityScreenState extends ConsumerState<SmsActivityScreen>
                     Text(
                       pendingCount > 0
                           ? '$pendingCount need${pendingCount == 1 ? 's' : ''} attention'
-                          : 'All caught up!',
+                          : BuddyMessages.noNotifications,
                       style: textTheme.bodySmall?.copyWith(
                         color: color.onSurfaceVariant,
                       ),
@@ -803,6 +806,7 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
     final isActionable = widget.activity.status == ActivityStatus.pending ||
         widget.activity.status == ActivityStatus.needsReview ||
         widget.activity.status == ActivityStatus.duplicate;
+    final ctxt = AppLocalizations.of(context);
 
     return SafeArea(
       child: Padding(
@@ -959,7 +963,7 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                       _divider(color),
                       _detailRow(
                         'Balance',
-                        '₹${widget.activity.balance!.toStringAsFixed(2)}',
+                        ctxt!.formatCompactCurrency(widget.activity.balance!),
                         color,
                         textTheme,
                       ),

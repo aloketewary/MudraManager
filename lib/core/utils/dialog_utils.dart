@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 
 class DialogUtils {
   static Future<bool?> showDeleteConfirmation(
     BuildContext context, {
-    required String title,
-    required String message,
+    String? title,
+    String? message,
     String? cancelText,
     String? deleteText,
   }) {
@@ -35,13 +36,13 @@ class DialogUtils {
               Icon(Icons.delete_forever_rounded, size: 48, color: color.error),
               const SizedBox(height: 16),
               Text(
-                title,
+                title ?? BuddyMessages.deleteTitle,
                 style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
               Text(
-                message,
+                message ?? BuddyMessages.deleteMessage(null),
                 style: textTheme.bodyMedium?.copyWith(color: color.onSurfaceVariant),
                 textAlign: TextAlign.center,
               ),
@@ -57,7 +58,7 @@ class DialogUtils {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       child: Text(
-                        (cancelText ?? 'CANCEL').toUpperCase(),
+                        (cancelText ?? BuddyMessages.deleteCancel).toUpperCase(),
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -73,7 +74,7 @@ class DialogUtils {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       child: Text(
-                        (deleteText ?? 'DELETE').toUpperCase(),
+                        (deleteText ?? BuddyMessages.deleteConfirm).toUpperCase(),
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),

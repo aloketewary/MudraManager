@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -89,7 +90,7 @@ class _AnimatedSwipeableAccountCardsState
 
     final accounts = data.accounts;
     if (accounts.isEmpty) {
-      return Center(child: Text(ctxt.common_noAccountsYet));
+      return Center(child: Text(BuddyMessages.noAccounts));
     }
 
     final balanceMap = data.accountBalances;

@@ -169,8 +169,8 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
         body: Center(child: CircularProgressIndicator()),
       ),
       error: (e, _) => Scaffold(
-        appBar: AppBar(title: const Text('Error')),
-        body: Center(child: Text('Error: $e')),
+        appBar: AppBar(title: Text(BuddyMessages.genericError)),
+        body: Center(child: Text(BuddyMessages.errorWith('$e'))),
       ),
     );
   }

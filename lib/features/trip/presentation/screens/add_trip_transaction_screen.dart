@@ -491,7 +491,7 @@ class _AddTripTransactionScreenState
         body: Center(child: CircularProgressIndicator()),
       ),
       error: (e, _) => Scaffold(
-        body: Center(child: Text('Error: $e')),
+        body: Center(child: Text(BuddyMessages.errorWith('$e'))),
       ),
     );
   }
@@ -599,11 +599,11 @@ class _AddTripTransactionScreenState
       return;
     }
     if (_paidById == null) {
-      SnackbarService.error('Please select who paid');
+      SnackbarService.error(BuddyMessages.fillAllFields);
       return;
     }
     if (_selectedParticipants.isEmpty) {
-      SnackbarService.error('Please select participants');
+      SnackbarService.error(BuddyMessages.addParticipant);
       return;
     }
 

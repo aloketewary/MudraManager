@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -102,7 +103,7 @@ class SpendingPersonalityScreen extends ConsumerWidget {
             Icon(LucideIcons.brain, size: 64, color: color.onSurfaceVariant),
             const SizedBox(height: 16),
             Text(
-              'Not enough data yet',
+              BuddyMessages.noData,
               style:
                   textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),

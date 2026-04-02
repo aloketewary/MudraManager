@@ -91,6 +91,8 @@ class BuddyMessages {
   static String get noCategories => Tone.current.noCategories;
   static String get noNotifications => Tone.current.noNotifications;
   static String noFilterResults(String filter) => Tone.current.noFilterResults(filter);
+  static String get noData => Tone.current.noData;
+  static String get noRecurring => Tone.current.noRecurring;
 
   // ── Export ──
   static String get exportSuccess => Tone.current.exportSuccess;
@@ -103,4 +105,31 @@ class BuddyMessages {
   // ── Generic ──
   static String errorWith(String detail) => Tone.current.errorWith(detail);
   static String get genericError => Tone.current.genericError;
+
+  // ── Confirmations ──
+  static String get deleteTitle => Tone.current.deleteTitle;
+  static String deleteMessage(String? param) => Tone.current.deleteMessage(param);
+  static String get deleteConfirm => Tone.current.deleteConfirm;
+  static String get deleteCancel => Tone.current.deleteCancel;
+  static String get logoutTitle => Tone.current.logoutTitle;
+  static String get logoutMessage => Tone.current.logoutMessage;
+  static String get logoutConfirm => Tone.current.logoutConfirm;
+
+  // ── AI Insights ──
+  static String get insightBillsDueSoon => Tone.current.insightBillsDueSoon;
+  static String insightBillsDueMessage(int count) => Tone.current.insightBillsDueMessage(count);
+  static String get insightOverBudget => Tone.current.insightOverBudget;
+  static String insightOverBudgetMessage(int count) => Tone.current.insightOverBudgetMessage(count);
+  static String get insightNearBudget => Tone.current.insightNearBudget;
+  static String insightNearBudgetMessage(int count) => Tone.current.insightNearBudgetMessage(count);
+  static String get insightOverspending => Tone.current.insightOverspending;
+  static String insightOverspendingMessage(String amount) => Tone.current.insightOverspendingMessage(amount);
+  static String get insightSpendingSpike => Tone.current.insightSpendingSpike;
+  static String insightSpendingSpikeMessage(String avg, String today) => Tone.current.insightSpendingSpikeMessage(avg, today);
+  static String get insightWeekendAlert => Tone.current.insightWeekendAlert;
+  static String insightWeekendAlertMessage(String avg, String current) => Tone.current.insightWeekendAlertMessage(avg, current);
+  static String insightMoneyLeak(String category, int count, String total) => Tone.current.insightMoneyLeak(category, count, total);
+  static String insightBestDay(String worst, String wAvg, String best, String bAvg, String saving) => Tone.current.insightBestDay(worst, wAvg, best, bAvg, saving);
+  static String get insightGetStarted => Tone.current.insightGetStarted;
+  static String get insightGetStartedMessage => Tone.current.insightGetStartedMessage;
 }

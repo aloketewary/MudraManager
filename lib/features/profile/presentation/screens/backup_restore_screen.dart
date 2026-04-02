@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 // lib/features/profile/presentation/screens/backup_restore_screen.dart
 
 import 'package:flutter/material.dart';
@@ -444,7 +445,7 @@ class BackupRestoreScreen extends ConsumerWidget {
       includeAttachments: includeAttachments ?? false,
     );
     if (filePath != null) {
-      SnackbarService.success(ctxt.backup_completedMessage);
+      SnackbarService.success(BuddyMessages.backupSuccess);
       ref.invalidate(_backupHistoryProvider);
       ref
           .read(gamificationServiceProvider)
@@ -470,7 +471,7 @@ class BackupRestoreScreen extends ConsumerWidget {
       password,
     );
     if (data != null) {
-      SnackbarService.success(ctxt.backup_restoreSuccessMessage);
+      SnackbarService.success(BuddyMessages.restoreSuccess);
       ref.invalidate(_backupHistoryProvider);
     }
   }

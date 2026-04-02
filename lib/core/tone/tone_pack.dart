@@ -89,6 +89,8 @@ abstract class TonePack {
   String get noCategories;
   String get noNotifications;
   String noFilterResults(String filter);
+  String get noData;
+  String get noRecurring;
 
   // ── Export ──
   String get exportSuccess;
@@ -101,6 +103,33 @@ abstract class TonePack {
   // ── Generic ──
   String errorWith(String detail);
   String get genericError;
+
+  // ── Confirmations ──
+  String get deleteTitle;
+  String deleteMessage(String? param);
+  String get deleteConfirm;
+  String get deleteCancel;
+  String get logoutTitle;
+  String get logoutMessage;
+  String get logoutConfirm;
+
+  // ── AI Insights ──
+  String get insightBillsDueSoon;
+  String insightBillsDueMessage(int count);
+  String get insightOverBudget;
+  String insightOverBudgetMessage(int count);
+  String get insightNearBudget;
+  String insightNearBudgetMessage(int count);
+  String get insightOverspending;
+  String insightOverspendingMessage(String amount);
+  String get insightSpendingSpike;
+  String insightSpendingSpikeMessage(String avg, String today);
+  String get insightWeekendAlert;
+  String insightWeekendAlertMessage(String avg, String current);
+  String insightMoneyLeak(String category, int count, String total);
+  String insightBestDay(String worst, String wAvg, String best, String bAvg, String saving);
+  String get insightGetStarted;
+  String get insightGetStartedMessage;
 
   // ── Smart Notifications (drain queue) ──
   String singleApproved(String amountStr);

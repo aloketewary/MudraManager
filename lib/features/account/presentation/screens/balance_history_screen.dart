@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -41,7 +42,7 @@ class BalanceHistoryScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'No balance history yet',
+                    BuddyMessages.noData,
                     style: textTheme.titleMedium?.copyWith(
                       color: color.onSurfaceVariant,
                     ),

@@ -121,13 +121,20 @@ extension AppLocalizationsHelper on AppLocalizations {
 
   String formatCompactCurrency(double amount, {int fixedStringLength = 2}) {
     if (amount.abs() >= 10000000) {
-      return '₹${(amount / 10000000).toStringAsFixed(fixedStringLength)}$currency_crore_short';
+      return '₹${_trimTrailingZeros((amount / 10000000).toStringAsFixed(fixedStringLength))}$currency_crore_short';
     } else if (amount.abs() >= 100000) {
-      return '₹${(amount / 100000).toStringAsFixed(fixedStringLength)}$currency_lakh_short';
+      return '₹${_trimTrailingZeros((amount / 100000).toStringAsFixed(fixedStringLength))}$currency_lakh_short';
     } else if (amount.abs() >= 1000) {
-      return '₹${(amount / 1000).toStringAsFixed(fixedStringLength)}$currency_thousand_short';
+      return '₹${_trimTrailingZeros((amount / 1000).toStringAsFixed(fixedStringLength))}$currency_thousand_short';
     }
     return formatCurrencyWithSign(fixedStringLength, amount);
+  }
+
+  String _trimTrailingZeros(String value) {
+    if (!value.contains('.')) return value;
+    var trimmed = value.replaceAll(RegExp(r'0+$'), '');
+    if (trimmed.endsWith('.')) trimmed = trimmed.substring(0, trimmed.length - 1);
+    return trimmed;
   }
 
   NumberFormat formatCompactNumber() {

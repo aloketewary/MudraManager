@@ -55,7 +55,7 @@ class _InvestmentPortfolioScreenState extends ConsumerState<InvestmentPortfolioS
         future: _metricsFuture,
         builder: (context, metricsSnapshot) {
           if (metricsSnapshot.hasError) {
-            return Center(child: Text('Error: ${metricsSnapshot.error}'));
+            return Center(child: Text(BuddyMessages.genericError));
           }
           if (!metricsSnapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
@@ -133,7 +133,7 @@ class _InvestmentPortfolioScreenState extends ConsumerState<InvestmentPortfolioS
                   future: _holdingsFuture,
                   builder: (context, holdingsSnapshot) {
                     if (holdingsSnapshot.hasError) {
-                      return Center(child: Text('Error: ${holdingsSnapshot.error}'));
+                      return Center(child: Text(BuddyMessages.genericError));
                     }
                     if (!holdingsSnapshot.hasData) {
                       return const Center(child: CircularProgressIndicator());
@@ -141,9 +141,9 @@ class _InvestmentPortfolioScreenState extends ConsumerState<InvestmentPortfolioS
 
                     final holdings = holdingsSnapshot.data!;
                     if (holdings.isEmpty) {
-                      return const Padding(
+                      return Padding(
                         padding: EdgeInsets.all(32),
-                        child: Text('No holdings yet'),
+                        child: Text(BuddyMessages.noTransactions),
                       );
                     }
 
@@ -377,7 +377,7 @@ class _InvestmentPortfolioScreenState extends ConsumerState<InvestmentPortfolioS
                               await InvestmentPortfolioService.instance
                                   .addHolding(holding, widget.account.id);
                               _loadData();
-                              SnackbarService.info('Holding added successfully');
+                              SnackbarService.info(BuddyMessages.txnAdded);
                               if (mounted) context.pop();
                             } catch (e) {
                               SnackbarService.error(BuddyMessages.errorWith('$e'));

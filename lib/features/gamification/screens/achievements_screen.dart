@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -199,7 +200,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
                                 Text(
                                   _filterCategory != null
                                       ? 'No ${_categoryLabel(_filterCategory!).toLowerCase()} badges yet'
-                                      : 'No achievements yet',
+                                      : BuddyMessages.noTransactions,
                                   style: textTheme.bodyLarge?.copyWith(
                                     color: color.onSurfaceVariant,
                                   ),
@@ -217,7 +218,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
             },
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (_, __) =>
-                const Center(child: Text('Error loading achievements')),
+                Center(child: Text(BuddyMessages.genericError)),
           ),
         ),
         Align(

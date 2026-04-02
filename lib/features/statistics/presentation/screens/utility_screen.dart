@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -200,7 +201,7 @@ class UtilityScreenState extends ConsumerState<UtilityScreen> {
                         IconButton(
                           onPressed: () async {
                             await _restoreDefaults();
-                            SnackbarService.info('Restored to defaults');
+                            SnackbarService.info(BuddyMessages.settingsSaved);
                             if (mounted) {
                               context.pop();
                             }
@@ -524,7 +525,7 @@ class UtilityScreenState extends ConsumerState<UtilityScreen> {
                   ),
                   SizedBox(height: spacing.elementGap),
                   Text(
-                    'No utilities enabled',
+                    BuddyMessages.noData,
                     style: textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),

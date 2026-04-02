@@ -221,7 +221,7 @@ class BudgetDetailsScreen extends ConsumerWidget {
               final confirmed = await DialogUtils.showDeleteConfirmation(
                 context,
                 title: 'Delete \'$budgetName\'',
-                message: 'Are you sure you want to delete this budget?',
+                
               );
               if (confirmed == true && context.mounted) {
                 await _deleteBudget(context, ref);

@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -39,7 +40,7 @@ class _BudgetDashboardState extends ConsumerState<BudgetDashboard> {
             data: (list) {
               if (list.isEmpty) {
                 return NoDataFound(
-                  message: ctxt.budget_dashboardNotFoundText,
+                  message: BuddyMessages.noBudgets,
                   iconData: Icons.pie_chart_outline,
                 );
               }
@@ -60,7 +61,7 @@ class _BudgetDashboardState extends ConsumerState<BudgetDashboard> {
               itemCount: 3,
               itemBuilder: (context, index) => const TransactionCardSkeleton(),
             ),
-            error: (e, _) => Center(child: Text('Error: $e')),
+            error: (e, _) => Center(child: Text(BuddyMessages.errorWith('$e'))),
           ),
         ),
       ),

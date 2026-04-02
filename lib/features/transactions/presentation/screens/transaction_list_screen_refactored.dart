@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -408,8 +409,8 @@ class TransactionListScreenRefactoredState
             message: _searchQuery.isNotEmpty ||
                     _selectedCategoryId != null ||
                     _filterStartDate != null
-                ? 'No matching transactions'
-                : ctxt.transaction_noTransactionFoundText,
+                ? BuddyMessages.noFilterResults('filter')
+                : BuddyMessages.noTransactions,
             iconData: Icons.receipt_long_outlined,
           );
         }
@@ -479,7 +480,7 @@ class TransactionListScreenRefactoredState
         itemCount: 5,
         itemBuilder: (context, index) => const TransactionCardSkeleton(),
       ),
-      error: (e, _) => Center(child: Text('Error: $e')),
+      error: (e, _) => Center(child: Text(BuddyMessages.errorWith('$e'))),
     );
   }
 }

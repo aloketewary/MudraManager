@@ -53,8 +53,6 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
     final confirmed = await DialogUtils.showDeleteConfirmation(
       context,
       title: 'Delete Goal?',
-      message:
-          'This will permanently delete this goal. This action cannot be undone.',
     );
     if (confirmed == true && mounted) {
       await ref.read(goalServiceProvider).deleteGoal(widget.goal.id);

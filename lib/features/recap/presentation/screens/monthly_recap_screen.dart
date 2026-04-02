@@ -46,7 +46,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
         'MudraManager_Recap_$monthStr.pdf',
         askUser: true,
       );
-      SnackbarService.success('Recap PDF saved');
+      SnackbarService.success(BuddyMessages.exportSuccess);
     } catch (e) {
       SnackbarService.error(BuddyMessages.exportFailed('$e'));
     } finally {

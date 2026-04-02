@@ -287,7 +287,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
               itemCount: 5,
               itemBuilder: (_, __) => const TransactionCardSkeleton(),
             ),
-            error: (e, _) => Center(child: Text('Error: $e')),
+            error: (e, _) => Center(child: Text(BuddyMessages.errorWith('$e'))),
           ),
         ),
       ],
@@ -956,8 +956,8 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
         message: _searchQuery.isNotEmpty ||
                 _selectedCategoryId != null ||
                 _filterStartDate != null
-            ? 'No matching transactions'
-            : ctxt.transaction_noTransactionFoundText,
+            ? BuddyMessages.noFilterResults('filter')
+            : BuddyMessages.noTransactions,
         iconData: Icons.receipt_long_outlined,
       );
     }
@@ -1103,10 +1103,10 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
   Future<void> _onRemoveTransaction(transaction, AppLocalizations ctxt) async {
     final confirm = await DialogUtils.showDeleteConfirmation(
       context,
-      title: ctxt.transaction_deleteAlertTitleText,
-      message: ctxt.transaction_deleteAlertBodyText,
-      cancelText: ctxt.transaction_cancelButtonActionText,
-      deleteText: ctxt.transaction_deleteButtonActionText,
+      title: BuddyMessages.deleteTitle,
+      message: BuddyMessages.deleteMessage(null),
+      cancelText: BuddyMessages.deleteCancel,
+      deleteText: BuddyMessages.deleteConfirm,
     );
 
     if (confirm != true) return;

@@ -112,7 +112,7 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
           itemCount: 6,
           itemBuilder: (_, __) => const TransactionCardSkeleton(),
         ),
-        error: (err, _) => Center(child: Text('Error: $err')),
+        error: (err, _) => Center(child: Text(BuddyMessages.errorWith('$err'))),
         data: (grouped) {
           final activeGroups =
               grouped.entries.where((e) => e.value.isNotEmpty).toList();
@@ -754,7 +754,7 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
 
             return accountsAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (err, _) => Center(child: Text('Error: $err')),
+              error: (err, _) => Center(child: Text(BuddyMessages.errorWith('$err'))),
               data: (accounts) {
                 final creditCards = accounts
                     .where((a) => a.accountType == AccountType.creditCard)

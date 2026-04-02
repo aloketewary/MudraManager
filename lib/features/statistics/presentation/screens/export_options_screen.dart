@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -41,7 +42,7 @@ class ExportOptionsScreen extends ConsumerWidget {
       ),
       body: formatsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text('Error: $err')),
+        error: (err, stack) => Center(child: Text(BuddyMessages.errorWith('$err'))),
         data: (formats) {
           if (formats.isEmpty) {
             return Center(
@@ -83,7 +84,7 @@ class ExportOptionsScreen extends ConsumerWidget {
                 error: (err, stack) => Card(
                   child: ListTile(
                     leading: const Icon(Icons.error),
-                    title: Text('Error: $err'),
+                    title: Text(BuddyMessages.errorWith('$err')),
                   ),
                 ),
                 data: (templates) {

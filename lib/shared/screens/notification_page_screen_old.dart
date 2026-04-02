@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -47,9 +48,9 @@ class NotificationPage extends ConsumerWidget {
           return CustomScrollView(
             slivers: [
               if (data.isEmpty)
-                const SliverFillRemaining(
+                SliverFillRemaining(
                   child: NoDataFound(
-                    message: 'No notifications yet.',
+                    message: BuddyMessages.noNotifications,
                     iconData: Icons.notifications_none_outlined,
                   ),
                 )
