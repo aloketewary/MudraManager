@@ -218,8 +218,8 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
                       } catch (e) {
                         if (!context.mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: const Text('Unable to check for updates'),
+                          const SnackBar(
+                            content: Text('Unable to check for updates'),
                             behavior: SnackBarBehavior.floating,
                           ),
                         );

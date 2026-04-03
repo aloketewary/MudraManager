@@ -1,4 +1,5 @@
 import 'package:mudra_manager/core/tone/tone_pack.dart';
+import 'package:mudra_manager/core/tone/tone_variation.dart';
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 🤝 BUDDY — warm, casual, encouraging (default)
@@ -14,11 +15,24 @@ class FriendlyTonePack extends TonePack {
   String get emoji => '🤝';
 
   @override
-  String get txnAdded => 'Done! Transaction saved ✨';
+  String get txnAdded => pickRandom([
+    'Done! Transaction saved ✨',
+    'Got it! All logged 👍',
+    'Saved! You\'re on top of it ✨',
+    'Noted! One more tracked 📝',
+  ]);
   @override
-  String get txnUpdated => 'Updated! Looking good 👍';
+  String get txnUpdated => pickRandom([
+    'Updated! Looking good 👍',
+    'Changes saved! ✓',
+    'All updated! 👌',
+  ]);
   @override
-  String get txnDeleted => 'Gone! Transaction removed 🗑️';
+  String get txnDeleted => pickRandom([
+    'Gone! Transaction removed 🗑️',
+    'Deleted! One less to track',
+    'Removed! Clean slate 🗑️',
+  ]);
   @override
   String get txnFailed => 'Hmm, couldn\'t save that. Try again?';
   @override
@@ -64,14 +78,22 @@ class FriendlyTonePack extends TonePack {
       isTrip ? 'Expense added to trip! 💰' : 'Expense added to group! 💰';
 
   @override
-  String get budgetCreated => 'Budget set! Let\'s stay on track 💪';
+  String get budgetCreated => pickRandom([
+    'Budget set! Let\'s stay on track 💪',
+    'Budget locked in! You\'re planning ahead 💪',
+    'Nice! Budget is ready to roll 📊',
+  ]);
   @override
   String get budgetUpdated => 'Budget updated!';
   @override
   String get budgetDeleted => 'Budget removed';
 
   @override
-  String get goalCreated => 'Goal set! You got this 🎯';
+  String get goalCreated => pickRandom([
+    'Goal set! You got this 🎯',
+    'New goal! Let\'s make it happen 🎯',
+    'Goal locked in! Eyes on the prize 🎯',
+  ]);
   @override
   String get goalUpdated => 'Goal updated!';
   @override
@@ -97,7 +119,11 @@ class FriendlyTonePack extends TonePack {
   @override
   String get billAdded => 'Bill tracked! I\'ll remind you 🔔';
   @override
-  String get billPaid => 'Nice, bill marked as paid! ✅';
+  String get billPaid => pickRandom([
+    'Nice, bill marked as paid! ✅',
+    'Bill done! One less to worry about ✅',
+    'Paid! That\'s a relief ✅',
+  ]);
   @override
   String get billDeleted => 'Bill removed';
 
@@ -137,7 +163,11 @@ class FriendlyTonePack extends TonePack {
 
   @override
   String get noTransactions =>
-      'Nothing here yet\nAdd your first transaction to get started';
+      pickRandom([
+        'Nothing here yet\nAdd your first transaction to get started',
+        'Empty for now\nStart tracking — it only takes a sec',
+        'No transactions yet\nYour financial journey starts with one entry',
+      ]);
   @override
   String get noBudgets => 'No budgets yet\nSet one up to track your spending';
   @override
@@ -260,7 +290,11 @@ class FriendlyTonePack extends TonePack {
   @override
   String get dashboardWelcomeBack => 'Welcome back! Let\'s see where you stand';
   @override
-  String get dashboardAllCaughtUp => 'You\'re all caught up! 🎉';
+  String get dashboardAllCaughtUp => pickRandom([
+    'You\'re all caught up! 🎉',
+    'Nothing needs your attention — nice! ✨',
+    'All good here! Enjoy your day 🎉',
+  ]);
   @override
   String streakMessage(int days) => '$days day streak! Keep it going! 🔥';
 
@@ -303,8 +337,11 @@ class FriendlyTonePack extends TonePack {
   String dailySummaryNotif(String spent, String earned, String topCategory) =>
       'Spent ₹$spent · Earned ₹$earned\nMost went to $topCategory';
   @override
-  String get dailySummaryEmpty =>
-      'Nothing recorded yesterday — either a zero-spend win or time to catch up!';
+  String get dailySummaryEmpty => pickRandom([
+    'Nothing recorded yesterday — either a zero-spend win or time to catch up!',
+    'Quiet day yesterday — your wallet thanks you!',
+    'No transactions yesterday — fresh start today!',
+  ]);
   @override
   String weeklySummaryNotif(String total, String topCategory, String trend) =>
       'You spent ₹$total\nMost on $topCategory\n$trend';
@@ -330,11 +367,23 @@ class ProfessionalTonePack extends TonePack {
   String get emoji => '📋';
 
   @override
-  String get txnAdded => 'Transaction recorded.';
+  String get txnAdded => pickRandom([
+    'Transaction recorded.',
+    'Entry saved successfully.',
+    'Transaction logged.',
+  ]);
   @override
-  String get txnUpdated => 'Transaction updated.';
+  String get txnUpdated => pickRandom([
+    'Transaction updated.',
+    'Changes applied.',
+    'Record updated successfully.',
+  ]);
   @override
-  String get txnDeleted => 'Transaction deleted.';
+  String get txnDeleted => pickRandom([
+    'Transaction deleted.',
+    'Record removed.',
+    'Entry deleted successfully.',
+  ]);
   @override
   String get txnFailed => 'Failed to save transaction. Please retry.';
   @override
@@ -380,14 +429,22 @@ class ProfessionalTonePack extends TonePack {
       isTrip ? 'Expense linked to trip.' : 'Expense linked to group.';
 
   @override
-  String get budgetCreated => 'Budget created.';
+  String get budgetCreated => pickRandom([
+    'Budget created.',
+    'Budget configured successfully.',
+    'New budget is active.',
+  ]);
   @override
   String get budgetUpdated => 'Budget updated.';
   @override
   String get budgetDeleted => 'Budget deleted.';
 
   @override
-  String get goalCreated => 'Goal created.';
+  String get goalCreated => pickRandom([
+    'Goal created.',
+    'Savings goal configured.',
+    'New goal is active.',
+  ]);
   @override
   String get goalUpdated => 'Goal updated.';
   @override
@@ -412,7 +469,11 @@ class ProfessionalTonePack extends TonePack {
   @override
   String get billAdded => 'Bill added. Reminders will be sent.';
   @override
-  String get billPaid => 'Bill marked as paid.';
+  String get billPaid => pickRandom([
+    'Bill marked as paid.',
+    'Payment recorded.',
+    'Bill settled.',
+  ]);
   @override
   String get billDeleted => 'Bill removed.';
 
@@ -451,7 +512,11 @@ class ProfessionalTonePack extends TonePack {
 
   @override
   String get noTransactions =>
-      'No transactions recorded.\nAdd your first entry.';
+      pickRandom([
+        'No transactions recorded.\nAdd your first entry.',
+        'No records found.\nBegin by adding a transaction.',
+        'Transaction history is empty.\nStart recording.',
+      ]);
   @override
   String get noBudgets => 'No budgets configured.';
   @override
@@ -572,7 +637,11 @@ class ProfessionalTonePack extends TonePack {
   @override
   String get dashboardWelcomeBack => 'Welcome back. Here is your summary.';
   @override
-  String get dashboardAllCaughtUp => 'All items are up to date.';
+  String get dashboardAllCaughtUp => pickRandom([
+    'All items are up to date.',
+    'No pending actions.',
+    'Everything is current.',
+  ]);
   @override
   String streakMessage(int days) => '$days consecutive days of tracking.';
 
@@ -614,7 +683,11 @@ class ProfessionalTonePack extends TonePack {
   String dailySummaryNotif(String spent, String earned, String topCategory) =>
       'Expenditure: ₹$spent · Income: ₹$earned\nPrimary category: $topCategory';
   @override
-  String get dailySummaryEmpty => 'No transactions recorded yesterday.';
+  String get dailySummaryEmpty => pickRandom([
+    'No transactions recorded yesterday.',
+    'Yesterday had no recorded activity.',
+    'No entries for the previous day.',
+  ]);
   @override
   String weeklySummaryNotif(String total, String topCategory, String trend) =>
       'Weekly expenditure: ₹$total\nTop category: $topCategory\n$trend';
@@ -642,11 +715,24 @@ class MotivationalTonePack extends TonePack {
 
 // Transaction
   @override
-  String get txnAdded => 'Great move! Transaction saved! 💪';
+  String get txnAdded => pickRandom([
+    'Great move! Transaction saved! 💪',
+    'Boom! Logged it! You\'re crushing it! 💪',
+    'Another one tracked! Keep the momentum! ✨',
+    'Saved! Every entry is a step forward! 🚀',
+  ]);
   @override
-  String get txnUpdated => 'Nice update! Staying sharp! ✨';
+  String get txnUpdated => pickRandom([
+    'Nice update! Staying sharp! ✨',
+    'Updated! Precision matters! ✨',
+    'Changes saved! You\'re on it! 👍',
+  ]);
   @override
-  String get txnDeleted => 'Cleared out! One less to worry about';
+  String get txnDeleted => pickRandom([
+    'Cleared out! One less to worry about',
+    'Removed! Keeping things clean! 💪',
+    'Gone! Focus on what matters',
+  ]);
   @override
   String get txnFailed => 'Didn\'t go through — give it another shot!';
   @override
@@ -697,7 +783,11 @@ class MotivationalTonePack extends TonePack {
 
 // Budget
   @override
-  String get budgetCreated => 'Smart move! Budget is set! 💪';
+  String get budgetCreated => pickRandom([
+    'Smart move! Budget is set! 💪',
+    'Budget locked in! You\'re taking control! 💪',
+    'That\'s discipline! Budget ready! 📊',
+  ]);
   @override
   String get budgetUpdated => 'Budget adjusted — staying flexible!';
   @override
@@ -705,7 +795,11 @@ class MotivationalTonePack extends TonePack {
 
 // Goal
   @override
-  String get goalCreated => 'Love the ambition! Goal set! 🎯';
+  String get goalCreated => pickRandom([
+    'Love the ambition! Goal set! 🎯',
+    'Big dreams start here! Goal locked in! 🎯',
+    'That\'s the spirit! New goal ready! 🚀',
+  ]);
   @override
   String get goalUpdated => 'Goal refined — keep pushing!';
   @override
@@ -733,7 +827,11 @@ class MotivationalTonePack extends TonePack {
   @override
   String get billAdded => 'Bill tracked! You\'re staying ahead! 🔔';
   @override
-  String get billPaid => 'Bill paid! One less thing to worry about! ✅';
+  String get billPaid => pickRandom([
+    'Bill paid! One less thing to worry about! ✅',
+    'Crushed it! Bill is done! ✅',
+    'Paid and done! You\'re ahead of the game! 💪',
+  ]);
   @override
   String get billDeleted => 'Bill removed';
 
@@ -778,7 +876,11 @@ class MotivationalTonePack extends TonePack {
 // Empty States
   @override
   String get noTransactions =>
-      'Fresh start! 🌟\nAdd your first transaction — every journey begins with one step';
+      pickRandom([
+        'Fresh start! 🌟\nAdd your first transaction — every journey begins with one step',
+        'Empty slate! 🌟\nYour first entry is waiting — let\'s go!',
+        'Nothing yet! 💪\nOne transaction and you\'re on your way!',
+      ]);
   @override
   String get noBudgets =>
       'No budgets yet\nSet one up — your future self will thank you! 💪';
@@ -874,7 +976,7 @@ class MotivationalTonePack extends TonePack {
       '$category: $count times, ₹$total — small wins add up if you cut back!';
   @override
   String insightBestDay(
-          String worst, String wAvg, String best, String bAvg, String saving) =>
+          String worst, String wAvg, String best, String bAvg, String saving,) =>
       '₹$wAvg on ${worst}s vs ₹$bAvg on ${best}s — ₹$saving potential savings!';
   @override
   String get insightGetStarted => 'Let\'s build something great! 🚀';
@@ -909,8 +1011,11 @@ class MotivationalTonePack extends TonePack {
   String get dashboardWelcomeBack =>
       'You\'re back! Let\'s keep the progress going! 🚀';
   @override
-  String get dashboardAllCaughtUp =>
-      'All caught up — you\'re ahead of the game! 🏆';
+  String get dashboardAllCaughtUp => pickRandom([
+    'All caught up — you\'re ahead of the game! 🏆',
+    'Nothing pending! You\'re on fire! 🔥',
+    'Clean slate! Keep this energy going! 💪',
+  ]);
   @override
   String streakMessage(int days) => '$days day streak! Unstoppable! 🔥';
 
@@ -952,8 +1057,11 @@ class MotivationalTonePack extends TonePack {
   String dailySummaryNotif(String spent, String earned, String topCategory) =>
       'Spent ₹$spent · Earned ₹$earned\n$topCategory led the way — keep tracking!';
   @override
-  String get dailySummaryEmpty =>
-      'Zero spend yesterday — your wallet thanks you! ✨';
+  String get dailySummaryEmpty => pickRandom([
+    'Zero spend yesterday — your wallet thanks you! ✨',
+    'Nothing spent yesterday — that\'s willpower! 💪',
+    'A no-spend day! That\'s a win! 🏆',
+  ]);
   @override
   String weeklySummaryNotif(String total, String topCategory, String trend) =>
       '₹$total this week on $topCategory\n$trend — keep pushing!';
@@ -979,11 +1087,23 @@ class CalmTonePack extends TonePack {
   String get emoji => '🧘';
 
   @override
-  String get txnAdded => 'Noted.';
+  String get txnAdded => pickRandom([
+    'Noted.',
+    'Recorded.',
+    'Saved quietly.',
+  ]);
   @override
-  String get txnUpdated => 'Updated.';
+  String get txnUpdated => pickRandom([
+    'Updated.',
+    'Adjusted.',
+    'Changes saved.',
+  ]);
   @override
-  String get txnDeleted => 'Released.';
+  String get txnDeleted => pickRandom([
+    'Released.',
+    'Removed.',
+    'Let go.',
+  ]);
   @override
   String get txnFailed => 'That didn\'t land. Try once more.';
   @override
@@ -1025,14 +1145,22 @@ class CalmTonePack extends TonePack {
   String expenseAddedToTrip(bool isTrip) => 'Added.';
 
   @override
-  String get budgetCreated => 'Boundary set.';
+  String get budgetCreated => pickRandom([
+    'Boundary set.',
+    'Budget in place.',
+    'Limits defined.',
+  ]);
   @override
   String get budgetUpdated => 'Adjusted.';
   @override
   String get budgetDeleted => 'Released.';
 
   @override
-  String get goalCreated => 'Intention set.';
+  String get goalCreated => pickRandom([
+    'Intention set.',
+    'A new direction.',
+    'Goal planted.',
+  ]);
   @override
   String get goalUpdated => 'Refined.';
   @override
@@ -1057,7 +1185,11 @@ class CalmTonePack extends TonePack {
   @override
   String get billAdded => 'Noted. You\'ll be reminded.';
   @override
-  String get billPaid => 'Settled.';
+  String get billPaid => pickRandom([
+    'Settled.',
+    'Paid. One less.',
+    'Done. Peace of mind.',
+  ]);
   @override
   String get billDeleted => 'Released.';
 
@@ -1095,7 +1227,11 @@ class CalmTonePack extends TonePack {
   String get smsImportEnabled => 'Quietly watching your transactions.';
 
   @override
-  String get noTransactions => 'A clean slate.\nBegin when you\'re ready.';
+  String get noTransactions => pickRandom([
+    'A clean slate.\nBegin when you\'re ready.',
+    'Nothing here yet.\nStart gently.',
+    'Empty.\nA fresh beginning awaits.',
+  ]);
   @override
   String get noBudgets => 'No boundaries yet.\nSet one when it feels right.';
   @override
@@ -1215,7 +1351,11 @@ class CalmTonePack extends TonePack {
   @override
   String get dashboardWelcomeBack => 'Welcome back.';
   @override
-  String get dashboardAllCaughtUp => 'Everything is in order.';
+  String get dashboardAllCaughtUp => pickRandom([
+    'Everything is in order.',
+    'Nothing needs attention.',
+    'All is well.',
+  ]);
   @override
   String streakMessage(int days) => '$days days of mindful tracking.';
 
@@ -1255,7 +1395,11 @@ class CalmTonePack extends TonePack {
   String dailySummaryNotif(String spent, String earned, String topCategory) =>
       '₹$spent spent · ₹$earned earned\nMostly $topCategory.';
   @override
-  String get dailySummaryEmpty => 'A quiet day. Nothing recorded.';
+  String get dailySummaryEmpty => pickRandom([
+    'A quiet day. Nothing recorded.',
+    'Yesterday was still. No entries.',
+    'Nothing spent. A restful day.',
+  ]);
   @override
   String weeklySummaryNotif(String total, String topCategory, String trend) =>
       '₹$total this week. $topCategory led. $trend.';

@@ -68,6 +68,15 @@ class AppRouter {
         navigatorKey: _rootNavigatorKey,
         initialLocation: showOnboarding ? AppRoutes.onboarding : AppRoutes.home,
         debugLogDiagnostics: true,
+        errorBuilder: (context, state) {
+          // Unhandled deep links (e.g. website URLs) redirect to home
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (context.mounted) context.go(AppRoutes.home);
+          });
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        },
         redirect: (context, state) {
           final isOnboardingComplete =
               SharedPrefsUtil.instance.isOnboardingComplete();
