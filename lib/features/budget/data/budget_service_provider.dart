@@ -4,6 +4,7 @@ import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/budget.dart';
 import 'package:mudra_manager/core/db/models/budget_category_allocation.dart';
+import 'package:mudra_manager/core/db/models/budget_type.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
@@ -156,6 +157,38 @@ class BudgetService {
       for (final budget in budgets) {
         final (s, e) = budgetRanges[budget.id]!;
 
+        // Handle tag-wise budgets
+        if (budget.budgetType == BudgetType.tagWise) {
+          await budget.budgetTags.load();
+          final tagIds = budget.budgetTags.map((t) => t.id).toSet();
+          if (tagIds.isEmpty) continue;
+
+          // Filter expenses that have any of the budget's tags
+          double totalSpent = 0;
+          for (final t in allExpenses) {
+            if (t.date.isBefore(s) || t.date.isAfter(e)) continue;
+            await t.tags.load();
+            if (t.tags.any((tag) => tagIds.contains(tag.id))) {
+              totalSpent += t.amount;
+            }
+          }
+
+          if (totalSpent > budget.amount) {
+            PluginService().emitBudget(totalSpent, budget.amount);
+          }
+
+          list.add(
+            BudgetWithProgress(
+              budget: budget,
+              spent: totalSpent,
+              categorySpendings: [],
+              startDate: s,
+              endDate: e,
+            ),
+          );
+          continue;
+        }
+
         double totalSpent = 0;
         final catSpendings = <CategorySpending>[];
 
@@ -201,6 +234,7 @@ class BudgetService {
       await isar.budgets.put(bud);
       await bud.categories.save();
       await bud.allocations.save();
+      await bud.budgetTags.save();
       for (final alloc in bud.allocations) {
         await isar.budgetCategoryAllocations.put(alloc);
         await alloc.category.save();

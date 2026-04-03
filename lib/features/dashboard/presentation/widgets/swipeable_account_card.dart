@@ -485,26 +485,10 @@ class _AnimatedSwipeableAccountCardsState
                                         child: Container(
                                           height: collapsedCardHeight,
                                           decoration: BoxDecoration(
-                                            gradient: LinearGradient(
-                                              begin: Alignment.topLeft,
-                                              end: Alignment.bottomRight,
-                                              colors: [
-                                                accentColor,
-                                                accentColor.withValues(
-                                                    alpha: 0.85,),
-                                              ],
-                                            ),
+                                            color: accentColor,
                                             borderRadius: BorderRadius.circular(
                                               spacing.radiusMedium,
                                             ),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: accentColor.withValues(
-                                                    alpha: 0.25,),
-                                                blurRadius: 8,
-                                                offset: const Offset(0, 2),
-                                              ),
-                                            ],
                                           ),
                                           padding: EdgeInsets.symmetric(
                                             horizontal:
@@ -828,22 +812,8 @@ class _AnimatedSwipeableAccountCardsState
       height: height,
       child: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              accentColor,
-              accentColor.withValues(alpha: 0.8),
-            ],
-          ),
+          color: accentColor,
           borderRadius: BorderRadius.circular(spacing.radiusMedium),
-          boxShadow: [
-            BoxShadow(
-              color: accentColor.withValues(alpha: 0.25),
-              blurRadius: 10,
-              offset: const Offset(0, 3),
-            ),
-          ],
         ),
         padding: EdgeInsets.all(spacing.cardInner),
         child: isLarge
@@ -963,27 +933,11 @@ class _AnimatedSwipeableAccountCardsState
             ),
             child: Container(
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Color(account.colorValue ?? 0xFF6B4CE6),
-                    Color(account.colorValue ?? 0xFF6B4CE6)
-                        .withValues(alpha: 0.85),
-                  ],
-                ),
+                color: Color(account.colorValue ?? 0xFF6B4CE6),
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(spacing.radiusLarge),
                   topRight: Radius.circular(spacing.radiusLarge),
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Color(account.colorValue ?? 0xFF6B4CE6)
-                        .withValues(alpha: 0.3),
-                    blurRadius: 16,
-                    offset: const Offset(0, -4),
-                  ),
-                ],
               ),
               padding: EdgeInsets.symmetric(
                 horizontal: spacing.cardHorizontalMax,

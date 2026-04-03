@@ -30,6 +30,7 @@ class RecurringTransactionService {
     log.i('Checking ${dueRecurring.length} recurring transactions');
 
     int processed = 0;
+    int matched = 0;
     int skipped = 0;
     for (final recurring in dueRecurring) {
       await recurring.category.load();
@@ -41,27 +42,84 @@ class RecurringTransactionService {
         recurring.nextDueDate.day,
       );
 
-      // Process if due date is today or in the past
-      if (dueDate.isBefore(today) || dueDate.isAtSameMomentAs(today)) {
-        // Check for duplicate
-        final exists =
-            await _transactionExists(isar, recurring, recurring.nextDueDate);
-        if (exists) {
-          log.i(
-              'Skipping duplicate: ${recurring.description} for ${recurring.nextDueDate}');
-          skipped++;
-          continue;
-        }
+      if (dueDate.isAfter(today)) continue;
 
+      // Check if already processed for this period
+      final exists =
+          await _transactionExists(isar, recurring, recurring.nextDueDate);
+      if (exists) {
+        skipped++;
+        continue;
+      }
+
+      // Try to match with an existing SMS-imported transaction
+      final smsMatch = await _findSmsMatch(isar, recurring);
+      if (smsMatch != null) {
+        // Link the existing transaction to this recurring bill
+        await _linkTransactionToRecurring(isar, smsMatch, recurring);
+        await _updateNextDueDate(isar, recurring);
+        log.i('Matched SMS transaction to recurring: ${recurring.description}');
+        matched++;
+        continue;
+      }
+
+      // No SMS match — only auto-create if overdue by 2+ days
+      // (gives SMS import time to pick it up)
+      final daysOverdue = today.difference(dueDate).inDays;
+      if (daysOverdue >= 2) {
         await _createTransaction(isar, recurring);
         await _updateNextDueDate(isar, recurring);
-        log.i('Created recurring transaction: ${recurring.description}');
+        log.i('Auto-created overdue recurring: ${recurring.description}');
         processed++;
       }
     }
 
     log.i(
-        'Processed $processed recurring transactions, skipped $skipped duplicates');
+        'Recurring: $processed created, $matched SMS-matched, $skipped already done');
+  }
+
+  /// Find an unlinked transaction that matches this recurring bill
+  /// (similar amount ±10%, within ±1 day of due date, same account)
+  Future<Transaction?> _findSmsMatch(
+      Isar isar, RecurringTransaction recurring) async {
+    final dueDate = recurring.nextDueDate;
+    final searchStart = DateTime(
+      dueDate.year, dueDate.month, dueDate.day,
+    ).subtract(const Duration(days: 1));
+    final searchEnd = DateTime(
+      dueDate.year, dueDate.month, dueDate.day, 23, 59, 59,
+    ).add(const Duration(days: 1));
+
+    final minAmount = recurring.amount * 0.9;
+    final maxAmount = recurring.amount * 1.1;
+
+    final candidates = await isar.transactions
+        .filter()
+        .isExpenseEqualTo(recurring.isExpense)
+        .isTransferEqualTo(false)
+        .dateBetween(searchStart, searchEnd)
+        .amountBetween(minAmount, maxAmount)
+        .findAll();
+
+    // Find one that isn't already linked to a recurring source
+    for (final txn in candidates) {
+      await txn.recurringTransactionSource.load();
+      await txn.account.load();
+      if (txn.recurringTransactionSource.value == null &&
+          txn.account.value?.id == recurring.account.value?.id) {
+        return txn;
+      }
+    }
+    return null;
+  }
+
+  Future<void> _linkTransactionToRecurring(
+      Isar isar, Transaction txn, RecurringTransaction recurring) async {
+    txn.recurringTransactionSource.value = recurring;
+    await isar.writeTxn(() async {
+      await isar.transactions.put(txn);
+      await txn.recurringTransactionSource.save();
+    });
   }
 
   Future<bool> _transactionExists(

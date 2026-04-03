@@ -5,16 +5,22 @@ class TransactionFilterChips extends StatelessWidget {
   final int? selectedCategoryId;
   final DateTime? filterStartDate;
   final DateTime? filterEndDate;
+  final int? selectedTagId;
+  final String? selectedTagName;
   final VoidCallback onClearCategory;
   final VoidCallback onClearDateRange;
+  final VoidCallback? onClearTag;
 
   const TransactionFilterChips({
     super.key,
     this.selectedCategoryId,
     this.filterStartDate,
     this.filterEndDate,
+    this.selectedTagId,
+    this.selectedTagName,
     required this.onClearCategory,
     required this.onClearDateRange,
+    this.onClearTag,
   });
 
   @override
@@ -22,7 +28,9 @@ class TransactionFilterChips extends StatelessWidget {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    if (selectedCategoryId == null && filterStartDate == null) {
+    if (selectedCategoryId == null &&
+        filterStartDate == null &&
+        selectedTagId == null) {
       return const SizedBox.shrink();
     }
 
@@ -42,6 +50,18 @@ class TransactionFilterChips extends StatelessWidget {
               onDeleted: () {
                 HapticFeedback.mediumImpact();
                 onClearCategory();
+              },
+            ),
+          if (selectedTagId != null)
+            Chip(
+              avatar: Icon(Icons.label_rounded, size: 18, color: color.tertiary),
+              label: Text(selectedTagName ?? 'Tag', style: textTheme.labelMedium),
+              deleteIcon: const Icon(Icons.close_rounded, size: 18),
+              backgroundColor: color.tertiaryContainer,
+              side: BorderSide.none,
+              onDeleted: () {
+                HapticFeedback.mediumImpact();
+                onClearTag?.call();
               },
             ),
           if (filterStartDate != null)

@@ -16,10 +16,10 @@ class AchievementUnlockListener {
   AchievementUnlockListener(this.ref);
 
   void initialize(BuildContext context) {
-    ref.listen<AsyncValue<List<Achievement>>>(
-      achievementsProvider,
-      (previous, next) {
-        next.whenData((achievements) {
+    ref.listen<AsyncValue<List<Achievement>>>(achievementsProvider,
+        (previous, next) {
+      next.maybeWhen(
+        data: (achievements) {
           final now = DateTime.now();
 
           for (final achievement in achievements) {
@@ -37,9 +37,10 @@ class AchievementUnlockListener {
               }
             }
           }
-        });
-      },
-    );
+        },
+        orElse: () {},
+      );
+    });
   }
 
   void _showAchievementShowcase(BuildContext context, Achievement achievement) {

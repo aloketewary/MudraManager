@@ -1210,15 +1210,15 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                             navigator.push(
                               AppRoutes.transfer,
                               extra: {
-                                'initialAmount':
+                                'amount':
                                     widget.activity.amount?.toString(),
-                                'initialNote':
+                                'note':
                                     'Auto: ${widget.activity.merchant ?? widget.activity.sender}',
-                                'initialDate': widget.activity.date,
+                                'date': widget.activity.date,
                                 if (fromAccount != null)
-                                  'initialFromAccount': fromAccount,
+                                  'fromAccount': fromAccount,
                                 if (toAccount != null)
-                                  'initialToAccount': toAccount,
+                                  'toAccount': toAccount,
                               },
                             );
                           } else {

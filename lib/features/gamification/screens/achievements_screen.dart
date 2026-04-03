@@ -66,7 +66,10 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    levelAsync.whenData((level) => _checkLevelUp(level));
+    levelAsync.maybeWhen(
+      data: (level) => _checkLevelUp(level),
+      orElse: () {},
+    );
 
     return Stack(
       children: [

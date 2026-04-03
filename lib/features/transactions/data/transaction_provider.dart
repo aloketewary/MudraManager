@@ -6,6 +6,7 @@ import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
+import 'package:mudra_manager/core/db/models/tag.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
@@ -194,11 +195,16 @@ final allSectionedTransactionsProvider = FutureProvider.autoDispose
 // OPTIMIZED: Filter at database level
 final filteredSectionedTransactionsProvider = FutureProvider.autoDispose.family<
     List<TxListEntry>,
-    ({String type, int? categoryId, String? searchQuery})>((ref, arg) async {
+    ({String type, int? categoryId, int? tagId, String? searchQuery})>((ref, arg) async {
   final service = ref.watch(transactionProvider);
 
   List<Transaction> transactions;
-  if (arg.categoryId != null) {
+  if (arg.tagId != null) {
+    transactions = await service.getByTagAndType(
+      tagId: arg.tagId!,
+      type: arg.type,
+    );
+  } else if (arg.categoryId != null) {
     transactions = await service.getByCategoryAndType(
       categoryId: arg.categoryId!,
       type: arg.type,
@@ -475,6 +481,30 @@ class TransactionService {
         .isTransferEqualTo(false)
         .sortByDateDesc()
         .findAll();
+  }
+
+  Future<List<Transaction>> getByTagAndType({
+    required int tagId,
+    required String type,
+  }) async {
+    final isar = await isarService.getInstance();
+    final tag = await isar.tags.get(tagId);
+    if (tag == null) return [];
+
+    // Query all transactions linked to this tag via backlink
+    var allTxns = await isar.transactions
+        .filter()
+        .tags((q) => q.idEqualTo(tagId))
+        .sortByDateDesc()
+        .findAll();
+
+    if (type == 'income') {
+      allTxns = allTxns.where((t) => !t.isExpense && !t.isTransfer).toList();
+    } else if (type == 'expense') {
+      allTxns = allTxns.where((t) => t.isExpense && !t.isTransfer).toList();
+    }
+
+    return allTxns;
   }
 
   // OPTIMIZED: Filter by category at database level

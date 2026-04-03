@@ -174,10 +174,10 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
           key: const PageStorageKey('dashboard_scroll'),
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
-            if (!hasSeenHelp) SliverToBoxAdapter(child: _HelpBanner()),
+            if (!hasSeenHelp) SliverToBoxAdapter(child: RepaintBoundary(child: _HelpBanner())),
             if (!hasSeenHelp && alerts.isNotEmpty)
-              SliverToBoxAdapter(child: _AlertBanner(alerts: alerts)),
-            SliverToBoxAdapter(child: _AutoImportBanner()),
+              SliverToBoxAdapter(child: RepaintBoundary(child: _AlertBanner(alerts: alerts))),
+            SliverToBoxAdapter(child: RepaintBoundary(child: _AutoImportBanner())),
             SliverList(
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
@@ -287,20 +287,15 @@ class _StaggeredEntryState extends State<_StaggeredEntry>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _opacity;
-  late final Animation<Offset> _slide;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 250),
       vsync: this,
     );
     _opacity = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
-    _slide = Tween<Offset>(
-      begin: const Offset(0, 0.04),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
     _controller.forward();
   }
 
@@ -314,10 +309,7 @@ class _StaggeredEntryState extends State<_StaggeredEntry>
   Widget build(BuildContext context) {
     return FadeTransition(
       opacity: _opacity,
-      child: SlideTransition(
-        position: _slide,
-        child: widget.child,
-      ),
+      child: widget.child,
     );
   }
 }

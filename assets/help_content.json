@@ -24,7 +24,7 @@
     "title": "Categories",
     "icon": "category",
     "shortDescription": "Organize transactions with custom categories",
-    "description": "Create income and expense categories to track where your money goes. Customize with icons and colors.",
+    "description": "Create income and expense categories to track where your money goes. Customize with icons and colors. Install category packs from the Marketplace for ready-made sets.",
     "steps": [
       "Go to Profile → Categories",
       "Tap 'Add Category' button",
@@ -35,28 +35,71 @@
     ],
     "tips": [
       "Use specific categories for better insights",
-      "Default categories can be edited",
+      "Install category packs from Marketplace for curated sets (Vehicle, Wedding, Fitness, etc.)",
+      "Create subcategories under parent categories for detailed tracking",
       "Archive unused categories"
+    ]
+  },
+  {
+    "id": "tags",
+    "title": "Tags",
+    "icon": "bookmark",
+    "shortDescription": "Cross-category labels for flexible tracking",
+    "description": "Tags let you group transactions across different categories. For example, tag expenses as 'Wedding', 'Vacation', or 'Side Hustle' regardless of their category. Filter transactions by tag and see tag-based spending analytics.",
+    "steps": [
+      "When adding a transaction, scroll down to the Tags section",
+      "Tap existing tags to select them, or tap 'Add New Tag'",
+      "To filter by tag, tap the tag icon in the transaction list toolbar",
+      "View tag spending breakdown in Statistics → Spending by Tag"
+    ],
+    "tips": [
+      "Tags work across categories — tag a 'Wedding' expense in Food, Transport, or Shopping",
+      "SMS auto-import suggests tags automatically based on merchant names",
+      "Create tag-based budgets to limit spending on a specific tag",
+      "Use tags for temporary tracking (e.g., a trip or event) without creating new categories"
     ]
   },
   {
     "id": "budgets",
     "title": "Budgets",
     "icon": "pie_chart",
-    "shortDescription": "Set monthly budgets for different categories",
-    "description": "Control spending by setting budget limits. Get alerts when you approach or exceed your budget.",
+    "shortDescription": "Set budgets by category, tag, or daily limit",
+    "description": "Control spending by setting budget limits. Choose category-wise budgets for specific categories, tag-wise budgets for cross-category tracking, or daily budgets for overall spending control. Get alerts when you approach or exceed your budget.",
     "steps": [
       "Go to Budget Dashboard",
       "Tap 'Add Budget' button",
-      "Select a category",
-      "Set monthly budget amount",
-      "Choose alert threshold (optional)",
+      "Enter budget name and amount",
+      "Choose budget type: Category-wise, Tag-wise, Daily, Festival, or Travel",
+      "For category-wise: select categories and allocate amounts",
+      "For tag-wise: select tags to track",
+      "Set date range and recurrence",
       "Save your budget"
     ],
     "tips": [
+      "Use tag-wise budgets for events like weddings or vacations",
       "Start with realistic budget amounts",
       "Review and adjust budgets monthly",
-      "Use budget insights to improve spending"
+      "Recurring budgets auto-renew so you don't have to recreate them"
+    ]
+  },
+  {
+    "id": "goals",
+    "title": "Goals & Savings",
+    "icon": "goal",
+    "shortDescription": "Set financial goals and track your progress",
+    "description": "Create savings goals for things you want to achieve — emergency fund, vacation, new phone, etc. Track your progress with visual indicators and get motivated to save.",
+    "steps": [
+      "Go to Goals screen",
+      "Tap 'Add Goal' button",
+      "Enter goal name and target amount",
+      "Set a target date (optional)",
+      "Add contributions as you save",
+      "Track progress on the dashboard"
+    ],
+    "tips": [
+      "Break big goals into smaller milestones",
+      "Set realistic target dates",
+      "Review goals monthly and adjust if needed"
     ]
   },
   {
@@ -115,7 +158,8 @@
     ],
     "tips": [
       "Add participants before adding expenses",
-      "Link existing transactions to trips",
+      "Active trips auto-link new transactions — just add normally",
+      "Choose equal, percentage, or custom split per expense",
       "Export trip summary for sharing"
     ]
   },
@@ -124,18 +168,40 @@
     "title": "Auto Import",
     "icon": "notifications",
     "shortDescription": "Auto-import transactions from bank notifications",
-    "description": "Automatically detect and parse financial transactions from bank and wallet notification messages. Review and import with one tap.",
+    "description": "Automatically detect and parse financial transactions from bank and wallet notification messages. Transfers between your accounts are detected automatically. Review and import with one tap.",
     "steps": [
       "Go to Profile → Auto Import",
       "Grant notification access permission",
       "Enable auto-import",
-      "Review pending transactions",
-      "Confirm or edit before importing"
+      "Review pending transactions in the Activity screen",
+      "Tap Approve to add as expense/income, or Transfer for account transfers",
+      "Tags are auto-suggested based on merchant names"
     ],
     "tips": [
       "Review transactions before importing",
-      "Auto-matching links to existing accounts",
-      "Edit amounts or categories if needed"
+      "Transfer detection links debit and credit SMS automatically",
+      "Auto-matching links to existing accounts by account number",
+      "Install bank-specific SMS parsers from Marketplace for better accuracy"
+    ]
+  },
+  {
+    "id": "plugins",
+    "title": "Marketplace & Plugins",
+    "icon": "grid",
+    "shortDescription": "Extend the app with category packs, parsers, and more",
+    "description": "The Marketplace lets you install category packs (Vehicle, Wedding, Fitness, etc.), bank SMS parsers, notification plugins, and export templates. Enable or disable plugins anytime.",
+    "steps": [
+      "Go to Marketplace from the Utilities tab",
+      "Browse available plugins by category",
+      "Tap a plugin to see details",
+      "Toggle the switch to enable or disable",
+      "Category packs add new categories automatically when enabled"
+    ],
+    "tips": [
+      "Category packs are removed cleanly when disabled",
+      "Enable bank-specific SMS parsers for better auto-import accuracy",
+      "Some plugins are Pro-only — upgrade to unlock all",
+      "Configure plugin settings by tapping the gear icon"
     ]
   },
   {
@@ -163,18 +229,20 @@
     "title": "Statistics & Reports",
     "icon": "auto_graph",
     "shortDescription": "Visualize your spending patterns",
-    "description": "View detailed charts, graphs, and reports. Analyze spending by category, time period, and account.",
+    "description": "View detailed charts, graphs, and reports. Analyze spending by category, tag, and time period. Check your financial health score and spending personality.",
     "steps": [
       "Go to Statistics tab",
-      "View spending by category",
-      "Check monthly trends",
-      "Compare months",
+      "Choose time period (Today, Week, Month, Year, or Custom)",
+      "View income vs expense overview",
+      "Check spending by category and by tag",
+      "Review 12-month trends and spending by day",
       "Export reports to PDF/Excel"
     ],
     "tips": [
-      "Review statistics weekly",
-      "Identify spending patterns",
-      "Use insights to adjust budgets"
+      "Review statistics weekly to catch overspending early",
+      "Tag spending breakdown helps track cross-category expenses",
+      "Financial Health score gives an overall picture of your finances",
+      "Pull down to refresh data on any screen"
     ]
   },
   {

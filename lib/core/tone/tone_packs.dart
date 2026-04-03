@@ -36,7 +36,7 @@ class FriendlyTonePack extends TonePack {
   @override
   String get txnFailed => 'Hmm, couldn\'t save that. Try again?';
   @override
-  String get txnNotFound => 'Can\'t find that transaction 🤔';
+  String get txnNotFound => 'Can\'t find that transaction';
 
   @override
   String get enterAmount => 'How much was it? Enter an amount';
@@ -49,7 +49,7 @@ class FriendlyTonePack extends TonePack {
   @override
   String get invalidAmount => 'That doesn\'t look right — enter a valid amount';
   @override
-  String get futureDate => 'Time travel? 😄 Pick today or earlier';
+  String get futureDate => 'Pick today or earlier';
   @override
   String get selectAccountAndCategory => 'Pick an account & category first';
 
@@ -180,7 +180,7 @@ class FriendlyTonePack extends TonePack {
   @override
   String get noCategories => 'No categories yet';
   @override
-  String get noNotifications => 'All quiet here 🤫\nNo notifications yet';
+  String get noNotifications => 'All quiet here\nNo notifications yet';
   @override
   String noFilterResults(String filter) => 'No $filter notifications';
   @override
@@ -202,7 +202,7 @@ class FriendlyTonePack extends TonePack {
   @override
   String errorWith(String detail) => 'Something went wrong: $detail';
   @override
-  String get genericError => 'Oops, something went wrong 😅';
+  String get genericError => 'Something went wrong. Try again?';
 
   @override
   String get deleteTitle => 'Are you sure?';
@@ -226,7 +226,7 @@ class FriendlyTonePack extends TonePack {
   String insightBillsDueMessage(int count) =>
       '$count bill${count > 1 ? "s" : ""} due soon, don\'t forget!';
   @override
-  String get insightOverBudget => 'Oops, over budget';
+  String get insightOverBudget => 'Over budget';
   @override
   String insightOverBudgetMessage(int count) =>
       '$count budget${count > 1 ? "s" : ""} went over this month — worth a look';
@@ -717,7 +717,7 @@ class MotivationalTonePack extends TonePack {
   @override
   String get txnAdded => pickRandom([
     'Great move! Transaction saved! 💪',
-    'Boom! Logged it! You\'re crushing it! 💪',
+    'Logged! You\'re on a roll 💪',
     'Another one tracked! Keep the momentum! ✨',
     'Saved! Every entry is a step forward! 🚀',
   ]);
@@ -896,7 +896,7 @@ class MotivationalTonePack extends TonePack {
   String get noCategories => 'No categories yet';
   @override
   String get noNotifications =>
-      'All clear! 🌟\nNo notifications — you\'re on top of things!';
+      'All clear!\nNo notifications — you\'re on top of things';
   @override
   String noFilterResults(String filter) => 'No $filter notifications';
   @override
@@ -921,7 +921,7 @@ class MotivationalTonePack extends TonePack {
   @override
   String errorWith(String detail) => 'Something went wrong: $detail';
   @override
-  String get genericError => 'Oops, something went wrong — hang tight!';
+  String get genericError => 'Something went wrong — try again!';
 
 // Confirmations
   @override
@@ -1013,8 +1013,8 @@ class MotivationalTonePack extends TonePack {
   @override
   String get dashboardAllCaughtUp => pickRandom([
     'All caught up — you\'re ahead of the game! 🏆',
-    'Nothing pending! You\'re on fire! 🔥',
-    'Clean slate! Keep this energy going! 💪',
+    'Nothing pending — you\'re on top of it 💪',
+    'All clear! Keep this energy going 🏆',
   ]);
   @override
   String streakMessage(int days) => '$days day streak! Unstoppable! 🔥';

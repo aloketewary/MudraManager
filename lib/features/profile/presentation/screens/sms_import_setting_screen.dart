@@ -12,7 +12,6 @@ import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/permission_provider.dart';
 import 'package:mudra_manager/features/sms/data/notification_listener_service.dart';
 import 'package:mudra_manager/features/sms/presentation/screens/sms_activity_screen.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 
 class SmsImportSettingsScreen extends ConsumerStatefulWidget {
@@ -164,8 +163,10 @@ class _SmsImportSettingsScreenState
                       textTheme: textTheme,
                       badge: ref
                           .watch(pendingCountProvider)
-                          .whenData((c) => c)
-                          .value,
+                          .maybeWhen(
+                            data: (c) => c,
+                            orElse: () => null,
+                          ),
                     ),
                     _divider(color),
                     _buildTapRow(

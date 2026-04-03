@@ -299,18 +299,21 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
     final textTheme = Theme.of(context).textTheme;
     final userProfileAsync = ref.watch(userProfileProvider);
 
-    userProfileAsync.whenData((profile) {
-      if (profile != null && _participants.isEmpty && !isEditMode) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted && _participants.isEmpty) {
-            setState(() {
-              _ownerName = profile.name;
-              _participants.add(TripParticipant.create(name: _ownerName!));
-            });
-          }
-        });
-      }
-    });
+    userProfileAsync.maybeWhen(
+      data: (profile) {
+        if (profile != null && _participants.isEmpty && !isEditMode) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted && _participants.isEmpty) {
+              setState(() {
+                _ownerName = profile.name;
+                _participants.add(TripParticipant.create(name: _ownerName!));
+              });
+            }
+          });
+        }
+      },
+      orElse: () {},
+    );
 
     if (isEditMode) {
       final tripAsync = ref.watch(tripByIdProvider(widget.tripId!));

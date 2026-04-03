@@ -733,26 +733,29 @@ class HomePageState extends ConsumerState<HomePage>
     final stats = ref.read(statsProvider('Month'));
     final profile = ref.read(userProfileProvider).value;
 
-    stats.whenData((data) {
-      showDialog(
-        context: context,
-        builder: (_) => Dialog.fullscreen(
-          child: ExportOptionsScreen(
-            exportData: ExportData(
-              income: data.income,
-              expense: data.expense,
-              savingsRate: data.savingsRate,
-              avgDailySpend: data.avgDailySpend,
-              transactions: data.recent,
-              categoryData: data.categoryData,
-              categoryDataMap: data.categoryDataMap,
-              startDate: DateTime.now().subtract(const Duration(days: 30)),
-              endDate: DateTime.now(),
-              userName: profile?.name,
+    stats.maybeWhen(
+      data: (data) {
+        showDialog(
+          context: context,
+          builder: (_) => Dialog.fullscreen(
+            child: ExportOptionsScreen(
+              exportData: ExportData(
+                income: data.income,
+                expense: data.expense,
+                savingsRate: data.savingsRate,
+                avgDailySpend: data.avgDailySpend,
+                transactions: data.recent,
+                categoryData: data.categoryData,
+                categoryDataMap: data.categoryDataMap,
+                startDate: DateTime.now().subtract(const Duration(days: 30)),
+                endDate: DateTime.now(),
+                userName: profile?.name,
+              ),
             ),
           ),
-        ),
-      );
-    });
+        );
+      },
+      orElse: () {},
+    );
   }
 }

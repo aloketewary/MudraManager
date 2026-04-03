@@ -16,6 +16,7 @@ import 'package:mudra_manager/core/utils/icon_helper.dart';
 import 'package:mudra_manager/core/utils/refresh_helper.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
+import 'package:mudra_manager/features/transactions/data/tag_provider.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 import 'package:mudra_manager/features/transactions/presentation/widgets/transaction_card.dart';
 import 'package:mudra_manager/features/transactions/presentation/widgets/transaction_group.dart';
@@ -55,6 +56,8 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
   DateTime _selectedDate = DateTime.now();
   String _searchQuery = '';
   int? _selectedCategoryId;
+  int? _selectedTagId;
+  String? _selectedTagName;
   DateTime? _filterStartDate;
   DateTime? _filterEndDate;
   CalendarFormat _calendarFormat = CalendarFormat.month;
@@ -195,6 +198,18 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                 IconButton(
                   onPressed: () {
                     HapticFeedback.mediumImpact();
+                    _showTagFilterSheet(context);
+                  },
+                  icon: Icon(
+                    Icons.label_rounded,
+                    color: _selectedTagId != null
+                        ? Theme.of(context).colorScheme.tertiary
+                        : null,
+                  ),
+                ),
+                IconButton(
+                  onPressed: () {
+                    HapticFeedback.mediumImpact();
                     showFilterBottomSheet(context, spacing);
                   },
                   icon: const Icon(Icons.filter_list_rounded),
@@ -254,7 +269,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
           ),
 
         // ── Active filter chips ──
-        if (_selectedCategoryId != null || _filterStartDate != null)
+        if (_selectedCategoryId != null || _filterStartDate != null || _selectedTagId != null)
           _buildFilterChips(
             color,
             textTheme,
@@ -270,24 +285,33 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
 
         // ── Transaction list ──
         Expanded(
-          child: sectionedAsync.when(
-            data: (sectioned) => RefreshIndicator(
-              onRefresh: () => RefreshHelper.withMinDuration(() async {
-                _invalidateTransactionProviders();
-              }),
-              child: _buildTransactionList(
+          child: RefreshIndicator(
+            onRefresh: () => RefreshHelper.withMinDuration(() async {
+              _invalidateTransactionProviders();
+            }),
+            child: sectionedAsync.when(
+              data: (sectioned) => _buildTransactionList(
                 sectioned,
                 color,
                 textTheme,
                 ctxt,
                 spacing,
               ),
+              loading: () => ListView.builder(
+                physics: const AlwaysScrollableScrollPhysics(),
+                itemCount: 5,
+                itemBuilder: (_, __) => const TransactionCardSkeleton(),
+              ),
+              error: (e, _) => ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: [
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.4,
+                    child: Center(child: Text(BuddyMessages.errorWith('$e'))),
+                  ),
+                ],
+              ),
             ),
-            loading: () => ListView.builder(
-              itemCount: 5,
-              itemBuilder: (_, __) => const TransactionCardSkeleton(),
-            ),
-            error: (e, _) => Center(child: Text(BuddyMessages.errorWith('$e'))),
           ),
         ),
       ],
@@ -416,6 +440,22 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                 setState(() {
                   _filterStartDate = null;
                   _filterEndDate = null;
+                  _clearCache();
+                });
+              },
+            ),
+          if (_selectedTagId != null)
+            Chip(
+              avatar: Icon(Icons.label_rounded, size: 18, color: color.tertiary),
+              label: Text(_selectedTagName ?? 'Tag', style: textTheme.labelMedium),
+              deleteIcon: const Icon(Icons.close_rounded, size: 18),
+              backgroundColor: color.tertiaryContainer,
+              side: BorderSide.none,
+              onDeleted: () {
+                HapticFeedback.mediumImpact();
+                setState(() {
+                  _selectedTagId = null;
+                  _selectedTagName = null;
                   _clearCache();
                 });
               },
@@ -953,6 +993,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
 
     if (filtered.isEmpty) {
       return ListView(
+        controller: _scrollController,
         physics: const AlwaysScrollableScrollPhysics(),
         children: [
           SizedBox(
@@ -976,20 +1017,6 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
     final transactionIds =
         displayItems.whereType<TxItem>().map((e) => e.txn.id).toList();
 
-    // Load Isar links for visible transactions
-    final visibleTransactions =
-        displayItems.whereType<TxItem>().map((e) => e.txn).toList();
-    for (var tx in visibleTransactions) {
-      tx.category.load();
-      tx.account.load();
-      tx.tags.load();
-      tx.related.load();
-      tx.recurringTransactionSource.load();
-      if (tx.isTransfer) {
-        tx.related.value?.account.load();
-      }
-    }
-
     // Cache trip names future — only re-fetch when IDs change
     if (_lastTxIds == null ||
         _lastTxIds!.length != transactionIds.length ||
@@ -1009,6 +1036,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
         return ListView.builder(
           key: const PageStorageKey('transactionList'),
           controller: _scrollController,
+          physics: const AlwaysScrollableScrollPhysics(),
           padding: EdgeInsets.only(
             bottom: MediaQuery.of(context).padding.bottom +
                 kBottomNavigationBarHeight +
@@ -1142,12 +1170,12 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
 
   // ── FILTER LOGIC ──
   List<TxListEntry> _filterTransactions(List<TxListEntry> sectioned) {
-    final filterKey = '$_searchQuery|$_selectedCategoryId';
+    final filterKey = '$_searchQuery|$_selectedCategoryId|$_selectedTagId';
     if (_cachedFiltered != null && _lastFilterKey == filterKey) {
       return _cachedFiltered!;
     }
 
-    if (_searchQuery.isEmpty && _selectedCategoryId == null) {
+    if (_searchQuery.isEmpty && _selectedCategoryId == null && _selectedTagId == null) {
       _cachedFiltered = sectioned;
       _lastFilterKey = filterKey;
       return sectioned;
@@ -1174,6 +1202,10 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
 
       if (matches && _selectedCategoryId != null) {
         matches = tx.category.value?.id == _selectedCategoryId;
+      }
+
+      if (matches && _selectedTagId != null) {
+        matches = tx.tags.any((t) => t.id == _selectedTagId);
       }
 
       if (matches && currentDate != null) {
@@ -1205,6 +1237,92 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
   }
 
   // ── FILTER BOTTOM SHEET ──
+  void _showTagFilterSheet(BuildContext context) {
+    final tagsAsync = ref.read(tagListProvider);
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return switch (tagsAsync) {
+          AsyncData(:final value) => Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Filter by Tag',
+                    style: textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  if (value.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 24),
+                      child: Center(
+                        child: Text(
+                          'No tags yet. Add tags to your transactions first.',
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: color.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                    )
+                  else
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        if (_selectedTagId != null)
+                          ActionChip(
+                            label: const Text('Clear'),
+                            avatar: const Icon(Icons.close, size: 16),
+                            onPressed: () {
+                              setState(() {
+                                _selectedTagId = null;
+                                _selectedTagName = null;
+                                _clearCache();
+                              });
+                              Navigator.pop(ctx);
+                            },
+                          ),
+                        ...value.map((tag) {
+                          final isSelected = _selectedTagId == tag.id;
+                          return FilterChip(
+                            label: Text(tag.name),
+                            selected: isSelected,
+                            onSelected: (_) {
+                              HapticFeedback.selectionClick();
+                              setState(() {
+                                _selectedTagId = tag.id;
+                                _selectedTagName = tag.name;
+                                _clearCache();
+                              });
+                              Navigator.pop(ctx);
+                            },
+                            showCheckmark: true,
+                          );
+                        }),
+                      ],
+                    ),
+                ],
+              ),
+            ),
+          _ => const Padding(
+              padding: EdgeInsets.all(48),
+              child: Center(child: CircularProgressIndicator()),
+            ),
+        };
+      },
+    );
+  }
+
   void showFilterBottomSheet(BuildContext context, AppSpacing spacing) async {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;

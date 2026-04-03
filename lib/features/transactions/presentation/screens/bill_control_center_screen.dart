@@ -1,3 +1,4 @@
+import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -659,151 +660,214 @@ class _BillControlCenterScreenState
       statusIcon = LucideIcons.calendar;
     }
 
-    return Container(
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(spacing.radiusLarge),
-        border: Border.all(
-          color: isOverdue
-              ? colorScheme.error.withValues(alpha: 0.5)
-              : colorScheme.outlineVariant.withValues(alpha: 0.5),
-          width: isOverdue ? 2 : 1,
-        ),
-      ),
-      child: InkWell(
-        onTap: () => context.push(AppRoutes.addRecurring, extra: {'recurring': bill}),
-        borderRadius: BorderRadius.circular(spacing.radiusLarge),
-        child: Padding(
-          padding: EdgeInsets.all(spacing.cardInner),
-          child: Column(
-            children: [
-              Row(
+    return FutureBuilder<bool>(
+      future: _isAlreadyPaid(bill),
+      builder: (context, paidSnapshot) {
+        final isPaid = paidSnapshot.data ?? false;
+
+        if (isPaid) {
+          statusColor = const Color(0xFF10B981);
+          statusText = 'Paid';
+          statusIcon = LucideIcons.circleCheck;
+        }
+
+        return Container(
+          decoration: BoxDecoration(
+            color: colorScheme.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(spacing.radiusLarge),
+            border: Border.all(
+              color: isOverdue && !isPaid
+                  ? colorScheme.error.withValues(alpha: 0.5)
+                  : colorScheme.outlineVariant.withValues(alpha: 0.5),
+              width: isOverdue && !isPaid ? 2 : 1,
+            ),
+          ),
+          child: InkWell(
+            onTap: () => context.push(
+              AppRoutes.addRecurring,
+              extra: {'recurring': bill},
+            ),
+            borderRadius: BorderRadius.circular(spacing.radiusLarge),
+            child: Padding(
+              padding: EdgeInsets.all(spacing.cardInner),
+              child: Column(
                 children: [
-                  Container(
-                    padding: EdgeInsets.all(spacing.elementGap),
-                    decoration: BoxDecoration(
-                      color: colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                    ),
-                    child: Icon(
-                      IconHelper.iconFromName(
-                        bill.category.value?.iconName ?? 'category',
-                      ),
-                      color: colorScheme.primary,
-                      size: 24,
-                    ),
-                  ),
-                  SizedBox(width: spacing.elementGap * 1.5),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          bill.category.value?.name ?? 'Unknown',
-                          style: textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                  Row(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(spacing.elementGap),
+                        decoration: BoxDecoration(
+                          color: colorScheme.primaryContainer,
+                          borderRadius:
+                              BorderRadius.circular(spacing.radiusMedium),
                         ),
-                        SizedBox(height: spacing.elementGap * 0.25),
-                        Row(
+                        child: Icon(
+                          IconHelper.iconFromName(
+                            bill.category.value?.iconName ?? 'category',
+                          ),
+                          color: colorScheme.primary,
+                          size: 24,
+                        ),
+                      ),
+                      SizedBox(width: spacing.elementGap * 1.5),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(
-                              statusIcon,
-                              size: 14,
-                              color: statusColor,
-                            ),
-                            SizedBox(width: spacing.elementGap * 0.5),
                             Text(
-                              statusText,
-                              style: textTheme.bodySmall?.copyWith(
-                                color: statusColor,
-                                fontWeight: FontWeight.w600,
+                              bill.category.value?.name ?? 'Unknown',
+                              style: textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                            Text(
-                              ' • ${_getFrequencyText(bill.frequency)}',
-                              style: textTheme.bodySmall?.copyWith(
-                                color: colorScheme.onSurfaceVariant,
-                              ),
+                            SizedBox(height: spacing.elementGap * 0.25),
+                            Row(
+                              children: [
+                                Icon(statusIcon, size: 14, color: statusColor),
+                                SizedBox(width: spacing.elementGap * 0.5),
+                                Text(
+                                  statusText,
+                                  style: textTheme.bodySmall?.copyWith(
+                                    color: statusColor,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                Text(
+                                  ' \u2022 ${_getFrequencyText(bill.frequency)}',
+                                  style: textTheme.bodySmall?.copyWith(
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      ],
-                    ),
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        '₹${bill.amount.toStringAsFixed(0)}',
-                        style: textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: colorScheme.error,
-                        ),
                       ),
-                      if (isOverdue || isDueSoon)
-                        Container(
-                          margin:
-                              EdgeInsets.only(top: spacing.elementGap * 0.5),
-                          padding: EdgeInsets.symmetric(
-                            horizontal: spacing.elementGap * 0.75,
-                            vertical: spacing.elementGap * 0.25,
-                          ),
-                          decoration: BoxDecoration(
-                            color: statusColor.withValues(alpha: 0.15),
-                            borderRadius:
-                                BorderRadius.circular(spacing.radiusSmall),
-                          ),
-                          child: Text(
-                            isOverdue ? 'OVERDUE' : 'URGENT',
-                            style: textTheme.labelSmall?.copyWith(
-                              color: statusColor,
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            '\u20b9${bill.amount.toStringAsFixed(0)}',
+                            style: textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
+                              color: isPaid
+                                  ? const Color(0xFF10B981)
+                                  : colorScheme.error,
+                            ),
+                          ),
+                          if ((isOverdue || isDueSoon) && !isPaid)
+                            Container(
+                              margin: EdgeInsets.only(
+                                top: spacing.elementGap * 0.5,
+                              ),
+                              padding: EdgeInsets.symmetric(
+                                horizontal: spacing.elementGap * 0.75,
+                                vertical: spacing.elementGap * 0.25,
+                              ),
+                              decoration: BoxDecoration(
+                                color: statusColor.withValues(alpha: 0.15),
+                                borderRadius:
+                                    BorderRadius.circular(spacing.radiusSmall),
+                              ),
+                              child: Text(
+                                isOverdue ? 'OVERDUE' : 'URGENT',
+                                style: textTheme.labelSmall?.copyWith(
+                                  color: statusColor,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          if (isPaid)
+                            Container(
+                              margin: EdgeInsets.only(
+                                top: spacing.elementGap * 0.5,
+                              ),
+                              padding: EdgeInsets.symmetric(
+                                horizontal: spacing.elementGap * 0.75,
+                                vertical: spacing.elementGap * 0.25,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF10B981)
+                                    .withValues(alpha: 0.15),
+                                borderRadius:
+                                    BorderRadius.circular(spacing.radiusSmall),
+                              ),
+                              child: Text(
+                                'PAID',
+                                style: textTheme.labelSmall?.copyWith(
+                                  color: const Color(0xFF10B981),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: spacing.elementGap * 1.5),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () => context.push(
+                            AppRoutes.addRecurring,
+                            extra: {'recurring': bill},
+                          ),
+                          icon: const Icon(LucideIcons.settings, size: 16),
+                          label: const Text('Manage'),
+                          style: OutlinedButton.styleFrom(
+                            padding: EdgeInsets.symmetric(
+                              vertical: spacing.elementGap,
                             ),
                           ),
                         ),
+                      ),
+                      if (!isPaid) ...[
+                        SizedBox(width: spacing.elementGap),
+                        Expanded(
+                          child: FilledButton.icon(
+                            onPressed: () {
+                              HapticFeedback.mediumImpact();
+                              _markAsPaid(bill);
+                            },
+                            icon: const Icon(LucideIcons.check, size: 16),
+                            label: const Text('Mark Paid'),
+                            style: FilledButton.styleFrom(
+                              padding: EdgeInsets.symmetric(
+                                vertical: spacing.elementGap,
+                              ),
+                              backgroundColor: statusColor,
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ],
               ),
-              SizedBox(height: spacing.elementGap * 1.5),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () => context
-                          .push(AppRoutes.addRecurring, extra: {'recurring': bill}),
-                      icon: const Icon(LucideIcons.settings, size: 16),
-                      label: const Text('Manage'),
-                      style: OutlinedButton.styleFrom(
-                        padding:
-                            EdgeInsets.symmetric(vertical: spacing.elementGap),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: spacing.elementGap),
-                  Expanded(
-                    child: FilledButton.icon(
-                      onPressed: () {
-                        HapticFeedback.mediumImpact();
-                        _markAsPaid(bill);
-                      },
-                      icon: const Icon(LucideIcons.check, size: 16),
-                      label: const Text('Mark Paid'),
-                      style: FilledButton.styleFrom(
-                        padding:
-                            EdgeInsets.symmetric(vertical: spacing.elementGap),
-                        backgroundColor: statusColor,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
+  }
+
+  Future<bool> _isAlreadyPaid(RecurringTransaction bill) async {
+    final isar = await ref.read(isarServiceProvider).getInstance();
+    final dueDate = bill.nextDueDate;
+    final searchStart = DateTime(dueDate.year, dueDate.month, dueDate.day)
+        .subtract(const Duration(days: 1));
+    final searchEnd =
+        DateTime(dueDate.year, dueDate.month, dueDate.day, 23, 59, 59)
+            .add(const Duration(days: 1));
+
+    final count = await isar.transactions
+        .filter()
+        .dateBetween(searchStart, searchEnd)
+        .recurringTransactionSource((q) => q.idEqualTo(bill.id))
+        .count();
+
+    return count > 0;
   }
 
   void _markAsPaid(RecurringTransaction bill) async {

@@ -8,18 +8,24 @@ import 'package:mudra_manager/plugins/category_packs/category_pack.dart';
 import 'package:mudra_manager/plugins/category_packs/couple_pack.dart';
 import 'package:mudra_manager/plugins/category_packs/default_pack.dart';
 import 'package:mudra_manager/plugins/category_packs/family_pack.dart';
+import 'package:mudra_manager/plugins/category_packs/fitness_freak_pack.dart';
 import 'package:mudra_manager/plugins/category_packs/foodie_pack.dart';
 import 'package:mudra_manager/plugins/category_packs/freelancer_pack.dart';
+import 'package:mudra_manager/plugins/category_packs/gamer_pack.dart';
 import 'package:mudra_manager/plugins/category_packs/health_pack.dart';
+import 'package:mudra_manager/plugins/category_packs/homeowner_pack.dart';
 import 'package:mudra_manager/plugins/category_packs/indian_common_pack.dart';
 import 'package:mudra_manager/plugins/category_packs/indian_east_pack.dart';
 import 'package:mudra_manager/plugins/category_packs/indian_north_pack.dart';
 import 'package:mudra_manager/plugins/category_packs/indian_south_pack.dart';
 import 'package:mudra_manager/plugins/category_packs/indian_west_pack.dart';
 import 'package:mudra_manager/plugins/category_packs/investor_pack.dart';
+import 'package:mudra_manager/plugins/category_packs/new_parent_pack.dart';
 import 'package:mudra_manager/plugins/category_packs/pet_owner_pack.dart';
 import 'package:mudra_manager/plugins/category_packs/student_pack.dart';
 import 'package:mudra_manager/plugins/category_packs/traveller_pack.dart';
+import 'package:mudra_manager/plugins/category_packs/vehicle_enthusiast_pack.dart';
+import 'package:mudra_manager/plugins/category_packs/wedding_planner_pack.dart';
 import 'package:mudra_manager/plugins/low_balance_alert_plugin.dart';
 import 'package:mudra_manager/plugins/sms_alert_plugin.dart';
 import 'package:mudra_manager/plugins/budget_guard_plugin.dart';
@@ -92,6 +98,12 @@ class PluginService {
     CategoryPackRegistry.register(InvestorPack.instance);
     CategoryPackRegistry.register(PetOwnerPack.instance);
     CategoryPackRegistry.register(CouplePack.instance);
+    CategoryPackRegistry.register(VehicleEnthusiastPack.instance);
+    CategoryPackRegistry.register(HomeownerPack.instance);
+    CategoryPackRegistry.register(NewParentPack.instance);
+    CategoryPackRegistry.register(GamerPack.instance);
+    CategoryPackRegistry.register(WeddingPlannerPack.instance);
+    CategoryPackRegistry.register(FitnessFreakPack.instance);
   }
 
   void _registerAvailablePlugins() {

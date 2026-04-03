@@ -12,6 +12,7 @@ import 'package:mudra_manager/features/analytics/data/net_worth_service.dart';
 import 'package:mudra_manager/features/analytics/data/personality_archetype.dart';
 import 'package:mudra_manager/features/dashboard/data/status_data_provider.dart';
 import 'package:mudra_manager/features/dashboard/presentation/widgets/spending_personality_card.dart';
+import 'package:mudra_manager/features/transactions/data/tag_analytics_provider.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/shared/widgets/period_calendar_selector.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
@@ -139,6 +140,10 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                           isGuestMode,
                           spacing,
                         ),
+                        SizedBox(height: spacing.sectionGap),
+
+                        // TAG SPENDING BREAKDOWN
+                        _buildTagSpendingZone(color, textTheme, spacing),
                         SizedBox(height: spacing.sectionGap),
 
                         // ZONE 4: FINANCIAL HEALTH
@@ -840,6 +845,116 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
           },
         ),
       ],
+    );
+  }
+
+  Widget _buildTagSpendingZone(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
+    return Consumer(
+      builder: (context, ref, _) {
+        final tagSpendingAsync = ref.watch(tagSpendingProvider(_period));
+        return tagSpendingAsync.when(
+          data: (tagSpendings) {
+            if (tagSpendings.isEmpty) return const SizedBox.shrink();
+            final maxAmount = tagSpendings.first.amount;
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Spending by Tag',
+                  style: textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: spacing.sectionGap),
+                Card(
+                  elevation: 0,
+                  margin: const EdgeInsets.only(),
+                  color: color.surfaceContainerLow,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                    side: BorderSide(
+                      color: color.outlineVariant.withValues(alpha: 0.5),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.all(spacing.cardInner),
+                    child: Column(
+                      children: tagSpendings.take(8).map((ts) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 14),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.label_rounded,
+                                        size: 16,
+                                        color: color.tertiary,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        ts.tag.name,
+                                        style: textTheme.bodyLarge?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      CurrencyText(
+                                        amount: ts.amount,
+                                        style: textTheme.titleSmall?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        '${ts.count} txn',
+                                        style: textTheme.bodySmall?.copyWith(
+                                          color: color.onSurfaceVariant,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(4),
+                                child: LinearProgressIndicator(
+                                  value: (ts.amount / maxAmount)
+                                      .clamp(0.0, 1.0),
+                                  backgroundColor:
+                                      color.surfaceContainerHighest,
+                                  color: color.tertiary,
+                                  minHeight: 8,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+          loading: () => const SizedBox.shrink(),
+          error: (_, __) => const SizedBox.shrink(),
+        );
+      },
     );
   }
 

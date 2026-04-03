@@ -13,7 +13,6 @@ import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/models/trip.dart';
 import 'package:mudra_manager/core/db/models/sms_activity.dart';
 import 'package:mudra_manager/core/entitlement/entitlement_feature.dart';
-import 'package:mudra_manager/core/extension/account_type_extenstion.dart';
 import 'package:mudra_manager/core/extension/localization_extenstion.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
@@ -23,25 +22,24 @@ import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/services/notification_service.dart';
 import 'package:mudra_manager/core/services/widget_service.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
-import 'package:mudra_manager/core/utils/icon_helper.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/account/data/account_access_provider.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/budget/data/budget_alert_provider.dart';
 import 'package:mudra_manager/features/budget/data/budget_alert_service.dart';
 import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
-import 'package:mudra_manager/features/category/data/category_provider.dart';
 import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
 import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
 import 'package:mudra_manager/features/sms/data/recurring_detector_service.dart';
+import 'package:mudra_manager/features/sms/data/tag_matcher_service.dart';
 import 'package:mudra_manager/features/sms/presentation/screens/sms_activity_screen.dart';
 import 'package:mudra_manager/features/transactions/data/tag_provider.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 import 'package:mudra_manager/features/transactions/presentation/providers/smart_defaults_provider.dart';
 import 'package:mudra_manager/features/trip/data/trip_provider.dart';
-import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/shared/widgets/simple_calculator.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
+import 'package:mudra_manager/features/transactions/presentation/widgets/add_transaction_widgets.dart';
 
 class AddEditTransactionScreen extends ConsumerStatefulWidget {
   final Transaction? transaction;
@@ -131,6 +129,8 @@ class _AddEditTransactionScreenState
       if (sms.body.isNotEmpty && _descController.text.isEmpty) {
         _descController.text = sms.body;
       }
+      // Auto-suggest tags from SMS keywords
+      _autoSuggestTags(sms.body);
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -145,9 +145,10 @@ class _AddEditTransactionScreenState
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _tripSubscription = ref.listenManual(allTripsProvider, (_, next) {
-        next.whenData((trips) {
+        if (next case AsyncData(:final value)) {
+          final List<Trip> trips = value;
           if (_tripManuallyCleared || _selectedTrip != null) return;
-          final activeTrip = trips.where((t) => t.isActive && t.isTrip).firstOrNull;
+          final Trip? activeTrip = trips.where((t) => t.isActive && t.isTrip).firstOrNull;
           if (activeTrip != null && mounted) {
             setState(() {
               _selectedTrip = activeTrip;
@@ -155,9 +156,22 @@ class _AddEditTransactionScreenState
               _paidBy = activeTrip.participants.firstOrNull;
             });
           }
-        });
+        }
       });
     });
+  }
+
+  Future<void> _autoSuggestTags(String smsBody) async {
+    final suggested = await TagMatcherService.suggestTagsForSms(smsBody);
+    if (suggested.isNotEmpty && mounted) {
+      setState(() {
+        for (final tag in suggested) {
+          if (!selectedTags.any((t) => t.id == tag.id)) {
+            selectedTags.add(tag);
+          }
+        }
+      });
+    }
   }
 
   Future<void> _applySmartDefaults() async {
@@ -247,22 +261,6 @@ class _AddEditTransactionScreenState
     );
   }
 
-  /// The parent category whose subcategories are currently expanded.
-  /// Either the selected category itself (if it's a parent) or the
-  /// parent of the selected subcategory.
-  Category? _expandedParent(List<Category> parents) {
-    if (_selectedCategory == null) return null;
-    // Selected is a parent itself
-    if (parents.any((p) => p.id == _selectedCategory!.id)) {
-      return _selectedCategory;
-    }
-    // Selected is a child — find its parent
-    final parentId = _selectedCategory!.parentCategory.value?.id;
-    if (parentId != null) {
-      return parents.where((p) => p.id == parentId).firstOrNull;
-    }
-    return null;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -298,7 +296,8 @@ class _AddEditTransactionScreenState
           children: [
             // ── Expense/Income toggle (in body, below AppBar) ──
             if (!_typeLockedByFab)
-              Padding(
+              RepaintBoundary(
+                child: Padding(
                 padding: EdgeInsets.symmetric(
                   horizontal: spacing.cardHorizontal,
                   vertical: spacing.elementGap,
@@ -428,6 +427,7 @@ class _AddEditTransactionScreenState
                   ),
                 ),
               ),
+              ),
 
             // ── Trip banner (top, outside ListView) ──
             if (_selectedTrip != null)
@@ -484,36 +484,21 @@ class _AddEditTransactionScreenState
             // ── Scrollable content (Parts 2-4 go here) ──
             Expanded(
               child: ListView(
-                keyboardDismissBehavior:
-                    ScrollViewKeyboardDismissBehavior.onDrag,
                 padding: EdgeInsets.symmetric(
                   horizontal: spacing.cardHorizontal,
                   vertical: spacing.cardVertical,
                 ),
                 children: [
                   // ── Hero Amount ──
-                  Container(
+                  RepaintBoundary(
+                    child: Container(
                     padding: EdgeInsets.symmetric(
                       horizontal: spacing.cardHorizontal,
                       vertical: spacing.cardVertical,
                     ),
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          accentColor.withValues(alpha: 0.12),
-                          accentColor.withValues(alpha: 0.03),
-                        ],
-                      ),
+                      color: accentColor.withValues(alpha: 0.06),
                       borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                      boxShadow: [
-                        BoxShadow(
-                          color: accentColor.withValues(alpha: 0.08),
-                          blurRadius: 16,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
                     ),
                     child: Column(
                       children: [
@@ -549,7 +534,6 @@ class _AddEditTransactionScreenState
                             suffixIcon: IconButton(
                               onPressed: () => _showCalculator(context, (v) {
                                 _amountController.text = v.toString();
-                                setState(() {});
                               }),
                               icon: Icon(
                                 LucideIcons.calculator,
@@ -562,871 +546,78 @@ class _AddEditTransactionScreenState
                         // Quick amounts
                         Padding(
                           padding: EdgeInsets.only(bottom: spacing.elementGap),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Consumer(
-                                builder: (context, ref, _) {
-                                  final amounts =
-                                      ref.watch(quickAmountsProvider);
-                                  final chips = amounts.valueOrNull ??
-                                      [100, 500, 1000, 2000, 5000];
-                                  return Wrap(
-                                    alignment: WrapAlignment.center,
-                                    spacing: 8,
-                                    children: chips.map((amt) {
-                                      return ActionChip(
-                                        label: Text(
-                                          '₹$amt',
-                                          style: textTheme.labelSmall?.copyWith(
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                        onPressed: () {
-                                          HapticFeedback.selectionClick();
-                                          _amountController.text =
-                                              amt.toString();
-                                          setState(() {});
-                                        },
-                                        visualDensity: VisualDensity.compact,
-                                        side: BorderSide.none,
-                                        backgroundColor:
-                                            accentColor.withValues(alpha: 0.08),
-                                      );
-                                    }).toList(),
-                                  );
-                                },
-                              ),
-                            ],
+                          child: QuickAmounts(
+                            accentColor: accentColor,
+                            onAmountSelected: (amt) {
+                              _amountController.text = amt.toString();
+                            },
                           ),
                         ),
                         if (!_isEditing && widget.smsActivity == null)
-                          Consumer(
-                            builder: (context, ref, _) {
-                              final defaults =
-                                  ref.watch(smartDefaultsProvider(_isExpense));
-                              return defaults.maybeWhen(
-                                data: (d) {
-                                  if (d.suggestedCategory == null) {
-                                    return const SizedBox.shrink();
-                                  }
-                                  return Padding(
-                                    padding: EdgeInsets.only(
-                                      top: spacing.elementGap,
-                                    ),
-                                    child: InkWell(
-                                      onTap: () {
-                                        HapticFeedback.selectionClick();
-                                        setState(() {
-                                          _selectedCategory =
-                                              d.suggestedCategory;
-                                          if (d.suggestedAccount != null &&
-                                              _selectedAccount == null) {
-                                            _selectedAccount =
-                                                d.suggestedAccount;
-                                          }
-                                          if (d.suggestedAmount != null &&
-                                              _amountController.text.isEmpty) {
-                                            _amountController.text = d
-                                                .suggestedAmount!
-                                                .toStringAsFixed(0);
-                                          }
-                                        });
-                                      },
-                                      borderRadius: BorderRadius.circular(
-                                        spacing.radiusSmall,
-                                      ),
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 12,
-                                          vertical: 8,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: color.primaryContainer
-                                              .withValues(alpha: 0.3),
-                                          borderRadius: BorderRadius.circular(
-                                            spacing.radiusSmall,
-                                          ),
-                                          border: Border.all(
-                                            color: color.primary
-                                                .withValues(alpha: 0.2),
-                                          ),
-                                        ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Icon(
-                                              LucideIcons.sparkles,
-                                              size: 14,
-                                              color: color.primary,
-                                            ),
-                                            const SizedBox(width: 6),
-                                            Flexible(
-                                              child: Text(
-                                                d.reason ??
-                                                    'Suggested: ${d.suggestedCategory!.name}',
-                                                style: textTheme.labelSmall
-                                                    ?.copyWith(
-                                                  color: color.primary,
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 4),
-                                            Text(
-                                              'Tap to apply',
-                                              style: textTheme.labelSmall
-                                                  ?.copyWith(
-                                                color: color.primary
-                                                    .withValues(alpha: 0.6),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                },
-                                orElse: () => const SizedBox.shrink(),
-                              );
+                          SmartDefaultsBanner(
+                            isExpense: _isExpense,
+                            onApply: () {
+                              final d = ref.read(smartDefaultsProvider(_isExpense)).valueOrNull;
+                              if (d == null) return;
+                              setState(() {
+                                _selectedCategory = d.suggestedCategory;
+                                if (d.suggestedAccount != null && _selectedAccount == null) {
+                                  _selectedAccount = d.suggestedAccount;
+                                }
+                                if (d.suggestedAmount != null && _amountController.text.isEmpty) {
+                                  _amountController.text = d.suggestedAmount!.toStringAsFixed(0);
+                                }
+                              });
                             },
                           ),
                       ],
                     ),
                   ),
+                  ),
                   SizedBox(height: spacing.sectionGap),
                   // ── Account selector ──
-                  Consumer(
-                    builder: (context, ref, _) {
-                      final accountsAsync =
-                          ref.watch(frequencySortedAccountsProvider);
-
-                      return accountsAsync.when(
-                        data: (accounts) {
-                          final unlockedIds = ref
-                                  .watch(unlockedAccountIdsProvider)
-                                  .valueOrNull ??
-                              {};
-                          // Auto-scroll to selected account
-                          if (_selectedAccount != null && !_accountScrolled) {
-                            _accountScrolled = true;
-                            final idx = accounts.indexWhere(
-                              (a) => a.id == _selectedAccount!.id,
-                            );
-                            if (idx > 0) {
-                              WidgetsBinding.instance.addPostFrameCallback((_) {
-                                if (_accountScrollController.hasClients) {
-                                  _accountScrollController.animateTo(
-                                    idx * 160.0, // approximate item width
-                                    duration: const Duration(milliseconds: 300),
-                                    curve: Curves.easeOut,
-                                  );
-                                }
-                              });
-                            }
-                          }
-
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Selected account label
-                              if (_selectedAccount != null)
-                                Padding(
-                                  padding: EdgeInsets.symmetric(
-                                    vertical: spacing.cardVertical,
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        Icons.check_circle,
-                                        size: 20,
-                                        color: Color(
-                                          _selectedAccount!.colorValue ??
-                                              color.primary.toARGB32(),
-                                        ),
-                                      ),
-                                      SizedBox(width: spacing.elementGap),
-                                      Text(
-                                        _selectedAccount!.name,
-                                        style: textTheme.labelLarge?.copyWith(
-                                          fontWeight: FontWeight.w600,
-                                          color: color.onSurface,
-                                        ),
-                                      ),
-                                      SizedBox(width: spacing.elementGap),
-                                      CurrencyText(
-                                        amount:
-                                            _balanceMap[_selectedAccount!.id] ??
-                                                _selectedAccount!
-                                                    .initialBalance,
-                                        showPositiveSign: false,
-                                        showSign: true,
-                                        style: textTheme.labelMedium?.copyWith(
-                                          color: color.onSurfaceVariant,
-                                        ),
-                                        maxLines: 1,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              SizedBox(
-                                height: 64,
-                                child: ListView.separated(
-                                  controller: _accountScrollController,
-                                  scrollDirection: Axis.horizontal,
-                                  itemCount: accounts.length + 1,
-                                  separatorBuilder: (_, __) =>
-                                      SizedBox(width: spacing.elementGap),
-                                  itemBuilder: (context, index) {
-                                    if (index == accounts.length) {
-                                      return GestureDetector(
-                                        onTap: () async {
-                                          final result =
-                                              await context.push<bool>(
-                                            '/manage-accounts/add',
-                                            extra: widget.smsActivity != null
-                                                ? {
-                                                    'accountNumber': widget
-                                                        .smsActivity!.account,
-                                                    'bankName': widget
-                                                        .smsActivity!.fromBank,
-                                                  }
-                                                : null,
-                                          );
-                                          if (result == true) {
-                                            ref.invalidate(accountsProvider);
-                                            ref.invalidate(allAccountsProvider);
-                                            ref.invalidate(
-                                              frequencySortedAccountsProvider,
-                                            );
-                                            // Re-fetch balance map
-                                            ref
-                                                .read(accountServiceProvider)
-                                                .getAccountBalanceMap()
-                                                .then((val) {
-                                              if (mounted) {
-                                                setState(
-                                                  () => _balanceMap = val,
-                                                );
-                                              }
-                                            });
-                                          }
-                                        },
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 14,
-                                            vertical: 8,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: color.surfaceContainerHigh,
-                                            borderRadius: BorderRadius.circular(
-                                              spacing.radiusMedium,
-                                            ),
-                                            border: Border.all(
-                                              color: color.outlineVariant
-                                                  .withValues(alpha: 0.2),
-                                            ),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Icon(
-                                                Icons.add,
-                                                size: 16,
-                                                color: color.onSurfaceVariant,
-                                              ),
-                                              const SizedBox(width: 6),
-                                              Text(
-                                                ctxt.common_addLabel,
-                                                style: textTheme.labelMedium
-                                                    ?.copyWith(
-                                                  color: color.onSurfaceVariant,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      );
-                                    }
-                                    final account = accounts[index];
-                                    final isSelected =
-                                        _selectedAccount?.id == account.id;
-                                    final acColor = Color(
-                                      account.colorValue ??
-                                          color.primary.toARGB32(),
-                                    );
-                                    final balance = _balanceMap[account.id] ??
-                                        account.initialBalance;
-                                    final isLocked =
-                                        !unlockedIds.contains(account.id);
-
-                                    return GestureDetector(
-                                      onTap: () {
-                                        HapticFeedback.selectionClick();
-                                        if (isLocked) {
-                                          _showUnlockPrompt(
-                                            accounts.length -
-                                                unlockedIds.length,
-                                          );
-                                          return;
-                                        }
-                                        setState(
-                                          () => _selectedAccount = account,
-                                        );
-                                      },
-                                      child: AnimatedContainer(
-                                        duration:
-                                            const Duration(milliseconds: 200),
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 14,
-                                          vertical: 8,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: isSelected
-                                              ? acColor.withValues(alpha: 0.1)
-                                              : isLocked
-                                                  ? color
-                                                      .surfaceContainerHighest
-                                                      .withValues(alpha: 0.5)
-                                                  : color
-                                                      .surfaceContainerHighest,
-                                          borderRadius: BorderRadius.circular(
-                                            spacing.radiusMedium,
-                                          ),
-                                          border: Border.all(
-                                            color: isSelected
-                                                ? acColor.withValues(alpha: 0.5)
-                                                : color.outlineVariant
-                                                    .withValues(alpha: 0.2),
-                                            width: isSelected ? 1.5 : 1,
-                                          ),
-                                        ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Container(
-                                              padding: const EdgeInsets.all(6),
-                                              decoration: BoxDecoration(
-                                                color: acColor.withValues(
-                                                  alpha: 0.1,
-                                                ),
-                                                shape: BoxShape.circle,
-                                              ),
-                                              child: Icon(
-                                                account.accountType.icon,
-                                                size: 16,
-                                                color: acColor,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 10),
-                                            Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  account.name,
-                                                  style: textTheme.labelLarge
-                                                      ?.copyWith(
-                                                    fontWeight: isSelected
-                                                        ? FontWeight.bold
-                                                        : FontWeight.w500,
-                                                    color: isSelected
-                                                        ? color.onSurface
-                                                        : color
-                                                            .onSurfaceVariant,
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 1),
-                                                CurrencyText(
-                                                  amount: balance,
-                                                  compact: true,
-                                                  showSign: true,
-                                                  showPositiveSign: false,
-                                                  style: textTheme.labelSmall
-                                                      ?.copyWith(
-                                                    color: color
-                                                        .onSurfaceVariant
-                                                        .withValues(alpha: 0.7),
-                                                  ),
-                                                  maxLines: 1,
-                                                ),
-                                              ],
-                                            ),
-                                            if (isLocked) ...[
-                                              const SizedBox(width: 6),
-                                              Icon(
-                                                LucideIcons.lock,
-                                                size: 14,
-                                                color: color.onSurfaceVariant
-                                                    .withValues(alpha: 0.4),
-                                              ),
-                                            ],
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                        loading: () => const SizedBox(height: 64),
-                        error: (_, __) => const SizedBox(),
-                      );
+                  AccountSelector(
+                    selectedAccount: _selectedAccount,
+                    balanceMap: _balanceMap,
+                    scrollController: _accountScrollController,
+                    alreadyScrolled: _accountScrolled,
+                    smsAccountNumber: widget.smsActivity?.account,
+                    smsBankName: widget.smsActivity?.fromBank,
+                    addLabel: ctxt.common_addLabel,
+                    onSelected: (account) {
+                      setState(() {
+                        _selectedAccount = account;
+                        _accountScrolled = true;
+                      });
                     },
+                    onAddResult: () {
+                      ref
+                          .read(accountServiceProvider)
+                          .getAccountBalanceMap()
+                          .then((val) {
+                        if (mounted) setState(() => _balanceMap = val);
+                      });
+                    },
+                    onShowUnlockPrompt: _showUnlockPrompt,
                   ),
 
                   SizedBox(height: spacing.sectionGap),
 
                   // ── Category selector ──
-                  Consumer(
-                    builder: (context, ref, _) {
-                      final type = _isExpense
-                          ? CategoryType.expense
-                          : CategoryType.income;
-                      final categoriesAsync =
-                          ref.watch(frequencySortedCategoriesProvider(type));
-                      return categoriesAsync.when(
-                        data: (categories) {
-                          final parents = categories
-                              .where((c) => c.parentCategory.value == null)
-                              .toList();
-
-                          final expanded = _expandedParent(parents);
-                          final hasChildren = expanded != null &&
-                              categories.any(
-                                (c) =>
-                                    c.parentCategory.value?.id == expanded.id,
-                              );
-                          final children = hasChildren
-                              ? categories
-                                  .where(
-                                    (c) =>
-                                        c.parentCategory.value?.id ==
-                                        expanded.id,
-                                  )
-                                  .toList()
-                              : <Category>[];
-
-                          // Auto-scroll parent row
-                          if (_selectedCategory != null && !_categoryScrolled) {
-                            _categoryScrolled = true;
-                            final parentId =
-                                _selectedCategory!.parentCategory.value?.id ??
-                                    _selectedCategory!.id;
-                            final idx =
-                                parents.indexWhere((c) => c.id == parentId);
-                            if (idx > 0) {
-                              WidgetsBinding.instance.addPostFrameCallback((_) {
-                                if (_categoryScrollController.hasClients) {
-                                  _categoryScrollController.animateTo(
-                                    idx * 120.0,
-                                    duration: const Duration(milliseconds: 300),
-                                    curve: Curves.easeOut,
-                                  );
-                                }
-                              });
-                            }
-                          }
-
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Selected label
-                              if (_selectedCategory != null)
-                                Padding(
-                                  padding: EdgeInsets.symmetric(
-                                    vertical: spacing.cardVertical,
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        Icons.check_circle,
-                                        size: 20,
-                                        color: Color(
-                                          _selectedCategory!.colorValue ??
-                                              color.primary.toARGB32(),
-                                        ),
-                                      ),
-                                      SizedBox(width: spacing.elementGap),
-                                      Text(
-                                        _selectedCategory!.name,
-                                        style: textTheme.labelLarge?.copyWith(
-                                          fontWeight: FontWeight.w600,
-                                          color: color.onSurface,
-                                        ),
-                                      ),
-                                      if (_selectedCategory!
-                                              .parentCategory.value !=
-                                          null) ...[
-                                        SizedBox(width: spacing.elementGap),
-                                        Text(
-                                          '· ${_selectedCategory!.parentCategory.value!.name}',
-                                          style:
-                                              textTheme.labelMedium?.copyWith(
-                                            color: color.onSurfaceVariant,
-                                          ),
-                                        ),
-                                      ],
-                                    ],
-                                  ),
-                                ),
-
-                              // ── Parent row ──
-                              SizedBox(
-                                height: 52,
-                                child: ListView.separated(
-                                  controller: _categoryScrollController,
-                                  scrollDirection: Axis.horizontal,
-                                  itemCount: parents.length + 1,
-                                  separatorBuilder: (_, __) =>
-                                      SizedBox(width: spacing.elementGap),
-                                  itemBuilder: (context, index) {
-                                    if (index == parents.length) {
-                                      return GestureDetector(
-                                        onTap: () =>
-                                            context.push(AppRoutes.addCategory),
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 14,
-                                            vertical: 8,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: color.surfaceContainerHigh,
-                                            borderRadius: BorderRadius.circular(
-                                              spacing.radiusMedium,
-                                            ),
-                                            border: Border.all(
-                                              color: color.outlineVariant
-                                                  .withValues(alpha: 0.2),
-                                            ),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Icon(
-                                                Icons.add,
-                                                size: 16,
-                                                color: color.onSurfaceVariant,
-                                              ),
-                                              const SizedBox(width: 6),
-                                              Text(
-                                                ctxt.common_addLabel,
-                                                style: textTheme.labelMedium
-                                                    ?.copyWith(
-                                                  color: color.onSurfaceVariant,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      );
-                                    }
-
-                                    final cat = parents[index];
-                                    final catColor = Color(
-                                      cat.colorValue ??
-                                          color.primary.toARGB32(),
-                                    );
-                                    final isExpanded = expanded?.id == cat.id;
-                                    final isDirectlySelected =
-                                        _selectedCategory?.id == cat.id;
-                                    final isSelected =
-                                        isExpanded || isDirectlySelected;
-                                    final hasSubcategories = categories.any(
-                                      (c) =>
-                                          c.parentCategory.value?.id == cat.id,
-                                    );
-
-                                    return GestureDetector(
-                                      onTap: () {
-                                        HapticFeedback.selectionClick();
-                                        setState(() => _selectedCategory = cat);
-                                      },
-                                      child: AnimatedContainer(
-                                        duration:
-                                            const Duration(milliseconds: 200),
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 14,
-                                          vertical: 8,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: isSelected
-                                              ? catColor.withValues(alpha: 0.1)
-                                              : color.surfaceContainerHighest,
-                                          borderRadius: BorderRadius.circular(
-                                            spacing.radiusMedium,
-                                          ),
-                                          border: Border.all(
-                                            color: isSelected
-                                                ? catColor.withValues(
-                                                    alpha: 0.5,
-                                                  )
-                                                : color.outlineVariant
-                                                    .withValues(alpha: 0.2),
-                                            width: isSelected ? 1.5 : 1,
-                                          ),
-                                        ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Container(
-                                              padding: const EdgeInsets.all(6),
-                                              decoration: BoxDecoration(
-                                                color: catColor.withValues(
-                                                  alpha: 0.1,
-                                                ),
-                                                shape: BoxShape.circle,
-                                              ),
-                                              child: Icon(
-                                                IconHelper.iconFromName(
-                                                  cat.iconName ?? 'category',
-                                                ),
-                                                size: 16,
-                                                color: catColor,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 10),
-                                            Text(
-                                              cat.name,
-                                              style: textTheme.labelLarge
-                                                  ?.copyWith(
-                                                fontWeight: isSelected
-                                                    ? FontWeight.bold
-                                                    : FontWeight.w500,
-                                                color: isSelected
-                                                    ? color.onSurface
-                                                    : color.onSurfaceVariant,
-                                              ),
-                                            ),
-                                            if (hasSubcategories) ...[
-                                              const SizedBox(width: 4),
-                                              AnimatedRotation(
-                                                turns: isExpanded ? 0.5 : 0.0,
-                                                duration: const Duration(
-                                                  milliseconds: 200,
-                                                ),
-                                                child: Icon(
-                                                  Icons.expand_more,
-                                                  size: 14,
-                                                  color: isSelected
-                                                      ? catColor
-                                                      : color.onSurfaceVariant
-                                                          .withValues(
-                                                          alpha: 0.5,
-                                                        ),
-                                                ),
-                                              ),
-                                            ],
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-
-                              // ── Subcategory row (slides in) ──
-                              AnimatedSize(
-                                duration: const Duration(milliseconds: 250),
-                                curve: Curves.easeOutCubic,
-                                alignment: Alignment.topCenter,
-                                child: hasChildren
-                                    ? Padding(
-                                        padding: EdgeInsets.only(
-                                          top: spacing.elementGap,
-                                        ),
-                                        child: SizedBox(
-                                          height: 44,
-                                          child: ListView.separated(
-                                            controller:
-                                                _subcategoryScrollController,
-                                            scrollDirection: Axis.horizontal,
-                                            itemCount: children.length + 1,
-                                            separatorBuilder: (_, __) =>
-                                                SizedBox(
-                                              width: spacing.elementGap,
-                                            ),
-                                            itemBuilder: (context, index) {
-                                              if (index == children.length) {
-                                                return GestureDetector(
-                                                  onTap: () async {
-                                                    final result = await context
-                                                        .push<bool>(
-                                                      AppRoutes.addCategory,
-                                                      extra: {
-                                                        'parent': expanded,
-                                                        'type': _isExpense
-                                                            ? CategoryType
-                                                                .expense
-                                                            : CategoryType
-                                                                .income,
-                                                      },
-                                                    );
-                                                    if (result == true) {
-                                                      ref.invalidate(
-                                                        frequencySortedCategoriesProvider,
-                                                      );
-                                                      ref.invalidate(
-                                                        categoryListProvider,
-                                                      );
-                                                      ref.invalidate(
-                                                        selectableCategoriesProvider,
-                                                      );
-                                                    }
-                                                  },
-                                                  child: Container(
-                                                    padding: const EdgeInsets
-                                                        .symmetric(
-                                                      horizontal: 12,
-                                                      vertical: 6,
-                                                    ),
-                                                    decoration: BoxDecoration(
-                                                      color: color
-                                                          .surfaceContainerHigh,
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                        spacing.radiusSmall,
-                                                      ),
-                                                      border: Border.all(
-                                                        color: color
-                                                            .outlineVariant
-                                                            .withValues(
-                                                          alpha: 0.15,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    child: Row(
-                                                      mainAxisSize:
-                                                          MainAxisSize.min,
-                                                      children: [
-                                                        Icon(
-                                                          Icons.add,
-                                                          size: 14,
-                                                          color: color
-                                                              .onSurfaceVariant,
-                                                        ),
-                                                        const SizedBox(
-                                                          width: 6,
-                                                        ),
-                                                        Text(
-                                                          'Add',
-                                                          style: textTheme
-                                                              .labelMedium
-                                                              ?.copyWith(
-                                                            color: color
-                                                                .onSurfaceVariant,
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                );
-                                              }
-                                              final sub = children[index];
-                                              final subColor = Color(
-                                                sub.colorValue ??
-                                                    color.primary.toARGB32(),
-                                              );
-                                              final isSubSelected =
-                                                  _selectedCategory?.id ==
-                                                      sub.id;
-
-                                              return GestureDetector(
-                                                onTap: () {
-                                                  HapticFeedback
-                                                      .selectionClick();
-                                                  setState(
-                                                    () =>
-                                                        _selectedCategory = sub,
-                                                  );
-                                                },
-                                                child: AnimatedContainer(
-                                                  duration: const Duration(
-                                                    milliseconds: 200,
-                                                  ),
-                                                  padding: const EdgeInsets
-                                                      .symmetric(
-                                                    horizontal: 12,
-                                                    vertical: 6,
-                                                  ),
-                                                  decoration: BoxDecoration(
-                                                    color: isSubSelected
-                                                        ? subColor.withValues(
-                                                            alpha: 0.12,
-                                                          )
-                                                        : color
-                                                            .surfaceContainerHighest
-                                                            .withValues(
-                                                            alpha: 0.7,
-                                                          ),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                      spacing.radiusSmall,
-                                                    ),
-                                                    border: Border.all(
-                                                      color: isSubSelected
-                                                          ? subColor.withValues(
-                                                              alpha: 0.5,
-                                                            )
-                                                          : color.outlineVariant
-                                                              .withValues(
-                                                              alpha: 0.15,
-                                                            ),
-                                                    ),
-                                                  ),
-                                                  child: Row(
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
-                                                    children: [
-                                                      Icon(
-                                                        IconHelper.iconFromName(
-                                                          sub.iconName ??
-                                                              'category',
-                                                        ),
-                                                        size: 14,
-                                                        color: subColor,
-                                                      ),
-                                                      const SizedBox(width: 8),
-                                                      Text(
-                                                        sub.name,
-                                                        style: textTheme
-                                                            .labelMedium
-                                                            ?.copyWith(
-                                                          fontWeight:
-                                                              isSubSelected
-                                                                  ? FontWeight
-                                                                      .bold
-                                                                  : FontWeight
-                                                                      .w500,
-                                                          color: isSubSelected
-                                                              ? color.onSurface
-                                                              : color
-                                                                  .onSurfaceVariant,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              );
-                                            },
-                                          ),
-                                        ),
-                                      )
-                                    : const SizedBox.shrink(),
-                              ),
-                            ],
-                          );
-                        },
-                        loading: () => const SizedBox(height: 52),
-                        error: (_, __) => const SizedBox(),
-                      );
+                  CategorySelector(
+                    isExpense: _isExpense,
+                    selectedCategory: _selectedCategory,
+                    categoryScrollController: _categoryScrollController,
+                    subcategoryScrollController: _subcategoryScrollController,
+                    alreadyScrolled: _categoryScrolled,
+                    addLabel: ctxt.common_addLabel,
+                    onSelected: (cat) {
+                      setState(() {
+                        _selectedCategory = cat;
+                        _categoryScrolled = true;
+                      });
                     },
+                    expandedParentFinder: (parents) => parents,
                   ),
                   SizedBox(height: spacing.sectionGap),
 
@@ -1600,48 +791,19 @@ class _AddEditTransactionScreenState
                   SizedBox(height: spacing.sectionGap),
 
                   // ── Tags ──
-                  Consumer(
-                    builder: (context, ref, _) {
-                      final tagsAsync = ref.watch(tagListProvider);
-                      return tagsAsync.when(
-                        data: (tags) => Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: [
-                            ...tags.map((tag) {
-                              final isSelected =
-                                  selectedTags.any((t) => t.id == tag.id);
-                              return FilterChip(
-                                label: Text(tag.name),
-                                selected: isSelected,
-                                onSelected: (selected) {
-                                  HapticFeedback.selectionClick();
-                                  setState(() {
-                                    if (selected) {
-                                      selectedTags.add(tag);
-                                    } else {
-                                      selectedTags
-                                          .removeWhere((t) => t.id == tag.id);
-                                    }
-                                  });
-                                },
-                                showCheckmark: false,
-                                visualDensity: VisualDensity.compact,
-                              );
-                            }),
-                            ActionChip(
-                              label: Text(ctxt.transaction_addNewTagText),
-                              avatar: const Icon(Icons.add, size: 16),
-                              onPressed: () =>
-                                  showAddTagBottomSheet(context, ref),
-                              visualDensity: VisualDensity.compact,
-                            ),
-                          ],
-                        ),
-                        loading: () => const SizedBox(),
-                        error: (_, __) => const SizedBox(),
-                      );
+                  TagSelector(
+                    selectedTags: selectedTags,
+                    addNewTagText: ctxt.transaction_addNewTagText,
+                    onToggle: (tag) {
+                      setState(() {
+                        if (selectedTags.any((t) => t.id == tag.id)) {
+                          selectedTags.removeWhere((t) => t.id == tag.id);
+                        } else {
+                          selectedTags.add(tag);
+                        }
+                      });
                     },
+                    onAddNew: () => showAddTagBottomSheet(context, ref),
                   ),
                 ],
               ),
@@ -1850,6 +1012,7 @@ class _AddEditTransactionScreenState
                 onPressed: () async {
                   final name = controller.text.trim();
                   if (name.isNotEmpty) {
+                    final navigator = Navigator.of(sheetContext);
                     final tag = Tag()..name = name;
                     final isar = await isarService.getInstance();
                     await isar.writeTxn(() async {
@@ -1857,8 +1020,8 @@ class _AddEditTransactionScreenState
                     });
                     if (mounted) {
                       setState(() => selectedTags.add(tag));
-                      sheetContext.pop();
                       ref.invalidate(tagListProvider);
+                      navigator.pop();
                     }
                   }
                 },
@@ -2227,77 +1390,77 @@ class _AddEditTransactionScreenState
   void _showTripSelector() {
     final tripsAsync = ref.read(allTripsProvider);
 
-    tripsAsync.whenData((allTrips) {
+    if (tripsAsync case AsyncData(:final value)) {
       if (!mounted) return;
-      final trips = allTrips.where((t) => t.isTrip).toList();
+      final trips = value.where((t) => t.isTrip).toList();
 
       showModalBottomSheet(
-        context: context,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        builder: (ctx) => Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Select Trip',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              const SizedBox(height: 16),
-              ListTile(
-                leading: const Icon(Icons.close),
-                title: const Text('None'),
-                onTap: () {
-                  setState(() {
-                    _selectedTrip = null;
-                    _selectedParticipants.clear();
-                    _paidBy = null;
-                    _tripManuallyCleared = true;
-                  });
-                  ctx.pop();
-                },
-              ),
-              ...trips.map(
-                (trip) => ListTile(
-                  leading: Icon(
-                    trip.isActive ? Icons.luggage : Icons.luggage_outlined,
-                  ),
-                  title: Text(trip.name),
-                  subtitle: Text(
-                    trip.isActive ? 'Active' : 'Inactive',
-                  ),
-                  selected: _selectedTrip?.id == trip.id,
+          context: context,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          builder: (ctx) => Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Select Trip',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                const SizedBox(height: 16),
+                ListTile(
+                  leading: const Icon(Icons.close),
+                  title: const Text('None'),
                   onTap: () {
                     setState(() {
-                      _selectedTrip = trip;
-                      _selectedParticipants = trip.participants.toList();
-                      _paidBy = trip.participants.firstOrNull;
-                      _tripManuallyCleared = false;
+                      _selectedTrip = null;
+                      _selectedParticipants.clear();
+                      _paidBy = null;
+                      _tripManuallyCleared = true;
                     });
                     ctx.pop();
                   },
                 ),
-              ),
-            ],
+                ...trips.map(
+                  (trip) => ListTile(
+                    leading: Icon(
+                      trip.isActive ? Icons.luggage : Icons.luggage_outlined,
+                    ),
+                    title: Text(trip.name),
+                    subtitle: Text(
+                      trip.isActive ? 'Active' : 'Inactive',
+                    ),
+                    selected: _selectedTrip?.id == trip.id,
+                    onTap: () {
+                      setState(() {
+                        _selectedTrip = trip;
+                        _selectedParticipants = trip.participants.toList();
+                        _paidBy = trip.participants.firstOrNull;
+                        _tripManuallyCleared = false;
+                      });
+                      ctx.pop();
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-      );
-    });
+        );
+    }
   }
 
   Future<void> _checkLowBalance(Account? account) async {
     if (account == null) return;
     final accountsService = ref.read(accountServiceProvider);
     final notificationService = ref.read(notificationRecordServiceProvider);
+    final ctxt = AppLocalizations.of(context)!;
     final currentBalance = await accountsService.getAccountBalance(account.id);
     final lowBalanceThreshold =
         SharedPrefsUtil.instance.getLowBalanceThreshold();
-    final ctxt = AppLocalizations.of(context)!;
 
     if (currentBalance < lowBalanceThreshold) {
       await notificationService.logNotification(

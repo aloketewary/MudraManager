@@ -9,14 +9,17 @@ import 'package:mudra_manager/core/db/models/budget.dart';
 import 'package:mudra_manager/core/db/models/budget_category_allocation.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/budget_type.dart';
+import 'package:mudra_manager/core/db/models/tag.dart';
 import 'package:mudra_manager/core/entitlement/entitlement_provider.dart';
 import 'package:mudra_manager/core/extension/case_extention.dart';
 import 'package:mudra_manager/core/extension/localization_extenstion.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
+import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
 import 'package:mudra_manager/features/category/data/category_provider.dart';
+import 'package:mudra_manager/features/transactions/data/tag_provider.dart';
 import 'package:mudra_manager/shared/widgets/common_dropdown_field.dart';
 import 'package:mudra_manager/shared/widgets/common_text_input_field.dart';
 
@@ -40,6 +43,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
   final Map<int, TextEditingController> _allocCtrls = {};
   final List<Category> _selectedCats = [];
   final List<int> selectedCategories = [];
+  final List<int> _selectedTagIds = [];
   BudgetRecurrence _recurrence = BudgetRecurrence.none;
   BudgetType _budgetType = BudgetType.categoryWise;
   final Map<int, bool> _expandedParents = {};
@@ -56,6 +60,15 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
       _startDate = widget.existing!.startDate;
       _endDate = widget.existing!.endDate;
       _budgetType = widget.existing!.budgetType;
+      // Load tags for tag-wise budgets
+      if (_budgetType == BudgetType.tagWise) {
+        widget.existing!.budgetTags.load().then((_) {
+          for (final tag in widget.existing!.budgetTags) {
+            _selectedTagIds.add(tag.id);
+          }
+          setState(() {});
+        });
+      }
       widget.existing!.allocations.load().then((_) {
         for (final alloc in widget.existing!.allocations) {
           alloc.category.load().then((_) {
@@ -139,6 +152,10 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
       SnackbarService.error(ctxt.budget_selectAtLeastOneCategoryErrorText);
       return;
     }
+    if (_budgetType == BudgetType.tagWise && _selectedTagIds.isEmpty) {
+      SnackbarService.error('Please select at least one tag');
+      return;
+    }
 
     final service = ref.read(budgetServiceProvider);
     final isEditing = widget.existing != null;
@@ -164,9 +181,11 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
     if (isEditing) {
       await bud.categories.load();
       await bud.allocations.load();
+      await bud.budgetTags.load();
       await service.deleteAllocation(bud.allocations.toList());
       bud.categories.clear();
       bud.allocations.clear();
+      bud.budgetTags.clear();
     }
 
     if (_budgetType == BudgetType.categoryWise) {
@@ -207,6 +226,15 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
         alloc.budget.value = bud;
 
         bud.allocations.add(alloc);
+      }
+    }
+
+    // Handle tag-wise budget
+    if (_budgetType == BudgetType.tagWise) {
+      final isar = await ref.read(isarServiceProvider).getInstance();
+      for (final tagId in _selectedTagIds) {
+        final tag = await isar.tags.get(tagId);
+        if (tag != null) bud.budgetTags.add(tag);
       }
     }
 
@@ -597,9 +625,97 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
                         }),
                       ],
 
-                      SizedBox(height: spacing.sectionGap * 1.5),
+                      // Tag-wise budget UI
+                      if (_budgetType == BudgetType.tagWise) ...[
+                        SizedBox(height: spacing.sectionGap * 1.5),
+                        _buildSectionHeader(
+                          'Select Tags',
+                          LucideIcons.tag,
+                          color,
+                          textTheme,
+                          spacing,
+                        ),
+                        SizedBox(height: spacing.elementGap),
+                        Container(
+                          padding: EdgeInsets.all(spacing.cardInner),
+                          decoration: BoxDecoration(
+                            color: color.primaryContainer,
+                            borderRadius:
+                                BorderRadius.circular(spacing.radiusMedium),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                LucideIcons.info,
+                                color: color.primary,
+                                size: 20,
+                              ),
+                              SizedBox(width: spacing.elementGap),
+                              Expanded(
+                                child: Text(
+                                  'All expenses with selected tags will count towards this budget.',
+                                  style: textTheme.bodySmall?.copyWith(
+                                    color: color.onPrimaryContainer,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: spacing.elementGap * 1.5),
+                        Consumer(
+                          builder: (context, ref, _) {
+                            final tagsAsync = ref.watch(tagListProvider);
+                            return tagsAsync.when(
+                              data: (tags) {
+                                if (tags.isEmpty) {
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 24,
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        'No tags yet. Add tags to your transactions first.',
+                                        style: textTheme.bodyMedium?.copyWith(
+                                          color: color.onSurfaceVariant,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }
+                                return Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: tags.map((tag) {
+                                    final isSelected =
+                                        _selectedTagIds.contains(tag.id);
+                                    return FilterChip(
+                                      label: Text(tag.name),
+                                      selected: isSelected,
+                                      onSelected: (selected) {
+                                        HapticFeedback.selectionClick();
+                                        setState(() {
+                                          if (selected) {
+                                            _selectedTagIds.add(tag.id);
+                                          } else {
+                                            _selectedTagIds.remove(tag.id);
+                                          }
+                                        });
+                                      },
+                                      showCheckmark: true,
+                                    );
+                                  }).toList(),
+                                );
+                              },
+                              loading: () =>
+                                  const CircularProgressIndicator(),
+                              error: (_, __) => const SizedBox(),
+                            );
+                          },
+                        ),
+                      ],
 
-                      // Recurrence
+                      SizedBox(height: spacing.sectionGap * 1.5),
                       _buildSectionHeader(
                         'Recurrence',
                         LucideIcons.repeat,

@@ -2,6 +2,7 @@ import 'package:isar_community/isar.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:mudra_manager/core/db/models/budget_category_allocation.dart';
 import 'package:mudra_manager/core/db/models/budget_type.dart';
+import 'package:mudra_manager/core/db/models/tag.dart';
 
 import 'category.dart';
 
@@ -42,6 +43,10 @@ class Budget {
   bool notifiedAt100 = false;
 
   final allocations = IsarLinks<BudgetCategoryAllocation>();
+
+  // Tags for tag-wise budgets
+  @Index()
+  final budgetTags = IsarLinks<Tag>();
 
   // Isar requires a default constructor
   Budget();

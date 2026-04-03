@@ -3,6 +3,7 @@ import 'package:flutter_boring_avatars/flutter_boring_avatars.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/entitlement/entitlement_products.dart';
@@ -171,7 +172,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     _SettingItem(
                       LucideIcons.languages,
                       'Language',
-                      Locale(SharedPrefsUtil.instance.getLanguage()).displayName(),
+                      Locale(SharedPrefsUtil.instance.getLanguage())
+                          .displayName(),
                       () => context.push(AppRoutes.chooseLanguage),
                     ),
                   ],
@@ -258,6 +260,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                   ),
                 ),
+                const SizedBox(height: 32),
+
+                // ── APP FOOTER ──
+                _buildAppFooter(color, textTheme, spacing),
                 const SizedBox(height: 80),
               ]),
             ),
@@ -434,8 +440,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color:
-                              color.tertiary.withValues(alpha: 0.12),
+                          color: color.tertiary.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Icon(
@@ -625,8 +630,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                       vertical: 2,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: color.primary
-                                          .withValues(alpha: 0.15),
+                                      color:
+                                          color.primary.withValues(alpha: 0.15),
                                       borderRadius: BorderRadius.circular(4),
                                     ),
                                     child: Text(
@@ -1008,7 +1013,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   'Best Streak',
                   color,
                   textTheme,
-                accentColor: color.tertiary,
+                  accentColor: color.tertiary,
                 ),
               ),
             ],
@@ -1345,6 +1350,91 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             const SizedBox(height: 24),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildAppFooter(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
+    const quotes = [
+      'Paisa bolta hai 🗣️',
+      'Hisaab kitaab, sab yaad rakhenge 📒',
+      'Spend smart, live large 🚀',
+      'Every rupee has a story 💰',
+      'Budget karo, chill karo 😎',
+      'Your wallet\'s best friend 🤝',
+      'Savings today, freedom tomorrow ✨',
+      'Track karo, tension nahi 🧘',
+    ];
+    final quote = quotes[DateTime.now().day % quotes.length];
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: spacing.cardHorizontal),
+      child: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.symmetric(
+              horizontal: spacing.cardHorizontal,
+              vertical: spacing.cardVertical,
+            ),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(spacing.radiusMedium),
+            ),
+            child: Column(
+              children: [
+                // App icon
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Image.asset(
+                    'assets/logo/logo.png',
+                    width: 48,
+                    height: 48,
+                  ),
+                ),
+                SizedBox(height: spacing.sectionGap),
+
+                // Fun quote
+                Text(
+                  quote,
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: color.onSurfaceVariant,
+                    fontStyle: FontStyle.italic,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: spacing.sectionGap),
+
+                // Version
+                FutureBuilder<PackageInfo>(
+                  future: PackageInfo.fromPlatform(),
+                  builder: (context, snapshot) {
+                    final version = snapshot.data?.version ?? '';
+                    if (version.isEmpty) return const SizedBox.shrink();
+                    return Text(
+                      'v$version',
+                      style: textTheme.labelSmall?.copyWith(
+                        color: color.onSurfaceVariant.withValues(alpha: 0.4),
+                      ),
+                    );
+                  },
+                ),
+                SizedBox(height: spacing.elementGap),
+
+                // Made in India
+                Text(
+                  'Made with ❤️ in India 🇮🇳',
+                  style: textTheme.labelSmall?.copyWith(
+                    color: color.onSurfaceVariant.withValues(alpha: 0.4),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
