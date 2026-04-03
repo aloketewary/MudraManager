@@ -22,17 +22,22 @@ class BuddyMessages {
   static String get fillAllFields => Tone.current.fillAllFields;
   static String get invalidAmount => Tone.current.invalidAmount;
   static String get futureDate => Tone.current.futureDate;
-  static String get selectAccountAndCategory => Tone.current.selectAccountAndCategory;
+  static String get selectAccountAndCategory =>
+      Tone.current.selectAccountAndCategory;
 
   // ── Trip & Split ──
   static String tripCreated(bool isTrip) => Tone.current.tripCreated(isTrip);
   static String tripUpdated(bool isTrip) => Tone.current.tripUpdated(isTrip);
   static String tripDeleted(bool isTrip) => Tone.current.tripDeleted(isTrip);
-  static String tripFinalized(bool isTrip) => Tone.current.tripFinalized(isTrip);
-  static String tripNameRequired(bool isTrip) => Tone.current.tripNameRequired(isTrip);
+  static String tripFinalized(bool isTrip) =>
+      Tone.current.tripFinalized(isTrip);
+  static String tripNameRequired(bool isTrip) =>
+      Tone.current.tripNameRequired(isTrip);
   static String get addParticipant => Tone.current.addParticipant;
-  static String tripLimitReached(bool isTrip) => Tone.current.tripLimitReached(isTrip);
-  static String expenseAddedToTrip(bool isTrip) => Tone.current.expenseAddedToTrip(isTrip);
+  static String tripLimitReached(bool isTrip) =>
+      Tone.current.tripLimitReached(isTrip);
+  static String expenseAddedToTrip(bool isTrip) =>
+      Tone.current.expenseAddedToTrip(isTrip);
 
   // ── Budget ──
   static String get budgetCreated => Tone.current.budgetCreated;
@@ -79,7 +84,8 @@ class BuddyMessages {
   static String get incorrectPin => Tone.current.incorrectPin;
 
   // ── SMS / Auto Import ──
-  static String get notificationAccessDenied => Tone.current.notificationAccessDenied;
+  static String get notificationAccessDenied =>
+      Tone.current.notificationAccessDenied;
   static String get smsImportEnabled => Tone.current.smsImportEnabled;
 
   // ── Empty States ──
@@ -90,7 +96,8 @@ class BuddyMessages {
   static String get noAccounts => Tone.current.noAccounts;
   static String get noCategories => Tone.current.noCategories;
   static String get noNotifications => Tone.current.noNotifications;
-  static String noFilterResults(String filter) => Tone.current.noFilterResults(filter);
+  static String noFilterResults(String filter) =>
+      Tone.current.noFilterResults(filter);
   static String get noData => Tone.current.noData;
   static String get noRecurring => Tone.current.noRecurring;
 
@@ -108,7 +115,8 @@ class BuddyMessages {
 
   // ── Confirmations ──
   static String get deleteTitle => Tone.current.deleteTitle;
-  static String deleteMessage(String? param) => Tone.current.deleteMessage(param);
+  static String deleteMessage(String? param) =>
+      Tone.current.deleteMessage(param);
   static String get deleteConfirm => Tone.current.deleteConfirm;
   static String get deleteCancel => Tone.current.deleteCancel;
   static String get logoutTitle => Tone.current.logoutTitle;
@@ -117,19 +125,45 @@ class BuddyMessages {
 
   // ── AI Insights ──
   static String get insightBillsDueSoon => Tone.current.insightBillsDueSoon;
-  static String insightBillsDueMessage(int count) => Tone.current.insightBillsDueMessage(count);
+  static String insightBillsDueMessage(int count) =>
+      Tone.current.insightBillsDueMessage(count);
   static String get insightOverBudget => Tone.current.insightOverBudget;
-  static String insightOverBudgetMessage(int count) => Tone.current.insightOverBudgetMessage(count);
+  static String insightOverBudgetMessage(int count) =>
+      Tone.current.insightOverBudgetMessage(count);
   static String get insightNearBudget => Tone.current.insightNearBudget;
-  static String insightNearBudgetMessage(int count) => Tone.current.insightNearBudgetMessage(count);
+  static String insightNearBudgetMessage(int count) =>
+      Tone.current.insightNearBudgetMessage(count);
   static String get insightOverspending => Tone.current.insightOverspending;
-  static String insightOverspendingMessage(String amount) => Tone.current.insightOverspendingMessage(amount);
+  static String insightOverspendingMessage(String amount) =>
+      Tone.current.insightOverspendingMessage(amount);
   static String get insightSpendingSpike => Tone.current.insightSpendingSpike;
-  static String insightSpendingSpikeMessage(String avg, String today) => Tone.current.insightSpendingSpikeMessage(avg, today);
+  static String insightSpendingSpikeMessage(String avg, String today) =>
+      Tone.current.insightSpendingSpikeMessage(avg, today);
   static String get insightWeekendAlert => Tone.current.insightWeekendAlert;
-  static String insightWeekendAlertMessage(String avg, String current) => Tone.current.insightWeekendAlertMessage(avg, current);
-  static String insightMoneyLeak(String category, int count, String total) => Tone.current.insightMoneyLeak(category, count, total);
-  static String insightBestDay(String worst, String wAvg, String best, String bAvg, String saving) => Tone.current.insightBestDay(worst, wAvg, best, bAvg, saving);
+  static String insightWeekendAlertMessage(String avg, String current) =>
+      Tone.current.insightWeekendAlertMessage(avg, current);
+  static String insightMoneyLeak(String category, int count, String total) =>
+      Tone.current.insightMoneyLeak(category, count, total);
+  static String insightBestDay(
+    String worst,
+    String wAvg,
+    String best,
+    String bAvg,
+    String saving,
+  ) =>
+      Tone.current.insightBestDay(worst, wAvg, best, bAvg, saving);
   static String get insightGetStarted => Tone.current.insightGetStarted;
-  static String get insightGetStartedMessage => Tone.current.insightGetStartedMessage;
+  static String get insightGetStartedMessage =>
+      Tone.current.insightGetStartedMessage;
+
+  // ── Dashboard Greetings ──
+  static String greetingMorning(String name) =>
+      Tone.current.greetingMorning(name);
+  static String greetingAfternoon(String name) =>
+      Tone.current.greetingAfternoon(name);
+  static String greetingEvening(String name) =>
+      Tone.current.greetingEvening(name);
+  static String get dashboardWelcomeBack => Tone.current.dashboardWelcomeBack;
+  static String get dashboardAllCaughtUp => Tone.current.dashboardAllCaughtUp;
+  static String streakMessage(int days) => Tone.current.streakMessage(days);
 }

@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -58,6 +59,9 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
       if (!_formKey.currentState!.validate()) return;
       HapticFeedback.lightImpact();
       setState(() => _step = 2);
+    } else if (_step == 2) {
+      HapticFeedback.lightImpact();
+      setState(() => _step = 3);
     } else {
       _completeSetup();
     }
@@ -186,7 +190,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                     ),
                     const Spacer(),
                     Row(
-                      children: List.generate(3, (i) {
+                      children: List.generate(4, (i) {
                         final active = i <= _step;
                         return AnimatedContainer(
                           duration: const Duration(milliseconds: 300),
@@ -244,13 +248,21 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                               accent,
                               isDark,
                             )
-                          : _buildPackPickerStep(
-                              color,
-                              textTheme,
-                              spacing,
-                              isDark,
-                              accent,
-                            ),
+                          : _step == 2
+                              ? _buildToneStep(
+                                  color,
+                                  textTheme,
+                                  spacing,
+                                  isDark,
+                                  accent,
+                                )
+                              : _buildPackPickerStep(
+                                  color,
+                                  textTheme,
+                                  spacing,
+                                  isDark,
+                                  accent,
+                                ),
                 ),
               ),
 
@@ -288,7 +300,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    _step < 2
+                                    _step < 3
                                         ? 'Continue'
                                         : ctxt.translate('onboard_GetStarted'),
                                     style: const TextStyle(
@@ -296,7 +308,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                                       fontSize: 16,
                                     ),
                                   ),
-                                  if (_step == 2) ...[
+                                  if (_step == 3) ...[
                                     const SizedBox(width: 8),
                                     const Icon(
                                       LucideIcons.arrowRight,
@@ -475,8 +487,8 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: color.primary
-                        .withValues(alpha: isDark ? 0.15 : 0.12),
+                    color:
+                        color.primary.withValues(alpha: isDark ? 0.15 : 0.12),
                     blurRadius: 40,
                     spreadRadius: 8,
                   ),
@@ -490,10 +502,8 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      color.primary
-                          .withValues(alpha: isDark ? 0.2 : 0.14),
-                      color.primary
-                          .withValues(alpha: isDark ? 0.08 : 0.05),
+                      color.primary.withValues(alpha: isDark ? 0.2 : 0.14),
+                      color.primary.withValues(alpha: isDark ? 0.08 : 0.05),
                     ],
                   ),
                 ),
@@ -623,7 +633,203 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
     );
   }
 
-  // ── STEP 3: PACK PICKER ──
+// ── STEP 3: TONE PICKER ──
+  Widget _buildToneStep(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    bool isDark,
+    Color accent,
+  ) {
+    final activeTone = ref.watch(tonePackProvider);
+
+    return SingleChildScrollView(
+      key: const ValueKey('tone_step'),
+      padding: EdgeInsets.symmetric(horizontal: spacing.cardHorizontalMax + 8),
+      child: Column(
+        children: [
+          const SizedBox(height: 32),
+          TweenAnimationBuilder<double>(
+            duration: const Duration(milliseconds: 600),
+            curve: Curves.easeOutBack,
+            tween: Tween(begin: 0.0, end: 1.0),
+            builder: (context, value, child) => Opacity(
+              opacity: value.clamp(0.0, 1.0),
+              child: Transform.scale(scale: value, child: child),
+            ),
+            child: Container(
+              padding: const EdgeInsets.all(5),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: color.tertiary.withValues(alpha: 0.25),
+                  width: 2.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color:
+                        color.tertiary.withValues(alpha: isDark ? 0.15 : 0.12),
+                    blurRadius: 40,
+                    spreadRadius: 8,
+                  ),
+                ],
+              ),
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      color.tertiary.withValues(alpha: isDark ? 0.2 : 0.14),
+                      color.tertiary.withValues(alpha: isDark ? 0.08 : 0.05),
+                    ],
+                  ),
+                ),
+                child: Icon(
+                  LucideIcons.messageCircleHeart,
+                  size: 48,
+                  color: color.tertiary,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 32),
+          Text(
+            'How should Mudra talk to you?',
+            style: textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+              color: color.onSurface,
+              letterSpacing: -0.5,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Pick a personality. You can change this anytime.',
+            style: textTheme.bodyLarge?.copyWith(
+              color: color.onSurfaceVariant,
+              height: 1.5,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 28),
+          ...allTonePacks.map((tone) {
+            final isSelected = activeTone.id == tone.id;
+            final toneColor = isSelected ? color.tertiary : color.onSurface;
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: GestureDetector(
+                onTap: () {
+                  HapticFeedback.mediumImpact();
+                  ref.read(tonePackProvider.notifier).select(tone);
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                    color: isSelected
+                        ? color.tertiary.withValues(alpha: isDark ? 0.15 : 0.08)
+                        : color.surfaceContainerLow,
+                    border: Border.all(
+                      color: isSelected
+                          ? color.tertiary.withValues(alpha: 0.5)
+                          : color.outlineVariant.withValues(alpha: 0.4),
+                      width: isSelected ? 1.5 : 1,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            tone.emoji,
+                            style: const TextStyle(fontSize: 22),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  tone.name,
+                                  style: textTheme.bodyLarge?.copyWith(
+                                    fontWeight: isSelected
+                                        ? FontWeight.w700
+                                        : FontWeight.w500,
+                                    color: toneColor,
+                                  ),
+                                ),
+                                Text(
+                                  tone.description,
+                                  style: textTheme.bodySmall?.copyWith(
+                                    color: color.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(
+                            isSelected
+                                ? LucideIcons.circleCheck
+                                : LucideIcons.circle,
+                            color: isSelected
+                                ? color.tertiary
+                                : color.outlineVariant,
+                            size: 22,
+                          ),
+                        ],
+                      ),
+                      if (isSelected) ...[
+                        const SizedBox(height: 10),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            color: color.tertiary.withValues(alpha: 0.08),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                LucideIcons.messageSquareQuote,
+                                size: 14,
+                                color: color.onSurfaceVariant,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  '"${tone.txnAdded}"',
+                                  style: textTheme.bodySmall?.copyWith(
+                                    color: color.onSurfaceVariant,
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  // ── STEP 4: PACK PICKER ──
   Widget _buildPackPickerStep(
     ColorScheme color,
     TextTheme textTheme,
@@ -656,8 +862,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
               ),
               boxShadow: [
                 BoxShadow(
-                  color: color.tertiary
-                      .withValues(alpha: isDark ? 0.15 : 0.12),
+                  color: color.tertiary.withValues(alpha: isDark ? 0.15 : 0.12),
                   blurRadius: 40,
                   spreadRadius: 8,
                 ),
@@ -671,10 +876,8 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    color.tertiary
-                        .withValues(alpha: isDark ? 0.2 : 0.14),
-                    color.tertiary
-                        .withValues(alpha: isDark ? 0.08 : 0.05),
+                    color.tertiary.withValues(alpha: isDark ? 0.2 : 0.14),
+                    color.tertiary.withValues(alpha: isDark ? 0.08 : 0.05),
                   ],
                 ),
               ),

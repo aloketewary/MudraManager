@@ -85,6 +85,11 @@ extension AppLocalizationsHelper on AppLocalizations {
         return onboard_SecureAndPrivate;
       case 'onboard_SecureAndPrivateDesc':
         return onboard_SecureAndPrivateDesc;
+      case 'onboard_SmartAutoTracking':
+        return onboard_SmartAutoTracking;
+      case 'onboard_SmartAutoTrackingDesc':
+        return onboard_SmartAutoTrackingDesc;
+
       default:
         return key;
     }
@@ -133,7 +138,8 @@ extension AppLocalizationsHelper on AppLocalizations {
   String _trimTrailingZeros(String value) {
     if (!value.contains('.')) return value;
     var trimmed = value.replaceAll(RegExp(r'0+$'), '');
-    if (trimmed.endsWith('.')) trimmed = trimmed.substring(0, trimmed.length - 1);
+    if (trimmed.endsWith('.'))
+      trimmed = trimmed.substring(0, trimmed.length - 1);
     return trimmed;
   }
 

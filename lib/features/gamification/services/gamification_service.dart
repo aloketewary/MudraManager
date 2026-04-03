@@ -914,6 +914,10 @@ class GamificationService {
 
   Future<void> _checkZeroSpendDay(DateTime now) async {
     try {
+      // Don't award zero-spend if user has no transactions at all (fresh install)
+      final totalTxns = await isar.transactions.count();
+      if (totalTxns == 0) return;
+
       final yesterday = now.subtract(const Duration(days: 1));
       final start = DateTime(yesterday.year, yesterday.month, yesterday.day);
       final end =
@@ -934,6 +938,8 @@ class GamificationService {
 
   Future<void> _checkSavingsStreak(DateTime now) async {
     try {
+      final totalTxns = await isar.transactions.count();
+      if (totalTxns == 0) return;
       final yesterday = now.subtract(const Duration(days: 1));
       final start = DateTime(yesterday.year, yesterday.month, yesterday.day);
       final end =

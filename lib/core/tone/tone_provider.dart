@@ -7,10 +7,10 @@ const _prefKey = 'selected_tone_pack';
 
 /// All available tone packs.
 final allTonePacks = <TonePack>[
-  BuddyTonePack(),
+  FriendlyTonePack(),
   ProfessionalTonePack(),
-  PlayfulTonePack(),
-  ZenTonePack(),
+  MotivationalTonePack(),
+  CalmTonePack(),
 ];
 
 /// Currently selected tone pack provider.
@@ -22,10 +22,20 @@ class TonePackNotifier extends StateNotifier<TonePack> {
   TonePackNotifier() : super(_loadFromPrefs());
 
   static TonePack _loadFromPrefs() {
-    final id = SharedPrefsUtil.instance.getString(_prefKey) ?? 'buddy';
+    var id = SharedPrefsUtil.instance.getString(_prefKey) ?? 'friendly';
+    // Migrate old IDs
+    const migration = {
+      'buddy': 'friendly',
+      'playful': 'motivational',
+      'zen': 'calm',
+    };
+    if (migration.containsKey(id)) {
+      id = migration[id]!;
+      SharedPrefsUtil.instance.setString(_prefKey, id);
+    }
     return allTonePacks.firstWhere(
       (t) => t.id == id,
-      orElse: () => BuddyTonePack(),
+      orElse: () => FriendlyTonePack(),
     );
   }
 
@@ -39,7 +49,7 @@ class TonePackNotifier extends StateNotifier<TonePack> {
 /// Falls back to Buddy if not initialized.
 class Tone {
   Tone._();
-  static TonePack _active = BuddyTonePack();
+  static TonePack _active = FriendlyTonePack();
 
   static TonePack get current => _active;
 

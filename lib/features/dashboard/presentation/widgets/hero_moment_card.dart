@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
@@ -172,7 +173,16 @@ final heroMomentProvider = Provider<HeroMoment?>((ref) {
     return const HeroMoment(
       icon: LucideIcons.shieldCheck,
       message: 'Your data never leaves this device — 100% offline, 100% yours',
-      accentColor: const Color(0xFF009688),
+      accentColor: Color(0xFF009688),
+    );
+  }
+
+  // All caught up — nothing needs attention
+  if (data.transactions.isNotEmpty) {
+    return HeroMoment(
+      icon: LucideIcons.circleCheck,
+      message: Tone.current.dashboardAllCaughtUp,
+      accentColor: const Color(0xFF4CAF50),
     );
   }
 

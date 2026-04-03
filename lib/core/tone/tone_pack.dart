@@ -127,7 +127,9 @@ abstract class TonePack {
   String get insightWeekendAlert;
   String insightWeekendAlertMessage(String avg, String current);
   String insightMoneyLeak(String category, int count, String total);
-  String insightBestDay(String worst, String wAvg, String best, String bAvg, String saving);
+  String insightBestDay(
+      // ignore: require_trailing_commas
+      String worst, String wAvg, String best, String bAvg, String saving);
   String get insightGetStarted;
   String get insightGetStartedMessage;
 
@@ -136,4 +138,30 @@ abstract class TonePack {
   String allApproved(int count, String amountStr);
   String mixedResults(int approved, int reviewCount);
   String allNeedReview(int reviewCount);
+
+  // ── Dashboard Greetings (context-aware) ──
+  String greetingMorning(String name);
+  String greetingAfternoon(String name);
+  String greetingEvening(String name);
+  String get dashboardWelcomeBack;
+  String get dashboardAllCaughtUp;
+  String streakMessage(int days);
+
+  // ── Contextual Notifications ──
+  String budgetExceededNotif(String name, String spent, String limit);
+  String budgetWarningNotif(String name, String remaining, String pct);
+  String billDueNotif(String name, String amount, String when);
+  String balanceDropNotif(String days);
+  String savingsOpportunityNotif(String category, String amount);
+  String unusualSpendingNotif(String today, String multiplier);
+  String pendingSmsNotif(int count);
+  String moneyLeakNotif(String category, int count, String total);
+  String reEngageMissYou(int lostStreak);
+  String reEngageUntracked(int days, String estimatedSpend);
+  String get reEngageQuickNudge;
+  String dailySummaryNotif(String spent, String earned, String topCategory);
+  String get dailySummaryEmpty;
+  String weeklySummaryNotif(String total, String topCategory, String trend);
+  String streakAtRisk(int streak);
+  String streakLost(int streak);
 }

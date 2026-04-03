@@ -632,10 +632,10 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
 
   IconData _toneIcon(String id) {
     return switch (id) {
-      'buddy' => LucideIcons.handshake,
+      'friendly' => LucideIcons.handshake,
       'professional' => LucideIcons.briefcase,
-      'playful' => LucideIcons.gamepad2,
-      'zen' => LucideIcons.leaf,
+      'motivational' => LucideIcons.trophy,
+      'calm' => LucideIcons.leaf,
       _ => LucideIcons.messageCircle,
     };
   }

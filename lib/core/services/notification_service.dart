@@ -9,6 +9,7 @@ import 'package:mudra_manager/core/db/models/notification_record.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -124,7 +125,7 @@ class NotificationService {
       await showLocalNotification(
         id: 100,
         title: '📊 Quiet day yesterday',
-        body: 'Nothing recorded — either a zero-spend win or time to catch up!',
+        body: Tone.current.dailySummaryEmpty,
         payload: 'statistics',
       );
       return;
@@ -157,27 +158,21 @@ class NotificationService {
     }
 
     final accounts = await isar.collection<Account>().where().findAll();
-    double totalBalance = 0;
     for (final acc in accounts) {
-      final txs = await isar.transactions
+      await isar.transactions
           .filter()
           .account((q) => q.idEqualTo(acc.id))
           .findAll();
-      final balance = acc.initialBalance +
-          txs.fold<double>(
-            0,
-            (sum, tx) => sum + (tx.isExpense ? -tx.amount : tx.amount),
-          );
-      totalBalance += balance;
     }
 
-    final body =
-        'Spent ₹${totalSpent.toStringAsFixed(0)} · Earned ₹${totalIncome.toStringAsFixed(0)}\n'
-        'Most went to $topCategory · Balance: ₹${totalBalance.toStringAsFixed(0)}';
     await showLocalNotification(
       id: 100,
       title: '📊 Here\'s yesterday',
-      body: body,
+      body: Tone.current.dailySummaryNotif(
+        totalSpent.toStringAsFixed(0),
+        totalIncome.toStringAsFixed(0),
+        topCategory,
+      ),
       payload: 'statistics',
     );
   }
@@ -468,7 +463,7 @@ class NotificationService {
     await _plugin.zonedSchedule(
       3,
       '🔥 $currentStreak days and counting!',
-      'Don\'t let today be the day it resets — just open the app',
+      Tone.current.streakAtRisk(currentStreak),
       scheduledDate,
       const NotificationDetails(
         android: AndroidNotificationDetails(

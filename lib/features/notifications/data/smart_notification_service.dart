@@ -10,6 +10,7 @@ import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
 import 'package:mudra_manager/core/services/notification_service.dart';
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/features/gamification/models/achievement.dart';
 import 'dart:convert';
 
@@ -182,8 +183,11 @@ class SmartNotificationService {
           isar,
           type: 'budget_exceeded_${budget.id}',
           title: '🚨 ${budget.name} is over budget',
-          body:
-              '₹${spent.toStringAsFixed(0)} spent out of ₹${budget.amount.toStringAsFixed(0)} — might want to ease up',
+          body: Tone.current.budgetExceededNotif(
+            budget.name,
+            spent.toStringAsFixed(0),
+            budget.amount.toStringAsFixed(0),
+          ),
           channel: 'budget_alerts',
           channelName: 'Budget Alerts',
           priority: NotificationPriority.urgent,
@@ -196,8 +200,11 @@ class SmartNotificationService {
           isar,
           type: 'budget_warning_${budget.id}',
           title: '⚠️ ${budget.name} is getting tight',
-          body:
-              'Only ₹${(budget.amount - spent).toStringAsFixed(0)} left — you\'re at ${pct.toStringAsFixed(0)}% already',
+          body: Tone.current.budgetWarningNotif(
+            budget.name,
+            (budget.amount - spent).toStringAsFixed(0),
+            pct.toStringAsFixed(0),
+          ),
           channel: 'budget_alerts',
           channelName: 'Budget Alerts',
           priority: NotificationPriority.high,
@@ -234,7 +241,11 @@ class SmartNotificationService {
         isar,
         type: 'bill_due_${bill.id}',
         title: '📅 ${bill.description ?? "Bill"} is due $label',
-        body: '₹${bill.amount.toStringAsFixed(0)} coming up — just a heads up',
+        body: Tone.current.billDueNotif(
+          bill.description ?? 'Bill',
+          bill.amount.toStringAsFixed(0),
+          label,
+        ),
         channel: 'bill_reminders',
         channelName: 'Bill Reminders',
         priority:
@@ -302,8 +313,7 @@ class SmartNotificationService {
         isar,
         type: 'balance_drop_prediction',
         title: '📉 Funds getting low',
-        body:
-            'At this pace, things could get tight in about ${daysUntilZero.toStringAsFixed(0)} days',
+        body: Tone.current.balanceDropNotif(daysUntilZero.toStringAsFixed(0)),
         channel: 'smart_alerts',
         channelName: 'Smart Alerts',
         priority: daysUntilZero <= 7
@@ -382,8 +392,10 @@ class SmartNotificationService {
         isar,
         type: 'savings_opportunity',
         title: '💡 $spikeCategory is creeping up',
-        body:
-            'Trending ₹${spikeAmount.toStringAsFixed(0)} higher than last month — small cuts add up',
+        body: Tone.current.savingsOpportunityNotif(
+          spikeCategory,
+          spikeAmount.toStringAsFixed(0),
+        ),
         channel: 'smart_alerts',
         channelName: 'Smart Alerts',
         primaryAction: 'View Spending',
@@ -425,8 +437,8 @@ class SmartNotificationService {
         isar,
         type: 'unusual_spending',
         title: '📈 Whoa, big day',
-        body:
-            '₹${todaySpend.toStringAsFixed(0)} spent today — that\'s ${(todaySpend / avgDaily).toStringAsFixed(1)}x your usual',
+        body: Tone.current.unusualSpendingNotif(todaySpend.toStringAsFixed(0),
+            (todaySpend / avgDaily).toStringAsFixed(1)),
         channel: 'smart_alerts',
         channelName: 'Smart Alerts',
         priority: NotificationPriority.high,
@@ -451,7 +463,7 @@ class SmartNotificationService {
         isar,
         type: 'pending_sms',
         title: '📱 $pendingCount SMS transactions found',
-        body: 'Picked up $pendingCount from your messages — quick review?',
+        body: Tone.current.pendingSmsNotif(pendingCount),
         channel: 'pending_transactions',
         channelName: 'Pending Transactions',
         primaryAction: 'Review',
@@ -500,8 +512,8 @@ class SmartNotificationService {
       isar,
       type: 'money_leak',
       title: '💧 Small spends adding up',
-      body:
-          '${top.key}: ${top.value.count} transactions, ₹${top.value.total.toStringAsFixed(0)} this month — worth a look',
+      body: Tone.current.moneyLeakNotif(
+          top.key, top.value.count, top.value.total.toStringAsFixed(0)),
       channel: 'smart_alerts',
       channelName: 'Smart Alerts',
       primaryAction: 'View Stats',
@@ -530,14 +542,11 @@ class SmartNotificationService {
       final streak =
           await isar.streaks.filter().typeEqualTo('daily_checkin').findFirst();
       final lost = streak?.longestCount ?? 0;
-      final body = lost > 3
-          ? 'Your $lost-day streak is gone — but a new one starts with one tap'
-          : 'It\'s been a while — just open the app to get back on track';
       await _emit(
         isar,
         type: 're_engage_day14',
         title: '👋 We miss you',
-        body: body,
+        body: Tone.current.reEngageMissYou(lost),
         channel: 're_engagement',
         channelName: 'Re-engagement',
         primaryAction: 'Open App',
@@ -556,30 +565,64 @@ class SmartNotificationService {
       final dailyAvg = recentExpenses / 30;
       final missed = (dailyAvg * daysSince).round();
 
-      final body = missed > 0
-          ? 'You probably spent around ₹${_formatAmount(missed)} since you last checked — quick catch-up?'
-          : 'A few days untracked — hop in before it piles up';
       await _emit(
         isar,
         type: 're_engage_day5',
         title: '📊 $daysSince days untracked',
-        body: body,
+        body: missed > 0
+            ? Tone.current.reEngageUntracked(daysSince, _formatAmount(missed))
+            : Tone.current.reEngageQuickNudge,
         channel: 're_engagement',
         channelName: 'Re-engagement',
         primaryAction: 'Catch Up',
         actionData: '{"type": "open_home"}',
       );
+    } else if (daysSince >= 3) {
+      // Day 3-4: streak just broke
+      final streak =
+          await isar.streaks.filter().typeEqualTo('daily_checkin').findFirst();
+      final lostStreak = streak?.longestCount ?? 0;
+      if (lostStreak >= 3) {
+        await _emit(
+          isar,
+          type: 're_engage_streak_lost',
+          title: '💔 $lostStreak-day streak ended',
+          body: Tone.current.streakLost(lostStreak),
+          channel: 're_engagement',
+          channelName: 'Re-engagement',
+          primaryAction: 'Start Fresh',
+          actionData: '{"type": "open_home"}',
+        );
+      } else {
+        await _emit(
+          isar,
+          type: 're_engage_day3',
+          title: '📊 A few days untracked',
+          body: Tone.current.reEngageQuickNudge,
+          channel: 're_engagement',
+          channelName: 'Re-engagement',
+          primaryAction: 'Open App',
+          actionData: '{"type": "open_home"}',
+        );
+      }
     } else {
-      // Day 2
+      // Day 2: streak at risk
+      final streak =
+          await isar.streaks.filter().typeEqualTo('daily_checkin').findFirst();
+      final currentStreak = streak?.currentCount ?? 0;
       await _emit(
         isar,
         type: 're_engage_day2',
-        title: '⚡ 5 seconds is all it takes',
-        body: 'Track today\'s spending before it slips — just one tap',
+        title: currentStreak >= 3
+            ? '🔥 $currentStreak-day streak on the line!'
+            : '⚡ 5 seconds is all it takes',
+        body: currentStreak >= 3
+            ? Tone.current.streakAtRisk(currentStreak)
+            : Tone.current.reEngageQuickNudge,
         channel: 're_engagement',
         channelName: 'Re-engagement',
-        primaryAction: 'Add Transaction',
-        actionData: '{"type": "add_transaction"}',
+        primaryAction: currentStreak >= 3 ? 'Keep Streak' : 'Add Transaction',
+        actionData: '{"type": "open_home"}',
       );
     }
   }

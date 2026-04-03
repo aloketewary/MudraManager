@@ -21,7 +21,6 @@ import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/theme/app_theme.dart';
 import 'package:mudra_manager/core/theme/theme_provider.dart';
 import 'package:mudra_manager/core/tone/tone_provider.dart';
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/utils/error_handler.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';

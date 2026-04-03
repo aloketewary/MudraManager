@@ -952,13 +952,21 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
     final filtered = _filterTransactions(sectioned);
 
     if (filtered.isEmpty) {
-      return NoDataFound(
-        message: _searchQuery.isNotEmpty ||
-                _selectedCategoryId != null ||
-                _filterStartDate != null
-            ? BuddyMessages.noFilterResults('filter')
-            : BuddyMessages.noTransactions,
-        iconData: Icons.receipt_long_outlined,
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          SizedBox(
+            height: MediaQuery.of(context).size.height * 0.5,
+            child: NoDataFound(
+              message: _searchQuery.isNotEmpty ||
+                      _selectedCategoryId != null ||
+                      _filterStartDate != null
+                  ? BuddyMessages.noFilterResults('filter')
+                  : BuddyMessages.noTransactions,
+              iconData: Icons.receipt_long_outlined,
+            ),
+          ),
+        ],
       );
     }
 

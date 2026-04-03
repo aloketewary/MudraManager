@@ -1,0 +1,322 @@
+[
+  {
+    "version": "3.4.17",
+    "build": 38,
+    "date": "2026-04-03",
+    "title": "Tone & Voice System",
+    "summary": "Your app, your personality. Mudra now talks the way you want.",
+    "icon": "comment-dots",
+    "tag": "LATEST",
+    "features": [
+      {
+        "type": "new",
+        "title": "Choose Your Voice",
+        "description": "Pick from Friendly, Professional, Motivational, or Calm. Every message, notification, and insight adapts to your style."
+      },
+      {
+        "type": "new",
+        "title": "Onboarding Tone Picker",
+        "description": "\"How should Mudra talk to you?\" — set your personality during first launch."
+      },
+      {
+        "type": "new",
+        "title": "Tone-Aware Notifications",
+        "description": "Budget alerts, bill reminders, streak warnings, spending spikes, and re-engagement nudges now speak in your chosen tone."
+      },
+      {
+        "type": "new",
+        "title": "Streak Loss Notifications",
+        "description": "Get notified when your streak is at risk (day 2) and when it breaks (day 3-4), with tone-aware messaging."
+      },
+      {
+        "type": "improved",
+        "title": "Dashboard Hero Moment",
+        "description": "\"All caught up\" message when nothing needs attention, in your chosen tone."
+      },
+      {
+        "type": "improved",
+        "title": "M3 Design Guidelines",
+        "description": "Updated UI components to follow Material 3 design standards."
+      }
+    ],
+    "fixes": [
+      "Fixed crash on Monthly Comparison screen with no data",
+      "Fixed false \"No Spend Day\" achievement on fresh install",
+      "Fixed missing onboarding text for Smart Auto Tracking",
+      "Fixed external links not opening in About screen (Android 11+)",
+      "Fixed pull-to-refresh not working on empty transaction list"
+    ]
+  },
+  {
+    "version": "3.4.13",
+    "build": 34,
+    "date": "2026-03-28",
+    "title": "Play Store Launch",
+    "summary": "Mudra Manager goes live on Google Play Store.",
+    "icon": "store",
+    "features": [
+      {
+        "type": "new",
+        "title": "Google Play Store Release",
+        "description": "Mudra Manager is now publicly available on the Play Store."
+      },
+      {
+        "type": "improved",
+        "title": "Play Store Compatibility",
+        "description": "Optimized app bundle, permissions, and metadata for Play Store guidelines."
+      }
+    ],
+    "fixes": []
+  },
+  {
+    "version": "3.4.9",
+    "build": 30,
+    "date": "2026-03-19",
+    "title": "Notification Engine & Plugin System",
+    "summary": "Smarter alerts and a more extensible architecture.",
+    "icon": "bell",
+    "features": [
+      {
+        "type": "new",
+        "title": "Smart Notification Engine",
+        "description": "9 types of context-aware alerts: budget warnings, bill reminders, spending spikes, money leaks, balance predictions, SMS pending, savings opportunities, weekly summaries, and re-engagement nudges."
+      },
+      {
+        "type": "improved",
+        "title": "Plugin System Upgrade",
+        "description": "Revamped plugin architecture for category packs, export formats, and notification plugins."
+      },
+      {
+        "type": "improved",
+        "title": "Route System",
+        "description": "Removed hardcoded routes, migrated to centralized route management."
+      }
+    ],
+    "fixes": [
+      "Fixed core notification delivery issues"
+    ]
+  },
+  {
+    "version": "3.4.0",
+    "build": 21,
+    "date": "2026-03-08",
+    "title": "New UI & Dashboard Customization",
+    "summary": "A fresh look with customizable dashboard and new screens.",
+    "icon": "palette",
+    "features": [
+      {
+        "type": "new",
+        "title": "Customizable Dashboard",
+        "description": "Choose which cards to show, reorder them, and pick your account display style — carousel, stack, or bento grid."
+      },
+      {
+        "type": "new",
+        "title": "Refreshed UI Screens",
+        "description": "New designs for transaction list, statistics, and profile screens."
+      },
+      {
+        "type": "improved",
+        "title": "Bottom Navigation Icons",
+        "description": "Updated to custom SVG icons with smooth animations."
+      }
+    ],
+    "fixes": [
+      "Fixed animation glitches on screen transitions"
+    ]
+  },
+  {
+    "version": "3.3.0",
+    "build": 20,
+    "date": "2026-03-06",
+    "title": "Plugin Marketplace & Dashboard Widgets",
+    "summary": "Extend Mudra with category packs, export plugins, and more.",
+    "icon": "puzzle-piece",
+    "features": [
+      {
+        "type": "new",
+        "title": "Plugin Marketplace",
+        "description": "Browse and install category packs (Student, Freelancer, Foodie, Traveller, etc.), export formats, and notification plugins."
+      },
+      {
+        "type": "new",
+        "title": "Dashboard Widget System",
+        "description": "Modular dashboard with pluggable widget cards — AI insights, hero moments, cash flow, budgets, goals, and more."
+      },
+      {
+        "type": "improved",
+        "title": "Plugin System Architecture",
+        "description": "Upgraded internal plugin system for better extensibility."
+      }
+    ],
+    "fixes": [
+      "Fixed various bugs across multiple screens"
+    ]
+  },
+  {
+    "version": "3.1.0",
+    "build": 17,
+    "date": "2026-02-28",
+    "title": "Stability & CI/CD",
+    "summary": "Build pipeline fixes and streak improvements.",
+    "icon": "cogs",
+    "features": [
+      {
+        "type": "improved",
+        "title": "CI/CD Pipeline",
+        "description": "Fixed GitHub Actions workflow for automated builds and releases."
+      },
+      {
+        "type": "improved",
+        "title": "Flutter Upgrade",
+        "description": "Updated to Flutter 3.41.2 with AppBarTheme compatibility fixes."
+      }
+    ],
+    "fixes": [
+      "Fixed streak calculation bugs",
+      "Fixed input border styling issues",
+      "Fixed credit card reminder calculation",
+      "Fixed Gradle hardcoded path issues"
+    ]
+  },
+  {
+    "version": "3.0.0",
+    "build": 9,
+    "date": "2026-02-20",
+    "title": "Gamification & Achievements",
+    "summary": "Building financial habits should feel rewarding.",
+    "icon": "trophy",
+    "features": [
+      {
+        "type": "new",
+        "title": "30+ Achievements",
+        "description": "Unlock badges for tracking milestones, streaks, budgets, goals, trips, exports, and more."
+      },
+      {
+        "type": "new",
+        "title": "XP & Levels",
+        "description": "Earn XP for daily check-ins, transactions, and achievements. Level up as you go."
+      },
+      {
+        "type": "new",
+        "title": "Daily Streaks",
+        "description": "Build consistency with daily check-in streaks. Visible on the dashboard with fire indicator."
+      },
+      {
+        "type": "improved",
+        "title": "Code Architecture",
+        "description": "Major refactor — restructured to feature-based architecture with proper logging."
+      }
+    ],
+    "fixes": []
+  },
+  {
+    "version": "2.2.0",
+    "build": 7,
+    "date": "2026-02-18",
+    "title": "Trips, Splits & Goals Revamp",
+    "summary": "Travel tracking and bill splitting, redesigned.",
+    "icon": "plane",
+    "features": [
+      {
+        "type": "new",
+        "title": "Trip Summary & Expense Filters",
+        "description": "View trip totals, per-person breakdowns, and filter expenses by category."
+      },
+      {
+        "type": "improved",
+        "title": "Trip & Split Enhancements",
+        "description": "Settlement tracking, participant management, and expense linking improvements."
+      },
+      {
+        "type": "improved",
+        "title": "Modernized Goal Screen",
+        "description": "Redesigned goal UI with progress visualization and milestone tracking."
+      }
+    ],
+    "fixes": [
+      "Removed unused components and old implementations"
+    ]
+  },
+  {
+    "version": "2.0.0",
+    "build": 5,
+    "date": "2026-02-17",
+    "title": "Material 3 & Foundation",
+    "summary": "Complete visual overhaul with Material 3 design system.",
+    "icon": "wand-magic-sparkles",
+    "features": [
+      {
+        "type": "new",
+        "title": "Material 3 Design",
+        "description": "Full migration to Material 3 with dynamic color theming, updated components, and modern typography."
+      },
+      {
+        "type": "new",
+        "title": "Website Launch",
+        "description": "Official website with privacy policy, terms of service, and support pages."
+      },
+      {
+        "type": "improved",
+        "title": "UI Polish",
+        "description": "Improved layouts, animations, and overall visual consistency across all screens."
+      }
+    ],
+    "fixes": []
+  },
+  {
+    "version": "1.0.0",
+    "build": 1,
+    "date": "2026-02-09",
+    "title": "Initial Release",
+    "summary": "Mudra Manager is born.",
+    "icon": "rocket",
+    "features": [
+      {
+        "type": "new",
+        "title": "Expense & Income Tracking",
+        "description": "Add, edit, and categorize transactions with multi-account support."
+      },
+      {
+        "type": "new",
+        "title": "Auto-Import from Notifications",
+        "description": "Automatically detect bank transactions from SMS and notification messages."
+      },
+      {
+        "type": "new",
+        "title": "Budgets & Goals",
+        "description": "Monthly budgets with category allocations. Savings goals with progress tracking."
+      },
+      {
+        "type": "new",
+        "title": "Trips & Bill Splitting",
+        "description": "Track travel expenses and split costs with friends."
+      },
+      {
+        "type": "new",
+        "title": "Statistics & Analytics",
+        "description": "Category breakdown, spending trends, financial health score, net worth tracking."
+      },
+      {
+        "type": "new",
+        "title": "Recurring Transactions",
+        "description": "Auto-track subscriptions and bills with due date reminders."
+      },
+      {
+        "type": "new",
+        "title": "Backup & Restore",
+        "description": "Encrypted local backups. Export to Excel and PDF."
+      },
+      {
+        "type": "new",
+        "title": "Privacy First",
+        "description": "100% offline. No cloud, no accounts, no data collection. Biometric lock support."
+      },
+      {
+        "type": "new",
+        "title": "Multi-Language",
+        "description": "English, Hindi, and Bengali support."
+      }
+    ],
+    "fixes": []
+  }
+]

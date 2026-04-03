@@ -4,8 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mudra Manager - Smart Personal Finance Tracker</title>
-    <meta name="description" content="Track expenses, manage budgets, and achieve financial goals with Mudra Manager">
+    <title>Mudra Manager — Smart Personal Finance Tracker</title>
+    <meta name="description" content="India's smartest personal finance app. Track expenses, manage budgets, split bills, and achieve financial goals — all offline, all yours.">
+    <meta name="keywords" content="expense tracker, budget app, personal finance, India, UPI, SMS tracking, split bills">
+    <meta property="og:title" content="Mudra Manager — Smart Personal Finance Tracker">
+    <meta property="og:description" content="Track expenses, manage budgets, and achieve financial goals with Mudra Manager">
+    <meta property="og:image" content="assets/logo.png">
     <link rel="icon" href="assets/logo.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -22,21 +26,9 @@
         }
     </script>
     <style>
-        @keyframes float {
-
-            0%,
-            100% {
-                transform: translateY(0px);
-            }
-
-            50% {
-                transform: translateY(-20px);
-            }
-        }
-
-        .float-animation {
-            animation: float 3s ease-in-out infinite;
-        }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-20px); } }
+        .float-animation { animation: float 3s ease-in-out infinite; }
+        html { scroll-behavior: smooth; }
     </style>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -47,61 +39,6 @@
                 current = (current + 1) % images.length;
                 images[current].classList.remove('hidden');
             }, 3000);
-
-            // Load beta testers from Google Sheets CSV
-            const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSY61RTP1EIxAhWf_RGDvDOU_Jd93ryhVO1S16fSJfblrkH7ffEM8S5Kc-tNUHq56oYy1WHXGivi7en/pub?gid=0&single=true&output=csv';
-
-            // Fallback testers to show while loading or if sheet is empty
-            const fallbackTesters = ['Abhishek Tewary', 'Priya Sharma', 'Rahul Kumar', 'Amit Singh', 'Sneha Patel'];
-
-            fetch(SHEET_URL)
-                .then(response => response.text())
-                .then(data => {
-                    const lines = data.split('\n').filter(line => line.trim());
-                    const testers = lines.slice(1).map(line => {
-                        const name = line.split(',')[0].replace(/"/g, '').trim();
-                        return name;
-                    }).filter(name => name && name.length > 0);
-
-                    // Use fallback if no testers in sheet
-                    displayTesters(testers.length > 0 ? testers : fallbackTesters);
-                })
-                .catch(() => {
-                    // Show fallback testers if fetch fails
-                    displayTesters(fallbackTesters);
-                });
-
-            function displayTesters(testers) {
-                const container = document.getElementById('beta-testers');
-                if (!testers || testers.length === 0) {
-                    container.innerHTML = '<div class="text-slate-400">Join our beta program!</div>';
-                    return;
-                }
-
-                const colors = [
-                    'from-blue-500 to-blue-600',
-                    'from-purple-500 to-purple-600',
-                    'from-pink-500 to-pink-600',
-                    'from-green-500 to-green-600',
-                    'from-orange-500 to-orange-600',
-                    'from-cyan-500 to-cyan-600',
-                    'from-indigo-500 to-indigo-600',
-                    'from-rose-500 to-rose-600'
-                ];
-
-                container.innerHTML = testers.map((name, index) => {
-                    const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-                    const color = colors[index % colors.length];
-                    return `
-                        <div class="group flex flex-col items-center">
-                            <div class="w-16 h-16 bg-gradient-to-br ${color} rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
-                                ${initials}
-                            </div>
-                            <span class="text-sm text-slate-600 mt-2 font-medium">${name}</span>
-                        </div>
-                    `;
-                }).join('');
-            }
         });
     </script>
 </head>
@@ -115,9 +52,14 @@
                     <img src="assets/logo.png" alt="Mudra Manager" class="h-12 w-12">
                     <span class="text-2xl font-bold text-slate-900">Mudra Manager</span>
                 </div>
-                <a href="#download"
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#features" class="text-slate-600 hover:text-primary transition font-medium">Features</a>
+                    <a href="whatsnew.html" class="text-slate-600 hover:text-primary transition font-medium">What's New</a>
+                    <a href="support.html" class="text-slate-600 hover:text-primary transition font-medium">Support</a>
+                </div>
+                <a href="https://play.google.com/store/apps/details?id=com.mudramanager.app" target="_blank"
                     class="bg-primary text-white px-8 py-3 rounded-xl font-semibold hover:bg-primary/90 transition-all duration-300 shadow-lg shadow-primary/30">
-                    Join Beta
+                    Download Free
                 </a>
             </div>
         </div>
@@ -127,371 +69,196 @@
     <section class="pt-32 pb-20 px-4 bg-gradient-to-b from-slate-50 to-white">
         <div class="max-w-7xl mx-auto">
             <div class="grid lg:grid-cols-2 gap-16 items-center">
-                <!-- Left Content -->
                 <div class="space-y-8">
-                    <div
-                        class="inline-flex items-center space-x-2 bg-primary/10 text-primary px-5 py-2.5 rounded-full text-sm font-semibold">
+                    <div class="inline-flex items-center space-x-2 bg-green-500/10 text-green-600 px-5 py-2.5 rounded-full text-sm font-semibold">
                         <span class="relative flex h-3 w-3">
-                            <span
-                                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
                         </span>
-                        <span>Currently in Closed Testing</span>
+                        <span>Now Live on Google Play</span>
                     </div>
 
                     <h1 class="text-6xl lg:text-7xl font-bold leading-tight text-slate-900">
                         Master Your
-                        <span
-                            class="block bg-gradient-to-r from-primary via-purple-500 to-secondary bg-clip-text text-transparent">
+                        <span class="block bg-gradient-to-r from-primary via-purple-500 to-secondary bg-clip-text text-transparent">
                             Money Journey
                         </span>
                     </h1>
 
                     <p class="text-xl text-slate-600 leading-relaxed max-w-xl">
-                        India's most intelligent personal finance app. Track expenses, manage budgets, and achieve your
-                        financial goals with ease.
+                        India's smartest personal finance app. Track expenses, manage budgets, split bills — all offline, all yours. No cloud, no tracking.
                     </p>
 
                     <div class="flex flex-col sm:flex-row gap-6 items-start">
-                        <a href="mudramanager://open" onclick="openApp(event)"
-                            class="bg-primary text-white px-10 py-4 rounded-xl font-semibold hover:bg-primary/90 transition-all duration-300 shadow-lg shadow-primary/30 text-lg">
-                            <i class="fas fa-mobile-alt mr-2"></i>Open App
+                        <a href="https://play.google.com/store/apps/details?id=com.mudramanager.app" target="_blank"
+                            class="inline-block transform hover:scale-105 transition-transform duration-300">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg"
+                                alt="Get it on Google Play" class="h-16">
                         </a>
-                        <a href="#join-testing"
-                            class="bg-slate-100 text-slate-900 px-10 py-4 rounded-xl font-semibold hover:bg-slate-200 transition-all duration-300 text-lg">
-                            Join Beta Testing
-                        </a>
-                        <!-- Uncomment when live on Play Store
-                        <a href="https://play.google.com/store/apps/details?id=com.mudramanager.app" target="_blank" class="inline-block transform hover:scale-105 transition-transform duration-300">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Get it on Google Play" class="h-16">
-                        </a>
-                        -->
-                        <div class="flex flex-col space-y-2">
-                            <div class="flex items-center space-x-2">
-                                <div class="flex -space-x-3">
-                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 border-2 border-white shadow-lg flex items-center justify-center text-white text-xs font-bold">SD</div>
-                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 border-2 border-white shadow-lg flex items-center justify-center text-white text-xs font-bold">AM</div>
-                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-pink-400 to-pink-600 border-2 border-white shadow-lg flex items-center justify-center text-white text-xs font-bold">AS</div>
-                                </div>
-                                <span class="text-sm font-semibold text-slate-700">Beta testers</span>
-                            </div>
+                        <div class="flex items-center space-x-3 text-slate-500">
+                            <i class="fas fa-shield-alt text-green-500"></i>
+                            <span class="text-sm">100% offline · No account needed · Free</span>
                         </div>
                     </div>
-
-                    <script>
-                        function openApp(e) {
-                            e.preventDefault();
-                            const deepLink = 'mudramanager://open';
-                            const playStoreLink = 'https://play.google.com/store/apps/details?id=com.mudramanager.app';
-                            
-                            // Try to open the app
-                            window.location.href = deepLink;
-                            
-                            // If app not installed, redirect to Play Store after 2 seconds
-                            setTimeout(() => {
-                                window.location.href = playStoreLink;
-                            }, 2000);
-                        }
-                    </script>
                 </div>
 
-                <!-- Right - Phone Mockup -->
+                <!-- Phone Mockup -->
                 <div class="relative flex justify-center lg:justify-end">
                     <div class="relative float-animation">
-                        <!-- Samsung S26 Ultra Frame -->
-                        <div
-                            class="relative w-[340px] h-[700px] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-[65px] p-3.5 shadow-2xl">
-                            <!-- Camera Cutout -->
-                            <div
-                                class="absolute top-7 left-1/2 -translate-x-1/2 w-28 h-8 bg-slate-950 rounded-full z-10 shadow-inner">
-                            </div>
-
-                            <!-- Screen with Carousel -->
+                        <div class="relative w-[340px] h-[700px] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-[65px] p-3.5 shadow-2xl">
+                            <div class="absolute top-7 left-1/2 -translate-x-1/2 w-28 h-8 bg-slate-950 rounded-full z-10 shadow-inner"></div>
                             <div class="relative w-full h-full bg-white rounded-[55px] overflow-hidden shadow-inner">
                                 <div id="carousel" class="w-full h-full">
-                                    <img src="assets/dashboard.jpeg" alt="Dashboard"
-                                        class="carousel-img w-full h-full object-cover">
-                                    <img src="assets/statistics.jpeg" alt="Statistics"
-                                        class="carousel-img w-full h-full object-cover hidden">
-                                    <img src="assets/activity.jpeg" alt="Activity"
-                                        class="carousel-img w-full h-full object-cover hidden">
-                                    <img src="assets/profile-section.jpeg" alt="Profile"
-                                        class="carousel-img w-full h-full object-cover hidden">
-                                    <img src="assets/utilities.jpeg" alt="Utilities"
-                                        class="carousel-img w-full h-full object-cover hidden">
+                                    <img src="assets/dashboard.jpeg" alt="Dashboard" class="carousel-img w-full h-full object-cover">
+                                    <img src="assets/statistics.jpeg" alt="Statistics" class="carousel-img w-full h-full object-cover hidden">
+                                    <img src="assets/activity.jpeg" alt="Activity" class="carousel-img w-full h-full object-cover hidden">
+                                    <img src="assets/utilities.jpeg" alt="Utilities" class="carousel-img w-full h-full object-cover hidden">
                                 </div>
                             </div>
-
-                            <!-- Side Buttons -->
                             <div class="absolute -right-1 top-36 w-1 h-14 bg-slate-700 rounded-l"></div>
                             <div class="absolute -right-1 top-52 w-1 h-20 bg-slate-700 rounded-l"></div>
                         </div>
-
-                        <!-- Floating Badges -->
-                        <div
-                            class="absolute -top-6 -right-6 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-3 rounded-2xl text-sm font-bold shadow-xl animate-bounce">
+                        <div class="absolute -top-6 -right-6 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-3 rounded-2xl text-sm font-bold shadow-xl animate-bounce">
                             <i class="fas fa-check-circle mr-2"></i>Free to Use
                         </div>
-                        <div
-                            class="absolute -bottom-6 -left-6 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-2xl text-sm font-bold shadow-xl">
-                            <i class="fas fa-lock mr-2"></i>Secure
+                        <div class="absolute -bottom-6 -left-6 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-2xl text-sm font-bold shadow-xl">
+                            <i class="fas fa-lock mr-2"></i>100% Offline
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- What's New Section -->
+    <section id="whats-new" class="py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-5xl font-bold mb-6 text-slate-900">What's New</h2>
+                <p class="text-xl text-slate-600 max-w-2xl mx-auto">The latest update makes Mudra Manager feel truly personal</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                <div class="bg-gradient-to-br from-primary/5 to-purple-500/5 p-8 rounded-3xl border border-primary/10">
+                    <div class="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-6">
+                        <i class="fas fa-comment-dots text-2xl text-primary"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-slate-900">Choose Your Voice</h3>
+                    <p class="text-slate-600">Pick how Mudra talks to you — Friendly, Professional, Motivational, or Calm. Every message adapts.</p>
+                </div>
+                <div class="bg-gradient-to-br from-amber-500/5 to-orange-500/5 p-8 rounded-3xl border border-amber-500/10">
+                    <div class="w-14 h-14 bg-amber-500/10 rounded-2xl flex items-center justify-center mb-6">
+                        <i class="fas fa-bell text-2xl text-amber-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-slate-900">Smart Notifications</h3>
+                    <p class="text-slate-600">Context-aware alerts for budgets, bills, streaks, and spending spikes — in your chosen tone.</p>
+                </div>
+                <div class="bg-gradient-to-br from-green-500/5 to-emerald-500/5 p-8 rounded-3xl border border-green-500/10">
+                    <div class="w-14 h-14 bg-green-500/10 rounded-2xl flex items-center justify-center mb-6">
+                        <i class="fas fa-trophy text-2xl text-green-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-slate-900">Streaks & Achievements</h3>
+                    <p class="text-slate-600">Build daily tracking habits with streaks, XP, levels, and 30+ unlockable achievements.</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Features Section -->
-    <section class="py-24 bg-slate-50">
+    <section id="features" class="py-24 bg-slate-50">
         <div class="max-w-7xl mx-auto px-4">
             <div class="text-center mb-20">
                 <h2 class="text-5xl font-bold mb-6 text-slate-900">Everything You Need</h2>
-                <p class="text-xl text-slate-600 max-w-2xl mx-auto">Powerful features designed to make financial
-                    management effortless</p>
+                <p class="text-xl text-slate-600 max-w-2xl mx-auto">Powerful features designed to make financial management effortless</p>
             </div>
-
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Feature Card 1 -->
-                <div
-                    class="group relative bg-white p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-slate-100 hover:border-primary/20 hover:-translate-y-2">
-                    <div
-                        class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity">
+                <div class="group relative bg-white p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-slate-100 hover:border-primary/20 hover:-translate-y-2">
+                    <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-blue-500/30">
+                        <i class="fas fa-chart-line text-3xl text-white"></i>
                     </div>
-                    <div class="relative">
-                        <div
-                            class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-blue-500/30">
-                            <i class="fas fa-chart-line text-3xl text-white"></i>
-                        </div>
-                        <h3 class="text-2xl font-bold mb-4 text-slate-900">Smart Dashboard</h3>
-                        <p class="text-slate-600 leading-relaxed">Real-time financial overview with beautiful charts and
-                            insights at your fingertips</p>
-                    </div>
+                    <h3 class="text-2xl font-bold mb-4 text-slate-900">Smart Dashboard</h3>
+                    <p class="text-slate-600 leading-relaxed">Real-time financial overview with AI insights, hero moments, and customizable cards</p>
                 </div>
-
-                <!-- Feature Card 2 -->
-                <div
-                    class="group relative bg-white p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-slate-100 hover:border-primary/20 hover:-translate-y-2">
-                    <div
-                        class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity">
+                <div class="group relative bg-white p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-slate-100 hover:border-primary/20 hover:-translate-y-2">
+                    <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-purple-500/30">
+                        <i class="fas fa-bell text-3xl text-white"></i>
                     </div>
-                    <div class="relative">
-                        <div
-                            class="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-purple-500/30">
-                            <i class="fas fa-sms text-3xl text-white"></i>
-                        </div>
-                        <h3 class="text-2xl font-bold mb-4 text-slate-900">SMS Auto-Import</h3>
-                        <p class="text-slate-600 leading-relaxed">Automatically detect and parse transactions from your
-                            bank SMS messages</p>
-                    </div>
+                    <h3 class="text-2xl font-bold mb-4 text-slate-900">Auto-Import</h3>
+                    <p class="text-slate-600 leading-relaxed">Automatically detect and import transactions from bank notifications — zero effort</p>
                 </div>
-
-                <!-- Feature Card 3 -->
-                <div
-                    class="group relative bg-white p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-slate-100 hover:border-primary/20 hover:-translate-y-2">
-                    <div
-                        class="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity">
+                <div class="group relative bg-white p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-slate-100 hover:border-primary/20 hover:-translate-y-2">
+                    <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-green-500/30">
+                        <i class="fas fa-wallet text-3xl text-white"></i>
                     </div>
-                    <div class="relative">
-                        <div
-                            class="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-green-500/30">
-                            <i class="fas fa-wallet text-3xl text-white"></i>
-                        </div>
-                        <h3 class="text-2xl font-bold mb-4 text-slate-900">Budget Management</h3>
-                        <p class="text-slate-600 leading-relaxed">Set monthly budgets and track spending with
-                            intelligent alerts and insights</p>
-                    </div>
+                    <h3 class="text-2xl font-bold mb-4 text-slate-900">Budget Management</h3>
+                    <p class="text-slate-600 leading-relaxed">Set monthly budgets with category allocations and intelligent overspending alerts</p>
                 </div>
-
-                <!-- Feature Card 4 -->
-                <div
-                    class="group relative bg-white p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-slate-100 hover:border-primary/20 hover:-translate-y-2">
-                    <div
-                        class="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity">
+                <div class="group relative bg-white p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-slate-100 hover:border-primary/20 hover:-translate-y-2">
+                    <div class="w-16 h-16 bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-amber-500/30">
+                        <i class="fas fa-bullseye text-3xl text-white"></i>
                     </div>
-                    <div class="relative">
-                        <div
-                            class="w-16 h-16 bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-amber-500/30">
-                            <i class="fas fa-bullseye text-3xl text-white"></i>
-                        </div>
-                        <h3 class="text-2xl font-bold mb-4 text-slate-900">Goals & Savings</h3>
-                        <p class="text-slate-600 leading-relaxed">Set financial goals and track your progress towards
-                            achieving them</p>
-                    </div>
+                    <h3 class="text-2xl font-bold mb-4 text-slate-900">Goals & Savings</h3>
+                    <p class="text-slate-600 leading-relaxed">Set financial goals and track your progress with visual milestones</p>
                 </div>
-
-                <!-- Feature Card 5 -->
-                <div
-                    class="group relative bg-white p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-slate-100 hover:border-primary/20 hover:-translate-y-2">
-                    <div
-                        class="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-transparent rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity">
+                <div class="group relative bg-white p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-slate-100 hover:border-primary/20 hover:-translate-y-2">
+                    <div class="w-16 h-16 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-cyan-500/30">
+                        <i class="fas fa-plane text-3xl text-white"></i>
                     </div>
-                    <div class="relative">
-                        <div
-                            class="w-16 h-16 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-cyan-500/30">
-                            <i class="fas fa-plane text-3xl text-white"></i>
-                        </div>
-                        <h3 class="text-2xl font-bold mb-4 text-slate-900">Travel Expenses</h3>
-                        <p class="text-slate-600 leading-relaxed">Track and manage your travel expenses separately with
-                            dedicated categories</p>
-                    </div>
+                    <h3 class="text-2xl font-bold mb-4 text-slate-900">Trips & Splits</h3>
+                    <p class="text-slate-600 leading-relaxed">Track travel expenses and split bills with friends — settlements made easy</p>
                 </div>
-
-                <!-- Feature Card 6 -->
-                <div
-                    class="group relative bg-white p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-slate-100 hover:border-primary/20 hover:-translate-y-2">
-                    <div
-                        class="absolute inset-0 bg-gradient-to-br from-rose-500/5 to-transparent rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity">
+                <div class="group relative bg-white p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-slate-100 hover:border-primary/20 hover:-translate-y-2">
+                    <div class="w-16 h-16 bg-gradient-to-br from-pink-500 to-pink-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-pink-500/30">
+                        <i class="fas fa-chart-pie text-3xl text-white"></i>
                     </div>
-                    <div class="relative">
-                        <div
-                            class="w-16 h-16 bg-gradient-to-br from-rose-500 to-rose-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-rose-500/30">
-                            <i class="fas fa-users text-3xl text-white"></i>
-                        </div>
-                        <h3 class="text-2xl font-bold mb-4 text-slate-900">Split Bills</h3>
-                        <p class="text-slate-600 leading-relaxed">Easily split expenses with friends and family, track
-                            who owes what</p>
-                    </div>
+                    <h3 class="text-2xl font-bold mb-4 text-slate-900">Analytics & Reports</h3>
+                    <p class="text-slate-600 leading-relaxed">Spending personality, financial health score, category trends, and exportable reports</p>
                 </div>
-
-                <!-- Feature Card 7 -->
-                <div
-                    class="group relative bg-white p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-slate-100 hover:border-primary/20 hover:-translate-y-2">
-                    <div
-                        class="absolute inset-0 bg-gradient-to-br from-violet-500/5 to-transparent rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity">
+                <div class="group relative bg-white p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-slate-100 hover:border-primary/20 hover:-translate-y-2">
+                    <div class="w-16 h-16 bg-gradient-to-br from-rose-500 to-rose-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-rose-500/30">
+                        <i class="fas fa-redo text-3xl text-white"></i>
                     </div>
-                    <div class="relative">
-                        <div
-                            class="w-16 h-16 bg-gradient-to-br from-violet-500 to-violet-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-violet-500/30">
-                            <i class="fas fa-redo text-3xl text-white"></i>
-                        </div>
-                        <h3 class="text-2xl font-bold mb-4 text-slate-900">Recurring Transactions</h3>
-                        <p class="text-slate-600 leading-relaxed">Automate recurring bills and subscriptions for
-                            hassle-free tracking</p>
-                    </div>
+                    <h3 class="text-2xl font-bold mb-4 text-slate-900">Recurring Bills</h3>
+                    <p class="text-slate-600 leading-relaxed">Never miss a payment — auto-track subscriptions and get reminders before due dates</p>
                 </div>
-
-                <!-- Feature Card 8 -->
-                <div
-                    class="group relative bg-white p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-slate-100 hover:border-primary/20 hover:-translate-y-2">
-                    <div
-                        class="absolute inset-0 bg-gradient-to-br from-pink-500/5 to-transparent rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity">
+                <div class="group relative bg-white p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-slate-100 hover:border-primary/20 hover:-translate-y-2">
+                    <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-indigo-500/30">
+                        <i class="fas fa-shield-alt text-3xl text-white"></i>
                     </div>
-                    <div class="relative">
-                        <div
-                            class="w-16 h-16 bg-gradient-to-br from-pink-500 to-pink-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-pink-500/30">
-                            <i class="fas fa-chart-pie text-3xl text-white"></i>
-                        </div>
-                        <h3 class="text-2xl font-bold mb-4 text-slate-900">Analytics & Reports</h3>
-                        <p class="text-slate-600 leading-relaxed">Visualize spending patterns with interactive charts
-                            and detailed reports</p>
-                    </div>
+                    <h3 class="text-2xl font-bold mb-4 text-slate-900">Privacy First</h3>
+                    <p class="text-slate-600 leading-relaxed">Everything stays on your device. No cloud, no accounts, no data collection. Encrypted local storage.</p>
                 </div>
-
-                <!-- Feature Card 9 -->
-                <div
-                    class="group relative bg-white p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-slate-100 hover:border-primary/20 hover:-translate-y-2">
-                    <div
-                        class="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity">
+                <div class="group relative bg-white p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-slate-100 hover:border-primary/20 hover:-translate-y-2">
+                    <div class="w-16 h-16 bg-gradient-to-br from-teal-500 to-teal-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-teal-500/30">
+                        <i class="fas fa-language text-3xl text-white"></i>
                     </div>
-                    <div class="relative">
-                        <div
-                            class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-indigo-500/30">
-                            <i class="fas fa-shield-alt text-3xl text-white"></i>
-                        </div>
-                        <h3 class="text-2xl font-bold mb-4 text-slate-900">Bank-Level Security</h3>
-                        <p class="text-slate-600 leading-relaxed">Local-first storage with optional biometric
-                            authentication for peace of mind</p>
-                    </div>
-                </div>
-
-                <!-- Feature Card 10 -->
-                <div
-                    class="group relative bg-white p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-slate-100 hover:border-primary/20 hover:-translate-y-2">
-                    <div
-                        class="absolute inset-0 bg-gradient-to-br from-teal-500/5 to-transparent rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity">
-                    </div>
-                    <div class="relative">
-                        <div
-                            class="w-16 h-16 bg-gradient-to-br from-teal-500 to-teal-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-teal-500/30">
-                            <i class="fas fa-language text-3xl text-white"></i>
-                        </div>
-                        <h3 class="text-2xl font-bold mb-4 text-slate-900">Multi-Language</h3>
-                        <p class="text-slate-600 leading-relaxed">Full support for multiple languages to serve users
-                            across India</p>
-                    </div>
-                </div>
-
-                <!-- Feature Card 11 -->
-                <div
-                    class="group relative bg-white p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-slate-100 hover:border-primary/20 hover:-translate-y-2">
-                    <div
-                        class="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity">
-                    </div>
-                    <div class="relative">
-                        <div
-                            class="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-orange-500/30">
-                            <i class="fas fa-file-export text-3xl text-white"></i>
-                        </div>
-                        <h3 class="text-2xl font-bold mb-4 text-slate-900">Export & Share</h3>
-                        <p class="text-slate-600 leading-relaxed">Export your financial data to Excel or PDF formats for
-                            easy sharing</p>
-                    </div>
+                    <h3 class="text-2xl font-bold mb-4 text-slate-900">Multi-Language</h3>
+                    <p class="text-slate-600 leading-relaxed">English, Hindi, and Bengali — with more languages coming soon</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Stats Section -->
-    <section
-        class="py-20 bg-gradient-to-r from-primary via-purple-600 to-secondary text-white relative overflow-hidden">
-        <div
-            class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMC41IiBvcGFjaXR5PSIwLjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-20">
-        </div>
+    <section class="py-20 bg-gradient-to-r from-primary via-purple-600 to-secondary text-white relative overflow-hidden">
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMC41IiBvcGFjaXR5PSIwLjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-20"></div>
         <div class="max-w-7xl mx-auto px-4 relative">
-            <div class="grid md:grid-cols-3 gap-12 text-center">
+            <div class="grid md:grid-cols-4 gap-12 text-center">
                 <div class="space-y-2">
-                    <div class="text-6xl font-bold">Beta</div>
-                    <div class="text-xl opacity-90">Testing Phase</div>
+                    <div class="text-5xl font-bold">15+</div>
+                    <div class="text-lg opacity-90">Core Features</div>
                 </div>
                 <div class="space-y-2">
-                    <div class="text-6xl font-bold">11+</div>
-                    <div class="text-xl opacity-90">Features</div>
+                    <div class="text-5xl font-bold">30+</div>
+                    <div class="text-lg opacity-90">Achievements</div>
                 </div>
                 <div class="space-y-2">
-                    <div class="text-6xl font-bold">🇮🇳</div>
-                    <div class="text-xl opacity-90">Made in India</div>
-                </div>
-                <!-- Uncomment when live
-                <div class="space-y-2">
-                    <div class="text-6xl font-bold">10K+</div>
-                    <div class="text-xl opacity-90">Active Users</div>
+                    <div class="text-5xl font-bold">4</div>
+                    <div class="text-lg opacity-90">Tone Personalities</div>
                 </div>
                 <div class="space-y-2">
-                    <div class="text-6xl font-bold">1M+</div>
-                    <div class="text-xl opacity-90">Transactions</div>
+                    <div class="text-5xl font-bold">🇮🇳</div>
+                    <div class="text-lg opacity-90">Made in India</div>
                 </div>
-                <div class="space-y-2">
-                    <div class="text-6xl font-bold">4.8★</div>
-                    <div class="text-xl opacity-90">App Rating</div>
-                </div>
-                -->
-            </div>
-        </div>
-    </section>
-
-    <!-- Beta Testers Section -->
-    <section class="py-24 bg-white">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="text-center mb-16">
-                <h2 class="text-5xl font-bold mb-6 text-slate-900">Our Beta Testers</h2>
-                <p class="text-xl text-slate-600 max-w-2xl mx-auto">Thank you to our amazing beta testers helping shape
-                    Mudra Manager</p>
-            </div>
-
-            <div id="beta-testers" class="flex flex-wrap justify-center gap-4">
-                <!-- Testers will be loaded here -->
-                <div class="text-slate-400">Loading testers...</div>
             </div>
         </div>
     </section>
@@ -499,106 +266,38 @@
     <!-- Download CTA -->
     <section id="download" class="py-24 bg-white">
         <div class="max-w-4xl mx-auto px-4 text-center">
-            <h2 class="text-5xl font-bold mb-6 text-slate-900">Get Early Access</h2>
-            <p class="text-xl text-slate-600 mb-12 max-w-2xl mx-auto">Join our beta program and be the first to
-                experience Mudra Manager. Get exclusive early access before the public launch.</p>
+            <h2 class="text-5xl font-bold mb-6 text-slate-900">Start Your Financial Journey</h2>
+            <p class="text-xl text-slate-600 mb-12 max-w-2xl mx-auto">Free to download. No account needed. Your data never leaves your device.</p>
 
-            <!-- Email Signup Form -->
-            <div class="max-w-md mx-auto mb-8">
-                <form id="beta-form" class="flex flex-col gap-4">
-                    <input type="text" name="name" required placeholder="Your name"
-                        class="px-6 py-4 rounded-xl border-2 border-slate-200 focus:border-primary focus:outline-none text-lg">
-                    <input type="email" name="email" required placeholder="Your email"
-                        class="px-6 py-4 rounded-xl border-2 border-slate-200 focus:border-primary focus:outline-none text-lg">
-                    <button type="submit"
-                        class="bg-primary text-white px-8 py-4 rounded-xl font-semibold hover:bg-primary/90 transition-all duration-300 shadow-lg shadow-primary/30">
-                        <i class="fas fa-rocket mr-2"></i>Join Waitlist
-                    </button>
-                </form>
-                <p id="form-message" class="text-sm mt-4 hidden"></p>
-                <p class="text-sm text-slate-500 mt-4">✨ Get beta access + early bird benefits</p>
-            </div>
+            <a href="https://play.google.com/store/apps/details?id=com.mudramanager.app" target="_blank"
+                class="inline-block transform hover:scale-105 transition-transform duration-300 mb-12">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg"
+                    alt="Get it on Google Play" class="h-20 mx-auto">
+            </a>
 
-            <script>
-                document.getElementById('beta-form').addEventListener('submit', async function(e) {
-                    e.preventDefault();
-                    const form = e.target;
-                    const message = document.getElementById('form-message');
-                    const button = form.querySelector('button');
-                    
-                    button.disabled = true;
-                    button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Joining...';
-                    
-                    const formData = {
-                        name: form.name.value,
-                        email: form.email.value
-                    };
-                    
-                    // Replace with your Google Apps Script Web App URL
-                    const SCRIPT_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL';
-                    
-                    try {
-                        const response = await fetch(SCRIPT_URL, {
-                            method: 'POST',
-                            body: JSON.stringify(formData)
-                        });
-                        
-                        const result = await response.json();
-                        
-                        if (result.status === 'success') {
-                            message.className = 'text-sm mt-4 text-green-600 font-semibold';
-                            message.textContent = '🎉 Welcome to the beta program!';
-                            form.reset();
-                            
-                            // Reload testers list after 1 second
-                            setTimeout(() => location.reload(), 1500);
-                        } else {
-                            throw new Error(result.message);
-                        }
-                    } catch (error) {
-                        message.className = 'text-sm mt-4 text-red-600';
-                        message.textContent = 'Error: ' + error.message;
-                    } finally {
-                        message.classList.remove('hidden');
-                        button.disabled = false;
-                        button.innerHTML = '<i class="fas fa-rocket mr-2"></i>Join Waitlist';
-                    }
-                });
-            </script>
-
-            <div class="grid md:grid-cols-3 gap-6 max-w-3xl mx-auto mt-12">
+            <div class="grid md:grid-cols-3 gap-6 max-w-3xl mx-auto">
                 <div class="bg-slate-50 p-6 rounded-2xl">
-                    <div
-                        class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-3 mx-auto">
-                        <i class="fas fa-vial text-xl text-white"></i>
-                    </div>
-                    <h3 class="font-bold text-slate-900 mb-2">Beta Access</h3>
-                    <p class="text-sm text-slate-600">Test features before anyone else</p>
-                </div>
-                <div class="bg-slate-50 p-6 rounded-2xl">
-                    <div
-                        class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mb-3 mx-auto">
+                    <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-3 mx-auto">
                         <i class="fas fa-bolt text-xl text-white"></i>
                     </div>
-                    <h3 class="font-bold text-slate-900 mb-2">Early Launch</h3>
-                    <p class="text-sm text-slate-600">First to get the public release</p>
+                    <h3 class="font-bold text-slate-900 mb-2">Quick Setup</h3>
+                    <p class="text-sm text-slate-600">Name, account, tone — you're tracking in under a minute</p>
                 </div>
                 <div class="bg-slate-50 p-6 rounded-2xl">
-                    <div
-                        class="w-12 h-12 bg-gradient-to-br from-pink-500 to-pink-600 rounded-xl flex items-center justify-center mb-3 mx-auto">
+                    <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mb-3 mx-auto">
+                        <i class="fas fa-lock text-xl text-white"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-900 mb-2">Zero Data Collection</h3>
+                    <p class="text-sm text-slate-600">No servers, no cloud, no tracking — ever</p>
+                </div>
+                <div class="bg-slate-50 p-6 rounded-2xl">
+                    <div class="w-12 h-12 bg-gradient-to-br from-pink-500 to-pink-600 rounded-xl flex items-center justify-center mb-3 mx-auto">
                         <i class="fas fa-gift text-xl text-white"></i>
                     </div>
-                    <h3 class="font-bold text-slate-900 mb-2">Exclusive Perks</h3>
-                    <p class="text-sm text-slate-600">Special features for early adopters</p>
+                    <h3 class="font-bold text-slate-900 mb-2">Free Forever</h3>
+                    <p class="text-sm text-slate-600">Core features are free. Pro unlocks advanced analytics.</p>
                 </div>
             </div>
-
-            <p class="text-sm text-slate-500 mt-8">Coming soon to Google Play Store</p>
-            <!-- Uncomment when live on Play Store
-            <a href="https://play.google.com/store/apps/details?id=com.mudramanager.app" target="_blank" class="inline-block transform hover:scale-105 transition-transform duration-300">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Get it on Google Play" class="h-20 mx-auto">
-            </a>
-            -->
         </div>
     </section>
 
@@ -611,24 +310,12 @@
                         <img src="assets/logo.png" alt="Mudra Manager" class="h-12 w-12">
                         <span class="text-2xl font-bold">Mudra Manager</span>
                     </div>
-                    <p class="text-slate-400 text-lg mb-6">Your trusted personal finance companion. Track, manage, and
-                        grow your wealth with ease.</p>
-                    <div class="flex space-x-4">
-                        <a href="#"
-                            class="w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center hover:bg-primary transition"><i
-                                class="fab fa-instagram"></i></a>
-                        <a href="#"
-                            class="w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center hover:bg-primary transition"><i
-                                class="fab fa-twitter"></i></a>
-                        <a href="#"
-                            class="w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center hover:bg-primary transition"><i
-                                class="fas fa-envelope"></i></a>
-                    </div>
+                    <p class="text-slate-400 text-lg mb-6">Your trusted personal finance companion. Track, manage, and grow your wealth — privately.</p>
                 </div>
                 <div>
                     <h3 class="font-bold text-lg mb-4">Quick Links</h3>
                     <ul class="space-y-3 text-slate-400">
-                        <li><a href="features.html" class="hover:text-white transition">Features</a></li>
+                        <li><a href="#features" class="hover:text-white transition">Features</a></li>
                         <li><a href="privacy.html" class="hover:text-white transition">Privacy Policy</a></li>
                         <li><a href="terms.html" class="hover:text-white transition">Terms of Service</a></li>
                         <li><a href="support.html" class="hover:text-white transition">Support</a></li>
@@ -637,13 +324,13 @@
                 <div>
                     <h3 class="font-bold text-lg mb-4">Contact</h3>
                     <ul class="space-y-3 text-slate-400">
-                        <li>support@mudramanager.com</li>
+                        <li><a href="mailto:support@mudramanager.com" class="hover:text-white transition">support@mudramanager.com</a></li>
                         <li>Made with ❤️ in India</li>
                     </ul>
                 </div>
             </div>
             <div class="border-t border-slate-800 pt-8 text-center text-slate-400">
-                <p>&copy; 2025 - 2026 Mudra Manager. All rights reserved.</p>
+                <p>&copy; 2025 Mudra Manager. All rights reserved.</p>
             </div>
         </div>
     </footer>

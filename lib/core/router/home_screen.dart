@@ -436,8 +436,7 @@ class HomePageState extends ConsumerState<HomePage>
     AsyncValue<UserProfile?> profileAsync,
     int selectedIndex,
   ) {
-    final greeting =
-        ref.watch(greetingProvider); // Changed: now returns String directly
+    final toneGreeting = ref.watch(greetingProvider);
     final textTheme = Theme.of(context).textTheme;
     final color = Theme.of(context).colorScheme;
     final notificationService = ref.watch(notificationRecordServiceProvider);
@@ -493,7 +492,7 @@ class HomePageState extends ConsumerState<HomePage>
                     children: [
                       profileAsync.when(
                         data: (profile) => AnimatedGreeting(
-                          greeting: '${ctxt.translate(greeting)},',
+                          greeting: '${ctxt.translate(toneGreeting)},',
                           name: profile?.name ?? 'Awesome User',
                           greetingStyle: textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w400,
@@ -503,14 +502,14 @@ class HomePageState extends ConsumerState<HomePage>
                           ),
                         ),
                         loading: () => AdaptiveText(
-                          '${ctxt.translate(greeting)},',
+                          '${ctxt.translate(toneGreeting)},',
                           style: textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w400,
                           ),
                           maxLines: 1,
                         ),
                         error: (_, __) => AdaptiveText(
-                          '${ctxt.translate(greeting)},',
+                          '${ctxt.translate(toneGreeting)},',
                           style: textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w400,
                           ),

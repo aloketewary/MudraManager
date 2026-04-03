@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'dart:io' show Platform;
 
@@ -46,7 +47,10 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
     super.initState();
     Future.delayed(const Duration(milliseconds: 500), _performDailyCheckIn);
     Future.delayed(const Duration(milliseconds: 1000), () {
-      if (mounted) ref.read(reconciliationServiceProvider).patchUncategorizedTransactions();
+      if (mounted)
+        ref
+            .read(reconciliationServiceProvider)
+            .patchUncategorizedTransactions();
     });
   }
 
@@ -68,7 +72,16 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
       final result = await service.updateDailyCheckIn();
       if (result != null && mounted) {
         await prefs.setLastDailyCheckIn(now);
-        SnackbarService.success('🔥 $result');
+        final streakCount = int.tryParse(
+          RegExp(r'Day (\d+)').firstMatch(result)?.group(1) ?? '',
+        );
+        if (streakCount != null && streakCount > 1) {
+          SnackbarService.success(
+            '🔥 ${Tone.current.streakMessage(streakCount)}',
+          );
+        } else {
+          SnackbarService.success('🔥 $result');
+        }
         log.i('✅ Daily check-in completed');
       }
     }
@@ -483,7 +496,8 @@ class _AutoImportBanner extends ConsumerWidget {
           padding: EdgeInsets.all(spacing.cardInner),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(spacing.radiusMedium),
-            color: color.tertiaryContainer.withValues(alpha: isDark ? 0.4 : 0.3),
+            color:
+                color.tertiaryContainer.withValues(alpha: isDark ? 0.4 : 0.3),
             border: Border.all(color: accent.withValues(alpha: 0.2)),
           ),
           child: Row(
@@ -494,8 +508,7 @@ class _AutoImportBanner extends ConsumerWidget {
                   color: accent.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(spacing.radiusSmall),
                 ),
-                child:
-                    Icon(LucideIcons.bellRing, color: accent, size: 18),
+                child: Icon(LucideIcons.bellRing, color: accent, size: 18),
               ),
               SizedBox(width: spacing.elementGap + 4),
               Expanded(
@@ -519,8 +532,7 @@ class _AutoImportBanner extends ConsumerWidget {
                 ),
               ),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: accent.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(spacing.radiusSmall),
@@ -567,7 +579,8 @@ class _AutoImportBanner extends ConsumerWidget {
           ),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(spacing.radiusMedium),
-            color: color.tertiaryContainer.withValues(alpha: isDark ? 0.4 : 0.3),
+            color:
+                color.tertiaryContainer.withValues(alpha: isDark ? 0.4 : 0.3),
             border: Border.all(color: accent.withValues(alpha: 0.25)),
           ),
           child: Row(
@@ -610,7 +623,10 @@ class _AutoImportBanner extends ConsumerWidget {
   }
 
   Widget _buildSetupBanner(
-      BuildContext context, WidgetRef ref, AppSpacing spacing) {
+    BuildContext context,
+    WidgetRef ref,
+    AppSpacing spacing,
+  ) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -650,8 +666,7 @@ class _AutoImportBanner extends ConsumerWidget {
                     color: accent.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(spacing.radiusMedium),
                   ),
-                  child:
-                      Icon(LucideIcons.bellRing, color: accent, size: 20),
+                  child: Icon(LucideIcons.bellRing, color: accent, size: 20),
                 ),
                 SizedBox(width: spacing.cardInner),
                 Expanded(

@@ -83,21 +83,6 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
   }
 
 // Group categories by parent
-  Map<Category?, List<Category>> _groupCategoriesByParent(
-    List<Category> categories,
-  ) {
-    final Map<Category?, List<Category>> grouped = {};
-
-    for (final cat in categories) {
-      final parent = cat.parentCategory.value;
-      if (!grouped.containsKey(parent)) {
-        grouped[parent] = [];
-      }
-      grouped[parent]!.add(cat);
-    }
-
-    return grouped;
-  }
 
   // Get all parent categories
   List<Category> _getParentCategories(List<Category> categories) {

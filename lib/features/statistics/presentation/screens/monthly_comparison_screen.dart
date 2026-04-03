@@ -718,7 +718,7 @@ class _MonthlyComparisonScreenState
                 gridData: FlGridData(
                   show: true,
                   drawVerticalLine: false,
-                  horizontalInterval: maxValue / 5,
+                  horizontalInterval: maxValue > 0 ? maxValue / 5 : 1,
                   getDrawingHorizontalLine: (value) {
                     return FlLine(
                       color: colorScheme.outlineVariant.withValues(alpha: 0.3),

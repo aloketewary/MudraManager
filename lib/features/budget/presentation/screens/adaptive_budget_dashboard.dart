@@ -362,7 +362,8 @@ class _AdaptiveBudgetDashboardState
             decoration: BoxDecoration(
               color: color.primaryContainer,
               borderRadius: BorderRadius.horizontal(
-                  left: Radius.circular(spacing.radiusMedium)),
+                left: Radius.circular(spacing.radiusMedium),
+              ),
               border: Border.all(
                 color: color.outlineVariant.withValues(alpha: 0.5),
                 width: 1,
@@ -411,7 +412,8 @@ class _AdaptiveBudgetDashboardState
             decoration: BoxDecoration(
               color: color.tertiaryContainer,
               borderRadius: BorderRadius.horizontal(
-                  right: Radius.circular(spacing.radiusMedium)),
+                right: Radius.circular(spacing.radiusMedium),
+              ),
               border: Border.all(
                 color: color.tertiary.withValues(alpha: 0.3),
                 width: 1,
@@ -467,8 +469,6 @@ class _AdaptiveBudgetDashboardState
   ) {
     final overage = projected - total;
     final day = DateTime.now().day;
-    final daysInMonth =
-        DateTime(DateTime.now().year, DateTime.now().month + 1, 0).day;
     final projectedDay = (day * total / projected).round();
 
     return Container(
