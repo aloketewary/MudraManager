@@ -21,6 +21,9 @@ class Trip {
 
   double? budget;
 
+  /// Currency code for trip budget/expenses. Null = base currency.
+  String? currencyCode;
+
   /// true = travel trip, false = split-only group
   late bool isTrip;
 
@@ -50,9 +53,13 @@ class TripParticipant {
   String? phone;
   String? email;
 
+  /// True if this participant is the app owner (the user).
+  /// Used to identify the user's share for analytics.
+  bool isOwner = false;
+
   TripParticipant();
 
-  TripParticipant.create({required this.name, this.phone, this.email});
+  TripParticipant.create({required this.name, this.phone, this.email, this.isOwner = false});
 }
 
 @collection
@@ -60,6 +67,16 @@ class SplitExpense {
   Id id = Isar.autoIncrement;
 
   late double amount;
+
+  /// Currency code for this expense. Null = base currency.
+  String? currencyCode;
+
+  /// Amount converted to base currency at time of entry.
+  double? convertedAmount;
+
+  /// Exchange rate snapshot used.
+  double? rateUsed;
+
   String? description;
   late DateTime date;
 
@@ -103,6 +120,25 @@ class TripTransaction {
   /// Returns the amount from whichever source is linked.
   double? get resolvedAmount =>
       transaction.value?.amount ?? splitExpense.value?.amount;
+
+  /// Returns the amount converted to a target currency.
+  /// For trip display: if the transaction is in a different currency,
+  /// falls back to convertedAmount (base) as best approximation.
+  double? resolvedAmountIn(String? targetCurrency) {
+    final txn = transaction.value;
+    if (txn != null) {
+      // Same currency or both null (base) → use raw amount
+      if (txn.currencyCode == targetCurrency) return txn.amount;
+      // Different currency → use base amount as approximation
+      return txn.baseAmount;
+    }
+    final split = splitExpense.value;
+    if (split != null) {
+      if (split.currencyCode == targetCurrency) return split.amount;
+      return split.convertedAmount ?? split.amount;
+    }
+    return null;
+  }
 
   /// Returns the description from whichever source is linked.
   String? get resolvedDescription =>

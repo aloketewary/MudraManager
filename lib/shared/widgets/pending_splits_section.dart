@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -146,7 +148,7 @@ class PendingSplitsSection extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              '₹${txn.amount.toStringAsFixed(0)}',
+                              '${formatCurrency(txn.amount, decimals: 0)}',
                               style: textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: color.primary,

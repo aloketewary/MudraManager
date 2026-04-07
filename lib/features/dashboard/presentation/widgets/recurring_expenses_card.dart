@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -65,7 +67,7 @@ class RecurringExpensesCard extends ConsumerWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '₹${monthlyTotal.toStringAsFixed(0)}/month • ${expenses.length} bills',
+                        '${formatCurrency(monthlyTotal, decimals: 0)}/month • ${expenses.length} bills',
                         style: textTheme.bodySmall?.copyWith(
                           color: color.onSurfaceVariant,
                         ),

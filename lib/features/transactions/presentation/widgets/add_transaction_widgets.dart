@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -838,7 +840,7 @@ class QuickAmounts extends ConsumerWidget {
       children: chips.map((amt) {
         return ActionChip(
           label: Text(
-            '₹$amt',
+            formatCurrency(amt.toDouble(), decimals: 0),
             style: textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w600),
           ),
           onPressed: () {

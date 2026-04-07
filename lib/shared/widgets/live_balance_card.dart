@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:flutter/material.dart';
 import 'package:mudra_manager/core/services/settlement_service.dart';
 
@@ -122,7 +124,7 @@ class LiveBalanceCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        '${pb.isOwed ? '+' : '-'}₹${pb.amount.toStringAsFixed(0)}',
+                        '${pb.isOwed ? '+' : '-'}${formatCurrency(pb.amount, decimals: 0)}',
                         style: textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: pb.isOwed ? color.primary : color.error,

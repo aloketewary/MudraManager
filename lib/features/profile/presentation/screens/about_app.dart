@@ -354,7 +354,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
                   shape: BoxShape.circle,
                 ),
                 child: Image.asset(
-                  'assets/logo/rupee.png',
+                  'assets/logo/logo.png',
                   width: 56,
                   height: 56,
                 ),

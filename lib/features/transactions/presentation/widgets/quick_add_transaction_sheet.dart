@@ -1,3 +1,5 @@
+import 'package:mudra_manager/shared/widgets/currency_badge.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -128,10 +130,9 @@ class _QuickAddTransactionSheetState
                 color: accentColor,
               ),
               decoration: InputDecoration(
-                prefixText: '₹ ',
-                prefixStyle: textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.w900,
-                  color: accentColor.withValues(alpha: 0.6),
+                prefix: Padding(
+                  padding: const EdgeInsets.only(right: 6),
+                  child: CurrencyBadge(code: BaseCurrency.code, size: 16),
                 ),
                 hintText: '0',
                 hintStyle: textTheme.headlineMedium?.copyWith(

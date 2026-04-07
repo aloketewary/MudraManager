@@ -174,7 +174,7 @@ class SmartNotificationService {
                 t.category.value != null &&
                 categoryIds.contains(t.category.value!.id),
           )
-          .fold<double>(0.0, (sum, t) => sum + t.amount);
+          .fold<double>(0.0, (sum, t) => sum + t.baseAmount);
 
       final pct = (spent / budget.amount * 100);
 
@@ -275,10 +275,10 @@ class SmartNotificationService {
           .findAll();
       final income = txns
           .where((t) => !t.isExpense && !t.isTransfer)
-          .fold<double>(0, (s, t) => s + t.amount);
+          .fold<double>(0, (s, t) => s + t.baseAmount);
       final expense = txns
           .where((t) => t.isExpense && !t.isTransfer)
-          .fold<double>(0, (s, t) => s + t.amount);
+          .fold<double>(0, (s, t) => s + t.baseAmount);
       totalBalance += acc.initialBalance + income - expense;
     }
 
@@ -292,7 +292,7 @@ class SmartNotificationService {
         .findAll();
 
     final totalRecentExpense =
-        recentExpenses.fold<double>(0, (s, t) => s + t.amount);
+        recentExpenses.fold<double>(0, (s, t) => s + t.baseAmount);
     final dailyBurn = totalRecentExpense / 30;
 
     if (dailyBurn <= 0 || totalBalance <= 0) return;
@@ -417,7 +417,7 @@ class SmartNotificationService {
         .dateBetween(today, now)
         .findAll();
 
-    final todaySpend = todayTxns.fold<double>(0, (s, t) => s + t.amount);
+    final todaySpend = todayTxns.fold<double>(0, (s, t) => s + t.baseAmount);
     if (todaySpend <= 0) return;
 
     final thirtyDaysAgo = today.subtract(const Duration(days: 30));
@@ -430,7 +430,7 @@ class SmartNotificationService {
 
     if (pastTxns.isEmpty) return;
 
-    final avgDaily = pastTxns.fold<double>(0, (s, t) => s + t.amount) / 30;
+    final avgDaily = pastTxns.fold<double>(0, (s, t) => s + t.baseAmount) / 30;
 
     if (todaySpend > avgDaily * 2) {
       await _emit(
@@ -498,7 +498,7 @@ class SmartNotificationService {
       catStats[name] = (count: prev.count + 1, total: prev.total + t.amount);
     }
 
-    final totalExpense = txns.fold<double>(0, (s, t) => s + t.amount);
+    final totalExpense = txns.fold<double>(0, (s, t) => s + t.baseAmount);
     final dailyAvg = totalExpense / now.day;
 
     final leaks = catStats.entries.where((e) {

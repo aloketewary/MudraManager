@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -36,17 +38,17 @@ final heroMomentProvider = Provider<HeroMoment?>((ref) {
             t.isExpense &&
             DateTime(t.date.year, t.date.month, t.date.day) == today,
       )
-      .fold<double>(0, (s, t) => s + t.amount);
+      .fold<double>(0, (s, t) => s + t.baseAmount);
 
   // 2. This week's savings (income - expense for last 7 days)
   final weekAgo = today.subtract(const Duration(days: 7));
   final weekTxns = txns.where((t) => t.date.isAfter(weekAgo));
   final weekIncome = weekTxns
       .where((t) => !t.isExpense)
-      .fold<double>(0, (s, t) => s + t.amount);
+      .fold<double>(0, (s, t) => s + t.baseAmount);
   final weekExpense = weekTxns
       .where((t) => t.isExpense)
-      .fold<double>(0, (s, t) => s + t.amount);
+      .fold<double>(0, (s, t) => s + t.baseAmount);
   final weekSavings = weekIncome - weekExpense;
 
   // Month-over-month improvement
@@ -64,7 +66,7 @@ final heroMomentProvider = Provider<HeroMoment?>((ref) {
                   .isAfter(lastMonthStart.subtract(const Duration(days: 1))) &&
               t.date.isBefore(lastMonthSameDay.add(const Duration(days: 1))),
         )
-        .fold<double>(0, (s, t) => s + t.amount);
+        .fold<double>(0, (s, t) => s + t.baseAmount);
 
     final thisMonthExpense = txns
         .where(
@@ -72,7 +74,7 @@ final heroMomentProvider = Provider<HeroMoment?>((ref) {
               t.isExpense &&
               t.date.isAfter(thisMonthStart.subtract(const Duration(days: 1))),
         )
-        .fold<double>(0, (s, t) => s + t.amount);
+        .fold<double>(0, (s, t) => s + t.baseAmount);
 
     if (lastMonthExpenseToDate > 0 &&
         thisMonthExpense < lastMonthExpenseToDate) {
@@ -118,7 +120,7 @@ final heroMomentProvider = Provider<HeroMoment?>((ref) {
     return HeroMoment(
       icon: LucideIcons.piggyBank,
       message:
-          '₹${applyGM(weekSavings).toStringAsFixed(0)} saved this week — not bad at all!',
+          '${formatCurrency(applyGM(weekSavings), decimals: 0)} saved this week — not bad at all!',
       accentColor: const Color(0xFF4CAF50),
     );
   }
@@ -163,8 +165,8 @@ final heroMomentProvider = Provider<HeroMoment?>((ref) {
     return HeroMoment(
       icon: isUnder ? LucideIcons.circleCheck : LucideIcons.receiptText,
       message: isUnder
-          ? '₹${applyGM(todayExpense).toStringAsFixed(0)} today — under your ₹${applyGM(avgDaily).toStringAsFixed(0)} daily average 👍'
-          : '₹${applyGM(todayExpense).toStringAsFixed(0)} today vs ₹${applyGM(avgDaily).toStringAsFixed(0)} daily average',
+          ? '${formatCurrency(applyGM(todayExpense), decimals: 0)} today — under your ${formatCurrency(applyGM(avgDaily), decimals: 0)} daily average 👍'
+          : '${formatCurrency(applyGM(todayExpense), decimals: 0)} today vs ${formatCurrency(applyGM(avgDaily), decimals: 0)} daily average',
       accentColor: isUnder ? const Color(0xFF4CAF50) : null,
     );
   }

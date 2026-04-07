@@ -168,6 +168,7 @@ class RecentTransactionsCard extends ConsumerWidget {
                           children: [
                             CurrencyText(
                               amount: displayAmount,
+                              currencyCode: transaction.currencyCode,
                               showSign: true,
                               isExpense: transaction.isExpense,
                               style: textTheme.bodyMedium?.copyWith(
@@ -178,6 +179,18 @@ class RecentTransactionsCard extends ConsumerWidget {
                               ),
                               maxLines: 1,
                             ),
+                            if (transaction.currencyCode != null &&
+                                transaction.convertedAmount != null)
+                              CurrencyText(
+                                amount: transaction.convertedAmount!,
+                                compact: true,
+                                style: textTheme.bodySmall?.copyWith(
+                                  color: color.onSurfaceVariant
+                                      .withValues(alpha: 0.6),
+                                  fontSize: 10,
+                                ),
+                                prefixText: '≈',
+                              ),
                             const SizedBox(height: 2),
                             Text(
                               _formatDate(transaction.date, ctxt),

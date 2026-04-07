@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mudra_manager/core/utils/dialog_utils.dart';
 import 'package:mudra_manager/core/providers/auth_service.dart';
 import 'package:mudra_manager/features/profile/presentation/widgets/pin_entry_dialog.dart';
 import 'package:mudra_manager/shared/widgets/adaptive_text.dart';
@@ -161,44 +162,12 @@ class _AuthGateState extends ConsumerState<AuthGate>
         if (!unlocked) return;
         final location = GoRouterState.of(context).uri.toString();
         if (location == AppRoutes.home) {
-          final shouldExit = await showModalBottomSheet<bool>(
-            context: context,
-            builder: (context) => Container(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.exit_to_app,
-                    size: 48,
-                    color: Theme.of(context).colorScheme.error,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Exit Mudra Manager?',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 24),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () => Navigator.pop(context, false),
-                          child: const Text('Cancel'),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: FilledButton(
-                          onPressed: () => Navigator.pop(context, true),
-                          child: const Text('Exit'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+          final shouldExit = await DialogUtils.showConfirmation(
+            context,
+            title: 'Exit Mudra Manager?',
+            message: 'Are you sure you want to exit?',
+            icon: Icons.exit_to_app,
+            confirmText: 'Exit',
           );
           if (shouldExit == true) SystemNavigator.pop();
         } else {

@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/providers/collection_watchers.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/services/plugin_service.dart';
@@ -5,6 +7,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
+import 'package:mudra_manager/core/db/models/exchange_rate.dart';
+import 'package:mudra_manager/core/db/models/frequency.dart';
+import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/tag.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
@@ -274,7 +279,7 @@ class TransactionService {
 
   Future<void> addTransaction(Transaction txn) async {
     log.d(
-      'Adding transaction: ${txn.isExpense ? "Expense" : "Income"} of ₹${txn.amount}',
+      'Adding transaction: ${txn.isExpense ? "Expense" : "Income"} of ${BaseCurrency.symbol}${txn.amount}',
     );
 
     final isar = await isarService.getInstance();
@@ -293,7 +298,7 @@ class TransactionService {
         await txn.tags.save();
       });
     } catch (e) {
-      log.e('Failed to save transaction: ₹${txn.amount}', e);
+      log.e('Failed to save transaction: ${BaseCurrency.symbol}${txn.amount}', e);
       rethrow;
     }
 
@@ -393,10 +398,44 @@ class TransactionService {
   Future<void> deleteTransaction(int transactionId) async {
     log.d('Deleting transaction ID: $transactionId');
     final isar = await isarService.getInstance();
+
+    // Check if linked to a recurring bill — revert due date if so
+    final txn = await isar.transactions.get(transactionId);
+    if (txn != null) {
+      await txn.recurringTransactionSource.load();
+      final recurring = txn.recurringTransactionSource.value;
+      if (recurring != null) {
+        final prevDate = _calculatePreviousDueDate(
+          recurring.nextDueDate, recurring.frequency,
+        );
+        await isar.writeTxn(() async {
+          recurring.nextDueDate = prevDate;
+          recurring.isActive = true;
+          await isar.recurringTransactions.put(recurring);
+          await isar.transactions.delete(transactionId);
+        });
+        log.i('Transaction deleted + recurring due date reverted to $prevDate');
+        return;
+      }
+    }
+
     await isar.writeTxn(() async {
       await isar.transactions.delete(transactionId);
     });
     log.i('Transaction deleted successfully');
+  }
+
+  DateTime _calculatePreviousDueDate(DateTime current, Frequency frequency) {
+    switch (frequency) {
+      case Frequency.daily:
+        return current.subtract(const Duration(days: 1));
+      case Frequency.weekly:
+        return current.subtract(const Duration(days: 7));
+      case Frequency.monthly:
+        return DateTime(current.year, current.month - 1, current.day);
+      case Frequency.yearly:
+        return DateTime(current.year - 1, current.month, current.day);
+    }
   }
 
   /// Perform a transfer between two accounts
@@ -404,27 +443,67 @@ class TransactionService {
     required Account from,
     required Account to,
     required double amount,
+    double? creditAmount,
     required DateTime date,
     String? note,
     int? fromId,
     int? toId,
   }) async {
-    log.d('Transfer: ₹$amount from ${from.name} to ${to.name}');
+    log.d('Transfer: $amount from ${from.name} to ${to.name}');
     final isar = await isarService.getInstance();
+
+    final fromCur = from.currencyCode;
+    final toCur = to.currencyCode;
+
+    // Snapshot conversion for debit side
+    double? debitConverted;
+    double? debitRate;
+    if (fromCur != null) {
+      final rate = await isar.exchangeRates
+          .filter()
+          .currencyCodeEqualTo(fromCur)
+          .findFirst();
+      if (rate != null) {
+        debitConverted = amount * rate.rateToBase;
+        debitRate = rate.rateToBase;
+      }
+    }
+
+    // Snapshot conversion for credit side
+    final effectiveCreditAmount = creditAmount ?? amount;
+    double? creditConverted;
+    double? creditRate;
+    if (toCur != null) {
+      final rate = await isar.exchangeRates
+          .filter()
+          .currencyCodeEqualTo(toCur)
+          .findFirst();
+      if (rate != null) {
+        creditConverted = effectiveCreditAmount * rate.rateToBase;
+        creditRate = rate.rateToBase;
+      }
+    }
+
     final debit = Transaction.create(
       date: date,
       amount: amount,
       isExpense: true,
       description: note,
+      currencyCode: fromCur,
+      convertedAmount: debitConverted,
+      rateUsed: debitRate,
     )
       ..isTransfer = true
       ..account.value = from;
     if (fromId != null) debit.id = fromId;
     final credit = Transaction.create(
       date: date,
-      amount: amount,
+      amount: effectiveCreditAmount,
       isExpense: false,
       description: note,
+      currencyCode: toCur,
+      convertedAmount: creditConverted,
+      rateUsed: creditRate,
     )
       ..isTransfer = true
       ..account.value = to;

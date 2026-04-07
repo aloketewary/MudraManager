@@ -107,6 +107,7 @@ final dashboardDataProvider =
             .sortByNextDueDate()
             .findAll(),
         isar.goals.where().findAll(),
+        accountService.getAccountBalanceMapInBase(),
       ]);
 
       final transactions = results[0] as List<Transaction>;
@@ -115,6 +116,7 @@ final dashboardDataProvider =
       final budgets = results[3] as List<BudgetWithProgress>;
       final recurringExpenses = results[4] as List<RecurringTransaction>;
       final goals = results[5] as List<Goal>;
+      final baseBalances = results[6] as Map<int, double>;
 
       // Calculate totals once
       final now = DateTime.now();
@@ -132,21 +134,21 @@ final dashboardDataProvider =
 
       final totalIncome = monthTransactions
           .where((t) => !t.isExpense && !t.isTransfer)
-          .fold<double>(0, (sum, t) => sum + t.amount);
+          .fold<double>(0, (sum, t) => sum + t.baseAmount);
 
       final totalExpense = monthTransactions
           .where((t) => t.isExpense && !t.isTransfer)
-          .fold<double>(0, (sum, t) => sum + t.amount);
+          .fold<double>(0, (sum, t) => sum + t.baseAmount);
 
       final totalBalance = accounts.fold<double>(0, (sum, acc) {
-        final balance = accountBalances[acc.id] ?? 0;
+        final balance = baseBalances[acc.id] ?? 0;
         return acc.accountType == AccountType.creditCard
             ? sum - balance
             : sum + balance;
       });
 
       final netWorth = accounts.fold<double>(0, (sum, acc) {
-        final balance = accountBalances[acc.id] ?? 0;
+        final balance = baseBalances[acc.id] ?? 0;
         return sum + balance;
       });
 

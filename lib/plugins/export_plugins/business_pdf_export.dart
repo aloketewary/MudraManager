@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
@@ -252,7 +254,7 @@ class BusinessPdfExportPlugin extends ExportPlugin {
           },
           children: [
             _buildTableRow(
-              ['Date', 'Description', 'Category', 'Amount', 'Type'],
+              ['Date', 'Description', 'Category', 'Amount', 'Cur', 'Type'],
               isHeader: true,
             ),
             ...data.transactions.map(
@@ -260,7 +262,8 @@ class BusinessPdfExportPlugin extends ExportPlugin {
                 DateFormat('dd/MM/yy').format(txn.date),
                 txn.description,
                 txn.category.value?.name ?? 'Unknown',
-                '${data.currency}${txn.amount.toStringAsFixed(2)}',
+                '${data.currency}${txn.baseAmount.toStringAsFixed(2)}',
+                txn.currencyCode ?? '',
                 txn.isExpense ? 'Expense' : 'Income',
               ]),
             ),
@@ -337,7 +340,7 @@ class BusinessPdfExportPlugin extends ExportPlugin {
                 (item) => _buildTableRow(
                   [
                     item[0].toString(),
-                    '₹${(item[1] as double).toStringAsFixed(2)}',
+                    '${formatCurrency((item[1] as double), decimals: 2)}',
                   ],
                   isTotal: isTotal,
                 ),
@@ -384,10 +387,10 @@ class BusinessPdfExportPlugin extends ExportPlugin {
     final netProfit = data.income - data.expense;
 
     if (netProfit > 0) {
-      insights.add('• Positive cash flow of ₹${netProfit.toStringAsFixed(2)}');
+      insights.add('• Positive cash flow of ${formatCurrency(netProfit, code: BaseCurrency.code, decimals: 2)}');
     } else {
       insights.add(
-        '• Negative cash flow of ₹${netProfit.abs().toStringAsFixed(2)}',
+        '• Negative cash flow of ${formatCurrency(netProfit.abs(), decimals: 2)}',
       );
     }
 
@@ -400,7 +403,7 @@ class BusinessPdfExportPlugin extends ExportPlugin {
     }
 
     insights.add(
-      '• Average daily spending: ₹${data.avgDailySpend.toStringAsFixed(2)}',
+      '• Average daily spending: ${formatCurrency(data.avgDailySpend, code: BaseCurrency.code, decimals: 2)}',
     );
 
     return pw.Container(

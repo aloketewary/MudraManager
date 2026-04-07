@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -137,7 +139,7 @@ class BudgetCard extends ConsumerWidget {
                                   Expanded(
                                     child: _buildMetricItem(
                                       'Remaining',
-                                      '₹${remaining.toStringAsFixed(0)}',
+                                      formatCurrency(remaining, decimals: 0),
                                       LucideIcons.wallet,
                                       progressColor,
                                       color,
@@ -148,7 +150,7 @@ class BudgetCard extends ConsumerWidget {
                                   Expanded(
                                     child: _buildMetricItem(
                                       'Per Day',
-                                      '₹${dailySafe.toStringAsFixed(0)}',
+                                      formatCurrency(dailySafe.toDouble(), decimals: 0),
                                       LucideIcons.calendar,
                                       color.primary,
                                       color,
@@ -174,7 +176,7 @@ class BudgetCard extends ConsumerWidget {
           ),
         );
       },
-      loading: () => const BudgetCardSkeleton(),
+      loading: () => BudgetCardSkeleton(),
       error: (_, __) => const SizedBox.shrink(),
     );
   }

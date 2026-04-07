@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_plugin_sdk/mudra_plugin_sdk.dart';
 
 class BudgetGuardPlugin extends MudraPlugin {
@@ -17,7 +19,7 @@ class BudgetGuardPlugin extends MudraPlugin {
 
     if (event.used > event.limit) {
       api.showNotification(
-        '🚨 Budget exceeded by ₹${(event.used - event.limit).toStringAsFixed(0)}',
+        '🚨 Budget exceeded by ${formatCurrency((event.used - event.limit), decimals: 0)}',
       );
     } else if (percentage >= warningThreshold) {
       api.showNotification(
@@ -32,7 +34,7 @@ class BudgetGuardPlugin extends MudraPlugin {
         config?.get<double>('large_expense') ?? 5000.0;
     if (event.amount > largeExpenseThreshold) {
       api.showNotification(
-        '💸 Large expense: ₹${event.amount.toStringAsFixed(0)}',
+        '💸 Large expense: ${formatCurrency(event.amount, code: BaseCurrency.code, decimals: 0)}',
       );
     }
   }

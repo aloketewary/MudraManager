@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:flutter/material.dart';
 
 class TripParticipantCard extends StatelessWidget {
@@ -33,7 +35,7 @@ class TripParticipantCard extends StatelessWidget {
         ),
         title: Text(name, style: textTheme.titleMedium),
         subtitle: Text(
-          balance >= 0 ? 'Gets back ₹${balance.abs().toStringAsFixed(2)}' : 'Owes ₹${balance.abs().toStringAsFixed(2)}',
+          balance >= 0 ? 'Gets back ${formatCurrency(balance.abs(), decimals: 2)}' : 'Owes ${formatCurrency(balance.abs(), decimals: 2)}',
           style: TextStyle(
             color: balance >= 0 ? Colors.green : Colors.red,
           ),

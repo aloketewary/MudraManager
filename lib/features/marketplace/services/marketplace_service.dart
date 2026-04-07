@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/entitlement/entitlement_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -387,7 +388,7 @@ class MarketplaceService {
           label: 'Alert Threshold',
           type: 'number',
           defaultValue: 1000.0,
-          prefix: '₹',
+          prefix: '${BaseCurrency.symbol}',
         ),
       ],
     ),

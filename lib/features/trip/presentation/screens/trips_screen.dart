@@ -5,148 +5,15 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
-import 'package:mudra_manager/core/utils/refresh_helper.dart';
+import 'package:mudra_manager/shared/widgets/ambient_brand_section.dart';
 import 'package:mudra_manager/features/trip/data/trip_provider.dart';
-import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/db/models/trip.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
-
-final _dateFormatter = DateFormat.MMMd();
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/features/trip/data/trip_service.dart';
 
 class TripsScreen extends ConsumerWidget {
   const TripsScreen({super.key});
-
-  String _getTripStatus(DateTime startDate, DateTime endDate, bool isActive) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final start = DateTime(startDate.year, startDate.month, startDate.day);
-    final end = DateTime(endDate.year, endDate.month, endDate.day);
-
-    if (!isActive) return 'Completed';
-    if (today.isBefore(start)) return 'Upcoming';
-    if (today.isAfter(end)) return 'Past';
-    return 'Active';
-  }
-
-  Color _getStatusColor(String status, ColorScheme color) {
-    switch (status) {
-      case 'Active':
-        return color.primary;
-      case 'Upcoming':
-        return color.tertiary;
-      case 'Past':
-        return color.secondary;
-      case 'Completed':
-        return color.primaryContainer;
-      default:
-        return color.onSurfaceVariant;
-    }
-  }
-
-  IconData _getStatusIcon(String status) {
-    switch (status) {
-      case 'Active':
-        return LucideIcons.plane;
-      case 'Upcoming':
-        return LucideIcons.calendar;
-      case 'Past':
-        return LucideIcons.clock;
-      case 'Completed':
-        return LucideIcons.circleCheck;
-      default:
-        return LucideIcons.circle;
-    }
-  }
-
-  Map<String, dynamic> _getHeaderInsight(List<Trip> trips, ColorScheme color) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-
-    // Check for active trip
-    final activeTrip = trips.where((t) {
-      if (!t.isActive) return false;
-      final start =
-          DateTime(t.startDate.year, t.startDate.month, t.startDate.day);
-      return !today.isBefore(start); // today >= startDate
-    }).firstOrNull;
-    if (activeTrip != null) {
-      final daysLeft = activeTrip.endDate.difference(today).inDays;
-      if (daysLeft >= 0) {
-        return {
-          'icon': LucideIcons.plane,
-          'title': 'Trip in Progress',
-          'message':
-              '${activeTrip.name} • ${daysLeft == 0 ? 'Last day' : '$daysLeft ${daysLeft == 1 ? 'day' : 'days'} left'}',
-          'color': color.primary,
-        };
-      }
-    }
-
-    // Check for upcoming trips
-    final upcomingTrips = trips.where((t) {
-      final start =
-          DateTime(t.startDate.year, t.startDate.month, t.startDate.day);
-      return t.isActive && start.isAfter(today);
-    }).toList();
-
-    if (upcomingTrips.isNotEmpty) {
-      upcomingTrips.sort((a, b) => a.startDate.compareTo(b.startDate));
-      final nextTrip = upcomingTrips.first;
-      final daysUntil = nextTrip.startDate.difference(today).inDays;
-
-      if (daysUntil <= 7) {
-        return {
-          'icon': LucideIcons.calendar,
-          'title': 'Upcoming Trip',
-          'message':
-              '${nextTrip.name} starts in ${daysUntil == 0 ? 'today' : daysUntil == 1 ? 'tomorrow' : '$daysUntil days'}',
-          'color': color.tertiary,
-        };
-      }
-    }
-
-    // Check for trips from last year same time
-    final lastYearTrips = trips.where((t) {
-      final tripMonth = t.startDate.month;
-      final tripDay = t.startDate.day;
-      final currentMonth = now.month;
-      final currentDay = now.day;
-      final yearDiff = now.year - t.startDate.year;
-
-      return yearDiff == 1 &&
-          (tripMonth == currentMonth && (tripDay - currentDay).abs() <= 7);
-    }).toList();
-
-    if (lastYearTrips.isNotEmpty) {
-      final trip = lastYearTrips.first;
-      return {
-        'icon': LucideIcons.sparkles,
-        'title': 'Memory Lane',
-        'message': 'Last year you went to ${trip.name} around this time',
-        'color': color.secondary,
-      };
-    }
-
-    // Check for completed trips
-    final completedTrips = trips.where((t) => !t.isActive).length;
-    if (completedTrips > 0) {
-      return {
-        'icon': LucideIcons.mapPin,
-        'title': 'Travel History',
-        'message':
-            'You\'ve completed $completedTrips ${completedTrips == 1 ? 'trip' : 'trips'}',
-        'color': color.secondary,
-      };
-    }
-
-    // Default: encourage planning
-    return {
-      'icon': LucideIcons.compass,
-      'title': 'Plan Your Next Trip',
-      'message': 'Ready to explore? Create a trip to track expenses',
-      'color': color.primary,
-    };
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -158,105 +25,61 @@ class TripsScreen extends ConsumerWidget {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            'Groups',
+            style: textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          actions: [
+            IconButton(
+              onPressed: () {
+                HapticFeedback.mediumImpact();
+                _showCreateSheet(context, color, textTheme, spacing);
+              },
+              icon: const Icon(LucideIcons.plus),
+              tooltip: 'New',
+            ),
+          ],
+          bottom: tripsAsync.when(
+            data: (allItems) {
+              final trips = allItems.where((t) => t.isTrip).toList();
+              final splits = allItems.where((t) => !t.isTrip).toList();
+              return TabBar(
+                tabs: [
+                  Tab(text: 'Trips (${trips.length})'),
+                  Tab(text: 'Shared (${splits.length})'),
+                ],
+              );
+            },
+            loading: () => const TabBar(
+              tabs: [Tab(text: 'Trips'), Tab(text: 'Shared')],
+            ),
+            error: (_, __) => const TabBar(
+              tabs: [Tab(text: 'Trips'), Tab(text: 'Shared')],
+            ),
+          ),
+        ),
         body: tripsAsync.when(
           data: (allItems) {
             final trips = allItems.where((t) => t.isTrip).toList();
             final splits = allItems.where((t) => !t.isTrip).toList();
-            final insight = _getHeaderInsight(trips, color);
 
-            return NestedScrollView(
-              headerSliverBuilder: (context, innerBoxIsScrolled) => [
-                _buildAppBar(
-                  context,
-                  textTheme,
-                  color,
-                  allItems.isNotEmpty ? insight : null,
-                  showInfo: true,
+            return TabBarView(
+              children: [
+                _buildListView(
+                  context, ref, trips, spacing, color, textTheme,
+                  isTrip: true,
                 ),
-                SliverPersistentHeader(
-                  pinned: true,
-                  delegate: _TabBarDelegate(
-                    TabBar(
-                      tabs: [
-                        Tab(text: 'Trips (${trips.length})'),
-                        Tab(text: 'Splits (${splits.length})'),
-                      ],
-                    ),
-                    color.surface,
-                  ),
+                _buildListView(
+                  context, ref, splits, spacing, color, textTheme,
+                  isTrip: false,
                 ),
               ],
-              body: TabBarView(
-                children: [
-                  _buildListView(
-                    context,
-                    ref,
-                    trips,
-                    spacing,
-                    color,
-                    textTheme,
-                    isTrip: true,
-                  ),
-                  _buildListView(
-                    context,
-                    ref,
-                    splits,
-                    spacing,
-                    color,
-                    textTheme,
-                    isTrip: false,
-                  ),
-                ],
-              ),
             );
           },
-          loading: () => CustomScrollView(
-            slivers: [
-              _buildLoadingAppBar(context, textTheme, color, spacing),
-              SliverPadding(
-                padding: EdgeInsets.all(spacing.cardHorizontalMax),
-                sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) => Padding(
-                      padding: EdgeInsets.only(bottom: spacing.cardVertical),
-                      child: Card(
-                        color: color.surfaceContainerHighest,
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Row(
-                            children: [
-                              SkeletonLoader(
-                                width: 48,
-                                height: 48,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              const SizedBox(width: 16),
-                              const Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    SkeletonLoader(
-                                      width: double.infinity,
-                                      height: 16,
-                                    ),
-                                    SizedBox(height: 8),
-                                    SkeletonLoader(width: 150, height: 12),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              const SkeletonLoader(width: 70, height: 24),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    childCount: 4,
-                  ),
-                ),
-              ),
-            ],
-          ),
+          loading: () => const Center(child: CircularProgressIndicator()),
           error: (e, _) => Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -402,7 +225,8 @@ class TripsScreen extends ConsumerWidget {
             ),
           ),
         ],
-        const SizedBox(height: 100),
+        const SizedBox(height: 24),
+        const AmbientBrandSection(),
       ],
     );
   }
@@ -429,216 +253,6 @@ class TripsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildAppBar(
-    BuildContext context,
-    TextTheme textTheme,
-    ColorScheme color,
-    Map<String, dynamic>? insight, {
-    bool showInfo = false,
-  }) {
-    final hasInsight = insight != null;
-    final expandedHeight = hasInsight ? 200.0 : 120.0;
-
-    return SliverAppBar(
-      expandedHeight: expandedHeight,
-      pinned: true,
-      backgroundColor: color.surface,
-      actions: [
-        IconButton(
-          onPressed: () {
-            HapticFeedback.mediumImpact();
-            // Use the current tab index to decide
-            final tabIndex = DefaultTabController.of(context).index;
-            context
-                .push(AppRoutes.createTrip, extra: {'isTrip': tabIndex == 0});
-          },
-          icon: const Icon(LucideIcons.plus),
-          tooltip: 'New',
-        ),
-        if (showInfo)
-          IconButton(
-            onPressed: () {
-              HapticFeedback.mediumImpact();
-              _showInfoSheet(context, color, textTheme);
-            },
-            icon: const Icon(LucideIcons.info),
-            tooltip: 'Info',
-          ),
-      ],
-      title: Text(
-        'Trips & Split',
-        style: textTheme.titleLarge?.copyWith(
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      flexibleSpace: LayoutBuilder(
-        builder: (context, constraints) {
-          final expandRatio = (constraints.maxHeight - kToolbarHeight) /
-              (expandedHeight - kToolbarHeight);
-          return FlexibleSpaceBar(
-            titlePadding: EdgeInsets.zero,
-            centerTitle: false,
-            background: hasInsight
-                ? Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          (insight['color'] as Color).withValues(alpha: 0.15),
-                          (insight['color'] as Color).withValues(alpha: 0.05),
-                        ],
-                      ),
-                    ),
-                    child: SafeArea(
-                      child: Opacity(
-                        opacity: expandRatio.clamp(0.0, 1.0),
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(12),
-                                    decoration: BoxDecoration(
-                                      color: (insight['color'] as Color)
-                                          .withValues(alpha: 0.15),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Icon(
-                                      insight['icon'] as IconData,
-                                      color: insight['color'] as Color,
-                                      size: 24,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          insight['title'] as String,
-                                          style:
-                                              textTheme.titleMedium?.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                            color: insight['color'] as Color,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          insight['message'] as String,
-                                          style: textTheme.bodyMedium?.copyWith(
-                                            color: color.onSurfaceVariant,
-                                          ),
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  )
-                : Container(
-                    color: color.surface,
-                  ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildLoadingAppBar(
-    BuildContext context,
-    TextTheme textTheme,
-    ColorScheme color,
-    AppSpacing spacing,
-  ) {
-    return SliverAppBar(
-      expandedHeight: 200,
-      pinned: true,
-      backgroundColor: color.surface,
-      flexibleSpace: LayoutBuilder(
-        builder: (context, constraints) {
-          final expandRatio =
-              (constraints.maxHeight - kToolbarHeight) / (200 - kToolbarHeight);
-          return FlexibleSpaceBar(
-            titlePadding: EdgeInsets.zero,
-            centerTitle: false,
-            title: Opacity(
-              opacity: 1 - expandRatio.clamp(0.0, 1.0),
-              child: Container(
-                alignment: Alignment.centerLeft,
-                padding: const EdgeInsets.only(left: 16, bottom: 16),
-                child: Text(
-                  'Trips & Split',
-                  style: textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-            background: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    color.primaryContainer,
-                    color.secondaryContainer,
-                  ],
-                ),
-              ),
-              child: SafeArea(
-                child: Opacity(
-                  opacity: expandRatio.clamp(0.0, 1.0),
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Row(
-                          children: [
-                            SkeletonLoader(
-                              width: 48,
-                              height: 48,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            const SizedBox(width: 12),
-                            const Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  SkeletonLoader(width: 150, height: 18),
-                                  SizedBox(height: 6),
-                                  SkeletonLoader(width: 200, height: 14),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
   Widget _buildTripCard(
     BuildContext context,
     WidgetRef ref,
@@ -648,15 +262,13 @@ class TripsScreen extends ConsumerWidget {
     AppSpacing spacing, {
     bool isActive = false,
   }) {
-    final duration = trip.endDate.difference(trip.startDate).inDays + 1;
-    final status = _getTripStatus(trip.startDate, trip.endDate, trip.isActive);
-    final statusColor = _getStatusColor(status, color);
-    final statusIcon = _getStatusIcon(status);
     final isSplit = !trip.isTrip;
+    final duration = trip.endDate.difference(trip.startDate).inDays + 1;
+    final summaryAsync = ref.watch(tripSummaryProvider(trip));
 
     return Card(
       elevation: 0,
-      margin: const EdgeInsets.only(),
+      margin: EdgeInsets.zero,
       color: isActive
           ? color.primaryContainer.withValues(alpha: 0.3)
           : color.surfaceContainerLow,
@@ -666,7 +278,6 @@ class TripsScreen extends ConsumerWidget {
           color: isActive
               ? color.primary.withValues(alpha: 0.3)
               : color.outlineVariant.withValues(alpha: 0.5),
-          width: isActive ? 2 : 1,
         ),
       ),
       child: InkWell(
@@ -677,114 +288,96 @@ class TripsScreen extends ConsumerWidget {
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
         child: Padding(
           padding: EdgeInsets.all(spacing.cardInner),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: statusColor.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                ),
-                child: Icon(
-                  statusIcon,
-                  color: color.onSurfaceVariant,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      trip.name,
-                      style: textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+              // Row 1: Icon + Name + Status
+              Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(spacing.elementGap * 1.5),
+                    decoration: BoxDecoration(
+                      color: color.primary.withValues(alpha: 0.12),
+                      borderRadius:
+                          BorderRadius.circular(spacing.radiusMedium),
                     ),
-                    const SizedBox(height: 4),
-                    if (isSplit)
-                      Row(
-                        children: [
-                          Icon(
-                            LucideIcons.users,
-                            size: 14,
-                            color: color.onSurfaceVariant,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            '${trip.participants.length} participants',
-                            style: textTheme.bodySmall?.copyWith(
-                              color: color.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
-                      )
-                    else
-                    Row(
+                    child: Icon(
+                      isSplit ? LucideIcons.users : LucideIcons.plane,
+                      color: color.primary,
+                      size: 22,
+                    ),
+                  ),
+                  SizedBox(width: spacing.elementGap * 1.5),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(
-                          LucideIcons.calendar,
-                          size: 14,
-                          color: color.onSurfaceVariant,
-                        ),
-                        const SizedBox(width: 4),
-                        Flexible(
-                          child: Text(
-                            '${_dateFormatter.format(trip.startDate)} - ${_dateFormatter.format(trip.endDate)}',
-                            style: textTheme.bodySmall?.copyWith(
-                              color: color.onSurfaceVariant,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Container(
-                          width: 3,
-                          height: 3,
-                          decoration: BoxDecoration(
-                            color: color.onSurfaceVariant,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
                         Text(
-                          '$duration ${duration == 1 ? 'day' : 'days'}',
-                          style: textTheme.bodySmall?.copyWith(
-                            color: color.onSurfaceVariant,
-                          ),
+                          trip.name,
+                          style: textTheme.titleSmall
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
+                        SizedBox(height: spacing.elementGapUltraMin),
+                        if (!isSplit)
+                          Text(
+                            '${DateFormat.MMMd().format(trip.startDate)} - ${DateFormat.MMMd().format(trip.endDate)} \u2022 $duration days',
+                            style: textTheme.bodySmall
+                                ?.copyWith(color: color.onSurfaceVariant),
+                          ),
                       ],
                     ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 12),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: statusColor.withValues(alpha: 0.05),
-                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
-                  border: Border.all(
-                    color: statusColor.withValues(alpha: 0.3),
                   ),
-                ),
-                child: Text(
-                  status,
-                  style: textTheme.labelSmall?.copyWith(
-                    color: color.onSurfaceVariant,
-                    fontWeight: FontWeight.bold,
+                  if (trip.isActive)
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: spacing.elementGap,
+                        vertical: spacing.elementGapMin,
+                      ),
+                      decoration: BoxDecoration(
+                        color: color.primary.withValues(alpha: 0.12),
+                        borderRadius:
+                            BorderRadius.circular(spacing.radiusSmall),
+                      ),
+                      child: Text(
+                        isSplit ? 'Active' : 'Live',
+                        style: textTheme.labelSmall?.copyWith(
+                          color: color.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  if (!trip.isActive)
+                    Icon(
+                      LucideIcons.circleCheck,
+                      size: 16,
+                      color: color.onSurfaceVariant.withValues(alpha: 0.4),
+                    ),
+                  SizedBox(width: spacing.elementGapMin),
+                  Icon(
+                    LucideIcons.chevronRight,
+                    size: 16,
+                    color: color.onSurfaceVariant.withValues(alpha: 0.4),
                   ),
-                ),
+                ],
               ),
-              const SizedBox(width: 8),
-              Icon(
-                LucideIcons.chevronRight,
-                color: color.onSurfaceVariant,
-                size: 20,
+              // Row 2: Summary data
+              summaryAsync.maybeWhen(
+                data: (s) {
+                  if (s.totalSpent == 0 && s.participantCount <= 1) {
+                    return const SizedBox.shrink();
+                  }
+                  return Padding(
+                    padding: EdgeInsets.only(top: spacing.elementGap),
+                    child: isSplit
+                        ? _buildSplitSummary(
+                            s, trip.currencyCode, color, textTheme, spacing)
+                        : _buildTripSummary(
+                            s, trip.currencyCode, color, textTheme, spacing),
+                  );
+                },
+                orElse: () => const SizedBox.shrink(),
               ),
             ],
           ),
@@ -793,10 +386,123 @@ class TripsScreen extends ConsumerWidget {
     );
   }
 
-  void _showInfoSheet(
+  /// Trip card summary: total spent + your share + people count
+  Widget _buildTripSummary(
+    TripSummary s,
+    String? currencyCode,
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
+    return Row(
+      children: [
+        Expanded(
+          child: Row(
+            children: [
+              Text(
+                formatCurrency(s.totalSpent, code: currencyCode, decimals: 0),
+                style: textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Text(
+                ' spent',
+                style: textTheme.bodySmall
+                    ?.copyWith(color: color.onSurfaceVariant),
+              ),
+              if (s.ownerShare > 0) ...[
+                Text(
+                  ' \u2022 ',
+                  style: textTheme.bodySmall
+                      ?.copyWith(color: color.onSurfaceVariant),
+                ),
+                Text(
+                  formatCurrency(s.ownerShare,
+                      code: currencyCode, decimals: 0),
+                  style: textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: color.primary,
+                  ),
+                ),
+                Text(
+                  ' your share',
+                  style: textTheme.bodySmall
+                      ?.copyWith(color: color.onSurfaceVariant),
+                ),
+              ],
+            ],
+          ),
+        ),
+        Text(
+          '${s.participantCount} people',
+          style:
+              textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+        ),
+      ],
+    );
+  }
+
+  /// Split card summary: net balance + people count
+  Widget _buildSplitSummary(
+    TripSummary s,
+    String? currencyCode,
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
+    final Color balanceColor;
+    final String balanceText;
+
+    if (s.youGet) {
+      balanceColor = Colors.green;
+      balanceText =
+          'You\'ll get ${formatCurrency(s.netBalance, code: currencyCode, decimals: 0)}';
+    } else if (s.youOwe) {
+      balanceColor = Colors.red;
+      balanceText =
+          'You owe ${formatCurrency(s.netBalance.abs(), code: currencyCode, decimals: 0)}';
+    } else if (s.settled) {
+      balanceColor = Colors.green;
+      balanceText = 'All settled';
+    } else {
+      balanceColor = color.onSurfaceVariant;
+      balanceText = 'No expenses yet';
+    }
+
+    return Row(
+      children: [
+        Container(
+          width: 6,
+          height: 6,
+          decoration: BoxDecoration(
+            color: balanceColor,
+            shape: BoxShape.circle,
+          ),
+        ),
+        SizedBox(width: spacing.elementGap),
+        Expanded(
+          child: Text(
+            balanceText,
+            style: textTheme.bodySmall?.copyWith(
+              color: balanceColor,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        Text(
+          '${s.participantCount} people',
+          style:
+              textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+        ),
+      ],
+    );
+  }
+
+  void _showCreateSheet(
     BuildContext context,
     ColorScheme color,
     TextTheme textTheme,
+    AppSpacing spacing,
   ) {
     showModalBottomSheet(
       context: context,
@@ -804,82 +510,72 @@ class TripsScreen extends ConsumerWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
-      builder: (ctx) => Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: color.onSurfaceVariant.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: color.primaryContainer,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                LucideIcons.plane,
-                size: 48,
-                color: color.primary,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'How it works',
-              style: textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Create trips, add participants, link transactions, and split expenses automatically. Only one trip can be active at a time.',
-              style: textTheme.bodyMedium?.copyWith(
-                color: color.onSurfaceVariant,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            FilledButton(
-              onPressed: () => ctx.pop(),
-              style: FilledButton.styleFrom(
-                minimumSize: const Size(double.infinity, 48),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: EdgeInsets.all(spacing.cardInner + spacing.elementGap),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: color.onSurfaceVariant.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              child: const Text('Got it'),
-            ),
-          ],
+              SizedBox(height: spacing.sectionGap),
+              Text(
+                'Create Group',
+                style: textTheme.titleLarge
+                    ?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: spacing.sectionGap),
+              ListTile(
+                leading: Container(
+                  padding: EdgeInsets.all(spacing.elementGap),
+                  decoration: BoxDecoration(
+                    color: color.primaryContainer,
+                    borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                  ),
+                  child: Icon(LucideIcons.plane, color: color.primary, size: 24),
+                ),
+                title: Text('Create Trip',
+                    style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+                subtitle: Text('Track travel expenses with dates & budget',
+                    style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant)),
+                trailing: Icon(LucideIcons.chevronRight, size: 18, color: color.onSurfaceVariant),
+                onTap: () {
+                  HapticFeedback.mediumImpact();
+                  ctx.pop();
+                  context.push(AppRoutes.createTrip, extra: {'isTrip': true});
+                },
+              ),
+              SizedBox(height: spacing.elementGap),
+              ListTile(
+                leading: Container(
+                  padding: EdgeInsets.all(spacing.elementGap),
+                  decoration: BoxDecoration(
+                    color: color.secondaryContainer,
+                    borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                  ),
+                  child: Icon(LucideIcons.users, color: color.secondary, size: 24),
+                ),
+                title: Text('Create Shared Group',
+                    style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+                subtitle: Text('Split bills with friends',
+                    style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant)),
+                trailing: Icon(LucideIcons.chevronRight, size: 18, color: color.onSurfaceVariant),
+                onTap: () {
+                  HapticFeedback.mediumImpact();
+                  ctx.pop();
+                  context.push(AppRoutes.createTrip, extra: {'isTrip': false});
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
-}
-
-class _TabBarDelegate extends SliverPersistentHeaderDelegate {
-  final TabBar tabBar;
-  final Color backgroundColor;
-
-  _TabBarDelegate(this.tabBar, this.backgroundColor);
-
-  @override
-  double get minExtent => tabBar.preferredSize.height;
-  @override
-  double get maxExtent => tabBar.preferredSize.height;
-
-  @override
-  Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Container(color: backgroundColor, child: tabBar);
-  }
-
-  @override
-  bool shouldRebuild(_TabBarDelegate oldDelegate) => false;
 }

@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -34,7 +36,7 @@ class SpendingPredictionCard extends ConsumerWidget {
               t.isExpense &&
               t.date.isAfter(thisMonthStart.subtract(const Duration(days: 1))),
         )
-        .fold<double>(0, (s, t) => s + t.amount);
+        .fold<double>(0, (s, t) => s + t.baseAmount);
 
     // Last month same-day expense
     final lastMonthStart = DateTime(now.year, now.month - 1, 1);
@@ -47,7 +49,7 @@ class SpendingPredictionCard extends ConsumerWidget {
                   .isAfter(lastMonthStart.subtract(const Duration(days: 1))) &&
               t.date.isBefore(lastMonthSameDay.add(const Duration(days: 1))),
         )
-        .fold<double>(0, (s, t) => s + t.amount);
+        .fold<double>(0, (s, t) => s + t.baseAmount);
 
     if (lastMonthExpenseToDate <= 0) return const SizedBox.shrink();
 
@@ -104,7 +106,7 @@ class SpendingPredictionCard extends ConsumerWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'On track for ₹${projected.toStringAsFixed(0)} by month end',
+                          'On track for ${formatCurrency(projected, decimals: 0)} by month end',
                           style: textTheme.bodySmall?.copyWith(
                             color: color.onSurfaceVariant,
                           ),

@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -170,7 +171,7 @@ class _ModernCashFlowCardState extends ConsumerState<ModernCashFlowCard> {
     return SizedBox(
       height: 170,
       child: Semantics(
-        label: '$labelText: ${ctxt.formatCurrencyWithSign(0, amount)}',
+        label: '$labelText: ${formatCurrency(amount, decimals: 0)}',
         child: GestureDetector(
           onTap: () {
             HapticFeedback.mediumImpact();

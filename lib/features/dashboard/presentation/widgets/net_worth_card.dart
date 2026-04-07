@@ -269,7 +269,7 @@ class NetWorthCard extends ConsumerWidget {
           ),
         );
       },
-      loading: () => const DashboardCardSkeleton(),
+      loading: () => DashboardCardSkeleton(),
       error: (_, __) => const SizedBox.shrink(),
     );
   }

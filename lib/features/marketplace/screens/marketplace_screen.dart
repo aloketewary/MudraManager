@@ -62,7 +62,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
           ? ListView.builder(
               padding: const EdgeInsets.all(16),
               itemCount: 4,
-              itemBuilder: (context, index) => const TransactionCardSkeleton(),
+              itemBuilder: (context, index) => TransactionCardSkeleton(),
             )
           : ListView.builder(
               padding: const EdgeInsets.all(16),

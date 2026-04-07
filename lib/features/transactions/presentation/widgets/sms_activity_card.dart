@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:isar_community/isar.dart';
+import 'package:mudra_manager/core/utils/dialog_utils.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/sms_activity.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
@@ -65,53 +66,13 @@ class _SmsActivityCardState extends ConsumerState<SmsActivityCard> {
 
     if (result == true && mounted) {
       // Ask if user wants to auto-approve pending transactions
-      final autoApprove = await showModalBottomSheet<bool>(
-        context: context,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-        ),
-        builder: (context) {
-          final color = Theme.of(context).colorScheme;
-          final textTheme = Theme.of(context).textTheme;
-          return Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Auto-approve pending?',
-                  style: textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Do you want to automatically approve pending transactions for "${widget.activity.account}"?',
-                  style: textTheme.bodyMedium,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.pop(context, false),
-                        child: const Text('NO'),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: FilledButton(
-                        onPressed: () => Navigator.pop(context, true),
-                        child: const Text('YES'),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          );
-        },
+      final autoApprove = await DialogUtils.showConfirmation(
+        context,
+        title: 'Auto-approve pending?',
+        message: 'Do you want to automatically approve pending transactions for "${widget.activity.account}"?',
+        icon: Icons.check_circle_outline,
+        confirmText: 'Yes',
+        cancelText: 'No',
       );
 
       if (autoApprove == true) {

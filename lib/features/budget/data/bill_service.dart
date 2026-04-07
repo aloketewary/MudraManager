@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/models/pending_transaction.dart';
 import 'package:mudra_manager/core/db/models/recurring_bill.dart';
@@ -24,7 +26,7 @@ class BillService {
             id: 1000 + bill.id,
             title: '💳 Bill Reminder',
             body:
-                '${bill.name} is due in $daysUntilDue days - ₹${bill.amount.toStringAsFixed(0)}',
+                '${bill.name} is due in $daysUntilDue days - ${formatCurrency(bill.amount, code: BaseCurrency.code)}',
           );
         }
       }

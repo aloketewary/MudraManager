@@ -44,10 +44,73 @@ class BuddyMessages {
   static String get budgetUpdated => Tone.current.budgetUpdated;
   static String get budgetDeleted => Tone.current.budgetDeleted;
 
+  // ── Budget Insights ──
+  static String budgetExceededBy(String amount) =>
+      Tone.current.budgetExceededBy(amount);
+  static String budgetSlowDown(String amount, int days) =>
+      Tone.current.budgetSlowDown(amount, days);
+  static String budgetSafePerDay(String amount) =>
+      Tone.current.budgetSafePerDay(amount);
+  static String get budgetExceededAdjust => Tone.current.budgetExceededAdjust;
+  static String budgetOnTrack(String amount) =>
+      Tone.current.budgetOnTrack(amount);
+  static String get budgetGreatDiscipline => Tone.current.budgetGreatDiscipline;
+  static String budgetAlreadySpent(String amount) =>
+      Tone.current.budgetAlreadySpent(amount);
+  static String budgetMayExceedIn(int days) =>
+      Tone.current.budgetMayExceedIn(days);
+  static String budgetGettingTight(String amount, int days) =>
+      Tone.current.budgetGettingTight(amount, days);
+  static String budgetInControl(String amount) =>
+      Tone.current.budgetInControl(amount);
+
+  // ── Monthly Comparison ──
+  static String comparisonSpentLess(String amount) =>
+      Tone.current.comparisonSpentLess(amount);
+  static String comparisonSpentMore(String amount) =>
+      Tone.current.comparisonSpentMore(amount);
+  static String get comparisonSpentSame => Tone.current.comparisonSpentSame;
+  static String comparisonTopIncrease(String category, String amount) =>
+      Tone.current.comparisonTopIncrease(category, amount);
+  static String comparisonTopDecrease(String category, String amount) =>
+      Tone.current.comparisonTopDecrease(category, amount);
+  static String comparisonPrediction(String amount) =>
+      Tone.current.comparisonPrediction(amount);
+  static String comparisonTxnCount(int current, int last) =>
+      Tone.current.comparisonTxnCount(current, last);
+  static String comparisonDailyAvg(String current, String last) =>
+      Tone.current.comparisonDailyAvg(current, last);
+  static String comparisonByThisDay(String amount) =>
+      Tone.current.comparisonByThisDay(amount);
+
   // ── Goal ──
   static String get goalCreated => Tone.current.goalCreated;
   static String get goalUpdated => Tone.current.goalUpdated;
   static String get goalDeleted => Tone.current.goalDeleted;
+
+  // ── Goal Insights ──
+  static String goalMilestone25(String goalName) =>
+      Tone.current.goalMilestone25(goalName);
+  static String goalMilestone50(String goalName) =>
+      Tone.current.goalMilestone50(goalName);
+  static String goalMilestone75(String goalName) =>
+      Tone.current.goalMilestone75(goalName);
+  static String goalMilestone100(String goalName) =>
+      Tone.current.goalMilestone100(goalName);
+  static String goalOnTrack(String goalName) =>
+      Tone.current.goalOnTrack(goalName);
+  static String goalBehind(String goalName) =>
+      Tone.current.goalBehind(goalName);
+  static String goalAhead(String goalName, String days) =>
+      Tone.current.goalAhead(goalName, days);
+  static String goalDailyNeeded(String amount) =>
+      Tone.current.goalDailyNeeded(amount);
+  static String goalPredictedDate(String date) =>
+      Tone.current.goalPredictedDate(date);
+  static String goalContributionThisMonth(String amount) =>
+      Tone.current.goalContributionThisMonth(amount);
+  static String goalNoDeadline(String goalName) =>
+      Tone.current.goalNoDeadline(goalName);
 
   // ── Account ──
   static String get accountCreated => Tone.current.accountCreated;
@@ -122,6 +185,28 @@ class BuddyMessages {
   static String get logoutTitle => Tone.current.logoutTitle;
   static String get logoutMessage => Tone.current.logoutMessage;
   static String get logoutConfirm => Tone.current.logoutConfirm;
+
+  // ── Currency ──
+  static String get currencyChanged => Tone.current.currencyChanged;
+  static String currencyArchivedCount(int count, String newCurrency) =>
+      Tone.current.currencyArchivedCount(count, newCurrency);
+  static String get currencyChangeTitle => Tone.current.currencyChangeTitle;
+  static String get currencyChangeWarning =>
+      Tone.current.currencyChangeWarning;
+  static String get currencyChangeConfirm =>
+      Tone.current.currencyChangeConfirm;
+  static String get currencyChangeCancel => Tone.current.currencyChangeCancel;
+  static String get currencyPickerTitle => Tone.current.currencyPickerTitle;
+  static String get currencyPickerSubtitle =>
+      Tone.current.currencyPickerSubtitle;
+  static String get currencyChangeIrreversible =>
+      Tone.current.currencyChangeIrreversible;
+  static String get archivedTransactionsTitle =>
+      Tone.current.archivedTransactionsTitle;
+  static String get noArchivedTransactions =>
+      Tone.current.noArchivedTransactions;
+  static String noTripExpenses(bool isTrip) =>
+      Tone.current.noTripExpenses(isTrip);
 
   // ── AI Insights ──
   static String get insightBillsDueSoon => Tone.current.insightBillsDueSoon;

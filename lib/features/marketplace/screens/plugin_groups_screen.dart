@@ -110,7 +110,7 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
         loading: () => ListView.builder(
           padding: const EdgeInsets.all(16),
           itemCount: 6,
-          itemBuilder: (_, __) => const TransactionCardSkeleton(),
+          itemBuilder: (_, __) => TransactionCardSkeleton(),
         ),
         error: (err, _) => Center(child: Text(BuddyMessages.errorWith('$err'))),
         data: (grouped) {
@@ -753,7 +753,7 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
             final accountsAsync = ref.watch(accountsProvider);
 
             return accountsAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => ListView(children: List.generate(3, (_) => DashboardCardSkeleton())),
               error: (err, _) => Center(child: Text(BuddyMessages.errorWith('$err'))),
               data: (accounts) {
                 final creditCards = accounts

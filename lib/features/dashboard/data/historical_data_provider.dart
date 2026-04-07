@@ -36,7 +36,7 @@ final _historicalDataProvider =
   final dailyExpense = List.filled(6, 0.0);
 
   for (final txn in allTxns) {
-    if (txn.isTransfer) continue;
+    if (!txn.affectsStats) continue;
 
     final amount = txn.isExpense ? -txn.amount : txn.amount;
 
@@ -54,9 +54,9 @@ final _historicalDataProvider =
     if (dayDiff >= 0 && dayDiff < 6) {
       final idx = 5 - dayDiff;
       if (txn.isExpense) {
-        dailyExpense[idx] += txn.amount;
+        dailyExpense[idx] += txn.effectiveAmount;
       } else {
-        dailyIncome[idx] += txn.amount;
+        dailyIncome[idx] += txn.effectiveAmount;
       }
     }
   }

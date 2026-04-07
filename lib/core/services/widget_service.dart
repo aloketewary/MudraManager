@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:isar_community/isar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -59,23 +61,23 @@ class WidgetService {
         _log.d('Txn: ${txn.description}, Amount: ${txn.amount}, isExpense: ${txn.isExpense}, isTransfer: ${txn.isTransfer}');
         if (txn.isTransfer) continue;
         if (txn.isExpense) {
-          todayExpense += txn.amount;
+          todayExpense += txn.baseAmount;
         } else {
-          todayIncome += txn.amount;
+          todayIncome += txn.baseAmount;
         }
       }
 
       await HomeWidget.saveWidgetData<String>(
         'balance',
-        '₹${totalBalance.toStringAsFixed(0)}',
+        '${formatCurrency(totalBalance, code: BaseCurrency.code, decimals: 0)}',
       );
       await HomeWidget.saveWidgetData<String>(
         'todayExpense',
-        '₹${todayExpense.toStringAsFixed(0)}',
+        '${formatCurrency(todayExpense, code: BaseCurrency.code, decimals: 0)}',
       );
       await HomeWidget.saveWidgetData<String>(
         'todayIncome',
-        '₹${todayIncome.toStringAsFixed(0)}',
+        '${formatCurrency(todayIncome, code: BaseCurrency.code, decimals: 0)}',
       );
 
       try {
@@ -86,7 +88,7 @@ class WidgetService {
       }
       
       _log.i(
-        'Widget updated: Balance=₹${totalBalance.toStringAsFixed(0)}, Expense=₹${todayExpense.toStringAsFixed(0)}, Income=₹${todayIncome.toStringAsFixed(0)}',
+        'Widget updated: Balance=${formatCurrency(totalBalance, code: BaseCurrency.code, decimals: 0)}, Expense=${formatCurrency(todayExpense, code: BaseCurrency.code, decimals: 0)}, Income=${formatCurrency(todayIncome, code: BaseCurrency.code, decimals: 0)}',
       );
     } catch (e) {
       _log.e('Error updating widget', e);

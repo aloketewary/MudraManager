@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/features/budget/data/overspend_prediction_provider.dart';
@@ -72,13 +74,13 @@ class _WarningCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Spent: ₹${prediction.currentSpent.toStringAsFixed(0)} / ₹${prediction.budgetAmount.toStringAsFixed(0)}',
+                  'Spent: ${formatCurrency(prediction.currentSpent, code: BaseCurrency.code)} / ${formatCurrency(prediction.budgetAmount, code: BaseCurrency.code)}',
                   style: textTheme.labelSmall?.copyWith(
                     color: color.onErrorContainer,
                   ),
                 ),
                 Text(
-                  'Projected: ₹${prediction.projectedTotal.toStringAsFixed(0)}',
+                  'Projected: ${formatCurrency(prediction.projectedTotal, code: BaseCurrency.code)}',
                   style: textTheme.labelSmall?.copyWith(
                     color: color.onErrorContainer,
                     fontWeight: FontWeight.bold,

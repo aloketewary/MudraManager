@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
+import 'package:mudra_manager/core/db/models/exchange_rate.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/providers/collection_watchers.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
@@ -116,6 +117,47 @@ class AccountsService {
           ? acc.initialBalance + expense - income
           : acc.initialBalance + income - expense;
       return MapEntry(acc.id, balance);
+    });
+
+    final entries = await Future.wait(futures);
+    return Map.fromEntries(entries);
+  }
+
+  /// Returns balances converted to base currency for cross-account totals.
+  Future<Map<int, double>> getAccountBalanceMapInBase() async {
+    final isar = await isarService.getInstance();
+    final accounts =
+        await isar.accounts.filter().isActiveEqualTo(true).findAll();
+    if (accounts.isEmpty) return {};
+
+    final rates = await isar.exchangeRates.where().findAll();
+    final rateMap = {for (final r in rates) r.currencyCode: r.rateToBase};
+
+    final futures = accounts.map((acc) async {
+      final results = await Future.wait([
+        isar.transactions
+            .filter()
+            .account((q) => q.idEqualTo(acc.id))
+            .isExpenseEqualTo(false)
+            .amountProperty()
+            .sum(),
+        isar.transactions
+            .filter()
+            .account((q) => q.idEqualTo(acc.id))
+            .isExpenseEqualTo(true)
+            .amountProperty()
+            .sum(),
+      ]);
+      final income = results[0];
+      final expense = results[1];
+      final rawBalance = acc.accountType == AccountType.creditCard
+          ? acc.initialBalance + expense - income
+          : acc.initialBalance + income - expense;
+
+      final rate = acc.currencyCode != null
+          ? (rateMap[acc.currencyCode!] ?? 1.0)
+          : 1.0;
+      return MapEntry(acc.id, rawBalance * rate);
     });
 
     final entries = await Future.wait(futures);

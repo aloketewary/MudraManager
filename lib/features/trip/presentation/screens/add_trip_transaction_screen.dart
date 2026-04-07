@@ -1,8 +1,13 @@
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
+import 'package:mudra_manager/shared/widgets/currency_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_provider.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/db/models/trip.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
@@ -72,6 +77,8 @@ class _AddTripTransactionScreenState
         final participants = trip.participants.toList();
         final amount = _resolvedAmount ?? 0.0;
 
+        final tripCurrency = trip.currencyCode;
+
         return Scaffold(
           appBar: AppBar(
             title: Text(
@@ -94,7 +101,7 @@ class _AddTripTransactionScreenState
                     _buildSectionHeader(
                       context,
                       'Amount',
-                      LucideIcons.indianRupee,
+                      currencyIcon(tripCurrency),
                       color.primary,
                     ),
                     SizedBox(height: spacing.elementGap),
@@ -110,11 +117,10 @@ class _AddTripTransactionScreenState
                       ),
                       onChanged: (_) => setState(() {}),
                       decoration: InputDecoration(
-                        prefixText: '₹ ',
-                        prefixStyle: textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.w900,
-                          color: color.primary.withValues(alpha: 0.6),
-                        ),
+                        prefix: Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: CurrencyBadge(code: tripCurrency ?? BaseCurrency.code, size: 24, color: color.primary.withValues(alpha: 0.6)),
+                      ),
                         hintText: '0',
                         hintStyle: textTheme.headlineMedium?.copyWith(
                           fontWeight: FontWeight.w900,
@@ -339,7 +345,7 @@ class _AddTripTransactionScreenState
                               return Text(
                                 isPercent
                                     ? 'Remaining: ${remaining.toStringAsFixed(1)}%'
-                                    : 'Remaining: ₹${remaining.toStringAsFixed(2)}',
+                                    : 'Remaining: ${formatCurrency(remaining, code: tripCurrency, decimals: 2)}',
                                 style: textTheme.labelLarge?.copyWith(
                                   color: remaining.abs() < 0.1
                                       ? color.primary
@@ -487,8 +493,8 @@ class _AddTripTransactionScreenState
           ),
         );
       },
-      loading: () => const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+      loading: () => Scaffold(
+        body: ListView(children: List.generate(3, (_) => DashboardCardSkeleton())),
       ),
       error: (e, _) => Scaffold(
         body: Center(child: Text(BuddyMessages.errorWith('$e'))),
@@ -512,7 +518,7 @@ class _AddTripTransactionScreenState
         const Spacer(),
         if (isPercent && amount > 0)
           Text(
-            '₹${(amount * (double.tryParse(_customAmountControllers[p.id]?.text ?? '0') ?? 0) / 100).toStringAsFixed(0)}  ',
+            '${formatCurrency((amount * (double.tryParse(_customAmountControllers[p.id]?.text ?? '0') ?? 0) / 100), decimals: 0)}  ',
             style: textTheme.bodySmall?.copyWith(
               color: color.primary,
               fontWeight: FontWeight.bold,
@@ -528,7 +534,10 @@ class _AddTripTransactionScreenState
             keyboardType:
                 const TextInputType.numberWithOptions(decimal: true),
             decoration: InputDecoration(
-              prefixText: isPercent ? '' : '₹',
+              prefix: isPercent ? null : Padding(
+                  padding: const EdgeInsets.only(right: 4),
+                  child: CurrencyBadge(code: BaseCurrency.code, size: 12),
+                ),
               suffixText: isPercent ? '%' : null,
               isDense: true,
               contentPadding:
@@ -622,6 +631,19 @@ class _AddTripTransactionScreenState
         date: DateTime.now(),
       );
 
+      // Snapshot currency conversion
+      if (trip.currencyCode != null) {
+        expense.currencyCode = trip.currencyCode;
+        final currencyService =
+            await ref.read(currencyServiceProvider.future);
+        final result =
+            await currencyService.convertToBase(amount, trip.currencyCode!);
+        if (result != null) {
+          expense.convertedAmount = result.converted;
+          expense.rateUsed = result.rate;
+        }
+      }
+
       await ref.read(tripServiceProvider).addSplitExpenseToTrip(
             widget.tripId,
             expense,
@@ -663,7 +685,7 @@ class _AddTripTransactionScreenState
       }
       if ((sum - amount).abs() > 0.1) {
         SnackbarService.error(
-          'Total split (₹${sum.toStringAsFixed(0)}) must match ₹${amount.toStringAsFixed(0)}',
+          'Total split (${formatCurrency(sum, decimals: 0)}) must match ${formatCurrency(amount, decimals: 0)}',
         );
         setState(() => _saving = false);
         return null;

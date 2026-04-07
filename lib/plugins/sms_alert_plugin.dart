@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_plugin_sdk/mudra_plugin_sdk.dart';
 
 class SmsAlertPlugin extends MudraPlugin {
@@ -22,7 +24,7 @@ class SmsAlertPlugin extends MudraPlugin {
     final threshold = config?.get<double>('min_amount') ?? 0.0;
     if (event.amount > threshold) {
       api.showNotification(
-        '💵 Income received: ₹${event.amount.toStringAsFixed(0)}',
+        '💵 Income received: ${formatCurrency(event.amount, code: BaseCurrency.code, decimals: 0)}',
       );
     }
   }
@@ -32,9 +34,9 @@ class SmsAlertPlugin extends MudraPlugin {
     if (event.isExpense) return null;
     return PluginNotification(
       title:
-          '₹${event.amount.toStringAsFixed(2)} just landed in ${event.account ?? "your account"}',
+          '${formatCurrency(event.amount, code: BaseCurrency.code, decimals: 2)} just landed in ${event.account ?? "your account"}',
       body:
-          '₹${event.amount.toStringAsFixed(2)} credited to ${event.account ?? "your account"}',
+          '${formatCurrency(event.amount, code: BaseCurrency.code, decimals: 2)} credited to ${event.account ?? "your account"}',
       priority: 5,
     );
   }

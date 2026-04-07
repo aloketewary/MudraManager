@@ -1,4 +1,5 @@
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,6 +11,7 @@ import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
 import 'package:mudra_manager/shared/widgets/adaptive_text.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 class BudgetMiniCard extends ConsumerStatefulWidget {
   final double globalPadding;
@@ -128,7 +130,17 @@ class _BudgetMiniCardState extends ConsumerState<BudgetMiniCard> {
               ),
             );
           },
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => SizedBox(
+            height: 220,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: 3,
+              itemBuilder: (_, __) => Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: SkeletonLoader(width: 180, height: 200, borderRadius: BorderRadius.all(Radius.circular(20))),
+              ),
+            ),
+          ),
           error: (e, st) => Center(child: Text(BuddyMessages.errorWith('$e'))),
         ),
       ],
@@ -205,19 +217,10 @@ class _BudgetCircularCard extends StatelessWidget {
                         SizedBox(
                           width: 80,
                           height: 80,
-                          child: TweenAnimationBuilder<double>(
-                            duration: const Duration(milliseconds: 1000),
-                            curve: Curves.easeOutCubic,
-                            tween: Tween(begin: 0.0, end: percent),
-                            builder: (context, value, child) {
-                              return CircularProgressIndicator(
-                                value: value,
-                                strokeWidth: 6,
-                                backgroundColor: Colors.transparent,
-                                valueColor: AlwaysStoppedAnimation(budgetColor),
-                                strokeCap: StrokeCap.round,
-                              );
-                            },
+                          child: _AnimatedCircularProgress(
+                            progress: percent,
+                            color: budgetColor,
+                            strokeWidth: 6,
                           ),
                         ),
                         // Percentage Text
@@ -265,6 +268,8 @@ class _BudgetCircularCard extends StatelessWidget {
                     Flexible(
                       child: CurrencyText(
                         amount: spent,
+                        compact: false,
+                        fixedLength: 0,
                         style: textTheme.labelSmall?.copyWith(
                           color: color.onSurfaceVariant,
                           fontWeight: FontWeight.w600,
@@ -281,6 +286,8 @@ class _BudgetCircularCard extends StatelessWidget {
                     Flexible(
                       child: CurrencyText(
                         amount: budget.amount,
+                        compact: false,
+                        fixedLength: 0,
                         style: textTheme.labelSmall?.copyWith(
                           color: color.onSurfaceVariant,
                           fontWeight: FontWeight.w600,
@@ -322,6 +329,8 @@ class _BudgetCircularCard extends StatelessWidget {
                         Flexible(
                           child: CurrencyText(
                             amount: remaining,
+                            compact: false,
+                            fixedLength: 0,
                             style: textTheme.labelSmall?.copyWith(
                               color: budgetColor,
                               fontWeight: FontWeight.w700,
@@ -368,6 +377,68 @@ class _BudgetCircularCard extends StatelessWidget {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AnimatedCircularProgress extends StatefulWidget {
+  final double progress;
+  final Color color;
+  final double strokeWidth;
+
+  const _AnimatedCircularProgress({
+    required this.progress,
+    required this.color,
+    required this.strokeWidth,
+  });
+
+  @override
+  State<_AnimatedCircularProgress> createState() =>
+      _AnimatedCircularProgressState();
+}
+
+class _AnimatedCircularProgressState extends State<_AnimatedCircularProgress>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double> _anim;
+  bool _started = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    );
+    _anim = CurvedAnimation(parent: _ctrl, curve: Curves.easeOutCubic);
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return VisibilityDetector(
+      key: ValueKey('budget_circ_${widget.progress}_${widget.color.toARGB32()}'),
+      onVisibilityChanged: (info) {
+        if (info.visibleFraction > 0.3 && !_started) {
+          _started = true;
+          _ctrl.forward();
+        }
+      },
+      child: AnimatedBuilder(
+        animation: _anim,
+        builder: (_, __) => CircularProgressIndicator(
+          value: _anim.value * widget.progress,
+          strokeWidth: widget.strokeWidth,
+          backgroundColor: Colors.transparent,
+          valueColor: AlwaysStoppedAnimation(widget.color),
+          strokeCap: StrokeCap.round,
         ),
       ),
     );

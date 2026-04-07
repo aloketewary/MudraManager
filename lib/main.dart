@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
+import 'package:isar_community/isar.dart';
+import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/entitlement/billing_provider.dart';
 import 'package:mudra_manager/core/entitlement/entitlement_provider.dart';
 import 'package:mudra_manager/core/entitlement/entitlement_service.dart';
@@ -133,6 +135,12 @@ Future<void> _initializeBackgroundServices(ProviderContainer container) async {
         await CategorySeeder.seedCategoryIcons(isar);
         log.i('✅ Category icons synced');
       });
+
+      // Migrate: seed isSettlement + isSharedExpense on old transactions
+      await safeExecute(() async {
+        await _migrateTransactionFields(isar);
+        log.i('✅ Transaction fields migrated');
+      });
     } else {
       log.e('❌ Isar initialization failed');
       return;
@@ -163,6 +171,31 @@ Future<void> _initializeBackgroundServices(ProviderContainer container) async {
       log.i('✅ HomeWidget initialized');
     });
   });
+}
+
+/// One-time migration: seed isSettlement and isSharedExpense on old transactions.
+/// Isar stores null for fields that didn't exist when the record was created.
+/// This ensures query filters like isSettlementEqualTo(false) work correctly.
+Future<void> _migrateTransactionFields(Isar isar) async {
+  final prefs = await SharedPreferences.getInstance();
+  const key = 'migration_txn_settlement_v1';
+  if (prefs.getBool(key) == true) return; // already done
+
+  final all = await isar.transactions.where().findAll();
+  if (all.isEmpty) {
+    await prefs.setBool(key, true);
+    return;
+  }
+
+  await isar.writeTxn(() async {
+    for (final txn in all) {
+      // Dart defaults are false, but Isar may have null on disk.
+      // Re-putting ensures the field is written.
+      await isar.transactions.put(txn);
+    }
+  });
+
+  await prefs.setBool(key, true);
 }
 
 Future<void> _initializeHomeWidget() async {

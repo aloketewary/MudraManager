@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/features/backup/data/enhanced_backup_service.dart';
 import 'package:mudra_manager/shared/widgets/common_button.dart';
 import 'package:mudra_manager/shared/widgets/app_card.dart';
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 
 class BackupSyncScreen extends ConsumerStatefulWidget {
   const BackupSyncScreen({super.key});
@@ -128,7 +129,7 @@ class _BackupSyncScreenState extends ConsumerState<BackupSyncScreen> {
                 future: EnhancedBackupService.getAvailableBackups(),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) {
-                    return const Center(child: CircularProgressIndicator());
+                    return ListView(children: List.generate(3, (_) => DashboardCardSkeleton()));
                   }
 
                   final backups = snapshot.data!;

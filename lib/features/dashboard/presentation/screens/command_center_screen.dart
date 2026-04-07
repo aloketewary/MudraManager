@@ -1,3 +1,6 @@
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -39,7 +42,7 @@ class CommandCenterScreen extends ConsumerWidget {
               final threeDaysAgo = now.subtract(const Duration(days: 3));
               final pendingAmount = transactions
                   .where((t) => t.date.isAfter(threeDaysAgo) && t.isExpense)
-                  .fold<double>(0, (sum, t) => sum + t.amount);
+                  .fold<double>(0, (sum, t) => sum + t.baseAmount);
 
               final availableBalance = totalBalance - pendingAmount;
               final primaryAccount =
@@ -98,7 +101,7 @@ class CommandCenterScreen extends ConsumerWidget {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            '₹${totalBalance.toStringAsFixed(2)}',
+                            formatCurrency(totalBalance, code: BaseCurrency.code, decimals: 2),
                             style: textTheme.displayLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                               fontSize: 56,
@@ -128,7 +131,7 @@ class CommandCenterScreen extends ConsumerWidget {
                                       size: 16, color: color.error),
                                   const SizedBox(width: 8),
                                   Text(
-                                    'Money hold: ₹${pendingAmount.toStringAsFixed(2)}',
+                                    'Money hold: ${formatCurrency(pendingAmount, code: BaseCurrency.code, decimals: 2)}',
                                     style: textTheme.bodyMedium?.copyWith(
                                       color: color.error,
                                       fontWeight: FontWeight.w600,
@@ -139,7 +142,7 @@ class CommandCenterScreen extends ConsumerWidget {
                             ),
                           const SizedBox(height: 12),
                           Text(
-                            'Available: ₹${availableBalance.toStringAsFixed(2)}',
+                            'Available: ${formatCurrency(availableBalance, code: BaseCurrency.code, decimals: 2)}',
                             style: textTheme.bodyLarge?.copyWith(
                               color: color.primary,
                               fontWeight: FontWeight.w600,
@@ -227,7 +230,7 @@ class CommandCenterScreen extends ConsumerWidget {
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
-                                          '₹${(primaryAccount.initialBalance ?? 0).toStringAsFixed(2)}',
+                                          formatCurrency((primaryAccount.initialBalance ?? 0), decimals: 2),
                                           style:
                                               textTheme.titleMedium?.copyWith(
                                             color: color.onPrimary,
@@ -274,7 +277,7 @@ class CommandCenterScreen extends ConsumerWidget {
             },
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Padding(padding: EdgeInsets.all(16), child: AccountCardSkeleton()),
         error: (_, __) => Center(child: Text(BuddyMessages.genericError)),
       ),
     );

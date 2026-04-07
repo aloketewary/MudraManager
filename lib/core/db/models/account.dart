@@ -23,6 +23,9 @@ class Account {
 
   String? accountNumber;
 
+  /// Currency code for this account (e.g. "USD"). Null = base currency.
+  String? currencyCode;
+
   // A field to mark if the account is active or closed/hidden
   @Index() // Index for easily filtering active accounts
   bool isActive = true;

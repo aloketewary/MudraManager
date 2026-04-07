@@ -1,6 +1,8 @@
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/extension/localization_extenstion.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 
@@ -58,7 +60,7 @@ class HeroChartCard extends StatelessWidget {
                         return touchedSpots.map((spot) {
                           final isIncome = spot.barIndex == 0;
                           return LineTooltipItem(
-                            '${isIncome ? ctxt.statistics_chartLineIncomeText : ctxt.statistics_chartLineExpenseText}: ${ctxt.formatCurrencyWithSign(0, spot.y)}',
+                            '${isIncome ? ctxt.statistics_chartLineIncomeText : ctxt.statistics_chartLineExpenseText}: ${formatCurrency(spot.y, code: BaseCurrency.code, decimals: 0)}',
                             TextStyle(
                               color: spot.bar.gradient?.colors.first,
                               fontWeight: FontWeight.bold,
@@ -109,7 +111,7 @@ class HeroChartCard extends StatelessWidget {
                       sideTitles: SideTitles(
                         showTitles: true,
                         getTitlesWidget: (value, _) => Text(
-                          ctxt.formatCurrencyWithSign(1, value, compact: true),
+                          formatCurrency(value, code: BaseCurrency.code, decimals: 0),
                           style: textTheme.bodySmall?.copyWith(fontSize: 9),
                         ),
                         reservedSize: 35,

@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/db/models/goal.dart';
-import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
 import 'package:mudra_manager/core/utils/dialog_utils.dart';
 import 'package:mudra_manager/features/goal/data/goal_provider.dart';
 import 'package:mudra_manager/shared/widgets/adaptive_text.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 class GoalCircularCard extends ConsumerWidget {
   final Goal goal;
@@ -106,19 +106,10 @@ class GoalCircularCard extends ConsumerWidget {
                           SizedBox(
                             width: 100,
                             height: 100,
-                            child: TweenAnimationBuilder<double>(
-                              duration: const Duration(milliseconds: 1000),
-                              curve: Curves.easeOutCubic,
-                              tween: Tween(begin: 0.0, end: progress),
-                              builder: (context, value, child) {
-                                return CircularProgressIndicator(
-                                  value: value,
-                                  strokeWidth: 8,
-                                  backgroundColor: Colors.transparent,
-                                  valueColor: AlwaysStoppedAnimation(cardColor),
-                                  strokeCap: StrokeCap.round,
-                                );
-                              },
+                            child: _AnimatedCircularProgress(
+                              progress: progress,
+                              color: cardColor,
+                              strokeWidth: 8,
                             ),
                           ),
                           // Percentage Text
@@ -166,6 +157,9 @@ class GoalCircularCard extends ConsumerWidget {
                       Flexible(
                         child: CurrencyText(
                           amount: goal.currentAmount,
+                          currencyCode: goal.currencyCode,
+                          compact: false,
+                          fixedLength: 0,
                           style: textTheme.bodySmall?.copyWith(
                             color: color.onSurfaceVariant,
                             fontWeight: FontWeight.w600,
@@ -182,6 +176,9 @@ class GoalCircularCard extends ConsumerWidget {
                       Flexible(
                         child: CurrencyText(
                           amount: goal.targetAmount,
+                          currencyCode: goal.currencyCode,
+                          compact: false,
+                          fixedLength: 0,
                           style: textTheme.bodySmall?.copyWith(
                             color: color.onSurfaceVariant,
                             fontWeight: FontWeight.w600,
@@ -213,6 +210,9 @@ class GoalCircularCard extends ConsumerWidget {
                           Flexible(
                             child: CurrencyText(
                               amount: remaining,
+                              currencyCode: goal.currencyCode,
+                              compact: false,
+                              fixedLength: 0,
                               style: textTheme.labelSmall?.copyWith(
                                 color: cardColor,
                                 fontWeight: FontWeight.w700,
@@ -260,6 +260,68 @@ class GoalCircularCard extends ConsumerWidget {
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AnimatedCircularProgress extends StatefulWidget {
+  final double progress;
+  final Color color;
+  final double strokeWidth;
+
+  const _AnimatedCircularProgress({
+    required this.progress,
+    required this.color,
+    required this.strokeWidth,
+  });
+
+  @override
+  State<_AnimatedCircularProgress> createState() =>
+      _AnimatedCircularProgressState();
+}
+
+class _AnimatedCircularProgressState extends State<_AnimatedCircularProgress>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double> _anim;
+  bool _started = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    );
+    _anim = CurvedAnimation(parent: _ctrl, curve: Curves.easeOutCubic);
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return VisibilityDetector(
+      key: ValueKey('circ_${widget.progress}_${widget.color.toARGB32()}'),
+      onVisibilityChanged: (info) {
+        if (info.visibleFraction > 0.3 && !_started) {
+          _started = true;
+          _ctrl.forward();
+        }
+      },
+      child: AnimatedBuilder(
+        animation: _anim,
+        builder: (_, __) => CircularProgressIndicator(
+          value: _anim.value * widget.progress,
+          strokeWidth: widget.strokeWidth,
+          backgroundColor: Colors.transparent,
+          valueColor: AlwaysStoppedAnimation(widget.color),
+          strokeCap: StrokeCap.round,
         ),
       ),
     );

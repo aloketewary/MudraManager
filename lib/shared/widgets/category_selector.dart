@@ -1,4 +1,5 @@
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -66,9 +67,14 @@ class CategorySelector extends ConsumerWidget {
               ),
             );
           },
-          loading: () => const SizedBox(
+          loading: () => SizedBox(
             height: 120,
-            child: Center(child: CircularProgressIndicator()),
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: 3,
+              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              itemBuilder: (_, __) => SkeletonLoader(width: 120, height: 120, borderRadius: BorderRadius.all(Radius.circular(16))),
+            ),
           ),
           error: (_, __) => SizedBox(
             height: 120,

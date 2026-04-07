@@ -101,7 +101,7 @@ class BudgetService {
               t.category.value != null &&
               categoryIds.contains(t.category.value!.id),
         )
-        .fold<double>(0.0, (sum, t) => sum + t.amount);
+        .fold<double>(0.0, (sum, t) => sum + t.baseAmount);
 
     return spent;
   }
@@ -145,11 +145,20 @@ class BudgetService {
       await Future.wait(allExpenses.map((t) => t.category.load()));
 
       // ── 4. Index by category ID for O(1) lookup ──
+      // Also index child category transactions under their parent ID
       final expensesByCat = <int, List<Transaction>>{};
       for (final t in allExpenses) {
-        final catId = t.category.value?.id;
-        if (catId == null) continue;
+        final cat = t.category.value;
+        if (cat == null) continue;
+        final catId = cat.id;
         expensesByCat.putIfAbsent(catId, () => []).add(t);
+
+        // If this category has a parent, also index under parent
+        await cat.parentCategory.load();
+        final parentId = cat.parentCategory.value?.id;
+        if (parentId != null && parentId != catId) {
+          expensesByCat.putIfAbsent(parentId, () => []).add(t);
+        }
       }
 
       // ── 5. Compute per-budget with zero additional queries ──
@@ -169,7 +178,7 @@ class BudgetService {
             if (t.date.isBefore(s) || t.date.isAfter(e)) continue;
             await t.tags.load();
             if (t.tags.any((tag) => tagIds.contains(tag.id))) {
-              totalSpent += t.amount;
+              totalSpent += t.baseAmount;
             }
           }
 
@@ -192,21 +201,47 @@ class BudgetService {
         double totalSpent = 0;
         final catSpendings = <CategorySpending>[];
 
-        for (final alloc in budget.allocations) {
-          final cat = alloc.category.value!;
-          final catTxns = expensesByCat[cat.id] ?? [];
-          final spent = catTxns
-              .where((t) => !t.date.isBefore(s) && !t.date.isAfter(e))
-              .fold<double>(0.0, (sum, t) => sum + t.amount);
+        if (budget.allocations.isNotEmpty) {
+          // Category-wise: use allocations
+          for (final alloc in budget.allocations) {
+            final cat = alloc.category.value!;
+            final catTxns = expensesByCat[cat.id] ?? [];
+            final spent = catTxns
+                .where((t) => !t.date.isBefore(s) && !t.date.isAfter(e))
+                .fold<double>(0.0, (sum, t) => sum + t.baseAmount);
 
-          totalSpent += spent;
-          catSpendings.add(
-            CategorySpending(
-              category: cat,
-              allocated: alloc.amount,
-              spent: spent,
-            ),
-          );
+            totalSpent += spent;
+            catSpendings.add(
+              CategorySpending(
+                category: cat,
+                allocated: alloc.amount,
+                spent: spent,
+              ),
+            );
+          }
+        } else {
+          // No allocations (dayWise, festival, travel): show all category spending
+          final periodExpenses = allExpenses
+              .where((t) => !t.date.isBefore(s) && !t.date.isAfter(e))
+              .toList();
+          final catMap = <int, (Category, double)>{};
+          for (final t in periodExpenses) {
+            final cat = t.category.value;
+            if (cat == null) continue;
+            final existing = catMap[cat.id];
+            catMap[cat.id] = (cat, (existing?.$2 ?? 0) + t.baseAmount);
+            totalSpent += t.baseAmount;
+          }
+          for (final entry in catMap.entries) {
+            catSpendings.add(
+              CategorySpending(
+                category: entry.value.$1,
+                allocated: budget.amount * (entry.value.$2 / (totalSpent > 0 ? totalSpent : 1)),
+                spent: entry.value.$2,
+              ),
+            );
+          }
+          catSpendings.sort((a, b2) => b2.spent.compareTo(a.spent));
         }
 
         if (totalSpent > budget.amount) {
@@ -230,16 +265,22 @@ class BudgetService {
   Future<void> save(Budget bud) async {
     final isar = await isarService.getInstance();
     final isNew = bud.id == Isar.autoIncrement;
+    // Capture allocations before writeTxn — iterating IsarLinks inside a txn causes nested txn error
+    final allocations = bud.allocations.toList();
     await isar.writeTxn(() async {
       await isar.budgets.put(bud);
       await bud.categories.save();
-      await bud.allocations.save();
       await bud.budgetTags.save();
-      for (final alloc in bud.allocations) {
+      // Put each allocation, then save its single links (budget + category)
+      for (final alloc in allocations) {
+        alloc.budget.value = bud;
         await isar.budgetCategoryAllocations.put(alloc);
         await alloc.category.save();
         await alloc.budget.save();
       }
+      // Update the budget → allocations link (other direction)
+      bud.allocations.addAll(allocations);
+      await bud.allocations.save();
     });
     log.i('Budget saved: ${bud.name}');
     if (isNew) {

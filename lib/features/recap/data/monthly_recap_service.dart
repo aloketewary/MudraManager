@@ -1,7 +1,8 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:isar_community/isar.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/models/budget.dart';
-import 'package:mudra_manager/core/db/models/budget_category_allocation.dart';
 import 'package:mudra_manager/core/db/models/user_profile.dart';
 import 'package:mudra_manager/features/gamification/models/achievement.dart';
 
@@ -40,7 +41,7 @@ class MonthlyRecapData {
   final List<CategoryFrequency> categoryByFrequency;
 
   MonthlyRecapData({
-    this.currency = '₹',
+    String? currency,
     required this.month,
     required this.totalIncome,
     required this.totalExpense,
@@ -70,7 +71,7 @@ class MonthlyRecapData {
     required this.oneTimeExpense,
     required this.accountBreakdown,
     required this.categoryByFrequency,
-  });
+  }) : currency = currency ?? BaseCurrency.symbol;
 
   double get prevMonthSavings => prevMonthIncome - prevMonthExpense;
   double get incomeChange => prevMonthIncome > 0
@@ -125,8 +126,9 @@ class MonthlyRecapService {
 
   Future<MonthlyRecapData> generate(
     DateTime month, {
-    String currency = '₹',
+    String? currency,
   }) async {
+    final effectiveCurrency = currency ?? BaseCurrency.symbol;
     final start = DateTime(month.year, month.month, 1);
     final end = DateTime(month.year, month.month + 1, 0, 23, 59, 59);
     final daysInMonth = end.day;
@@ -157,47 +159,47 @@ class MonthlyRecapService {
       await txn.account.load();
 
       if (txn.isExpense) {
-        expense += txn.amount;
+        expense += txn.baseAmount;
         final catName = txn.category.value?.name ?? 'Uncategorized';
-        catTotals[catName] = (catTotals[catName] ?? 0) + txn.amount;
+        catTotals[catName] = (catTotals[catName] ?? 0) + txn.baseAmount;
         catCounts[catName] = (catCounts[catName] ?? 0) + 1;
         expenseTxns.add(txn);
 
         // Daily spending
-        dailySpend[txn.date.day] = (dailySpend[txn.date.day] ?? 0) + txn.amount;
+        dailySpend[txn.date.day] = (dailySpend[txn.date.day] ?? 0) + txn.baseAmount;
 
         // Weekday vs weekend
         final wd = txn.date.weekday;
         if (wd >= 6) {
-          weekendTotal += txn.amount;
+          weekendTotal += txn.baseAmount;
           weekendDaysSeen.add(txn.date.day);
         } else {
-          weekdayTotal += txn.amount;
+          weekdayTotal += txn.baseAmount;
           weekdayDaysSeen.add(txn.date.day);
         }
 
         // First half vs second half
         if (txn.date.day <= midDay) {
-          firstHalf += txn.amount;
+          firstHalf += txn.baseAmount;
         } else {
-          secondHalf += txn.amount;
+          secondHalf += txn.baseAmount;
         }
 
         // Recurring vs one-time
         await txn.recurringTransactionSource.load();
         if (txn.recurringTransactionSource.value != null) {
-          recurringExp += txn.amount;
+          recurringExp += txn.baseAmount;
         } else {
-          oneTimeExp += txn.amount;
+          oneTimeExp += txn.baseAmount;
         }
 
         // Account breakdown
         final accName = txn.account.value?.name ?? 'Unknown';
-        accountTotals[accName] = (accountTotals[accName] ?? 0) + txn.amount;
+        accountTotals[accName] = (accountTotals[accName] ?? 0) + txn.baseAmount;
       } else {
-        income += txn.amount;
+        income += txn.baseAmount;
         final catName = txn.category.value?.name ?? 'Other Income';
-        incomeCatTotals[catName] = (incomeCatTotals[catName] ?? 0) + txn.amount;
+        incomeCatTotals[catName] = (incomeCatTotals[catName] ?? 0) + txn.baseAmount;
         incomeTxns.add(txn);
       }
     }
@@ -213,9 +215,9 @@ class MonthlyRecapService {
     for (final txn in prevTxns) {
       if (txn.isTransfer) continue;
       if (txn.isExpense) {
-        prevExpense += txn.amount;
+        prevExpense += txn.baseAmount;
       } else {
-        prevIncome += txn.amount;
+        prevIncome += txn.baseAmount;
       }
     }
 
@@ -255,7 +257,7 @@ class MonthlyRecapService {
         TransactionSummary(
           txn.description ?? 'No description',
           txn.category.value?.name ?? 'Uncategorized',
-          txn.amount,
+          txn.baseAmount,
           txn.date,
         ),
       );
@@ -269,7 +271,7 @@ class MonthlyRecapService {
         TransactionSummary(
           txn.description ?? 'No description',
           txn.category.value?.name ?? 'Other Income',
-          txn.amount,
+          txn.baseAmount,
           txn.date,
         ),
       );
@@ -311,7 +313,7 @@ class MonthlyRecapService {
       double spent = 0;
       for (final txn in expenseTxns) {
         if (catIds.isEmpty || catIds.contains(txn.category.value?.id)) {
-          spent += txn.amount;
+          spent += txn.baseAmount;
         }
       }
       if (spent <= b.amount) kept++;
@@ -344,7 +346,7 @@ class MonthlyRecapService {
         : 0.0;
 
     return MonthlyRecapData(
-      currency: currency,
+      currency: effectiveCurrency,
       month: start,
       totalIncome: income,
       totalExpense: expense,

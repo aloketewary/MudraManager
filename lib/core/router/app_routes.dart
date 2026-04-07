@@ -78,6 +78,11 @@ abstract class AppRoutes {
   // Upgrade
   static const upgrade = '/upgrade';
 
+  // Currency
+  static const currencySettings = '/currency-settings';
+  static const exchangeRates = '/exchange-rates';
+  static const archivedTransactions = '/archived-transactions';
+
   // Import/Export
   static const importExport = '/import-export';
   static const importPreview = '/import-preview';

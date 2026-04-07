@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
@@ -83,7 +85,7 @@ class BudgetAlertService {
               t.category.value != null &&
               categoryIds.contains(t.category.value!.id),
         )
-        .fold<double>(0.0, (sum, t) => sum + t.amount);
+        .fold<double>(0.0, (sum, t) => sum + t.baseAmount);
   }
 
   int? _getThreshold(double percentage) {
@@ -115,7 +117,7 @@ class BudgetAlertService {
         : '⚠️ Budget Alert: 80%';
 
     final body =
-        '${alert.budget.name}: ₹${alert.spent.toStringAsFixed(0)} / ₹${alert.budget.amount.toStringAsFixed(0)} (${alert.percentage.toStringAsFixed(1)}%)';
+        '${alert.budget.name}: ${formatCurrency(alert.spent, code: BaseCurrency.code)} / ${formatCurrency(alert.budget.amount, code: BaseCurrency.code)} (${alert.percentage.toStringAsFixed(1)}%)';
 
     await notificationsPlugin.show(
       alert.budget.id,

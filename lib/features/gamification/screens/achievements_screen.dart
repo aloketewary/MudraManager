@@ -1,3 +1,4 @@
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'dart:math';
 import 'package:flutter/material.dart';
@@ -219,7 +220,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
                 ],
               );
             },
-            loading: () => const Center(child: CircularProgressIndicator()),
+            loading: () => ListView(children: List.generate(4, (_) => DashboardCardSkeleton())),
             error: (_, __) =>
                 Center(child: Text(BuddyMessages.genericError)),
           ),

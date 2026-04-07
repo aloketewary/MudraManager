@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_native_timezone_latest/flutter_native_timezone_latest.dart';
@@ -139,14 +141,14 @@ class NotificationService {
       if (tx.isTransfer) continue;
 
       if (tx.isExpense) {
-        totalSpent += tx.amount;
+        totalSpent += tx.baseAmount;
         final cat = tx.category.value;
         if (cat != null) {
           categorySpending[cat.name] =
-              (categorySpending[cat.name] ?? 0) + tx.amount;
+              (categorySpending[cat.name] ?? 0) + tx.baseAmount;
         }
       } else {
-        totalIncome += tx.amount;
+        totalIncome += tx.baseAmount;
       }
     }
 
@@ -253,8 +255,8 @@ class NotificationService {
         .dateBetween(startOfLastWeek, endOfLastWeek)
         .findAll();
 
-    final thisWeekTotal = thisWeekTxns.fold<double>(0, (s, t) => s + t.amount);
-    final lastWeekTotal = lastWeekTxns.fold<double>(0, (s, t) => s + t.amount);
+    final thisWeekTotal = thisWeekTxns.fold<double>(0, (s, t) => s + t.baseAmount);
+    final lastWeekTotal = lastWeekTxns.fold<double>(0, (s, t) => s + t.baseAmount);
 
     if (thisWeekTotal <= 0) {
       await showLocalNotification(
@@ -276,7 +278,7 @@ class NotificationService {
     for (final t in thisWeekTxns) {
       await t.category.load();
       final name = t.category.value?.name ?? 'Other';
-      catSpend[name] = (catSpend[name] ?? 0) + t.amount;
+      catSpend[name] = (catSpend[name] ?? 0) + t.baseAmount;
     }
     final topEntry =
         catSpend.entries.reduce((a, b) => a.value > b.value ? a : b);
@@ -296,7 +298,7 @@ class NotificationService {
       }
     }
 
-    final body = 'You spent ₹${thisWeekTotal.toStringAsFixed(0)}\n'
+    final body = 'You spent ${formatCurrency(thisWeekTotal, code: BaseCurrency.code, decimals: 0)}\n'
         '$topPct% on ${topEntry.key}\n'
         '$trend';
     await showLocalNotification(

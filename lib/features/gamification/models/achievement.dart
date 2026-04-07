@@ -141,7 +141,7 @@ class XpLog {
 class AppConfig {
   Id id = Isar.autoIncrement;
 
-  @Index(unique: true)
+  @Index(unique: true, replace: true)
   late String key;
 
   String? stringValue;

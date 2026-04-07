@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -36,7 +38,7 @@ class BudgetCategoryAllocation extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              '₹${allocatedAmount.toStringAsFixed(0)}',
+              '${formatCurrency(allocatedAmount, code: BaseCurrency.code)}',
               style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             IconButton(

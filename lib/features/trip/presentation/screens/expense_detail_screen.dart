@@ -1,3 +1,7 @@
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
+import 'package:mudra_manager/shared/widgets/currency_badge.dart';
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -146,6 +150,9 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
               _buildInfoCard(
                 paidBy: paidBy,
                 description: expenseDescription,
+                trip: trip,
+                tripTxn: tripTxn,
+                totalAmount: amount,
                 spacing: spacing,
                 color: color,
                 textTheme: textTheme,
@@ -165,8 +172,8 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
           ),
         );
       },
-      loading: () => const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+      loading: () => Scaffold(
+        body: ListView(children: List.generate(3, (_) => const DashboardCardSkeleton())),
       ),
       error: (e, _) => Scaffold(
         appBar: AppBar(title: Text(BuddyMessages.genericError)),
@@ -190,73 +197,51 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            color.primary,
-            color.primary.withValues(alpha: 0.8),
-            color.tertiary.withValues(alpha: 0.7),
+            color.primaryContainer,
+            color.secondaryContainer,
           ],
         ),
       ),
-      child: Stack(
-        children: [
-          Positioned(
-            top: -30,
-            right: -30,
-            child: Container(
-              width: 120,
-              height: 120,
+      child: Padding(
+        padding: EdgeInsets.all(spacing.cardInner),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: spacing.elementGap,
+                vertical: spacing.elementGapMin,
+              ),
               decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    Colors.white.withValues(alpha: 0.1),
-                    Colors.white.withValues(alpha: 0.0),
-                  ],
+                color: color.primary.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(spacing.radiusSmall),
+              ),
+              child: Text(
+                category,
+                style: textTheme.labelLarge?.copyWith(
+                  color: color.primary,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
-          ),
-          Padding(
-            padding: EdgeInsets.all(spacing.cardInner),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: spacing.cardHorizontal,
-                    vertical: spacing.cardVertical,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(spacing.radiusSmall),
-                  ),
-                  child: Text(
-                    category,
-                    style: textTheme.labelLarge?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                SizedBox(height: spacing.sectionGap),
-                CurrencyText(
-                  amount: amount,
-                  compact: false,
-                  style: textTheme.displaySmall?.copyWith(
-                    fontWeight: FontWeight.w900,
-                    color: Colors.white,
-                  ),
-                ),
-                SizedBox(height: spacing.elementGap),
-                Text(
-                  DateFormat('EEEE, d MMMM yyyy').format(date),
-                  style: textTheme.bodyMedium?.copyWith(
-                    color: Colors.white.withValues(alpha: 0.7),
-                  ),
-                ),
-              ],
+            SizedBox(height: spacing.sectionGap),
+            CurrencyText(
+              amount: amount,
+              compact: false,
+              style: textTheme.displaySmall?.copyWith(
+                fontWeight: FontWeight.w900,
+                color: color.onSurface,
+              ),
             ),
-          ),
-        ],
+            SizedBox(height: spacing.elementGap),
+            Text(
+              DateFormat('EEEE, d MMMM yyyy').format(date),
+              style: textTheme.bodyMedium?.copyWith(
+                color: color.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -264,13 +249,32 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
   Widget _buildInfoCard({
     required TripParticipant? paidBy,
     required String? description,
+    required Trip trip,
+    required TripTransaction tripTxn,
+    required double totalAmount,
     required AppSpacing spacing,
     required ColorScheme color,
     required TextTheme textTheme,
   }) {
+    // Find owner's share
+    final owner = trip.participants.where((p) => p.isOwner).firstOrNull;
+    final ownerId = owner?.id;
+    double? ownerShare;
+    if (ownerId != null) {
+      final idx = tripTxn.participantIds.indexOf(ownerId);
+      if (idx >= 0 && idx < tripTxn.splitAmounts.length) {
+        ownerShare = tripTxn.splitType == SplitType.percentage
+            ? totalAmount * tripTxn.splitAmounts[idx] / 100
+            : tripTxn.splitType == SplitType.equal
+                ? totalAmount / tripTxn.participantIds.length
+                : tripTxn.splitAmounts[idx];
+      }
+    }
+    final isPaidByOwner = paidBy?.id == ownerId;
+
     return Card(
       elevation: 0,
-      margin: const EdgeInsets.only(),
+      margin: EdgeInsets.zero,
       color: color.surfaceContainerLow,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
@@ -285,11 +289,22 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
             _infoRow(
               icon: LucideIcons.user,
               label: 'Paid by',
-              value: paidBy?.name ?? 'Unknown',
+              value: isPaidByOwner ? 'You' : (paidBy?.name ?? 'Unknown'),
               color: color,
               textTheme: textTheme,
               spacing: spacing,
             ),
+            if (ownerShare != null && tripTxn.participantIds.length > 1) ...[
+              Divider(color: color.outlineVariant.withValues(alpha: 0.3)),
+              _infoRow(
+                icon: LucideIcons.receiptText,
+                label: 'Your share',
+                value: formatCurrency(ownerShare, code: trip.currencyCode, decimals: 0),
+                color: color,
+                textTheme: textTheme,
+                spacing: spacing,
+              ),
+            ],
             if (description != null && description.isNotEmpty) ...[
               Divider(color: color.outlineVariant.withValues(alpha: 0.3)),
               _infoRow(
@@ -392,26 +407,28 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
                 SizedBox(width: spacing.sectionGap),
                 Expanded(
                   child: Text(
-                    'Split · ${_splitType.name.toTitleCase()}',
+                    'Split \u2022 ${_splitType.name.toTitleCase()}',
                     style: textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
-                TextButton.icon(
-                  onPressed: () => _editSplit(trip, tripTxn),
-                  icon: const Icon(LucideIcons.pencil, size: 14),
-                  label: const Text('Edit'),
-                  style: TextButton.styleFrom(
-                    visualDensity: VisualDensity.compact,
+                if (trip.isActive)
+                  TextButton.icon(
+                    onPressed: () => _editSplit(trip, tripTxn),
+                    icon: const Icon(LucideIcons.pencil, size: 14),
+                    label: const Text('Edit'),
+                    style: TextButton.styleFrom(
+                      visualDensity: VisualDensity.compact,
+                    ),
                   ),
-                ),
               ],
             ),
             SizedBox(height: spacing.sectionGap),
             ..._selectedParticipants.asMap().entries.map((entry) {
               final i = entry.key;
               final p = entry.value;
+              final isOwnerRow = p.isOwner;
               final pIdx = tripTxn.participantIds.indexOf(p.id);
               double share;
               if (_splitType == SplitType.equal) {
@@ -428,9 +445,17 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
 
               return Container(
                 padding: EdgeInsets.all(spacing.cardInner),
+                margin: EdgeInsets.only(bottom: spacing.cardVertical),
                 decoration: BoxDecoration(
-                  color: color.surfaceContainerHighest,
+                  color: isOwnerRow
+                      ? color.primaryContainer.withValues(alpha: 0.3)
+                      : color.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                  border: isOwnerRow
+                      ? Border.all(
+                          color: color.primary.withValues(alpha: 0.3),
+                        )
+                      : null,
                 ),
                 child: Row(
                   children: [
@@ -456,9 +481,10 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            p.name,
+                            isOwnerRow ? 'You' : p.name,
                             style: textTheme.bodyMedium?.copyWith(
                               fontWeight: FontWeight.w600,
+                              color: isOwnerRow ? color.primary : null,
                             ),
                           ),
                           SizedBox(height: spacing.cardHorizontalMin),
@@ -564,7 +590,7 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
                       Text(
                         isPercentage
                             ? 'Remaining: ${remaining.toStringAsFixed(1)}%'
-                            : 'Remaining: ₹${remaining.toStringAsFixed(2)}',
+                            : 'Remaining: ${formatCurrency(remaining, decimals: 2)}',
                         style: textTheme.labelLarge?.copyWith(
                           color: remaining.abs() < 0.1
                               ? color.primary
@@ -682,7 +708,7 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
                                                   SplitType.percentage &&
                                               amount > 0)
                                             Text(
-                                              '₹${(amount * (_splitAmounts[p.id] ?? 0) / 100).toStringAsFixed(0)}  ',
+                                              '${formatCurrency((amount * (_splitAmounts[p.id] ?? 0) / 100), decimals: 0)}  ',
                                               style:
                                                   textTheme.bodySmall?.copyWith(
                                                 color: color.primary,
@@ -701,7 +727,11 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
                                                 prefixText: _splitType ==
                                                         SplitType.percentage
                                                     ? ''
-                                                    : '₹',
+                                                    : null,
+                                                prefix: _splitType != SplitType.percentage ? Padding(
+                                                  padding: const EdgeInsets.only(right: 4),
+                                                  child: CurrencyBadge(code: BaseCurrency.code, size: 12),
+                                                ) : null,
                                                 suffixText: _splitType ==
                                                         SplitType.percentage
                                                     ? '%'

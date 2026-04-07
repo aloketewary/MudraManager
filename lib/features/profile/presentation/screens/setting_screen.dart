@@ -1,3 +1,4 @@
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 // lib/features/profile/presentation/screens/setting_screen.dart
 
@@ -161,7 +162,7 @@ class _SecuritySettingsScreenState
     return Scaffold(
       appBar: AppBar(title: const Text('Security')),
       body: !_loaded
-          ? const Center(child: CircularProgressIndicator())
+          ? const Padding(padding: EdgeInsets.all(16), child: Column(children: [DashboardCardSkeleton(), SizedBox(height: 12), DashboardCardSkeleton()]))
           : ListView(
               padding: EdgeInsets.symmetric(
                 horizontal: spacing.cardHorizontal,

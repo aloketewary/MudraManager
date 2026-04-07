@@ -1,5 +1,7 @@
 import 'package:isar_community/isar.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
+import 'package:mudra_manager/core/db/models/exchange_rate.dart';
 import 'package:mudra_manager/core/db/models/frequency.dart';
 import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
@@ -79,26 +81,24 @@ class RecurringTransactionService {
   }
 
   /// Find an unlinked transaction that matches this recurring bill
-  /// (similar amount ±10%, within ±1 day of due date, same account)
+  /// (exact amount, within the billing period, same account)
   Future<Transaction?> _findSmsMatch(
       Isar isar, RecurringTransaction recurring) async {
     final dueDate = recurring.nextDueDate;
+    // Search from 5 days before due to 2 days after (payments can be early/late)
     final searchStart = DateTime(
       dueDate.year, dueDate.month, dueDate.day,
-    ).subtract(const Duration(days: 1));
+    ).subtract(const Duration(days: 5));
     final searchEnd = DateTime(
       dueDate.year, dueDate.month, dueDate.day, 23, 59, 59,
-    ).add(const Duration(days: 1));
-
-    final minAmount = recurring.amount * 0.9;
-    final maxAmount = recurring.amount * 1.1;
+    ).add(const Duration(days: 2));
 
     final candidates = await isar.transactions
         .filter()
         .isExpenseEqualTo(recurring.isExpense)
         .isTransferEqualTo(false)
         .dateBetween(searchStart, searchEnd)
-        .amountBetween(minAmount, maxAmount)
+        .amountBetween(recurring.amount - 0.01, recurring.amount + 0.01)
         .findAll();
 
     // Find one that isn't already linked to a recurring source
@@ -144,11 +144,30 @@ class RecurringTransactionService {
         ? '${recurring.description} (🔄 $frequencyText)'
         : '🔄 $frequencyText - ${recurring.category.value?.name ?? ""}';
 
+    // Inherit currency from linked account
+    final accountCurrency = recurring.account.value?.currencyCode;
+    double? convertedAmount;
+    double? rateUsed;
+
+    if (accountCurrency != null) {
+      final rate = await isar.exchangeRates
+          .filter()
+          .currencyCodeEqualTo(accountCurrency)
+          .findFirst();
+      if (rate != null) {
+        convertedAmount = recurring.amount * rate.rateToBase;
+        rateUsed = rate.rateToBase;
+      }
+    }
+
     final transaction = Transaction.create(
       date: recurring.nextDueDate,
       amount: recurring.amount,
       isExpense: recurring.isExpense,
       description: description,
+      currencyCode: accountCurrency,
+      convertedAmount: convertedAmount,
+      rateUsed: rateUsed,
     )
       ..account.value = recurring.account.value
       ..category.value = recurring.category.value

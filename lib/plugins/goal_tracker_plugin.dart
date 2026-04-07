@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_plugin_sdk/mudra_plugin_sdk.dart';
 
 class GoalTrackerPlugin extends MudraPlugin {
@@ -22,7 +24,7 @@ class GoalTrackerPlugin extends MudraPlugin {
     final trackSavings = config?.get<bool>('track_savings') ?? true;
     if (trackSavings && event.source.toLowerCase().contains('savings')) {
       api.showNotification(
-        '💰 Savings added: ₹${event.amount.toStringAsFixed(0)}',
+        '💰 Savings added: ${formatCurrency(event.amount, code: BaseCurrency.code, decimals: 0)}',
       );
     }
   }

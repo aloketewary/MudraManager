@@ -6,6 +6,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:isar_community/isar.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_provider.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/tag.dart';
@@ -38,6 +41,7 @@ import 'package:mudra_manager/features/transactions/data/transaction_provider.da
 import 'package:mudra_manager/features/transactions/presentation/providers/smart_defaults_provider.dart';
 import 'package:mudra_manager/features/trip/data/trip_provider.dart';
 import 'package:mudra_manager/shared/widgets/simple_calculator.dart';
+import 'package:mudra_manager/shared/widgets/currency_badge.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/features/transactions/presentation/widgets/add_transaction_widgets.dart';
 
@@ -81,8 +85,12 @@ class _AddEditTransactionScreenState
   TripParticipant? _paidBy;
   SplitType _splitType = SplitType.equal;
   final Map<int, double> _splitAmounts = {};
+  String? _txnCurrencyCode;
 
   bool get _isEditing => widget.transaction != null;
+
+  String? get _effectiveCurrency =>
+      _txnCurrencyCode ?? _selectedAccount?.currencyCode;
 
   /// True when the FAB explicitly set income/expense — hide the toggle
   bool get _typeLockedByFab =>
@@ -110,6 +118,7 @@ class _AddEditTransactionScreenState
     _selectedAccount = widget.transaction?.account.value;
     _selectedCategory = widget.transaction?.category.value;
     _isExpense = widget.transaction?.isExpense ?? !widget.initialIsIncome;
+    _txnCurrencyCode = widget.transaction?.currencyCode;
 
     if (widget.transaction != null) {
       _loadEditTags();
@@ -481,6 +490,37 @@ class _AddEditTransactionScreenState
                 ),
               ),
 
+            // ── Currency mismatch hint ──
+            if (_selectedTrip?.currencyCode != null &&
+                _selectedAccount != null &&
+                _effectiveCurrency != _selectedTrip!.currencyCode)
+              Padding(
+                padding: EdgeInsets.only(
+                  left: spacing.cardHorizontal,
+                  right: spacing.cardHorizontal,
+                  top: 6,
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      LucideIcons.info,
+                      size: 14,
+                      color: color.tertiary,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        'Trip is in ${_selectedTrip!.currencyCode} — amount will be converted',
+                        style: textTheme.bodySmall?.copyWith(
+                          color: color.tertiary,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
             // ── Scrollable content (Parts 2-4 go here) ──
             Expanded(
               child: ListView(
@@ -519,10 +559,13 @@ class _AddEditTransactionScreenState
                               fontWeight: FontWeight.w900,
                               color: accentColor.withValues(alpha: 0.2),
                             ),
-                            prefixText: '₹ ',
-                            prefixStyle: textTheme.displaySmall?.copyWith(
-                              fontWeight: FontWeight.w900,
-                              color: accentColor.withValues(alpha: 0.6),
+                            prefix: Padding(
+                              padding: const EdgeInsets.only(right: 8),
+                              child: CurrencyBadge(
+                                code: _effectiveCurrency ?? BaseCurrency.code,
+                                size: 28,
+                                color: accentColor.withValues(alpha: 0.6),
+                              ),
                             ),
                             border: InputBorder.none,
                             contentPadding: EdgeInsets.symmetric(
@@ -878,11 +921,30 @@ class _AddEditTransactionScreenState
     setState(() => _saving = true);
 
     try {
+      final amount = double.parse(_amountController.text);
+
+      final String? saveCurrency = _effectiveCurrency;
+      double? convertedAmount;
+      double? rateUsed;
+
+      if (saveCurrency != null) {
+        final currencyService =
+            await ref.read(currencyServiceProvider.future);
+        final result = await currencyService.convertToBase(amount, saveCurrency);
+        if (result != null) {
+          convertedAmount = result.converted;
+          rateUsed = result.rate;
+        }
+      }
+
       final txn = Transaction.create(
         date: _selectedDate,
-        amount: double.parse(_amountController.text),
+        amount: amount,
         isExpense: _isExpense,
         description: _descController.text,
+        currencyCode: saveCurrency,
+        convertedAmount: convertedAmount,
+        rateUsed: rateUsed,
       );
 
       if (_isEditing && widget.transaction!.id != Isar.autoIncrement) {
@@ -935,6 +997,7 @@ class _AddEditTransactionScreenState
           await isar.smsActivitys.put(widget.smsActivity!);
         });
 
+        // Detect and link to recurring bills (SMS imports only)
         await RecurringDetectorService.detectAndTagRecurring(txn);
       }
 
@@ -1115,7 +1178,7 @@ class _AddEditTransactionScreenState
                       Text(
                         isPercentage
                             ? 'Remaining: ${remaining.toStringAsFixed(1)}%'
-                            : 'Remaining: ₹${remaining.toStringAsFixed(2)}',
+                            : 'Remaining: ${formatCurrency(remaining, decimals: 2)}',
                         style: textTheme.labelLarge?.copyWith(
                           color: remaining.abs() < 0.1
                               ? color.primary
@@ -1233,7 +1296,7 @@ class _AddEditTransactionScreenState
                                                   SplitType.percentage &&
                                               amount > 0)
                                             Text(
-                                              '₹${(amount * (_splitAmounts[p.id] ?? 0) / 100).toStringAsFixed(0)}  ',
+                                              '${formatCurrency(amount * (_splitAmounts[p.id] ?? 0) / 100, decimals: 0)}  ',
                                               style:
                                                   textTheme.bodySmall?.copyWith(
                                                 color: color.primary,
@@ -1252,7 +1315,11 @@ class _AddEditTransactionScreenState
                                                 prefixText: _splitType ==
                                                         SplitType.percentage
                                                     ? ''
-                                                    : '₹',
+                                                    : null,
+                                                prefix: _splitType != SplitType.percentage ? Padding(
+                                                  padding: const EdgeInsets.only(right: 4),
+                                                  child: CurrencyBadge(code: _effectiveCurrency ?? BaseCurrency.code, size: 12),
+                                                ) : null,
                                                 suffixText: _splitType ==
                                                         SplitType.percentage
                                                     ? '%'
@@ -1466,14 +1533,14 @@ class _AddEditTransactionScreenState
       await notificationService.logNotification(
         title: 'Low Balance Alert',
         body:
-            'Your account "${account.name}" has ${ctxt.formatCurrencyWithSign(2, currentBalance)} remaining.',
+            'Your account "${account.name}" has ${formatCurrency(currentBalance, decimals: 2)} remaining.',
         type: 'low_balance',
       );
       await NotificationService.showLocalNotification(
         id: 1000 + account.id,
         title: 'Low Balance Alert',
         body:
-            'Your balance in ${account.name} is ${ctxt.formatCurrencyWithSign(2, currentBalance)}.',
+            'Your balance in ${account.name} is ${formatCurrency(currentBalance, decimals: 2)}.',
       );
     }
   }

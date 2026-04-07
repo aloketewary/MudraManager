@@ -33,9 +33,9 @@ final filteredDashboardTransactionsProvider =
 
   for (var txn in txns) {
     if (!txn.isExpense) {
-      income += txn.amount;
+      income += txn.baseAmount;
     } else if (txn.isExpense) {
-      expense += txn.amount;
+      expense += txn.baseAmount;
     }
   }
 
@@ -72,9 +72,9 @@ final customDateRangeTransactionsProvider = FutureProvider.autoDispose
 
   for (var txn in txns) {
     if (!txn.isExpense) {
-      income += txn.amount;
+      income += txn.baseAmount;
     } else if (txn.isExpense) {
-      expense += txn.amount;
+      expense += txn.baseAmount;
     }
   }
 
@@ -105,9 +105,9 @@ final periodBasedTransactionsProvider = FutureProvider.autoDispose
 
   for (var txn in txns) {
     if (!txn.isExpense) {
-      income += txn.amount;
+      income += txn.baseAmount;
     } else if (txn.isExpense) {
-      expense += txn.amount;
+      expense += txn.baseAmount;
     }
   }
 
@@ -149,9 +149,9 @@ final previousPeriodTransactionsProvider = FutureProvider.autoDispose
 
   for (var txn in txns) {
     if (!txn.isExpense) {
-      income += txn.amount;
+      income += txn.baseAmount;
     } else if (txn.isExpense) {
-      expense += txn.amount;
+      expense += txn.baseAmount;
     }
   }
 

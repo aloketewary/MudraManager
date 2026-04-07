@@ -1,3 +1,9 @@
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
+import 'package:mudra_manager/shared/widgets/currency_badge.dart';
+import 'package:mudra_manager/shared/widgets/no_data_found.dart';
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_provider.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
@@ -119,16 +125,38 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
       _amountController.text.isNotEmpty &&
       (double.tryParse(_amountController.text) ?? 0) > 0;
 
+  bool get _isCrossCurrency {
+    if (_fromAccount == null || _toAccount == null) return false;
+    final fromCur = _fromAccount!.currencyCode;
+    final toCur = _toAccount!.currencyCode;
+    return fromCur != toCur;
+  }
+
   Future<void> _executeTransfer() async {
     if (!_canTransfer) return;
     setState(() => _saving = true);
 
     try {
       HapticFeedback.heavyImpact();
+      final amount = double.parse(_amountController.text);
+      final fromCur = _fromAccount!.currencyCode;
+      final toCur = _toAccount!.currencyCode;
+
+      // For cross-currency: convert amount to destination currency
+      double creditAmount = amount;
+      if (_isCrossCurrency) {
+        final service = await ref.read(currencyServiceProvider.future);
+        final result = await service.convert(amount, fromCur ?? BaseCurrency.code, toCur ?? BaseCurrency.code);
+        if (result != null) {
+          creditAmount = result.converted;
+        }
+      }
+
       await ref.read(transactionProvider).transfer(
             from: _fromAccount!,
             to: _toAccount!,
-            amount: double.parse(_amountController.text),
+            amount: amount,
+            creditAmount: creditAmount,
             date: _date,
             note: _noteController.text.trim().isEmpty
                 ? null
@@ -181,7 +209,7 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
         data: (accounts) {
           if (accounts.isEmpty) {
             return Center(
-              child: Text(BuddyMessages.noAccounts, style: textTheme.bodyLarge),
+              child: NoDataFound(message: BuddyMessages.noAccounts, iconData: LucideIcons.wallet),
             );
           }
 
@@ -230,10 +258,13 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
                                 fontWeight: FontWeight.w900,
                                 color: color.primary.withValues(alpha: 0.2),
                               ),
-                              prefixText: '₹ ',
-                              prefixStyle: textTheme.displaySmall?.copyWith(
-                                fontWeight: FontWeight.w900,
-                                color: color.primary.withValues(alpha: 0.5),
+                              prefix: Padding(
+                                padding: const EdgeInsets.only(right: 8),
+                                child: CurrencyBadge(
+                                  code: BaseCurrency.code,
+                                  size: 28,
+                                  color: color.primary.withValues(alpha: 0.6),
+                                ),
                               ),
                               border: InputBorder.none,
                               contentPadding: EdgeInsets.symmetric(
@@ -264,7 +295,7 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
                                       children: chips.map((amt) {
                                         return ActionChip(
                                           label: Text(
-                                            '₹$amt',
+                                            formatCurrency(amt.toDouble(), decimals: 0),
                                             style:
                                                 textTheme.labelSmall?.copyWith(
                                               fontWeight: FontWeight.w600,
@@ -380,6 +411,13 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
 
                     SizedBox(height: spacing.sectionGap + 8),
 
+                    // ── CROSS-CURRENCY PREVIEW ──
+                    if (_isCrossCurrency)
+                      _buildCrossCurrencyPreview(color, textTheme, spacing),
+
+                    if (_isCrossCurrency)
+                      SizedBox(height: spacing.elementGap),
+
                     // ── NOTE ──
                     TextField(
                       controller: _noteController,
@@ -474,9 +512,70 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
             ],
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Padding(padding: EdgeInsets.all(16), child: AccountCardSkeleton()),
         error: (e, _) => Center(child: Text(BuddyMessages.errorWith('$e'))),
       ),
+    );
+  }
+
+  // ── CROSS-CURRENCY PREVIEW ──
+  Widget _buildCrossCurrencyPreview(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
+    final amount = double.tryParse(_amountController.text) ?? 0;
+    final fromCur = _fromAccount?.currencyCode ?? BaseCurrency.code;
+    final toCur = _toAccount?.currencyCode ?? BaseCurrency.code;
+    
+    
+
+    return FutureBuilder<({double converted, double rate})?>(
+      future: () async {
+        if (amount <= 0) return null;
+        final service = await ref.read(currencyServiceProvider.future);
+        return service.convert(amount, fromCur, toCur);
+      }(),
+      builder: (context, snapshot) {
+        final result = snapshot.data;
+        return Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: color.tertiaryContainer.withValues(alpha: 0.3),
+            borderRadius: BorderRadius.circular(spacing.radiusMedium),
+            border: Border.all(
+              color: color.tertiary.withValues(alpha: 0.3),
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(LucideIcons.arrowLeftRight, size: 18, color: color.tertiary),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${formatCurrency(amount, code: fromCur)} → ${result != null ? formatCurrency(result.converted, code: toCur) : '...'} $toCur',
+                      style: textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: color.onTertiaryContainer,
+                      ),
+                    ),
+                    if (result != null)
+                      Text(
+                        'Rate: 1 $fromCur = ${result.rate.toStringAsFixed(4)} $toCur',
+                        style: textTheme.bodySmall?.copyWith(
+                          color: color.onTertiaryContainer.withValues(alpha: 0.7),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -561,6 +660,7 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
                       const SizedBox(height: 4),
                       CurrencyText(
                         amount: displayBalance,
+                        currencyCode: account?.currencyCode,
                         compact: true,
                         style: textTheme.labelMedium?.copyWith(
                           color: color.onSurfaceVariant,
@@ -668,6 +768,7 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
                 ),
                 trailing: CurrencyText(
                   amount: displayBal,
+                  currencyCode: account.currencyCode,
                   compact: true,
                   style: textTheme.labelLarge?.copyWith(
                     color: color.onSurfaceVariant,

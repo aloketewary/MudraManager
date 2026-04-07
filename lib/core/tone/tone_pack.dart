@@ -37,10 +37,46 @@ abstract class TonePack {
   String get budgetUpdated;
   String get budgetDeleted;
 
+  // ── Budget Insights ──
+  String budgetExceededBy(String amount);
+  String budgetSlowDown(String amount, int days);
+  String budgetSafePerDay(String amount);
+  String get budgetExceededAdjust;
+  String budgetOnTrack(String amount);
+  String get budgetGreatDiscipline;
+  String budgetAlreadySpent(String amount);
+  String budgetMayExceedIn(int days);
+  String budgetGettingTight(String amount, int days);
+  String budgetInControl(String amount);
+
+  // ── Monthly Comparison ──
+  String comparisonSpentLess(String amount);
+  String comparisonSpentMore(String amount);
+  String get comparisonSpentSame;
+  String comparisonTopIncrease(String category, String amount);
+  String comparisonTopDecrease(String category, String amount);
+  String comparisonPrediction(String amount);
+  String comparisonTxnCount(int current, int last);
+  String comparisonDailyAvg(String current, String last);
+  String comparisonByThisDay(String amount);
+
   // ── Goal ──
   String get goalCreated;
   String get goalUpdated;
   String get goalDeleted;
+
+  // ── Goal Insights ──
+  String goalMilestone25(String goalName);
+  String goalMilestone50(String goalName);
+  String goalMilestone75(String goalName);
+  String goalMilestone100(String goalName);
+  String goalOnTrack(String goalName);
+  String goalBehind(String goalName);
+  String goalAhead(String goalName, String days);
+  String goalDailyNeeded(String amount);
+  String goalPredictedDate(String date);
+  String goalContributionThisMonth(String amount);
+  String goalNoDeadline(String goalName);
 
   // ── Account ──
   String get accountCreated;
@@ -112,6 +148,20 @@ abstract class TonePack {
   String get logoutTitle;
   String get logoutMessage;
   String get logoutConfirm;
+
+  // ── Currency ──
+  String get currencyChanged;
+  String currencyArchivedCount(int count, String newCurrency);
+  String get currencyChangeTitle;
+  String get currencyChangeWarning;
+  String get currencyChangeConfirm;
+  String get currencyChangeCancel;
+  String get currencyPickerTitle;
+  String get currencyPickerSubtitle;
+  String get currencyChangeIrreversible;
+  String get archivedTransactionsTitle;
+  String get noArchivedTransactions;
+  String noTripExpenses(bool isTrip);
 
   // ── AI Insights ──
   String get insightBillsDueSoon;

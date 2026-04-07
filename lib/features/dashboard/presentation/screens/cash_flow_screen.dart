@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:math' as math;
@@ -305,7 +306,7 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
         height: 170,
         child: Semantics(
           label:
-              '${isExpense ? "Expense" : "Income"}: ${ctxt.formatCurrencyWithSign(0, value)}',
+              '${isExpense ? "Expense" : "Income"}: ${formatCurrency(value, decimals: 0)}',
           child: GestureDetector(
             onTap: () {
               HapticFeedback.mediumImpact();

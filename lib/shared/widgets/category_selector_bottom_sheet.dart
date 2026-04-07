@@ -1,4 +1,5 @@
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
@@ -202,7 +203,17 @@ class _CategorySelectorBottomSheetState
                   },
                 );
               },
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => GridView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: 2.5,
+                ),
+                itemCount: 6,
+                itemBuilder: (_, __) => const SkeletonLoader(width: double.infinity, height: 48, borderRadius: BorderRadius.all(Radius.circular(12))),
+              ),
               error: (e, _) => Center(child: Text(BuddyMessages.errorWith('$e'))),
             ),
           ),

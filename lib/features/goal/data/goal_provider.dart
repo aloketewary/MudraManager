@@ -57,6 +57,7 @@ class GoalService {
       goal = await isar.goals.get(goalId);
       if (goal != null) {
         goal!.currentAmount += amount;
+        goal!.contributions.add(GoalContribution.create(amount));
         await isar.goals.put(goal!);
       }
     });

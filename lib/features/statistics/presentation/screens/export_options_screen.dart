@@ -1,3 +1,4 @@
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -41,7 +42,7 @@ class ExportOptionsScreen extends ConsumerWidget {
         ],
       ),
       body: formatsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Padding(padding: EdgeInsets.all(16), child: DashboardCardSkeleton()),
         error: (err, stack) => Center(child: Text(BuddyMessages.errorWith('$err'))),
         data: (formats) {
           if (formats.isEmpty) {

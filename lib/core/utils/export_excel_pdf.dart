@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -10,8 +12,8 @@ import 'package:mudra_manager/features/statistics/presentation/screens/export_op
 import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
 import 'package:mudra_manager/features/gamification/services/gamification_service.dart';
 
-String formatCurrency(double amount) {
-  return '₹${amount.toStringAsFixed(2)}';
+String formatExportCurrency(double amount) {
+  return formatCurrency(amount, code: BaseCurrency.code, decimals: 2);
 }
 
 Future<void> exportStatsToExcel(StatsData stats, [GamificationService? gamificationService]) async {

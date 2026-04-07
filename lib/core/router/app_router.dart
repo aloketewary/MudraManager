@@ -31,6 +31,9 @@ import 'package:mudra_manager/features/profile/presentation/screens/app_settings
 import 'package:mudra_manager/features/profile/presentation/screens/appearance_screen.dart';
 import 'package:mudra_manager/features/profile/presentation/screens/backup_restore_screen.dart';
 import 'package:mudra_manager/features/profile/presentation/screens/choose_language_screen.dart';
+import 'package:mudra_manager/features/profile/presentation/screens/currency_settings_screen.dart';
+import 'package:mudra_manager/features/profile/presentation/screens/exchange_rate_screen.dart';
+import 'package:mudra_manager/features/profile/presentation/screens/archived_transactions_screen.dart';
 import 'package:mudra_manager/features/profile/presentation/screens/edit_user_profile_screen.dart';
 import 'package:mudra_manager/features/profile/presentation/screens/help_screen.dart';
 import 'package:mudra_manager/features/profile/presentation/screens/manage_account_screen.dart';
@@ -418,6 +421,18 @@ class AppRouter {
               GoRoute(
                 path: AppRoutes.upgrade,
                 builder: (context, state) => const UpgradeScreen(),
+              ),
+              GoRoute(
+                path: AppRoutes.currencySettings,
+                builder: (context, state) => const CurrencySettingsScreen(),
+              ),
+              GoRoute(
+                path: AppRoutes.exchangeRates,
+                builder: (context, state) => const ExchangeRateScreen(),
+              ),
+              GoRoute(
+                path: AppRoutes.archivedTransactions,
+                builder: (context, state) => const ArchivedTransactionsScreen(),
               ),
               GoRoute(
                 path: AppRoutes.importExport,

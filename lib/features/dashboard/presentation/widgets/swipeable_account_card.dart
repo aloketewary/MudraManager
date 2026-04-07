@@ -1,4 +1,6 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
+import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -13,6 +15,7 @@ import 'package:mudra_manager/features/dashboard/presentation/providers/dashboar
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 import 'package:mudra_manager/shared/widgets/animated_balance.dart';
+import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 
@@ -90,7 +93,10 @@ class _AnimatedSwipeableAccountCardsState
 
     final accounts = data.accounts;
     if (accounts.isEmpty) {
-      return Center(child: Text(BuddyMessages.noAccounts));
+      return Center(child: NoDataFound(
+        message: BuddyMessages.noAccounts,
+        iconData: LucideIcons.wallet,
+      ),);
     }
 
     final balanceMap = data.accountBalances;
@@ -226,6 +232,7 @@ class _AnimatedSwipeableAccountCardsState
               Expanded(
                 child: AnimatedBalance(
                   value: displayBalance,
+                  currencyCode: isTotal ? null : accounts[balanceViewIndex].currencyCode,
                   style: textTheme.displayMedium?.copyWith(
                     fontWeight: FontWeight.w900,
                     color: color.onSurface,
@@ -532,6 +539,7 @@ class _AnimatedSwipeableAccountCardsState
                                                 ),
                                               ),
                                               AnimatedBalance(
+                                                currencyCode: account.currencyCode,
                                                 value: balance,
                                                 compact: false,
                                                 fixedStringLength: 0,
@@ -849,6 +857,7 @@ class _AnimatedSwipeableAccountCardsState
                     ),
                   ),
                   AnimatedBalance(
+                    currencyCode: account.currencyCode,
                     value: balance,
                     compact: false,
                     fixedStringLength: 0,
@@ -886,6 +895,7 @@ class _AnimatedSwipeableAccountCardsState
                     ],
                   ),
                   AnimatedBalance(
+                    currencyCode: account.currencyCode,
                     value: balance,
                     compact: true,
                     fixedStringLength: 0,
@@ -975,6 +985,7 @@ class _AnimatedSwipeableAccountCardsState
                       ),
                       SizedBox(height: spacing.cardVertical),
                       AnimatedBalance(
+                        currencyCode: account.currencyCode,
                         value: currentBalance,
                         compact: false,
                         fixedStringLength: 0,

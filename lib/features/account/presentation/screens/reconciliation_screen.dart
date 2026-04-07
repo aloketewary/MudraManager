@@ -1,4 +1,5 @@
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -97,7 +98,7 @@ class _ReconciliationScreenState extends ConsumerState<ReconciliationScreen> {
     return Scaffold(
       appBar: AppBar(title: Text('Reconcile ${widget.account.name}')),
       body: _calculatedBalance == null
-          ? const Center(child: CircularProgressIndicator())
+          ? ListView(children: List.generate(3, (_) => DashboardCardSkeleton()))
           : ListView(
               padding: EdgeInsets.all(spacing.cardInner + 8),
               children: [

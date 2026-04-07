@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -122,7 +124,7 @@ class GoalCard extends ConsumerWidget {
                           Expanded(
                             child: _buildMetricItem(
                               '${activeGoals.length} active',
-                              '₹${totalSaved.toStringAsFixed(0)}',
+                              formatCurrency(totalSaved, decimals: 0),
                               LucideIcons.target,
                               color.primary,
                               color,
@@ -133,7 +135,7 @@ class GoalCard extends ConsumerWidget {
                           Expanded(
                             child: _buildMetricItem(
                               'Remaining',
-                              '₹${(totalTarget - totalSaved).toStringAsFixed(0)}',
+                              formatCurrency((totalTarget - totalSaved), decimals: 0),
                               LucideIcons.trendingUp,
                               color.tertiary,
                               color,

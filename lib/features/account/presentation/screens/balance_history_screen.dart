@@ -1,4 +1,6 @@
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
+import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -31,31 +33,9 @@ class BalanceHistoryScreen extends ConsumerWidget {
       body: balanceHistory.when(
         data: (snapshots) {
           if (snapshots.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    LucideIcons.history,
-                    size: 64,
-                    color: color.onSurfaceVariant.withValues(alpha: 0.5),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    BuddyMessages.noData,
-                    style: textTheme.titleMedium?.copyWith(
-                      color: color.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Add transactions to see balance trends',
-                    style: textTheme.bodySmall?.copyWith(
-                      color: color.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
+            return NoDataFound(
+              message: BuddyMessages.noData,
+              iconData: LucideIcons.history,
             );
           }
 
@@ -101,7 +81,7 @@ class BalanceHistoryScreen extends ConsumerWidget {
             ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Padding(padding: EdgeInsets.all(16), child: DashboardCardSkeleton()),
         error: (err, _) => Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

@@ -158,7 +158,7 @@ class MudraApiImpl implements MudraApi {
             .dateBetween(b.startDate, b.endDate)
             .category((q) => q.idEqualTo(cat.id))
             .findAll();
-        spent += txs.fold<double>(0, (s, t) => s + t.amount);
+        spent += txs.fold<double>(0, (s, t) => s + t.baseAmount);
       }
       result.add(
         BudgetData(

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/shared/widgets/ambient_brand_section.dart';
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:mudra_manager/features/analytics/data/analytics_provider.dart';
 import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
@@ -139,7 +141,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                   ),
                 ),
               ),
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => const DashboardCardSkeleton(),
               error: (_, __) => const SizedBox.shrink(),
             ),
 
@@ -207,7 +209,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                   ),
                 ),
               ),
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => const DashboardCardSkeleton(),
               error: (_, __) => const SizedBox.shrink(),
             ),
 
@@ -315,7 +317,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                   ),
                 );
               },
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => const DashboardCardSkeleton(),
               error: (_, __) => const SizedBox.shrink(),
             ),
 
@@ -412,11 +414,12 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                   ),
                 );
               },
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => const DashboardCardSkeleton(),
               error: (_, __) => const SizedBox.shrink(),
             ),
 
-            const SizedBox(height: 100),
+            const SizedBox(height: 24),
+            const AmbientBrandSection(),
           ],
         ),
       ),

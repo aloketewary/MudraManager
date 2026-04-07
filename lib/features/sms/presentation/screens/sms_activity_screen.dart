@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/currency/currency_service.dart';
+import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -963,7 +965,7 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                       _divider(color),
                       _detailRow(
                         'Balance',
-                        ctxt!.formatCompactCurrency(widget.activity.balance!),
+                        formatCurrency(widget.activity.balance!, code: BaseCurrency.code, decimals: 0),
                         color,
                         textTheme,
                       ),

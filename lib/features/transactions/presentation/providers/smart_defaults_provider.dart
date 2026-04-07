@@ -49,7 +49,7 @@ final smartDefaultsProvider = FutureProvider.autoDispose
 
     final entry = scores.putIfAbsent(catId, () => _CatScore());
     entry.count++;
-    entry.totalAmount += tx.amount;
+    entry.totalAmount += tx.baseAmount;
 
     final txHour = tx.date.hour;
     if ((txHour - hour).abs() <= 2 || (txHour - hour).abs() >= 22) {

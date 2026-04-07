@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -113,7 +115,7 @@ class BillsScreen extends ConsumerWidget {
         loading: () => ListView.builder(
           padding: const EdgeInsets.all(16),
           itemCount: 4,
-          itemBuilder: (context, index) => const TransactionCardSkeleton(),
+          itemBuilder: (context, index) => TransactionCardSkeleton(),
         ),
         error: (e, _) => Center(child: Text(BuddyMessages.errorWith('$e'))),
       ),
@@ -176,7 +178,7 @@ class BillsScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '₹${displayAmount.toStringAsFixed(0)}',
+                      '${formatCurrency(displayAmount, code: BaseCurrency.code)}',
                       style: textTheme.titleLarge?.copyWith(
                         color: billColor,
                         fontWeight: FontWeight.bold,
@@ -345,7 +347,7 @@ class BillsScreen extends ConsumerWidget {
                     decoration: InputDecoration(
                       labelText: 'Amount',
                       prefixIcon: Icon(
-                        Icons.currency_rupee,
+                        currencyIcon(null),
                         color: color.primary,
                       ),
                     ),

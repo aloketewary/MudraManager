@@ -27,6 +27,55 @@ class TripService {
     return await isar.trips.where().sortByCreatedAtDesc().findAll();
   }
 
+  /// Loads summary data for a trip (participants, total spent, owner share).
+  Future<TripSummary> getTripSummary(Trip trip) async {
+    await trip.participants.load();
+    await trip.transactions.load();
+
+    final participants = trip.participants.toList();
+    final txns = trip.transactions.toList();
+
+    double totalSpent = 0;
+    double ownerPaid = 0;
+    double ownerOwes = 0;
+
+    // Find owner participant
+    final owner = participants.where((p) => p.isOwner).firstOrNull;
+    final ownerId = owner?.id;
+
+    for (final tripTxn in txns) {
+      await tripTxn.transaction.load();
+      await tripTxn.splitExpense.load();
+      await tripTxn.paidBy.load();
+
+      final amount = tripTxn.resolvedAmountIn(trip.currencyCode) ?? 0;
+      totalSpent += amount;
+
+      if (ownerId != null) {
+        // Owner paid this expense
+        if (tripTxn.paidBy.value?.id == ownerId) {
+          ownerPaid += amount;
+        }
+        // Owner's share of this expense
+        final idx = tripTxn.participantIds.indexOf(ownerId);
+        if (idx >= 0 && idx < tripTxn.splitAmounts.length) {
+          ownerOwes += tripTxn.splitAmounts[idx];
+        }
+      }
+    }
+
+    // Net: positive = others owe you, negative = you owe others
+    final netBalance = ownerPaid - ownerOwes;
+
+    return TripSummary(
+      participantCount: participants.length,
+      totalSpent: totalSpent,
+      ownerShare: ownerOwes,
+      ownerPaid: ownerPaid,
+      netBalance: netBalance,
+    );
+  }
+
   Future<List<Trip>> getActiveTrips() async {
     final isar = await isarService.getInstance();
     return await isar.trips
@@ -59,7 +108,22 @@ class TripService {
     List<double> splitAmounts,
   ) async {
     final isar = await isarService.getInstance();
+
+    // Set shared expense metadata — find the owner's share
+    if (participantIds.length > 1) {
+      transaction.isSharedExpense = true;
+      for (int i = 0; i < participantIds.length; i++) {
+        final p = await isar.tripParticipants.get(participantIds[i]);
+        if (p != null && p.isOwner) {
+          transaction.myShare = splitAmounts[i];
+          break;
+        }
+      }
+    }
+
     await isar.writeTxn(() async {
+      await isar.transactions.put(transaction);
+
       final tripTxn = TripTransaction.create(
         splitType: splitType,
         participantIds: participantIds,
@@ -130,7 +194,7 @@ class TripService {
       await tripTxn.splitExpense.load();
       await tripTxn.paidBy.load();
 
-      final amount = tripTxn.resolvedAmount;
+      final amount = tripTxn.resolvedAmountIn(trip.currencyCode);
       final paidBy = tripTxn.paidBy.value;
 
       if (amount == null || paidBy == null) continue;
@@ -350,4 +414,24 @@ class TripService {
       }
     });
   }
+}
+
+class TripSummary {
+  final int participantCount;
+  final double totalSpent;
+  final double ownerShare;
+  final double ownerPaid;
+  final double netBalance;
+
+  const TripSummary({
+    required this.participantCount,
+    required this.totalSpent,
+    required this.ownerShare,
+    required this.ownerPaid,
+    required this.netBalance,
+  });
+
+  bool get youOwe => netBalance < -0.01;
+  bool get youGet => netBalance > 0.01;
+  bool get settled => netBalance.abs() < 0.01 && totalSpent > 0;
 }

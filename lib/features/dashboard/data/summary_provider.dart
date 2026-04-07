@@ -15,9 +15,9 @@ final incomeExpenseSummaryProvider =
 
   for (var txn in txns) {
     if (!txn.isExpense) {
-      income += txn.amount;
+      income += txn.effectiveAmount;
     } else if (txn.isExpense) {
-      expense += txn.amount;
+      expense += txn.effectiveAmount;
     }
   }
 

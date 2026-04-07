@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:mudra_manager/core/currency/currency_meta.dart';
 
 class TripExpenseItem extends StatelessWidget {
   final String description;
   final double amount;
   final String paidBy;
   final DateTime date;
+  final String? currencyCode;
   final VoidCallback? onTap;
   final VoidCallback? onDelete;
 
@@ -15,6 +17,7 @@ class TripExpenseItem extends StatelessWidget {
     required this.amount,
     required this.paidBy,
     required this.date,
+    this.currencyCode,
     this.onTap,
     this.onDelete,
   });
@@ -41,7 +44,7 @@ class TripExpenseItem extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              '₹${amount.toStringAsFixed(2)}',
+              '${formatCurrency(amount, code: currencyCode, decimals: 2)}',
               style: textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: color.primary,

@@ -1,7 +1,10 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 import 'package:mudra_manager/core/db/models/frequency.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
@@ -39,25 +42,9 @@ class RecurringExpensesScreen extends ConsumerWidget {
           final expenses = data.recurringExpenses;
 
           if (expenses.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.repeat_outlined,
-                    size: 64,
-                    color: color.onSurfaceVariant,
-                  ),
-                  SizedBox(height: spacing.cardHorizontal),
-                  Text(BuddyMessages.noRecurring, style: textTheme.titleLarge),
-                  SizedBox(height: spacing.cardHorizontal),
-                  Text(
-                    'Patterns will be detected automatically',
-                    style: textTheme.bodyMedium
-                        ?.copyWith(color: color.onSurfaceVariant),
-                  ),
-                ],
-              ),
+            return NoDataFound(
+              message: BuddyMessages.noRecurring,
+              iconData: LucideIcons.repeat,
             );
           }
 
@@ -102,7 +89,7 @@ class RecurringExpensesScreen extends ConsumerWidget {
                     ],
                   ),
                   trailing: Text(
-                    '₹${expense.amount.toStringAsFixed(0)}',
+                    formatCurrency(expense.amount, decimals: 0),
                     style: textTheme.titleMedium
                         ?.copyWith(fontWeight: FontWeight.bold),
                   ),

@@ -7,7 +7,7 @@ part 'dashboard_widget_preference.g.dart';
 class DashboardWidgetPreference {
   Id id = Isar.autoIncrement;
 
-  @Index(unique: true)
+  @Index(unique: true, replace: true)
   late String widgetId;
 
   late int order;

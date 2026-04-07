@@ -1,3 +1,4 @@
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
@@ -106,7 +107,7 @@ class GoalMiniCard extends ConsumerWidget {
               ),
             );
           },
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => DashboardCardSkeleton(),
           error: (e, st) => Center(child: Text(BuddyMessages.errorWith('$e'))),
         ),
       ],

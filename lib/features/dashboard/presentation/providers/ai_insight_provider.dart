@@ -172,7 +172,7 @@ List<AiInsight> _generateInsights(DashboardData data) {
               !t.isTransfer &&
               DateTime(t.date.year, t.date.month, t.date.day) == today,
         )
-        .fold<double>(0, (sum, t) => sum + t.amount);
+        .fold<double>(0, (sum, t) => sum + t.baseAmount);
 
     if (todayExpenses > 0) {
       final avgDaily = data.totalExpense / now.day;
@@ -211,7 +211,7 @@ List<AiInsight> _generateInsights(DashboardData data) {
               !t.date.isBefore(weekendStart) &&
               !t.date.isAfter(now),
         )
-        .fold<double>(0, (s, t) => s + t.amount);
+        .fold<double>(0, (s, t) => s + t.baseAmount);
 
     if (weekendSpend <= 0) {
       // skip — nothing spent yet
@@ -228,7 +228,7 @@ List<AiInsight> _generateInsights(DashboardData data) {
                 t.date.weekday == DateTime.sunday),
       );
       final pastWeekendTotal =
-          pastWeekendTxns.fold<double>(0, (s, t) => s + t.amount);
+          pastWeekendTxns.fold<double>(0, (s, t) => s + t.baseAmount);
 
       // Count past weekends
       int weekendCount = 0;
@@ -322,7 +322,7 @@ List<AiInsight> _generateInsights(DashboardData data) {
 
       for (final t in recentExpenses) {
         final idx = t.date.weekday - 1;
-        byDay[idx] += t.amount;
+        byDay[idx] += t.baseAmount;
         countByDay[idx]++;
       }
 

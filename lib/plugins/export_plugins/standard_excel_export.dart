@@ -101,18 +101,25 @@ class StandardExcelExportPlugin extends ExportPlugin {
     txnSheet.cell(CellIndex.indexByString('A3')).value = 'Date';
     txnSheet.cell(CellIndex.indexByString('B3')).value = 'Category';
     txnSheet.cell(CellIndex.indexByString('C3')).value = 'Amount';
-    txnSheet.cell(CellIndex.indexByString('D3')).value = 'Type';
+    txnSheet.cell(CellIndex.indexByString('D3')).value = 'Currency';
+    txnSheet.cell(CellIndex.indexByString('E3')).value = 'Base Amount';
+    txnSheet.cell(CellIndex.indexByString('F3')).value = 'Type';
     txnSheet.cell(CellIndex.indexByString('A3')).cellStyle = CellStyle(bold: true);
     txnSheet.cell(CellIndex.indexByString('B3')).cellStyle = CellStyle(bold: true);
     txnSheet.cell(CellIndex.indexByString('C3')).cellStyle = CellStyle(bold: true);
     txnSheet.cell(CellIndex.indexByString('D3')).cellStyle = CellStyle(bold: true);
+    txnSheet.cell(CellIndex.indexByString('E3')).cellStyle = CellStyle(bold: true);
+    txnSheet.cell(CellIndex.indexByString('F3')).cellStyle = CellStyle(bold: true);
 
     int row = 4;
     for (var txn in data.transactions) {
+      final txnCurrency = txn.currencyCode;
       txnSheet.cell(CellIndex.indexByString('A$row')).value = DateFormat('dd/MM/yyyy').format(txn.date);
       txnSheet.cell(CellIndex.indexByString('B$row')).value = txn.category.value?.name ?? 'Unknown';
-      txnSheet.cell(CellIndex.indexByString('C$row')).value = '${data.currency}${txn.amount.toStringAsFixed(2)}';
-      txnSheet.cell(CellIndex.indexByString('D$row')).value = txn.isExpense ? 'Expense' : 'Income';
+      txnSheet.cell(CellIndex.indexByString('C$row')).value = '${txn.amount.toStringAsFixed(2)}';
+      txnSheet.cell(CellIndex.indexByString('D$row')).value = txnCurrency ?? data.currency;
+      txnSheet.cell(CellIndex.indexByString('E$row')).value = '${data.currency}${txn.baseAmount.toStringAsFixed(2)}';
+      txnSheet.cell(CellIndex.indexByString('F$row')).value = txn.isExpense ? 'Expense' : 'Income';
       row++;
     }
   }

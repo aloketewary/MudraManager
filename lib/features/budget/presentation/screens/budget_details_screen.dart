@@ -1,18 +1,24 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
+import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/dialog_utils.dart';
 import 'package:mudra_manager/core/utils/icon_helper.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
+import 'package:mudra_manager/shared/widgets/animated_balance.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
+import 'package:mudra_manager/shared/widgets/ambient_brand_section.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
+import 'dart:math' as math;
 
 class BudgetDetailsScreen extends ConsumerWidget {
   final BudgetWithProgress data;
@@ -23,329 +29,208 @@ class BudgetDetailsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final spacing = ref.watch(spacingProvider);
     final isGuestMode = ref.watch(guestModeProvider);
+    final brightness = Theme.of(context).brightness;
+    final isDark = brightness == Brightness.dark;
     final b = data.budget;
-    final spent = data.spent;
-    final total = b.amount;
-    final displaySpent = GuestModeUtil.applyGuestMode(spent, isGuestMode);
-    final displayTotal = GuestModeUtil.applyGuestMode(total, isGuestMode);
-    final remaining = displayTotal - displaySpent;
-    final pct = displayTotal > 0 ? (displaySpent / displayTotal) : 0;
+    final spent = GuestModeUtil.applyGuestMode(data.spent, isGuestMode);
+    final total = GuestModeUtil.applyGuestMode(b.amount, isGuestMode);
+    final remaining = total - spent;
+    final pct = total > 0 ? (spent / total).clamp(0.0, 1.5) : 0.0;
+    final isOver = spent > total;
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-
-    // Calculate days and daily allowance
     final now = DateTime.now();
     final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
     final daysLeft = daysInMonth - now.day + 1;
-    final dailyAllowance = daysLeft > 0 ? remaining / daysLeft : 0;
-    final burnRate = displaySpent / now.day;
-    final projectedSpend = burnRate * daysInMonth;
-    final projectedOverage = projectedSpend - displayTotal;
+    final safePerDay =
+        daysLeft > 0 && remaining > 0 ? remaining / daysLeft : 0.0;
 
-    // Status color based on health
-    final statusColor = pct >= 1.0
-        ? color.error
-        : pct >= 0.8
-            ? color.tertiary
-            : color.primary;
+    final accent = isOver
+        ? FinanceColors.expenseColor(brightness)
+        : pct > 0.8
+            ? Colors.orange
+            : FinanceColors.incomeColor(brightness);
 
-    // Sort categories: over 80% first
-    final List<CategorySpending> sortedCategories =
-        List.from(data.categorySpendings)
-          ..sort((a, b) {
-            final aPct = a.allocated > 0 ? a.spent / a.allocated : 0;
-            final bPct = b.allocated > 0 ? b.spent / b.allocated : 0;
-            if (aPct >= 0.8 && bPct < 0.8) return -1;
-            if (aPct < 0.8 && bPct >= 0.8) return 1;
-            return bPct.compareTo(aPct);
-          });
+    final sortedCategories = List<CategorySpending>.from(data.categorySpendings)
+      ..sort((a, b2) {
+        final aPct = a.allocated > 0 ? a.spent / a.allocated : 0.0;
+        final bPct = b2.allocated > 0 ? b2.spent / b2.allocated : 0.0;
+        return bPct.compareTo(aPct);
+      });
 
     return Scaffold(
       backgroundColor: color.surface,
-      body: CustomScrollView(
-        slivers: [
-          // Modern SliverAppBar
-          _buildSliverAppBar(b.name, remaining, displayTotal, pct.toDouble(),
-              statusColor, color, textTheme, context, spacing, ref),
-
-          // Quick Stats Cards
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: spacing.cardHorizontal,
-                vertical: spacing.cardVertical,
-              ),
-              child: _buildQuickStats(
-                displaySpent,
-                dailyAllowance.toDouble(),
-                daysLeft,
-                statusColor,
-                color,
-                textTheme,
-                spacing,
-              ),
-            ),
+      appBar: AppBar(
+        title: Text(b.name),
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(LucideIcons.pencil, size: 20),
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              context.push(AppRoutes.addBudget, extra: {'budget': b});
+            },
           ),
+          PopupMenuButton<String>(
+            icon: const Icon(LucideIcons.ellipsisVertical),
+            onSelected: (value) async {
+              if (value == 'delete') {
+                HapticFeedback.mediumImpact();
+                final confirmed = await DialogUtils.showDeleteConfirmation(
+                  context,
+                  title: 'Delete \'${b.name}\'',
+                );
+                if (confirmed == true && context.mounted) {
+                  await _deleteBudget(context, ref);
+                }
+              }
+            },
+            itemBuilder: (_) => [
+              PopupMenuItem(
+                value: 'delete',
+                child: Row(
+                  children: [
+                    Icon(LucideIcons.trash2, size: 18, color: color.error),
+                    const SizedBox(width: 12),
+                    Text('Delete', style: TextStyle(color: color.error)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+      body: ListView(
+        padding: EdgeInsets.symmetric(
+          horizontal: spacing.cardHorizontal,
+          vertical: spacing.cardVertical,
+        ),
+        children: [
+          // ── 1. HERO RING ──
+          _buildHero(remaining, total, spent, pct, isOver, accent, color,
+              textTheme, spacing, isDark),
+          SizedBox(height: spacing.sectionGap),
 
-          // Burn Rate Alert
-          if (pct >= 0.8 && projectedOverage > 0)
-            SliverToBoxAdapter(
-              child: Padding(
-                padding:
-                    EdgeInsets.symmetric(horizontal: spacing.cardHorizontal),
-                child: _buildBurnRateAlert(
-                  projectedOverage,
-                  burnRate,
-                  daysInMonth,
-                  now.day,
+          // ── 2. DAILY HINT + HEALTH ──
+          Row(
+            children: [
+              Expanded(
+                child: _buildMiniStat(
+                  '${formatCurrency(safePerDay, code: BaseCurrency.code)}/day',
+                  'Safe to spend',
+                  LucideIcons.shieldCheck,
+                  accent,
                   color,
                   textTheme,
                   spacing,
                 ),
               ),
-            ),
+              SizedBox(width: spacing.elementGap),
+              Expanded(
+                child: _buildMiniStat(
+                  '$daysLeft days',
+                  'Remaining',
+                  LucideIcons.calendar,
+                  color.primary,
+                  color,
+                  textTheme,
+                  spacing,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: spacing.elementGap * 1.5),
 
-          SliverToBoxAdapter(child: SizedBox(height: spacing.elementGap)),
+          // ── 3. SMART INSIGHT ──
+          _buildInsight(pct, isOver, remaining, safePerDay, daysLeft, accent,
+              color, textTheme, spacing, brightness),
+          SizedBox(height: spacing.sectionGap),
 
-          // Budget Health Indicator
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: spacing.cardHorizontal),
-              child: _buildHealthIndicator(
-                pct.toDouble(),
-                statusColor,
-                color,
-                textTheme,
-                spacing,
+          // ── 4. CATEGORY BREAKDOWN ──
+          if (sortedCategories.isNotEmpty) ...[
+            Text(
+              'BREAKDOWN',
+              style: textTheme.labelSmall?.copyWith(
+                color: color.onSurfaceVariant.withValues(alpha: 0.5),
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.5,
               ),
             ),
-          ),
+            SizedBox(height: spacing.elementGap),
+            ...sortedCategories.map((cat) => _buildCategoryTile(
+                  cat,
+                  isGuestMode,
+                  color,
+                  textTheme,
+                  spacing,
+                  brightness,
+                )),
+          ],
 
-          // Category Breakdown Header
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(
-                spacing.sectionGap,
-                spacing.sectionGap * 1.5,
-                spacing.sectionGap,
-                spacing.elementGap * 1.5,
-              ),
-              child: Row(
-                children: [
-                  Icon(LucideIcons.chartPie, size: 20, color: color.primary),
-                  SizedBox(width: spacing.elementGap),
-                  Text(
-                    'Category Breakdown',
-                    style: textTheme.titleMedium
-                        ?.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          // Category List
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final cat = sortedCategories[index];
-                return Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: spacing.cardHorizontal,
-                    vertical: spacing.cardVertical,
-                  ),
-                  child: _buildCategoryCard(
-                    cat,
-                    isGuestMode,
-                    color,
-                    textTheme,
-                    spacing,
-                  ),
-                );
-              },
-              childCount: sortedCategories.length,
-            ),
-          ),
-
-          SliverToBoxAdapter(child: SizedBox(height: spacing.sectionGap * 5)),
+          SizedBox(height: spacing.elementGap),
+          const AmbientBrandSection(),
         ],
       ),
-      // floatingActionButton: FloatingActionButton.extended(
-      //   onPressed: () {
-      //     HapticFeedback.mediumImpact();
-      //     context.push(AppRoutes.addBudget, extra: {'budget': b});
-      //   },
-      //   icon: const Icon(LucideIcons.settings),
-      //   label: const Text('Edit Budget'),
-      // ),
     );
   }
 
-  Widget _buildSliverAppBar(
-    String budgetName,
+  // ── HERO ──
+
+  Widget _buildHero(
     double remaining,
     double total,
+    double spent,
     double pct,
-    Color statusColor,
+    bool isOver,
+    Color accent,
     ColorScheme color,
     TextTheme textTheme,
-    BuildContext context,
     AppSpacing spacing,
-    WidgetRef ref,
+    bool isDark,
   ) {
-    final now = DateTime.now();
-
-    return SliverAppBar(
-      expandedHeight: 320,
-      pinned: true,
+    return Card(
       elevation: 0,
-      backgroundColor: color.surface,
-      title: Text(
-        budgetName,
-        style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+      color: color.surfaceContainerLow,
+      margin: const EdgeInsets.only(),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        side: BorderSide(color: color.outlineVariant.withValues(alpha: 0.3)),
       ),
-      actions: [
-        IconButton(
-          icon: const Icon(LucideIcons.pencil),
-          tooltip: 'Edit Budget',
-          onPressed: () {
-            HapticFeedback.lightImpact();
-            context.push(AppRoutes.addBudget, extra: {'budget': data.budget});
-          },
-        ),
-        PopupMenuButton<String>(
-          icon: const Icon(LucideIcons.ellipsisVertical),
-          onSelected: (value) async {
-            if (value == 'delete') {
-              HapticFeedback.mediumImpact();
-              final confirmed = await DialogUtils.showDeleteConfirmation(
-                context,
-                title: 'Delete \'$budgetName\'',
-                
-              );
-              if (confirmed == true && context.mounted) {
-                await _deleteBudget(context, ref);
-              }
-            }
-          },
-          itemBuilder: (context) => [
-            PopupMenuItem(
-              value: 'delete',
-              child: Row(
-                children: [
-                  Icon(LucideIcons.trash2, size: 18, color: color.error),
-                  const SizedBox(width: 12),
-                  Text(
-                    'Delete Budget',
-                    style: TextStyle(color: color.error),
+      child: Padding(
+        padding: EdgeInsets.all(spacing.cardInner + spacing.elementGap),
+        child: Column(
+          children: [
+            SizedBox(
+              width: 140,
+              height: 140,
+              child: TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0, end: pct.clamp(0.0, 1.0)),
+                duration: const Duration(milliseconds: 1200),
+                curve: Curves.easeOutCubic,
+                builder: (_, value, __) => CustomPaint(
+                  painter: _RingPainter(
+                    progress: value,
+                    accent: accent,
+                    track: accent.withValues(alpha: isDark ? 0.15 : 0.1),
+                    width: 10,
                   ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ],
-      flexibleSpace: LayoutBuilder(
-        builder: (context, constraints) {
-          final expandRatio =
-              (constraints.maxHeight - kToolbarHeight) / (320 - kToolbarHeight);
-          final opacity = expandRatio.clamp(0.0, 1.0);
-
-          return FlexibleSpaceBar(
-            background: Opacity(
-              opacity: opacity,
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      statusColor,
-                      statusColor.withValues(alpha: 0.8),
-                      statusColor.withValues(alpha: 0.6),
-                    ],
-                  ),
-                ),
-                child: SafeArea(
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      spacing.sectionGap * 1.5,
-                      56,
-                      spacing.sectionGap * 1.5,
-                      spacing.elementGap,
-                    ),
+                  child: Center(
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
-                          DateFormat('MMMM yyyy').format(now),
-                          style: textTheme.titleMedium?.copyWith(
-                            color: Colors.white.withValues(alpha: 0.9),
-                            fontWeight: FontWeight.w500,
-                            letterSpacing: 1,
-                          ),
-                        ),
-                        SizedBox(height: spacing.elementGap),
-                        CurrencyText(
-                          amount: remaining > 0 ? remaining : 0,
-                          compact: false,
-                          fixedLength: 0,
-                          style: textTheme.displayLarge?.copyWith(
+                        AnimatedBalance(
+                          value: remaining.abs(),
+                          style: textTheme.headlineSmall?.copyWith(
                             fontWeight: FontWeight.w900,
-                            color: Colors.white,
-                            letterSpacing: -1,
+                            color: accent,
                           ),
+                          fixedStringLength: 0,
+                          compact: true,
                         ),
-                        SizedBox(height: spacing.elementGap),
                         Text(
-                          'Remaining to spent',
-                          style: textTheme.titleSmall?.copyWith(
-                            color: Colors.white.withValues(alpha: 0.9),
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        SizedBox(height: spacing.elementGap),
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: spacing.cardHorizontal,
-                            vertical: spacing.cardVertical,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            borderRadius:
-                                BorderRadius.circular(spacing.radiusMedium),
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.3),
-                              width: 1,
-                            ),
-                          ),
-                          child: Text(
-                            '${(pct * 100).toStringAsFixed(0)}% spent',
-                            style: textTheme.labelLarge?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: spacing.elementGap),
-                        // Progress bar
-                        Container(
-                          height: 8,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            borderRadius:
-                                BorderRadius.circular(spacing.radiusSmall),
-                          ),
-                          child: FractionallySizedBox(
-                            alignment: Alignment.centerLeft,
-                            widthFactor: pct.clamp(0.0, 1.0),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius:
-                                    BorderRadius.circular(spacing.radiusSmall),
-                              ),
-                            ),
+                          isOver ? 'over' : 'left',
+                          style: textTheme.labelMedium?.copyWith(
+                            color: accent.withValues(alpha: 0.7),
                           ),
                         ),
                       ],
@@ -354,257 +239,130 @@ class BudgetDetailsScreen extends ConsumerWidget {
                 ),
               ),
             ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildQuickStats(
-    double spent,
-    double dailyAllowance,
-    int daysLeft,
-    Color statusColor,
-    ColorScheme color,
-    TextTheme textTheme,
-    AppSpacing spacing,
-  ) {
-    return Row(
-      children: [
-        Expanded(
-          child: Container(
-            padding: EdgeInsets.all(spacing.cardInner),
-            decoration: BoxDecoration(
-              color: color.primaryContainer,
-              borderRadius: BorderRadius.horizontal(
-                left: Radius.circular(spacing.radiusSmall),
-              ),
-              border: Border.all(
-                color: color.primaryContainer.withValues(alpha: 0.5),
-                width: 1,
-              ),
-            ),
-            child: Column(
+            SizedBox(height: spacing.sectionGap),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Container(
-                  padding: EdgeInsets.all(spacing.elementGap),
-                  decoration: BoxDecoration(
-                    color: color.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(
-                      spacing.radiusSmall,
-                    ),
-                  ),
-                  child: Icon(
-                    LucideIcons.trendingUp,
-                    color: color.primary,
-                    size: 20,
-                  ),
-                ),
-                SizedBox(height: spacing.elementGap),
+                Text('Used ',
+                    style: textTheme.bodySmall
+                        ?.copyWith(color: color.onSurfaceVariant)),
                 CurrencyText(
                   amount: spent,
                   fixedLength: 0,
-                  style: textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  compact: true,
+                  style: textTheme.bodySmall
+                      ?.copyWith(fontWeight: FontWeight.w700),
                 ),
-                SizedBox(height: spacing.elementGap),
-                Text(
-                  'Total Spent',
-                  style: textTheme.bodySmall?.copyWith(
-                    color: color.onSurfaceVariant,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        SizedBox(width: spacing.elementGap),
-        Expanded(
-          child: Container(
-            padding: EdgeInsets.all(spacing.cardInner),
-            decoration: BoxDecoration(
-              color: statusColor.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.horizontal(
-                right: Radius.circular(spacing.radiusSmall),
-              ),
-              border: Border.all(
-                color: statusColor.withValues(alpha: 0.3),
-                width: 1,
-              ),
-            ),
-            child: Column(
-              children: [
-                Container(
-                  padding: EdgeInsets.all(spacing.elementGap),
-                  decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(spacing.radiusSmall),
-                  ),
-                  child:
-                      Icon(LucideIcons.calendar, color: statusColor, size: 20),
-                ),
-                SizedBox(height: spacing.elementGap),
+                Text(' of ',
+                    style: textTheme.bodySmall
+                        ?.copyWith(color: color.onSurfaceVariant)),
                 CurrencyText(
-                  amount: dailyAllowance > 0 ? dailyAllowance : 0,
+                  amount: total,
                   fixedLength: 0,
-                  style: textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: statusColor,
-                  ),
-                ),
-                SizedBox(height: spacing.elementGap),
-                Text(
-                  'Per Day ($daysLeft left)',
-                  style: textTheme.bodySmall?.copyWith(
-                    color: statusColor,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  compact: true,
+                  style: textTheme.bodySmall
+                      ?.copyWith(fontWeight: FontWeight.w700),
                 ),
               ],
             ),
-          ),
+          ],
         ),
-      ],
+      ),
     );
   }
 
-  Widget _buildBurnRateAlert(
-    double overage,
-    double burnRate,
-    int daysInMonth,
-    int currentDay,
+  // ── MINI STAT ──
+
+  Widget _buildMiniStat(
+    String value,
+    String label,
+    IconData icon,
+    Color accent,
     ColorScheme color,
     TextTheme textTheme,
     AppSpacing spacing,
   ) {
-    final projectedDay =
-        (currentDay * 1.0 / (burnRate * daysInMonth / 100)).round();
-
     return Container(
       padding: EdgeInsets.all(spacing.cardInner),
       decoration: BoxDecoration(
-        color: color.errorContainer,
+        color: accent.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        border: Border.all(
-          color: color.error.withValues(alpha: 0.3),
-          width: 1,
-        ),
       ),
-      child: Row(
+      child: Column(
         children: [
-          Container(
-            padding: EdgeInsets.all(spacing.elementGap * 1.5),
-            decoration: BoxDecoration(
-              color: color.error,
-              borderRadius: BorderRadius.circular(spacing.radiusMedium),
+          Icon(icon, size: 18, color: accent),
+          SizedBox(height: spacing.elementGap),
+          Text(
+            value,
+            style: textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w800,
+              color: accent,
             ),
-            child:
-                Icon(LucideIcons.triangleAlert, color: color.onError, size: 24),
           ),
-          SizedBox(width: spacing.sectionGap),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Overspending Alert',
-                  style: textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: color.onErrorContainer,
-                  ),
-                ),
-                SizedBox(height: spacing.elementGap * 0.5),
-                Text(
-                  'At this pace, you\'ll exceed budget by ₹${overage.toStringAsFixed(0)}',
-                  style: textTheme.bodyMedium
-                      ?.copyWith(color: color.onErrorContainer),
-                ),
-              ],
-            ),
+          Text(
+            label,
+            style:
+                textTheme.labelSmall?.copyWith(color: color.onSurfaceVariant),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildHealthIndicator(
+  // ── INSIGHT ──
+
+  Widget _buildInsight(
     double pct,
-    Color statusColor,
+    bool isOver,
+    double remaining,
+    double safePerDay,
+    int daysLeft,
+    Color accent,
     ColorScheme color,
     TextTheme textTheme,
     AppSpacing spacing,
+    Brightness brightness,
   ) {
-    String healthStatus;
-    String healthMessage;
-    IconData healthIcon;
+    final String message;
+    final IconData icon;
 
-    if (pct >= 1.0) {
-      healthStatus = 'Over Budget';
-      healthMessage = 'You\'ve exceeded your budget limit';
-      healthIcon = LucideIcons.circleAlert;
-    } else if (pct >= 0.8) {
-      healthStatus = 'Approaching Limit';
-      healthMessage = 'Slow down spending to stay on track';
-      healthIcon = LucideIcons.triangleAlert;
-    } else if (pct >= 0.5) {
-      healthStatus = 'On Track';
-      healthMessage = 'You\'re managing your budget well';
-      healthIcon = LucideIcons.circleCheck;
+    if (isOver) {
+      message = BuddyMessages.budgetExceededAdjust;
+      icon = LucideIcons.triangleAlert;
+    } else if (pct > 0.8) {
+      message = BuddyMessages.budgetSlowDown(
+          formatCurrency(remaining, code: BaseCurrency.code), daysLeft);
+      icon = LucideIcons.clock;
+    } else if (pct > 0.5) {
+      message = BuddyMessages.budgetOnTrack(
+          formatCurrency(safePerDay, code: BaseCurrency.code));
+      icon = LucideIcons.circleCheck;
     } else {
-      healthStatus = 'Excellent';
-      healthMessage = 'Great job staying under budget!';
-      healthIcon = LucideIcons.sparkles;
+      message = BuddyMessages.budgetGreatDiscipline;
+      icon = LucideIcons.sparkles;
     }
 
     return Container(
-      padding: EdgeInsets.all(spacing.cardInner),
+      padding: EdgeInsets.symmetric(
+        horizontal: spacing.cardInner,
+        vertical: spacing.elementGap * 1.5,
+      ),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            statusColor.withValues(alpha: 0.15),
-            statusColor.withValues(alpha: 0.05),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(spacing.radiusLarge),
-        border: Border.all(
-          color: statusColor.withValues(alpha: 0.3),
-          width: 1,
-        ),
+        color: accent.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
       ),
       child: Row(
         children: [
-          Container(
-            padding: EdgeInsets.all(spacing.elementGap * 1.5),
-            decoration: BoxDecoration(
-              color: statusColor.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(spacing.radiusMedium),
-            ),
-            child: Icon(healthIcon, color: statusColor, size: 24),
-          ),
-          SizedBox(width: spacing.sectionGap),
+          Icon(icon, size: 20, color: accent),
+          SizedBox(width: spacing.elementGap),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  healthStatus,
-                  style: textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: statusColor,
-                  ),
-                ),
-                SizedBox(height: spacing.elementGap * 0.5),
-                Text(
-                  healthMessage,
-                  style: textTheme.bodyMedium?.copyWith(
-                    color: color.onSurfaceVariant,
-                  ),
-                ),
-              ],
+            child: Text(
+              message,
+              style: textTheme.bodyMedium?.copyWith(
+                color: accent,
+                fontWeight: FontWeight.w500,
+                height: 1.3,
+              ),
             ),
           ),
         ],
@@ -612,170 +370,166 @@ class BudgetDetailsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildCategoryCard(
+  // ── CATEGORY TILE ──
+
+  Widget _buildCategoryTile(
     CategorySpending cat,
     bool isGuestMode,
     ColorScheme color,
     TextTheme textTheme,
     AppSpacing spacing,
+    Brightness brightness,
   ) {
-    final catPct = cat.allocated > 0 ? cat.spent / cat.allocated : 0;
-    final catColor = catPct >= 1.0
-        ? color.error
-        : catPct >= 0.8
-            ? color.tertiary
-            : color.tertiary;
-    final isOverBudget = catPct >= 0.8;
-    final catRemaining = cat.allocated - cat.spent;
+    final catSpent = GuestModeUtil.applyGuestMode(cat.spent, isGuestMode);
+    final catAlloc = GuestModeUtil.applyGuestMode(cat.allocated, isGuestMode);
+    final pct = catAlloc > 0 ? (catSpent / catAlloc).clamp(0.0, 1.0) : 0.0;
+    final isOver = catSpent > catAlloc;
+    final remaining = catAlloc - catSpent;
 
-    return Container(
-      padding: EdgeInsets.all(spacing.cardInner),
-      decoration: BoxDecoration(
-        color: color.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        border: Border.all(
-          color: isOverBudget
-              ? catColor.withValues(alpha: 0.5)
-              : color.outlineVariant.withValues(alpha: 0.5),
-          width: isOverBudget ? 2 : 1,
+    final accent = isOver
+        ? FinanceColors.expenseColor(brightness)
+        : pct > 0.8
+            ? Colors.orange
+            : color.primary;
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: spacing.elementGap),
+      child: Container(
+        padding: EdgeInsets.all(spacing.cardInner),
+        decoration: BoxDecoration(
+          color: color.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(spacing.radiusMedium),
+          border: Border.all(
+            color: isOver
+                ? accent.withValues(alpha: 0.4)
+                : color.outlineVariant.withValues(alpha: 0.3),
+          ),
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: EdgeInsets.all(spacing.radiusSmall),
-                decoration: BoxDecoration(
-                  color: catColor.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                ),
-                child: Icon(
-                  IconHelper.getIconData(cat.category.iconName),
-                  color: catColor,
-                  size: 20,
-                ),
+        child: Row(
+          children: [
+            // Category icon in circular progress
+            SizedBox(
+              width: 40,
+              height: 40,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  CircularProgressIndicator(
+                    value: pct,
+                    strokeWidth: 3,
+                    strokeCap: StrokeCap.round,
+                    backgroundColor: accent.withValues(alpha: 0.12),
+                    valueColor: AlwaysStoppedAnimation(accent),
+                  ),
+                  Icon(
+                    IconHelper.getIconData(cat.category.iconName),
+                    size: 16,
+                    color: accent,
+                  ),
+                ],
               ),
-              SizedBox(width: spacing.elementGap),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      cat.category.name,
-                      style: textTheme.titleMedium
-                          ?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            SizedBox(width: spacing.elementGap * 1.5),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    cat.category.name,
+                    style: textTheme.titleSmall
+                        ?.copyWith(fontWeight: FontWeight.w700),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: spacing.elementGapUltraMin),
+                  // Thin inline bar
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(2),
+                    child: LinearProgressIndicator(
+                      value: pct,
+                      minHeight: 3,
+                      backgroundColor: accent.withValues(alpha: 0.1),
+                      valueColor: AlwaysStoppedAnimation(accent),
                     ),
-                    SizedBox(height: spacing.elementGap * 0.25),
-                    Text(
-                      '₹${GuestModeUtil.applyGuestMode(cat.spent, isGuestMode).toStringAsFixed(0)} of ₹${GuestModeUtil.applyGuestMode(cat.allocated, isGuestMode).toStringAsFixed(0)}',
-                      style: textTheme.bodySmall
-                          ?.copyWith(color: color.onSurfaceVariant),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              SizedBox(width: spacing.elementGap),
-              Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: spacing.cardHorizontal,
-                  vertical: spacing.cardVertical,
-                ),
-                decoration: BoxDecoration(
-                  color: catColor.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                ),
-                child: Text(
-                  '${(catPct * 100).toStringAsFixed(0)}%',
-                  style: textTheme.labelLarge?.copyWith(
-                    color: catColor,
+            ),
+            SizedBox(width: spacing.elementGap * 1.5),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                CurrencyText(
+                  amount: remaining.abs(),
+                  fixedLength: 0,
+                  compact: true,
+                  style: textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
+                    color: accent,
                   ),
                 ),
-              ),
-            ],
-          ),
-          SizedBox(height: spacing.elementGap),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(spacing.radiusSmall),
-            child: LinearProgressIndicator(
-              value: catPct.toDouble().clamp(0.0, 1.0),
-              minHeight: 10,
-              backgroundColor: color.outline.withValues(alpha: 0.1),
-              valueColor: AlwaysStoppedAnimation(catColor),
-            ),
-          ),
-          SizedBox(height: spacing.elementGap),
-          Row(
-            children: [
-              if (catRemaining > 0) ...[
-                Row(
-                  children: [
-                    Icon(LucideIcons.trendingDown, size: 14, color: catColor),
-                    SizedBox(width: spacing.elementGap),
-                    Text(
-                      '₹${GuestModeUtil.applyGuestMode(catRemaining, isGuestMode).toStringAsFixed(0)} remaining',
-                      style: textTheme.bodySmall?.copyWith(
-                        color: catColor,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
+                Text(
+                  isOver ? 'over' : 'left',
+                  style: textTheme.labelSmall
+                      ?.copyWith(color: color.onSurfaceVariant),
                 ),
               ],
-              const Spacer(),
-              if (isOverBudget)
-                Padding(
-                  padding: EdgeInsets.zero,
-                  child: Row(
-                    children: [
-                      Icon(
-                        catPct >= 1.0
-                            ? LucideIcons.circleAlert
-                            : LucideIcons.triangleAlert,
-                        size: 14,
-                        color: catColor,
-                      ),
-                      SizedBox(width: spacing.elementGap),
-                      Text(
-                        catPct >= 1.0 ? 'Over budget!' : 'Approaching limit',
-                        style: textTheme.labelSmall?.copyWith(
-                          color: catColor,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Future<void> _deleteBudget(BuildContext context, WidgetRef ref) async {
     try {
-      final budgetService = ref.read(budgetServiceProvider);
-      await budgetService.deleteBudget(data.budget.id);
-      // Show success message
-      SnackbarService.success(
-        'Budget "${data.budget.name}" deleted',
-      );
-      if (context.mounted) {
-        // Navigate back
-        context.pop();
-      }
+      await ref.read(budgetServiceProvider).deleteBudget(data.budget.id);
+      SnackbarService.success(BuddyMessages.budgetDeleted);
+      if (context.mounted) context.pop();
     } catch (e) {
-      SnackbarService.success(
-        'Budget "${data.budget.name}" deleted',
-      );
-      if (context.mounted) {
-        SnackbarService.error(
-          'Failed to delete budget',
-        );
-      }
+      if (context.mounted) SnackbarService.error(BuddyMessages.genericError);
     }
   }
+}
+
+// ── Ring painter ──
+
+class _RingPainter extends CustomPainter {
+  final double progress;
+  final Color accent;
+  final Color track;
+  final double width;
+
+  _RingPainter({
+    required this.progress,
+    required this.accent,
+    required this.track,
+    required this.width,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = (size.width - width) / 2;
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = width
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawCircle(center, radius, paint..color = track);
+
+    if (progress > 0) {
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: radius),
+        -math.pi / 2,
+        2 * math.pi * progress,
+        false,
+        paint..color = accent,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_RingPainter old) =>
+      old.progress != progress || old.accent != accent;
 }

@@ -1,3 +1,4 @@
+import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +8,6 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
-import 'package:mudra_manager/features/marketplace/services/marketplace_service.dart';
 import 'package:mudra_manager/features/dashboard/data/priority_alert_provider.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -20,88 +20,74 @@ class UtilityScreen extends ConsumerStatefulWidget {
 }
 
 class UtilityScreenState extends ConsumerState<UtilityScreen> {
-  List<String> _visibleUtilities = [];
-  List<String> _seenUtilities = [];
+  List<String> _hiddenUtilities = [];
   bool _isLoading = true;
 
-  final List<_UtilityItem> _allUtilities = [];
-  bool _utilitiesInitialized = false;
+  // Grouped utility definitions
+  static const _activeMoney = [
+    _UtilityDef(
+      id: 'recurring',
+      title: 'Bills',
+      subtitle: 'Upcoming & recurring',
+      icon: LucideIcons.repeat,
+      route: AppRoutes.recurringTransactions,
+      section: _Section.active,
+    ),
+    _UtilityDef(
+      id: 'trips',
+      title: 'Groups',
+      subtitle: 'Trips & splits',
+      icon: LucideIcons.users,
+      route: AppRoutes.trips,
+      section: _Section.active,
+    ),
+  ];
 
-  void _ensureUtilitiesInitialized() {
-    if (_utilitiesInitialized) return;
-    _utilitiesInitialized = true;
-    final cs = Theme.of(context).colorScheme;
-    _allUtilities.addAll([
-      _UtilityItem(
-        id: 'trips',
-        title: 'Trips & Split',
-        subtitle: 'Group expenses & settlements',
-        icon: LucideIcons.plane,
-        route: AppRoutes.trips,
-        color: cs.primary,
-      ),
-      _UtilityItem(
-        id: 'monthly_comparison',
-        title: 'Monthly Comparison',
-        subtitle: 'Current vs last month',
-        icon: LucideIcons.arrowLeftRight,
-        route: AppRoutes.monthlyComparison,
-        color: cs.secondary,
-      ),
-      _UtilityItem(
-        id: 'recurring',
-        title: 'Bill Control Center',
-        subtitle: 'Auto-create transactions',
-        icon: LucideIcons.repeat,
-        route: AppRoutes.recurringTransactions,
-        color: cs.tertiary,
-      ),
-      _UtilityItem(
-        id: 'budgets',
-        title: 'Budgets',
-        subtitle: 'Manage spending limits',
-        icon: LucideIcons.chartPie,
-        route: AppRoutes.budgetDashboard,
-        color: cs.error,
-      ),
-      _UtilityItem(
-        id: 'goals',
-        title: 'Goals',
-        subtitle: 'Track savings progress',
-        icon: LucideIcons.target,
-        route: AppRoutes.goalScreen,
-        color: cs.primary,
-      ),
-    ]);
-  }
+  static const _planning = [
+    _UtilityDef(
+      id: 'budgets',
+      title: 'Budgets',
+      subtitle: 'Spending limits',
+      icon: LucideIcons.chartPie,
+      route: AppRoutes.budgetDashboard,
+      section: _Section.planning,
+    ),
+    _UtilityDef(
+      id: 'goals',
+      title: 'Goals',
+      subtitle: 'Savings progress',
+      icon: LucideIcons.target,
+      route: AppRoutes.goalScreen,
+      section: _Section.planning,
+    ),
+  ];
+
+  static const _insights = [
+    _UtilityDef(
+      id: 'monthly_comparison',
+      title: 'Monthly Comparison',
+      subtitle: 'Current vs last month',
+      icon: LucideIcons.arrowLeftRight,
+      route: AppRoutes.monthlyComparison,
+      section: _Section.insights,
+    ),
+  ];
+
+  List<_UtilityDef> get _allUtilities =>
+      [..._activeMoney, ..._planning, ..._insights];
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _ensureUtilitiesInitialized();
-    if (_isLoading) _loadPreferences();
+  void initState() {
+    super.initState();
+    _loadPreferences();
   }
 
   Future<void> _loadPreferences() async {
     final prefs = await SharedPreferences.getInstance();
-    final saved = prefs.getStringList('visible_utilities');
-    final seen = prefs.getStringList('seen_utilities') ?? [];
-
-    final marketplace = MarketplaceService();
-    final filteredUtilities = <_UtilityItem>[];
-    for (final utility in _allUtilities) {
-      if (utility.pluginId == null ||
-          await marketplace.isPluginEnabled(utility.pluginId!)) {
-        filteredUtilities.add(utility);
-      }
-    }
-
+    final hidden = prefs.getStringList('hidden_utilities') ?? [];
     if (mounted) {
       setState(() {
-        _allUtilities.clear();
-        _allUtilities.addAll(filteredUtilities);
-        _visibleUtilities = saved ?? ['monthly_comparison', 'recurring'];
-        _seenUtilities = seen;
+        _hiddenUtilities = hidden;
         _isLoading = false;
       });
     }
@@ -109,33 +95,17 @@ class UtilityScreenState extends ConsumerState<UtilityScreen> {
 
   Future<void> _savePreferences() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList('visible_utilities', _visibleUtilities);
+    await prefs.setStringList('hidden_utilities', _hiddenUtilities);
   }
 
-  Future<void> _restoreDefaults() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('visible_utilities');
-    setState(() {
-      _visibleUtilities = ['monthly_comparison', 'recurring'];
-    });
-    await _savePreferences();
-  }
+  bool _isVisible(String id) => !_hiddenUtilities.contains(id);
 
-  void showCustomizeSheet() {
-    _showCustomizeSheet();
-  }
+  void showCustomizeSheet() => _showCustomizeSheet();
 
   void _showCustomizeSheet() {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-
-    final allIds = _allUtilities.map((e) => e.id).toList();
-    SharedPreferences.getInstance().then((prefs) {
-      prefs.setStringList('seen_utilities', allIds);
-    });
-    setState(() {
-      _seenUtilities = allIds;
-    });
+    final spacing = ref.read(spacingProvider);
 
     showModalBottomSheet(
       context: context,
@@ -146,12 +116,12 @@ class UtilityScreenState extends ConsumerState<UtilityScreen> {
       ),
       builder: (ctx) => StatefulBuilder(
         builder: (context, setModalState) => Container(
-          height: MediaQuery.of(context).size.height * 0.75,
-          padding: const EdgeInsets.only(bottom: 16),
+          height: MediaQuery.of(context).size.height * 0.6,
+          padding: EdgeInsets.only(bottom: spacing.sectionGap),
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.all(24),
+                padding: EdgeInsets.all(spacing.cardInner + spacing.elementGap),
                 child: Column(
                   children: [
                     Container(
@@ -162,53 +132,26 @@ class UtilityScreenState extends ConsumerState<UtilityScreen> {
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    SizedBox(height: spacing.sectionGap),
                     Row(
                       children: [
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: color.primaryContainer,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Icon(
-                            LucideIcons.settings2,
-                            color: color.onPrimaryContainer,
-                            size: 24,
-                          ),
+                        Icon(LucideIcons.settings2,
+                            color: color.primary, size: 22),
+                        SizedBox(width: spacing.elementGap),
+                        Text(
+                          'Customize Utilities',
+                          style: textTheme.titleLarge
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Customize Utilities',
-                                style: textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Reorder or hide utilities',
-                                style: textTheme.bodyMedium?.copyWith(
-                                  color: color.onSurfaceVariant,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: () async {
-                            await _restoreDefaults();
+                        const Spacer(),
+                        TextButton(
+                          onPressed: () {
+                            setModalState(() => _hiddenUtilities = []);
+                            setState(() {});
+                            _savePreferences();
                             SnackbarService.info(BuddyMessages.settingsSaved);
-                            if (mounted) {
-                              context.pop();
-                            }
                           },
-                          icon:
-                              Icon(LucideIcons.rotateCcw, color: color.primary),
-                          tooltip: 'Reset',
+                          child: const Text('Reset'),
                         ),
                       ],
                     ),
@@ -216,106 +159,43 @@ class UtilityScreenState extends ConsumerState<UtilityScreen> {
                 ),
               ),
               Expanded(
-                child: ReorderableListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: _allUtilities.length,
-                  onReorder: (oldIndex, newIndex) {
-                    setModalState(() {
-                      if (newIndex > oldIndex) newIndex--;
-                      final item = _allUtilities.removeAt(oldIndex);
-                      _allUtilities.insert(newIndex, item);
-                      _visibleUtilities = _allUtilities
-                          .where((u) => _visibleUtilities.contains(u.id))
-                          .map((u) => u.id)
-                          .toList();
-                    });
-                    setState(() {});
-                    _savePreferences();
-                  },
-                  itemBuilder: (context, index) {
-                    final utility = _allUtilities[index];
-                    final isVisible = _visibleUtilities.contains(utility.id);
-
+                child: ListView(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: spacing.cardHorizontal),
+                  children: _allUtilities.map((u) {
+                    final visible = _isVisible(u.id);
                     return Card(
-                      key: ValueKey(utility.id),
-                      margin: const EdgeInsets.only(bottom: 12),
                       elevation: 0,
+                      margin: EdgeInsets.only(bottom: spacing.elementGap),
                       color: color.surfaceContainerHighest,
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        leading: Stack(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: utility.color.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Icon(
-                                utility.icon,
-                                color: utility.color,
-                                size: 24,
-                              ),
-                            ),
-                            if (!_seenUtilities.contains(utility.id))
-                              Positioned(
-                                right: 0,
-                                top: 0,
-                                child: Container(
-                                  width: 10,
-                                  height: 10,
-                                  decoration: BoxDecoration(
-                                    color: color.primary,
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
+                      child: SwitchListTile(
+                        value: visible,
+                        onChanged: (v) {
+                          HapticFeedback.selectionClick();
+                          setModalState(() {
+                            if (v) {
+                              _hiddenUtilities.remove(u.id);
+                            } else {
+                              _hiddenUtilities.add(u.id);
+                            }
+                          });
+                          setState(() {});
+                          _savePreferences();
+                        },
+                        secondary: Icon(u.icon, color: color.primary, size: 22),
                         title: Text(
-                          utility.title,
-                          style: textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: color.onSurface,
-                          ),
+                          u.title,
+                          style: textTheme.titleSmall
+                              ?.copyWith(fontWeight: FontWeight.w600),
                         ),
                         subtitle: Text(
-                          utility.subtitle,
-                          style: textTheme.bodySmall?.copyWith(
-                            color: color.onSurfaceVariant,
-                          ),
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Switch(
-                              value: isVisible,
-                              onChanged: (value) {
-                                HapticFeedback.mediumImpact();
-                                setModalState(() {
-                                  if (value) {
-                                    _visibleUtilities.add(utility.id);
-                                  } else {
-                                    _visibleUtilities.remove(utility.id);
-                                  }
-                                });
-                                setState(() {});
-                                _savePreferences();
-                              },
-                            ),
-                            const SizedBox(width: 8),
-                            Icon(
-                              LucideIcons.gripVertical,
-                              color: color.onSurfaceVariant,
-                            ),
-                          ],
+                          u.subtitle,
+                          style: textTheme.bodySmall
+                              ?.copyWith(color: color.onSurfaceVariant),
                         ),
                       ),
                     );
-                  },
+                  }).toList(),
                 ),
               ),
             ],
@@ -332,443 +212,257 @@ class UtilityScreenState extends ConsumerState<UtilityScreen> {
     final textTheme = Theme.of(context).textTheme;
 
     if (_isLoading) {
-      return RefreshIndicator(
-        onRefresh: () async {
-          ref.invalidate(priorityAlertProvider);
-          setState(() => _isLoading = true);
-          await _loadPreferences();
-        },
-        child: CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          slivers: [
-            SliverAppBar(
-              expandedHeight: 280,
-              pinned: true,
-              backgroundColor: color.surface,
-              flexibleSpace: LayoutBuilder(
-                builder: (context, constraints) {
-                  final expandRatio = (constraints.maxHeight - kToolbarHeight) /
-                      (280 - kToolbarHeight);
-                  return FlexibleSpaceBar(
-                    titlePadding: EdgeInsets.zero,
-                    centerTitle: false,
-                    title: Opacity(
-                      opacity: 1 - expandRatio.clamp(0.0, 1.0),
-                      child: Container(
-                        alignment: Alignment.centerLeft,
-                        padding: const EdgeInsets.only(left: 16, bottom: 16),
-                        child: Text(
-                          'Utilities',
-                          style: textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                    background: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            color.primaryContainer,
-                            color.secondaryContainer,
-                          ],
-                        ),
-                      ),
-                      child: SafeArea(
-                        child: Opacity(
-                          opacity: expandRatio.clamp(0.0, 1.0),
-                          child: Padding(
-                            padding: const EdgeInsets.all(24),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(16),
-                                  decoration: BoxDecoration(
-                                    color: color.surfaceContainerHigh,
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(12),
-                                        decoration: BoxDecoration(
-                                          gradient: LinearGradient(
-                                            colors: [
-                                              color.primary,
-                                              color.primary
-                                                  .withValues(alpha: 0.7),
-                                            ],
-                                          ),
-                                          borderRadius:
-                                              BorderRadius.circular(16),
-                                        ),
-                                        child: Icon(
-                                          LucideIcons.layoutGrid,
-                                          color: color.onPrimary,
-                                          size: 32,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 16),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              'Utilities',
-                                              style: textTheme.headlineSmall
-                                                  ?.copyWith(
-                                                fontWeight: FontWeight.bold,
-                                                color: color.onSurface,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              'Powerful tools for your finances',
-                                              style: textTheme.bodyMedium
-                                                  ?.copyWith(
-                                                color: color.onSurfaceVariant,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const Spacer(),
-                                SkeletonLoader(
-                                  width: 200,
-                                  height: 32,
-                                  borderRadius: BorderRadius.circular(
-                                      spacing.radiusMedium),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                },
+      return Padding(
+        padding: EdgeInsets.all(spacing.cardHorizontalMax),
+        child: Column(
+          children: List.generate(
+            4,
+            (_) => Padding(
+              padding: EdgeInsets.only(bottom: spacing.elementGap),
+              child: SkeletonLoader(
+                width: double.infinity,
+                height: 80,
+                borderRadius: BorderRadius.circular(spacing.radiusMedium),
               ),
             ),
-            SliverPadding(
-              padding: EdgeInsets.all(spacing.cardHorizontalMax),
-              sliver: SliverGrid(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 1.0,
-                ),
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) => Card(
-                    color: color.surfaceContainerHighest,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          SkeletonLoader(
-                            width: 48,
-                            height: 48,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          const Spacer(),
-                          const SkeletonLoader(
-                            width: double.infinity,
-                            height: 16,
-                          ),
-                          const SizedBox(height: 8),
-                          const SkeletonLoader(
-                            width: 100,
-                            height: 12,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  childCount: 4,
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
       );
     }
 
-    final visibleItems =
-        _allUtilities.where((u) => _visibleUtilities.contains(u.id)).toList();
+    final activeVisible =
+        _activeMoney.where((u) => _isVisible(u.id)).toList();
+    final planningVisible =
+        _planning.where((u) => _isVisible(u.id)).toList();
+    final insightsVisible =
+        _insights.where((u) => _isVisible(u.id)).toList();
 
-    return Scaffold(
-      body: visibleItems.isEmpty
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(32),
-                    decoration: BoxDecoration(
-                      color: color.surfaceContainerHighest,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      LucideIcons.package,
-                      size: 64,
-                      color: color.onSurfaceVariant.withValues(alpha: 0.5),
-                    ),
-                  ),
-                  SizedBox(height: spacing.elementGap),
-                  Text(
-                    BuddyMessages.noData,
-                    style: textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: spacing.elementGap),
-                  Text(
-                    'Add utilities to get started',
-                    style: textTheme.bodyMedium?.copyWith(
-                      color: color.onSurfaceVariant,
-                    ),
-                  ),
-                  SizedBox(height: spacing.elementGap),
-                  FilledButton.icon(
-                    onPressed: _showCustomizeSheet,
-                    icon: const Icon(LucideIcons.plus),
-                    label: const Text('Add Utilities'),
-                    style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
+    final hasAny = activeVisible.isNotEmpty ||
+        planningVisible.isNotEmpty ||
+        insightsVisible.isNotEmpty;
+
+    if (!hasAny) {
+      return NoDataFound(
+        message: BuddyMessages.noData,
+        iconData: LucideIcons.layoutGrid,
+        action: FilledButton.icon(
+          onPressed: _showCustomizeSheet,
+          icon: const Icon(LucideIcons.plus),
+          label: const Text('Add Utilities'),
+        ),
+      );
+    }
+
+    return ListView(
+      padding: EdgeInsets.symmetric(
+        horizontal: spacing.cardHorizontal,
+        vertical: spacing.cardVertical,
+      ),
+      children: [
+        // Priority alert
+        _buildPriorityAlert(color, textTheme, spacing),
+
+        // 1. Active Money
+        if (activeVisible.isNotEmpty) ...[
+          _sectionHeader(
+            'Active Money',
+            LucideIcons.zap,
+            color.error,
+            textTheme,
+            spacing,
+          ),
+          SizedBox(height: spacing.elementGap),
+          Row(
+            children: activeVisible
+                .map(
+                  (u) => Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        right: u != activeVisible.last
+                            ? spacing.elementGap
+                            : 0,
                       ),
+                      child: _buildCard(u, color, textTheme, spacing),
                     ),
                   ),
-                ],
-              ),
-            )
-          : CustomScrollView(
-              slivers: [
-                Consumer(
-                  builder: (context, ref, child) {
-                    final alertAsync = ref.watch(priorityAlertProvider);
-                    return alertAsync.when(
-                      data: (alert) {
-                        if (alert == null) {
-                          return const SliverToBoxAdapter(child: SizedBox());
-                        }
+                )
+                .toList(),
+          ),
+          SizedBox(height: spacing.sectionGap * 1.5),
+        ],
 
-                        final alertColor = alert.type == AlertType.urgent
-                            ? color.error
-                            : alert.type == AlertType.warning
-                                ? color.tertiary
-                                : color.primary;
+        // 2. Planning
+        if (planningVisible.isNotEmpty) ...[
+          _sectionHeader(
+            'Planning',
+            LucideIcons.compass,
+            color.primary,
+            textTheme,
+            spacing,
+          ),
+          SizedBox(height: spacing.elementGap),
+          Row(
+            children: planningVisible
+                .map(
+                  (u) => Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        right: u != planningVisible.last
+                            ? spacing.elementGap
+                            : 0,
+                      ),
+                      child: _buildCard(u, color, textTheme, spacing),
+                    ),
+                  ),
+                )
+                .toList(),
+          ),
+          SizedBox(height: spacing.sectionGap * 1.5),
+        ],
 
-                        return SliverToBoxAdapter(
-                          child: InkWell(
-                            onTap: () {
-                              HapticFeedback.mediumImpact();
-                              context.push(alert.route);
-                            },
-                            borderRadius:
-                                BorderRadius.circular(spacing.radiusMedium),
-                            child: Container(
-                              margin: EdgeInsets.symmetric(
-                                horizontal: spacing.cardHorizontal,
-                                vertical: spacing.cardVertical,
-                              ),
-                              padding: EdgeInsets.symmetric(
-                                horizontal: spacing.cardHorizontal,
-                                vertical: spacing.cardVertical,
-                              ),
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    alertColor.withValues(alpha: 0.2),
-                                    alertColor.withValues(alpha: 0.05),
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                  color: alertColor.withValues(alpha: 0.3),
-                                  width: 2,
-                                ),
-                              ),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(12),
-                                    decoration: BoxDecoration(
-                                      color: alertColor.withValues(alpha: 0.3),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Icon(
-                                      alert.type == AlertType.urgent
-                                          ? LucideIcons.circleAlert
-                                          : alert.type == AlertType.warning
-                                              ? LucideIcons.triangleAlert
-                                              : LucideIcons.info,
-                                      color: color.onSurfaceVariant,
-                                      size: 20,
-                                    ),
-                                  ),
-                                  SizedBox(width: spacing.elementGap),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          alert.title,
-                                          style: textTheme.titleSmall?.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                            color: color.onSurfaceVariant,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          alert.message,
-                                          style: textTheme.bodyMedium?.copyWith(
-                                            color: color.onSurfaceVariant,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Icon(
-                                    LucideIcons.chevronRight,
-                                    color: color.onSurfaceVariant,
-                                  ),
-                                ],
+        // 3. Insights
+        if (insightsVisible.isNotEmpty) ...[
+          _sectionHeader(
+            'Insights',
+            LucideIcons.lightbulb,
+            color.secondary,
+            textTheme,
+            spacing,
+          ),
+          SizedBox(height: spacing.elementGap),
+          ...insightsVisible.map(
+            (u) => Padding(
+              padding: EdgeInsets.only(bottom: spacing.elementGap),
+              child: _buildListCard(u, color, textTheme, spacing),
+            ),
+          ),
+        ],
+
+        SizedBox(
+          height: MediaQuery.of(context).padding.bottom +
+              kBottomNavigationBarHeight +
+              16,
+        ),
+      ],
+    );
+  }
+
+  Widget _sectionHeader(String title, IconData icon, Color accent,
+      TextTheme textTheme, AppSpacing spacing) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: accent),
+        SizedBox(width: spacing.elementGap),
+        Text(
+          title,
+          style: textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: accent,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPriorityAlert(
+      ColorScheme color, TextTheme textTheme, AppSpacing spacing) {
+    return Consumer(
+      builder: (context, ref, _) {
+        final alertAsync = ref.watch(priorityAlertProvider);
+        return alertAsync.maybeWhen(
+          data: (alert) {
+            if (alert == null) return const SizedBox.shrink();
+
+            final alertColor = alert.type == AlertType.urgent
+                ? color.error
+                : alert.type == AlertType.warning
+                    ? color.tertiary
+                    : color.primary;
+
+            return Padding(
+              padding: EdgeInsets.only(bottom: spacing.sectionGap),
+              child: InkWell(
+                onTap: () {
+                  HapticFeedback.mediumImpact();
+                  context.push(alert.route);
+                },
+                borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                child: Container(
+                  padding: EdgeInsets.all(spacing.cardInner),
+                  decoration: BoxDecoration(
+                    color: alertColor.withValues(alpha: 0.08),
+                    borderRadius:
+                        BorderRadius.circular(spacing.radiusMedium),
+                    border: Border.all(
+                      color: alertColor.withValues(alpha: 0.25),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(spacing.elementGap),
+                        decoration: BoxDecoration(
+                          color: alertColor.withValues(alpha: 0.15),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          alert.type == AlertType.urgent
+                              ? LucideIcons.circleAlert
+                              : LucideIcons.triangleAlert,
+                          color: alertColor,
+                          size: 18,
+                        ),
+                      ),
+                      SizedBox(width: spacing.elementGap * 1.5),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              alert.title,
+                              style: textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                          ),
-                        );
-                      },
-                      loading: () => SliverToBoxAdapter(
-                        child: Container(
-                          margin: EdgeInsets.symmetric(
-                            horizontal: spacing.cardHorizontal,
-                            vertical: spacing.cardVertical,
-                          ),
-                          child: SkeletonLoader(
-                            width: double.infinity,
-                            height: 100,
-                            borderRadius:
-                                BorderRadius.circular(spacing.radiusMedium),
-                          ),
+                            Text(
+                              alert.message,
+                              style: textTheme.bodySmall?.copyWith(
+                                color: color.onSurfaceVariant,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
                         ),
                       ),
-                      error: (_, __) =>
-                          const SliverToBoxAdapter(child: SizedBox()),
-                    );
-                  },
-                ),
-                SliverPadding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: spacing.cardHorizontal,
-                    vertical: spacing.cardVertical,
-                  ),
-                  sliver: SliverGrid(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: spacing.cardHorizontal,
-                      mainAxisSpacing: spacing.cardVertical,
-                      childAspectRatio: 1.0,
-                    ),
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) =>
-                          _UtilityCard(item: visibleItems[index]),
-                      childCount:
-                          visibleItems.length > 4 ? 4 : visibleItems.length,
-                    ),
+                      Icon(
+                        LucideIcons.chevronRight,
+                        size: 16,
+                        color: color.onSurfaceVariant.withValues(alpha: 0.5),
+                      ),
+                    ],
                   ),
                 ),
-                if (visibleItems.length > 4)
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: spacing.cardHorizontal,
-                        vertical: spacing.cardVertical,
-                      ),
-                      child: Text(
-                        'More Tools',
-                        style: textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                if (visibleItems.length > 4)
-                  SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) => Container(
-                        margin: EdgeInsets.symmetric(
-                          horizontal: spacing.cardHorizontal,
-                          vertical: spacing.cardVertical,
-                        ),
-                        child: _UtilityListCard(item: visibleItems[index + 4]),
-                      ),
-                      childCount: visibleItems.length - 4,
-                    ),
-                  ),
-                SliverToBoxAdapter(
-                  child: SizedBox(
-                    height: MediaQuery.of(context).padding.bottom +
-                        kBottomNavigationBarHeight +
-                        16,
-                  ),
-                ),
-              ],
-            ),
+              ),
+            );
+          },
+          orElse: () => const SizedBox.shrink(),
+        );
+      },
     );
   }
-}
 
-class _UtilityItem {
-  final String id;
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final String route;
-  final String? pluginId;
-  final Color color;
-
-  _UtilityItem({
-    required this.id,
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    required this.route,
-    this.pluginId,
-    required this.color,
-  });
-}
-
-class _UtilityCard extends ConsumerWidget {
-  final _UtilityItem item;
-
-  const _UtilityCard({required this.item});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final spacing = ref.watch(spacingProvider);
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
+  // Medium card — used for Active Money and Planning sections
+  Widget _buildCard(_UtilityDef item, ColorScheme color, TextTheme textTheme,
+      AppSpacing spacing) {
     return Card(
       elevation: 0,
-      color: colorScheme.surfaceContainerLow,
-      margin: const EdgeInsets.only(),
+      margin: EdgeInsets.zero,
+      color: color.surfaceContainerLow,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
         side: BorderSide(
-          color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+          color: color.outlineVariant.withValues(alpha: 0.5),
         ),
       ),
       child: InkWell(
@@ -777,134 +471,79 @@ class _UtilityCard extends ConsumerWidget {
           context.push(item.route);
         },
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        child: Stack(
-          clipBehavior: Clip.hardEdge,
-          children: [
-            Positioned(
-              right: -20,
-              bottom: -20,
-              child: Icon(
-                item.icon,
-                size: 100,
-                color: item.color.withValues(alpha: 0.08),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: item.color.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      item.icon,
-                      color: item.color,
-                      size: 28,
-                    ),
-                  ),
-                  const Spacer(),
-                  Text(
-                    item.title,
-                    style: textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: colorScheme.onSurface,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Flexible(
-                    child: Text(
-                      item.subtitle,
-                      style: textTheme.labelSmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _UtilityListCard extends StatelessWidget {
-  final _UtilityItem item;
-
-  const _UtilityListCard({required this.item});
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return Card(
-      elevation: 0,
-      color: colorScheme.surfaceContainerLow,
-      margin: const EdgeInsets.only(),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: colorScheme.outlineVariant.withValues(alpha: 0.5),
-        ),
-      ),
-      child: InkWell(
-        onTap: () {
-          HapticFeedback.mediumImpact();
-          context.push(item.route);
-        },
-        borderRadius: BorderRadius.circular(16),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(spacing.cardInner),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(item.icon, size: 24, color: color.primary),
+              SizedBox(height: spacing.elementGap * 1.5),
+              Text(
+                item.title,
+                style: textTheme.titleSmall
+                    ?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: spacing.elementGapMin),
+              Text(
+                item.subtitle,
+                style: textTheme.bodySmall
+                    ?.copyWith(color: color.onSurfaceVariant),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // List card — used for Insights section (smaller, horizontal)
+  Widget _buildListCard(_UtilityDef item, ColorScheme color,
+      TextTheme textTheme, AppSpacing spacing) {
+    return Card(
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      color: color.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        side: BorderSide(
+          color: color.outlineVariant.withValues(alpha: 0.5),
+        ),
+      ),
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.mediumImpact();
+          context.push(item.route);
+        },
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        child: Padding(
+          padding: EdgeInsets.all(spacing.cardInner),
           child: Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: item.color.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  item.icon,
-                  color: item.color,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 16),
+              Icon(item.icon, size: 22, color: color.secondary),
+              SizedBox(width: spacing.elementGap * 1.5),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       item.title,
-                      style: textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: colorScheme.onSurface,
-                      ),
+                      style: textTheme.titleSmall
+                          ?.copyWith(fontWeight: FontWeight.bold),
                     ),
-                    const SizedBox(height: 2),
                     Text(
                       item.subtitle,
-                      style: textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
+                      style: textTheme.bodySmall
+                          ?.copyWith(color: color.onSurfaceVariant),
                     ),
                   ],
                 ),
               ),
               Icon(
                 LucideIcons.chevronRight,
-                color: colorScheme.onSurfaceVariant,
+                size: 16,
+                color: color.onSurfaceVariant.withValues(alpha: 0.4),
               ),
             ],
           ),
@@ -913,3 +552,23 @@ class _UtilityListCard extends StatelessWidget {
     );
   }
 }
+
+class _UtilityDef {
+  final String id;
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final String route;
+  final _Section section;
+
+  const _UtilityDef({
+    required this.id,
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.route,
+    required this.section,
+  });
+}
+
+enum _Section { active, planning, insights }

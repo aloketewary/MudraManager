@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:flutter/material.dart';
 import 'package:mudra_manager/features/budget/data/budget_alert_service.dart';
@@ -80,7 +82,7 @@ class BudgetAlertBanner extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${alert.budget.name}: ₹${alert.spent.toStringAsFixed(0)} / ₹${alert.budget.amount.toStringAsFixed(0)}',
+                        '${alert.budget.name}: ${formatCurrency(alert.spent, decimals: 0)} / ${formatCurrency(alert.budget.amount, decimals: 0)}',
                         style: textTheme.bodyMedium?.copyWith(
                           color: colorScheme.onSurface,
                         ),

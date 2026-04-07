@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
@@ -121,11 +123,11 @@ class NotificationListenerBridge with WidgetsBindingObserver {
     String body;
 
     if (total == 1 && approved == 1) {
-      final amountStr = totalAmount > 0 ? ' of ₹${totalAmount.toStringAsFixed(0)}' : '';
+      final amountStr = totalAmount > 0 ? ' of ${formatCurrency(totalAmount, code: BaseCurrency.code, decimals: 0)}' : '';
       title = '✅ Got it!';
       body = tone.singleApproved(amountStr);
     } else if (approved > 0 && pending == 0 && needsReview == 0) {
-      final amountStr = totalAmount > 0 ? ' totalling ₹${totalAmount.toStringAsFixed(0)}' : '';
+      final amountStr = totalAmount > 0 ? ' totalling ${formatCurrency(totalAmount, code: BaseCurrency.code, decimals: 0)}' : '';
       title = '✅ All caught up!';
       body = tone.allApproved(approved, amountStr);
     } else if (needsReview > 0 || pending > 0) {

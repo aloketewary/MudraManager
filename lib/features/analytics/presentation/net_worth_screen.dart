@@ -1,3 +1,9 @@
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
+import 'package:mudra_manager/shared/widgets/no_data_found.dart';
+import 'package:mudra_manager/shared/widgets/ambient_brand_section.dart';
+import 'package:mudra_manager/shared/widgets/stat_panel_card.dart';
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
+import 'package:mudra_manager/core/utils/refresh_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -5,6 +11,7 @@ import 'package:mudra_manager/features/analytics/data/net_worth_service.dart';
 import 'package:mudra_manager/core/extension/account_type_extenstion.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:mudra_manager/shared/widgets/widgets.dart';
 
@@ -21,183 +28,136 @@ class NetWorthScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: color.surface,
+      appBar: AppBar(
+        title: const Text('Net Worth'),
+        backgroundColor: color.surface,
+        elevation: 0,
+      ),
       body: netWorthAsync.when(
-        data: (data) => CustomScrollView(
-          slivers: [
-            _buildSliverAppBar(
-              data,
-              historyAsync,
-              color,
-              textTheme,
-              context,
-              spacing,
-            ),
-            SliverToBoxAdapter(
-              child: Column(
-                children: [
-                  SizedBox(height: spacing.sectionGap * 1.5),
-                  _buildQuickStats(
-                    data,
-                    color,
-                    textTheme,
-                    spacing,
-                  ),
-                  SizedBox(height: spacing.sectionGap * 1.5),
-                  _buildCompositionCards(
-                    data,
-                    color,
-                    textTheme,
-                    spacing,
-                  ),
-                  SizedBox(height: spacing.sectionGap),
-                  _buildAssetsList(
-                    data.assets,
-                    color,
-                    textTheme,
-                    spacing,
-                    isAsset: true,
-                  ),
-                  SizedBox(height: spacing.elementGap * 1.5),
-                  _buildAssetsList(
-                    data.liabilities,
-                    color,
-                    textTheme,
-                    spacing,
-                    isAsset: false,
-                  ),
-                  SizedBox(height: spacing.sectionGap * 2),
-                ],
+        data: (data) {
+          if (data.assets.isEmpty && data.liabilities.isEmpty) {
+            return NoDataFound(
+              message: BuddyMessages.noAccounts,
+              iconData: LucideIcons.wallet,
+            );
+          }
+
+          return RefreshIndicator(
+            onRefresh: () => RefreshHelper.withMinDuration(() async {
+              ref.invalidate(netWorthProvider);
+              ref.invalidate(netWorthHistoryProvider);
+            }),
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: EdgeInsets.symmetric(
+                horizontal: spacing.cardHorizontal,
+                vertical: spacing.cardVertical,
               ),
+              children: [
+                _buildHeroCard(data, historyAsync, color, textTheme, spacing),
+                SizedBox(height: spacing.elementGap),
+                _buildQuickStats(data, color, textTheme, spacing, Theme.of(context).brightness),
+                SizedBox(height: spacing.elementGap),
+                _buildCompositionCard(data, color, textTheme, spacing),
+                SizedBox(height: spacing.elementGap),
+                _buildAccountsCard(
+                  data.assets, color, textTheme, spacing, isAsset: true,
+                ),
+                SizedBox(height: spacing.elementGap),
+                _buildAccountsCard(
+                  data.liabilities, color, textTheme, spacing, isAsset: false,
+                ),
+                SizedBox(height: spacing.sectionGap),
+                const AmbientBrandSection(),
+              ],
             ),
-          ],
+          );
+        },
+        loading: () => ListView(
+          children: List.generate(3, (_) => const DashboardCardSkeleton()),
         ),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) =>
-            const Center(child: Text('Unable to load net worth data')),
+        error: (_, __) => Center(child: Text(BuddyMessages.genericError)),
       ),
     );
   }
 
-  Widget _buildSliverAppBar(
+  // ── HERO CARD ──
+
+  Widget _buildHeroCard(
     NetWorthData data,
     AsyncValue<List<NetWorthHistoryPoint>> historyAsync,
     ColorScheme color,
     TextTheme textTheme,
-    BuildContext context,
     AppSpacing spacing,
   ) {
     final isPositive = data.netWorth >= 0;
 
-    return SliverAppBar(
-      expandedHeight: 320,
-      pinned: true,
+    return Card(
       elevation: 0,
-      backgroundColor: color.surface,
-      title: Text(
-        'Net Worth',
-        style: textTheme.titleLarge?.copyWith(
-          fontWeight: FontWeight.bold,
-        ),
+      color: color.primaryContainer,
+      margin: const EdgeInsets.only(),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
       ),
-      flexibleSpace: LayoutBuilder(
-        builder: (context, constraints) {
-          // Calculate opacity based on scroll position
-          final expandRatio =
-              (constraints.maxHeight - kToolbarHeight) / (320 - kToolbarHeight);
-          final opacity = expandRatio.clamp(0.0, 1.0);
-
-          return FlexibleSpaceBar(
-            background: Opacity(
-              opacity: opacity,
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      color.primaryContainer,
-                      color.primaryContainer.withValues(alpha: 0.8),
-                      color.tertiaryContainer.withValues(alpha: 0.6),
-                    ],
+      child: Padding(
+        padding: EdgeInsets.all(spacing.cardInner + spacing.elementGap),
+        child: Column(
+          children: [
+            CurrencyText(
+              amount: data.netWorth,
+              compact: false,
+              showSign: true,
+              fixedLength: 0,
+              style: textTheme.displaySmall?.copyWith(
+                fontWeight: FontWeight.w900,
+                color: color.onPrimaryContainer,
+                letterSpacing: -0.5,
+              ),
+              showPositiveSign: false,
+            ),
+            SizedBox(height: spacing.elementGap * 1.5),
+            Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: spacing.sectionGap,
+                vertical: spacing.elementGap,
+              ),
+              decoration: BoxDecoration(
+                color: color.primary.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(spacing.radiusMedium),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    isPositive
+                        ? LucideIcons.trendingUp
+                        : LucideIcons.trendingDown,
+                    size: 16,
+                    color: color.onPrimaryContainer,
                   ),
-                ),
-                child: SafeArea(
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      spacing.sectionGap * 1.5,
-                      56,
-                      spacing.sectionGap * 1.5,
-                      spacing.elementGap,
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        CurrencyText(
-                          amount: data.netWorth,
-                          compact: false,
-                          showSign: true,
-                          fixedLength: 0,
-                          style: textTheme.displayLarge?.copyWith(
-                            fontWeight: FontWeight.w900,
-                            color: color.onPrimaryContainer,
-                            letterSpacing: -1,
-                          ),
-                        ),
-                        SizedBox(height: spacing.sectionGap),
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: spacing.sectionGap,
-                            vertical: spacing.elementGap,
-                          ),
-                          decoration: BoxDecoration(
-                            color: color.primary.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: color.primary.withValues(alpha: 0.3),
-                              width: 1,
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                isPositive
-                                    ? LucideIcons.trendingUp
-                                    : LucideIcons.trendingDown,
-                                size: 16,
-                                color: color.onPrimaryContainer,
-                              ),
-                              SizedBox(width: spacing.elementGap * 0.75),
-                              CurrencyText(
-                                amount: data.monthlyChange,
-                                compact: false,
-                                showSign: true,
-                                fixedLength: 0,
-                                suffixText: 'this month',
-                                style: textTheme.labelLarge?.copyWith(
-                                  color: color.onPrimaryContainer,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          height: spacing.cardInner + spacing.elementGap,
-                        ),
-                        historyAsync.when(
-                          data: (history) => _buildMiniChart(history, color),
-                          loading: () => const SizedBox(height: 60),
-                          error: (_, __) => const SizedBox.shrink(),
-                        ),
-                      ],
+                  SizedBox(width: spacing.elementGap),
+                  CurrencyText(
+                    amount: data.monthlyChange,
+                    compact: false,
+                    showSign: true,
+                    fixedLength: 0,
+                    suffixText: 'this month',
+                    style: textTheme.labelLarge?.copyWith(
+                      color: color.onPrimaryContainer,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                ),
+                ],
               ),
             ),
-          );
-        },
+            SizedBox(height: spacing.sectionGap),
+            historyAsync.when(
+              data: (history) => _buildMiniChart(history, color),
+              loading: () => const SizedBox(height: 60),
+              error: (_, __) => const SizedBox.shrink(),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -249,96 +209,42 @@ class NetWorthScreen extends ConsumerWidget {
     );
   }
 
+  // ── QUICK STATS ──
+
   Widget _buildQuickStats(
     NetWorthData data,
     ColorScheme color,
     TextTheme textTheme,
     AppSpacing spacing,
+    Brightness brightness,
   ) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: spacing.sectionGap),
-      child: Row(
-        children: [
-          Expanded(
-            child: _buildStatCard(
-              'Total Assets',
-              data.totalAssets,
-              LucideIcons.circleArrowUp,
-              color.primary,
-              color,
-              textTheme,
-              spacing,
-            ),
+    return Row(
+      children: [
+        Expanded(
+          child: StatPanelCard(
+            label: 'Assets',
+            amount: data.totalAssets,
+            icon: LucideIcons.arrowDown,
+            accent: FinanceColors.incomeColor(brightness),
           ),
-          SizedBox(width: spacing.elementGap * 1.5),
-          Expanded(
-            child: _buildStatCard(
-              'Total Liabilities',
-              data.totalLiabilities,
-              LucideIcons.circleArrowDown,
-              color.error,
-              color,
-              textTheme,
-              spacing,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatCard(
-    String label,
-    double amount,
-    IconData icon,
-    Color accentColor,
-    ColorScheme color,
-    TextTheme textTheme,
-    AppSpacing spacing,
-  ) {
-    return Container(
-      padding: EdgeInsets.all(spacing.cardInner),
-      decoration: BoxDecoration(
-        color: color.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(spacing.radiusLarge),
-        border: Border.all(
-          color: color.outlineVariant.withValues(alpha: 0.5),
-          width: 1,
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: EdgeInsets.all(spacing.elementGap),
-            decoration: BoxDecoration(
-              color: accentColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(spacing.radiusSmall + 2),
-            ),
-            child: Icon(icon, color: accentColor, size: 20),
+        SizedBox(width: spacing.elementGap),
+        Expanded(
+          child: StatPanelCard(
+            label: 'Liabilities',
+            amount: data.totalLiabilities,
+            icon: LucideIcons.arrowUp,
+            accent: FinanceColors.expenseColor(brightness),
+            trendInverted: true,
           ),
-          SizedBox(height: spacing.elementGap * 1.5),
-          Text(
-            label,
-            style: textTheme.bodySmall?.copyWith(
-              color: color.onSurfaceVariant,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          SizedBox(height: spacing.elementGap * 0.5),
-          Text(
-            '₹${amount.toStringAsFixed(0)}',
-            style: textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
-  Widget _buildCompositionCards(
+  // ── COMPOSITION ──
+
+  Widget _buildCompositionCard(
     NetWorthData data,
     ColorScheme color,
     TextTheme textTheme,
@@ -348,22 +254,15 @@ class NetWorthScreen extends ConsumerWidget {
     final totalLiabilities = data.totalLiabilities;
     final total = totalAssets + totalLiabilities;
 
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: spacing.sectionGap),
-      child: Container(
+    return Card(
+      elevation: 0,
+      color: color.primaryContainer,
+      margin: const EdgeInsets.only(),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+      ),
+      child: Padding(
         padding: EdgeInsets.all(spacing.cardInner + spacing.elementGap),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              color.primaryContainer,
-              color.secondaryContainer.withValues(alpha: 0.5),
-            ],
-          ),
-          borderRadius:
-              BorderRadius.circular(spacing.cardInner + spacing.elementGap),
-        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -375,35 +274,21 @@ class NetWorthScreen extends ConsumerWidget {
               ),
             ),
             SizedBox(height: spacing.sectionGap),
-            Row(
-              children: [
-                Expanded(
-                  flex: totalAssets.toInt(),
-                  child: Container(
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: color.primary,
-                      borderRadius: BorderRadius.horizontal(
-                        left: Radius.circular(spacing.elementGap * 0.5),
-                      ),
-                    ),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(spacing.radiusSmall),
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: totalAssets > 0 ? totalAssets.toInt() : 1,
+                    child: Container(height: 8, color: color.primary),
                   ),
-                ),
-                Expanded(
-                  flex: totalLiabilities.toInt() > 0
-                      ? totalLiabilities.toInt()
-                      : 1,
-                  child: Container(
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: color.error,
-                      borderRadius: BorderRadius.horizontal(
-                        right: Radius.circular(spacing.elementGap * 0.5),
-                      ),
-                    ),
+                  SizedBox(width: spacing.elementGapUltraMin),
+                  Expanded(
+                    flex: totalLiabilities > 0 ? totalLiabilities.toInt() : 1,
+                    child: Container(height: 8, color: color.error),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             SizedBox(height: spacing.sectionGap),
             Row(
@@ -412,18 +297,12 @@ class NetWorthScreen extends ConsumerWidget {
                 _buildLegendItem(
                   'Assets',
                   total > 0 ? (totalAssets / total * 100) : 0,
-                  color.primary,
-                  textTheme,
-                  color,
-                  spacing,
+                  color.primary, textTheme, color, spacing,
                 ),
                 _buildLegendItem(
                   'Liabilities',
                   total > 0 ? (totalLiabilities / total * 100) : 0,
-                  color.error,
-                  textTheme,
-                  color,
-                  spacing,
+                  color.error, textTheme, color, spacing,
                 ),
               ],
             ),
@@ -444,17 +323,14 @@ class NetWorthScreen extends ConsumerWidget {
     return Row(
       children: [
         Container(
-          width: 12,
-          height: 12,
-          decoration: BoxDecoration(
-            color: itemColor,
-            shape: BoxShape.circle,
-          ),
+          width: 10,
+          height: 10,
+          decoration: BoxDecoration(color: itemColor, shape: BoxShape.circle),
         ),
         SizedBox(width: spacing.elementGap),
         Text(
           '$label ${percentage.toStringAsFixed(1)}%',
-          style: textTheme.bodyMedium?.copyWith(
+          style: textTheme.bodySmall?.copyWith(
             fontWeight: FontWeight.w600,
             color: color.onPrimaryContainer,
           ),
@@ -463,7 +339,9 @@ class NetWorthScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildAssetsList(
+  // ── ACCOUNTS LIST ──
+
+  Widget _buildAccountsCard(
     List<AccountItem> items,
     ColorScheme color,
     TextTheme textTheme,
@@ -471,147 +349,146 @@ class NetWorthScreen extends ConsumerWidget {
     required bool isAsset,
   }) {
     if (items.isEmpty) return const SizedBox.shrink();
-    final itemColor =
-        isAsset ? color.primary : color.error;
+    final itemColor = isAsset ? color.primary : color.error;
 
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: spacing.sectionGap),
-      child: Container(
-        decoration: BoxDecoration(
-          color: color.surfaceContainerLow,
-          borderRadius:
-              BorderRadius.circular(spacing.cardInner + spacing.elementGap),
-          border: Border.all(
-            color: color.outlineVariant.withValues(alpha: 0.5),
-            width: 1,
-          ),
+    return Card(
+      elevation: 0,
+      color: color.surfaceContainerLow,
+      margin: const EdgeInsets.only(),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        side: BorderSide(
+          color: color.outlineVariant.withValues(alpha: 0.5),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: EdgeInsets.all(spacing.cardInner + spacing.elementGap),
-              child: Row(
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(spacing.radiusSmall + 2),
-                    decoration: BoxDecoration(
-                      color: itemColor.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                    ),
-                    child: Icon(
-                      isAsset ? LucideIcons.wallet : LucideIcons.creditCard,
-                      color: itemColor,
-                      size: 20,
-                    ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Padding(
+            padding: EdgeInsets.all(spacing.cardInner),
+            child: Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(spacing.elementGap),
+                  decoration: BoxDecoration(
+                    color: itemColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(spacing.radiusMedium),
                   ),
-                  SizedBox(width: spacing.elementGap * 1.5),
-                  Text(
-                    isAsset ? 'Assets' : 'Liabilities',
-                    style: textTheme.titleMedium?.copyWith(
+                  child: Icon(
+                    isAsset ? LucideIcons.wallet : LucideIcons.creditCard,
+                    color: itemColor, size: 20,
+                  ),
+                ),
+                SizedBox(width: spacing.elementGap * 1.5),
+                Text(
+                  isAsset ? 'Assets' : 'Liabilities',
+                  style: textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const Spacer(),
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: spacing.elementGap,
+                    vertical: spacing.elementGapMin,
+                  ),
+                  decoration: BoxDecoration(
+                    color: itemColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                  ),
+                  child: Text(
+                    '${items.length}',
+                    style: textTheme.labelMedium?.copyWith(
+                      color: itemColor,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const Spacer(),
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: spacing.radiusSmall + 2,
-                      vertical: spacing.elementGap * 0.75,
-                    ),
-                    decoration: BoxDecoration(
-                      color: itemColor.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                    ),
-                    child: Text(
-                      '${items.length}',
-                      style: textTheme.labelMedium?.copyWith(
-                        color: itemColor,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-            Divider(
-              height: 1,
-              color: color.outlineVariant.withValues(alpha: 0.3),
-            ),
-            ...items.asMap().entries.map((entry) {
-              final index = entry.key;
-              final item = entry.value;
-              final isLast = index == items.length - 1;
+          ),
+          Divider(
+            height: 1,
+            color: color.outlineVariant.withValues(alpha: 0.3),
+          ),
+          // Items
+          ...items.asMap().entries.map((entry) {
+            final index = entry.key;
+            final item = entry.value;
+            final isLast = index == items.length - 1;
 
-              return Column(
-                children: [
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: spacing.cardInner + spacing.elementGap,
-                      vertical: spacing.sectionGap,
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: EdgeInsets.all(spacing.radiusMedium),
-                          decoration: BoxDecoration(
-                            color: Color(item.colorValue ?? 0xFF6B4CE6)
-                                .withValues(alpha: 0.15),
-                            borderRadius:
-                                BorderRadius.circular(spacing.radiusMedium),
-                          ),
-                          child: Icon(
-                            item.accountType.icon,
-                            size: 22,
-                            color: Color(item.colorValue ?? 0xFF6B4CE6),
-                          ),
-                        ),
-                        SizedBox(width: spacing.elementGap * 1.75),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                item.name,
-                                style: textTheme.bodyLarge?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              SizedBox(height: spacing.elementGap * 0.25),
-                              Text(
-                                _getPsychologicalLabel(
-                                  item.accountType,
-                                  isAsset,
-                                ),
-                                style: textTheme.bodySmall?.copyWith(
-                                  color: color.onSurfaceVariant,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Text(
-                          '₹${item.balance.toStringAsFixed(0)}',
-                          style: textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: itemColor,
-                          ),
-                        ),
-                      ],
-                    ),
+            return Column(
+              children: [
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: spacing.cardInner,
+                    vertical: spacing.elementGap * 1.5,
                   ),
-                  if (!isLast)
-                    Divider(
-                      height: 1,
-                      indent: 72,
-                      endIndent: spacing.cardInner + spacing.elementGap,
-                      color: color.outlineVariant.withValues(alpha: 0.3),
-                    ),
-                ],
-              );
-            }),
-          ],
-        ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(spacing.radiusMedium),
+                        decoration: BoxDecoration(
+                          color: Color(item.colorValue ?? 0xFF6B4CE6)
+                              .withValues(alpha: 0.15),
+                          borderRadius:
+                              BorderRadius.circular(spacing.radiusMedium),
+                        ),
+                        child: Icon(
+                          item.accountType.icon,
+                          size: 22,
+                          color: Color(item.colorValue ?? 0xFF6B4CE6),
+                        ),
+                      ),
+                      SizedBox(width: spacing.elementGap * 1.5),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              item.name,
+                              style: textTheme.bodyLarge?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            SizedBox(height: spacing.elementGapUltraMin),
+                            Text(
+                              _getPsychologicalLabel(item.accountType, isAsset),
+                              style: textTheme.bodySmall?.copyWith(
+                                color: color.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      CurrencyText(
+                        amount: item.balance,
+                        currencyCode: item.currencyCode,
+                        fixedLength: 0,
+                        compact: false,
+                        style: textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: itemColor,
+                        ),
+                        showPositiveSign: false,
+                        showSign: true,
+                      ),
+                    ],
+                  ),
+                ),
+                if (!isLast)
+                  Divider(
+                    height: 1,
+                    indent: 72,
+                    endIndent: spacing.cardInner,
+                    color: color.outlineVariant.withValues(alpha: 0.3),
+                  ),
+              ],
+            );
+          }),
+        ],
       ),
     );
   }

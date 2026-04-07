@@ -1,4 +1,10 @@
+import 'package:isar_community/isar.dart';
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
+import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
+import 'dart:math' as math;
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -60,29 +66,47 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
       _startDate = widget.existing!.startDate;
       _endDate = widget.existing!.endDate;
       _budgetType = widget.existing!.budgetType;
+      _recurrence = widget.existing!.recurrence;
       // Load tags for tag-wise budgets
       if (_budgetType == BudgetType.tagWise) {
         widget.existing!.budgetTags.load().then((_) {
           for (final tag in widget.existing!.budgetTags) {
             _selectedTagIds.add(tag.id);
           }
-          setState(() {});
+          if (mounted) setState(() {});
         });
       }
-      widget.existing!.allocations.load().then((_) {
-        for (final alloc in widget.existing!.allocations) {
-          alloc.category.load().then((_) {
-            final cat = alloc.category.value!;
-            _selectedCats.add(cat);
-            selectedCategories.add(cat.id);
-            _allocCtrls[cat.id] = TextEditingController(
-              text: alloc.amount.toString(),
-            );
-            setState(() {});
-          });
-        }
-      });
+      // Load category allocations
+      _loadAllocations();
     }
+  }
+
+  Future<void> _loadAllocations() async {
+    final budget = widget.existing!;
+    await budget.allocations.load();
+    var allocs = budget.allocations.toList();
+
+    // Fallback: if IsarLinks is empty (old budgets before link fix),
+    // query allocations directly by their budget backlink
+    if (allocs.isEmpty) {
+      final isar = await ref.read(isarServiceProvider).getInstance();
+      allocs = await isar.budgetCategoryAllocations
+          .filter()
+          .budget((q) => q.idEqualTo(budget.id))
+          .findAll();
+    }
+
+    for (final alloc in allocs) {
+      await alloc.category.load();
+      final cat = alloc.category.value;
+      if (cat == null) continue;
+      _selectedCats.add(cat);
+      selectedCategories.add(cat.id);
+      _allocCtrls[cat.id] = TextEditingController(
+        text: alloc.amount.toString(),
+      );
+    }
+    if (mounted) setState(() {});
   }
 
   @override
@@ -182,7 +206,17 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
       await bud.categories.load();
       await bud.allocations.load();
       await bud.budgetTags.load();
-      await service.deleteAllocation(bud.allocations.toList());
+
+      // Get old allocations — fallback to backlink query for old budgets
+      var oldAllocs = bud.allocations.toList();
+      if (oldAllocs.isEmpty) {
+        final isar = await ref.read(isarServiceProvider).getInstance();
+        oldAllocs = await isar.budgetCategoryAllocations
+            .filter()
+            .budget((q) => q.idEqualTo(bud.id))
+            .findAll();
+      }
+      await service.deleteAllocation(oldAllocs);
       bud.categories.clear();
       bud.allocations.clear();
       bud.budgetTags.clear();
@@ -245,8 +279,8 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
       ref.invalidate(budgetServiceProvider);
       SnackbarService.success(
         isEditing
-            ? 'Budget updated successfully'
-            : 'Budget created successfully',
+            ? BuddyMessages.budgetUpdated
+            : BuddyMessages.budgetCreated,
       );
       context.pop();
     }
@@ -325,7 +359,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
                       CommonTextInputField(
                         controller: _amountC,
                         labelText: ctxt.budget_budgetAmountControllerText,
-                        iconData: Icons.currency_rupee,
+                        iconData: currencyIcon(null),
                         inputType: const TextInputType.numberWithOptions(
                           decimal: true,
                         ),
@@ -335,6 +369,52 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
                             ? ctxt.budget_amountRequiredHintText
                             : null,
                         onChanged: (v) => setState(() {}),
+                      ),
+
+                      // Quick suggestion chips
+                      _buildQuickChips(color, textTheme, spacing),
+
+                      // Dynamic slider
+                      if (totalAmount > 0)
+                        _buildSmartSlider(totalAmount, color, spacing),
+
+                      // Live progress bar
+                      if (widget.existing != null && totalAmount > 0)
+                        _buildLiveProgress(totalAmount, color, textTheme, spacing),
+
+                      // Smart predictive feedback
+                      if (totalAmount > 0)
+                        _buildSmartFeedback(totalAmount, color, textTheme, spacing),
+
+                      SizedBox(height: spacing.sectionGap * 1.5),
+
+                      // Recurrence (pick first — drives duration)
+                      _buildSectionHeader(
+                        'Recurrence',
+                        LucideIcons.repeat,
+                        color,
+                        textTheme,
+                        spacing,
+                      ),
+                      SizedBox(height: spacing.elementGap),
+                      CommonDropdownField(
+                        value: _recurrence,
+                        items: BudgetRecurrence.values,
+                        onChanged: (val) {
+                          if (val != null) {
+                            HapticFeedback.lightImpact();
+                            setState(() {
+                              _recurrence = val;
+                              _autoFillDates(val);
+                            });
+                          }
+                        },
+                        labelText: ctxt.budget_recurrenceText,
+                        itemBuilder: (BudgetRecurrence budget) => Row(
+                          children: [
+                            Text(ctxt.translate(budget.name).toTitleCase()),
+                          ],
+                        ),
                       ),
 
                       SizedBox(height: spacing.sectionGap * 1.5),
@@ -481,7 +561,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
                                         height: spacing.elementGap * 0.5,
                                       ),
                                       Text(
-                                        '₹${totalAmount.toStringAsFixed(0)}',
+                                        '${formatCurrency(totalAmount, code: BaseCurrency.code)}',
                                         style: textTheme.titleLarge?.copyWith(
                                           fontWeight: FontWeight.bold,
                                           color: color.onTertiaryContainer,
@@ -502,7 +582,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
                                         height: spacing.elementGap * 0.5,
                                       ),
                                       Text(
-                                        '₹${totalAlloc.toStringAsFixed(0)}',
+                                        '${formatCurrency(totalAlloc, code: BaseCurrency.code)}',
                                         style: textTheme.titleLarge?.copyWith(
                                           fontWeight: FontWeight.bold,
                                           color: color.onTertiaryContainer,
@@ -545,7 +625,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
                                     ),
                                   ),
                                   Text(
-                                    '₹${remaining.abs().toStringAsFixed(0)}',
+                                    '${formatCurrency(remaining.abs(), code: BaseCurrency.code)}',
                                     style: textTheme.titleSmall?.copyWith(
                                       fontWeight: FontWeight.bold,
                                       color: remaining < 0
@@ -715,32 +795,6 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
                         ),
                       ],
 
-                      SizedBox(height: spacing.sectionGap * 1.5),
-                      _buildSectionHeader(
-                        'Recurrence',
-                        LucideIcons.repeat,
-                        color,
-                        textTheme,
-                        spacing,
-                      ),
-                      SizedBox(height: spacing.elementGap),
-                      CommonDropdownField(
-                        value: _recurrence,
-                        items: BudgetRecurrence.values,
-                        onChanged: (val) {
-                          if (val != null) {
-                            HapticFeedback.lightImpact();
-                            setState(() => _recurrence = val);
-                          }
-                        },
-                        labelText: ctxt.budget_recurrenceText,
-                        itemBuilder: (BudgetRecurrence budget) => Row(
-                          children: [
-                            Text(ctxt.translate(budget.name).toTitleCase()),
-                          ],
-                        ),
-                      ),
-
                       SizedBox(height: spacing.sectionGap * 5),
                     ],
                   ),
@@ -749,10 +803,296 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
             ],
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => ListView(children: List.generate(3, (_) => const BudgetCardSkeleton())),
         error: (e, _) => Center(child: Text(BuddyMessages.errorWith('$e'))),
       ),
     );
+  }
+
+  // ── QUICK CHIPS ──
+
+  Widget _buildQuickChips(ColorScheme color, TextTheme textTheme, AppSpacing spacing) {
+    // Smart suggestions based on context
+    final existing = widget.existing;
+    final currentAmount = double.tryParse(_amountC.text) ?? 0;
+    final spent = _getSpent();
+
+    final suggestions = <int>[];
+    if (existing != null && spent > 0) {
+      // Based on current spending pattern
+      suggestions.add(((spent * 1.2) / 500).round() * 500); // 20% buffer
+      suggestions.add(((spent * 1.5) / 1000).round() * 1000); // 50% buffer
+    }
+    // Round number suggestions
+    suggestions.addAll([1000, 2000, 5000, 10000, 20000, 50000]);
+
+    // Deduplicate + filter + take top 4
+    final chips = suggestions.toSet()
+        .where((v) => v > 0 && v != currentAmount.round())
+        .toList()..sort();
+    final display = chips.take(4).toList();
+
+    if (display.isEmpty) return const SizedBox.shrink();
+
+    return Padding(
+      padding: EdgeInsets.only(top: spacing.elementGap, bottom: spacing.elementGap),
+      child: Wrap(
+        spacing: spacing.elementGap,
+        runSpacing: spacing.elementGap,
+        children: display.map((v) {
+          final isSelected = currentAmount.round() == v;
+          return GestureDetector(
+            onTap: () {
+              HapticFeedback.mediumImpact();
+              setState(() => _amountC.text = v.toString());
+            },
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: EdgeInsets.symmetric(
+                horizontal: spacing.elementGap * 1.5,
+                vertical: spacing.elementGap,
+              ),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? color.primary.withValues(alpha: 0.15)
+                    : color.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                border: Border.all(
+                  color: isSelected
+                      ? color.primary
+                      : color.outlineVariant.withValues(alpha: 0.3),
+                ),
+              ),
+              child: Text(
+                formatCurrency(v.toDouble(), code: BaseCurrency.code),
+                style: textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: isSelected ? color.primary : color.onSurfaceVariant,
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  // ── DYNAMIC SLIDER ──
+
+  Widget _buildSmartSlider(double amount, ColorScheme color, AppSpacing spacing) {
+    // Dynamic range: max = max(amount * 2, 10000), snaps to round numbers
+    final maxVal = math.max(amount * 2, 10000.0);
+    final step = maxVal <= 10000 ? 500.0 : maxVal <= 50000 ? 1000.0 : 5000.0;
+    final divisions = (maxVal / step).round().clamp(10, 200);
+
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: spacing.elementGap),
+      child: SliderTheme(
+        data: SliderThemeData(
+          activeTrackColor: color.primary,
+          inactiveTrackColor: color.primary.withValues(alpha: 0.1),
+          thumbColor: color.primary,
+          overlayColor: color.primary.withValues(alpha: 0.08),
+          trackHeight: 4,
+          thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
+        ),
+        child: Slider(
+          value: amount.clamp(0, maxVal),
+          min: 0,
+          max: maxVal,
+          divisions: divisions,
+          onChanged: (v) {
+            HapticFeedback.selectionClick();
+            // Snap to step
+            final snapped = (v / step).round() * step;
+            setState(() => _amountC.text = snapped.round().toString());
+          },
+        ),
+      ),
+    );
+  }
+
+  // ── LIVE PROGRESS BAR ──
+
+  Widget _buildLiveProgress(
+    double newBudget, ColorScheme color, TextTheme textTheme, AppSpacing spacing,
+  ) {
+    final spent = _getSpent();
+    final pct = newBudget > 0 ? (spent / newBudget).clamp(0.0, 1.0) : 0.0;
+    final accent = pct > 0.9
+        ? color.error
+        : pct > 0.7
+            ? Colors.orange
+            : FinanceColors.incomeColor(Theme.of(context).brightness);
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: spacing.elementGap),
+      child: Column(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(3),
+            child: TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0, end: pct),
+              duration: const Duration(milliseconds: 400),
+              curve: Curves.easeOutCubic,
+              builder: (_, value, __) => LinearProgressIndicator(
+                value: value,
+                minHeight: 6,
+                backgroundColor: accent.withValues(alpha: 0.1),
+                valueColor: AlwaysStoppedAnimation(accent),
+              ),
+            ),
+          ),
+          SizedBox(height: spacing.elementGapMin),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '${formatCurrency(spent, code: BaseCurrency.code)} spent',
+                style: textTheme.labelSmall?.copyWith(color: color.onSurfaceVariant),
+              ),
+              Text(
+                '${(pct * 100).toStringAsFixed(0)}% used',
+                style: textTheme.labelSmall?.copyWith(
+                  color: accent,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── SMART FEEDBACK ──
+
+  Widget _buildSmartFeedback(
+    double newAmount, ColorScheme color, TextTheme textTheme, AppSpacing spacing,
+  ) {
+    final spent = _getSpent();
+    final now = DateTime.now();
+    final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
+    final daysLeft = daysInMonth - now.day + 1;
+    final remaining = newAmount - spent;
+    final safePerDay = daysLeft > 0 && remaining > 0 ? remaining / daysLeft : 0.0;
+    final burnRate = spent / now.day;
+    final projectedSpend = burnRate * daysInMonth;
+    final daysUntilExceed = burnRate > 0 ? ((newAmount - spent) / burnRate).round() : 999;
+
+    final String message;
+    final IconData icon;
+    final Color accent;
+
+    if (newAmount < spent) {
+      // 🔴 Already exceeded
+      message = BuddyMessages.budgetAlreadySpent(formatCurrency(spent, code: BaseCurrency.code));
+      icon = LucideIcons.triangleAlert;
+      accent = color.error;
+    } else if (projectedSpend > newAmount && daysUntilExceed < daysLeft) {
+      // 🟣 Over-optimistic
+      message = BuddyMessages.budgetMayExceedIn(daysUntilExceed);
+      icon = LucideIcons.trendingUp;
+      accent = Colors.deepPurple;
+    } else if (remaining / newAmount < 0.2) {
+      // 🟠 Tight
+      message = BuddyMessages.budgetGettingTight(formatCurrency(remaining, code: BaseCurrency.code), daysLeft);
+      icon = LucideIcons.clock;
+      accent = Colors.orange;
+    } else {
+      // 🟢 Healthy
+      message = BuddyMessages.budgetInControl(formatCurrency(safePerDay, code: BaseCurrency.code));
+      icon = LucideIcons.shieldCheck;
+      accent = FinanceColors.incomeColor(Theme.of(context).brightness);
+    }
+
+    // Daily impact comparison (before vs after)
+    final oldBudget = widget.existing?.amount ?? 0;
+    final oldDaily = daysLeft > 0 && oldBudget > spent ? (oldBudget - spent) / daysLeft : 0.0;
+    final showComparison = widget.existing != null && oldBudget != newAmount && oldDaily > 0;
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: spacing.elementGap),
+      child: Container(
+        padding: EdgeInsets.all(spacing.cardInner),
+        decoration: BoxDecoration(
+          color: accent.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(icon, size: 16, color: accent),
+                SizedBox(width: spacing.elementGap),
+                Expanded(
+                  child: Text(
+                    message,
+                    style: textTheme.bodySmall?.copyWith(
+                      color: accent,
+                      fontWeight: FontWeight.w600,
+                      height: 1.3,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            if (showComparison) ...[
+              SizedBox(height: spacing.elementGap),
+              Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: spacing.elementGap,
+                  vertical: spacing.elementGapMin,
+                ),
+                decoration: BoxDecoration(
+                  color: accent.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                ),
+                child: Text(
+                  '${formatCurrency(oldDaily, code: BaseCurrency.code)}/day \u2192 ${formatCurrency(safePerDay, code: BaseCurrency.code)}/day',
+                  style: textTheme.labelSmall?.copyWith(
+                    color: accent,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  double _getSpent() {
+    if (widget.existing == null) return 0;
+    return ref.read(budgetsWithProgressProvider).valueOrNull
+        ?.where((b) => b.budget.id == widget.existing!.id)
+        .firstOrNull?.spent ?? 0.0;
+  }
+
+  void _autoFillDates(BudgetRecurrence recurrence) {
+    final now = DateTime.now();
+    switch (recurrence) {
+      case BudgetRecurrence.daily:
+        _startDate = now;
+        _endDate = now;
+        break;
+      case BudgetRecurrence.weekly:
+        _startDate = now;
+        _endDate = now.add(const Duration(days: 6));
+        break;
+      case BudgetRecurrence.monthly:
+        _startDate = DateTime(now.year, now.month, 1);
+        _endDate = DateTime(now.year, now.month + 1, 0);
+        break;
+      case BudgetRecurrence.yearly:
+        _startDate = DateTime(now.year, 1, 1);
+        _endDate = DateTime(now.year, 12, 31);
+        break;
+      case BudgetRecurrence.none:
+        break;
+    }
   }
 
   Widget _buildSectionHeader(
@@ -966,7 +1306,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
               child: CommonTextInputField(
                 controller: _allocCtrls[cat.id],
                 labelText: 'Allocate Amount',
-                iconData: Icons.currency_rupee,
+                iconData: currencyIcon(null),
                 inputType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),

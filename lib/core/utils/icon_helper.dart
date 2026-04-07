@@ -366,6 +366,7 @@ class IconHelper {
       'goal': LucideIcons.target,
       'trophy': LucideIcons.trophy,
       'download': LucideIcons.download,
+      'currency_exchange': LucideIcons.currency,
     },
   };
 

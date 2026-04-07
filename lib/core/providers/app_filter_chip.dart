@@ -1,9 +1,12 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/currency/currency_provider.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/extension/account_type_extenstion.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
@@ -264,7 +267,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                       ),
                     ),
                     Text(
-                      '₹ ${balance.toStringAsFixed(2)}',
+                      formatCurrency(balance, code: BaseCurrency.code, decimals: 2),
                       style: textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w900,
                         color: _selectedColor,
@@ -419,7 +422,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                 color: color.onSurfaceVariant.withValues(alpha: 0.6),
               ),
               prefixIcon: Icon(
-                LucideIcons.indianRupee,
+                ref.watch(baseCurrencyIconProvider),
                 size: 18,
                 color: _selectedColor,
               ),

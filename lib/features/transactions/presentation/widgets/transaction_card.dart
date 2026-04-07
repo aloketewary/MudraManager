@@ -10,6 +10,7 @@ import 'package:mudra_manager/core/extension/case_extention.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
+import 'package:mudra_manager/core/utils/dialog_utils.dart';
 import 'package:mudra_manager/core/utils/icon_helper.dart';
 import 'package:mudra_manager/core/utils/string_util.dart';
 import 'package:mudra_manager/shared/widgets/adaptive_text.dart';
@@ -35,6 +36,9 @@ class TransactionCard extends ConsumerStatefulWidget {
   final int? index;
   final bool isRecurring;
   final bool enablePeek;
+  final String? currencyCode;
+  final double? convertedAmount;
+  final VoidCallback? onUnlinkRecurring;
 
   const TransactionCard({
     super.key,
@@ -53,6 +57,9 @@ class TransactionCard extends ConsumerStatefulWidget {
     this.index,
     this.isRecurring = false,
     this.enablePeek = false,
+    this.currencyCode,
+    this.convertedAmount,
+    this.onUnlinkRecurring,
   });
 
   @override
@@ -107,224 +114,148 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
             borderRadius: BorderRadius.circular(spacing.radiusMedium),
             side: BorderSide(color: color.outlineVariant, width: 0.5),
           ),
-          child: Stack(
-            children: [
-              if (widget.isRecurring)
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: color.errorContainer.withValues(alpha: 0.3),
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(20),
-                        bottomRight: Radius.circular(16),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.repeat,
-                          size: 12,
-                          color: color.error,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          'SUBSCRIPTION',
-                          style: textTheme.labelSmall?.copyWith(
-                            color: color.error,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              if (widget.tripName != null)
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: color.primaryContainer.withValues(alpha: 0.3),
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(20),
-                        bottomRight: Radius.circular(16),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.flight_takeoff,
-                          size: 12,
-                          color: color.primary,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          'TRIP',
-                          style: textTheme.labelSmall?.copyWith(
-                            color: color.primary,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              Padding(
-                padding: const EdgeInsets.all(14),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    widget.isTransfer ? buildTransferCard() : buildNormalCard(),
-                    if (_hasDetails)
-                      AnimatedSize(
-                        duration: const Duration(milliseconds: 200),
-                        curve: Curves.easeOutCubic,
-                        alignment: Alignment.topCenter,
-                        child: _expanded &&
-                                (widget.description?.isNotEmpty == true ||
-                                    widget.tags.isNotEmpty)
-                            ? AnimatedOpacity(
-                                opacity: _expanded ? 1.0 : 0.0,
-                                duration: const Duration(milliseconds: 200),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 10,
-                                      ),
-                                      child: Container(
-                                        height: 1,
-                                        decoration: BoxDecoration(
-                                          gradient: LinearGradient(
-                                            colors: [
-                                              color.outlineVariant
-                                                  .withValues(alpha: 0.0),
-                                              color.outlineVariant
-                                                  .withValues(alpha: 0.4),
-                                              color.outlineVariant
-                                                  .withValues(alpha: 0.0),
-                                            ],
-                                          ),
-                                        ),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                widget.isTransfer
+                    ? buildTransferCard()
+                    : widget.isRecurring
+                        ? buildSubscriptionCard()
+                        : widget.tripName != null
+                            ? buildTripCard()
+                            : buildNormalCard(),
+                if (_hasDetails)
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeOutCubic,
+                    alignment: Alignment.topCenter,
+                    child: _expanded &&
+                            (widget.description?.isNotEmpty == true ||
+                                widget.tags.isNotEmpty)
+                        ? AnimatedOpacity(
+                            opacity: _expanded ? 1.0 : 0.0,
+                            duration: const Duration(milliseconds: 200),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 10,
+                                  ),
+                                  child: Container(
+                                    height: 1,
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          color.outlineVariant
+                                              .withValues(alpha: 0.0),
+                                          color.outlineVariant
+                                              .withValues(alpha: 0.4),
+                                          color.outlineVariant
+                                              .withValues(alpha: 0.0),
+                                        ],
                                       ),
                                     ),
-                                    if (widget.description?.isNotEmpty == true)
-                                      Container(
-                                        width: double.infinity,
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 12,
-                                          vertical: 8,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: color.surfaceContainerHighest
-                                              .withValues(alpha: 0.4),
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                        ),
-                                        child: Row(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Icon(
-                                              Icons.notes_rounded,
-                                              size: 14,
-                                              color: color.onSurfaceVariant
-                                                  .withValues(alpha: 0.6),
-                                            ),
-                                            const SizedBox(width: 8),
-                                            Expanded(
-                                              child: Text(
-                                                widget.description!,
-                                                style: textTheme.bodySmall
-                                                    ?.copyWith(
-                                                  color: color.onSurfaceVariant,
-                                                  height: 1.4,
-                                                ),
-                                                maxLines: 3,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    if (widget.description?.isNotEmpty ==
-                                            true &&
-                                        widget.tags.isNotEmpty)
-                                      const SizedBox(height: 8),
-                                    if (widget.tags.isNotEmpty)
-                                      Wrap(
-                                        spacing: 6,
-                                        runSpacing: 6,
-                                        children: widget.tags
-                                            .map(
-                                              (tag) => Container(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                  horizontal: 8,
-                                                  vertical: 4,
-                                                ),
-                                                decoration: BoxDecoration(
-                                                  color: color
-                                                      .secondaryContainer
-                                                      .withValues(
-                                                    alpha: 0.5,
-                                                  ),
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                    8,
-                                                  ),
-                                                ),
-                                                child: Row(
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  children: [
-                                                    Icon(
-                                                      Icons.tag,
-                                                      size: 12,
-                                                      color: color
-                                                          .onSecondaryContainer,
-                                                    ),
-                                                    const SizedBox(
-                                                      width: 4,
-                                                    ),
-                                                    Text(
-                                                      tag.name,
-                                                      style: textTheme
-                                                          .labelSmall
-                                                          ?.copyWith(
-                                                        color: color
-                                                            .onSecondaryContainer,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            )
-                                            .toList(),
-                                      ),
-                                  ],
+                                  ),
                                 ),
-                              )
-                            : const SizedBox.shrink(),
+                                if (widget.description?.isNotEmpty == true)
+                                  Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 8,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: color.surfaceContainerHighest
+                                          .withValues(alpha: 0.4),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Icon(
+                                          Icons.notes_rounded,
+                                          size: 14,
+                                          color: color.onSurfaceVariant
+                                              .withValues(alpha: 0.6),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            widget.description!,
+                                            style:
+                                                textTheme.bodySmall?.copyWith(
+                                              color: color.onSurfaceVariant,
+                                              height: 1.4,
+                                            ),
+                                            maxLines: 3,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                if (widget.description?.isNotEmpty == true &&
+                                    widget.tags.isNotEmpty)
+                                  const SizedBox(height: 8),
+                                if (widget.tags.isNotEmpty)
+                                  Wrap(
+                                    spacing: 6,
+                                    runSpacing: 6,
+                                    children: widget.tags
+                                        .map(
+                                          (tag) => Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical: 4,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: color.secondaryContainer
+                                                  .withValues(
+                                                alpha: 0.5,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                8,
+                                              ),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Icon(
+                                                  Icons.tag,
+                                                  size: 12,
+                                                  color: color
+                                                      .onSecondaryContainer,
+                                                ),
+                                                const SizedBox(
+                                                  width: 4,
+                                                ),
+                                                Text(
+                                                  tag.name,
+                                                  style: textTheme.labelSmall
+                                                      ?.copyWith(
+                                                    color: color
+                                                        .onSecondaryContainer,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        )
+                                        .toList(),
+                                  ),
+                              ],
+                            ),
+                          )
+                        : const SizedBox.shrink(),
                       ),
                   ],
                 ),
-              ),
-            ],
-          ),
+            ),
         ),
       ),
     );
@@ -405,8 +336,8 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
           crossAxisAlignment: CrossAxisAlignment.end,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            if (widget.tripName != null) const SizedBox(height: 20),
             CurrencyText(
+              currencyCode: widget.currencyCode,
               amount: displayAmount,
               showSign: true,
               isExpense: widget.isExpense,
@@ -418,12 +349,294 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
               ),
               maxLines: 1,
             ),
+            if (widget.currencyCode != null && widget.convertedAmount != null)
+              CurrencyText(
+                amount: widget.convertedAmount!,
+                compact: true,
+                style: textTheme.bodySmall?.copyWith(
+                  color: color.onSurfaceVariant.withValues(alpha: 0.6),
+                  fontSize: 11,
+                ),
+                prefixText: '≈',
+              ),
             const SizedBox(height: 4),
             Text(
               DateFormat('MMM dd', ctxt.localeName).format(widget.date),
               style: textTheme.bodySmall?.copyWith(
                 color: color.onSurfaceVariant,
               ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget buildSubscriptionCard() {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final ctxt = AppLocalizations.of(context)!;
+    final categoryColor = Color(widget.category?.colorValue ?? 0xFF000000);
+    final brightness = Theme.of(context).brightness;
+
+    return Row(
+      children: [
+        // Category icon with recurring badge
+        Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: categoryColor.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(
+                IconHelper.getIconData(widget.category?.iconName),
+                color: categoryColor,
+                size: 24,
+              ),
+            ),
+            Positioned(
+              right: -4,
+              bottom: -4,
+              child: Container(
+                padding: const EdgeInsets.all(3),
+                decoration: BoxDecoration(
+                  color: color.error,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: color.surfaceContainerLow, width: 1.5),
+                ),
+                child: const Icon(Icons.repeat, size: 10, color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AdaptiveText(
+                widget.category?.name ?? 'Uncategorized',
+                style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                maxLines: 1,
+              ),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  GestureDetector(
+                    onTap: widget.onUnlinkRecurring != null
+                        ? () async {
+                            final confirmed = await DialogUtils.showConfirmation(
+                              context,
+                              title: 'Remove Subscription Tag?',
+                              message: 'This will unlink this transaction from the recurring bill.',
+                              icon: Icons.repeat,
+                              confirmText: 'Remove',
+                            );
+                            if (confirmed == true) widget.onUnlinkRecurring?.call();
+                          }
+                        : null,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: color.error.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Subscription',
+                            style: textTheme.labelSmall?.copyWith(
+                              color: color.error,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 10,
+                            ),
+                          ),
+                          if (widget.onUnlinkRecurring != null) ...[
+                            const SizedBox(width: 2),
+                            Icon(Icons.close, size: 10, color: color.error),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: AdaptiveText(
+                      widget.account?.name ?? '',
+                      style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+                      maxLines: 1,
+                    ),
+                  ),
+                ],
+              ),
+              if (_hasDetails)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: AnimatedRotation(
+                    turns: _expanded ? 0.5 : 0.0,
+                    duration: const Duration(milliseconds: 200),
+                    child: Icon(Icons.expand_more, size: 14, color: color.onSurfaceVariant.withValues(alpha: 0.4)),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 8),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CurrencyText(
+              currencyCode: widget.currencyCode,
+              amount: displayAmount,
+              showSign: true,
+              isExpense: widget.isExpense,
+              style: textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: widget.isExpense
+                    ? FinanceColors.expenseColor(brightness)
+                    : FinanceColors.incomeColor(brightness),
+              ),
+              maxLines: 1,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              DateFormat('MMM dd', ctxt.localeName).format(widget.date),
+              style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget buildTripCard() {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final ctxt = AppLocalizations.of(context)!;
+    final categoryColor = Color(widget.category?.colorValue ?? 0xFF000000);
+    final brightness = Theme.of(context).brightness;
+
+    return Row(
+      children: [
+        // Category icon with trip badge
+        Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: categoryColor.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(
+                IconHelper.getIconData(widget.category?.iconName),
+                color: categoryColor,
+                size: 24,
+              ),
+            ),
+            Positioned(
+              right: -4,
+              bottom: -4,
+              child: Container(
+                padding: const EdgeInsets.all(3),
+                decoration: BoxDecoration(
+                  color: color.primary,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: color.surfaceContainerLow, width: 1.5),
+                ),
+                child: const Icon(Icons.flight_takeoff, size: 10, color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AdaptiveText(
+                widget.category?.name ?? 'Uncategorized',
+                style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                maxLines: 1,
+              ),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: color.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.flight_takeoff, size: 10, color: color.primary),
+                        const SizedBox(width: 3),
+                        Text(
+                          widget.tripName!,
+                          style: textTheme.labelSmall?.copyWith(
+                            color: color.primary,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 10,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: AdaptiveText(
+                      widget.account?.name ?? '',
+                      style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+                      maxLines: 1,
+                    ),
+                  ),
+                ],
+              ),
+              if (_hasDetails)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: AnimatedRotation(
+                    turns: _expanded ? 0.5 : 0.0,
+                    duration: const Duration(milliseconds: 200),
+                    child: Icon(Icons.expand_more, size: 14, color: color.onSurfaceVariant.withValues(alpha: 0.4)),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 8),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CurrencyText(
+              currencyCode: widget.currencyCode,
+              amount: displayAmount,
+              showSign: true,
+              isExpense: widget.isExpense,
+              style: textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: widget.isExpense
+                    ? FinanceColors.expenseColor(brightness)
+                    : FinanceColors.incomeColor(brightness),
+              ),
+              maxLines: 1,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              DateFormat('MMM dd', ctxt.localeName).format(widget.date),
+              style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
             ),
           ],
         ),
@@ -544,6 +757,7 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             CurrencyText(
+              currencyCode: widget.currencyCode,
               amount: displayAmount,
               style: textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,

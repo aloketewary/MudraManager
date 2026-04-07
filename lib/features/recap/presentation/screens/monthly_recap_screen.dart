@@ -1,3 +1,7 @@
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
+import 'package:mudra_manager/shared/widgets/ambient_brand_section.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -21,7 +25,7 @@ class MonthlyRecapScreen extends ConsumerStatefulWidget {
 class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
   late DateTime _selectedMonth;
   bool _downloading = false;
-  static const _currency = '₹';
+  static String get _currency => BaseCurrency.symbol;
 
   @override
   void initState() {
@@ -78,8 +82,8 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
             return CustomScrollView(
               slivers: [
                 SliverAppBar(title: Text('Recap — $monthName'), pinned: true),
-                const SliverFillRemaining(
-                  child: Center(child: CircularProgressIndicator()),
+                SliverFillRemaining(
+                  child: ListView(children: List.generate(4, (_) => DashboardCardSkeleton())),
                 ),
               ],
             );
@@ -380,7 +384,8 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 80),
+                    const SizedBox(height: 24),
+                    const AmbientBrandSection(),
                   ]),
                 ),
               ),

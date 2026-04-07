@@ -1,3 +1,8 @@
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/shared/widgets/no_data_found.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -58,7 +63,7 @@ class _InvestmentPortfolioScreenState extends ConsumerState<InvestmentPortfolioS
             return Center(child: Text(BuddyMessages.genericError));
           }
           if (!metricsSnapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
+            return ListView(children: List.generate(3, (_) => DashboardCardSkeleton()));
           }
 
           final metrics = metricsSnapshot.data!;
@@ -84,7 +89,7 @@ class _InvestmentPortfolioScreenState extends ConsumerState<InvestmentPortfolioS
                                   Text('Total Value',
                                       style: textTheme.labelMedium,),
                                   Text(
-                                    '₹${GuestModeUtil.applyGuestMode(metrics['totalValue'] ?? 0, isGuestMode).toStringAsFixed(0)}',
+                                    '${formatCurrency(GuestModeUtil.applyGuestMode(metrics['totalValue'] ?? 0, isGuestMode), decimals: 0)}',
                                     style: textTheme.headlineSmall
                                         ?.copyWith(fontWeight: FontWeight.bold),
                                   ),
@@ -96,7 +101,7 @@ class _InvestmentPortfolioScreenState extends ConsumerState<InvestmentPortfolioS
                                   Text('Gain/Loss',
                                       style: textTheme.labelMedium,),
                                   Text(
-                                    '₹${GuestModeUtil.applyGuestMode(gainLoss, isGuestMode).toStringAsFixed(0)} (${GuestModeUtil.applyGuestMode(gainLossPercent, isGuestMode).toStringAsFixed(2)}%)',
+                                    '${formatCurrency(GuestModeUtil.applyGuestMode(gainLoss, isGuestMode), decimals: 0)} (${GuestModeUtil.applyGuestMode(gainLossPercent, isGuestMode).toStringAsFixed(2)}%)',
                                     style: textTheme.titleMedium?.copyWith(
                                       fontWeight: FontWeight.bold,
                                       color: gainLoss >= 0
@@ -113,7 +118,7 @@ class _InvestmentPortfolioScreenState extends ConsumerState<InvestmentPortfolioS
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                'Total Cost: ₹${GuestModeUtil.applyGuestMode(metrics['totalCost'] ?? 0, isGuestMode).toStringAsFixed(0)}',
+                                'Total Cost: ${formatCurrency(GuestModeUtil.applyGuestMode(metrics['totalCost'] ?? 0, isGuestMode), decimals: 0)}',
                                 style: textTheme.bodySmall,
                               ),
                             ],
@@ -136,7 +141,7 @@ class _InvestmentPortfolioScreenState extends ConsumerState<InvestmentPortfolioS
                       return Center(child: Text(BuddyMessages.genericError));
                     }
                     if (!holdingsSnapshot.hasData) {
-                      return const Center(child: CircularProgressIndicator());
+                      return Column(children: List.generate(3, (_) => DashboardCardSkeleton()));
                     }
 
                     final holdings = holdingsSnapshot.data!;
@@ -175,7 +180,7 @@ class _InvestmentPortfolioScreenState extends ConsumerState<InvestmentPortfolioS
                                       Text(holding.name,
                                           style: textTheme.bodySmall,),
                                       Text(
-                                          '${holding.quantity} @ ₹${holding.currentPrice.toStringAsFixed(2)}',
+                                          '${holding.quantity} @ ${formatCurrency(holding.currentPrice, decimals: 2)}',
                                           style: textTheme.labelSmall,),
                                     ],
                                   ),
@@ -184,13 +189,13 @@ class _InvestmentPortfolioScreenState extends ConsumerState<InvestmentPortfolioS
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
                                     Text(
-                                      '₹${GuestModeUtil.applyGuestMode(holding.currentValue, isGuestMode).toStringAsFixed(0)}',
+                                      '${formatCurrency(GuestModeUtil.applyGuestMode(holding.currentValue, isGuestMode), decimals: 0)}',
                                       style: textTheme.titleSmall
                                           ?.copyWith(
                                               fontWeight: FontWeight.bold,),
                                     ),
                                     Text(
-                                      '${isGain ? '+' : ''}₹${GuestModeUtil.applyGuestMode(gainLoss, isGuestMode).toStringAsFixed(0)}',
+                                      '${isGain ? '+' : ''}${formatCurrency(GuestModeUtil.applyGuestMode(gainLoss, isGuestMode), decimals: 0)}',
                                       style: textTheme.labelSmall?.copyWith(
                                         color: isGain
                                             ? color.primary

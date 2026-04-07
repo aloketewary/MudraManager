@@ -1,3 +1,5 @@
+import 'package:mudra_manager/shared/widgets/currency_badge.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -163,7 +165,10 @@ class _ApproveTransactionSheetState extends State<ApproveTransactionSheet> {
               controller: _amountController,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
-                prefixText: '₹',
+                prefix: Padding(
+                  padding: const EdgeInsets.only(right: 6),
+                  child: CurrencyBadge(code: BaseCurrency.code, size: 14),
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),

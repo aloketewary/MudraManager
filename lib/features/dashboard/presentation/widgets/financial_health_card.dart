@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/features/analytics/data/analytics_provider.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
-import 'dart:math' as math;
 import 'package:mudra_manager/core/router/app_routes.dart';
+import 'package:visibility_detector/visibility_detector.dart';
+import 'dart:math' as math;
 
 class FinancialHealthCard extends ConsumerWidget {
   final double globalPadding;
@@ -18,145 +21,139 @@ class FinancialHealthCard extends ConsumerWidget {
     final healthAsync = ref.watch(financialHealthProvider);
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
 
     return healthAsync.when(
       data: (health) {
         if (health.score == 0) return const SizedBox.shrink();
 
-        return Padding(
-          padding: const EdgeInsets.only(top: 16),
-          child: SizedBox(
-            width: double.infinity,
-            child: Container(
-              margin: EdgeInsets.symmetric(horizontal: globalPadding),
-              child: Card(
-                elevation: 0,
-                color: color.surfaceContainerLow,
-                child: InkWell(
-                  onTap: () {
-                    HapticFeedback.mediumImpact();
-                    context.push(AppRoutes.financialHealth);
-                  },
-                  borderRadius: BorderRadius.circular(20),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                    children: [
-                      TweenAnimationBuilder<double>(
-                        duration: const Duration(milliseconds: 1500),
-                        curve: Curves.easeOutCubic,
-                        tween: Tween(begin: 0.0, end: health.score / 100),
-                        builder: (context, value, child) {
-                          return Stack(
-                            alignment: Alignment.center,
+        final scoreColor = _scoreColor(health.score, color);
+        final verdict = _verdict(health.score);
+        final topInsight =
+            health.insights.isNotEmpty ? health.insights.first : null;
+
+        return Container(
+          margin: EdgeInsets.symmetric(horizontal: globalPadding),
+          child: Card(
+            elevation: 0,
+            color: color.surfaceContainerLow,
+            margin: const EdgeInsets.only(),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(spacing.radiusMedium),
+              side: BorderSide(
+                color: scoreColor.withValues(alpha: 0.2),
+              ),
+            ),
+            child: InkWell(
+              onTap: () {
+                HapticFeedback.mediumImpact();
+                context.push(AppRoutes.financialHealth);
+              },
+              borderRadius: BorderRadius.circular(spacing.radiusMedium),
+              child: Padding(
+                padding: EdgeInsets.all(spacing.cardInner),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Row 1: Ring + Score + Verdict
+                    Row(
+                      children: [
+                        _AnimatedMiniRing(
+                          score: health.score / 100,
+                          scoreColor: scoreColor,
+                          textTheme: textTheme,
+                        ),
+                        SizedBox(width: spacing.elementGap * 1.5),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              SizedBox(
-                                width: 60,
-                                height: 60,
-                                child: CustomPaint(
-                                  painter: _CompactRingPainter(
-                                    progress: value,
-                                    color: _getScoreColor(health.score, color),
-                                  ),
+                              Text(
+                                'Financial Health',
+                                style: textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              Text(
-                                '${(value * 100).toInt()}%',
-                                style: textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w900,
-                                  color: _getScoreColor(health.score, color),
+                              SizedBox(height: spacing.elementGapMin),
+                              // Verdict badge
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: spacing.elementGap,
+                                  vertical: spacing.elementGapUltraMin,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: scoreColor.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(
+                                    spacing.radiusSmall,
+                                  ),
+                                ),
+                                child: Text(
+                                  '${health.rating} — $verdict',
+                                  style: textTheme.labelSmall?.copyWith(
+                                    color: scoreColor,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ),
                             ],
-                          );
-                        },
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Financial Health',
-                              style: textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 12),
-                            Container(
-                              height: 10,
-                              decoration: BoxDecoration(
-                                color: color.surfaceContainerHighest,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(10),
-                                child: TweenAnimationBuilder<double>(
-                                  duration: const Duration(milliseconds: 1500),
-                                  curve: Curves.easeOutCubic,
-                                  tween: Tween(begin: 0.0, end: health.score / 100),
-                                  builder: (context, value, child) {
-                                    return FractionallySizedBox(
-                                      widthFactor: value,
-                                      alignment: Alignment.centerLeft,
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          gradient: LinearGradient(
-                                            colors: [_getScoreColor(health.score, color), _getScoreColor(health.score, color).withValues(alpha: 0.7)],
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _buildMetricItem(
-                                    'Savings',
-                                    '${health.savingsRate.toStringAsFixed(1)}%',
-                                    LucideIcons.piggyBank,
-                                    color.primary,
-                                    color,
-                                    textTheme,
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: _buildMetricItem(
-                                    'Spending',
-                                    '${health.expenseRatio.toStringAsFixed(1)}%',
-                                    LucideIcons.shoppingCart,
-                                    color.tertiary,
-                                    color,
-                                    textTheme,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
+                          ),
                         ),
-                      ),
-                      Icon(
-                        LucideIcons.chevronRight,
-                        color: color.onSurfaceVariant,
-                        size: 20,
+                        Icon(
+                          LucideIcons.chevronRight,
+                          size: 16,
+                          color: color.onSurfaceVariant.withValues(alpha: 0.4),
+                        ),
+                      ],
+                    ),
+
+                    // Row 2: Key insight
+                    if (topInsight != null) ...[
+                      SizedBox(height: spacing.elementGap * 1.5),
+                      Text(
+                        topInsight,
+                        style: textTheme.bodySmall?.copyWith(
+                          color: color.onSurfaceVariant,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
-                  ),
+
+                    SizedBox(height: spacing.elementGap),
+
+                    // Row 3: Tap hint
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Tap to explore',
+                          style: textTheme.labelSmall?.copyWith(
+                            color:
+                                color.onSurfaceVariant.withValues(alpha: 0.5),
+                          ),
+                        ),
+                        SizedBox(width: spacing.elementGapMin),
+                        Icon(
+                          LucideIcons.arrowRight,
+                          size: 12,
+                          color: color.onSurfaceVariant.withValues(alpha: 0.5),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
-          ),
-        );
+        ).animate().fadeIn(duration: 400.ms, curve: Curves.easeOut).slideY(
+              begin: 0.05,
+              end: 0,
+              duration: 400.ms,
+              curve: Curves.easeOut,
+            );
       },
       loading: () => Padding(
-        padding: const EdgeInsets.only(top: 16),
+        padding: EdgeInsets.only(top: spacing.sectionGap),
         child: Container(
           margin: EdgeInsets.symmetric(horizontal: globalPadding),
           child: const DashboardCardSkeleton(),
@@ -166,107 +163,100 @@ class FinancialHealthCard extends ConsumerWidget {
     );
   }
 
-  Widget _buildMetricItem(
-    String label,
-    String value,
-    IconData icon,
-    Color itemColor,
-    ColorScheme color,
-    TextTheme textTheme,
-  ) {
-    return Row(
-      children: [
-        Icon(icon, color: itemColor, size: 16),
-        const SizedBox(width: 6),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: textTheme.bodySmall?.copyWith(
-                  color: color.onSurfaceVariant,
-                  fontSize: 11,
+  String _verdict(int score) {
+    if (score >= 80) return "great shape";
+    if (score >= 60) return "on track";
+    if (score >= 40) return 'needs work';
+    return 'needs attention';
+  }
+
+  Color _scoreColor(int score, ColorScheme color) {
+    if (score >= 80) return Colors.green;
+    if (score >= 60) return color.primary;
+    if (score >= 40) return Colors.orange;
+    return Colors.red;
+  }
+}
+
+// ── Visibility-aware mini score ring ──
+
+class _AnimatedMiniRing extends StatefulWidget {
+  final double score;
+  final Color scoreColor;
+  final TextTheme textTheme;
+
+  const _AnimatedMiniRing({
+    required this.score,
+    required this.scoreColor,
+    required this.textTheme,
+  });
+
+  @override
+  State<_AnimatedMiniRing> createState() => _AnimatedMiniRingState();
+}
+
+class _AnimatedMiniRingState extends State<_AnimatedMiniRing>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double> _anim;
+  bool _started = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    );
+    _anim = CurvedAnimation(parent: _ctrl, curve: Curves.easeOutCubic);
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return VisibilityDetector(
+      key: const ValueKey('health_mini_ring'),
+      onVisibilityChanged: (info) {
+        if (info.visibleFraction > 0.3 && !_started) {
+          _started = true;
+          _ctrl.forward();
+        }
+      },
+      child: AnimatedBuilder(
+        animation: _anim,
+        builder: (_, __) {
+          final value = _anim.value * widget.score;
+          return SizedBox(
+            width: 52,
+            height: 52,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                CustomPaint(
+                  size: const Size(52, 52),
+                  painter: _CompactRingPainter(
+                    progress: value,
+                    color: widget.scoreColor,
+                  ),
                 ),
-                overflow: TextOverflow.ellipsis,
-              ),
-              Text(
-                value,
-                style: textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
+                Text(
+                  '${(value * 100).toInt()}',
+                  style: widget.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    color: widget.scoreColor,
+                  ),
                 ),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMetricCard(
-    String label,
-    String value,
-    IconData icon,
-    Color itemColor,
-    ColorScheme color,
-    TextTheme textTheme,
-  ) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: color.surfaceContainer,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: itemColor, size: 18),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            style: textTheme.bodySmall?.copyWith(
-              color: color.onSurfaceVariant,
-              fontSize: 11,
+              ],
             ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            value,
-            style: textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
+          );
+        },
       ),
     );
-  }
-
-  Widget _buildMetric(
-    String label,
-    String value,
-    ColorScheme color,
-    TextTheme textTheme,
-  ) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
-        ),
-        Text(
-          value,
-          style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
-        ),
-      ],
-    );
-  }
-
-  Color _getScoreColor(int score, ColorScheme color) {
-    if (score >= 80) return color.primary;
-    if (score >= 60) return color.secondary;
-    if (score >= 40) return color.tertiary;
-    return color.error;
   }
 }
 
@@ -280,7 +270,7 @@ class _CompactRingPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = size.width / 2 - 4;
-    const strokeWidth = 6.0;
+    const strokeWidth = 5.0;
 
     final bgPaint = Paint()
       ..color = color.withValues(alpha: 0.15)
@@ -313,6 +303,6 @@ class _CompactRingPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_CompactRingPainter oldDelegate) => 
-    oldDelegate.progress != progress || oldDelegate.color != color;
+  bool shouldRepaint(_CompactRingPainter oldDelegate) =>
+      oldDelegate.progress != progress || oldDelegate.color != color;
 }

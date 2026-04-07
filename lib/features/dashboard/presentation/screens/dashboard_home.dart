@@ -26,6 +26,7 @@ import 'package:mudra_manager/features/dashboard/presentation/providers/permissi
 import 'package:mudra_manager/features/dashboard/presentation/providers/widget_preferences_provider.dart';
 import 'package:mudra_manager/features/profile/data/help_guide_provider.dart';
 import 'package:mudra_manager/features/sms/presentation/screens/sms_activity_screen.dart';
+import 'package:mudra_manager/shared/widgets/ambient_brand_section.dart';
 import 'package:mudra_manager/shared/widgets/budget_alert_banner.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 
@@ -47,10 +48,11 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
     super.initState();
     Future.delayed(const Duration(milliseconds: 500), _performDailyCheckIn);
     Future.delayed(const Duration(milliseconds: 1000), () {
-      if (mounted)
+      if (mounted) {
         ref
             .read(reconciliationServiceProvider)
             .patchUncategorizedTransactions();
+      }
     });
   }
 
@@ -174,10 +176,15 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
           key: const PageStorageKey('dashboard_scroll'),
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
-            if (!hasSeenHelp) SliverToBoxAdapter(child: RepaintBoundary(child: _HelpBanner())),
+            if (!hasSeenHelp)
+              SliverToBoxAdapter(child: RepaintBoundary(child: _HelpBanner())),
             if (!hasSeenHelp && alerts.isNotEmpty)
-              SliverToBoxAdapter(child: RepaintBoundary(child: _AlertBanner(alerts: alerts))),
-            SliverToBoxAdapter(child: RepaintBoundary(child: _AutoImportBanner())),
+              SliverToBoxAdapter(
+                child: RepaintBoundary(child: _AlertBanner(alerts: alerts)),
+              ),
+            SliverToBoxAdapter(
+              child: RepaintBoundary(child: _AutoImportBanner()),
+            ),
             SliverList(
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
@@ -259,12 +266,8 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                   ),
                 ),
               ),
-              SliverToBoxAdapter(
-                child: SizedBox(
-                  height: MediaQuery.of(context).padding.bottom +
-                      kBottomNavigationBarHeight +
-                      16,
-                ),
+              const SliverToBoxAdapter(
+                child: AmbientBrandSection(showSignature: false),
               ),
             ],
           ],

@@ -1,3 +1,4 @@
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_boring_avatars/flutter_boring_avatars.dart';
@@ -5,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/shared/widgets/currency_badge.dart';
 import 'package:mudra_manager/core/db/models/trip.dart';
 import 'package:mudra_manager/core/entitlement/entitlement_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
@@ -36,6 +39,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
   DateTime _endDate = DateTime.now().add(const Duration(days: 3));
   final List<TripParticipant> _participants = [];
   String? _ownerName;
+  String? _tripCurrency;
   bool _isActive = true;
   bool _isInitialized = false;
 
@@ -67,6 +71,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
     _participants.addAll(trip.participants.toList());
     _isActive = trip.isActive;
     _isTrip = trip.isTrip;
+    _tripCurrency = trip.currencyCode;
     _isInitialized = true;
   }
 
@@ -221,6 +226,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
       originalTrip.budget = budget;
       originalTrip.isActive = _isActive;
       originalTrip.isTrip = _isTrip;
+      originalTrip.currencyCode = _tripCurrency;
 
       await ref.read(tripServiceProvider).updateTrip(
             originalTrip,
@@ -243,6 +249,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
         isActive: _isActive,
         isTrip: _isTrip,
       );
+      trip.currencyCode = _tripCurrency;
 
       await ref.read(tripServiceProvider).createTrip(trip, _participants);
       ref.invalidate(allTripsProvider);
@@ -306,7 +313,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
             if (mounted && _participants.isEmpty) {
               setState(() {
                 _ownerName = profile.name;
-                _participants.add(TripParticipant.create(name: _ownerName!));
+                _participants.add(TripParticipant.create(name: _ownerName!, isOwner: true));
               });
             }
           });
@@ -337,7 +344,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
         },
         loading: () => Scaffold(
           appBar: AppBar(title: Text(_isTrip ? 'Edit Trip' : 'Edit Group')),
-          body: const Center(child: CircularProgressIndicator()),
+          body: ListView(children: List.generate(3, (_) => DashboardCardSkeleton())),
         ),
         error: (e, _) => Scaffold(
           appBar: AppBar(title: Text(BuddyMessages.genericError)),
@@ -493,10 +500,74 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(spacing.radiusMedium),
                       ),
-                      prefixIcon: const Icon(LucideIcons.indianRupee),
+                      prefixIcon: Icon(currencyIcon(_tripCurrency)),
                     ),
                     keyboardType: TextInputType.number,
                   ),
+                if (_isTrip) const SizedBox(height: 16),
+                // Currency picker
+                InkWell(
+                  onTap: () async {
+                    HapticFeedback.lightImpact();
+                    final picked = await showModalBottomSheet<String>(
+                      context: context,
+                      isScrollControlled: true,
+                      shape: const RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.vertical(top: Radius.circular(20)),
+                      ),
+                      builder: (_) => _TripCurrencyPicker(
+                        selected: _tripCurrency,
+                      ),
+                    );
+                    if (picked != null) {
+                      setState(() => _tripCurrency = picked);
+                    }
+                  },
+                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                  child: InputDecorator(
+                    decoration: InputDecoration(
+                      labelText: 'Currency',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                      ),
+                      prefixIcon: const Icon(LucideIcons.coins),
+                    ),
+                    child: Row(
+                      children: [
+                        _tripCurrency != null
+                            ? Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  CurrencyBadge(code: _tripCurrency!, size: 14),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    currencyName(_tripCurrency),
+                                    style: textTheme.bodyLarge,
+                                  ),
+                                ],
+                              )
+                            : Text(
+                                'Base currency (default)',
+                                style: textTheme.bodyLarge,
+                              ),
+                        const Spacer(),
+                        if (_tripCurrency != null)
+                          GestureDetector(
+                            onTap: () {
+                              HapticFeedback.lightImpact();
+                              setState(() => _tripCurrency = null);
+                            },
+                            child: Icon(
+                              LucideIcons.x,
+                              size: 18,
+                              color: color.onSurfaceVariant,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -938,6 +1009,114 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
             ),
           ],
           const SizedBox(height: 100),
+        ],
+      ),
+    );
+  }
+}
+
+class _TripCurrencyPicker extends StatefulWidget {
+  final String? selected;
+  const _TripCurrencyPicker({this.selected});
+
+  @override
+  State<_TripCurrencyPicker> createState() => _TripCurrencyPickerState();
+}
+
+class _TripCurrencyPickerState extends State<_TripCurrencyPicker> {
+  String _query = '';
+
+  List<CurrencyMeta> get _filtered {
+    final all = kCurrencies.values.toList();
+    if (_query.isEmpty) return all;
+    final q = _query.toLowerCase();
+    return all
+        .where((c) =>
+            c.code.toLowerCase().contains(q) ||
+            c.name.toLowerCase().contains(q),)
+        .toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return DraggableScrollableSheet(
+      initialChildSize: 0.7,
+      maxChildSize: 0.9,
+      minChildSize: 0.4,
+      expand: false,
+      builder: (context, scrollController) => Column(
+        children: [
+          const SizedBox(height: 12),
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: color.onSurfaceVariant.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: TextField(
+              autofocus: true,
+              decoration: InputDecoration(
+                hintText: 'Search currency...',
+                prefixIcon: const Icon(Icons.search, size: 20),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: color.outlineVariant),
+                ),
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 12,
+                ),
+              ),
+              onChanged: (v) => setState(() => _query = v),
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              controller: scrollController,
+              itemCount: _filtered.length,
+              itemBuilder: (context, i) {
+                final c = _filtered[i];
+                final isSelected = c.code == widget.selected;
+                return ListTile(
+                  leading: Container(
+                    width: 40,
+                    height: 40,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? color.primary.withValues(alpha: 0.12)
+                          : color.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      c.symbol,
+                      style: textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: isSelected ? color.primary : color.onSurface,
+                      ),
+                    ),
+                  ),
+                  title: Text(c.code),
+                  subtitle: Text(c.name, style: textTheme.bodySmall),
+                  trailing: isSelected
+                      ? Icon(Icons.check_circle, color: color.primary)
+                      : null,
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    Navigator.of(context).pop(c.code);
+                  },
+                );
+              },
+            ),
+          ),
         ],
       ),
     );

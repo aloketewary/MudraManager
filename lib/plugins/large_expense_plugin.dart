@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_plugin_sdk/mudra_plugin_sdk.dart';
 
 class LargeExpensePlugin extends MudraPlugin {
@@ -15,7 +17,7 @@ class LargeExpensePlugin extends MudraPlugin {
     final threshold = config?.get<double>('threshold') ?? 1000.0;
     if (event.amount > threshold) {
       api.showNotification(
-        '💸 Large expense: ₹${event.amount.toStringAsFixed(0)} in ${event.category}',
+        '💸 Large expense: ${formatCurrency(event.amount, code: BaseCurrency.code, decimals: 0)} in ${event.category}',
       );
     }
   }
@@ -27,9 +29,9 @@ class LargeExpensePlugin extends MudraPlugin {
     if (event.amount < threshold) return null;
     return PluginNotification(
       title:
-          '₹${event.amount.toStringAsFixed(2)} on ${event.category ?? "something"} — just making sure you meant to',
+          '${formatCurrency(event.amount, code: BaseCurrency.code, decimals: 2)} on ${event.category ?? "something"} — just making sure you meant to',
       body:
-          'You spent ₹${event.amount.toStringAsFixed(2)} on ${event.category ?? "Unknown"}',
+          'You spent ${formatCurrency(event.amount, code: BaseCurrency.code, decimals: 2)} on ${event.category ?? "Unknown"}',
       priority: 4,
     );
   }

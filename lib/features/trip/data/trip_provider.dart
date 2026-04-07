@@ -34,3 +34,9 @@ final tripSettlementsProvider = FutureProvider.autoDispose
   final service = ref.watch(tripServiceProvider);
   return await service.calculateSettlements(tripId);
 });
+
+final tripSummaryProvider = FutureProvider.autoDispose
+    .family<TripSummary, Trip>((ref, trip) async {
+  final service = ref.watch(tripServiceProvider);
+  return await service.getTripSummary(trip);
+});

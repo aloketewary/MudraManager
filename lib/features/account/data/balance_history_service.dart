@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
@@ -62,7 +63,7 @@ class BalanceHistoryService {
         await snapshot.account.save();
       });
 
-      _log.i('Snapshot recorded for ${account.name}: ₹$balance');
+      _log.i('Snapshot recorded for ${account.name}: ${BaseCurrency.symbol}$balance');
     }
   }
 

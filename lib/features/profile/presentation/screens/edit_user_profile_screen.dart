@@ -1,3 +1,4 @@
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter_boring_avatars/flutter_boring_avatars.dart';
 import 'package:go_router/go_router.dart';
@@ -54,71 +55,56 @@ class _EditUserProfileScreenState extends ConsumerState<EditUserProfileScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
+      appBar: AppBar(
+        title: Text(ctxt.profile_editUserProfileAppTitle,
+            style: textTheme.titleLarge),
+        elevation: 0,
+      ),
       body: profileAsync.when(
         data: (profile) {
           if (!_didInit) _loadProfile(profile);
-          return CustomScrollView(
-            slivers: [
-              // ── HERO HEADER ──
-              SliverAppBar(
-                expandedHeight: 220,
-                pinned: true,
-                leading: IconButton(
-                  icon: const Icon(LucideIcons.arrowLeft),
-                  onPressed: () => context.pop(),
-                ),
-                title: Text(
-                  ctxt.profile_editUserProfileAppTitle,
-                  style: textTheme.titleLarge,
-                ),
-                flexibleSpace: FlexibleSpaceBar(
-                  background: _buildHeroAvatar(color, textTheme, isDark),
-                ),
+          return ListView(
+            padding: EdgeInsets.symmetric(
+              horizontal: spacing.cardHorizontal,
+              vertical: spacing.cardVertical,
+            ),
+            children: [
+              // Hero Avatar
+              _buildHeroAvatar(color, textTheme, isDark),
+              SizedBox(height: spacing.sectionGap),
+
+              // Personal Info
+              _buildSectionHeader(
+                  'Personal Info', LucideIcons.user, color, textTheme),
+              const SizedBox(height: 10),
+              Form(
+                key: _formKey,
+                child: _buildFormCard(color, textTheme, spacing, ctxt),
               ),
+              SizedBox(height: spacing.sectionGap),
 
-              // ── FORM BODY ──
-              SliverPadding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: spacing.cardHorizontal,
-                  vertical: spacing.cardVertical,
-                ),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate([
-                    SizedBox(height: spacing.sectionGap),
+              // Privacy Note
+              _buildPrivacyNote(color, textTheme, spacing, ctxt),
+              const SizedBox(height: 24),
 
-                    // ── PERSONAL INFO SECTION ──
-                    _buildSectionHeader(
-                      'Personal Info',
-                      LucideIcons.user,
-                      color,
-                      textTheme,
-                    ),
-                    const SizedBox(height: 10),
-                    Form(
-                      key: _formKey,
-                      child: _buildFormCard(
-                        color,
-                        textTheme,
-                        spacing,
-                        ctxt,
-                      ),
-                    ),
-                    SizedBox(height: spacing.sectionGap),
-
-                    // ── PRIVACY NOTE ──
-                    _buildPrivacyNote(color, textTheme, spacing, ctxt),
-                    const SizedBox(height: 24),
-
-                    // ── SAVE BUTTON ──
-                    _buildSaveButton(color, textTheme, spacing, ctxt),
-                    const SizedBox(height: 80),
-                  ]),
-                ),
-              ),
+              // Save Button
+              _buildSaveButton(color, textTheme, spacing, ctxt),
+              const SizedBox(height: 80),
             ],
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Padding(
+            padding: EdgeInsets.all(16),
+            child: Column(children: [
+              SkeletonLoader(
+                  width: 80,
+                  height: 80,
+                  borderRadius: BorderRadius.all(Radius.circular(40))),
+              SizedBox(height: 24),
+              SkeletonLoader(width: double.infinity, height: 48),
+              SizedBox(height: 16),
+              SkeletonLoader(width: double.infinity, height: 48)
+            ])),
         error: (e, _) => Center(child: Text(BuddyMessages.errorWith('$e'))),
       ),
     );
@@ -132,17 +118,7 @@ class _EditUserProfileScreenState extends ConsumerState<EditUserProfileScreen> {
     final userLevelAsync = ref.watch(userLevelProvider);
 
     return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            color.primary.withValues(alpha: isDark ? 0.2 : 0.12),
-            color.primaryContainer.withValues(alpha: 0.6),
-            color.surface,
-          ],
-        ),
-      ),
+      decoration: const BoxDecoration(),
       child: SafeArea(
         child: Center(
           child: Stack(
@@ -233,69 +209,61 @@ class _EditUserProfileScreenState extends ConsumerState<EditUserProfileScreen> {
     AppSpacing spacing,
     AppLocalizations ctxt,
   ) {
-    return Card(
-      elevation: 0,
-      margin: const EdgeInsets.only(),
-      color: color.surfaceContainerLow,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        side: BorderSide(
-          color: color.outlineVariant.withValues(alpha: 0.5),
-        ),
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: spacing.cardHorizontal,
+        vertical: spacing.cardVertical,
       ),
-      child: Padding(
-        padding: EdgeInsets.all(spacing.cardInner),
-        child: Column(
-          children: [
-            TextFormField(
-              controller: _nameController,
-              decoration: InputDecoration(
-                labelText: ctxt.profile_nameControllerText,
-                hintText: ctxt.profile_nameControllerHintText,
-                prefixIcon: const Icon(LucideIcons.user),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                ),
-                filled: true,
-                fillColor: color.surfaceContainerHighest.withValues(alpha: 0.3),
+      child: Column(
+        children: [
+          TextFormField(
+            controller: _nameController,
+            decoration: InputDecoration(
+              labelText: ctxt.profile_nameControllerText,
+              hintText: ctxt.profile_nameControllerHintText,
+              prefixIcon: const Icon(LucideIcons.user),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(spacing.radiusMedium),
               ),
-              validator: (v) => v == null || v.isEmpty
-                  ? ctxt.profile_nameRequiredHintText
-                  : null,
-              onChanged: (_) => setState(() {}),
+              filled: true,
+              fillColor: color.surfaceContainerHighest.withValues(alpha: 0.3),
             ),
-            SizedBox(height: spacing.sectionGap),
-            TextFormField(
-              controller: _emailController,
-              keyboardType: TextInputType.emailAddress,
-              decoration: InputDecoration(
-                labelText: ctxt.profile_emailControllerText,
-                hintText: ctxt.profile_emailControllerHintText,
-                prefixIcon: const Icon(LucideIcons.mail),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                ),
-                filled: true,
-                fillColor: color.surfaceContainerHighest.withValues(alpha: 0.3),
+            validator: (v) => v == null || v.isEmpty
+                ? ctxt.profile_nameRequiredHintText
+                : null,
+            onChanged: (_) => setState(() {}),
+          ),
+          SizedBox(height: spacing.sectionGap),
+          TextFormField(
+            controller: _emailController,
+            keyboardType: TextInputType.emailAddress,
+            decoration: InputDecoration(
+              labelText: ctxt.profile_emailControllerText,
+              hintText: ctxt.profile_emailControllerHintText,
+              prefixIcon: const Icon(LucideIcons.mail),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(spacing.radiusMedium),
               ),
+              filled: true,
+              fillColor: color.surfaceContainerHighest.withValues(alpha: 0.3),
             ),
-            SizedBox(height: spacing.sectionGap),
-            TextFormField(
-              controller: _phoneController,
-              keyboardType: TextInputType.phone,
-              decoration: InputDecoration(
-                labelText: ctxt.profile_phoneControllerText,
-                hintText: ctxt.profile_phoneControllerHintText,
-                prefixIcon: const Icon(LucideIcons.phone),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                ),
-                filled: true,
-                fillColor: color.surfaceContainerHighest.withValues(alpha: 0.3),
+          ),
+          SizedBox(height: spacing.sectionGap),
+          TextFormField(
+            controller: _phoneController,
+            keyboardType: TextInputType.phone,
+            decoration: InputDecoration(
+              labelText: ctxt.profile_phoneControllerText,
+              hintText: ctxt.profile_phoneControllerHintText,
+              prefixIcon: const Icon(LucideIcons.phone),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(spacing.radiusMedium),
               ),
+              filled: true,
+              fillColor: color.surfaceContainerHighest.withValues(alpha: 0.3),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

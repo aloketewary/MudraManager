@@ -7,35 +7,41 @@ final netWorthProvider = FutureProvider.autoDispose((ref) async {
   final accounts = await ref.watch(accountsProvider.future);
   final accountService = ref.watch(accountServiceProvider);
   final balanceMap = await accountService.getAccountBalanceMap();
+  final baseBalanceMap = await accountService.getAccountBalanceMapInBase();
 
   final assets = <AccountItem>[];
   final liabilities = <AccountItem>[];
 
+  double totalAssets = 0;
+  double totalLiabilities = 0;
+
   for (final account in accounts) {
     final balance = balanceMap[account.id] ?? 0.0;
+    final baseBalance = baseBalanceMap[account.id] ?? 0.0;
     final item = AccountItem(
       name: account.name,
       balance: balance.abs(),
       accountType: account.accountType,
       colorValue: account.colorValue,
+      currencyCode: account.currencyCode,
     );
 
     if (account.accountType == AccountType.creditCard) {
       if (balance > 0) {
         liabilities.add(item);
+        totalLiabilities += baseBalance.abs();
       }
     } else {
       if (balance >= 0) {
         assets.add(item);
+        totalAssets += baseBalance.abs();
       } else {
         liabilities.add(item);
+        totalLiabilities += baseBalance.abs();
       }
     }
   }
 
-  final totalAssets = assets.fold(0.0, (sum, item) => sum + item.balance);
-  final totalLiabilities =
-      liabilities.fold(0.0, (sum, item) => sum + item.balance);
   final netWorth = totalAssets - totalLiabilities;
 
   // Calculate monthly change from balance history
@@ -119,12 +125,14 @@ class AccountItem {
   final double balance;
   final AccountType accountType;
   final int? colorValue;
+  final String? currencyCode;
 
   AccountItem({
     required this.name,
     required this.balance,
     required this.accountType,
     this.colorValue,
+    this.currencyCode,
   });
 }
 

@@ -1,3 +1,4 @@
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 // lib/features/dashboard/presentation/screens/dashboard_customize_screen.dart
 
@@ -106,7 +107,7 @@ class _DashboardCustomizeScreenState
         ],
       ),
       body: prefsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => ListView(children: List.generate(4, (_) => DashboardCardSkeleton())),
         error: (e, _) => Center(child: Text(BuddyMessages.errorWith('$e'))),
         data: (prefs) {
           if (!_initialized) {

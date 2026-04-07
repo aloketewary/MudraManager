@@ -22,7 +22,7 @@ class AdvancedAnalyticsService {
               tx.isExpense &&
               tx.date.year == month.year &&
               tx.date.month == month.month)
-          .fold(0.0, (sum, tx) => sum + tx.amount);
+          .fold(0.0, (sum, tx) => sum + tx.effectiveAmount);
       
       if (monthTotal > 0) {
         total += monthTotal;
@@ -39,15 +39,15 @@ class AdvancedAnalyticsService {
     final transactions = await _transactionService.getAllForDashBoard();
 
     final thisMonth = transactions.where(
-      (tx) => tx.date.year == now.year && tx.date.month == now.month,
+      (tx) => tx.date.year == now.year && tx.date.month == now.month && tx.affectsStats,
     );
 
     final income = thisMonth
         .where((tx) => !tx.isExpense)
-        .fold(0.0, (sum, tx) => sum + tx.amount);
+        .fold(0.0, (sum, tx) => sum + tx.effectiveAmount);
     final expense = thisMonth
         .where((tx) => tx.isExpense)
-        .fold(0.0, (sum, tx) => sum + tx.amount);
+        .fold(0.0, (sum, tx) => sum + tx.effectiveAmount);
 
     if (income == 0) {
       return FinancialHealthScore(
@@ -153,9 +153,9 @@ class AdvancedAnalyticsService {
       }
 
       if (tx.date.year == now.year && tx.date.month == now.month) {
-        trends[categoryName]!.thisMonth += tx.amount;
+        trends[categoryName]!.thisMonth += tx.effectiveAmount;
       } else if (tx.date.year == now.year && tx.date.month == now.month - 1) {
-        trends[categoryName]!.lastMonth += tx.amount;
+        trends[categoryName]!.lastMonth += tx.effectiveAmount;
       }
     }
 
@@ -174,7 +174,7 @@ class AdvancedAnalyticsService {
           tx.date.month == now.month,
     );
 
-    final spent = thisMonth.fold(0.0, (sum, tx) => sum + tx.amount);
+    final spent = thisMonth.fold(0.0, (sum, tx) => sum + tx.effectiveAmount);
     final remaining = budgetAmount - spent;
 
     if (remaining <= 0) return now;
@@ -209,7 +209,7 @@ class AdvancedAnalyticsService {
       (t) => t.isExpense && t.date.isAfter(now.subtract(const Duration(days: 90))),
     )) {
       final dayName = days[tx.date.weekday - 1];
-      byDay[dayName] = (byDay[dayName] ?? 0) + tx.amount;
+      byDay[dayName] = (byDay[dayName] ?? 0) + tx.effectiveAmount;
     }
 
     return byDay;

@@ -1,3 +1,6 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/shared/widgets/currency_badge.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -58,10 +61,9 @@ class HeroAmountInput extends StatelessWidget {
                 fontWeight: FontWeight.w900,
                 color: accentColor.withValues(alpha: 0.2),
               ),
-              prefixText: '₹ ',
-              prefixStyle: textTheme.displaySmall?.copyWith(
-                fontWeight: FontWeight.w900,
-                color: accentColor.withValues(alpha: 0.6),
+              prefix: Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: CurrencyBadge(code: BaseCurrency.code, size: 28),
               ),
               border: InputBorder.none,
               contentPadding: const EdgeInsets.symmetric(vertical: 16),
@@ -89,7 +91,7 @@ class HeroAmountInput extends StatelessWidget {
                 children: quickAmounts!.map((amt) {
                   return ActionChip(
                     label: Text(
-                      '₹$amt',
+                      '${formatCurrency(amt.toDouble(), decimals: 0)}',
                       style: textTheme.labelSmall?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),

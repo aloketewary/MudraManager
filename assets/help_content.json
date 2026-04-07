@@ -246,6 +246,27 @@
     ]
   },
   {
+    "id": "currency",
+    "title": "Multi-Currency",
+    "icon": "currency_exchange",
+    "shortDescription": "Track finances across multiple currencies",
+    "description": "Set a base currency during onboarding. Create accounts in any currency — USD, EUR, GBP, and 40+ more. When you add a transaction in a foreign currency, the converted amount and exchange rate are snapshotted automatically so your totals stay accurate forever.",
+    "steps": [
+      "Your base currency is set during onboarding",
+      "To create a foreign-currency account: Profile → Accounts → Add → pick a currency",
+      "Transactions in foreign accounts auto-convert to your base currency",
+      "View your base currency in Profile → Currency",
+      "To change base currency: Profile → Currency → Change Base Currency"
+    ],
+    "tips": [
+      "Exchange rates are bundled offline — no internet needed for conversion",
+      "Each transaction stores the rate used, so old data stays historically accurate",
+      "Changing base currency archives ALL existing transactions — this cannot be undone",
+      "View archived transactions anytime from Profile → Currency → Archived Transactions",
+      "Budgets and dashboard totals always show in your base currency"
+    ]
+  },
+  {
     "id": "security",
     "title": "Security",
     "icon": "lock",

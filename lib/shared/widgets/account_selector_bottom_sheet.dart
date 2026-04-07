@@ -1,4 +1,6 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
@@ -95,7 +97,7 @@ class AccountSelectorBottomSheet extends ConsumerWidget {
                           final balance = snapshot.data ?? 0.0;
                           return AccountDisplayCard(
                             title: account.name,
-                            amount: l10n.formatCurrencyWithSign(0, balance),
+                            amount: formatCurrency(balance, decimals: 0),
                             accountType: account.accountType,
                             startColor: Colors.blue,
                             endColor: Colors.blue.shade100,
@@ -109,7 +111,14 @@ class AccountSelectorBottomSheet extends ConsumerWidget {
                   },
                 );
               },
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: 4,
+                itemBuilder: (_, __) => const Padding(
+                  padding: EdgeInsets.only(bottom: 12),
+                  child: AccountCardSkeleton(),
+                ),
+              ),
               error: (e, _) => Center(child: Text(BuddyMessages.errorWith('$e'))),
             ),
           ),

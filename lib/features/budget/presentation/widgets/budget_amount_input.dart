@@ -1,3 +1,5 @@
+import 'package:mudra_manager/shared/widgets/currency_badge.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -23,7 +25,10 @@ class BudgetAmountInput extends StatelessWidget {
       ],
       decoration: InputDecoration(
         labelText: label,
-        prefixText: '₹ ',
+        prefix: Padding(
+          padding: const EdgeInsets.only(right: 6),
+          child: CurrencyBadge(code: BaseCurrency.code, size: 16),
+        ),
         errorText: errorText,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),

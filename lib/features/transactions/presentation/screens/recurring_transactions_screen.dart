@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -122,7 +124,7 @@ class RecurringTransactionsScreen extends ConsumerWidget {
         loading: () => ListView.builder(
           padding: const EdgeInsets.all(16).copyWith(bottom: 80),
           itemCount: 4,
-          itemBuilder: (context, index) => const TransactionCardSkeleton(),
+          itemBuilder: (context, index) => TransactionCardSkeleton(),
         ),
         error: (_, __) =>
             Center(child: Text(BuddyMessages.genericError)),
@@ -223,7 +225,7 @@ class _RecurringCard extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    '${item.isExpense ? '-' : '+'}₹${GuestModeUtil.applyGuestMode(item.amount, isGuestMode).toStringAsFixed(0)}',
+                    '${item.isExpense ? '-' : '+'}${formatCurrency(GuestModeUtil.applyGuestMode(item.amount, isGuestMode), decimals: 0)}',
                     style: textTheme.titleMedium?.copyWith(
                       color: color,
                       fontWeight: FontWeight.bold,

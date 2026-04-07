@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_plugin_sdk/mudra_plugin_sdk.dart';
 
 class CategoryAlertPlugin extends MudraPlugin {
@@ -38,7 +39,7 @@ class CategoryAlertPlugin extends MudraPlugin {
           ),
         ],
         action: RuleAction.notify,
-        actionParams: {'text': '🍔 High Food expense! Over ₹5,000'},
+        actionParams: {'text': '🍔 High Food expense! Over ${BaseCurrency.symbol}5,000'},
       ),
     );
 
@@ -59,7 +60,7 @@ class CategoryAlertPlugin extends MudraPlugin {
           ),
         ],
         action: RuleAction.notify,
-        actionParams: {'text': '🛍️ High Shopping expense! Over ₹3,000'},
+        actionParams: {'text': '🛍️ High Shopping expense! Over ${BaseCurrency.symbol}3,000'},
       ),
     );
 
@@ -80,7 +81,7 @@ class CategoryAlertPlugin extends MudraPlugin {
           ),
         ],
         action: RuleAction.notify,
-        actionParams: {'text': '🎬 High Entertainment expense! Over ₹2,000'},
+        actionParams: {'text': '🎬 High Entertainment expense! Over ${BaseCurrency.symbol}2,000'},
       ),
     );
   }

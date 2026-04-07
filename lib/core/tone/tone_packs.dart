@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/currency/currency_service.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/tone/tone_pack.dart';
 import 'package:mudra_manager/core/tone/tone_variation.dart';
 
@@ -89,6 +91,66 @@ class FriendlyTonePack extends TonePack {
   String get budgetDeleted => 'Budget removed';
 
   @override
+  String budgetExceededBy(String amount) =>
+      'You\'ve exceeded your budget by $amount 😬';
+  @override
+  String budgetSlowDown(String amount, int days) =>
+      'Slow down — only $amount left for $days days';
+  @override
+  String budgetSafePerDay(String amount) =>
+      'You can spend $amount/day safely 👍';
+  @override
+  String get budgetExceededAdjust =>
+      'You\'ve exceeded this budget. Maybe ease up a bit?';
+  @override
+  String budgetOnTrack(String amount) =>
+      'On track! $amount/day keeps you within budget';
+  @override
+  String get budgetGreatDiscipline =>
+      'Great discipline! You\'re well within your budget ✨';
+  @override
+  String budgetAlreadySpent(String amount) =>
+      'You\'ve already spent $amount — this won\'t fit';
+  @override
+  String budgetMayExceedIn(int days) =>
+      'At current pace, you may exceed in $days days';
+  @override
+  String budgetGettingTight(String amount, int days) =>
+      'Getting tight — $amount left for $days days';
+  @override
+  String budgetInControl(String amount) =>
+      'You\'re in control — about $amount/day works 👌';
+
+  // ── Monthly Comparison ──
+  @override
+  String comparisonSpentLess(String amount) =>
+      'Nice! You spent $amount less than last month 🎉';
+  @override
+  String comparisonSpentMore(String amount) =>
+      'You spent $amount more than last month — worth a look';
+  @override
+  String get comparisonSpentSame =>
+      'Spending is about the same as last month — steady!';
+  @override
+  String comparisonTopIncrease(String category, String amount) =>
+      '$category went up the most (+$amount)';
+  @override
+  String comparisonTopDecrease(String category, String amount) =>
+      'You cut back on $category the most (-$amount) 👍';
+  @override
+  String comparisonPrediction(String amount) =>
+      'At this pace, you\'ll spend about $amount this month';
+  @override
+  String comparisonTxnCount(int current, int last) =>
+      '${current > last ? '${current - last} more' : '${last - current} fewer'} transactions than last month';
+  @override
+  String comparisonDailyAvg(String current, String last) =>
+      'Daily average: $current vs $last last month';
+  @override
+  String comparisonByThisDay(String amount) =>
+      'By this day last month, you\'d spent $amount';
+
+  @override
   String get goalCreated => pickRandom([
     'Goal set! You got this 🎯',
     'New goal! Let\'s make it happen 🎯',
@@ -98,6 +160,29 @@ class FriendlyTonePack extends TonePack {
   String get goalUpdated => 'Goal updated!';
   @override
   String get goalDeleted => 'Goal removed';
+
+  @override
+  String goalMilestone25(String goalName) => 'Good start on $goalName! 🌱';
+  @override
+  String goalMilestone50(String goalName) => 'Halfway there on $goalName! 🚀';
+  @override
+  String goalMilestone75(String goalName) => 'Almost done with $goalName! 🔥';
+  @override
+  String goalMilestone100(String goalName) => '🎉 $goalName is complete! You did it!';
+  @override
+  String goalOnTrack(String goalName) => 'You\'re on track — keep going! 👍';
+  @override
+  String goalBehind(String goalName) => 'A little behind — you can catch up!';
+  @override
+  String goalAhead(String goalName, String days) => 'You\'re ahead by $days days 🎉';
+  @override
+  String goalDailyNeeded(String amount) => 'Save $amount/day to reach on time';
+  @override
+  String goalPredictedDate(String date) => 'At this pace, you\'ll reach by $date';
+  @override
+  String goalContributionThisMonth(String amount) => '+$amount added this month';
+  @override
+  String goalNoDeadline(String goalName) => 'No rush — save at your own pace ✨';
 
   @override
   String get accountCreated => 'Account added! 🏦';
@@ -220,6 +305,37 @@ class FriendlyTonePack extends TonePack {
   @override
   String get logoutConfirm => 'Logout';
 
+  // ── Currency ──
+  @override
+  String get currencyChanged => 'Base currency updated! 💱';
+  @override
+  String currencyArchivedCount(int count, String newCurrency) =>
+      'Switched to $newCurrency. $count transactions archived.';
+  @override
+  String get currencyChangeTitle => 'Change base currency?';
+  @override
+  String get currencyChangeWarning =>
+      'All existing transactions will be archived. You start fresh with the new currency.';
+  @override
+  String get currencyChangeConfirm => 'Archive & Change';
+  @override
+  String get currencyChangeCancel => 'Keep it';
+  @override
+  String get currencyPickerTitle => 'Choose Your Currency';
+  @override
+  String get currencyPickerSubtitle =>
+      'All your totals and budgets will be shown in this currency.';
+  @override
+  String get currencyChangeIrreversible => 'This action cannot be undone.';
+  @override
+  String get archivedTransactionsTitle => 'Archived Transactions';
+  @override
+  String get noArchivedTransactions => 'No archived transactions yet\nThey\'ll show up here if you change your base currency';
+  @override
+  String noTripExpenses(bool isTrip) => isTrip
+      ? 'No expenses yet\nAdd your first trip expense to get started'
+      : 'No expenses yet\nAdd a split expense to start tracking';
+
   @override
   String get insightBillsDueSoon => 'Heads up — bills incoming';
   @override
@@ -239,20 +355,20 @@ class FriendlyTonePack extends TonePack {
   String get insightOverspending => 'Spending outpacing income';
   @override
   String insightOverspendingMessage(String amount) =>
-      'You\'re ₹$amount over your income this month — might want to slow down';
+      'You\'re ${BaseCurrency.symbol}$amount over your income this month — might want to slow down';
   @override
   String get insightSpendingSpike => 'Spending spike today';
   @override
   String insightSpendingSpikeMessage(String avg, String today) =>
-      'You usually spend ₹$avg/day. Today\'s already ₹$today.';
+      'You usually spend ${BaseCurrency.symbol}$avg/day. Today\'s already ${BaseCurrency.symbol}$today.';
   @override
   String get insightWeekendAlert => 'Weekend spending alert';
   @override
   String insightWeekendAlertMessage(String avg, String current) =>
-      'You usually spend ₹$avg on weekends. This one\'s already ₹$current.';
+      'You usually spend ${BaseCurrency.symbol}$avg on weekends. This one\'s already ${BaseCurrency.symbol}$current.';
   @override
   String insightMoneyLeak(String category, int count, String total) =>
-      '$category: $count times this month, ₹$total total — small hits add up';
+      '$category: $count times this month, ${BaseCurrency.symbol}$total total — small hits add up';
   @override
   String insightBestDay(
     String worst,
@@ -261,7 +377,7 @@ class FriendlyTonePack extends TonePack {
     String bAvg,
     String saving,
   ) =>
-      '₹$wAvg avg on ${worst}s vs ₹$bAvg on ${best}s — that\'s ₹$saving you could keep';
+      '${BaseCurrency.symbol}$wAvg avg on ${worst}s vs ${BaseCurrency.symbol}$bAvg on ${best}s — that\'s ${BaseCurrency.symbol}$saving you could keep';
   @override
   String get insightGetStarted => 'Let\'s get started! 🚀';
   @override
@@ -301,41 +417,41 @@ class FriendlyTonePack extends TonePack {
   // ── Contextual Notifications ──
   @override
   String budgetExceededNotif(String name, String spent, String limit) =>
-      '$name is over budget — ₹$spent of ₹$limit spent. Might want to ease up';
+      '$name is over budget — ${BaseCurrency.symbol}$spent of ${BaseCurrency.symbol}$limit spent. Might want to ease up';
   @override
   String budgetWarningNotif(String name, String remaining, String pct) =>
-      '$name is at $pct% — only ₹$remaining left to play with';
+      '$name is at $pct% — only ${BaseCurrency.symbol}$remaining left to play with';
   @override
   String billDueNotif(String name, String amount, String when) =>
-      '$name (₹$amount) is due $when — just a heads up!';
+      '$name (${BaseCurrency.symbol}$amount) is due $when — just a heads up!';
   @override
   String balanceDropNotif(String days) =>
       'At this pace, things could get tight in about $days days';
   @override
   String savingsOpportunityNotif(String category, String amount) =>
-      '$category is trending ₹$amount higher than last month — small cuts add up!';
+      '$category is trending ${BaseCurrency.symbol}$amount higher than last month — small cuts add up!';
   @override
   String unusualSpendingNotif(String today, String multiplier) =>
-      '₹$today spent today — that\'s ${multiplier}x your usual. Big day?';
+      '${BaseCurrency.symbol}$today spent today — that\'s ${multiplier}x your usual. Big day?';
   @override
   String pendingSmsNotif(int count) =>
       'Picked up $count from your messages — quick review?';
   @override
   String moneyLeakNotif(String category, int count, String total) =>
-      '$category: $count transactions, ₹$total this month — worth a look';
+      '$category: $count transactions, ${BaseCurrency.symbol}$total this month — worth a look';
   @override
   String reEngageMissYou(int lostStreak) => lostStreak > 3
       ? 'Your $lostStreak-day streak is gone — but a new one starts with one tap'
       : 'It\'s been a while — just open the app to get back on track';
   @override
   String reEngageUntracked(int days, String estimatedSpend) =>
-      'You probably spent around ₹$estimatedSpend since you last checked — quick catch-up?';
+      'You probably spent around ${BaseCurrency.symbol}$estimatedSpend since you last checked — quick catch-up?';
   @override
   String get reEngageQuickNudge =>
       'Track today\'s spending before it slips — just one tap';
   @override
   String dailySummaryNotif(String spent, String earned, String topCategory) =>
-      'Spent ₹$spent · Earned ₹$earned\nMost went to $topCategory';
+      'Spent ${BaseCurrency.symbol}$spent · Earned ${BaseCurrency.symbol}$earned\nMost went to $topCategory';
   @override
   String get dailySummaryEmpty => pickRandom([
     'Nothing recorded yesterday — either a zero-spend win or time to catch up!',
@@ -344,7 +460,7 @@ class FriendlyTonePack extends TonePack {
   ]);
   @override
   String weeklySummaryNotif(String total, String topCategory, String trend) =>
-      'You spent ₹$total\nMost on $topCategory\n$trend';
+      'You spent ${BaseCurrency.symbol}$total\nMost on $topCategory\n$trend';
   @override
   String streakAtRisk(int streak) =>
       '$streak-day streak on the line — just open the app to keep it alive!';
@@ -440,6 +556,66 @@ class ProfessionalTonePack extends TonePack {
   String get budgetDeleted => 'Budget deleted.';
 
   @override
+  String budgetExceededBy(String amount) =>
+      'Budget exceeded by $amount.';
+  @override
+  String budgetSlowDown(String amount, int days) =>
+      '$amount remaining for $days days. Consider reducing expenditure.';
+  @override
+  String budgetSafePerDay(String amount) =>
+      'Safe daily spend: $amount.';
+  @override
+  String get budgetExceededAdjust =>
+      'Budget exceeded. Review spending or adjust the limit.';
+  @override
+  String budgetOnTrack(String amount) =>
+      'On track. $amount/day within budget.';
+  @override
+  String get budgetGreatDiscipline =>
+      'Well within budget. Good financial discipline.';
+  @override
+  String budgetAlreadySpent(String amount) =>
+      'Current spending ($amount) exceeds this budget amount.';
+  @override
+  String budgetMayExceedIn(int days) =>
+      'At current rate, budget may be exceeded in $days days.';
+  @override
+  String budgetGettingTight(String amount, int days) =>
+      '$amount remaining for $days days. Budget is tight.';
+  @override
+  String budgetInControl(String amount) =>
+      'Sustainable pace at $amount/day.';
+
+  // ── Monthly Comparison ──
+  @override
+  String comparisonSpentLess(String amount) =>
+      'Spending decreased by $amount compared to last month.';
+  @override
+  String comparisonSpentMore(String amount) =>
+      'Spending increased by $amount compared to last month.';
+  @override
+  String get comparisonSpentSame =>
+      'Spending is consistent with last month.';
+  @override
+  String comparisonTopIncrease(String category, String amount) =>
+      '$category: highest increase (+$amount).';
+  @override
+  String comparisonTopDecrease(String category, String amount) =>
+      '$category: largest reduction (-$amount).';
+  @override
+  String comparisonPrediction(String amount) =>
+      'Projected month-end expenditure: $amount.';
+  @override
+  String comparisonTxnCount(int current, int last) =>
+      '${current > last ? '${current - last} additional' : '${last - current} fewer'} transactions versus last month.';
+  @override
+  String comparisonDailyAvg(String current, String last) =>
+      'Daily average: $current (previous: $last).';
+  @override
+  String comparisonByThisDay(String amount) =>
+      'Expenditure by this date last month: $amount.';
+
+  @override
   String get goalCreated => pickRandom([
     'Goal created.',
     'Savings goal configured.',
@@ -449,6 +625,29 @@ class ProfessionalTonePack extends TonePack {
   String get goalUpdated => 'Goal updated.';
   @override
   String get goalDeleted => 'Goal deleted.';
+
+  @override
+  String goalMilestone25(String goalName) => '$goalName: 25% milestone reached.';
+  @override
+  String goalMilestone50(String goalName) => '$goalName: 50% complete.';
+  @override
+  String goalMilestone75(String goalName) => '$goalName: 75% complete.';
+  @override
+  String goalMilestone100(String goalName) => '$goalName: Goal achieved.';
+  @override
+  String goalOnTrack(String goalName) => 'On track to meet your goal.';
+  @override
+  String goalBehind(String goalName) => 'Slightly behind schedule. Consider increasing contributions.';
+  @override
+  String goalAhead(String goalName, String days) => 'Ahead of schedule by $days days.';
+  @override
+  String goalDailyNeeded(String amount) => 'Required daily savings: $amount.';
+  @override
+  String goalPredictedDate(String date) => 'Projected completion: $date.';
+  @override
+  String goalContributionThisMonth(String amount) => '+$amount contributed this month.';
+  @override
+  String goalNoDeadline(String goalName) => 'No target date set. Save at your discretion.';
 
   @override
   String get accountCreated => 'Account added.';
@@ -567,6 +766,37 @@ class ProfessionalTonePack extends TonePack {
   @override
   String get logoutConfirm => 'Logout';
 
+  // ── Currency ──
+  @override
+  String get currencyChanged => 'Base currency updated.';
+  @override
+  String currencyArchivedCount(int count, String newCurrency) =>
+      'Switched to $newCurrency. $count transactions archived.';
+  @override
+  String get currencyChangeTitle => 'Change Base Currency';
+  @override
+  String get currencyChangeWarning =>
+      'All existing transactions will be archived. Transaction history will be reset.';
+  @override
+  String get currencyChangeConfirm => 'Archive & Change';
+  @override
+  String get currencyChangeCancel => 'Cancel';
+  @override
+  String get currencyPickerTitle => 'Select Currency';
+  @override
+  String get currencyPickerSubtitle =>
+      'All totals, budgets, and analytics will use this currency.';
+  @override
+  String get currencyChangeIrreversible => 'This action is irreversible.';
+  @override
+  String get archivedTransactionsTitle => 'Archived Transactions';
+  @override
+  String get noArchivedTransactions => 'No archived transactions.\nTransactions are archived upon base currency change.';
+  @override
+  String noTripExpenses(bool isTrip) => isTrip
+      ? 'No expenses recorded.\nAdd trip expenses to begin tracking.'
+      : 'No expenses recorded.\nAdd split expenses to begin.';
+
   @override
   String get insightBillsDueSoon => 'Upcoming bills';
   @override
@@ -647,41 +877,41 @@ class ProfessionalTonePack extends TonePack {
 
   @override
   String budgetExceededNotif(String name, String spent, String limit) =>
-      '$name exceeded: ₹$spent of ₹$limit allocated.';
+      '$name exceeded: ${BaseCurrency.symbol}$spent of ${BaseCurrency.symbol}$limit allocated.';
   @override
   String budgetWarningNotif(String name, String remaining, String pct) =>
-      '$name at $pct% utilization. ₹$remaining remaining.';
+      '$name at $pct% utilization. ${BaseCurrency.symbol}$remaining remaining.';
   @override
   String billDueNotif(String name, String amount, String when) =>
-      '$name (₹$amount) due $when.';
+      '$name (${BaseCurrency.symbol}$amount) due $when.';
   @override
   String balanceDropNotif(String days) =>
       'At current rate, funds may be insufficient in $days days.';
   @override
   String savingsOpportunityNotif(String category, String amount) =>
-      '$category trending ₹$amount above last month.';
+      '$category trending ${BaseCurrency.symbol}$amount above last month.';
   @override
   String unusualSpendingNotif(String today, String multiplier) =>
-      '₹$today recorded today — ${multiplier}x daily average.';
+      '${BaseCurrency.symbol}$today recorded today — ${multiplier}x daily average.';
   @override
   String pendingSmsNotif(int count) =>
       '$count SMS transactions detected. Review required.';
   @override
   String moneyLeakNotif(String category, int count, String total) =>
-      '$category: $count transactions totaling ₹$total this month.';
+      '$category: $count transactions totaling ${BaseCurrency.symbol}$total this month.';
   @override
   String reEngageMissYou(int lostStreak) => lostStreak > 3
       ? '$lostStreak-day streak ended. Resume tracking to start a new one.'
       : 'Tracking has been inactive. Resume to maintain records.';
   @override
   String reEngageUntracked(int days, String estimatedSpend) =>
-      '$days days untracked. Estimated unrecorded spending: ₹$estimatedSpend.';
+      '$days days untracked. Estimated unrecorded spending: ${BaseCurrency.symbol}$estimatedSpend.';
   @override
   String get reEngageQuickNudge =>
       'Record today\'s transactions to maintain accurate records.';
   @override
   String dailySummaryNotif(String spent, String earned, String topCategory) =>
-      'Expenditure: ₹$spent · Income: ₹$earned\nPrimary category: $topCategory';
+      'Expenditure: ${BaseCurrency.symbol}$spent · Income: ${BaseCurrency.symbol}$earned\nPrimary category: $topCategory';
   @override
   String get dailySummaryEmpty => pickRandom([
     'No transactions recorded yesterday.',
@@ -690,7 +920,7 @@ class ProfessionalTonePack extends TonePack {
   ]);
   @override
   String weeklySummaryNotif(String total, String topCategory, String trend) =>
-      'Weekly expenditure: ₹$total\nTop category: $topCategory\n$trend';
+      'Weekly expenditure: ${BaseCurrency.symbol}$total\nTop category: $topCategory\n$trend';
   @override
   String streakAtRisk(int streak) =>
       '$streak-day tracking streak at risk. Open the app to maintain it.';
@@ -793,6 +1023,66 @@ class MotivationalTonePack extends TonePack {
   @override
   String get budgetDeleted => 'Budget removed';
 
+  @override
+  String budgetExceededBy(String amount) =>
+      'Over by $amount — you can course-correct! 💪';
+  @override
+  String budgetSlowDown(String amount, int days) =>
+      'Only $amount left for $days days — stay focused!';
+  @override
+  String budgetSafePerDay(String amount) =>
+      '$amount/day keeps you on track — you\'ve got this! 💪';
+  @override
+  String get budgetExceededAdjust =>
+      'Over budget — but every day is a chance to reset! 💪';
+  @override
+  String budgetOnTrack(String amount) =>
+      'Crushing it! $amount/day keeps you in the zone!';
+  @override
+  String get budgetGreatDiscipline =>
+      'Amazing discipline! You\'re way ahead! 🏆';
+  @override
+  String budgetAlreadySpent(String amount) =>
+      'Already spent $amount — this budget won\'t cover it';
+  @override
+  String budgetMayExceedIn(int days) =>
+      'At this pace, you\'ll exceed in $days days — time to adjust!';
+  @override
+  String budgetGettingTight(String amount, int days) =>
+      'Tight! $amount for $days days — stay sharp!';
+  @override
+  String budgetInControl(String amount) =>
+      'In control! $amount/day is sustainable — keep it up! 🚀';
+
+  // ── Monthly Comparison ──
+  @override
+  String comparisonSpentLess(String amount) =>
+      'You saved $amount compared to last month — amazing discipline! 🎉';
+  @override
+  String comparisonSpentMore(String amount) =>
+      '$amount more than last month — you can course-correct! 💪';
+  @override
+  String get comparisonSpentSame =>
+      'Holding steady! Consistent spending shows control 💪';
+  @override
+  String comparisonTopIncrease(String category, String amount) =>
+      '$category jumped the most (+$amount) — worth watching!';
+  @override
+  String comparisonTopDecrease(String category, String amount) =>
+      'Great cut on $category (-$amount) — that\'s discipline! 💪';
+  @override
+  String comparisonPrediction(String amount) =>
+      'On track to spend $amount this month — stay focused!';
+  @override
+  String comparisonTxnCount(int current, int last) =>
+      '${current > last ? '${current - last} more' : '${last - current} fewer'} transactions — ${current > last ? 'stay mindful!' : 'nice restraint!'}';
+  @override
+  String comparisonDailyAvg(String current, String last) =>
+      '$current/day vs $last/day last month';
+  @override
+  String comparisonByThisDay(String amount) =>
+      'By this day last month you\'d spent $amount — how do you compare?';
+
 // Goal
   @override
   String get goalCreated => pickRandom([
@@ -804,6 +1094,29 @@ class MotivationalTonePack extends TonePack {
   String get goalUpdated => 'Goal refined — keep pushing!';
   @override
   String get goalDeleted => 'Goal removed — new priorities, new plans';
+
+  @override
+  String goalMilestone25(String goalName) => 'Great start on $goalName! The journey begins! 🌟';
+  @override
+  String goalMilestone50(String goalName) => 'Halfway there on $goalName! Unstoppable! 💪';
+  @override
+  String goalMilestone75(String goalName) => 'Almost there! $goalName is within reach! 🔥';
+  @override
+  String goalMilestone100(String goalName) => '🏆 $goalName COMPLETE! You\'re a champion!';
+  @override
+  String goalOnTrack(String goalName) => 'Crushing it! Right on track! 💪';
+  @override
+  String goalBehind(String goalName) => 'A little behind — but comebacks are your thing! 💪';
+  @override
+  String goalAhead(String goalName, String days) => 'Ahead by $days days! Unstoppable! 🚀';
+  @override
+  String goalDailyNeeded(String amount) => 'Save $amount/day — you\'ve got this! 💪';
+  @override
+  String goalPredictedDate(String date) => 'At this pace, you\'ll crush it by $date! 🎯';
+  @override
+  String goalContributionThisMonth(String amount) => '+$amount this month! Keep the momentum! 🔥';
+  @override
+  String goalNoDeadline(String goalName) => 'No deadline — every step counts! 🚀';
 
 // Account
   @override
@@ -941,6 +1254,37 @@ class MotivationalTonePack extends TonePack {
   String get logoutConfirm => 'Logout';
 
 // Insights
+  // ── Currency ──
+  @override
+  String get currencyChanged => 'Currency switched! New chapter! 💱';
+  @override
+  String currencyArchivedCount(int count, String newCurrency) =>
+      'Switched to $newCurrency! $count transactions archived — fresh start! 🚀';
+  @override
+  String get currencyChangeTitle => 'Ready to switch?';
+  @override
+  String get currencyChangeWarning =>
+      'All existing transactions get archived. You start fresh — a clean slate!';
+  @override
+  String get currencyChangeConfirm => 'Let\'s do it!';
+  @override
+  String get currencyChangeCancel => 'Not yet';
+  @override
+  String get currencyPickerTitle => 'Pick Your Currency! 🌍';
+  @override
+  String get currencyPickerSubtitle =>
+      'Everything — totals, budgets, goals — will show in this currency.';
+  @override
+  String get currencyChangeIrreversible => 'This can\'t be undone — but your archived data is safe!';
+  @override
+  String get archivedTransactionsTitle => 'Archived Transactions';
+  @override
+  String get noArchivedTransactions => 'Nothing archived yet! 📦\nIf you ever switch currencies, your old transactions land here safely';
+  @override
+  String noTripExpenses(bool isTrip) => isTrip
+      ? 'No expenses yet! ✈️\nStart adding trip expenses — every rupee counts!'
+      : 'No expenses yet! 🤝\nAdd your first split expense — let\'s go!';
+
   @override
   String get insightBillsDueSoon => 'Bills coming up! 📋';
   @override
@@ -960,24 +1304,24 @@ class MotivationalTonePack extends TonePack {
   String get insightOverspending => 'Spending exceeding income';
   @override
   String insightOverspendingMessage(String amount) =>
-      '₹$amount over income — small adjustments make a big difference!';
+      '${BaseCurrency.symbol}$amount over income — small adjustments make a big difference!';
   @override
   String get insightSpendingSpike => 'Spending spike today';
   @override
   String insightSpendingSpikeMessage(String avg, String today) =>
-      'Usually ₹$avg/day. Today\'s ₹$today — be intentional!';
+      'Usually ${BaseCurrency.symbol}$avg/day. Today\'s ${BaseCurrency.symbol}$today — be intentional!';
   @override
   String get insightWeekendAlert => 'Weekend spending alert';
   @override
   String insightWeekendAlertMessage(String avg, String current) =>
-      'Weekend avg: ₹$avg. This one\'s ₹$current — stay aware!';
+      'Weekend avg: ${BaseCurrency.symbol}$avg. This one\'s ${BaseCurrency.symbol}$current — stay aware!';
   @override
   String insightMoneyLeak(String category, int count, String total) =>
-      '$category: $count times, ₹$total — small wins add up if you cut back!';
+      '$category: $count times, ${BaseCurrency.symbol}$total — small wins add up if you cut back!';
   @override
   String insightBestDay(
           String worst, String wAvg, String best, String bAvg, String saving,) =>
-      '₹$wAvg on ${worst}s vs ₹$bAvg on ${best}s — ₹$saving potential savings!';
+      '${BaseCurrency.symbol}$wAvg on ${worst}s vs ${BaseCurrency.symbol}$bAvg on ${best}s — ${BaseCurrency.symbol}$saving potential savings!';
   @override
   String get insightGetStarted => 'Let\'s build something great! 🚀';
   @override
@@ -1021,41 +1365,41 @@ class MotivationalTonePack extends TonePack {
 
   @override
   String budgetExceededNotif(String name, String spent, String limit) =>
-      '$name went over — ₹$spent of ₹$limit. You can course-correct! 💪';
+      '$name went over — ${BaseCurrency.symbol}$spent of ${BaseCurrency.symbol}$limit. You can course-correct! 💪';
   @override
   String budgetWarningNotif(String name, String remaining, String pct) =>
-      '$name is at $pct% — ₹$remaining left. You\'ve got this!';
+      '$name is at $pct% — ${BaseCurrency.symbol}$remaining left. You\'ve got this!';
   @override
   String billDueNotif(String name, String amount, String when) =>
-      '$name (₹$amount) due $when — stay ahead of it! 🔔';
+      '$name (${BaseCurrency.symbol}$amount) due $when — stay ahead of it! 🔔';
   @override
   String balanceDropNotif(String days) =>
       'Funds could run tight in $days days — small adjustments now pay off big!';
   @override
   String savingsOpportunityNotif(String category, String amount) =>
-      '$category is up ₹$amount — a little discipline here goes a long way! 💡';
+      '$category is up ${BaseCurrency.symbol}$amount — a little discipline here goes a long way! 💡';
   @override
   String unusualSpendingNotif(String today, String multiplier) =>
-      '₹$today today — ${multiplier}x your average! Be intentional! 🎯';
+      '${BaseCurrency.symbol}$today today — ${multiplier}x your average! Be intentional! 🎯';
   @override
   String pendingSmsNotif(int count) =>
       '$count transactions auto-detected — review them to stay on top! 📩';
   @override
   String moneyLeakNotif(String category, int count, String total) =>
-      '$category: $count times, ₹$total — small wins add up if you cut back!';
+      '$category: $count times, ${BaseCurrency.symbol}$total — small wins add up if you cut back!';
   @override
   String reEngageMissYou(int lostStreak) => lostStreak > 3
       ? 'Your $lostStreak-day streak ended — but comebacks are the best stories! 🔥'
       : 'You\'ve been away — today\'s a great day to restart!';
   @override
   String reEngageUntracked(int days, String estimatedSpend) =>
-      '$days days untracked, ~₹$estimatedSpend missed — let\'s catch up! 💪';
+      '$days days untracked, ~${BaseCurrency.symbol}$estimatedSpend missed — let\'s catch up! 💪';
   @override
   String get reEngageQuickNudge =>
       'One quick entry keeps the momentum going — you\'ve got this!';
   @override
   String dailySummaryNotif(String spent, String earned, String topCategory) =>
-      'Spent ₹$spent · Earned ₹$earned\n$topCategory led the way — keep tracking!';
+      'Spent ${BaseCurrency.symbol}$spent · Earned ${BaseCurrency.symbol}$earned\n$topCategory led the way — keep tracking!';
   @override
   String get dailySummaryEmpty => pickRandom([
     'Zero spend yesterday — your wallet thanks you! ✨',
@@ -1064,7 +1408,7 @@ class MotivationalTonePack extends TonePack {
   ]);
   @override
   String weeklySummaryNotif(String total, String topCategory, String trend) =>
-      '₹$total this week on $topCategory\n$trend — keep pushing!';
+      '${BaseCurrency.symbol}$total this week on $topCategory\n$trend — keep pushing!';
   @override
   String streakAtRisk(int streak) =>
       '$streak-day streak is on the line — don\'t let it slip! 🔥';
@@ -1156,6 +1500,66 @@ class CalmTonePack extends TonePack {
   String get budgetDeleted => 'Released.';
 
   @override
+  String budgetExceededBy(String amount) =>
+      'Over by $amount. A moment to reflect.';
+  @override
+  String budgetSlowDown(String amount, int days) =>
+      '$amount left across $days days. Gently.';
+  @override
+  String budgetSafePerDay(String amount) =>
+      '$amount/day feels right.';
+  @override
+  String get budgetExceededAdjust =>
+      'Past the boundary. Pause and reconsider.';
+  @override
+  String budgetOnTrack(String amount) =>
+      'Flowing well. $amount/day.';
+  @override
+  String get budgetGreatDiscipline =>
+      'Well within bounds. Peaceful.';
+  @override
+  String budgetAlreadySpent(String amount) =>
+      '$amount already spent. This won\'t hold.';
+  @override
+  String budgetMayExceedIn(int days) =>
+      'At this rhythm, the boundary arrives in $days days.';
+  @override
+  String budgetGettingTight(String amount, int days) =>
+      '$amount for $days days. Tread lightly.';
+  @override
+  String budgetInControl(String amount) =>
+      'Balanced. $amount/day.';
+
+  // ── Monthly Comparison ──
+  @override
+  String comparisonSpentLess(String amount) =>
+      '$amount less than last month. A lighter path.';
+  @override
+  String comparisonSpentMore(String amount) =>
+      '$amount more than last month. A moment to notice.';
+  @override
+  String get comparisonSpentSame =>
+      'Spending flows at the same pace.';
+  @override
+  String comparisonTopIncrease(String category, String amount) =>
+      '$category rose the most (+$amount).';
+  @override
+  String comparisonTopDecrease(String category, String amount) =>
+      '$category eased the most (-$amount).';
+  @override
+  String comparisonPrediction(String amount) =>
+      'This month may settle around $amount.';
+  @override
+  String comparisonTxnCount(int current, int last) =>
+      '${current > last ? '${current - last} more' : '${last - current} fewer'} transactions than before.';
+  @override
+  String comparisonDailyAvg(String current, String last) =>
+      '$current/day now. $last/day before.';
+  @override
+  String comparisonByThisDay(String amount) =>
+      'By this day last month: $amount.';
+
+  @override
   String get goalCreated => pickRandom([
     'Intention set.',
     'A new direction.',
@@ -1165,6 +1569,29 @@ class CalmTonePack extends TonePack {
   String get goalUpdated => 'Refined.';
   @override
   String get goalDeleted => 'Released.';
+
+  @override
+  String goalMilestone25(String goalName) => 'A seed planted for $goalName.';
+  @override
+  String goalMilestone50(String goalName) => 'Halfway. Steady progress on $goalName.';
+  @override
+  String goalMilestone75(String goalName) => 'Nearly there. $goalName approaches.';
+  @override
+  String goalMilestone100(String goalName) => '$goalName. Complete. Breathe.';
+  @override
+  String goalOnTrack(String goalName) => 'Flowing at the right pace.';
+  @override
+  String goalBehind(String goalName) => 'Slightly behind. No rush.';
+  @override
+  String goalAhead(String goalName, String days) => '$days days ahead. Steady.';
+  @override
+  String goalDailyNeeded(String amount) => '$amount/day brings balance.';
+  @override
+  String goalPredictedDate(String date) => 'The path leads to $date.';
+  @override
+  String goalContributionThisMonth(String amount) => '+$amount this month. Quietly growing.';
+  @override
+  String goalNoDeadline(String goalName) => 'No timeline. Let it unfold.';
 
   @override
   String get accountCreated => 'Account opened.';
@@ -1282,6 +1709,37 @@ class CalmTonePack extends TonePack {
   @override
   String get logoutConfirm => 'Leave';
 
+  // ── Currency ──
+  @override
+  String get currencyChanged => 'Currency shifted.';
+  @override
+  String currencyArchivedCount(int count, String newCurrency) =>
+      'Now $newCurrency. $count transactions archived. A new beginning.';
+  @override
+  String get currencyChangeTitle => 'A new currency?';
+  @override
+  String get currencyChangeWarning =>
+      'Existing transactions will be archived. A fresh page begins.';
+  @override
+  String get currencyChangeConfirm => 'Let go & change';
+  @override
+  String get currencyChangeCancel => 'Stay';
+  @override
+  String get currencyPickerTitle => 'Choose your currency';
+  @override
+  String get currencyPickerSubtitle =>
+      'Your totals and budgets will reflect this choice.';
+  @override
+  String get currencyChangeIrreversible => 'Once changed, it cannot return.';
+  @override
+  String get archivedTransactionsTitle => 'Archived';
+  @override
+  String get noArchivedTransactions => 'Nothing here yet.\nPast transactions rest here after a currency change.';
+  @override
+  String noTripExpenses(bool isTrip) => isTrip
+      ? 'Empty for now.\nAdd expenses when ready.'
+      : 'Nothing yet.\nBegin when the moment comes.';
+
   @override
   String get insightBillsDueSoon => 'Bills approaching';
   @override
@@ -1361,39 +1819,39 @@ class CalmTonePack extends TonePack {
 
   @override
   String budgetExceededNotif(String name, String spent, String limit) =>
-      '$name has passed its limit. ₹$spent of ₹$limit.';
+      '$name has passed its limit. ${BaseCurrency.symbol}$spent of ${BaseCurrency.symbol}$limit.';
   @override
   String budgetWarningNotif(String name, String remaining, String pct) =>
-      '$name is at $pct%. ₹$remaining remains.';
+      '$name is at $pct%. ${BaseCurrency.symbol}$remaining remains.';
   @override
   String billDueNotif(String name, String amount, String when) =>
-      '$name — ₹$amount, due $when.';
+      '$name — ${BaseCurrency.symbol}$amount, due $when.';
   @override
   String balanceDropNotif(String days) =>
       'At this pace, about $days days of runway remain.';
   @override
   String savingsOpportunityNotif(String category, String amount) =>
-      '$category is ₹$amount above last month. A moment to reflect.';
+      '$category is ${BaseCurrency.symbol}$amount above last month. A moment to reflect.';
   @override
   String unusualSpendingNotif(String today, String multiplier) =>
-      '₹$today today. ${multiplier}x the usual rhythm.';
+      '${BaseCurrency.symbol}$today today. ${multiplier}x the usual rhythm.';
   @override
   String pendingSmsNotif(int count) => '$count transactions await your review.';
   @override
   String moneyLeakNotif(String category, int count, String total) =>
-      '$category: $count times, ₹$total. Small streams form rivers.';
+      '$category: $count times, ${BaseCurrency.symbol}$total. Small streams form rivers.';
   @override
   String reEngageMissYou(int lostStreak) => lostStreak > 3
       ? 'A $lostStreak-day rhythm ended. Begin again when ready.'
       : 'It\'s been quiet. Return when you\'re ready.';
   @override
   String reEngageUntracked(int days, String estimatedSpend) =>
-      '$days days untracked. Perhaps ~₹$estimatedSpend. No rush.';
+      '$days days untracked. Perhaps ~${BaseCurrency.symbol}$estimatedSpend. No rush.';
   @override
   String get reEngageQuickNudge => 'A small note today keeps things clear.';
   @override
   String dailySummaryNotif(String spent, String earned, String topCategory) =>
-      '₹$spent spent · ₹$earned earned\nMostly $topCategory.';
+      '${BaseCurrency.symbol}$spent spent · ${BaseCurrency.symbol}$earned earned\nMostly $topCategory.';
   @override
   String get dailySummaryEmpty => pickRandom([
     'A quiet day. Nothing recorded.',
@@ -1402,7 +1860,7 @@ class CalmTonePack extends TonePack {
   ]);
   @override
   String weeklySummaryNotif(String total, String topCategory, String trend) =>
-      '₹$total this week. $topCategory led. $trend.';
+      '${BaseCurrency.symbol}$total this week. $topCategory led. $trend.';
   @override
   String streakAtRisk(int streak) =>
       'A $streak-day rhythm may end today. A moment to return.';

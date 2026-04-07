@@ -5,6 +5,8 @@ import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/features/analytics/data/advanced_analytics_service.dart';
 import 'package:mudra_manager/features/analytics/data/analytics_provider.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 import 'dart:math' as math;
 
 class FinancialHealthScreen extends ConsumerWidget {
@@ -22,253 +24,144 @@ class FinancialHealthScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: color.surface,
+      appBar: AppBar(
+        title: const Text('Financial Health'),
+        elevation: 0,
+      ),
       body: healthAsync.when(
-        data: (health) => CustomScrollView(
-          slivers: [
-            // Gradient hero app bar
-            SliverAppBar(
-              expandedHeight: 380,
-              pinned: true,
-              backgroundColor: color.surface,
-              elevation: 0,
-              flexibleSpace: FlexibleSpaceBar(
-                background: _buildHeroSection(health, color, textTheme, isDark),
-              ),
-              title: const Text('Financial Health'),
+        data: (health) {
+          final scoreColor = _scoreColor(health.score, color);
+
+          return ListView(
+            padding: EdgeInsets.symmetric(
+              horizontal: spacing.cardHorizontal,
+              vertical: spacing.cardVertical,
             ),
-            SliverPadding(
-              padding: EdgeInsets.symmetric(
-                horizontal: spacing.cardHorizontal,
-                vertical: spacing.cardVertical,
+            children: [
+              // 1. Hero — Score + Verdict
+              _buildHero(health, scoreColor, color, textTheme, spacing, isDark),
+              SizedBox(height: spacing.sectionGap),
+
+              // 2. Key Insight (top 1)
+              if (health.insights.isNotEmpty)
+                _buildKeyInsight(
+                    health.insights.first, scoreColor, color, textTheme, spacing),
+              if (health.insights.isNotEmpty)
+                SizedBox(height: spacing.sectionGap),
+
+              // 3. Score Breakdown
+              _buildScoreBreakdown(health, color, textTheme, spacing),
+              SizedBox(height: spacing.sectionGap),
+
+              // 4. Liquidity Runway
+              predictionAsync.maybeWhen(
+                data: (predicted) => _buildLiquidityRunway(
+                    health, predicted, color, textTheme, spacing),
+                orElse: () => const SizedBox.shrink(),
               ),
-              sliver: SliverList(
-                delegate: SliverChildListDelegate([
-                  // Bento stat pills
-                  _buildBentoStats(health, color, textTheme),
-                  SizedBox(height: spacing.sectionGap),
+              SizedBox(height: spacing.sectionGap),
 
-                  // Score breakdown
-                  _buildScoreBreakdown(health, color, textTheme, spacing),
-                  SizedBox(height: spacing.sectionGap),
-
-                  // Category health
-                  categoryTrendsAsync.maybeWhen(
-                    data: (trends) => _buildCategoryHealth(
-                      trends,
-                      color,
-                      textTheme,
-                      spacing,
-                    ),
-                    orElse: () => const SizedBox.shrink(),
-                  ),
-                  SizedBox(height: spacing.sectionGap),
-
-                  // Liquidity runway
-                  predictionAsync.maybeWhen(
-                    data: (predicted) => _buildLiquidityRunway(
-                      health,
-                      predicted,
-                      color,
-                      textTheme,
-                    ),
-                    orElse: () => const SizedBox.shrink(),
-                  ),
-                  SizedBox(height: spacing.sectionGap),
-
-                  // Smart insights
-                  if (health.insights.isNotEmpty)
-                    _buildInsights(health, color, textTheme),
-                  SizedBox(height: spacing.sectionGap * 2),
-                ]),
+              // 5. Category Health
+              categoryTrendsAsync.maybeWhen(
+                data: (trends) =>
+                    _buildCategoryHealth(trends, color, textTheme, spacing),
+                orElse: () => const SizedBox.shrink(),
               ),
-            ),
-          ],
-        ),
-        loading: () => const Center(child: CircularProgressIndicator()),
+              SizedBox(height: spacing.sectionGap),
+
+              // 6. What You Can Do
+              if (health.insights.length > 1)
+                _buildActions(health.insights.skip(1).toList(), color,
+                    textTheme, spacing),
+              SizedBox(height: spacing.sectionGap * 3),
+            ],
+          );
+        },
+        loading: () => ListView(
+            children:
+                List.generate(3, (_) => const DashboardCardSkeleton())),
         error: (_, __) =>
             const Center(child: Text('Unable to load health data')),
       ),
     );
   }
 
-  // ── HERO SECTION ──
-  Widget _buildHeroSection(
+  // ── 1. HERO ──
+  Widget _buildHero(
     FinancialHealthScore health,
+    Color scoreColor,
     ColorScheme color,
     TextTheme textTheme,
+    AppSpacing spacing,
     bool isDark,
   ) {
-    final scoreColor = _getScoreColor(health.score, color);
-    final progress = health.score / 100;
+    final verdict = _verdict(health.score);
 
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            scoreColor.withValues(alpha: isDark ? 0.15 : 0.08),
-            color.surface,
-          ],
-        ),
-      ),
-      child: Stack(
-        children: [
-          // Radial glow blob
-          Positioned(
-            top: 60,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: Container(
-                width: 200,
-                height: 200,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ),
-          ),
-          // Score ring
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 100),
-              child: TweenAnimationBuilder<double>(
-                duration: const Duration(milliseconds: 1800),
-                curve: Curves.easeOutCubic,
-                tween: Tween(begin: 0.0, end: progress),
-                builder: (context, value, child) {
-                  return Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          SizedBox(
-                            width: 200,
-                            height: 200,
-                            child: CustomPaint(
-                              painter: _GradientRingPainter(
-                                progress: value,
-                                color: scoreColor,
-                                isDark: isDark,
-                              ),
-                            ),
-                          ),
-                          Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                '${(value * 100).toInt()}',
-                                style: textTheme.displayLarge?.copyWith(
-                                  fontWeight: FontWeight.w900,
-                                  height: 1,
-                                  color: scoreColor,
-                                  fontSize: 56,
-                                ),
-                              ),
-                              Text(
-                                'of 100',
-                                style: textTheme.bodyMedium?.copyWith(
-                                  color: color.onSurfaceVariant,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ── BENTO STAT PILLS ──
-  Widget _buildBentoStats(
-    FinancialHealthScore health,
-    ColorScheme color,
-    TextTheme textTheme,
-  ) {
-    final scoreColor = _getScoreColor(health.score, color);
-
-    return Row(
+    return Column(
       children: [
-        Expanded(
-          child: _bentoPill(
-            icon: LucideIcons.shield,
-            label: health.rating,
-            subtitle: 'Rating',
-            pillColor: scoreColor,
-            color: color,
-            textTheme: textTheme,
-          ),
+        SizedBox(height: spacing.sectionGap),
+        _AnimatedScoreRing(
+          score: health.score / 100,
+          scoreColor: scoreColor,
+          textTheme: textTheme,
+          isDark: isDark,
         ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _bentoPill(
-            icon: LucideIcons.piggyBank,
-            label: '${health.savingsRate.toStringAsFixed(1)}%',
-            subtitle: 'Savings',
-            pillColor: color.primary,
-            color: color,
-            textTheme: textTheme,
+        SizedBox(height: spacing.sectionGap),
+        // Verdict badge
+        Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: spacing.cardInner,
+            vertical: spacing.elementGap,
           ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _bentoPill(
-            icon: LucideIcons.shoppingCart,
-            label: '${health.expenseRatio.toStringAsFixed(1)}%',
-            subtitle: 'Spending',
-            pillColor: health.expenseRatio > 80
-                ? color.error
-                : color.tertiary,
-            color: color,
-            textTheme: textTheme,
+          decoration: BoxDecoration(
+            color: scoreColor.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(spacing.radiusLarge),
+          ),
+          child: Text(
+            '${health.rating} — $verdict',
+            style: textTheme.titleSmall?.copyWith(
+              color: scoreColor,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
       ],
     );
   }
 
-  Widget _bentoPill({
-    required IconData icon,
-    required String label,
-    required String subtitle,
-    required Color pillColor,
-    required ColorScheme color,
-    required TextTheme textTheme,
-  }) {
+  String _verdict(int score) {
+    if (score >= 80) return "you're in great shape";
+    if (score >= 60) return "you're on track";
+    if (score >= 40) return 'room for improvement';
+    return 'needs attention';
+  }
+
+  // ── 2. KEY INSIGHT ──
+  Widget _buildKeyInsight(
+    String insight,
+    Color scoreColor,
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: EdgeInsets.all(spacing.cardInner),
       decoration: BoxDecoration(
-        color: color.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: color.outlineVariant.withValues(alpha: 0.3),
-        ),
+        color: scoreColor.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        border: Border.all(color: scoreColor.withValues(alpha: 0.2)),
       ),
-      child: Column(
+      child: Row(
         children: [
-          Icon(icon, size: 18, color: pillColor),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            style: textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: pillColor,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            subtitle,
-            style: textTheme.labelSmall?.copyWith(
-              color: color.onSurfaceVariant,
+          Icon(LucideIcons.lightbulb, size: 18, color: scoreColor),
+          SizedBox(width: spacing.elementGap * 1.5),
+          Expanded(
+            child: Text(
+              insight,
+              style: textTheme.bodyMedium?.copyWith(
+                color: color.onSurface,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
         ],
@@ -276,14 +169,13 @@ class FinancialHealthScreen extends ConsumerWidget {
     );
   }
 
-  // ── SCORE BREAKDOWN ──
+  // ── 3. SCORE BREAKDOWN ──
   Widget _buildScoreBreakdown(
     FinancialHealthScore health,
     ColorScheme color,
     TextTheme textTheme,
     AppSpacing spacing,
   ) {
-    // Derive component scores from the health calculation logic
     final savingsRate = health.savingsRate;
     final expenseRatio = health.expenseRatio;
 
@@ -301,47 +193,125 @@ class FinancialHealthScreen extends ConsumerWidget {
             : expenseRatio <= 90
                 ? 10
                 : 0;
-    // Remaining points from total
     final knownPoints = savingsPoints + budgetPoints;
     final remainingPoints = health.score - knownPoints;
     final debtPoints = remainingPoints.clamp(0, 20);
     final emergencyPoints = (remainingPoints - debtPoints).clamp(0, 20);
 
     final components = [
-      _ScoreComponent(
-        'Savings Rate',
-        savingsPoints,
-        30,
-        LucideIcons.piggyBank,
-        color.primary,
-      ),
-      _ScoreComponent(
-        'Budget Discipline',
-        budgetPoints,
-        30,
-        LucideIcons.shieldCheck,
-        color.secondary,
-      ),
-      _ScoreComponent(
-        'Debt Factor',
-        debtPoints,
-        20,
-        LucideIcons.landmark,
-        color.tertiary,
-      ),
-      _ScoreComponent(
-        'Emergency Fund',
-        emergencyPoints,
-        20,
-        LucideIcons.heartPulse,
-        color.primaryContainer,
-      ),
+      _Component('Savings', savingsPoints, 30, LucideIcons.piggyBank),
+      _Component('Spending', budgetPoints, 30, LucideIcons.shieldCheck),
+      _Component('Debt', debtPoints, 20, LucideIcons.landmark),
+      _Component('Emergency', emergencyPoints, 20, LucideIcons.heartPulse),
     ];
 
     return Card(
       elevation: 0,
-      margin: const EdgeInsets.only(),
+      margin: EdgeInsets.zero,
       color: color.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        side: BorderSide(
+            color: color.outlineVariant.withValues(alpha: 0.5)),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(spacing.cardInner),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _sectionHeader('Score Breakdown', LucideIcons.chartBar, color,
+                textTheme, spacing),
+            SizedBox(height: spacing.sectionGap),
+            ...components.map(
+              (c) => Padding(
+                padding: EdgeInsets.only(bottom: spacing.elementGap * 1.5),
+                child: _buildComponentRow(c, color, textTheme, spacing),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildComponentRow(
+    _Component c,
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
+    final ratio = c.max > 0 ? c.earned / c.max : 0.0;
+    final isGood = ratio >= 0.7;
+    final statusColor = isGood ? Colors.green : Colors.orange;
+    final statusIcon = isGood ? LucideIcons.circleCheck : LucideIcons.circleAlert;
+
+    return Row(
+      children: [
+        Icon(c.icon, size: 16, color: color.onSurfaceVariant),
+        SizedBox(width: spacing.elementGap),
+        SizedBox(
+          width: 80,
+          child: Text(
+            c.label,
+            style: textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500),
+          ),
+        ),
+        Expanded(
+          child: _AnimatedBar(
+            progress: ratio.clamp(0.0, 1.0),
+            barColor: statusColor,
+            radius: spacing.radiusSmall,
+          ),
+        ),
+        SizedBox(width: spacing.elementGap),
+        Text(
+          '${c.earned}/${c.max}',
+          style: textTheme.labelSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: statusColor,
+          ),
+        ),
+        SizedBox(width: spacing.elementGapMin),
+        Icon(statusIcon, size: 14, color: statusColor),
+      ],
+    );
+  }
+
+  // ── 4. LIQUIDITY RUNWAY ──
+  Widget _buildLiquidityRunway(
+    FinancialHealthScore health,
+    double predicted,
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
+    final daysOfCover =
+        predicted > 0 ? (30 * (100 - health.expenseRatio) / 100).round() : 0;
+    final months = (daysOfCover / 30).toStringAsFixed(1);
+    final runwayProgress = (daysOfCover / 90).clamp(0.0, 1.0);
+
+    final Color runwayColor;
+    final String statusLabel;
+    if (daysOfCover >= 60) {
+      runwayColor = Colors.green;
+      statusLabel = 'Safe';
+    } else if (daysOfCover >= 30) {
+      runwayColor = Colors.orange;
+      statusLabel = 'Moderate';
+    } else {
+      runwayColor = Colors.red;
+      statusLabel = 'Risk';
+    }
+
+    return Card(
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      color: color.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        side: BorderSide(
+            color: color.outlineVariant.withValues(alpha: 0.5)),
+      ),
       child: Padding(
         padding: EdgeInsets.all(spacing.cardInner),
         child: Column(
@@ -352,29 +322,89 @@ class FinancialHealthScreen extends ConsumerWidget {
                 Container(
                   padding: EdgeInsets.all(spacing.elementGap),
                   decoration: BoxDecoration(
-                    color: color.primary.withValues(alpha: 0.12),
+                    color: runwayColor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(spacing.radiusMedium),
                   ),
-                  child: Icon(
-                    LucideIcons.chartBar,
-                    color: color.primary,
-                    size: 20,
+                  child: Icon(LucideIcons.droplet,
+                      color: runwayColor, size: 20),
+                ),
+                SizedBox(width: spacing.elementGap * 1.5),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Liquidity Runway',
+                        style: textTheme.titleSmall
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        'Your balance covers $months months of expenses',
+                        style: textTheme.bodySmall
+                            ?.copyWith(color: color.onSurfaceVariant),
+                      ),
+                    ],
                   ),
                 ),
-                SizedBox(width: spacing.elementGap),
-                Text(
-                  'Score Breakdown',
-                  style: textTheme.titleMedium
-                      ?.copyWith(fontWeight: FontWeight.bold),
+                // Status badge
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: spacing.elementGap,
+                    vertical: spacing.elementGapMin,
+                  ),
+                  decoration: BoxDecoration(
+                    color: runwayColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                  ),
+                  child: Text(
+                    statusLabel,
+                    style: textTheme.labelSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: runwayColor,
+                    ),
+                  ),
                 ),
               ],
             ),
-            SizedBox(height: spacing.cardHorizontal),
-            ...components.map(
-              (c) => Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: _buildComponentBar(c, color, textTheme),
-              ),
+            SizedBox(height: spacing.sectionGap),
+            // Days + bar
+            Row(
+              children: [
+                Text(
+                  '$daysOfCover',
+                  style: textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    color: runwayColor,
+                  ),
+                ),
+                SizedBox(width: spacing.elementGapMin),
+                Text(
+                  'days',
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: runwayColor,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: spacing.elementGap),
+            _AnimatedBar(
+              progress: runwayProgress,
+              barColor: runwayColor,
+              radius: spacing.radiusSmall,
+              height: 10,
+            ),
+            SizedBox(height: spacing.elementGapMin),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('0',
+                    style: textTheme.labelSmall
+                        ?.copyWith(color: color.onSurfaceVariant)),
+                Text('90 days',
+                    style: textTheme.labelSmall
+                        ?.copyWith(color: color.onSurfaceVariant)),
+              ],
             ),
           ],
         ),
@@ -382,60 +412,7 @@ class FinancialHealthScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildComponentBar(
-    _ScoreComponent component,
-    ColorScheme color,
-    TextTheme textTheme,
-  ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(component.icon, size: 16, color: component.barColor),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                component.label,
-                style: textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            Text(
-              '${component.earned}/${component.max}',
-              style: textTheme.labelLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: component.barColor,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(6),
-          child: TweenAnimationBuilder<double>(
-            duration: const Duration(milliseconds: 1200),
-            curve: Curves.easeOutCubic,
-            tween: Tween(
-              begin: 0.0,
-              end: (component.earned / component.max).clamp(0.0, 1.0),
-            ),
-            builder: (context, value, child) {
-              return LinearProgressIndicator(
-                value: value,
-                minHeight: 10,
-                backgroundColor: component.barColor.withValues(alpha: 0.1),
-                valueColor: AlwaysStoppedAnimation(component.barColor),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  // ── CATEGORY HEALTH ──
+  // ── 5. CATEGORY HEALTH ──
   Widget _buildCategoryHealth(
     Map<String, CategoryTrend> trends,
     ColorScheme color,
@@ -447,89 +424,51 @@ class FinancialHealthScreen extends ConsumerWidget {
     final sorted = trends.values.toList()
       ..sort((a, b) => b.thisMonth.compareTo(a.thisMonth));
     final top = sorted.take(5).toList();
-    final maxAmount = top.first.thisMonth;
 
     return Card(
       elevation: 0,
-      margin: const EdgeInsets.only(),
+      margin: EdgeInsets.zero,
       color: color.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        side: BorderSide(
+            color: color.outlineVariant.withValues(alpha: 0.5)),
+      ),
       child: Padding(
         padding: EdgeInsets.all(spacing.cardInner),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: color.primary.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child:
-                      Icon(LucideIcons.layers, color: color.primary, size: 20),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  'Category Health',
-                  style: textTheme.titleMedium
-                      ?.copyWith(fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
+            _sectionHeader('Category Health', LucideIcons.layers, color,
+                textTheme, spacing),
+            SizedBox(height: spacing.sectionGap),
             ...top.map(
               (trend) => Padding(
-                padding: const EdgeInsets.only(bottom: 14),
+                padding: EdgeInsets.only(bottom: spacing.elementGap * 1.5),
                 child: Row(
                   children: [
                     Expanded(
                       flex: 3,
                       child: Text(
                         trend.categoryName,
-                        style: textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: textTheme.bodySmall
+                            ?.copyWith(fontWeight: FontWeight.w500),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      flex: 4,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: TweenAnimationBuilder<double>(
-                          duration: const Duration(milliseconds: 1000),
-                          curve: Curves.easeOutCubic,
-                          tween: Tween(
-                            begin: 0.0,
-                            end: maxAmount > 0
-                                ? (trend.thisMonth / maxAmount).clamp(0.0, 1.0)
-                                : 0.0,
-                          ),
-                          builder: (context, value, child) {
-                            return LinearProgressIndicator(
-                              value: value,
-                              minHeight: 8,
-                              backgroundColor: color.surfaceContainerHighest,
-                              valueColor: AlwaysStoppedAnimation(color.primary),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: spacing.elementGap),
+                    // Trend label
+                    _trendLabel(trend.changePercent, textTheme, color),
+                    SizedBox(width: spacing.elementGap),
                     SizedBox(
-                      width: 72,
+                      width: 64,
                       child: CurrencyText(
                         amount: trend.thisMonth,
-                        style: textTheme.labelLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        fixedLength: 0,
+                        style: textTheme.labelMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    _buildTrendBadge(trend.changePercent, textTheme, color),
                   ],
                 ),
               ),
@@ -540,234 +479,90 @@ class FinancialHealthScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildTrendBadge(
-    double changePercent,
-    TextTheme textTheme,
-    ColorScheme color,
-  ) {
-    if (changePercent == 0) {
-      return SizedBox(
-        width: 48,
+  Widget _trendLabel(
+      double changePercent, TextTheme textTheme, ColorScheme color) {
+    if (changePercent.abs() < 5) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        decoration: BoxDecoration(
+          color: color.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(8),
+        ),
         child: Text(
-          '—',
-          textAlign: TextAlign.center,
-          style: textTheme.labelSmall,
+          'Stable →',
+          style: textTheme.labelSmall?.copyWith(
+            color: color.onSurfaceVariant,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       );
     }
 
     final isUp = changePercent > 0;
-    final trendColor = isUp ? color.error : color.primary;
+    final trendColor = isUp ? Colors.red : Colors.green;
+    final label = isUp ? 'High ↑' : 'Reduced ↓';
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
         color: trendColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            isUp ? LucideIcons.trendingUp : LucideIcons.trendingDown,
-            size: 10,
-            color: trendColor,
-          ),
-          const SizedBox(width: 2),
-          Text(
-            '${changePercent.abs().toStringAsFixed(0)}%',
-            style: textTheme.labelSmall?.copyWith(
-              color: trendColor,
-              fontWeight: FontWeight.w600,
-              fontSize: 9,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ── LIQUIDITY RUNWAY ──
-  Widget _buildLiquidityRunway(
-    FinancialHealthScore health,
-    double predicted,
-    ColorScheme color,
-    TextTheme textTheme,
-  ) {
-    final daysOfCover =
-        predicted > 0 ? (30 * (100 - health.expenseRatio) / 100).round() : 0;
-    final runwayProgress = (daysOfCover / 90).clamp(0.0, 1.0);
-    final runwayColor = daysOfCover >= 60
-        ? color.primary
-        : daysOfCover >= 30
-            ? color.tertiary
-            : color.error;
-
-    return Card(
-      elevation: 0,
-      margin: const EdgeInsets.only(),
-      color: color.surfaceContainerLow,
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: runwayColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child:
-                      Icon(LucideIcons.droplet, color: runwayColor, size: 20),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Liquidity Runway',
-                        style: textTheme.titleMedium
-                            ?.copyWith(fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        'If income stops today',
-                        style: textTheme.bodySmall?.copyWith(
-                          color: color.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Text(
-                  '$daysOfCover',
-                  style: textTheme.displaySmall?.copyWith(
-                    fontWeight: FontWeight.w900,
-                    color: runwayColor,
-                  ),
-                ),
-                Text(
-                  ' days',
-                  style: textTheme.bodyMedium?.copyWith(
-                    color: runwayColor,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            // Runway gauge
-            ClipRRect(
-              borderRadius: BorderRadius.circular(6),
-              child: TweenAnimationBuilder<double>(
-                duration: const Duration(milliseconds: 1400),
-                curve: Curves.easeOutCubic,
-                tween: Tween(begin: 0.0, end: runwayProgress),
-                builder: (context, value, child) {
-                  return LinearProgressIndicator(
-                    value: value,
-                    minHeight: 12,
-                    backgroundColor: runwayColor.withValues(alpha: 0.1),
-                    valueColor: AlwaysStoppedAnimation(runwayColor),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '0 days',
-                  style: textTheme.labelSmall?.copyWith(
-                    color: color.onSurfaceVariant,
-                  ),
-                ),
-                Text(
-                  '90 days',
-                  style: textTheme.labelSmall?.copyWith(
-                    color: color.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ],
+      child: Text(
+        label,
+        style: textTheme.labelSmall?.copyWith(
+          color: trendColor,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );
   }
 
-  // ── SMART INSIGHTS ──
-  Widget _buildInsights(
-    FinancialHealthScore health,
+  // ── 6. WHAT YOU CAN DO ──
+  Widget _buildActions(
+    List<String> insights,
     ColorScheme color,
     TextTheme textTheme,
+    AppSpacing spacing,
   ) {
     return Card(
       elevation: 0,
-      margin: const EdgeInsets.only(),
+      margin: EdgeInsets.zero,
       color: color.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        side: BorderSide(
+            color: color.outlineVariant.withValues(alpha: 0.5)),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(spacing.cardInner),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: color.primary.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    LucideIcons.sparkles,
-                    color: color.primary,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  'Smart Insights',
-                  style: textTheme.titleMedium
-                      ?.copyWith(fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            ...health.insights.map(
-              (insight) => Container(
-                margin: const EdgeInsets.only(bottom: 10),
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: color.surfaceContainer,
-                  borderRadius: BorderRadius.circular(12),
-                ),
+            _sectionHeader('What You Can Do', LucideIcons.rocket, color,
+                textTheme, spacing),
+            SizedBox(height: spacing.sectionGap),
+            ...insights.map(
+              (insight) => Padding(
+                padding: EdgeInsets.only(bottom: spacing.elementGap),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(6),
+                      margin: EdgeInsets.only(top: spacing.elementGapUltraMin),
+                      width: 6,
+                      height: 6,
                       decoration: BoxDecoration(
-                        color: color.primary.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Icon(
-                        LucideIcons.lightbulb,
                         color: color.primary,
-                        size: 14,
+                        shape: BoxShape.circle,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: spacing.elementGap * 1.5),
                     Expanded(
                       child: Text(
                         insight,
                         style: textTheme.bodyMedium?.copyWith(
                           height: 1.4,
-                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
@@ -781,25 +576,203 @@ class FinancialHealthScreen extends ConsumerWidget {
     );
   }
 
-  Color _getScoreColor(int score, ColorScheme color) {
-    if (score >= 80) return color.primary;
-    if (score >= 60) return color.secondary;
-    if (score >= 40) return color.tertiary;
-    return color.error;
+  // ── Helpers ──
+
+  Widget _sectionHeader(String title, IconData icon, ColorScheme color,
+      TextTheme textTheme, AppSpacing spacing) {
+    return Row(
+      children: [
+        Icon(icon, size: 18, color: color.primary),
+        SizedBox(width: spacing.elementGap),
+        Text(
+          title,
+          style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+        ),
+      ],
+    );
+  }
+
+  Color _scoreColor(int score, ColorScheme color) {
+    if (score >= 80) return Colors.green;
+    if (score >= 60) return color.primary;
+    if (score >= 40) return Colors.orange;
+    return Colors.red;
   }
 }
 
-// ── HELPER CLASSES ──
+// ── Data helpers ──
 
-class _ScoreComponent {
+class _Component {
   final String label;
   final int earned;
   final int max;
   final IconData icon;
-  final Color barColor;
-
-  _ScoreComponent(this.label, this.earned, this.max, this.icon, this.barColor);
+  _Component(this.label, this.earned, this.max, this.icon);
 }
+
+// ── Animated Score Ring (visibility-aware) ──
+
+class _AnimatedScoreRing extends StatefulWidget {
+  final double score;
+  final Color scoreColor;
+  final TextTheme textTheme;
+  final bool isDark;
+
+  const _AnimatedScoreRing({
+    required this.score,
+    required this.scoreColor,
+    required this.textTheme,
+    required this.isDark,
+  });
+
+  @override
+  State<_AnimatedScoreRing> createState() => _AnimatedScoreRingState();
+}
+
+class _AnimatedScoreRingState extends State<_AnimatedScoreRing>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double> _anim;
+  bool _started = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 1800));
+    _anim = CurvedAnimation(parent: _ctrl, curve: Curves.easeOutCubic);
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return VisibilityDetector(
+      key: const ValueKey('health_score_ring'),
+      onVisibilityChanged: (info) {
+        if (info.visibleFraction > 0.3 && !_started) {
+          _started = true;
+          _ctrl.forward();
+        }
+      },
+      child: AnimatedBuilder(
+        animation: _anim,
+        builder: (_, __) {
+          final value = _anim.value * widget.score;
+          return SizedBox(
+            width: 200,
+            height: 200,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                CustomPaint(
+                  size: const Size(200, 200),
+                  painter: _GradientRingPainter(
+                    progress: value,
+                    color: widget.scoreColor,
+                    isDark: widget.isDark,
+                  ),
+                ),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '${(value * 100).toInt()}',
+                      style: widget.textTheme.displayLarge?.copyWith(
+                        fontWeight: FontWeight.w900,
+                        height: 1,
+                        color: widget.scoreColor,
+                        fontSize: 56,
+                      ),
+                    ),
+                    Text(
+                      'of 100',
+                      style: widget.textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+// ── Animated Bar (visibility-aware) ──
+
+class _AnimatedBar extends StatefulWidget {
+  final double progress;
+  final Color barColor;
+  final double radius;
+  final double height;
+
+  const _AnimatedBar({
+    required this.progress,
+    required this.barColor,
+    required this.radius,
+    this.height = 8,
+  });
+
+  @override
+  State<_AnimatedBar> createState() => _AnimatedBarState();
+}
+
+class _AnimatedBarState extends State<_AnimatedBar>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double> _anim;
+  bool _started = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 1200));
+    _anim = CurvedAnimation(parent: _ctrl, curve: Curves.easeOutCubic);
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return VisibilityDetector(
+      key: ValueKey(
+          'bar_${widget.progress}_${widget.barColor.toARGB32()}'),
+      onVisibilityChanged: (info) {
+        if (info.visibleFraction > 0.3 && !_started) {
+          _started = true;
+          _ctrl.forward();
+        }
+      },
+      child: AnimatedBuilder(
+        animation: _anim,
+        builder: (_, __) => ClipRRect(
+          borderRadius: BorderRadius.circular(widget.radius),
+          child: LinearProgressIndicator(
+            value: _anim.value * widget.progress,
+            minHeight: widget.height,
+            backgroundColor: widget.barColor.withValues(alpha: 0.1),
+            valueColor: AlwaysStoppedAnimation(widget.barColor),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Gradient Ring Painter ──
 
 class _GradientRingPainter extends CustomPainter {
   final double progress;
@@ -854,21 +827,11 @@ class _GradientRingPainter extends CustomPainter {
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
 
       canvas.drawArc(
-        rect,
-        -math.pi / 2,
-        2 * math.pi * progress,
-        false,
-        glowPaint,
-      );
+          rect, -math.pi / 2, 2 * math.pi * progress, false, glowPaint);
     }
 
     canvas.drawArc(
-      rect,
-      -math.pi / 2,
-      2 * math.pi * progress,
-      false,
-      progressPaint,
-    );
+        rect, -math.pi / 2, 2 * math.pi * progress, false, progressPaint);
   }
 
   @override

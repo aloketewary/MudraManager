@@ -148,7 +148,7 @@ class ManageCategoriesScreen extends ConsumerWidget {
         loading: () => ListView.builder(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
           itemCount: 6,
-          itemBuilder: (_, __) => const TransactionCardSkeleton(),
+          itemBuilder: (_, __) => TransactionCardSkeleton(),
         ),
         error: (err, _) => Center(child: Text(BuddyMessages.errorWith('$err'))),
       ),

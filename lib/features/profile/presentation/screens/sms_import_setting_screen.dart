@@ -1,4 +1,5 @@
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -73,7 +74,7 @@ class _SmsImportSettingsScreenState
     return Scaffold(
       appBar: AppBar(title: const Text('Auto Import')),
       body: !_loaded
-          ? const Center(child: CircularProgressIndicator())
+          ? ListView(children: List.generate(3, (_) => DashboardCardSkeleton()))
           : ListView(
               padding: EdgeInsets.symmetric(
                 horizontal: spacing.cardHorizontal,

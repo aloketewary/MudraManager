@@ -5,67 +5,123 @@ import 'package:mudra_manager/core/db/models/frequency.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 
 class RecurringDetectorService {
-  static const _similarAmountThreshold = 0.05; // 5% variance
-  static const _minOccurrences = 2; // Need 2+ occurrences to detect pattern
+  static const _minOccurrences = 2;
 
+  /// Called after every transaction save (manual or SMS).
+  /// First tries to link to an existing recurring bill by exact amount + account + date window.
+  /// If no match, falls back to pattern detection from history.
   static Future<void> detectAndTagRecurring(Transaction newTransaction) async {
     final isar = await IsarService().getInstance();
 
-    // Skip if already linked to recurring
     if (newTransaction.recurringTransactionSource.value != null) return;
 
-    // Look for similar transactions in past 90 days
+    // ── Step 1: Try exact match against existing recurring bills ──
+    final linked = await _tryLinkToExistingRecurring(isar, newTransaction);
+    if (linked) return;
+
+    // ── Step 2: Pattern detection from transaction history ──
+    await _detectPatternFromHistory(isar, newTransaction);
+  }
+
+  /// Match by exact amount, same account, within the recurring bill's date window.
+  static Future<bool> _tryLinkToExistingRecurring(
+      Isar isar, Transaction newTransaction) async {
+    await newTransaction.account.load();
+    await newTransaction.category.load();
+    final accountId = newTransaction.account.value?.id;
+    if (accountId == null) return false;
+
+    final activeRecurring = await isar.recurringTransactions
+        .filter()
+        .isActiveEqualTo(true)
+        .amountBetween(
+          newTransaction.amount - 0.01,
+          newTransaction.amount + 0.01,
+        )
+        .isExpenseEqualTo(newTransaction.isExpense)
+        .findAll();
+
+    for (final recurring in activeRecurring) {
+      await recurring.account.load();
+      if (recurring.account.value?.id != accountId) continue;
+
+      // Check if transaction date is within the billing period
+      // (5 days before due to 2 days after)
+      final dueDate = recurring.nextDueDate;
+      final windowStart = dueDate.subtract(const Duration(days: 5));
+      final windowEnd = dueDate.add(const Duration(days: 2));
+      if (newTransaction.date.isBefore(windowStart) ||
+          newTransaction.date.isAfter(windowEnd)) continue;
+
+      // Check not already linked for this period
+      final alreadyLinked = await isar.transactions
+          .filter()
+          .recurringTransactionSource((q) => q.idEqualTo(recurring.id))
+          .dateBetween(windowStart, windowEnd)
+          .count();
+      if (alreadyLinked > 0) continue;
+
+      // Exact match found — link it
+      await isar.writeTxn(() async {
+        newTransaction.recurringTransactionSource.value = recurring;
+        await newTransaction.recurringTransactionSource.save();
+        await isar.transactions.put(newTransaction);
+      });
+      return true;
+    }
+    return false;
+  }
+
+  /// Fallback: detect recurring pattern from similar past transactions.
+  static Future<void> _detectPatternFromHistory(
+      Isar isar, Transaction newTransaction) async {
     final startDate = newTransaction.date.subtract(const Duration(days: 90));
     final similar = await isar.transactions
         .filter()
         .dateBetween(startDate, newTransaction.date)
         .and()
         .isExpenseEqualTo(newTransaction.isExpense)
+        .amountBetween(
+          newTransaction.amount - 0.01,
+          newTransaction.amount + 0.01,
+        )
         .findAll();
 
-    // Filter by amount similarity and same category
+    // Filter by same category
     final matches = similar.where((t) {
       if (t.id == newTransaction.id) return false;
-      final amountDiff =
-          (t.amount - newTransaction.amount).abs() / newTransaction.amount;
-      return amountDiff <= _similarAmountThreshold &&
-          t.category.value?.id == newTransaction.category.value?.id;
+      return t.category.value?.id == newTransaction.category.value?.id;
     }).toList();
 
     if (matches.length < _minOccurrences) return;
 
-    // Detect frequency pattern
     final pattern = _detectFrequency(matches, newTransaction);
     if (pattern == null) return;
 
-    // Check if recurring transaction already exists
+    // Check if recurring transaction already exists for this pattern
     final existing = await isar.recurringTransactions
         .filter()
         .amountBetween(
-          newTransaction.amount * (1 - _similarAmountThreshold),
-          newTransaction.amount * (1 + _similarAmountThreshold),
+          newTransaction.amount - 0.01,
+          newTransaction.amount + 0.01,
         )
         .and()
         .isExpenseEqualTo(newTransaction.isExpense)
         .findAll();
 
     final matchingRecurring = existing
-        .where(
-          (r) =>
-              r.category.value?.id == newTransaction.category.value?.id &&
-              r.frequency == pattern,
-        )
+        .where((r) =>
+            r.category.value?.id == newTransaction.category.value?.id &&
+            r.frequency == pattern)
         .firstOrNull;
 
     if (matchingRecurring != null) {
-      // Link to existing recurring
       await isar.writeTxn(() async {
         newTransaction.recurringTransactionSource.value = matchingRecurring;
         await newTransaction.recurringTransactionSource.save();
         await isar.transactions.put(newTransaction);
       });
     } else {
-      // Create new recurring transaction
       final recurring = RecurringTransaction()
         ..amount = newTransaction.amount
         ..isExpense = newTransaction.isExpense
@@ -83,7 +139,6 @@ class RecurringDetectorService {
         await recurring.category.save();
         await recurring.account.save();
 
-        // Link all matching transactions
         for (final match in [...matches, newTransaction]) {
           match.recurringTransactionSource.value = recurring;
           await match.recurringTransactionSource.save();

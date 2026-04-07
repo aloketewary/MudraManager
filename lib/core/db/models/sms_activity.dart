@@ -33,7 +33,7 @@ class SmsActivity {
   bool? isLikelyTransfer;
   int? pairedActivityId;
 
-  @Index(unique: true)
+  @Index(unique: true, replace: true)
   late String smsHash;
 
   @Enumerated(EnumType.name)

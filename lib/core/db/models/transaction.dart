@@ -49,6 +49,31 @@ class Transaction {
   /// Link to SMS activity if created from SMS
   int? smsActivityId;
 
+  /// Original currency code (e.g. "USD"). Null = base currency.
+  String? currencyCode;
+
+  /// Amount converted to base currency at transaction time.
+  /// Null = same as [amount] (base currency transaction).
+  double? convertedAmount;
+
+  /// Exchange rate snapshot used at transaction time.
+  /// e.g. 83.5 means 1 USD = 83.5 INR.
+  double? rateUsed;
+
+  /// The user's personal share of this transaction.
+  /// Null = full amount belongs to the user (default for non-shared expenses).
+  /// Set when the transaction is part of a split/shared expense.
+  double? myShare;
+
+  /// Whether this transaction is a shared/split expense.
+  /// Used for UI tagging ("Shared", "You paid • Split").
+  bool isSharedExpense = false;
+
+  /// Whether this transaction is a settlement payment between people.
+  /// Settlements affect account balance but NOT spending stats.
+  @Index()
+  bool isSettlement = false;
+
   /// Indicates whether this transaction is part of a transfer between accounts.
   ///
   /// - `true`: This transaction is part of an account transfer.
@@ -86,7 +111,26 @@ class Transaction {
     required this.isExpense,
     this.description,
     this.isTransfer = false,
+    this.currencyCode,
+    this.convertedAmount,
+    this.rateUsed,
   });
+
+  /// Returns amount in base currency (uses convertedAmount if available).
+  double get baseAmount => convertedAmount ?? amount;
+
+  /// Whether this transaction should be included in spending/income stats.
+  /// False for settlements and transfers — they only affect balance.
+  bool get affectsStats => !isSettlement && !isTransfer;
+
+  /// Returns the user's effective share in base currency.
+  /// Settlements return 0 (don't affect stats).
+  /// Shared expenses return myShare.
+  /// Regular expenses return full baseAmount.
+  double get effectiveAmount {
+    if (!affectsStats) return 0;
+    return myShare ?? baseAmount;
+  }
 
   factory Transaction.fromJson(Map<String, dynamic> json) =>
       _$TransactionFromJson(json);

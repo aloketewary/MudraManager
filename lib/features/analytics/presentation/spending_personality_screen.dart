@@ -1,5 +1,9 @@
+import 'package:mudra_manager/shared/widgets/ambient_brand_section.dart';
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
+import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
@@ -22,44 +26,54 @@ class SpendingPersonalityScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: color.surface,
+      appBar: AppBar(
+        title: const Text('Spending Personality'),
+        elevation: 0,
+      ),
       body: personality.when(
         data: (data) {
           if (data == null) {
-            return _buildEmptyState(color, textTheme);
+            return NoDataFound(
+              message: BuddyMessages.noData,
+              iconData: LucideIcons.brain,
+            );
           }
 
           final archetype = PersonalityArchetype.fromSpendingPersonality(data);
 
-          return CustomScrollView(
-            slivers: [
-              // Hero app bar
-              SliverAppBar(
-                expandedHeight: 360,
-                pinned: true,
-                backgroundColor: color.surface,
-                elevation: 0,
-                flexibleSpace: FlexibleSpaceBar(
-                  background: _buildHeroSection(
-                    archetype,
-                    color,
-                    textTheme,
-                    isDark,
-                  ),
-                ),
-                title: const Text('Spending Personality'),
-              ),
-              SliverPadding(
+          return ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              // 1. Hero
+              _buildHero(archetype, color, textTheme, spacing, isDark),
+              Padding(
                 padding: EdgeInsets.symmetric(
                   horizontal: spacing.cardHorizontal,
-                  vertical: spacing.cardVertical,
                 ),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate([
-                    // Bento trait pills
-                    _buildBentoTraits(data, color, textTheme, spacing),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     SizedBox(height: spacing.sectionGap),
 
-                    // Spending DNA
+                    // 2. Traits
+                    _buildTraits(
+                      archetype,
+                      color,
+                      textTheme,
+                      spacing,
+                    ),
+                    SizedBox(height: spacing.sectionGap),
+
+                    // 3. Data Insights
+                    _buildDataInsights(
+                      data,
+                      color,
+                      textTheme,
+                      spacing,
+                    ),
+                    SizedBox(height: spacing.sectionGap),
+
+                    // 4. Spending DNA
                     _buildSpendingDNA(
                       data,
                       spendingByDayAsync,
@@ -69,263 +83,106 @@ class SpendingPersonalityScreen extends ConsumerWidget {
                     ),
                     SizedBox(height: spacing.sectionGap),
 
-                    // Behavior map
-                    _buildBehaviorMap(data, archetype, color, textTheme, spacing,),
-                    SizedBox(height: spacing.sectionGap),
-
-                    // Vibe cloud
-                    _buildVibeCloud(data, archetype, color, textTheme, spacing,),
-                    SizedBox(height: spacing.sectionGap * 2),
-                  ]),
+                    // 5. Guidance
+                    _buildGuidance(
+                      archetype,
+                      color,
+                      textTheme,
+                      spacing,
+                    ),
+                    SizedBox(height: spacing.sectionGap * 3),
+                    const AmbientBrandSection(),
+                  ],
                 ),
               ),
             ],
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => ListView(
+          children: List.generate(3, (_) => const DashboardCardSkeleton()),
+        ),
         error: (_, __) =>
             const Center(child: Text('Unable to load personality data')),
       ),
     );
   }
 
-  // ── EMPTY STATE ──
-  Widget _buildEmptyState(ColorScheme color, TextTheme textTheme) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Spending Personality'),
-        elevation: 0,
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(LucideIcons.brain, size: 64, color: color.onSurfaceVariant),
-            const SizedBox(height: 16),
-            Text(
-              BuddyMessages.noData,
-              style:
-                  textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Add more transactions to discover your personality',
-              style:
-                  textTheme.bodyMedium?.copyWith(color: color.onSurfaceVariant),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ── HERO SECTION ──
-  Widget _buildHeroSection(
+  // ── 1. HERO ──
+  Widget _buildHero(
     PersonalityArchetype archetype,
     ColorScheme color,
     TextTheme textTheme,
+    AppSpacing spacing,
     bool isDark,
   ) {
     return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            archetype.color.withValues(alpha: isDark ? 0.15 : 0.08),
-            color.surface,
-          ],
-        ),
+      padding: EdgeInsets.fromLTRB(
+        spacing.cardHorizontal,
+        spacing.sectionGap * 2,
+        spacing.cardHorizontal,
+        spacing.sectionGap * 2,
       ),
-      child: Stack(
+      child: Column(
         children: [
-          // Radial glow
-          Positioned(
-            top: 80,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: Container(
-                width: 180,
-                height: 180,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                ),
+          // Icon circle
+          Container(
+            width: 96,
+            height: 96,
+            decoration: BoxDecoration(
+              color: archetype.color.withValues(alpha: 0.15),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              archetype.icon,
+              size: 44,
+              color: archetype.color,
+            ),
+          ),
+          SizedBox(height: spacing.sectionGap),
+          Text(
+            archetype.name,
+            style: textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          SizedBox(height: spacing.elementGap),
+          Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: spacing.cardInner,
+              vertical: spacing.elementGap,
+            ),
+            decoration: BoxDecoration(
+              color: archetype.color.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(spacing.radiusLarge),
+            ),
+            child: Text(
+              archetype.tagline,
+              style: textTheme.titleSmall?.copyWith(
+                color: archetype.color,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),
-          // Content
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 100),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Replace the SvgPicture.asset block with:
-                  Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      color: archetype.color.withValues(alpha: 0.12),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      archetype.icon,
-                      size: 48,
-                      color: archetype.color,
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-                  Text(
-                    archetype.name,
-                    style: textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: archetype.color.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      archetype.tagline,
-                      style: textTheme.titleSmall?.copyWith(
-                        color: archetype.color,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+          SizedBox(height: spacing.elementGap * 1.5),
+          Text(
+            archetype.description,
+            style: textTheme.bodyMedium?.copyWith(
+              color: color.onSurfaceVariant,
             ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
     );
   }
 
-  // ── BENTO TRAIT PILLS ──
-  Widget _buildBentoTraits(
-    SpendingPersonality data,
+  // ── 2. TRAITS ──
+  Widget _buildTraits(
+    PersonalityArchetype archetype,
     ColorScheme color,
     TextTheme textTheme,
     AppSpacing spacing,
   ) {
-    final traits = [
-      _Trait(LucideIcons.tag, data.topCategory, 'Category'),
-      _Trait(LucideIcons.calendar, data.spendingPattern, 'Pattern'),
-      _Trait(LucideIcons.brain, data.behaviorType, 'Behavior'),
-      _Trait(LucideIcons.trendingUp, data.spendingTrend, 'Trend'),
-    ];
-
-    return GridView.count(
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: 8,
-      crossAxisSpacing: 8,
-      childAspectRatio: 2.4,
-      children: traits.map((t) {
-        return Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 14,
-          ),
-          decoration: BoxDecoration(
-            color: color.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(spacing.radiusMedium),
-            border: Border.all(
-              color: color.outlineVariant.withValues(alpha: 0.3),
-            ),
-          ),
-          child: Row(
-            children: [
-              Icon(t.icon, size: 16, color: color.primary),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      t.subtitle,
-                      style: textTheme.labelSmall?.copyWith(
-                        color: color.onSurfaceVariant,
-                        fontSize: 10,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      t.label,
-                      style: textTheme.labelLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  // ── SPENDING DNA ──
-  Widget _buildSpendingDNA(
-    SpendingPersonality data,
-    AsyncValue<Map<String, double>> spendingByDayAsync,
-    ColorScheme color,
-    TextTheme textTheme,
-    AppSpacing spacing,
-  ) {
-    // Derive ratios from personality data
-    final isWeekend = data.spendingPattern.toLowerCase().contains('weekend');
-    final isImpulse = data.behaviorType.toLowerCase().contains('impulse');
-    final isIncreasing =
-        data.spendingTrend.toLowerCase().contains('increasing');
-    final isDecreasing =
-        data.spendingTrend.toLowerCase().contains('decreasing');
-
-    final dnaItems = [
-      _DNAItem(
-        'Weekday vs Weekend',
-        isWeekend ? 'Weekend heavy' : 'Weekday heavy',
-        isWeekend ? 0.7 : 0.3,
-        LucideIcons.calendarDays,
-        isWeekend ? color.tertiary : color.primary,
-      ),
-      _DNAItem(
-        'Impulse Score',
-        isImpulse ? 'High impulse' : 'Planned',
-        isImpulse ? 0.75 : 0.25,
-        LucideIcons.zap,
-        isImpulse ? color.error : color.secondary,
-      ),
-      _DNAItem(
-        'Trend Direction',
-        data.spendingTrend,
-        isIncreasing
-            ? 0.8
-            : isDecreasing
-                ? 0.2
-                : 0.5,
-        LucideIcons.activity,
-        isIncreasing
-            ? color.error
-            : isDecreasing
-                ? color.primary
-                : color.secondary,
-      ),
-    ];
-
     return Card(
       elevation: 0,
       margin: const EdgeInsets.only(),
@@ -343,33 +200,219 @@ class SpendingPersonalityScreen extends ConsumerWidget {
           children: [
             Row(
               children: [
-                Container(
-                  padding: EdgeInsets.all(spacing.sectionGap),
-                  decoration: BoxDecoration(
-                    color: color.primary.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                Icon(LucideIcons.listChecks, size: 18, color: archetype.color),
+                SizedBox(width: spacing.elementGap),
+                Text(
+                  'Your Traits',
+                  style: textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
                   ),
-                  child: Icon(LucideIcons.dna, color: color.primary, size: 20),
                 ),
+              ],
+            ),
+            SizedBox(height: spacing.elementGap * 1.5),
+            ...archetype.traits.map(
+              (t) => Padding(
+                padding: EdgeInsets.only(bottom: spacing.elementGap),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 24,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        color: archetype.color.withValues(alpha: 0.12),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        LucideIcons.check,
+                        size: 14,
+                        color: archetype.color,
+                      ),
+                    ),
+                    SizedBox(width: spacing.elementGap * 1.5),
+                    Expanded(
+                      child: Text(
+                        t,
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: color.onSurface,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── 3. DATA INSIGHTS ──
+  Widget _buildDataInsights(
+    SpendingPersonality data,
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
+    final insights = <_InsightItem>[
+      _InsightItem(
+        LucideIcons.piggyBank,
+        '${data.savingsRate.toStringAsFixed(0)}% savings rate',
+        data.savingsRate > 20 ? Colors.green : Colors.orange,
+      ),
+      _InsightItem(
+        LucideIcons.tag,
+        '${(data.essentialRatio * 100).toStringAsFixed(0)}% on essentials',
+        data.essentialRatio > 0.5 ? Colors.blue : Colors.amber,
+      ),
+      _InsightItem(
+        LucideIcons.receipt,
+        '${data.txnCount} transactions this month',
+        color.primary,
+      ),
+      if (data.activeGoals > 0)
+        _InsightItem(
+          LucideIcons.target,
+          '${data.activeGoals} active ${data.activeGoals == 1 ? 'goal' : 'goals'}',
+          Colors.green,
+        ),
+      _InsightItem(
+        LucideIcons.calendarDays,
+        data.spendingPattern,
+        color.tertiary,
+      ),
+    ];
+
+    return Card(
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      color: color.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        side: BorderSide(
+          color: color.outlineVariant.withValues(alpha: 0.5),
+        ),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(spacing.cardInner),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(LucideIcons.chartBar, size: 18, color: color.primary),
+                SizedBox(width: spacing.elementGap),
+                Text(
+                  'Data Insights',
+                  style: textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: spacing.elementGap * 1.5),
+            ...insights.map(
+              (i) => Padding(
+                padding: EdgeInsets.only(bottom: spacing.elementGap),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: i.color.withValues(alpha: 0.12),
+                        borderRadius:
+                            BorderRadius.circular(spacing.radiusSmall),
+                      ),
+                      child: Icon(i.icon, size: 16, color: i.color),
+                    ),
+                    SizedBox(width: spacing.elementGap * 1.5),
+                    Expanded(
+                      child: Text(
+                        i.label,
+                        style: textTheme.bodyMedium,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── 4. SPENDING DNA ──
+  Widget _buildSpendingDNA(
+    SpendingPersonality data,
+    AsyncValue<Map<String, double>> spendingByDayAsync,
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
+    final dnaItems = [
+      _DNABar(
+        'Weekend Spending',
+        data.weekendRatio > 0.4 ? 'Weekend heavy' : 'Weekday focused',
+        data.weekendRatio,
+        LucideIcons.calendarDays,
+        data.weekendRatio > 0.4 ? color.tertiary : color.primary,
+      ),
+      _DNABar(
+        'Impulse Score',
+        data.highActivityDays >= 2 ? 'High impulse' : 'Planned',
+        (data.highActivityDays / 5).clamp(0.0, 1.0),
+        LucideIcons.zap,
+        data.highActivityDays >= 2 ? color.error : color.secondary,
+      ),
+      _DNABar(
+        'Essential Ratio',
+        '${(data.essentialRatio * 100).toStringAsFixed(0)}% essentials',
+        data.essentialRatio,
+        LucideIcons.shieldCheck,
+        color.primary,
+      ),
+    ];
+
+    return Card(
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      color: color.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        side: BorderSide(
+          color: color.outlineVariant.withValues(alpha: 0.5),
+        ),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(spacing.cardInner),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(LucideIcons.dna, size: 18, color: color.primary),
                 SizedBox(width: spacing.elementGap),
                 Text(
                   'Spending DNA',
-                  style: textTheme.titleMedium
-                      ?.copyWith(fontWeight: FontWeight.bold),
+                  style: textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
             SizedBox(height: spacing.sectionGap),
             ...dnaItems.map(
               (item) => Padding(
-                padding: const EdgeInsets.only(bottom: 16),
+                padding: EdgeInsets.only(bottom: spacing.sectionGap),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
                         Icon(item.icon, size: 14, color: item.barColor),
-                        const SizedBox(width: 8),
+                        SizedBox(width: spacing.elementGap),
                         Expanded(
                           child: Text(
                             item.label,
@@ -387,23 +430,11 @@ class SpendingPersonalityScreen extends ConsumerWidget {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(6),
-                      child: TweenAnimationBuilder<double>(
-                        duration: const Duration(milliseconds: 1200),
-                        curve: Curves.easeOutCubic,
-                        tween: Tween(begin: 0.0, end: item.progress),
-                        builder: (context, animValue, child) {
-                          return LinearProgressIndicator(
-                            value: animValue,
-                            minHeight: 8,
-                            backgroundColor:
-                                item.barColor.withValues(alpha: 0.1),
-                            valueColor: AlwaysStoppedAnimation(item.barColor),
-                          );
-                        },
-                      ),
+                    SizedBox(height: spacing.elementGap),
+                    _AnimatedBar(
+                      progress: item.progress,
+                      barColor: item.barColor,
+                      radius: spacing.radiusSmall,
                     ),
                   ],
                 ),
@@ -411,7 +442,8 @@ class SpendingPersonalityScreen extends ConsumerWidget {
             ),
             // Day-of-week mini chart
             spendingByDayAsync.maybeWhen(
-              data: (byDay) => _buildDayOfWeekMini(byDay, color, textTheme),
+              data: (byDay) =>
+                  _buildDayOfWeekMini(byDay, color, textTheme, spacing),
               orElse: () => const SizedBox.shrink(),
             ),
           ],
@@ -424,6 +456,7 @@ class SpendingPersonalityScreen extends ConsumerWidget {
     Map<String, double> byDay,
     ColorScheme color,
     TextTheme textTheme,
+    AppSpacing spacing,
   ) {
     final maxVal = byDay.values.fold(0.0, (a, b) => a > b ? a : b);
     if (maxVal == 0) return const SizedBox.shrink();
@@ -433,14 +466,12 @@ class SpendingPersonalityScreen extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Divider(height: 32),
+        Divider(height: spacing.sectionGap * 2),
         Text(
           'Spending by Day',
-          style: textTheme.labelLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
+          style: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: spacing.elementGap * 1.5),
         Row(
           children: days.map((day) {
             final val = byDay[day] ?? 0;
@@ -456,35 +487,19 @@ class SpendingPersonalityScreen extends ConsumerWidget {
                       height: 60,
                       child: Align(
                         alignment: Alignment.bottomCenter,
-                        child: TweenAnimationBuilder<double>(
-                          duration: const Duration(milliseconds: 1000),
-                          curve: Curves.easeOutCubic,
-                          tween: Tween(begin: 0.0, end: ratio),
-                          builder: (context, value, child) {
-                            return FractionallySizedBox(
-                              heightFactor: value.clamp(0.05, 1.0),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: isWeekend
-                                      ? color.tertiary
-                                      : color.primary,
-                                  borderRadius: const BorderRadius.vertical(
-                                    top: Radius.circular(4),
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
+                        child: _AnimatedDayBar(
+                          ratio: ratio,
+                          barColor:
+                              isWeekend ? color.tertiary : color.primary,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 6),
+                    SizedBox(height: spacing.elementGapMin),
                     Text(
                       day[0],
                       style: textTheme.labelSmall?.copyWith(
-                        color: isWeekend
-                            ? color.tertiary
-                            : color.onSurfaceVariant,
+                        color:
+                            isWeekend ? color.tertiary : color.onSurfaceVariant,
                         fontWeight:
                             isWeekend ? FontWeight.bold : FontWeight.normal,
                         fontSize: 10,
@@ -500,260 +515,207 @@ class SpendingPersonalityScreen extends ConsumerWidget {
     );
   }
 
-  // ── BEHAVIOR MAP ──
-  Widget _buildBehaviorMap(
-    SpendingPersonality data,
+  // ── 5. GUIDANCE ──
+  Widget _buildGuidance(
     PersonalityArchetype archetype,
     ColorScheme color,
     TextTheme textTheme,
     AppSpacing spacing,
   ) {
-    return Card(
-      elevation: 0,
-      margin: const EdgeInsets.only(),
-      color: color.surfaceContainerLow,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        side: BorderSide(
-          color: color.outlineVariant.withValues(alpha: 0.5),
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: color.primary.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(LucideIcons.map, color: color.primary, size: 20),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  'Behavior Map',
-                  style: textTheme.titleMedium
-                      ?.copyWith(fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            _buildBehaviorRow(
-              'Pattern',
-              data.spendingPattern,
-              LucideIcons.calendar,
-              color,
-              textTheme,
-            ),
-            const SizedBox(height: 10),
-            _buildBehaviorRow(
-              'Style',
-              data.behaviorType,
-              LucideIcons.zap,
-              color,
-              textTheme,
-            ),
-            const SizedBox(height: 10),
-            _buildBehaviorRow(
-              'Trend',
-              data.spendingTrend,
-              LucideIcons.trendingUp,
-              color,
-              textTheme,
-            ),
-            const SizedBox(height: 10),
-            _buildBehaviorRow(
-              'Archetype',
-              archetype.trait,
-              archetype.icon,
-              color,
-              textTheme,
-            ),
+    return Container(
+      padding: EdgeInsets.all(spacing.cardInner),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            archetype.color.withValues(alpha: 0.08),
+            archetype.color.withValues(alpha: 0.03),
           ],
         ),
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        border: Border.all(
+          color: archetype.color.withValues(alpha: 0.2),
+        ),
       ),
-    );
-  }
-
-  Widget _buildBehaviorRow(
-    String label,
-    String value,
-    IconData icon,
-    ColorScheme color,
-    TextTheme textTheme,
-  ) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: color.surfaceContainer,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.primary.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, size: 18, color: color.primary),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Text(
-              label,
-              style: textTheme.bodySmall?.copyWith(
-                color: color.onSurfaceVariant,
-                fontWeight: FontWeight.w500,
+          Row(
+            children: [
+              Icon(LucideIcons.lightbulb, size: 18, color: archetype.color),
+              SizedBox(width: spacing.elementGap),
+              Text(
+                'Your Next Step',
+                style: textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: archetype.color,
+                ),
               ),
-            ),
+            ],
           ),
+          SizedBox(height: spacing.elementGap * 1.5),
           Text(
-            value,
+            archetype.guidance,
             style: textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.bold,
+              color: color.onSurface,
+              height: 1.5,
             ),
           ),
         ],
       ),
     );
   }
-
-  // ── VIBE CLOUD ──
-  Widget _buildVibeCloud(
-    SpendingPersonality data,
-    PersonalityArchetype archetype,
-    ColorScheme color,
-    TextTheme textTheme,
-    AppSpacing spacing,
-  ) {
-    return Card(
-      elevation: 0,
-      margin: const EdgeInsets.only(),
-      color: color.surfaceContainerLow,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        side: BorderSide(
-          color: color.outlineVariant.withValues(alpha: 0.5),
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: color.primary.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    LucideIcons.sparkles,
-                    color: color.primary,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  'Your Vibe',
-                  style: textTheme.titleMedium
-                      ?.copyWith(fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              archetype.description,
-              style: textTheme.bodyMedium?.copyWith(
-                color: color.onSurfaceVariant,
-                height: 1.5,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              children: [
-                _buildVibeBubble(
-                  data.topCategory,
-                  archetype.color,
-                  color,
-                  textTheme,
-                  isPrimary: true,
-                ),
-                _buildVibeBubble(
-                  data.spendingPattern.split(' ')[0],
-                  archetype.color,
-                  color,
-                  textTheme,
-                ),
-                _buildVibeBubble(
-                  data.behaviorType.split(' ')[0],
-                  archetype.color,
-                  color,
-                  textTheme,
-                ),
-                _buildVibeBubble(
-                  archetype.trait,
-                  archetype.color,
-                  color,
-                  textTheme,
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildVibeBubble(
-    String text,
-    Color accentColor,
-    ColorScheme color,
-    TextTheme textTheme, {
-    bool isPrimary = false,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      decoration: BoxDecoration(
-        color: isPrimary
-            ? accentColor.withValues(alpha: 0.15)
-            : color.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        text,
-        style: textTheme.labelLarge?.copyWith(
-          fontWeight: FontWeight.w600,
-          color: isPrimary ? accentColor : color.onSurface,
-        ),
-      ),
-    );
-  }
 }
 
-// ── HELPER CLASSES ──
+// ── Helper classes ──
 
-class _Trait {
+class _InsightItem {
   final IconData icon;
   final String label;
-  final String subtitle;
-  _Trait(this.icon, this.label, this.subtitle);
+  final Color color;
+  _InsightItem(this.icon, this.label, this.color);
 }
 
-class _DNAItem {
+class _DNABar {
   final String label;
   final String value;
   final double progress;
   final IconData icon;
   final Color barColor;
-  _DNAItem(this.label, this.value, this.progress, this.icon, this.barColor);
+  _DNABar(this.label, this.value, this.progress, this.icon, this.barColor);
+}
+
+/// Progress bar that animates only when it becomes visible on screen.
+class _AnimatedBar extends StatefulWidget {
+  final double progress;
+  final Color barColor;
+  final double radius;
+
+  const _AnimatedBar({
+    required this.progress,
+    required this.barColor,
+    required this.radius,
+  });
+
+  @override
+  State<_AnimatedBar> createState() => _AnimatedBarState();
+}
+
+class _AnimatedBarState extends State<_AnimatedBar>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double> _anim;
+  bool _started = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    );
+    _anim = CurvedAnimation(parent: _ctrl, curve: Curves.easeOutCubic);
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  void _maybeStart(bool visible) {
+    if (visible && !_started) {
+      _started = true;
+      _ctrl.forward();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return VisibilityDetector(
+      key: ValueKey('bar_${widget.progress}_${widget.barColor.toARGB32()}'),
+      onVisibilityChanged: (info) =>
+          _maybeStart(info.visibleFraction > 0.3),
+      child: AnimatedBuilder(
+        animation: _anim,
+        builder: (_, __) => ClipRRect(
+          borderRadius: BorderRadius.circular(widget.radius),
+          child: LinearProgressIndicator(
+            value: _anim.value * widget.progress,
+            minHeight: 8,
+            backgroundColor: widget.barColor.withValues(alpha: 0.1),
+            valueColor: AlwaysStoppedAnimation(widget.barColor),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Day-of-week bar that animates only when visible.
+class _AnimatedDayBar extends StatefulWidget {
+  final double ratio;
+  final Color barColor;
+
+  const _AnimatedDayBar({
+    required this.ratio,
+    required this.barColor,
+  });
+
+  @override
+  State<_AnimatedDayBar> createState() => _AnimatedDayBarState();
+}
+
+class _AnimatedDayBarState extends State<_AnimatedDayBar>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double> _anim;
+  bool _started = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    );
+    _anim = CurvedAnimation(parent: _ctrl, curve: Curves.easeOutCubic);
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  void _maybeStart(bool visible) {
+    if (visible && !_started) {
+      _started = true;
+      _ctrl.forward();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return VisibilityDetector(
+      key: ValueKey('day_${widget.ratio}_${widget.barColor.toARGB32()}'),
+      onVisibilityChanged: (info) =>
+          _maybeStart(info.visibleFraction > 0.3),
+      child: AnimatedBuilder(
+        animation: _anim,
+        builder: (_, __) => FractionallySizedBox(
+          heightFactor: (_anim.value * widget.ratio).clamp(0.05, 1.0),
+          child: Container(
+            decoration: BoxDecoration(
+              color: widget.barColor,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(4),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }

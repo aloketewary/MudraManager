@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
+import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
@@ -300,7 +301,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
               loading: () => ListView.builder(
                 physics: const AlwaysScrollableScrollPhysics(),
                 itemCount: 5,
-                itemBuilder: (_, __) => const TransactionCardSkeleton(),
+                itemBuilder: (_, __) => TransactionCardSkeleton(),
               ),
               error: (e, _) => ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
@@ -1047,7 +1048,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
             if (index == displayItems.length) {
               return Padding(
                 padding: EdgeInsets.all(spacing.cardInner),
-                child: const Center(child: CircularProgressIndicator()),
+                child: TransactionCardSkeleton(),
               );
             }
             final entry = displayItems[index];
@@ -1083,15 +1084,20 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
               description: transaction.description,
               account: transaction.account.value,
               amount: transaction.amount.toStringAsFixed(2),
+              currencyCode: transaction.currencyCode,
+              convertedAmount: transaction.convertedAmount,
               date: transaction.date,
               isExpense: transaction.isExpense,
               isTransfer: transaction.isTransfer,
               tags: tags,
               related: transaction.related.value,
-              tripName: isRecurring ? null : tripName,
+              tripName: tripName,
               isRecurring: isRecurring,
               onEdit: () => _onEditTransaction(transaction),
               onRemove: () => _onRemoveTransaction(transaction, ctxt),
+              onUnlinkRecurring: isRecurring
+                  ? () => _onUnlinkRecurring(transaction)
+                  : null,
               enablePeek: index == firstTxIndex && widget.isTabActive,
             );
           },
@@ -1136,6 +1142,18 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
   }
 
   // ── DELETE HANDLER ──
+  Future<void> _onUnlinkRecurring(Transaction transaction) async {
+    final isar = await ref.read(isarServiceProvider).getInstance();
+    await isar.writeTxn(() async {
+      transaction.recurringTransactionSource.value = null;
+      await transaction.recurringTransactionSource.save();
+      await isar.transactions.put(transaction);
+    });
+    _invalidateTransactionProviders();
+    setState(() => _clearCache());
+    if (mounted) SnackbarService.success('Subscription tag removed');
+  }
+
   Future<void> _onRemoveTransaction(transaction, AppLocalizations ctxt) async {
     final confirm = await DialogUtils.showDeleteConfirmation(
       context,
@@ -1314,9 +1332,9 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                 ],
               ),
             ),
-          _ => const Padding(
-              padding: EdgeInsets.all(48),
-              child: Center(child: CircularProgressIndicator()),
+          _ => Padding(
+              padding: const EdgeInsets.all(48),
+              child: Column(children: List.generate(5, (_) => TransactionCardSkeleton())),
             ),
         };
       },

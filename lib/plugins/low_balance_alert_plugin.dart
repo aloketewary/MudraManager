@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_plugin_sdk/mudra_plugin_sdk.dart';
 
 class LowBalanceAlertPlugin extends MudraPlugin {
@@ -13,7 +15,7 @@ class LowBalanceAlertPlugin extends MudraPlugin {
   @override
   void onLowBalance(LowBalanceEvent event) {
     api.showNotification(
-      '⚠️ ${event.accountName} balance low: ₹${event.balance.toStringAsFixed(0)}',
+      '⚠️ ${event.accountName} balance low: ${formatCurrency(event.balance, code: BaseCurrency.code, decimals: 0)}',
     );
   }
 

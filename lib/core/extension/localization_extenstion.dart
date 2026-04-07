@@ -1,5 +1,7 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 
 extension AppLocalizationsHelper on AppLocalizations {
@@ -99,7 +101,7 @@ extension AppLocalizationsHelper on AppLocalizations {
     final locale = localeName == 'hi' ? 'hi_IN' : localeName;
     final format = NumberFormat.currency(
       locale: locale,
-      symbol: '₹', // Or separate sign and symbol if needed
+      symbol: BaseCurrency.symbol,
       decimalDigits: fixedStringLength,
       customPattern: '¤#,##,##0.00',
     );
@@ -121,16 +123,17 @@ extension AppLocalizationsHelper on AppLocalizations {
     final format = compact
         ? formatCompactLocalizedCurrency(fixedStringLength)
         : formatLocalizedCurrency(fixedStringLength);
-    return "${compact ? "₹" : ""}${format.format(amount)}";
+    return "${compact ? BaseCurrency.symbol : ""}${format.format(amount)}";
   }
 
   String formatCompactCurrency(double amount, {int fixedStringLength = 2}) {
+    final s = BaseCurrency.symbol;
     if (amount.abs() >= 10000000) {
-      return '₹${_trimTrailingZeros((amount / 10000000).toStringAsFixed(fixedStringLength))}$currency_crore_short';
+      return '$s${_trimTrailingZeros((amount / 10000000).toStringAsFixed(fixedStringLength))}$currency_crore_short';
     } else if (amount.abs() >= 100000) {
-      return '₹${_trimTrailingZeros((amount / 100000).toStringAsFixed(fixedStringLength))}$currency_lakh_short';
+      return '$s${_trimTrailingZeros((amount / 100000).toStringAsFixed(fixedStringLength))}$currency_lakh_short';
     } else if (amount.abs() >= 1000) {
-      return '₹${_trimTrailingZeros((amount / 1000).toStringAsFixed(fixedStringLength))}$currency_thousand_short';
+      return '$s${_trimTrailingZeros((amount / 1000).toStringAsFixed(fixedStringLength))}$currency_thousand_short';
     }
     return formatCurrencyWithSign(fixedStringLength, amount);
   }

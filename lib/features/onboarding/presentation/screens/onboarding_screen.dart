@@ -166,7 +166,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                               ),
                               child: index == 0
                                   ? Image.asset(
-                                      'assets/logo/rupee.png',
+                                      'assets/logo/logo.png',
                                       width: 64,
                                       height: 64,
                                     )

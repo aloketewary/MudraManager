@@ -255,14 +255,16 @@ class StandardPdfExportPlugin extends ExportPlugin {
           ),
           headerDecoration: const pw.BoxDecoration(color: PdfColors.blue900),
           cellAlignment: pw.Alignment.centerLeft,
-          headers: ['Date', 'Category', 'Amount', 'Type'],
+          headers: ['Date', 'Category', 'Amount', 'Currency', 'Base Amt', 'Type'],
           data: data.transactions
               .take(20)
               .map(
                 (txn) => [
                   DateFormat('dd/MM/yyyy').format(txn.date),
                   txn.category.value?.name ?? 'Unknown',
-                  '${data.currency}${txn.amount.toStringAsFixed(2)}',
+                  txn.amount.toStringAsFixed(2),
+                  txn.currencyCode ?? data.currency,
+                  '${data.currency}${txn.baseAmount.toStringAsFixed(2)}',
                   txn.isExpense ? 'Expense' : 'Income',
                 ],
               )

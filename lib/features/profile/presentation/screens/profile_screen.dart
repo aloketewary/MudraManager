@@ -6,13 +6,15 @@ import 'package:flutter/services.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_provider.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/entitlement/entitlement_products.dart';
 import 'package:mudra_manager/core/entitlement/entitlement_provider.dart';
 import 'package:mudra_manager/core/extension/localization_extenstion.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
-import 'package:mudra_manager/core/theme/mudra_manager_avatar_icons.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
@@ -21,6 +23,7 @@ import 'package:mudra_manager/features/category/data/category_provider.dart';
 import 'package:mudra_manager/features/profile/data/user_profile_provider.dart';
 import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
 import 'package:mudra_manager/shared/widgets/pro_gate.dart';
+import 'package:mudra_manager/shared/widgets/ambient_brand_section.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 
@@ -35,7 +38,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final spacing = ref.watch(spacingProvider);
-    final iconDataList = MudraManagerAvatarIcons.iconDataList;
     final profileAsync = ref.watch(userProfileProvider);
     final accountsAsync = ref.watch(accountsProvider);
     final categoriesAsync = ref.watch(categoryListProvider);
@@ -81,7 +83,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       : const SizedBox.shrink(),
                   background: _buildHeroBackground(
                     profile,
-                    iconDataList,
                     color,
                     textTheme,
                     isDark,
@@ -133,6 +134,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       'Categories',
                       'Manage your categories',
                       () => context.push(AppRoutes.manageCategories),
+                    ),
+                    _SettingItem(
+                      LucideIcons.coins,
+                      'Currency',
+                      _baseCurrencySubtitle(ref),
+                      () => context.push(AppRoutes.currencySettings),
                     ),
                     _SettingItem(
                       Icons.lock,
@@ -263,16 +270,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 const SizedBox(height: 32),
 
                 // ── APP FOOTER ──
-                _buildAppFooter(color, textTheme, spacing),
-                const SizedBox(height: 80),
+                const AmbientBrandSection(showSignature: true),
               ]),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: SizedBox(
-              height: MediaQuery.of(context).padding.bottom +
-                  kBottomNavigationBarHeight +
-                  16,
             ),
           ),
         ],
@@ -720,7 +719,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   // ── HERO BACKGROUND ──
   Widget _buildHeroBackground(
     dynamic profile,
-    List<IconData> iconDataList,
     ColorScheme color,
     TextTheme textTheme,
     bool isDark,
@@ -748,7 +746,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               child: Container(
                 width: 160,
                 height: 160,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   shape: BoxShape.circle,
                 ),
               ),
@@ -764,7 +762,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   // Avatar with level ring
                   _buildAvatarWithLevel(
                     profile,
-                    iconDataList,
                     color,
                     textTheme,
                   ),
@@ -816,7 +813,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   Widget _buildAvatarWithLevel(
     dynamic profile,
-    List<IconData> iconDataList,
     ColorScheme color,
     TextTheme textTheme,
   ) {
@@ -1354,91 +1350,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  Widget _buildAppFooter(
-    ColorScheme color,
-    TextTheme textTheme,
-    AppSpacing spacing,
-  ) {
-    const quotes = [
-      'Paisa bolta hai 🗣️',
-      'Hisaab kitaab, sab yaad rakhenge 📒',
-      'Spend smart, live large 🚀',
-      'Every rupee has a story 💰',
-      'Budget karo, chill karo 😎',
-      'Your wallet\'s best friend 🤝',
-      'Savings today, freedom tomorrow ✨',
-      'Track karo, tension nahi 🧘',
-    ];
-    final quote = quotes[DateTime.now().day % quotes.length];
-
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: spacing.cardHorizontal),
-      child: Column(
-        children: [
-          Container(
-            width: double.infinity,
-            padding: EdgeInsets.symmetric(
-              horizontal: spacing.cardHorizontal,
-              vertical: spacing.cardVertical,
-            ),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(spacing.radiusMedium),
-            ),
-            child: Column(
-              children: [
-                // App icon
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: Image.asset(
-                    'assets/logo/logo.png',
-                    width: 48,
-                    height: 48,
-                  ),
-                ),
-                SizedBox(height: spacing.sectionGap),
-
-                // Fun quote
-                Text(
-                  quote,
-                  style: textTheme.bodyMedium?.copyWith(
-                    color: color.onSurfaceVariant,
-                    fontStyle: FontStyle.italic,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: spacing.sectionGap),
-
-                // Version
-                FutureBuilder<PackageInfo>(
-                  future: PackageInfo.fromPlatform(),
-                  builder: (context, snapshot) {
-                    final version = snapshot.data?.version ?? '';
-                    if (version.isEmpty) return const SizedBox.shrink();
-                    return Text(
-                      'v$version',
-                      style: textTheme.labelSmall?.copyWith(
-                        color: color.onSurfaceVariant.withValues(alpha: 0.4),
-                      ),
-                    );
-                  },
-                ),
-                SizedBox(height: spacing.elementGap),
-
-                // Made in India
-                Text(
-                  'Made with ❤️ in India 🇮🇳',
-                  style: textTheme.labelSmall?.copyWith(
-                    color: color.onSurfaceVariant.withValues(alpha: 0.4),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _showLogoutBottomSheet(
     BuildContext context,
     WidgetRef ref,
@@ -1508,6 +1419,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         await isar.writeTxn(() async => await isar.clear());
                         prefs.clear();
                         prefs.setLanguage(lang);
+                        BaseCurrency.sync('INR');
+                        ref.invalidate(baseCurrencyProvider);
+                        ref.invalidate(currencyServiceProvider);
                         ref.invalidate(userProfileProvider);
                         ref.invalidate(accountsProvider);
                         ref.invalidate(categoryListProvider);
@@ -1532,6 +1446,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         );
       },
     );
+  }
+
+  String _baseCurrencySubtitle(WidgetRef ref) {
+    final async = ref.watch(baseCurrencyProvider);
+    final code = async.valueOrNull ?? 'INR';
+    return '$code — ${currencyName(code)}';
   }
 }
 

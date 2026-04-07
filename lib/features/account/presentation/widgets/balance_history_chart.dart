@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:mudra_manager/core/db/models/balance_snapshot.dart';
@@ -110,7 +112,7 @@ class BalanceHistoryChart extends StatelessWidget {
                               ? snapshots[index].date
                               : DateTime.now();
                           return LineTooltipItem(
-                            '${date.day}/${date.month}\n₹${spot.y.toStringAsFixed(0)}',
+                            '${date.day}/${date.month}\n${formatCurrency(spot.y, decimals: 0)}',
                             textTheme.labelSmall?.copyWith(
                                   color: accountColor,
                                   fontWeight: FontWeight.bold,

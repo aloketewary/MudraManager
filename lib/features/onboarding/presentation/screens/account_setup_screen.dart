@@ -5,6 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/shared/widgets/currency_badge.dart';
+import 'package:mudra_manager/core/currency/currency_provider.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/user_profile.dart';
 import 'package:mudra_manager/core/entitlement/entitlement_provider.dart';
@@ -34,10 +37,11 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
   final _accountController = TextEditingController(text: 'Cash');
   final _balanceController = TextEditingController(text: '0');
 
-  int _step = 0; // 0 = name, 1 = account, 2 = pack picker
+  int _step = 0; // 0 = name, 1 = currency, 2 = account, 3 = tone, 4 = pack
   bool _isLoading = false;
   bool _startFresh = false;
   final Set<String> _selectedPackIds = {'com.mudra.pack.default'};
+  String _selectedCurrency = 'INR';
 
   @override
   void dispose() {
@@ -56,12 +60,16 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
       HapticFeedback.lightImpact();
       setState(() => _step = 1);
     } else if (_step == 1) {
-      if (!_formKey.currentState!.validate()) return;
+      // Currency step — just advance
       HapticFeedback.lightImpact();
       setState(() => _step = 2);
     } else if (_step == 2) {
+      if (!_formKey.currentState!.validate()) return;
       HapticFeedback.lightImpact();
       setState(() => _step = 3);
+    } else if (_step == 3) {
+      HapticFeedback.lightImpact();
+      setState(() => _step = 4);
     } else {
       _completeSetup();
     }
@@ -129,6 +137,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
             ..accountType = AccountType.cash
             ..colorValue = Colors.green.toARGB32()
             ..accountNumber = '0000'
+            ..currencyCode = _selectedCurrency
             ..initialBalance = double.parse(_balanceController.text.trim()),
         );
       });
@@ -138,6 +147,10 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
           _selectedPackIds.toList(),
         );
       }
+
+      // Set base currency
+      final currencyService = await ref.read(currencyServiceProvider.future);
+      await currencyService.setBaseCurrency(_selectedCurrency);
 
       SharedPrefsUtil.instance.setOnboardingComplete();
       // Stamp install date for trial period
@@ -190,7 +203,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                     ),
                     const Spacer(),
                     Row(
-                      children: List.generate(4, (i) {
+                      children: List.generate(5, (i) {
                         final active = i <= _step;
                         return AnimatedContainer(
                           duration: const Duration(milliseconds: 300),
@@ -240,29 +253,37 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                           isDark,
                         )
                       : _step == 1
-                          ? _buildAccountStep(
+                          ? _buildCurrencyStep(
                               color,
                               textTheme,
                               spacing,
-                              ctxt,
                               accent,
                               isDark,
                             )
                           : _step == 2
-                              ? _buildToneStep(
+                              ? _buildAccountStep(
                                   color,
                                   textTheme,
                                   spacing,
-                                  isDark,
+                                  ctxt,
                                   accent,
+                                  isDark,
                                 )
-                              : _buildPackPickerStep(
-                                  color,
-                                  textTheme,
-                                  spacing,
-                                  isDark,
-                                  accent,
-                                ),
+                              : _step == 3
+                                  ? _buildToneStep(
+                                      color,
+                                      textTheme,
+                                      spacing,
+                                      isDark,
+                                      accent,
+                                    )
+                                  : _buildPackPickerStep(
+                                      color,
+                                      textTheme,
+                                      spacing,
+                                      isDark,
+                                      accent,
+                                    ),
                 ),
               ),
 
@@ -300,7 +321,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    _step < 3
+                                    _step < 4
                                         ? 'Continue'
                                         : ctxt.translate('onboard_GetStarted'),
                                     style: const TextStyle(
@@ -308,7 +329,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                                       fontSize: 16,
                                     ),
                                   ),
-                                  if (_step == 3) ...[
+                                  if (_step == 4) ...[
                                     const SizedBox(width: 8),
                                     const Icon(
                                       LucideIcons.arrowRight,
@@ -454,7 +475,197 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
     );
   }
 
-  // ── STEP 2: ACCOUNT ──
+  // ── STEP 2: CURRENCY ──
+  Widget _buildCurrencyStep(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    Color accent,
+    bool isDark,
+  ) {
+    // Popular currencies shown at top
+    const popular = ['INR', 'USD', 'EUR', 'GBP', 'AED', 'SGD', 'CAD', 'AUD'];
+    final popularMetas = popular
+        .map((c) => kCurrencies[c])
+        .whereType<CurrencyMeta>()
+        .toList();
+
+    return SingleChildScrollView(
+      key: const ValueKey('currency_step'),
+      padding: EdgeInsets.symmetric(horizontal: spacing.cardHorizontalMax + 8),
+      child: Column(
+        children: [
+          const SizedBox(height: 32),
+          TweenAnimationBuilder<double>(
+            duration: const Duration(milliseconds: 600),
+            curve: Curves.easeOutBack,
+            tween: Tween(begin: 0.0, end: 1.0),
+            builder: (context, value, child) => Opacity(
+              opacity: value.clamp(0.0, 1.0),
+              child: Transform.scale(scale: value, child: child),
+            ),
+            child: Container(
+              padding: const EdgeInsets.all(5),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: accent.withValues(alpha: 0.25),
+                  width: 2.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: accent.withValues(alpha: isDark ? 0.15 : 0.12),
+                    blurRadius: 40,
+                    spreadRadius: 8,
+                  ),
+                ],
+              ),
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      accent.withValues(alpha: isDark ? 0.2 : 0.14),
+                      accent.withValues(alpha: isDark ? 0.08 : 0.05),
+                    ],
+                  ),
+                ),
+                child: CurrencyBadge(
+                  code: _selectedCurrency,
+                  size: 36,
+                  color: accent,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 32),
+          Text(
+            BuddyMessages.currencyPickerTitle,
+            style: textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+              color: color.onSurface,
+              letterSpacing: -0.5,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            BuddyMessages.currencyPickerSubtitle,
+            style: textTheme.bodyLarge?.copyWith(
+              color: color.onSurfaceVariant,
+              height: 1.5,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 28),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: popularMetas.map((c) {
+              final isSelected = _selectedCurrency == c.code;
+              return GestureDetector(
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  setState(() => _selectedCurrency = c.code);
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? accent.withValues(alpha: isDark ? 0.2 : 0.12)
+                        : color.surfaceContainerLow,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isSelected
+                          ? accent.withValues(alpha: 0.5)
+                          : color.outlineVariant.withValues(alpha: 0.4),
+                      width: isSelected ? 1.5 : 1,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        c.symbol,
+                        style: textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: isSelected ? accent : color.onSurface,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        c.code,
+                        style: textTheme.bodyMedium?.copyWith(
+                          fontWeight: isSelected
+                              ? FontWeight.w700
+                              : FontWeight.w500,
+                          color: isSelected
+                              ? accent
+                              : color.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 16),
+          TextButton.icon(
+            onPressed: () async {
+              final picked = await showModalBottomSheet<String>(
+                context: context,
+                isScrollControlled: true,
+                shape: const RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.vertical(top: Radius.circular(20)),
+                ),
+                builder: (_) => _AllCurrenciesSheet(
+                  selected: _selectedCurrency,
+                ),
+              );
+              if (picked != null) {
+                setState(() => _selectedCurrency = picked);
+              }
+            },
+            icon: Icon(LucideIcons.globe, size: 16, color: accent),
+            label: Text(
+              'Browse all currencies',
+              style: textTheme.labelLarge?.copyWith(color: accent),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Icon(
+                LucideIcons.info,
+                size: 14,
+                color: color.onSurfaceVariant.withValues(alpha: 0.6),
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  'Changing base currency later will archive existing transactions.',
+                  style: textTheme.bodySmall?.copyWith(
+                    color: color.onSurfaceVariant.withValues(alpha: 0.6),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── STEP 3: ACCOUNT ──
   Widget _buildAccountStep(
     ColorScheme color,
     TextTheme textTheme,
@@ -584,7 +795,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                     decoration: InputDecoration(
                       hintText: '0',
                       icon: Icon(
-                        LucideIcons.indianRupee,
+                        currencyIcon(_selectedCurrency),
                         color: color.primary,
                         size: 20,
                       ),
@@ -1099,6 +1310,115 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Full searchable currency list for onboarding.
+class _AllCurrenciesSheet extends StatefulWidget {
+  final String selected;
+  const _AllCurrenciesSheet({required this.selected});
+
+  @override
+  State<_AllCurrenciesSheet> createState() => _AllCurrenciesSheetState();
+}
+
+class _AllCurrenciesSheetState extends State<_AllCurrenciesSheet> {
+  String _query = '';
+
+  List<CurrencyMeta> get _filtered {
+    final all = kCurrencies.values.toList();
+    if (_query.isEmpty) return all;
+    final q = _query.toLowerCase();
+    return all
+        .where((c) =>
+            c.code.toLowerCase().contains(q) ||
+            c.name.toLowerCase().contains(q),)
+        .toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return DraggableScrollableSheet(
+      initialChildSize: 0.7,
+      maxChildSize: 0.9,
+      minChildSize: 0.4,
+      expand: false,
+      builder: (context, scrollController) => Column(
+        children: [
+          const SizedBox(height: 12),
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: color.onSurfaceVariant.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: TextField(
+              autofocus: true,
+              decoration: InputDecoration(
+                hintText: 'Search currency...',
+                prefixIcon: const Icon(Icons.search, size: 20),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: color.outlineVariant),
+                ),
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 12,
+                ),
+              ),
+              onChanged: (v) => setState(() => _query = v),
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              controller: scrollController,
+              itemCount: _filtered.length,
+              itemBuilder: (context, i) {
+                final c = _filtered[i];
+                final isSelected = c.code == widget.selected;
+                return ListTile(
+                  leading: Container(
+                    width: 40,
+                    height: 40,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? color.primary.withValues(alpha: 0.12)
+                          : color.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      c.symbol,
+                      style: textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: isSelected ? color.primary : color.onSurface,
+                      ),
+                    ),
+                  ),
+                  title: Text(c.code),
+                  subtitle: Text(c.name, style: textTheme.bodySmall),
+                  trailing: isSelected
+                      ? Icon(Icons.check_circle, color: color.primary)
+                      : null,
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    Navigator.of(context).pop(c.code);
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

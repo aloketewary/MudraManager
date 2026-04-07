@@ -1,4 +1,5 @@
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -144,53 +145,34 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
     final billing = ref.watch(billingServiceProvider);
 
     return Scaffold(
+      appBar: AppBar(
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(LucideIcons.x),
+          onPressed: () {
+            HapticFeedback.mediumImpact();
+            context.pop();
+          },
+        ),
+      ),
       body: Stack(
         children: [
-          CustomScrollView(
-            slivers: [
-              SliverAppBar(
-                expandedHeight: 280,
-                pinned: true,
-                leading: IconButton(
-                  icon: const Icon(LucideIcons.x),
-                  onPressed: () {
-                    HapticFeedback.mediumImpact();
-                    context.pop();
-                  },
-                ),
-                flexibleSpace: FlexibleSpaceBar(
-                  background: _buildHero(color, textTheme, isDark),
-                ),
+          ListView(
+            padding: EdgeInsets.symmetric(
+              horizontal: spacing.cardHorizontal,
+              vertical: spacing.cardVertical,
+            ),
+            children: [
+              _buildHero(color, textTheme, isDark),
+              SizedBox(height: spacing.sectionGap),
+              ...isProAsync.when(
+                data: (isPro) => isPro
+                    ? _buildProStatusContent(color, textTheme, spacing)
+                    : _buildFreeUserContent(color, textTheme, spacing, billing),
+                loading: () => [const DashboardCardSkeleton()],
+                error: (_, __) => _buildFreeUserContent(color, textTheme, spacing, billing),
               ),
-              SliverPadding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: spacing.cardHorizontal,
-                  vertical: spacing.cardVertical,
-                ),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate([
-                    ...isProAsync.when(
-                      data: (isPro) => isPro
-                          ? _buildProStatusContent(color, textTheme, spacing)
-                          : _buildFreeUserContent(
-                              color,
-                              textTheme,
-                              spacing,
-                              billing,
-                            ),
-                      loading: () =>
-                          [const Center(child: CircularProgressIndicator())],
-                      error: (_, __) => _buildFreeUserContent(
-                        color,
-                        textTheme,
-                        spacing,
-                        billing,
-                      ),
-                    ),
-                    const SizedBox(height: 80),
-                  ]),
-                ),
-              ),
+              const SizedBox(height: 80),
             ],
           ),
           Align(
@@ -467,16 +449,8 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
   // ── HERO ──
   Widget _buildHero(ColorScheme color, TextTheme textTheme, bool isDark) {
     return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            color.primary.withValues(alpha: isDark ? 0.25 : 0.15),
-            color.tertiary.withValues(alpha: isDark ? 0.12 : 0.06),
-            color.surface,
-          ],
-        ),
+      decoration: const BoxDecoration(
+        
       ),
       child: SafeArea(
         child: Column(

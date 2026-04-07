@@ -26,17 +26,9 @@ class _NetWorthMiniCardState extends ConsumerState<NetWorthMiniCard> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_initialized) {
-      final balanceMap = ref
-          .watch(accountServiceProvider)
-          .getAccountBalanceMap();
-      balanceMap.then(
-        (val) => {
-          if (mounted)
-            {
-              setState(() {
-                _balanceMap = val;
-              }),
-            },
+      ref.watch(accountServiceProvider).getAccountBalanceMapInBase().then(
+        (val) {
+          if (mounted) setState(() => _balanceMap = val);
         },
       );
       _initialized = true;

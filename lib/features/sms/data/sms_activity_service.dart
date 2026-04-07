@@ -1,9 +1,12 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/sms_activity.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
+import 'package:mudra_manager/core/db/models/exchange_rate.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
 import 'package:mudra_manager/features/sms/data/bank_sms_parser.dart';
@@ -144,7 +147,7 @@ class SmsActivityService {
       });
 
       _log.i(
-        'Transfer pair detected: ${activity.id} <-> ${transferPair.id} (₹${activity.amount})',
+        'Transfer pair detected: ${activity.id} <-> ${transferPair.id} (${BaseCurrency.symbol}${activity.amount})',
       );
       return activity;
     }
@@ -180,13 +183,31 @@ class SmsActivityService {
       );
 
       if (matchResult != null) {
+        // Inherit currency from matched account
+        final accountCurrency = matchResult.account.currencyCode;
+        double? convertedAmount;
+        double? rateUsed;
+        if (accountCurrency != null) {
+          final rate = await isar.exchangeRates
+              .filter()
+              .currencyCodeEqualTo(accountCurrency)
+              .findFirst();
+          if (rate != null) {
+            convertedAmount = (activity.amount ?? 0) * rate.rateToBase;
+            rateUsed = rate.rateToBase;
+          }
+        }
+
         final transaction = Transaction()
           ..amount = activity.amount ?? 0
           ..date = safeDate
           ..description = activity.body
           ..isExpense = !(activity.isIncome == true)
           ..isTransfer = false
-          ..isFromSms = true;
+          ..isFromSms = true
+          ..currencyCode = accountCurrency
+          ..convertedAmount = convertedAmount
+          ..rateUsed = rateUsed;
 
         transaction.account.value = matchResult.account;
         transaction.category.value = matchResult.category;
@@ -219,7 +240,7 @@ class SmsActivityService {
       await isar.smsActivitys.put(activity);
     });
 
-    _log.i('Activity added: ${activity.status.name} - ₹${activity.amount}');
+    _log.i('Activity added: ${activity.status.name} - ${BaseCurrency.symbol}${activity.amount}');
     return activity;
   }
 
@@ -240,6 +261,21 @@ class SmsActivityService {
       ..description = activity.body
       ..isExpense = !(activity.isIncome == true)
       ..isTransfer = false;
+
+    // Inherit currency from account
+    final accountCurrency = account.currencyCode;
+    if (accountCurrency != null) {
+      transaction.currencyCode = accountCurrency;
+      final rate = await isar.exchangeRates
+          .filter()
+          .currencyCodeEqualTo(accountCurrency)
+          .findFirst();
+      if (rate != null) {
+        transaction.convertedAmount =
+            (activity.amount ?? 0) * rate.rateToBase;
+        transaction.rateUsed = rate.rateToBase;
+      }
+    }
 
     transaction.account.value = account;
     transaction.category.value = category;

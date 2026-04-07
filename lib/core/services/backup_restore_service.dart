@@ -10,6 +10,8 @@ import 'package:intl/intl.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/backup_metadata.dart';
+import 'package:mudra_manager/core/db/models/exchange_rate.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/db/models/budget.dart';
 import 'package:mudra_manager/core/db/models/budget_category_allocation.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
@@ -311,6 +313,30 @@ class BackupService {
     _log.i(
       'DB export completed: ${backupData.values.fold<int>(0, (sum, list) => sum + list.length)} records',
     );
+
+    // Backup AppConfig (includes base_currency)
+    final appConfigs = await isar.appConfigs.where().findAll();
+    backupData['AppConfig'] = appConfigs
+        .map((c) => {
+              'key': c.key,
+              'stringValue': c.stringValue,
+              'intValue': c.intValue,
+              'doubleValue': c.doubleValue,
+              'boolValue': c.boolValue,
+              'dateValue': c.dateValue?.toIso8601String(),
+            })
+        .toList();
+
+    // Backup ExchangeRates
+    final rates = await isar.exchangeRates.where().findAll();
+    backupData['ExchangeRate'] = rates
+        .map((r) => {
+              'currencyCode': r.currencyCode,
+              'rateToBase': r.rateToBase,
+              'updatedAt': r.updatedAt.toIso8601String(),
+            })
+        .toList();
+
     return backupData;
   }
 
@@ -539,6 +565,49 @@ class BackupService {
         }
       }
     });
+
+    // --- Restore AppConfig (base_currency etc.) ---
+    if (backupData.containsKey('AppConfig')) {
+      final configs = backupData['AppConfig'] as List<dynamic>;
+      await isar.writeTxn(() async {
+        for (final item in configs) {
+          final map = Map<String, dynamic>.from(item);
+          final config = AppConfig()
+            ..key = map['key'] as String
+            ..stringValue = map['stringValue'] as String?
+            ..intValue = map['intValue'] as int?
+            ..doubleValue = (map['doubleValue'] as num?)?.toDouble()
+            ..boolValue = map['boolValue'] as bool?
+            ..dateValue = map['dateValue'] != null
+                ? DateTime.tryParse(map['dateValue'] as String)
+                : null;
+          await isar.appConfigs.put(config);
+        }
+      });
+    }
+
+    // --- Restore ExchangeRates ---
+    if (backupData.containsKey('ExchangeRate')) {
+      final rates = backupData['ExchangeRate'] as List<dynamic>;
+      await isar.writeTxn(() async {
+        for (final item in rates) {
+          final map = Map<String, dynamic>.from(item);
+          final rate = ExchangeRate()
+            ..currencyCode = map['currencyCode'] as String
+            ..rateToBase = (map['rateToBase'] as num).toDouble()
+            ..updatedAt = DateTime.parse(map['updatedAt'] as String);
+          await isar.exchangeRates.put(rate);
+        }
+      });
+    }
+
+    // Sync BaseCurrency from restored AppConfig
+    final baseCurrencyConfig = await isar.appConfigs
+        .filter()
+        .keyEqualTo('base_currency')
+        .findFirst();
+    BaseCurrency.sync(baseCurrencyConfig?.stringValue ?? 'INR');
+
     _log.i('Restore completed successfully');
   }
 

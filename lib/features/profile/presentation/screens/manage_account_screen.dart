@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/currency/currency_service.dart';
+import 'package:mudra_manager/shared/widgets/currency_badge.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
@@ -31,6 +33,7 @@ class ManageAccountScreen extends ConsumerStatefulWidget {
 
 class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
   Map<int, double> _balanceMap = {};
+  Map<int, double> _baseBalanceMap = {};
   bool _initialized = false;
 
   @override
@@ -38,8 +41,17 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
     super.didChangeDependencies();
     if (!_initialized) {
       _initialized = true;
-      ref.read(accountServiceProvider).getAccountBalanceMap().then((val) {
-        if (mounted) setState(() => _balanceMap = val);
+      final service = ref.read(accountServiceProvider);
+      Future.wait([
+        service.getAccountBalanceMap(),
+        service.getAccountBalanceMapInBase(),
+      ]).then((results) {
+        if (mounted) {
+          setState(() {
+            _balanceMap = results[0];
+            _baseBalanceMap = results[1];
+          });
+        }
       });
     }
   }
@@ -101,15 +113,23 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
             grouped.putIfAbsent(account.accountType, () => []).add(account);
           }
 
-          final totalBalance = _balanceMap.values.fold(0.0, (a, b) => a + b);
+          final totalBalance = _baseBalanceMap.values.fold(0.0, (a, b) => a + b);
 
           return RefreshIndicator(
             onRefresh: () => RefreshHelper.withMinDuration(() async {
               ref.invalidate(allAccountsProvider);
               ref.invalidate(accountsProvider);
-              final balances =
-                  await ref.read(accountServiceProvider).getAccountBalanceMap();
-              if (mounted) setState(() => _balanceMap = balances);
+              final service = ref.read(accountServiceProvider);
+              final results = await Future.wait([
+                service.getAccountBalanceMap(),
+                service.getAccountBalanceMapInBase(),
+              ]);
+              if (mounted) {
+                setState(() {
+                  _balanceMap = results[0];
+                  _baseBalanceMap = results[1];
+                });
+              }
             }),
             child: ListView(
               physics: const AlwaysScrollableScrollPhysics(),
@@ -176,7 +196,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
         loading: () => ListView.builder(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
           itemCount: 5,
-          itemBuilder: (context, index) => const TransactionCardSkeleton(),
+          itemBuilder: (context, index) => TransactionCardSkeleton(),
         ),
         error: (err, stack) => Center(child: Text(BuddyMessages.errorWith('$err'))),
       ),
@@ -208,7 +228,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Total Balance',
+            'Total Balance (in ${BaseCurrency.code})',
             style: textTheme.labelLarge?.copyWith(
               color: color.onPrimaryContainer.withValues(alpha: 0.7),
             ),
@@ -405,10 +425,30 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
                                       letterSpacing: 1.2,
                                     ),
                                   ),
+                                if (account.currencyCode != null)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 4),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: accountColor.withValues(alpha: 0.1),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: CurrencyBadge(
+                                        code: account.currencyCode!,
+                                        size: 12,
+                                        color: accountColor,
+                                      ),
+                                    ),
+                                  ),
                               ],
                             ),
                           ),
                           CurrencyText(
+                            currencyCode: account.currencyCode,
                             amount: balance,
                             style: textTheme.titleSmall?.copyWith(
                               fontWeight: FontWeight.bold,
@@ -688,6 +728,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
                   ],
                 ),
                 CurrencyText(
+                  currencyCode: account.currencyCode,
                   amount: balance,
                   style: textTheme.bodyMedium?.copyWith(
                     color: accountColor,

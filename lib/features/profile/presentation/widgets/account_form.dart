@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_provider.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/entitlement/entitlement_provider.dart';
 import 'package:mudra_manager/core/extension/account_type_extenstion.dart';
@@ -37,6 +39,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
   late TextEditingController _balanceController;
   late AccountType _selectedType;
   late Color _selectedColor;
+  String? _selectedCurrency;
   bool _saving = false;
 
   bool get _isEditing => widget.account != null;
@@ -71,6 +74,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
     _selectedColor = widget.account?.colorValue != null
         ? Color(widget.account!.colorValue!)
         : const Color(0xFF2196F3);
+    _selectedCurrency = widget.account?.currencyCode;
   }
 
   @override
@@ -130,9 +134,11 @@ class _AccountFormState extends ConsumerState<AccountForm> {
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: EdgeInsets.symmetric(
-            horizontal: spacing.cardHorizontal,
-            vertical: spacing.cardVertical,
+          padding: EdgeInsets.only(
+            left: spacing.cardHorizontal,
+            right: spacing.cardHorizontal,
+            top: spacing.cardVertical,
+            bottom: MediaQuery.of(context).padding.bottom + kBottomNavigationBarHeight + spacing.sectionGap,
           ),
           children: [
             _buildHeroPreview(
@@ -166,6 +172,10 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               textTheme,
               spacing,
             ),
+            SizedBox(height: spacing.sectionGap),
+            _sectionLabel('Currency', textTheme),
+            SizedBox(height: spacing.sectionGap),
+            _buildCurrencySelector(color, textTheme, spacing),
           ],
         ),
       ),
@@ -287,7 +297,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                       ),
                     ),
                     Text(
-                      '₹ ${balance.toStringAsFixed(2)}',
+                      formatCurrency(balance, code: _selectedCurrency, decimals: 2),
                       style: textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w900,
                         color: _selectedColor,
@@ -456,7 +466,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                 color: color.onSurfaceVariant.withValues(alpha: 0.6),
               ),
               prefixIcon: Icon(
-                LucideIcons.indianRupee,
+                currencyIcon(_selectedCurrency),
                 size: 18,
                 color: _selectedColor,
               ),
@@ -582,6 +592,285 @@ class _AccountFormState extends ConsumerState<AccountForm> {
     );
   }
 
+  Widget _buildCurrencySelector(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
+    final baseCurrencyAsync = ref.watch(baseCurrencyProvider);
+    final baseCurrency = baseCurrencyAsync.valueOrNull ?? 'INR';
+    final displayCode = _selectedCurrency ?? baseCurrency;
+    final meta = kCurrencies[displayCode];
+    final isBase = _selectedCurrency == null;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Card(
+          elevation: 0,
+          color: color.surfaceContainerLow,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(spacing.radiusMedium),
+            side: BorderSide(
+              color: color.outlineVariant.withValues(alpha: 0.3),
+            ),
+          ),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(spacing.radiusMedium),
+            onTap: () async {
+              HapticFeedback.lightImpact();
+              final picked = await showModalBottomSheet<String>(
+                context: context,
+                isScrollControlled: true,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                ),
+                builder: (_) => _CurrencyPickerInline(selected: displayCode),
+              );
+              if (picked == null) return;
+              final newIsBase = picked == baseCurrency;
+              final oldCode = _selectedCurrency;
+
+              // Warn if editing existing account and currency is changing
+              if (_isEditing && oldCode != (newIsBase ? null : picked)) {
+                if (!context.mounted) return;
+                final confirmed = await _showCurrencyChangeWarning(
+                  context, oldCode ?? baseCurrency, picked, color, textTheme, spacing,
+                );
+                if (confirmed != true) return;
+              }
+
+              setState(() {
+                _selectedCurrency = newIsBase ? null : picked;
+              });
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: _selectedColor.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      meta?.symbol ?? displayCode,
+                      style: textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: _selectedColor,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          displayCode,
+                          style: textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(
+                          isBase
+                              ? '${meta?.name ?? ''} (base currency)'
+                              : meta?.name ?? '',
+                          style: textTheme.bodySmall?.copyWith(
+                            color: color.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (!isBase && _isEditing)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: GestureDetector(
+                        onTap: () async {
+                          HapticFeedback.lightImpact();
+                          final confirmed = await _showCurrencyChangeWarning(
+                            context, displayCode, baseCurrency, color, textTheme, spacing,
+                          );
+                          if (confirmed == true) {
+                            setState(() => _selectedCurrency = null);
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: color.primary.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                          ),
+                          child: Text(
+                            'Reset to $baseCurrency',
+                            style: textTheme.labelSmall?.copyWith(
+                              color: color.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  Icon(
+                    Icons.chevron_right,
+                    color: color.onSurfaceVariant,
+                    size: 20,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        SizedBox(height: spacing.elementGap),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: spacing.elementGap),
+          child: Text(
+            isBase
+                ? 'Transactions in this account use your base currency.'
+                : 'Transactions will be recorded in $displayCode and converted to $baseCurrency for totals.',
+            style: textTheme.bodySmall?.copyWith(
+              color: color.onSurfaceVariant.withValues(alpha: 0.6),
+              height: 1.3,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<bool?> _showCurrencyChangeWarning(
+    BuildContext context,
+    String fromCode,
+    String toCode,
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
+    return showModalBottomSheet<bool>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.fromLTRB(24, 24, 24, 24 + MediaQuery.of(ctx).padding.bottom),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40, height: 4,
+              decoration: BoxDecoration(
+                color: color.onSurfaceVariant.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            SizedBox(height: spacing.sectionGap),
+            Icon(LucideIcons.triangleAlert, size: 36, color: color.error),
+            SizedBox(height: spacing.elementGap * 1.5),
+            Text(
+              'Change Currency?',
+              style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: spacing.elementGap),
+            // From → To
+            Container(
+              padding: EdgeInsets.all(spacing.cardInner),
+              decoration: BoxDecoration(
+                color: color.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(spacing.radiusMedium),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(fromCode, style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: spacing.elementGap * 1.5),
+                    child: Icon(LucideIcons.arrowRight, size: 18, color: color.error),
+                  ),
+                  Text(toCode, style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                ],
+              ),
+            ),
+            SizedBox(height: spacing.sectionGap),
+            Container(
+              padding: EdgeInsets.all(spacing.cardInner),
+              decoration: BoxDecoration(
+                color: color.error.withValues(alpha: 0.06),
+                borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                border: Border.all(color: color.error.withValues(alpha: 0.15)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _infoRow('Existing balances will NOT be converted automatically.', color, textTheme),
+                  SizedBox(height: spacing.elementGap),
+                  _infoRow('New transactions will use the new currency.', color, textTheme),
+                  SizedBox(height: spacing.elementGap),
+                  _infoRow('You may need to manually adjust the balance.', color, textTheme),
+                ],
+              ),
+            ),
+            SizedBox(height: spacing.sectionGap),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => ctx.pop(false),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                      ),
+                    ),
+                    child: const Text('Cancel'),
+                  ),
+                ),
+                SizedBox(width: spacing.elementGap * 1.5),
+                Expanded(
+                  child: FilledButton(
+                    onPressed: () => ctx.pop(true),
+                    style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                      ),
+                    ),
+                    child: const Text('Change'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _infoRow(String text, ColorScheme color, TextTheme textTheme) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 2),
+          child: Icon(LucideIcons.dot, size: 16, color: color.onSurfaceVariant),
+        ),
+        const SizedBox(width: 4),
+        Expanded(
+          child: Text(
+            text,
+            style: textTheme.bodySmall?.copyWith(
+              color: color.onSurfaceVariant,
+              height: 1.4,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   void _pickColor() async {
     final c = await showDialog<Color>(
       context: context,
@@ -644,6 +933,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
         ..accountType = _selectedType
         ..accountNumber = accountNumber.isEmpty ? null : accountNumber
         ..colorValue = _selectedColor.toARGB32()
+        ..currencyCode = _selectedCurrency
         ..isActive = true;
 
       await isar.writeTxn(() async {
@@ -663,5 +953,115 @@ class _AccountFormState extends ConsumerState<AccountForm> {
     } finally {
       if (mounted) setState(() => _saving = false);
     }
+  }
+}
+
+class _CurrencyPickerInline extends StatefulWidget {
+  final String selected;
+  const _CurrencyPickerInline({required this.selected});
+
+  @override
+  State<_CurrencyPickerInline> createState() => _CurrencyPickerInlineState();
+}
+
+class _CurrencyPickerInlineState extends State<_CurrencyPickerInline> {
+  String _query = '';
+
+  List<CurrencyMeta> get _filtered {
+    final all = kCurrencies.values.toList();
+    if (_query.isEmpty) return all;
+    final q = _query.toLowerCase();
+    return all
+        .where(
+          (c) =>
+              c.code.toLowerCase().contains(q) ||
+              c.name.toLowerCase().contains(q),
+        )
+        .toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return DraggableScrollableSheet(
+      initialChildSize: 0.7,
+      maxChildSize: 0.9,
+      minChildSize: 0.4,
+      expand: false,
+      builder: (context, scrollController) => Column(
+        children: [
+          const SizedBox(height: 12),
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: color.onSurfaceVariant.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: TextField(
+              autofocus: true,
+              decoration: InputDecoration(
+                hintText: 'Search currency...',
+                prefixIcon: const Icon(Icons.search, size: 20),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: color.outlineVariant),
+                ),
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 12,
+                ),
+              ),
+              onChanged: (v) => setState(() => _query = v),
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              controller: scrollController,
+              itemCount: _filtered.length,
+              itemBuilder: (context, i) {
+                final c = _filtered[i];
+                final isSelected = c.code == widget.selected;
+                return ListTile(
+                  leading: Container(
+                    width: 40,
+                    height: 40,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? color.primary.withValues(alpha: 0.12)
+                          : color.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      c.symbol,
+                      style: textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: isSelected ? color.primary : color.onSurface,
+                      ),
+                    ),
+                  ),
+                  title: Text(c.code),
+                  subtitle: Text(c.name, style: textTheme.bodySmall),
+                  trailing: isSelected
+                      ? Icon(Icons.check_circle, color: color.primary)
+                      : null,
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    Navigator.of(context).pop(c.code);
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

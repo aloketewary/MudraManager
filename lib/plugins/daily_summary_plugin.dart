@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_plugin_sdk/mudra_plugin_sdk.dart';
 
 class DailySummaryPlugin extends MudraPlugin {
@@ -49,7 +51,7 @@ class DailySummaryPlugin extends MudraPlugin {
         : 'None';
 
     api.showNotification(
-      '📊 Spent ₹${spent.toStringAsFixed(0)} · Earned ₹${earned.toStringAsFixed(0)} · Most: $topCategory',
+      '📊 Spent ${formatCurrency(spent, code: BaseCurrency.code, decimals: 0)} · Earned ${formatCurrency(earned, code: BaseCurrency.code, decimals: 0)} · Most: $topCategory',
     );
   }
 

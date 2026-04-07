@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/db/models/trip.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/dialog_utils.dart';
@@ -44,18 +45,25 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(
+      length: 2,
+      vsync: this,
+      initialIndex: 0, // Will be updated in build based on isTrip
+    );
     _loadSettledData();
   }
 
-  void _updateTabController(bool isActive) {
+  void _updateTabController(bool isActive, bool isTrip) {
     final newLength = isActive ? 2 : 3;
+    final defaultIndex = isTrip ? 0 : 1; // Trip → Expenses, Split → Settlements
     if (_tabController.length != newLength) {
       final oldIndex = _tabController.index;
       _tabController.dispose();
       _tabController = TabController(length: newLength, vsync: this);
       if (oldIndex < newLength) {
         _tabController.index = oldIndex;
+      } else {
+        _tabController.index = defaultIndex.clamp(0, newLength - 1);
       }
     }
   }
@@ -140,12 +148,12 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
         }
 
         final duration = trip.endDate.difference(trip.startDate).inDays + 1;
-        _updateTabController(trip.isActive);
+        _updateTabController(trip.isActive, trip.isTrip);
 
         final transactionsList = trip.transactions.toList();
         double totalSpent = 0;
         for (var tripTxn in transactionsList) {
-          final amount = tripTxn.resolvedAmount;
+          final amount = tripTxn.resolvedAmountIn(trip.currencyCode);
           if (amount != null) totalSpent += amount;
         }
         final budget =
@@ -153,6 +161,124 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
         final budgetUsed = totalSpent / budget;
 
         return Scaffold(
+          appBar: AppBar(
+            title: Text(
+              trip.name,
+              style: textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            actions: [
+              Container(
+                margin: EdgeInsets.symmetric(vertical: spacing.elementGap),
+                padding: EdgeInsets.symmetric(
+                  horizontal: spacing.elementGap,
+                  vertical: spacing.elementGapMin,
+                ),
+                decoration: BoxDecoration(
+                  color: color.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      trip.isTrip ? LucideIcons.plane : LucideIcons.users,
+                      size: 14,
+                      color: color.onSurfaceVariant,
+                    ),
+                    SizedBox(width: spacing.elementGapMin),
+                    Text(
+                      trip.isTrip ? 'Trip' : 'Group',
+                      style: textTheme.labelSmall?.copyWith(
+                        color: color.onSurfaceVariant,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              PopupMenuButton(
+                icon: const Icon(LucideIcons.ellipsisVertical),
+                onSelected: (value) async {
+                  HapticFeedback.mediumImpact();
+                  if (value == 'edit') {
+                    context.push('/edit-trip/${trip.id}');
+                  } else if (value == 'end') {
+                    final confirm = await DialogUtils.showConfirmation(
+                      context,
+                      title: trip.isTrip ? 'End Trip' : 'End Group',
+                      message: trip.isTrip
+                          ? 'Mark this trip as completed?'
+                          : 'Mark this group as completed?',
+                      confirmText: trip.isTrip ? 'End Trip' : 'End Group',
+                      icon: LucideIcons.circleCheck,
+                    );
+                    if (confirm == true) {
+                      await ref
+                          .read(tripServiceProvider)
+                          .markTripInactive(widget.tripId);
+                      ref.invalidate(allTripsProvider);
+                      ref.invalidate(activeTripsProvider);
+                      ref.invalidate(tripByIdProvider(widget.tripId));
+                    }
+                  } else if (value == 'delete') {
+                    final confirm = await DialogUtils.showDeleteConfirmation(
+                      context,
+                      title: trip.isTrip ? 'Delete Trip' : 'Delete Group',
+                      message: trip.isTrip
+                          ? 'This will delete all trip data. Continue?'
+                          : 'This will delete all group data. Continue?',
+                    );
+                    if (confirm == true) {
+                      await ref
+                          .read(tripServiceProvider)
+                          .deleteTrip(widget.tripId);
+                      ref.invalidate(allTripsProvider);
+                      ref.invalidate(activeTripsProvider);
+                      if (mounted) context.pop();
+                    }
+                  }
+                },
+                itemBuilder: (ctx) => [
+                  PopupMenuItem(
+                    value: 'edit',
+                    child: Row(
+                      children: [
+                        const Icon(LucideIcons.pencil, size: 18),
+                        const SizedBox(width: 12),
+                        Text(trip.isTrip ? 'Edit Trip' : 'Edit Group'),
+                      ],
+                    ),
+                  ),
+                  if (trip.isActive)
+                    PopupMenuItem(
+                      value: 'end',
+                      child: Row(
+                        children: [
+                          const Icon(LucideIcons.circleCheck, size: 18),
+                          const SizedBox(width: 12),
+                          Text(trip.isTrip ? 'End Trip' : 'End Group'),
+                        ],
+                      ),
+                    ),
+                  PopupMenuItem(
+                    value: 'delete',
+                    child: Row(
+                      children: [
+                        Icon(LucideIcons.trash2, size: 18, color: color.error),
+                        const SizedBox(width: 12),
+                        Text(
+                          trip.isTrip ? 'Delete Trip' : 'Delete Group',
+                          style: TextStyle(color: color.error),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
           floatingActionButton: !trip.isTrip && trip.isActive
               ? FloatingActionButton.extended(
                   onPressed: () {
@@ -166,386 +292,83 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                   label: const Text('Split Expense'),
                 )
               : null,
-          body: NestedScrollView(
-            headerSliverBuilder: (context, innerBoxIsScrolled) {
-              return [
-                SliverAppBar(
-                  expandedHeight: 220,
-                  pinned: true,
-                  backgroundColor: color.surface,
-                  leading: IconButton(
-                    icon: const Icon(LucideIcons.arrowLeft),
-                    onPressed: () {
-                      HapticFeedback.mediumImpact();
-                      context.pop();
-                    },
-                  ),
-                  title: Text(
-                    trip.name,
-                    style: textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  actions: [
-                    PopupMenuButton(
-                      icon: const Icon(LucideIcons.ellipsisVertical),
-                      onSelected: (value) async {
-                        HapticFeedback.mediumImpact();
-                        if (value == 'edit') {
-                          context.push('/edit-trip/${trip.id}');
-                        } else if (value == 'end') {
-                          final confirm = await DialogUtils.showConfirmation(
-                            context,
-                            title: trip.isTrip ? 'End Trip' : 'End Group',
-                            message: trip.isTrip
-                                ? 'Mark this trip as completed?'
-                                : 'Mark this group as completed?',
-                            confirmText: trip.isTrip ? 'End Trip' : 'End Group',
-                            icon: LucideIcons.circleCheck,
-                          );
-                          if (confirm == true) {
-                            await ref
-                                .read(tripServiceProvider)
-                                .markTripInactive(widget.tripId);
-                            ref.invalidate(allTripsProvider);
-                            ref.invalidate(activeTripsProvider);
-                            ref.invalidate(tripByIdProvider(widget.tripId));
-                          }
-                        } else if (value == 'delete') {
-                          final confirm =
-                              await DialogUtils.showDeleteConfirmation(
-                            context,
-                            title: trip.isTrip ? 'Delete Trip' : 'Delete Group',
-                            message: trip.isTrip
-                                ? 'This will delete all trip data. Continue?'
-                                : 'This will delete all group data. Continue?',
-                          );
-                          if (confirm == true) {
-                            await ref
-                                .read(tripServiceProvider)
-                                .deleteTrip(widget.tripId);
-                            ref.invalidate(allTripsProvider);
-                            ref.invalidate(activeTripsProvider);
-                            if (mounted) {
-                              context.pop();
-                            }
-                          }
-                        }
-                      },
-                      itemBuilder: (ctx) => [
-                        PopupMenuItem(
-                          value: 'edit',
-                          child: Row(
-                            children: [
-                              const Icon(LucideIcons.pencil, size: 18),
-                              const SizedBox(width: 12),
-                              Text(trip.isTrip ? 'Edit Trip' : 'Edit Group'),
-                            ],
+          body: Column(
+            children: [
+              // Summary card
+              _buildSummaryCard(
+                trip,
+                totalSpent,
+                budgetUsed,
+                duration,
+                color,
+                textTheme,
+                spacing,
+              ),
+              // Tab bar
+              TabBar(
+                controller: _tabController,
+                tabs: [
+                  Tab(text: trip.isTrip ? 'Expenses' : 'Balances'),
+                  Tab(text: trip.isTrip ? 'Settlements' : 'Expenses'),
+                  if (!trip.isActive) const Tab(text: 'Report'),
+                ],
+              ),
+              // Tab content
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: trip.isTrip
+                      ? [
+                          _buildTransactionsTab(
+                            trip,
+                            isGuestMode,
+                            spacing,
+                            color,
+                            textTheme,
                           ),
-                        ),
-                        if (trip.isActive)
-                          PopupMenuItem(
-                            value: 'end',
-                            child: Row(
-                              children: [
-                                const Icon(LucideIcons.circleCheck, size: 18),
-                                const SizedBox(width: 12),
-                                Text(trip.isTrip ? 'End Trip' : 'End Group'),
-                              ],
+                          _buildSettlementsTab(
+                            trip,
+                            isGuestMode,
+                            spacing,
+                            color,
+                            textTheme,
+                          ),
+                          if (!trip.isActive)
+                            _buildReportTab(
+                              trip,
+                              isGuestMode,
+                              spacing,
+                              color,
+                              textTheme,
                             ),
+                        ]
+                      : [
+                          _buildSettlementsTab(
+                            trip,
+                            isGuestMode,
+                            spacing,
+                            color,
+                            textTheme,
                           ),
-                        PopupMenuItem(
-                          value: 'delete',
-                          child: Row(
-                            children: [
-                              Icon(
-                                LucideIcons.trash2,
-                                size: 18,
-                                color: color.error,
-                              ),
-                              const SizedBox(width: 12),
-                              Text(
-                                trip.isTrip ? 'Delete Trip' : 'Delete Group',
-                                style: TextStyle(color: color.error),
-                              ),
-                            ],
+                          _buildTransactionsTab(
+                            trip,
+                            isGuestMode,
+                            spacing,
+                            color,
+                            textTheme,
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
-                  flexibleSpace: LayoutBuilder(
-                    builder: (context, constraints) {
-                      final expandRatio =
-                          (constraints.maxHeight - kToolbarHeight) /
-                              (220 - kToolbarHeight);
-                      return FlexibleSpaceBar(
-                        titlePadding:
-                            EdgeInsets.only(bottom: spacing.sectionGap),
-                        centerTitle: false,
-                        background: Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                color.primaryContainer,
-                                color.secondaryContainer,
-                              ],
+                          if (!trip.isActive)
+                            _buildReportTab(
+                              trip,
+                              isGuestMode,
+                              spacing,
+                              color,
+                              textTheme,
                             ),
-                          ),
-                          child: SafeArea(
-                            child: Opacity(
-                              opacity: expandRatio.clamp(0.0, 1.0),
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.fromLTRB(16, 16, 16, 24),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    const SizedBox(height: 12),
-                                    if (trip.isTrip)
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Flexible(
-                                          // Added: Prevent overflow
-                                          child: Row(
-                                            children: [
-                                              Icon(
-                                                LucideIcons.calendar,
-                                                size: 16,
-                                                color: color.onSurfaceVariant,
-                                              ),
-                                              const SizedBox(width: 6),
-                                              Flexible(
-                                                // Added: Prevent overflow
-                                                child: Text(
-                                                  '${DateFormat.MMMd().format(trip.startDate)} - ${DateFormat.MMMd().format(trip.endDate)}',
-                                                  style: textTheme.bodyMedium
-                                                      ?.copyWith(
-                                                    color:
-                                                        color.onSurfaceVariant,
-                                                  ),
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                ),
-                                              ),
-                                              const SizedBox(width: 8),
-                                              Container(
-                                                width: 3,
-                                                height: 3,
-                                                decoration: BoxDecoration(
-                                                  color: color.onSurfaceVariant,
-                                                  shape: BoxShape.circle,
-                                                ),
-                                              ),
-                                              const SizedBox(width: 8),
-                                              Text(
-                                                '$duration ${duration == 1 ? 'day' : 'days'}',
-                                                style: textTheme.bodyMedium
-                                                    ?.copyWith(
-                                                  color: color.onSurfaceVariant,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        if (trip.isActive)
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 10,
-                                              vertical: 4,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: color.primary,
-                                              borderRadius:
-                                                  BorderRadius.circular(
-                                                spacing.radiusSmall,
-                                              ),
-                                            ),
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Container(
-                                                  width: 6,
-                                                  height: 6,
-                                                  decoration: BoxDecoration(
-                                                    color: color.onPrimary,
-                                                    shape: BoxShape.circle,
-                                                  ),
-                                                ),
-                                                const SizedBox(width: 6),
-                                                Text(
-                                                  'LIVE',
-                                                  style: textTheme.labelSmall
-                                                      ?.copyWith(
-                                                    color: color.onPrimary,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                    if (!trip.isTrip && trip.isActive)
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 10,
-                                          vertical: 4,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: color.primary,
-                                          borderRadius: BorderRadius.circular(
-                                            spacing.radiusSmall,
-                                          ),
-                                        ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Container(
-                                              width: 6,
-                                              height: 6,
-                                              decoration: BoxDecoration(
-                                                color: color.onPrimary,
-                                                shape: BoxShape.circle,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 6),
-                                            Text(
-                                              'ACTIVE',
-                                              style: textTheme.labelSmall
-                                                  ?.copyWith(
-                                                color: color.onPrimary,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    const SizedBox(height: 16),
-                                    Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.end,
-                                      children: [
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                'Total Spent',
-                                                style: textTheme.labelMedium
-                                                    ?.copyWith(
-                                                  color: color.onSurfaceVariant,
-                                                ),
-                                              ),
-                                              const SizedBox(height: 4),
-                                              Text(
-                                                '₹${(totalSpent / 1000).toStringAsFixed(1)}k',
-                                                style: textTheme.displaySmall
-                                                    ?.copyWith(
-                                                  color: color.onSurface,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 16,
-                                            vertical: 12,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: budgetUsed > 0.9
-                                                ? color.errorContainer
-                                                : color.tertiaryContainer,
-                                            borderRadius: BorderRadius.circular(
-                                              spacing.radiusMedium,
-                                            ),
-                                          ),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.end,
-                                            children: [
-                                              Text(
-                                                '${(budgetUsed * 100).toStringAsFixed(0)}%',
-                                                style: textTheme.titleLarge
-                                                    ?.copyWith(
-                                                  color: budgetUsed > 0.9
-                                                      ? color.onErrorContainer
-                                                      : color
-                                                          .onTertiaryContainer,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                              Text(
-                                                'of budget',
-                                                style: textTheme.labelSmall
-                                                    ?.copyWith(
-                                                  color: budgetUsed > 0.9
-                                                      ? color.onErrorContainer
-                                                      : color
-                                                          .onTertiaryContainer,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Padding(
-                                      padding: EdgeInsets.only(
-                                        bottom: spacing.sectionGap * 2,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                  bottom: TabBar(
-                    controller: _tabController,
-                    tabs: [
-                      const Tab(text: 'Expenses'),
-                      const Tab(text: 'Settlements'),
-                      if (!trip.isActive) const Tab(text: 'Report'),
-                    ],
-                  ),
+                        ],
                 ),
-              ];
-            },
-            body: TabBarView(
-              controller: _tabController,
-              children: [
-                _buildTransactionsTab(
-                  trip,
-                  isGuestMode,
-                  spacing,
-                  color,
-                  textTheme,
-                ),
-                _buildSettlementsTab(
-                  trip,
-                  isGuestMode,
-                  spacing,
-                  color,
-                  textTheme,
-                ),
-                if (!trip.isActive)
-                  _buildReportTab(trip, isGuestMode, spacing, color, textTheme),
-              ],
-            ),
+              ),
+            ],
           ),
         );
       },
@@ -586,6 +409,194 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
     );
   }
 
+  Widget _buildSummaryCard(
+    Trip trip,
+    double totalSpent,
+    double budgetUsed,
+    int duration,
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
+    return Container(
+      margin: EdgeInsets.symmetric(
+        horizontal: spacing.cardHorizontal,
+        vertical: spacing.cardVertical,
+      ),
+      padding: EdgeInsets.all(spacing.cardInner),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            color.primaryContainer,
+            color.secondaryContainer,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Date + status row (trip only)
+          if (trip.isTrip)
+            Row(
+              children: [
+                Icon(
+                  LucideIcons.calendar,
+                  size: 14,
+                  color: color.onSurfaceVariant,
+                ),
+                SizedBox(width: spacing.elementGapMin),
+                Text(
+                  '${DateFormat.MMMd().format(trip.startDate)} - ${DateFormat.MMMd().format(trip.endDate)} \u2022 $duration ${duration == 1 ? 'day' : 'days'}',
+                  style: textTheme.bodySmall
+                      ?.copyWith(color: color.onSurfaceVariant),
+                ),
+                const Spacer(),
+                if (trip.isActive)
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: spacing.elementGap,
+                      vertical: spacing.elementGapUltraMin,
+                    ),
+                    decoration: BoxDecoration(
+                      color: color.primary,
+                      borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                    ),
+                    child: Text(
+                      'LIVE',
+                      style: textTheme.labelSmall?.copyWith(
+                        color: color.onPrimary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          if (!trip.isTrip && trip.isActive)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: spacing.elementGap,
+                  vertical: spacing.elementGapUltraMin,
+                ),
+                decoration: BoxDecoration(
+                  color: color.primary,
+                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                ),
+                child: Text(
+                  'ACTIVE',
+                  style: textTheme.labelSmall?.copyWith(
+                    color: color.onPrimary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          SizedBox(height: spacing.elementGap),
+          // Amount row — context-aware
+          if (trip.isTrip)
+            // Trip: Total Spent + Budget %
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Total Spent',
+                        style: textTheme.labelMedium?.copyWith(
+                          color: color.onSurfaceVariant,
+                        ),
+                      ),
+                      SizedBox(height: spacing.elementGapMin),
+                      Text(
+                        formatCurrency(
+                          totalSpent,
+                          code: trip.currencyCode,
+                          decimals: 0,
+                        ),
+                        style: textTheme.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: spacing.cardInner * 0.75,
+                    vertical: spacing.elementGap,
+                  ),
+                  decoration: BoxDecoration(
+                    color: budgetUsed > 0.9
+                        ? color.errorContainer
+                        : color.tertiaryContainer,
+                    borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        '${(budgetUsed * 100).toStringAsFixed(0)}%',
+                        style: textTheme.titleMedium?.copyWith(
+                          color: budgetUsed > 0.9
+                              ? color.onErrorContainer
+                              : color.onTertiaryContainer,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        'of budget',
+                        style: textTheme.labelSmall?.copyWith(
+                          color: budgetUsed > 0.9
+                              ? color.onErrorContainer
+                              : color.onTertiaryContainer,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            )
+          else
+            // Split: participant count + total expenses
+            Row(
+              children: [
+                Icon(
+                  LucideIcons.users,
+                  size: 14,
+                  color: color.onSurfaceVariant,
+                ),
+                SizedBox(width: spacing.elementGapMin),
+                Text(
+                  '${trip.participants.length} people',
+                  style: textTheme.bodySmall
+                      ?.copyWith(color: color.onSurfaceVariant),
+                ),
+                if (totalSpent > 0) ...[
+                  Text(
+                    ' \u2022 ',
+                    style: textTheme.bodySmall
+                        ?.copyWith(color: color.onSurfaceVariant),
+                  ),
+                  Text(
+                    '${formatCurrency(totalSpent, code: trip.currencyCode, decimals: 0)} total',
+                    style: textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildTransactionsTab(
     Trip trip,
     bool isGuestMode,
@@ -602,8 +613,8 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
         return false;
       }
       if (_filterCategory != null) {
-        final catName = tripTxn.transaction.value?.category.value?.name
-            ?? tripTxn.splitExpense.value?.description;
+        final catName = tripTxn.transaction.value?.category.value?.name ??
+            tripTxn.splitExpense.value?.description;
         if (catName != _filterCategory) return false;
       }
       return true;
@@ -616,6 +627,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
         .toList();
 
     if (transactionsList.isEmpty) {
+      final emptyMsg = BuddyMessages.noTripExpenses(trip.isTrip).split('\n');
       return Center(
         child: Padding(
           padding: EdgeInsets.all(spacing.cardHorizontalMax),
@@ -629,26 +641,43 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  LucideIcons.receiptText,
+                  trip.isTrip ? LucideIcons.plane : LucideIcons.split,
                   size: 64,
                   color: color.onSurfaceVariant.withValues(alpha: 0.5),
                 ),
               ),
               const SizedBox(height: 24),
               Text(
-                BuddyMessages.noTransactions,
+                emptyMsg.first,
                 style: textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Add expenses to split with participants',
-                style: textTheme.bodyMedium?.copyWith(
-                  color: color.onSurfaceVariant,
-                ),
                 textAlign: TextAlign.center,
               ),
+              if (emptyMsg.length > 1) ...[
+                const SizedBox(height: 8),
+                Text(
+                  emptyMsg.sublist(1).join('\n'),
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: color.onSurfaceVariant,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+              if (!trip.isTrip) ...[
+                const SizedBox(height: 24),
+                FilledButton.icon(
+                  onPressed: () {
+                    HapticFeedback.mediumImpact();
+                    context.push(
+                      AppRoutes.addTripTransaction,
+                      extra: trip.id,
+                    );
+                  },
+                  icon: const Icon(LucideIcons.plus, size: 18),
+                  label: const Text('Split Expense'),
+                ),
+              ],
             ],
           ),
         ),
@@ -804,11 +833,12 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
             final txn = tripTxn.transaction.value;
             final splitExp = tripTxn.splitExpense.value;
             final paidBy = tripTxn.paidBy.value;
-            final displayTitle = txn?.category.value?.name
-                ?? splitExp?.description
-                ?? 'Uncategorized';
+            final displayTitle = txn?.category.value?.name ??
+                splitExp?.description ??
+                'Uncategorized';
             final displayDesc = tripTxn.resolvedDescription;
-            final displayAmount = tripTxn.resolvedAmount ?? 0;
+            final displayAmount =
+                tripTxn.resolvedAmountIn(trip.currencyCode) ?? 0;
 
             return Dismissible(
               key: Key('trip_txn_${tripTxn.id}'),
@@ -887,13 +917,49 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 4),
-                      Text(
-                        'Paid by ${paidBy?.name ?? "Unknown"}',
-                        style: textTheme.bodySmall?.copyWith(
-                          color: color.onSurfaceVariant,
+                      if (trip.isTrip)
+                        // Trip: "Paid by You • Split among 4"
+                        Text(
+                          'Paid by ${paidBy?.name ?? "Unknown"} \u2022 Split among ${tripTxn.participantIds.length}',
+                          style: textTheme.bodySmall?.copyWith(
+                            color: color.onSurfaceVariant,
+                          ),
+                        )
+                      else
+                        // Split: "Rahul paid • You owe ₹200" or "You paid"
+                        Builder(
+                          builder: (_) {
+                            final ownerParticipant = trip.participants
+                                .where((p) => p.isOwner)
+                                .firstOrNull;
+                            final ownerId = ownerParticipant?.id;
+                            final isPaidByOwner = paidBy?.id == ownerId;
+                            String label;
+                            if (isPaidByOwner) {
+                              label = 'You paid';
+                            } else {
+                              final ownerIdx = ownerId != null
+                                  ? tripTxn.participantIds.indexOf(ownerId)
+                                  : -1;
+                              if (ownerIdx >= 0 &&
+                                  ownerIdx < tripTxn.splitAmounts.length) {
+                                label =
+                                    '${paidBy?.name ?? "Someone"} paid \u2022 You owe ${formatCurrency(tripTxn.splitAmounts[ownerIdx], code: trip.currencyCode, decimals: 0)}';
+                              } else {
+                                label = '${paidBy?.name ?? "Someone"} paid';
+                              }
+                            }
+                            return Text(
+                              label,
+                              style: textTheme.bodySmall?.copyWith(
+                                color: color.onSurfaceVariant,
+                              ),
+                            );
+                          },
                         ),
-                      ),
-                      if (displayDesc != null && displayDesc.isNotEmpty && displayDesc != displayTitle)
+                      if (displayDesc != null &&
+                          displayDesc.isNotEmpty &&
+                          displayDesc != displayTitle)
                         Text(
                           displayDesc,
                           maxLines: 1,
@@ -906,11 +972,13 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                     ],
                   ),
                   trailing: CurrencyText(
+                    currencyCode: trip.currencyCode,
                     amount: GuestModeUtil.applyGuestMode(
                       displayAmount,
                       isGuestMode,
                     ),
                     fixedLength: 0,
+                    showPositiveSign: false,
                     showSign: true,
                     style: textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
@@ -964,10 +1032,13 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'No pending settlements',
+                    trip.isTrip
+                        ? 'No pending settlements for this trip'
+                        : 'Everyone is square \u2014 no one owes anything',
                     style: textTheme.bodyMedium?.copyWith(
                       color: color.onSurfaceVariant,
                     ),
+                    textAlign: TextAlign.center,
                   ),
                 ],
               ),
@@ -979,47 +1050,124 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
         settlements.forEach((from, toMap) {
           toMap.forEach((to, amount) {
             final key = '${from}_TO_$to';
+            final isPaid = _settledKeys.contains(key);
             settlementList.add({
               'from': from,
               'to': to,
               'amount': amount,
               'key': key,
-              'isPaid': _settledKeys.contains(key),
+              'isPaid': isPaid,
               'settledDate': _settledDates[key],
             });
           });
         });
 
-        return ListView.builder(
+        final pendingCount =
+            settlementList.where((s) => !(s['isPaid'] as bool)).length;
+
+        return ListView(
           padding: EdgeInsets.symmetric(
             horizontal: spacing.cardHorizontal,
             vertical: spacing.cardVertical,
           ),
-          itemCount: settlementList.length,
-          itemBuilder: (context, index) {
-            final settlement = settlementList[index];
-            return SettlementCard(
-              fromPerson: settlement['from'],
-              toPerson: settlement['to'],
-              amount: settlement['amount'],
-              isPaid: settlement['isPaid'],
-              settledDate: settlement['settledDate'],
-              onMarkPaid: settlement['isPaid']
-                  ? null
-                  : () async {
-                      HapticFeedback.mediumImpact();
-                      setState(() {
-                        _settledKeys.add(settlement['key']);
-                        _settledDates[settlement['key']] = DateTime.now();
-                      });
-                      await _saveSettledData();
-                    },
-              spacing: spacing,
-            );
-          },
+          children: [
+            // Trip active hint
+            if (trip.isTrip && trip.isActive) ...[
+              Container(
+                padding: EdgeInsets.all(spacing.cardInner),
+                decoration: BoxDecoration(
+                  color: color.tertiaryContainer.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                ),
+                child: Row(
+                  children: [
+                    Icon(LucideIcons.info, size: 16, color: color.tertiary),
+                    SizedBox(width: spacing.elementGap),
+                    Expanded(
+                      child: Text(
+                        'End the trip to settle up',
+                        style: textTheme.bodySmall?.copyWith(
+                          color: color.onTertiaryContainer,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: spacing.sectionGap),
+            ],
+            // Net summary for split groups (Balances tab)
+            if (!trip.isTrip) ...[
+              Container(
+                padding: EdgeInsets.all(spacing.cardInner),
+                decoration: BoxDecoration(
+                  color: color.surfaceContainerLow,
+                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                  border: Border.all(
+                    color: color.outlineVariant.withValues(alpha: 0.5),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      pendingCount > 0
+                          ? LucideIcons.clock
+                          : LucideIcons.circleCheck,
+                      size: 20,
+                      color: pendingCount > 0 ? color.tertiary : Colors.green,
+                    ),
+                    SizedBox(width: spacing.elementGap * 1.5),
+                    Expanded(
+                      child: Text(
+                        pendingCount > 0
+                            ? '$pendingCount pending settlement${pendingCount == 1 ? '' : 's'}'
+                            : 'All settled!',
+                        style: textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color:
+                              pendingCount > 0 ? color.onSurface : Colors.green,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: spacing.sectionGap),
+            ],
+            // Settlement cards
+            ...settlementList.map(
+              (settlement) => Padding(
+                padding: EdgeInsets.only(bottom: spacing.cardVertical),
+                child: SettlementCard(
+                  fromPerson: settlement['from'],
+                  toPerson: settlement['to'],
+                  amount: settlement['amount'],
+                  isPaid: settlement['isPaid'],
+                  settledDate: settlement['settledDate'],
+                  onMarkPaid: settlement['isPaid']
+                      ? null
+                      // Trip: only after ended. Split: anytime.
+                      : (trip.isTrip && trip.isActive)
+                          ? null
+                          : () async {
+                              HapticFeedback.mediumImpact();
+                              setState(() {
+                                _settledKeys.add(settlement['key']);
+                                _settledDates[settlement['key']] =
+                                    DateTime.now();
+                              });
+                              await _saveSettledData();
+                            },
+                  spacing: spacing,
+                ),
+              ),
+            ),
+          ],
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => ListView(
+        children: List.generate(3, (_) => const DashboardCardSkeleton()),
+      ),
       error: (e, _) => Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -1056,12 +1204,20 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
       children: [
         _buildTotalCostCard(data, isGuestMode, spacing, color, textTheme, trip),
         SizedBox(height: spacing.cardHorizontalMax),
-        _buildPerPersonCard(data, isGuestMode, spacing, color, textTheme),
+        _buildPerPersonCard(
+          data,
+          isGuestMode,
+          spacing,
+          trip?.currencyCode,
+          color,
+          textTheme,
+        ),
         SizedBox(height: spacing.cardHorizontalMax),
         _buildCategoryBreakdownCard(
           data,
           isGuestMode,
           spacing,
+          trip?.currencyCode,
           color,
           textTheme,
         ),
@@ -1081,6 +1237,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                 endDate: trip?.endDate ?? DateTime.now(),
                 context: context,
                 color: color,
+                currencyCode: trip?.currencyCode,
               ),
               icon: const Icon(LucideIcons.download, size: 18),
               label: const Text('Export as PDF'),
@@ -1107,12 +1264,12 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
     final Map<int, double> participantSpending = {};
 
     for (var tripTxn in transactionsList) {
-      final amount = tripTxn.resolvedAmount;
+      final amount = tripTxn.resolvedAmountIn(trip?.currencyCode);
       if (amount != null) {
         totalCost += amount;
-        final categoryName = tripTxn.transaction.value?.category.value?.name
-            ?? tripTxn.splitExpense.value?.description
-            ?? 'Uncategorized';
+        final categoryName = tripTxn.transaction.value?.category.value?.name ??
+            tripTxn.splitExpense.value?.description ??
+            'Uncategorized';
         categoryTotals[categoryName] =
             (categoryTotals[categoryName] ?? 0) + amount;
         final paidById = tripTxn.paidBy.value?.id;
@@ -1291,7 +1448,10 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                   builder: (context, value, child) {
                     return CurrencyText(
                       amount: value,
+                      currencyCode: trip?.currencyCode,
                       compact: false,
+                      showPositiveSign: false,
+                      showSign: true,
                       style: textTheme.displaySmall?.copyWith(
                         fontWeight: FontWeight.w900,
                         color: color.onPrimaryContainer,
@@ -1318,8 +1478,14 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                       child: _buildStatPill(
                         icon: LucideIcons.users,
                         label: 'Per Person',
-                        value:
-                            '₹${GuestModeUtil.applyGuestMode(data.perPersonAverage.toDouble(), isGuestMode).toStringAsFixed(0)}',
+                        value: formatCurrency(
+                          GuestModeUtil.applyGuestMode(
+                            data.perPersonAverage.toDouble(),
+                            isGuestMode,
+                          ),
+                          code: trip?.currencyCode,
+                          decimals: 0,
+                        ),
                         color: color,
                         textTheme: textTheme,
                         spacing: spacing,
@@ -1330,8 +1496,11 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                       child: _buildStatPill(
                         icon: LucideIcons.trendingUp,
                         label: 'Avg/Txn',
-                        value:
-                            '₹${GuestModeUtil.applyGuestMode(dailyAvg, isGuestMode).toStringAsFixed(0)}',
+                        value: formatCurrency(
+                          GuestModeUtil.applyGuestMode(dailyAvg, isGuestMode),
+                          code: trip?.currencyCode,
+                          decimals: 0,
+                        ),
                         color: color,
                         textTheme: textTheme,
                         spacing: spacing,
@@ -1396,6 +1565,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
     _ReportData data,
     bool isGuestMode,
     AppSpacing spacing,
+    String? currencyCode,
     ColorScheme color,
     TextTheme textTheme,
   ) {
@@ -1457,11 +1627,14 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                       data.perPersonAverage.toDouble(),
                       isGuestMode,
                     ),
+                    currencyCode: currencyCode,
                     compact: false,
                     style: textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: color.secondary,
                     ),
+                    showPositiveSign: false,
+                    showSign: true,
                   ),
                 ],
               ),
@@ -1564,11 +1737,14 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                             spent,
                             isGuestMode,
                           ),
+                          currencyCode: currencyCode,
                           compact: false,
                           style: textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: barColor,
                           ),
+                          showPositiveSign: false,
+                          showSign: true,
                         ),
                         Text(
                           '${percentage.toStringAsFixed(1)}%',
@@ -1592,6 +1768,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
     _ReportData data,
     bool isGuestMode,
     AppSpacing spacing,
+    String? currencyCode,
     ColorScheme color,
     TextTheme textTheme,
   ) {
@@ -1683,11 +1860,14 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                         cat.value,
                         isGuestMode,
                       ),
+                      currencyCode: currencyCode,
                       compact: false,
                       style: textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: catColor,
                       ),
+                      showPositiveSign: false,
+                      showSign: true,
                     ),
                     SizedBox(width: spacing.sectionGap),
                     SizedBox(
@@ -1728,6 +1908,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
     required DateTime endDate,
     required BuildContext context,
     required ColorScheme color,
+    String? currencyCode,
   }) async {
     HapticFeedback.mediumImpact();
 
@@ -1753,7 +1934,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
         final pct = totalCost > 0 ? (spent / totalCost * 100) : 0.0;
         return [
           p.name,
-          '₹${spent.toStringAsFixed(2)}',
+          (formatCurrency(spent, code: currencyCode, decimals: 2)),
           '${pct.toStringAsFixed(1)}%',
         ];
       }).toList();
@@ -1762,7 +1943,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
         final pct = totalCost > 0 ? (e.value / totalCost * 100) : 0.0;
         return [
           e.key,
-          '₹${e.value.toStringAsFixed(2)}',
+          (formatCurrency(e.value, code: currencyCode, decimals: 2)),
           '${pct.toStringAsFixed(1)}%',
         ];
       }).toList();
@@ -1836,7 +2017,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                 children: [
                   _pdfSummaryRow(
                     'Total Cost',
-                    '₹${totalCost.toStringAsFixed(2)}',
+                    formatCurrency(totalCost, code: currencyCode, decimals: 2),
                     PdfColors.blue900,
                     bold: true,
                   ),
@@ -1855,7 +2036,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                   pw.SizedBox(height: 8),
                   _pdfSummaryRow(
                     'Avg Per Person',
-                    '₹${perPerson.toStringAsFixed(2)}',
+                    formatCurrency(perPerson, code: currencyCode, decimals: 2),
                     PdfColors.blue900,
                   ),
                 ],

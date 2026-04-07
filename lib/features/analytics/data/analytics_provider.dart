@@ -69,7 +69,7 @@ final monthlyExpenseTrendsProvider =
         categoryMonthlyData[categoryName] =
             List<double>.generate(12, (_) => 0.0);
       }
-      categoryMonthlyData[categoryName]![11 - i] += tx.amount;
+      categoryMonthlyData[categoryName]![11 - i] += tx.effectiveAmount;
     }
   }
 
