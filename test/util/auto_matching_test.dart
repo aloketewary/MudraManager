@@ -15,7 +15,7 @@ void main() {
         Account.create(name: 'SBM Bank')..accountNumber = '1651',
       ];
       mockCategories = [
-        Category.create(name: 'Grocery', categoryType: CategoryType.expense),
+        Category.create(name: 'Grocery', categoryType: CategoryType.expense, keywords: ['grocery', 'vegetable', 'sabzi', 'kirana', 'supermarket']),
         Category.create(name: 'Salary', categoryType: CategoryType.income),
         Category.create(name: 'Other', categoryType: CategoryType.expense),
       ];

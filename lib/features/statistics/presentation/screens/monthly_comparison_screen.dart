@@ -9,8 +9,8 @@ import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/shared/widgets/month_picker_sheet.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
-import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 import 'package:mudra_manager/core/utils/icon_helper.dart';
 import 'package:mudra_manager/core/utils/refresh_helper.dart';
@@ -74,11 +74,29 @@ class MonthlyComparisonScreen extends ConsumerStatefulWidget {
 class _MonthlyComparisonScreenState
     extends ConsumerState<MonthlyComparisonScreen> {
   late Future<_ComparisonData> _future;
+  late DateTime _compareMonth;
 
   @override
   void initState() {
     super.initState();
+    final now = DateTime.now();
+    _compareMonth = DateTime(now.year, now.month - 1, 1);
     _future = _load();
+  }
+
+  Future<void> _pickCompareMonth(BuildContext context) async {
+    final now = DateTime.now();
+    final picked = await showMonthPicker(
+      context: context,
+      initialMonth: _compareMonth,
+      lastMonth: DateTime(now.year, now.month - 1, 1),
+    );
+    if (picked != null) {
+      setState(() {
+        _compareMonth = picked;
+        _future = _load();
+      });
+    }
   }
 
   Future<_ComparisonData> _load() async {
@@ -86,9 +104,8 @@ class _MonthlyComparisonScreenState
     final now = DateTime.now();
     final curStart = DateTime(now.year, now.month, 1);
     final curEnd = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
-    final lastStart = DateTime(now.year, now.month - 1, 1);
-    final lastEnd = DateTime(now.year, now.month, 0, 23, 59, 59);
-    // Same day cutoff in last month (e.g. if today is 15th, get 1st-15th of last month)
+    final lastStart = _compareMonth;
+    final lastEnd = DateTime(lastStart.year, lastStart.month + 1, 0, 23, 59, 59);
     final lastSameDayEnd = DateTime(
       lastStart.year,
       lastStart.month,
@@ -170,12 +187,41 @@ class _MonthlyComparisonScreenState
     final brightness = Theme.of(context).brightness;
     final now = DateTime.now();
     final curName = DateFormat('MMMM').format(now);
-    final lastStart = DateTime(now.year, now.month - 1, 1);
-    final lastName = DateFormat('MMMM').format(lastStart);
+    final lastName = DateFormat('MMMM yyyy').format(_compareMonth);
 
     return Scaffold(
       backgroundColor: color.surface,
-      appBar: AppBar(title: const Text('Monthly Comparison'), elevation: 0),
+      appBar: AppBar(
+        title: const Text('Compare Months'),
+        elevation: 0,
+        actions: [
+          GestureDetector(
+            onTap: () => _pickCompareMonth(context),
+            child: Container(
+              margin: const EdgeInsets.only(right: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: color.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(LucideIcons.calendarSearch, size: 16, color: color.primary),
+                  const SizedBox(width: 6),
+                  Text(
+                    DateFormat('MMM yy').format(_compareMonth),
+                    style: text.labelLarge?.copyWith(
+                      color: color.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
       body: FutureBuilder<_ComparisonData>(
         future: _future,
         builder: (ctx, snap) {
@@ -226,8 +272,9 @@ class _MonthlyComparisonScreenState
 
           return RefreshIndicator(
             onRefresh: () => RefreshHelper.withMinDuration(() async {
-              setState(() => _future = _load());
-              await _future;
+              final f = _load();
+              setState(() => _future = f);
+              await f;
             }),
             child: ListView(
               physics: const AlwaysScrollableScrollPhysics(),
@@ -238,50 +285,59 @@ class _MonthlyComparisonScreenState
               children: [
                 // ── 1. HERO ──
                 _buildHero(
-                  variance, variancePct, curExp, lastExp,
+                  curInc, lastInc, curExp, lastExp, variance, variancePct,
                   GuestModeUtil.applyGuestMode(d.lastExpenseByThisDay, isGuest),
                   curName, lastName, accent, isDown, isFlat,
                   color, text, spacing, brightness,
                 ),
-                SizedBox(height: spacing.elementGap * 1.5),
+                SizedBox(height: spacing.elementGap),
 
-                // ── 2. SMART INSIGHT ──
-                _buildInsight(
-                  variance, isDown, isFlat, accent,
-                  topIncrease, topDecrease,
-                  color, text, spacing,
-                ),
+                // ── 2. VERDICT ──
+                _buildVerdict(variance, isDown, isFlat, accent,
+                    topIncrease, topDecrease, projected,
+                    color, text, spacing),
                 SizedBox(height: spacing.sectionGap),
 
-                // ── 3. MINI STATS ──
+                // ── 3. INCOME / EXPENSE / BALANCE ──
                 _buildMiniStats(
                   curInc, lastInc, curExp, lastExp,
                   color, text, spacing, brightness,
                 ),
                 SizedBox(height: spacing.sectionGap),
 
-                // ── 4. CATEGORY BREAKDOWN ──
-                if (d.categories.isNotEmpty) ...[
-                  Text(
-                    'CATEGORY IMPACT',
-                    style: text.labelSmall?.copyWith(
-                      color: color.onSurfaceVariant.withValues(alpha: 0.5),
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1.5,
-                    ),
+                // ── 4. CATEGORY CHART ──
+                if (d.categories.where((c) => c.current > 0 || c.last > 0).isNotEmpty) ...[
+                  _buildCategoryChart(
+                    d.categories.take(5).toList(),
+                    curName, lastName,
+                    color, text, spacing, brightness,
                   ),
+                  SizedBox(height: spacing.sectionGap),
+                ],
+
+                // ── 5. SPENDING PACE ──
+                _buildPaceCard(
+                  dailyAvgCur, dailyAvgLast, projected,
+                  curName, lastName,
+                  color, text, spacing, brightness,
+                ),
+                SizedBox(height: spacing.sectionGap),
+
+                // ── 6. CATEGORY IMPACT ──
+                if (d.categories.isNotEmpty) ...[
+                  _sectionLabel('CATEGORY IMPACT', color, text),
                   SizedBox(height: spacing.elementGap),
-                  ...d.categories.take(8).map((cat) => _buildCategoryTile(
+                  ...d.categories.take(6).map((cat) => _buildCategoryTile(
                         cat, isGuest, color, text, spacing, brightness,
                       )),
                   SizedBox(height: spacing.sectionGap),
                 ],
 
-                // ── 5. BEHAVIORAL STATS ──
-                _buildBehavior(
+                // ── 7. ACTIVITY ──
+                _buildActivityRow(
                   d.currentTxnCount, d.lastTxnCount,
-                  dailyAvgCur, dailyAvgLast, projected,
-                  color, text, spacing, brightness,
+                  curName, lastName,
+                  color, text, spacing,
                 ),
 
                 SizedBox(height: spacing.sectionGap),
@@ -297,211 +353,205 @@ class _MonthlyComparisonScreenState
   // ── 1. HERO ──
 
   Widget _buildHero(
+    double curInc, double lastInc, double curExp, double lastExp,
     double variance, double variancePct,
-    double curExp, double lastExp, double lastExpByThisDay,
+    double lastExpByThisDay,
     String curName, String lastName,
     Color accent, bool isDown, bool isFlat,
     ColorScheme color, TextTheme text, AppSpacing spacing, Brightness brightness,
   ) {
-    return Card(
-      elevation: 0,
-      color: color.surfaceContainerLow,
-      margin: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(
+    final code = BaseCurrency.code;
+    final incColor = FinanceColors.incomeColor(brightness);
+    final expColor = FinanceColors.expenseColor(brightness);
+
+    return Container(
+      padding: EdgeInsets.all(spacing.cardInner),
+      decoration: BoxDecoration(
+        color: color.surfaceContainerLow,
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        side: BorderSide(color: color.outlineVariant.withValues(alpha: 0.3)),
+        border: Border.all(color: color.outlineVariant.withValues(alpha: 0.3)),
       ),
-      child: Padding(
-        padding: EdgeInsets.all(spacing.cardInner + spacing.elementGap),
-        child: Column(
-          children: [
-            // Delta amount + badge
-            AnimatedBalance(
-              value: variance.abs(),
-              style: text.headlineLarge?.copyWith(
-                fontWeight: FontWeight.w900,
-                color: accent,
-                letterSpacing: -0.5,
+      child: Column(
+        children: [
+          // Header row
+          Row(
+            children: [
+              const SizedBox(width: 80),
+              Expanded(
+                child: Text(curName.split(' ').first, textAlign: TextAlign.center,
+                    style: text.labelMedium?.copyWith(fontWeight: FontWeight.w700, color: color.primary)),
               ),
-              fixedStringLength: 0,
-              compact: true,
-            ),
-            SizedBox(height: spacing.elementGapMin),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (!isFlat)
-                  Icon(
-                    isDown ? LucideIcons.arrowDown : LucideIcons.arrowUp,
-                    size: 14,
-                    color: accent,
-                  ),
-                if (!isFlat) SizedBox(width: spacing.elementGapMin),
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: spacing.elementGap,
-                    vertical: spacing.elementGapMin,
-                  ),
-                  decoration: BoxDecoration(
-                    color: accent.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(spacing.radiusSmall),
-                  ),
-                  child: Text(
-                    isFlat
-                        ? 'No change'
-                        : '${variancePct.abs().toStringAsFixed(1)}% ${isDown ? 'less' : 'more'}',
-                    style: text.labelMedium?.copyWith(
-                      color: accent,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: spacing.sectionGap),
-            // Side-by-side months
-            Row(
-              children: [
-                Expanded(
-                  child: _buildMonthColumn(
-                    curName, curExp, true, color, text, spacing,
-                  ),
-                ),
-                Container(
-                  width: 1,
-                  height: 40,
-                  color: color.outlineVariant.withValues(alpha: 0.3),
-                ),
-                Expanded(
-                  child: _buildMonthColumn(
-                    lastName, lastExp, false, color, text, spacing,
-                  ),
-                ),
-              ],
-            ),
-            // "By this day last month" context line
-            if (lastExpByThisDay > 0) ...[
-              SizedBox(height: spacing.elementGap * 1.5),
-              Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: spacing.elementGap * 1.5,
-                  vertical: spacing.elementGap,
-                ),
-                decoration: BoxDecoration(
-                  color: color.primary.withValues(alpha: 0.06),
-                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(LucideIcons.calendarClock, size: 14, color: color.onSurfaceVariant),
-                    SizedBox(width: spacing.elementGap),
-                    Flexible(
-                      child: Text(
-                        BuddyMessages.comparisonByThisDay(
-                          formatCurrency(lastExpByThisDay, code: BaseCurrency.code),
-                        ),
-                        style: text.bodySmall?.copyWith(
-                          color: color.onSurfaceVariant,
-                          fontWeight: FontWeight.w500,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ],
-                ),
+              Expanded(
+                child: Text(lastName.split(' ').first, textAlign: TextAlign.center,
+                    style: text.labelMedium?.copyWith(fontWeight: FontWeight.w600, color: color.onSurfaceVariant)),
               ),
+              const SizedBox(width: 50),
             ],
+          ),
+          const SizedBox(height: 12),
+          // Income row
+          _heroRow('Income', curInc, lastInc, incColor, code, color, text, brightness),
+          const SizedBox(height: 8),
+          // Expense row
+          _heroRow('Expense', curExp, lastExp, expColor, code, color, text, brightness),
+          const SizedBox(height: 8),
+          Divider(height: 1, color: color.outlineVariant.withValues(alpha: 0.2)),
+          const SizedBox(height: 8),
+          // Net row
+          _heroRow('Net', curInc - curExp, lastInc - lastExp,
+              (curInc - curExp) >= 0 ? incColor : expColor, code, color, text, brightness),
+          if (lastExpByThisDay > 0) ...[
+            const SizedBox(height: 10),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: color.primary.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                'By day ${DateTime.now().day}: ${formatCurrencyCompact(lastExpByThisDay, code: code)} in ${lastName.split(' ').first}',
+                style: text.bodySmall?.copyWith(color: color.onSurfaceVariant),
+                textAlign: TextAlign.center,
+              ),
+            ),
           ],
-        ),
+        ],
       ),
     );
   }
 
-  Widget _buildMonthColumn(
-    String label, double amount, bool isCurrent,
-    ColorScheme color, TextTheme text, AppSpacing spacing,
-  ) {
-    return Column(
+  Widget _heroRow(
+    String label, double curVal, double lastVal, Color rowColor, String code,
+    ColorScheme color, TextTheme text, Brightness brightness, {
+    String? customCur, String? customDelta, Color? deltaColor,
+  }) {
+    final delta = curVal - lastVal;
+    final pct = lastVal > 0 ? (delta / lastVal * 100) : 0.0;
+    final isUp = delta > 0;
+    final dColor = deltaColor ?? (isUp
+        ? FinanceColors.expenseColor(brightness)
+        : FinanceColors.incomeColor(brightness));
+
+    return Row(
       children: [
-        Text(
-          label,
-          style: text.labelSmall?.copyWith(
-            color: color.onSurfaceVariant,
-            fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w500,
+        SizedBox(
+          width: 80,
+          child: Text(label, style: text.bodySmall?.copyWith(
+            color: color.onSurfaceVariant, fontWeight: FontWeight.w600,
+          )),
+        ),
+        Expanded(
+          child: Text(
+            customCur ?? formatCurrencyCompact(curVal, code: code),
+            textAlign: TextAlign.center,
+            style: text.titleSmall?.copyWith(fontWeight: FontWeight.w800),
           ),
         ),
-        SizedBox(height: spacing.elementGapMin),
-        CurrencyText(
-          amount: amount,
-          fixedLength: 0,
-          compact: true,
-          style: text.titleMedium?.copyWith(
-            fontWeight: FontWeight.w800,
-            color: isCurrent ? color.onSurface : color.onSurfaceVariant,
+        Expanded(
+          child: Text(
+            formatCurrencyCompact(lastVal, code: code),
+            textAlign: TextAlign.center,
+            style: text.titleSmall?.copyWith(
+              fontWeight: FontWeight.w600, color: color.onSurfaceVariant,
+            ),
+          ),
+        ),
+        SizedBox(
+          width: 50,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: dColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              customDelta ?? (delta.abs() < 1 ? '\u2014' : '${isUp ? '+' : ''}${pct.toStringAsFixed(0)}%'),
+              textAlign: TextAlign.center,
+              style: text.labelSmall?.copyWith(color: dColor, fontWeight: FontWeight.w700),
+            ),
           ),
         ),
       ],
     );
   }
 
-  // ── 2. SMART INSIGHT ──
+  // ── 2. VERDICT ──
 
-  Widget _buildInsight(
+  Widget _buildVerdict(
     double variance, bool isDown, bool isFlat, Color accent,
     List<_CategoryDelta> topIncrease, List<_CategoryDelta> topDecrease,
+    double projected,
     ColorScheme color, TextTheme text, AppSpacing spacing,
   ) {
     final code = BaseCurrency.code;
-    final lines = <String>[];
+    String headline;
+    String detail;
+    IconData icon;
 
-    // Primary insight
     if (isFlat) {
-      lines.add(BuddyMessages.comparisonSpentSame);
+      headline = 'Steady as she goes';
+      detail = 'Your spending is consistent — that\'s discipline.';
+      icon = LucideIcons.shieldCheck;
     } else if (isDown) {
-      lines.add(BuddyMessages.comparisonSpentLess(
-          formatCurrencyFull(variance.abs(), code: code)));
+      headline = 'You\'re doing great 🌟';
+      detail = 'Spending is down ${formatCurrencyCompact(variance.abs(), code: code)}. ';
+      if (topDecrease.isNotEmpty) {
+        detail += '${topDecrease.first.name} dropped the most.';
+      }
+      icon = LucideIcons.trendingDown;
     } else {
-      lines.add(BuddyMessages.comparisonSpentMore(
-          formatCurrencyFull(variance.abs(), code: code)));
+      headline = 'Heads up — spending is up';
+      detail = '${formatCurrencyCompact(variance.abs(), code: code)} more than before. ';
+      if (topIncrease.isNotEmpty) {
+        detail += '${topIncrease.first.name} grew the most.';
+      }
+      icon = LucideIcons.trendingUp;
     }
 
-    // Category highlight
-    if (topIncrease.isNotEmpty) {
-      final t = topIncrease.first;
-      lines.add(BuddyMessages.comparisonTopIncrease(
-          t.name, formatCurrency(t.absDelta, code: code)));
-    } else if (topDecrease.isNotEmpty) {
-      final t = topDecrease.first;
-      lines.add(BuddyMessages.comparisonTopDecrease(
-          t.name, formatCurrency(t.absDelta, code: code)));
+    if (projected > 0) {
+      detail += '\nOn track to spend ${formatCurrencyCompact(projected, code: code)} this month.';
     }
-
-    final icon = isFlat
-        ? LucideIcons.minus
-        : isDown
-            ? LucideIcons.sparkles
-            : LucideIcons.triangleAlert;
 
     return Container(
       padding: EdgeInsets.all(spacing.cardInner),
       decoration: BoxDecoration(
-        color: accent.withValues(alpha: 0.08),
+        color: accent.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        border: Border.all(color: accent.withValues(alpha: 0.15)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 18, color: accent),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: accent.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, size: 18, color: accent),
+          ),
           SizedBox(width: spacing.elementGap),
           Expanded(
-            child: Text(
-              lines.join('\n'),
-              style: text.bodyMedium?.copyWith(
-                color: accent,
-                fontWeight: FontWeight.w600,
-                height: 1.4,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  headline,
+                  style: text.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: accent,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  detail,
+                  style: text.bodySmall?.copyWith(
+                    color: color.onSurfaceVariant,
+                    height: 1.4,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -613,7 +663,7 @@ class _MonthlyComparisonScreenState
     final delta = cur - last;
     final isUp = delta > 0;
     final isZero = delta.abs() < 1;
-    final maxVal = math.max(cur, last);
+    final pct = cat.pct;
 
     final deltaColor = isZero
         ? color.onSurfaceVariant
@@ -624,207 +674,316 @@ class _MonthlyComparisonScreenState
     return Padding(
       padding: EdgeInsets.only(bottom: spacing.elementGap),
       child: Container(
-        padding: EdgeInsets.all(spacing.cardInner),
+        padding: EdgeInsets.symmetric(
+          horizontal: spacing.cardInner,
+          vertical: spacing.elementGap * 1.2,
+        ),
         decoration: BoxDecoration(
           color: color.surfaceContainerLow,
           borderRadius: BorderRadius.circular(spacing.radiusMedium),
-          border: Border.all(
-            color: color.outlineVariant.withValues(alpha: 0.3),
-          ),
+          border: Border.all(color: color.outlineVariant.withValues(alpha: 0.3)),
         ),
-        child: Column(
+        child: Row(
           children: [
-            Row(
-              children: [
-                // Category icon
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: color.primaryContainer,
-                    borderRadius: BorderRadius.circular(spacing.radiusSmall),
-                  ),
-                  child: Icon(
-                    IconHelper.getIconData(cat.iconName),
-                    size: 16,
-                    color: color.primary,
-                  ),
-                ),
-                SizedBox(width: spacing.elementGap),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        cat.name,
-                        style: text.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      SizedBox(height: spacing.elementGapUltraMin),
-                      Text(
-                        '${formatCurrency(cur, code: BaseCurrency.code)} vs ${formatCurrency(last, code: BaseCurrency.code)}',
-                        style: text.bodySmall?.copyWith(
-                          color: color.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                // Delta chip
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: spacing.elementGap,
-                    vertical: spacing.elementGapMin,
-                  ),
-                  decoration: BoxDecoration(
-                    color: deltaColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(spacing.radiusSmall),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (!isZero)
-                        Icon(
-                          isUp ? LucideIcons.arrowUp : LucideIcons.arrowDown,
-                          size: 12,
-                          color: deltaColor,
-                        ),
-                      if (!isZero) SizedBox(width: spacing.elementGapUltraMin),
-                      Text(
-                        isZero
-                            ? '—'
-                            : formatCurrency(delta.abs(), code: BaseCurrency.code),
-                        style: text.labelSmall?.copyWith(
-                          color: deltaColor,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: deltaColor.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                IconHelper.getIconData(cat.iconName),
+                size: 16,
+                color: deltaColor,
+              ),
             ),
-            SizedBox(height: spacing.elementGap),
-            // Dual progress bars
-            if (maxVal > 0) ...[
-              _dualBar(cur, maxVal, color.primary, spacing),
-              SizedBox(height: spacing.elementGapMin),
-              _dualBar(last, maxVal, color.primary.withValues(alpha: 0.35), spacing),
-            ],
+            SizedBox(width: spacing.elementGap),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    cat.name,
+                    style: text.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    '${formatCurrencyCompact(cur, code: BaseCurrency.code)} vs ${formatCurrencyCompact(last, code: BaseCurrency.code)}',
+                    style: text.bodySmall?.copyWith(color: color.onSurfaceVariant, fontSize: 11),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: deltaColor.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                isZero ? '—' : '${isUp ? '+' : ''}${pct.toStringAsFixed(0)}%',
+                style: text.labelSmall?.copyWith(
+                  color: deltaColor,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _dualBar(double value, double max, Color barColor, AppSpacing spacing) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(2),
-      child: TweenAnimationBuilder<double>(
-        tween: Tween(begin: 0, end: max > 0 ? (value / max).clamp(0.0, 1.0) : 0),
-        duration: const Duration(milliseconds: 600),
-        curve: Curves.easeOutCubic,
-        builder: (_, v, __) => LinearProgressIndicator(
-          value: v,
-          minHeight: 4,
-          backgroundColor: barColor.withValues(alpha: 0.08),
-          valueColor: AlwaysStoppedAnimation(barColor),
-        ),
+  // ── 5. SPENDING PACE ──
+
+  Widget _buildPaceCard(
+    double dailyAvgCur, double dailyAvgLast, double projected,
+    String curName, String lastName,
+    ColorScheme color, TextTheme text, AppSpacing spacing, Brightness brightness,
+  ) {
+    final maxAvg = math.max(dailyAvgCur, dailyAvgLast);
+    final curFrac = maxAvg > 0 ? (dailyAvgCur / maxAvg).clamp(0.0, 1.0) : 0.0;
+    final lastFrac = maxAvg > 0 ? (dailyAvgLast / maxAvg).clamp(0.0, 1.0) : 0.0;
+    final code = BaseCurrency.code;
+
+    return Container(
+      padding: EdgeInsets.all(spacing.cardInner),
+      decoration: BoxDecoration(
+        color: color.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        border: Border.all(color: color.outlineVariant.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(LucideIcons.gauge, size: 16, color: color.primary),
+              const SizedBox(width: 8),
+              Text('Daily Spending Pace', style: text.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Current month bar
+          _paceBar(curName.split(' ').first, dailyAvgCur, curFrac, color.primary, code, color, text),
+          const SizedBox(height: 10),
+          // Compare month bar
+          _paceBar(lastName.split(' ').first, dailyAvgLast, lastFrac, color.primary.withValues(alpha: 0.4), code, color, text),
+          if (projected > 0) ...[
+            const SizedBox(height: 14),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: color.primary.withValues(alpha: 0.06),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(LucideIcons.sparkles, size: 14, color: color.primary),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Projected: ${formatCurrencyCompact(projected, code: code)} this month',
+                    style: text.bodySmall?.copyWith(color: color.primary, fontWeight: FontWeight.w600),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }
 
-  // ── 5. BEHAVIORAL STATS ──
-
-  Widget _buildBehavior(
-    int curTxnCount, int lastTxnCount,
-    double dailyAvgCur, double dailyAvgLast, double projected,
-    ColorScheme color, TextTheme text, AppSpacing spacing, Brightness brightness,
-  ) {
-    final code = BaseCurrency.code;
-    final items = <_BehaviorItem>[];
-
-    // Transaction count
-    if (curTxnCount > 0 || lastTxnCount > 0) {
-      items.add(_BehaviorItem(
-        icon: LucideIcons.hash,
-        message: BuddyMessages.comparisonTxnCount(curTxnCount, lastTxnCount),
-      ));
-    }
-
-    // Daily average
-    if (dailyAvgCur > 0 || dailyAvgLast > 0) {
-      items.add(_BehaviorItem(
-        icon: LucideIcons.calendarDays,
-        message: BuddyMessages.comparisonDailyAvg(
-          formatCurrency(dailyAvgCur, code: code),
-          formatCurrency(dailyAvgLast, code: code),
-        ),
-      ));
-    }
-
-    // Prediction
-    if (projected > 0) {
-      items.add(_BehaviorItem(
-        icon: LucideIcons.sparkles,
-        message: BuddyMessages.comparisonPrediction(
-          formatCurrency(projected, code: code),
-        ),
-      ));
-    }
-
-    if (items.isEmpty) return const SizedBox.shrink();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _paceBar(String label, double value, double fraction, Color barColor, String code, ColorScheme color, TextTheme text) {
+    return Row(
       children: [
-        Text(
-          'INSIGHTS',
-          style: text.labelSmall?.copyWith(
-            color: color.onSurfaceVariant.withValues(alpha: 0.5),
-            fontWeight: FontWeight.w700,
-            letterSpacing: 1.5,
+        SizedBox(
+          width: 40,
+          child: Text(label, style: text.labelSmall?.copyWith(color: color.onSurfaceVariant, fontWeight: FontWeight.w600)),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0, end: fraction),
+              duration: const Duration(milliseconds: 600),
+              curve: Curves.easeOutCubic,
+              builder: (_, v, __) => LinearProgressIndicator(
+                value: v,
+                minHeight: 8,
+                backgroundColor: barColor.withValues(alpha: 0.08),
+                valueColor: AlwaysStoppedAnimation(barColor),
+              ),
+            ),
           ),
         ),
-        SizedBox(height: spacing.elementGap),
-        ...items.map((item) => Padding(
-              padding: EdgeInsets.only(bottom: spacing.elementGap),
-              child: Container(
-                padding: EdgeInsets.all(spacing.cardInner),
-                decoration: BoxDecoration(
-                  color: color.surfaceContainerLow,
-                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                  border: Border.all(
-                    color: color.outlineVariant.withValues(alpha: 0.3),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(item.icon, size: 16, color: color.primary),
-                    SizedBox(width: spacing.elementGap),
-                    Expanded(
-                      child: Text(
-                        item.message,
-                        style: text.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w500,
-                          height: 1.3,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            )),
+        const SizedBox(width: 8),
+        Text(
+          formatCurrencyCompact(value, code: code),
+          style: text.labelSmall?.copyWith(fontWeight: FontWeight.w700),
+        ),
       ],
     );
   }
-}
 
-class _BehaviorItem {
-  final IconData icon;
-  final String message;
-  const _BehaviorItem({required this.icon, required this.message});
+  // ── 6. ACTIVITY ROW ──
+
+  Widget _buildActivityRow(
+    int curCount, int lastCount,
+    String curName, String lastName,
+    ColorScheme color, TextTheme text, AppSpacing spacing,
+  ) {
+    final delta = curCount - lastCount;
+    final isUp = delta > 0;
+
+    return Container(
+      padding: EdgeInsets.all(spacing.cardInner),
+      decoration: BoxDecoration(
+        color: color.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        border: Border.all(color: color.outlineVariant.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        children: [
+          Icon(LucideIcons.activity, size: 18, color: color.primary),
+          SizedBox(width: spacing.elementGap),
+          Expanded(
+            child: Text(
+              '$curCount transactions this month vs $lastCount in ${lastName.split(' ').first}',
+              style: text.bodySmall?.copyWith(color: color.onSurfaceVariant),
+            ),
+          ),
+          if (delta != 0)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: (isUp ? color.primary : color.tertiary).withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                '${isUp ? '+' : ''}$delta',
+                style: text.labelSmall?.copyWith(
+                  color: isUp ? color.primary : color.tertiary,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  // ── CATEGORY CHART ──
+
+  Widget _buildCategoryChart(
+    List<_CategoryDelta> categories,
+    String curName, String lastName,
+    ColorScheme color, TextTheme text, AppSpacing spacing, Brightness brightness,
+  ) {
+    final maxVal = categories.fold<double>(
+      0, (m, c) => math.max(m, math.max(c.current, c.last)),
+    );
+    if (maxVal <= 0) return const SizedBox.shrink();
+
+    return Container(
+      padding: EdgeInsets.all(spacing.cardInner),
+      decoration: BoxDecoration(
+        color: color.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        border: Border.all(color: color.outlineVariant.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(LucideIcons.chartBarBig, size: 16, color: color.primary),
+              const SizedBox(width: 8),
+              Text('Top Categories', style: text.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
+            ],
+          ),
+          const SizedBox(height: 6),
+          // Legend
+          Row(
+            children: [
+              Container(width: 10, height: 10, decoration: BoxDecoration(
+                color: color.primary, borderRadius: BorderRadius.circular(2),
+              )),
+              const SizedBox(width: 4),
+              Text(curName.split(' ').first, style: text.labelSmall?.copyWith(color: color.onSurfaceVariant)),
+              const SizedBox(width: 12),
+              Container(width: 10, height: 10, decoration: BoxDecoration(
+                color: color.primary.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2),
+              )),
+              const SizedBox(width: 4),
+              Text(lastName.split(' ').first, style: text.labelSmall?.copyWith(color: color.onSurfaceVariant)),
+            ],
+          ),
+          const SizedBox(height: 14),
+          // Bars
+          ...categories.map((cat) {
+            final curFrac = (cat.current / maxVal).clamp(0.0, 1.0);
+            final lastFrac = (cat.last / maxVal).clamp(0.0, 1.0);
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(cat.name, style: text.labelSmall?.copyWith(
+                    fontWeight: FontWeight.w600, color: color.onSurfaceVariant,
+                  )),
+                  const SizedBox(height: 4),
+                  // Current month bar
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(3),
+                    child: TweenAnimationBuilder<double>(
+                      tween: Tween(begin: 0, end: curFrac),
+                      duration: const Duration(milliseconds: 600),
+                      curve: Curves.easeOutCubic,
+                      builder: (_, v, __) => LinearProgressIndicator(
+                        value: v, minHeight: 6,
+                        backgroundColor: color.primary.withValues(alpha: 0.06),
+                        valueColor: AlwaysStoppedAnimation(color.primary),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  // Compare month bar
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(3),
+                    child: TweenAnimationBuilder<double>(
+                      tween: Tween(begin: 0, end: lastFrac),
+                      duration: const Duration(milliseconds: 600),
+                      curve: Curves.easeOutCubic,
+                      builder: (_, v, __) => LinearProgressIndicator(
+                        value: v, minHeight: 6,
+                        backgroundColor: color.primary.withValues(alpha: 0.03),
+                        valueColor: AlwaysStoppedAnimation(color.primary.withValues(alpha: 0.3)),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  // ── HELPERS ──
+
+  Widget _sectionLabel(String label, ColorScheme color, TextTheme text) {
+    return Text(
+      label,
+      style: text.labelSmall?.copyWith(
+        color: color.onSurfaceVariant.withValues(alpha: 0.5),
+        fontWeight: FontWeight.w700,
+        letterSpacing: 1.5,
+      ),
+    );
+  }
 }

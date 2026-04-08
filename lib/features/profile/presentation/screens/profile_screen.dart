@@ -1289,13 +1289,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         () => context.push(AppRoutes.backupRestore),
         trailing: const ProBadge(),
       ),
-      _SettingItem(
-        LucideIcons.fileText,
-        'Monthly Recap',
-        'View & download monthly report',
-        () => context.push(AppRoutes.monthlyRecap),
-        trailing: const ProBadge(),
-      ),
     ];
 
     return Consumer(

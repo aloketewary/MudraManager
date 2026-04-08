@@ -490,11 +490,15 @@ bool checkForTransactionalMessage(String? body) {
   if (isLoyaltyPoints) return false;
 
   // Must have transaction keywords
-  final hasConfirmedTrn = lower.contains('debited') ||
-      lower.contains('credited') ||
-      lower.contains('spent') ||
-      lower.contains('paid') ||
-      lower.contains('withdrawn');
+  // Check for confirmed (past tense) transaction keywords
+  // Exclude future tense: "will be debited" / "to be debited"
+  final hasFutureTense = lower.contains('will be') || lower.contains('to be');
+  final hasConfirmedTrn = !hasFutureTense &&
+      (lower.contains('debited') ||
+          lower.contains('credited') ||
+          lower.contains('spent') ||
+          lower.contains('paid') ||
+          lower.contains('withdrawn'));
 
   final hasTrn = hasConfirmedTrn ||
       (lower.contains('added') && RegExp(r'rs\.?|inr').hasMatch(lower)) ||

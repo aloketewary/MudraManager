@@ -1,7 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:isar_community/isar.dart';
+import 'package:mudra_manager/core/db/models/account.dart';
+import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
+import 'package:mudra_manager/core/db/models/trip.dart';
 import 'package:mudra_manager/core/entitlement/billing_provider.dart';
 import 'package:mudra_manager/core/entitlement/entitlement_provider.dart';
 import 'package:mudra_manager/core/entitlement/entitlement_service.dart';
@@ -136,10 +139,22 @@ Future<void> _initializeBackgroundServices(ProviderContainer container) async {
         log.i('✅ Category icons synced');
       });
 
+      // Seed system categories (trip/split/settlement)
+      await safeExecute(() async {
+        await CategorySeeder.seedSystemCategories(isar);
+        log.i('✅ System categories seeded');
+      });
+
       // Migrate: seed isSettlement + isSharedExpense on old transactions
       await safeExecute(() async {
         await _migrateTransactionFields(isar);
         log.i('✅ Transaction fields migrated');
+      });
+
+      // Migrate: seed isSystem on categories + isOwner on participants
+      await safeExecute(() async {
+        await _migrateCategoryAndParticipantFields(isar);
+        log.i('✅ Category & participant fields migrated');
       });
     } else {
       log.e('❌ Isar initialization failed');
@@ -194,6 +209,55 @@ Future<void> _migrateTransactionFields(Isar isar) async {
       await isar.transactions.put(txn);
     }
   });
+
+  await prefs.setBool(key, true);
+}
+
+/// One-time migration: seed isSystem on old categories and isOwner on old participants.
+Future<void> _migrateCategoryAndParticipantFields(Isar isar) async {
+  final prefs = await SharedPreferences.getInstance();
+  const key = 'migration_category_system_v1';
+  if (prefs.getBool(key) == true) return;
+
+  // Re-put all categories to write isSystem = false to disk
+  final categories = await isar.categorys.where().findAll();
+  if (categories.isNotEmpty) {
+    await isar.writeTxn(() async {
+      for (final cat in categories) {
+        await isar.categorys.put(cat);
+      }
+    });
+  }
+
+  // Re-put all trip participants to write isOwner = false to disk
+  final participants = await isar.tripParticipants.where().findAll();
+  if (participants.isNotEmpty) {
+    await isar.writeTxn(() async {
+      for (final p in participants) {
+        await isar.tripParticipants.put(p);
+      }
+    });
+  }
+
+  // Re-put all accounts to write isPrimary = false to disk
+  // Then set the first active account as primary if none exists
+  final accounts = await isar.accounts.where().findAll();
+  if (accounts.isNotEmpty) {
+    final hasPrimary = accounts.any((a) => a.isPrimary);
+    await isar.writeTxn(() async {
+      for (final acc in accounts) {
+        await isar.accounts.put(acc);
+      }
+      // Auto-set first active account as primary
+      if (!hasPrimary) {
+        final first = accounts.where((a) => a.isActive).firstOrNull;
+        if (first != null) {
+          first.isPrimary = true;
+          await isar.accounts.put(first);
+        }
+      }
+    });
+  }
 
   await prefs.setBool(key, true);
 }

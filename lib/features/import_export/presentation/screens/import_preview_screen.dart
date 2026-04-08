@@ -20,7 +20,8 @@ class ImportPreviewScreen extends ConsumerStatefulWidget {
   const ImportPreviewScreen({super.key, required this.fileBytes});
 
   @override
-  ConsumerState<ImportPreviewScreen> createState() => _ImportPreviewScreenState();
+  ConsumerState<ImportPreviewScreen> createState() =>
+      _ImportPreviewScreenState();
 }
 
 class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
@@ -39,25 +40,37 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
     super.initState();
     debugPrint('[Preview] fileBytes: ${widget.fileBytes.length} bytes');
     _sheets = ExcelImportService.getSheetInfo(widget.fileBytes);
-    debugPrint('[Preview] Sheets: ${_sheets.map((s) => '${s.name}(${s.rowCount})').toList()}');
+    debugPrint(
+      '[Preview] Sheets: ${_sheets.map((s) => '${s.name}(${s.rowCount})').toList()}',
+    );
     // Auto-select first sheet with data
-    _selectedSheet = _sheets.where((s) => s.rowCount > 1).firstOrNull?.name
-        ?? _sheets.firstOrNull?.name;
+    _selectedSheet = _sheets.where((s) => s.rowCount > 1).firstOrNull?.name ??
+        _sheets.firstOrNull?.name;
     _loadSheet();
   }
 
   void _loadSheet() {
-    _headers = ExcelImportService.readHeaders(widget.fileBytes, sheetName: _selectedSheet);
+    _headers = ExcelImportService.readHeaders(
+      widget.fileBytes,
+      sheetName: _selectedSheet,
+    );
     debugPrint('[Preview] Headers (${_headers.length}): $_headers');
-    _dataRows = ExcelImportService.readDataRows(widget.fileBytes, sheetName: _selectedSheet);
+    _dataRows = ExcelImportService.readDataRows(
+      widget.fileBytes,
+      sheetName: _selectedSheet,
+    );
     debugPrint('[Preview] Data rows: ${_dataRows.length}');
     if (_dataRows.isNotEmpty) {
       debugPrint('[Preview] First row: ${_dataRows.first}');
     }
     _mapping = ExcelImportService.autoDetectMapping(_headers);
-    debugPrint('[Preview] Mapping: date=${_mapping.dateColumn}, amount=${_mapping.amountColumn}, desc=${_mapping.descriptionColumn}, cat=${_mapping.categoryColumn}, type=${_mapping.typeColumn}, currency=${_mapping.currencyColumn}');
+    debugPrint(
+      '[Preview] Mapping: date=${_mapping.dateColumn}, amount=${_mapping.amountColumn}, desc=${_mapping.descriptionColumn}, cat=${_mapping.categoryColumn}, type=${_mapping.typeColumn}, currency=${_mapping.currencyColumn}',
+    );
     _parsedRows = ExcelImportService.parseRows(_dataRows, _mapping);
-    debugPrint('[Preview] Parsed: ${_parsedRows.length} rows, ${_parsedRows.where((r) => r.isValid).length} valid');
+    debugPrint(
+      '[Preview] Parsed: ${_parsedRows.length} rows, ${_parsedRows.where((r) => r.isValid).length} valid',
+    );
   }
 
   void _reParse() {
@@ -84,9 +97,10 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
         ),
         actions: [
           TextButton.icon(
-            onPressed: _mapping.isValid && _selectedAccount != null && !_importing
-                ? _doImport
-                : null,
+            onPressed:
+                _mapping.isValid && _selectedAccount != null && !_importing
+                    ? _doImport
+                    : null,
             icon: _importing
                 ? SizedBox(
                     width: 16,
@@ -110,8 +124,7 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
           // ── SHEET SELECTOR ──
           if (_sheets.length > 1)
             _buildSheetSelector(color, textTheme, spacing),
-          if (_sheets.length > 1)
-            SizedBox(height: spacing.sectionGap),
+          if (_sheets.length > 1) SizedBox(height: spacing.sectionGap),
 
           // ── STATS ──
           _buildStatsRow(color, textTheme, spacing),
@@ -159,11 +172,16 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
           children: [
             Row(
               children: [
-                Icon(LucideIcons.fileSpreadsheet, size: 18, color: color.primary),
+                Icon(
+                  LucideIcons.fileSpreadsheet,
+                  size: 18,
+                  color: color.primary,
+                ),
                 SizedBox(width: spacing.elementGap),
                 Text(
                   'Sheet',
-                  style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                  style: textTheme.titleSmall
+                      ?.copyWith(fontWeight: FontWeight.w600),
                 ),
               ],
             ),
@@ -196,7 +214,11 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
     );
   }
 
-  Widget _buildStatsRow(ColorScheme color, TextTheme textTheme, AppSpacing spacing) {
+  Widget _buildStatsRow(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
     return Row(
       children: [
         Expanded(
@@ -276,13 +298,22 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
     );
   }
 
-  Widget _buildMappingCard(ColorScheme color, TextTheme textTheme, AppSpacing spacing) {
+  Widget _buildMappingCard(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
     final fields = [
       ('Date', _mapping.dateColumn, LucideIcons.calendar, true),
       ('Amount', _mapping.amountColumn, LucideIcons.coins, true),
       ('Description', _mapping.descriptionColumn, LucideIcons.fileText, false),
       ('Category', _mapping.categoryColumn, LucideIcons.tag, false),
-      ('Type (Income/Expense)', _mapping.typeColumn, LucideIcons.arrowLeftRight, false),
+      (
+        'Type (Income/Expense)',
+        _mapping.typeColumn,
+        LucideIcons.arrowLeftRight,
+        false
+      ),
       ('Currency', _mapping.currencyColumn, LucideIcons.banknote, false),
     ];
 
@@ -305,7 +336,8 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
                 SizedBox(width: spacing.elementGap),
                 Text(
                   'Column Mapping',
-                  style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                  style: textTheme.titleSmall
+                      ?.copyWith(fontWeight: FontWeight.w600),
                 ),
               ],
             ),
@@ -320,7 +352,9 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
                     Icon(
                       icon,
                       size: 16,
-                      color: mapped ? color.primary : color.onSurfaceVariant.withValues(alpha: 0.5),
+                      color: mapped
+                          ? color.primary
+                          : color.onSurfaceVariant.withValues(alpha: 0.5),
                     ),
                     SizedBox(width: spacing.elementGap),
                     Expanded(
@@ -328,7 +362,9 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
                         label,
                         style: textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w500,
-                          color: required && !mapped ? color.error : color.onSurface,
+                          color: required && !mapped
+                              ? color.error
+                              : color.onSurface,
                         ),
                       ),
                     ),
@@ -340,22 +376,28 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
                         isDense: true,
                         isExpanded: true,
                         decoration: InputDecoration(
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 8,
+                          ),
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                            borderRadius:
+                                BorderRadius.circular(spacing.radiusSmall),
                           ),
                         ),
                         items: [
                           const DropdownMenuItem(value: null, child: Text('—')),
                           ..._headers.asMap().entries.map(
-                            (e) => DropdownMenuItem(
-                              value: e.key,
-                              child: Text(
-                                e.value.isEmpty ? 'Col ${e.key + 1}' : e.value,
-                                overflow: TextOverflow.ellipsis,
+                                (e) => DropdownMenuItem(
+                                  value: e.key,
+                                  child: Text(
+                                    e.value.isEmpty
+                                        ? 'Col ${e.key + 1}'
+                                        : e.value,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
                         ],
                         onChanged: (val) {
                           final v = val ?? ColumnMapping.clearColumn;
@@ -363,9 +405,12 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
                             _mapping = switch (label) {
                               'Date' => _mapping.copyWith(dateColumn: v),
                               'Amount' => _mapping.copyWith(amountColumn: v),
-                              'Description' => _mapping.copyWith(descriptionColumn: v),
-                              'Category' => _mapping.copyWith(categoryColumn: v),
-                              'Currency' => _mapping.copyWith(currencyColumn: v),
+                              'Description' =>
+                                _mapping.copyWith(descriptionColumn: v),
+                              'Category' =>
+                                _mapping.copyWith(categoryColumn: v),
+                              'Currency' =>
+                                _mapping.copyWith(currencyColumn: v),
                               _ => _mapping.copyWith(typeColumn: v),
                             };
                           });
@@ -408,21 +453,24 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
                 SizedBox(width: spacing.elementGap),
                 Text(
                   'Default Account',
-                  style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                  style: textTheme.titleSmall
+                      ?.copyWith(fontWeight: FontWeight.w600),
                 ),
               ],
             ),
             SizedBox(height: spacing.elementGap),
             Text(
               'All imported transactions will be added to this account.',
-              style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+              style:
+                  textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
             ),
             SizedBox(height: spacing.elementGap + 4),
             accountsAsync.when(
               data: (accounts) {
                 if (_selectedAccount == null && accounts.isNotEmpty) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (mounted) setState(() => _selectedAccount = accounts.first);
+                    if (mounted)
+                      setState(() => _selectedAccount = accounts.first);
                   });
                 }
                 return DropdownButtonFormField<int>(
@@ -432,10 +480,16 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(spacing.radiusSmall),
                     ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 12,
+                    ),
                   ),
                   items: accounts
-                      .map((a) => DropdownMenuItem(value: a.id, child: Text(a.name)))
+                      .map(
+                        (a) =>
+                            DropdownMenuItem(value: a.id, child: Text(a.name)),
+                      )
                       .toList(),
                   onChanged: (id) {
                     setState(() {
@@ -521,7 +575,8 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
                 SizedBox(width: spacing.elementGap),
                 Text(
                   'Currency',
-                  style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                  style: textTheme.titleSmall
+                      ?.copyWith(fontWeight: FontWeight.w600),
                 ),
                 const Spacer(),
                 Text(
@@ -535,7 +590,8 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
             SizedBox(height: spacing.elementGap),
             Text(
               'Select the currency for all imported transactions.',
-              style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+              style:
+                  textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
             ),
             SizedBox(height: spacing.elementGap + 4),
             InkWell(
@@ -670,9 +726,8 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
                         title: Text(
                           c.$1,
                           style: textTheme.bodyLarge?.copyWith(
-                            fontWeight: isSelected
-                                ? FontWeight.w600
-                                : FontWeight.w400,
+                            fontWeight:
+                                isSelected ? FontWeight.w600 : FontWeight.w400,
                             color: isSelected ? color.primary : color.onSurface,
                           ),
                         ),
@@ -683,7 +738,11 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
                           ),
                         ),
                         trailing: isSelected
-                            ? Icon(LucideIcons.check, color: color.primary, size: 20)
+                            ? Icon(
+                                LucideIcons.check,
+                                color: color.primary,
+                                size: 20,
+                              )
                             : null,
                         onTap: () {
                           setState(() => _selectedCurrency = c.$1);
@@ -701,7 +760,11 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
     );
   }
 
-  Widget _buildPreviewTable(ColorScheme color, TextTheme textTheme, AppSpacing spacing) {
+  Widget _buildPreviewTable(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
     final previewRows = _parsedRows.take(20).toList();
 
     return Card(
@@ -723,7 +786,8 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
                 SizedBox(width: spacing.elementGap),
                 Text(
                   'Preview (first 20 rows)',
-                  style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                  style: textTheme.titleSmall
+                      ?.copyWith(fontWeight: FontWeight.w600),
                 ),
               ],
             ),
@@ -746,21 +810,32 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
                 ],
                 rows: previewRows.map((row) {
                   final hasError = !row.isValid;
-                  final currency = row.currency ?? (_mapping.currencyColumn == null ? _selectedCurrency : null);
+                  final currency = row.currency ??
+                      (_mapping.currencyColumn == null
+                          ? _selectedCurrency
+                          : null);
                   return DataRow(
                     color: hasError
-                        ? WidgetStateProperty.all(color.errorContainer.withValues(alpha: 0.3))
+                        ? WidgetStateProperty.all(
+                            color.errorContainer.withValues(alpha: 0.3),
+                          )
                         : null,
                     cells: [
                       DataCell(Text('${row.rowIndex}')),
-                      DataCell(Text(
-                        row.date != null
-                            ? '${row.date!.day}/${row.date!.month}/${row.date!.year}'
-                            : '—',
-                      )),
-                      DataCell(Text(
-                        row.amount != null ? row.amount!.toStringAsFixed(0) : '—',
-                      )),
+                      DataCell(
+                        Text(
+                          row.date != null
+                              ? '${row.date!.day}/${row.date!.month}/${row.date!.year}'
+                              : '—',
+                        ),
+                      ),
+                      DataCell(
+                        Text(
+                          row.amount != null
+                              ? row.amount!.toStringAsFixed(0)
+                              : '—',
+                        ),
+                      ),
                       DataCell(Text(currency ?? '—')),
                       DataCell(Text(row.isExpense ? 'Expense' : 'Income')),
                       DataCell(
@@ -777,15 +852,26 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
                             ? Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(LucideIcons.circleX, size: 14, color: color.error),
+                                  Icon(
+                                    LucideIcons.circleX,
+                                    size: 14,
+                                    color: color.error,
+                                  ),
                                   const SizedBox(width: 4),
                                   Text(
                                     row.error ?? 'Error',
-                                    style: TextStyle(color: color.error, fontSize: 12),
+                                    style: TextStyle(
+                                      color: color.error,
+                                      fontSize: 12,
+                                    ),
                                   ),
                                 ],
                               )
-                            : Icon(LucideIcons.circleCheck, size: 14, color: color.primary),
+                            : Icon(
+                                LucideIcons.circleCheck,
+                                size: 14,
+                                color: color.primary,
+                              ),
                       ),
                     ],
                   );
@@ -811,9 +897,47 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
     HapticFeedback.mediumImpact();
     setState(() => _importing = true);
 
+    // Show blocking overlay
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => PopScope(
+        canPop: false,
+        child: Center(
+          child: Card(
+            margin: const EdgeInsets.all(32),
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Importing $_validCount transactions...',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Please don\'t close the app',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
     try {
       final isarService = ref.read(isarServiceProvider);
-      final categoryMap = await ExcelImportService.buildCategoryMap(isarService);
+      final categoryMap =
+          await ExcelImportService.buildCategoryMap(isarService);
 
       final result = await ExcelImportService.importRows(
         rows: _parsedRows,
@@ -823,9 +947,11 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
       );
 
       if (mounted) {
+        Navigator.of(context).pop(); // dismiss loader
         _showResultDialog(result);
       }
     } catch (e) {
+      if (mounted) Navigator.of(context).pop(); // dismiss loader
       SnackbarService.error(BuddyMessages.errorWith('$e'));
     } finally {
       if (mounted) setState(() => _importing = false);
@@ -840,7 +966,9 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         icon: Icon(
-          result.imported > 0 ? LucideIcons.circleCheck : LucideIcons.circleAlert,
+          result.imported > 0
+              ? LucideIcons.circleCheck
+              : LucideIcons.circleAlert,
           color: result.imported > 0 ? color.primary : color.error,
           size: 48,
         ),
@@ -851,11 +979,33 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _resultRow('Imported', '${result.imported}', color.primary, textTheme),
+            _resultRow(
+              'Imported',
+              '${result.imported}',
+              color.primary,
+              textTheme,
+            ),
+            if (result.categoriesCreated > 0)
+              _resultRow(
+                'Categories created',
+                '${result.categoriesCreated}',
+                color.secondary,
+                textTheme,
+              ),
             if (result.duplicates > 0)
-              _resultRow('Duplicates skipped', '${result.duplicates}', color.tertiary, textTheme),
+              _resultRow(
+                'Duplicates skipped',
+                '${result.duplicates}',
+                color.tertiary,
+                textTheme,
+              ),
             if (result.skipped > 0)
-              _resultRow('Errors/skipped', '${result.skipped}', color.error, textTheme),
+              _resultRow(
+                'Errors/skipped',
+                '${result.skipped}',
+                color.error,
+                textTheme,
+              ),
           ],
         ),
         actions: [
@@ -871,7 +1021,12 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
     );
   }
 
-  Widget _resultRow(String label, String value, Color accent, TextTheme textTheme) {
+  Widget _resultRow(
+    String label,
+    String value,
+    Color accent,
+    TextTheme textTheme,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(

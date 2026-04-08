@@ -3,6 +3,7 @@ import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
@@ -13,15 +14,19 @@ import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UtilityScreen extends ConsumerStatefulWidget {
-  const UtilityScreen({super.key});
+  final bool isTabActive;
+  const UtilityScreen({super.key, this.isTabActive = false});
 
   @override
   ConsumerState<UtilityScreen> createState() => UtilityScreenState();
 }
 
-class UtilityScreenState extends ConsumerState<UtilityScreen> {
+class UtilityScreenState extends ConsumerState<UtilityScreen>
+    with TickerProviderStateMixin {
   List<String> _hiddenUtilities = [];
   bool _isLoading = true;
+  late final AnimationController _bgIconController;
+  Key _animKey = UniqueKey();
 
   // Grouped utility definitions
   static const _activeMoney = [
@@ -64,9 +69,17 @@ class UtilityScreenState extends ConsumerState<UtilityScreen> {
 
   static const _insights = [
     _UtilityDef(
+      id: 'monthly_recap',
+      title: 'Monthly Recap',
+      subtitle: 'Your month at a glance',
+      icon: LucideIcons.calendarCheck,
+      route: AppRoutes.monthlyRecap,
+      section: _Section.insights,
+    ),
+    _UtilityDef(
       id: 'monthly_comparison',
-      title: 'Monthly Comparison',
-      subtitle: 'Current vs last month',
+      title: 'Compare Months',
+      subtitle: 'Track progress over time',
       icon: LucideIcons.arrowLeftRight,
       route: AppRoutes.monthlyComparison,
       section: _Section.insights,
@@ -79,7 +92,29 @@ class UtilityScreenState extends ConsumerState<UtilityScreen> {
   @override
   void initState() {
     super.initState();
+    _bgIconController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 6),
+    );
+    if (widget.isTabActive) _bgIconController.repeat(reverse: true);
     _loadPreferences();
+  }
+
+  @override
+  void dispose() {
+    _bgIconController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant UtilityScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isTabActive && !oldWidget.isTabActive) {
+      setState(() => _animKey = UniqueKey());
+      _bgIconController.repeat(reverse: true);
+    } else if (!widget.isTabActive && oldWidget.isTabActive) {
+      _bgIconController.stop();
+    }
   }
 
   Future<void> _loadPreferences() async {
@@ -135,8 +170,11 @@ class UtilityScreenState extends ConsumerState<UtilityScreen> {
                     SizedBox(height: spacing.sectionGap),
                     Row(
                       children: [
-                        Icon(LucideIcons.settings2,
-                            color: color.primary, size: 22),
+                        Icon(
+                          LucideIcons.settings2,
+                          color: color.primary,
+                          size: 22,
+                        ),
                         SizedBox(width: spacing.elementGap),
                         Text(
                           'Customize Utilities',
@@ -230,12 +268,9 @@ class UtilityScreenState extends ConsumerState<UtilityScreen> {
       );
     }
 
-    final activeVisible =
-        _activeMoney.where((u) => _isVisible(u.id)).toList();
-    final planningVisible =
-        _planning.where((u) => _isVisible(u.id)).toList();
-    final insightsVisible =
-        _insights.where((u) => _isVisible(u.id)).toList();
+    final activeVisible = _activeMoney.where((u) => _isVisible(u.id)).toList();
+    final planningVisible = _planning.where((u) => _isVisible(u.id)).toList();
+    final insightsVisible = _insights.where((u) => _isVisible(u.id)).toList();
 
     final hasAny = activeVisible.isNotEmpty ||
         planningVisible.isNotEmpty ||
@@ -253,102 +288,136 @@ class UtilityScreenState extends ConsumerState<UtilityScreen> {
       );
     }
 
-    return ListView(
-      padding: EdgeInsets.symmetric(
-        horizontal: spacing.cardHorizontal,
-        vertical: spacing.cardVertical,
-      ),
-      children: [
-        // Priority alert
-        _buildPriorityAlert(color, textTheme, spacing),
-
-        // 1. Active Money
-        if (activeVisible.isNotEmpty) ...[
-          _sectionHeader(
-            'Active Money',
-            LucideIcons.zap,
-            color.error,
-            textTheme,
-            spacing,
-          ),
-          SizedBox(height: spacing.elementGap),
-          Row(
-            children: activeVisible
-                .map(
-                  (u) => Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                        right: u != activeVisible.last
-                            ? spacing.elementGap
-                            : 0,
-                      ),
-                      child: _buildCard(u, color, textTheme, spacing),
-                    ),
-                  ),
-                )
-                .toList(),
-          ),
-          SizedBox(height: spacing.sectionGap * 1.5),
-        ],
-
-        // 2. Planning
-        if (planningVisible.isNotEmpty) ...[
-          _sectionHeader(
-            'Planning',
-            LucideIcons.compass,
-            color.primary,
-            textTheme,
-            spacing,
-          ),
-          SizedBox(height: spacing.elementGap),
-          Row(
-            children: planningVisible
-                .map(
-                  (u) => Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                        right: u != planningVisible.last
-                            ? spacing.elementGap
-                            : 0,
-                      ),
-                      child: _buildCard(u, color, textTheme, spacing),
-                    ),
-                  ),
-                )
-                .toList(),
-          ),
-          SizedBox(height: spacing.sectionGap * 1.5),
-        ],
-
-        // 3. Insights
-        if (insightsVisible.isNotEmpty) ...[
-          _sectionHeader(
-            'Insights',
-            LucideIcons.lightbulb,
-            color.secondary,
-            textTheme,
-            spacing,
-          ),
-          SizedBox(height: spacing.elementGap),
-          ...insightsVisible.map(
-            (u) => Padding(
-              padding: EdgeInsets.only(bottom: spacing.elementGap),
-              child: _buildListCard(u, color, textTheme, spacing),
-            ),
-          ),
-        ],
-
-        SizedBox(
-          height: MediaQuery.of(context).padding.bottom +
-              kBottomNavigationBarHeight +
-              16,
+    return KeyedSubtree(
+      key: _animKey,
+      child: ListView(
+        padding: EdgeInsets.symmetric(
+          horizontal: spacing.cardHorizontal,
+          vertical: spacing.cardVertical,
         ),
-      ],
+        children: [
+          // Priority alert
+          _buildPriorityAlert(color, textTheme, spacing),
+
+          // 1. Active Money
+          if (activeVisible.isNotEmpty) ...[
+            _sectionHeader(
+              'Active Money',
+              LucideIcons.zap,
+              color.error,
+              textTheme,
+              spacing,
+              staggerIndex: 0,
+            ),
+            SizedBox(height: spacing.elementGap),
+            Row(
+              children: activeVisible
+                  .asMap()
+                  .entries
+                  .map(
+                    (e) => Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                          right: e.key != activeVisible.length - 1
+                              ? spacing.elementGap
+                              : 0,
+                        ),
+                        child: _buildCard(
+                          e.value,
+                          color,
+                          textTheme,
+                          spacing,
+                          e.key,
+                        ),
+                      ),
+                    ),
+                  )
+                  .toList(),
+            ),
+            SizedBox(height: spacing.sectionGap * 1.5),
+          ],
+
+          // 2. Planning
+          if (planningVisible.isNotEmpty) ...[
+            _sectionHeader(
+              'Planning',
+              LucideIcons.compass,
+              color.primary,
+              textTheme,
+              spacing,
+              staggerIndex: 2,
+            ),
+            SizedBox(height: spacing.elementGap),
+            Row(
+              children: planningVisible
+                  .asMap()
+                  .entries
+                  .map(
+                    (e) => Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                          right: e.key != planningVisible.length - 1
+                              ? spacing.elementGap
+                              : 0,
+                        ),
+                        child: _buildCard(
+                          e.value,
+                          color,
+                          textTheme,
+                          spacing,
+                          e.key + 2,
+                        ),
+                      ),
+                    ),
+                  )
+                  .toList(),
+            ),
+            SizedBox(height: spacing.sectionGap * 1.5),
+          ],
+
+          // 3. Insights
+          if (insightsVisible.isNotEmpty) ...[
+            _sectionHeader(
+              'Insights',
+              LucideIcons.lightbulb,
+              color.secondary,
+              textTheme,
+              spacing,
+              staggerIndex: 4,
+            ),
+            SizedBox(height: spacing.elementGap),
+            ...insightsVisible.asMap().entries.map(
+                  (e) => Padding(
+                    padding: EdgeInsets.only(bottom: spacing.elementGap),
+                    child: _buildListCard(
+                      e.value,
+                      color,
+                      textTheme,
+                      spacing,
+                      e.key + 4,
+                    ),
+                  ),
+                ),
+          ],
+
+          SizedBox(
+            height: MediaQuery.of(context).padding.bottom +
+                kBottomNavigationBarHeight +
+                16,
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _sectionHeader(String title, IconData icon, Color accent,
-      TextTheme textTheme, AppSpacing spacing) {
+  Widget _sectionHeader(
+    String title,
+    IconData icon,
+    Color accent,
+    TextTheme textTheme,
+    AppSpacing spacing, {
+    int staggerIndex = 0,
+  }) {
     return Row(
       children: [
         Icon(icon, size: 16, color: accent),
@@ -361,11 +430,20 @@ class UtilityScreenState extends ConsumerState<UtilityScreen> {
           ),
         ),
       ],
-    );
+    ).animate().fadeIn(duration: 200.ms, delay: (50 * staggerIndex).ms).slideX(
+          begin: -0.15,
+          end: 0,
+          duration: 200.ms,
+          delay: (50 * staggerIndex).ms,
+          curve: Curves.easeOutCubic,
+        );
   }
 
   Widget _buildPriorityAlert(
-      ColorScheme color, TextTheme textTheme, AppSpacing spacing) {
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
     return Consumer(
       builder: (context, ref, _) {
         final alertAsync = ref.watch(priorityAlertProvider);
@@ -391,8 +469,7 @@ class UtilityScreenState extends ConsumerState<UtilityScreen> {
                   padding: EdgeInsets.all(spacing.cardInner),
                   decoration: BoxDecoration(
                     color: alertColor.withValues(alpha: 0.08),
-                    borderRadius:
-                        BorderRadius.circular(spacing.radiusMedium),
+                    borderRadius: BorderRadius.circular(spacing.radiusMedium),
                     border: Border.all(
                       color: alertColor.withValues(alpha: 0.25),
                     ),
@@ -452,9 +529,14 @@ class UtilityScreenState extends ConsumerState<UtilityScreen> {
     );
   }
 
-  // Medium card — used for Active Money and Planning sections
-  Widget _buildCard(_UtilityDef item, ColorScheme color, TextTheme textTheme,
-      AppSpacing spacing) {
+  // Medium card with animated background icon
+  Widget _buildCard(
+    _UtilityDef item,
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    int index,
+  ) {
     return Card(
       elevation: 0,
       margin: EdgeInsets.zero,
@@ -465,91 +547,178 @@ class UtilityScreenState extends ConsumerState<UtilityScreen> {
           color: color.outlineVariant.withValues(alpha: 0.5),
         ),
       ),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () {
           HapticFeedback.mediumImpact();
           context.push(item.route);
         },
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        child: Padding(
-          padding: EdgeInsets.all(spacing.cardInner),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        child: SizedBox(
+          height: 120,
+          child: Stack(
             children: [
-              Icon(item.icon, size: 24, color: color.primary),
-              SizedBox(height: spacing.elementGap * 1.5),
-              Text(
-                item.title,
-                style: textTheme.titleSmall
-                    ?.copyWith(fontWeight: FontWeight.bold),
+              // Large background icon — slow float
+              Positioned(
+                right: -8,
+                bottom: -14,
+                child: AnimatedBuilder(
+                  animation: _bgIconController,
+                  builder: (_, __) {
+                    final t = _bgIconController.value;
+                    return Transform.translate(
+                      offset: Offset(t * 6 - 3, -t * 5 + 2.5),
+                      child: Transform.rotate(
+                        angle: (t - 0.5) * 0.12,
+                        child: Icon(
+                          item.icon,
+                          size: 80,
+                          color:
+                              color.primary.withValues(alpha: 0.08 + t * 0.04),
+                        ),
+                      ),
+                    );
+                  },
+                ),
               ),
-              SizedBox(height: spacing.elementGapMin),
-              Text(
-                item.subtitle,
-                style: textTheme.bodySmall
-                    ?.copyWith(color: color.onSurfaceVariant),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // List card — used for Insights section (smaller, horizontal)
-  Widget _buildListCard(_UtilityDef item, ColorScheme color,
-      TextTheme textTheme, AppSpacing spacing) {
-    return Card(
-      elevation: 0,
-      margin: EdgeInsets.zero,
-      color: color.surfaceContainerLow,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        side: BorderSide(
-          color: color.outlineVariant.withValues(alpha: 0.5),
-        ),
-      ),
-      child: InkWell(
-        onTap: () {
-          HapticFeedback.mediumImpact();
-          context.push(item.route);
-        },
-        borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        child: Padding(
-          padding: EdgeInsets.all(spacing.cardInner),
-          child: Row(
-            children: [
-              Icon(item.icon, size: 22, color: color.secondary),
-              SizedBox(width: spacing.elementGap * 1.5),
-              Expanded(
+              // Content
+              Padding(
+                padding: EdgeInsets.all(spacing.cardInner),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: color.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(item.icon, size: 20, color: color.primary),
+                    ),
+                    const Spacer(),
                     Text(
                       item.title,
                       style: textTheme.titleSmall
                           ?.copyWith(fontWeight: FontWeight.bold),
                     ),
+                    SizedBox(height: spacing.elementGapUltraMin),
                     Text(
                       item.subtitle,
                       style: textTheme.bodySmall
                           ?.copyWith(color: color.onSurfaceVariant),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
-              ),
-              Icon(
-                LucideIcons.chevronRight,
-                size: 16,
-                color: color.onSurfaceVariant.withValues(alpha: 0.4),
               ),
             ],
           ),
         ),
       ),
-    );
+    ).animate().fadeIn(duration: 250.ms, delay: (50 * index).ms).slideY(
+          begin: 0.3,
+          end: 0,
+          duration: 250.ms,
+          delay: (50 * index).ms,
+          curve: Curves.easeOutCubic,
+        );
+  }
+
+  // List card with animated background icon
+  Widget _buildListCard(
+    _UtilityDef item,
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    int index,
+  ) {
+    return Card(
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      color: color.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        side: BorderSide(
+          color: color.outlineVariant.withValues(alpha: 0.5),
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.mediumImpact();
+          context.push(item.route);
+        },
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        child: Stack(
+          children: [
+            Positioned(
+              right: 30,
+              top: -6,
+              bottom: -6,
+              child: AnimatedBuilder(
+                animation: _bgIconController,
+                builder: (_, __) {
+                  final t = _bgIconController.value;
+                  return Transform.translate(
+                    offset: Offset(-t * 4 + 2, t * 3 - 1.5),
+                    child: Icon(
+                      item.icon,
+                      size: 56,
+                      color: color.secondary.withValues(alpha: 0.07 + t * 0.04),
+                    ),
+                  );
+                },
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(spacing.cardInner),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: color.secondary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(item.icon, size: 18, color: color.secondary),
+                  ),
+                  SizedBox(width: spacing.elementGap * 1.5),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item.title,
+                          style: textTheme.titleSmall
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          item.subtitle,
+                          style: textTheme.bodySmall
+                              ?.copyWith(color: color.onSurfaceVariant),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    LucideIcons.chevronRight,
+                    size: 16,
+                    color: color.onSurfaceVariant.withValues(alpha: 0.4),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    ).animate().fadeIn(duration: 250.ms, delay: (50 * index).ms).slideY(
+          begin: 0.3,
+          end: 0,
+          duration: 250.ms,
+          delay: (50 * index).ms,
+          curve: Curves.easeOutCubic,
+        );
   }
 }
 

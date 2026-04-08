@@ -1,5 +1,5 @@
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
-import 'dart:convert';
+import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -13,13 +13,12 @@ import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/db/models/trip.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/dialog_utils.dart';
+import 'package:mudra_manager/core/utils/refresh_helper.dart';
 import 'package:mudra_manager/features/trip/data/trip_provider.dart';
-import 'package:mudra_manager/shared/widgets/settlement_card.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 import 'package:mudra_manager/shared/widgets/widgets.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:mudra_manager/core/utils/file_utils.dart';
@@ -39,8 +38,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
   late TabController _tabController;
   int? _filterParticipantId;
   String? _filterCategory;
-  Set<String> _settledKeys = {};
-  Map<String, DateTime> _settledDates = {};
+  // Settlement state is now tracked via real transactions, not SharedPreferences
 
   @override
   void initState() {
@@ -48,80 +46,16 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
     _tabController = TabController(
       length: 2,
       vsync: this,
-      initialIndex: 0, // Will be updated in build based on isTrip
+      initialIndex: 0,
     );
-    _loadSettledData();
   }
 
-  void _updateTabController(bool isActive, bool isTrip) {
+  void _updateTabController(bool isActive) {
     final newLength = isActive ? 2 : 3;
-    final defaultIndex = isTrip ? 0 : 1; // Trip → Expenses, Split → Settlements
     if (_tabController.length != newLength) {
-      final oldIndex = _tabController.index;
       _tabController.dispose();
       _tabController = TabController(length: newLength, vsync: this);
-      if (oldIndex < newLength) {
-        _tabController.index = oldIndex;
-      } else {
-        _tabController.index = defaultIndex.clamp(0, newLength - 1);
-      }
     }
-  }
-
-  Future<void> _loadSettledData() async {
-    final prefs = await SharedPreferences.getInstance();
-    final key = 'settled_${widget.tripId}';
-    final data = prefs.getString(key);
-    if (data != null && data.isNotEmpty) {
-      try {
-        final Map<String, dynamic> decoded = Map<String, dynamic>.from(
-          json.decode(data) as Map,
-        );
-        final Map<String, DateTime> dates = {};
-        for (final entry in decoded.entries) {
-          try {
-            dates[entry.key] = DateTime.parse(entry.value as String);
-          } catch (_) {}
-        }
-        if (mounted) {
-          setState(() {
-            _settledKeys = dates.keys.toSet();
-            _settledDates = dates;
-          });
-        }
-      } catch (_) {
-        // Migrate from old delimiter format
-        final items = data.split('|');
-        final Map<String, DateTime> dates = {};
-        for (var item in items) {
-          final parts = item.split(':');
-          if (parts.length >= 2) {
-            final settlementKey = parts[0];
-            final dateStr = parts.sublist(1).join(':');
-            try {
-              dates[settlementKey] = DateTime.parse(dateStr);
-            } catch (_) {}
-          }
-        }
-        if (mounted) {
-          setState(() {
-            _settledKeys = dates.keys.toSet();
-            _settledDates = dates;
-          });
-          // Re-save in JSON format
-          _saveSettledData();
-        }
-      }
-    }
-  }
-
-  Future<void> _saveSettledData() async {
-    final prefs = await SharedPreferences.getInstance();
-    final key = 'settled_${widget.tripId}';
-    final data = _settledDates.map(
-      (k, v) => MapEntry(k, v.toIso8601String()),
-    );
-    await prefs.setString(key, json.encode(data));
   }
 
   @override
@@ -148,11 +82,15 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
         }
 
         final duration = trip.endDate.difference(trip.startDate).inDays + 1;
-        _updateTabController(trip.isActive, trip.isTrip);
+        _updateTabController(trip.isActive);
 
-        final transactionsList = trip.transactions.toList();
+        final allTransactions = trip.transactions.toList();
+        // Exclude settlements from total spent
+        final expenseTransactions = allTransactions
+            .where((t) => t.splitExpense.value?.description != 'Settlement')
+            .toList();
         double totalSpent = 0;
-        for (var tripTxn in transactionsList) {
+        for (var tripTxn in expenseTransactions) {
           final amount = tripTxn.resolvedAmountIn(trip.currencyCode);
           if (amount != null) totalSpent += amount;
         }
@@ -182,14 +120,10 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      trip.isTrip ? LucideIcons.plane : LucideIcons.users,
-                      size: 14,
-                      color: color.onSurfaceVariant,
-                    ),
+                    Icon(LucideIcons.plane, size: 14, color: color.onSurfaceVariant),
                     SizedBox(width: spacing.elementGapMin),
                     Text(
-                      trip.isTrip ? 'Trip' : 'Group',
+                      'Trip',
                       style: textTheme.labelSmall?.copyWith(
                         color: color.onSurfaceVariant,
                         fontWeight: FontWeight.w600,
@@ -204,94 +138,51 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                   HapticFeedback.mediumImpact();
                   if (value == 'edit') {
                     context.push('/edit-trip/${trip.id}');
-                  } else if (value == 'end') {
+                  } else if (value == 'archive') {
                     final confirm = await DialogUtils.showConfirmation(
                       context,
-                      title: trip.isTrip ? 'End Trip' : 'End Group',
-                      message: trip.isTrip
-                          ? 'Mark this trip as completed?'
-                          : 'Mark this group as completed?',
-                      confirmText: trip.isTrip ? 'End Trip' : 'End Group',
-                      icon: LucideIcons.circleCheck,
+                      title: 'Archive Trip',
+                      message: 'This trip will be moved to archive. All data and settlements will be preserved.',
+                      confirmText: 'Archive',
+                      icon: LucideIcons.archive,
                     );
                     if (confirm == true) {
-                      await ref
-                          .read(tripServiceProvider)
-                          .markTripInactive(widget.tripId);
+                      await ref.read(tripServiceProvider).archiveTrip(widget.tripId);
                       ref.invalidate(allTripsProvider);
                       ref.invalidate(activeTripsProvider);
                       ref.invalidate(tripByIdProvider(widget.tripId));
-                    }
-                  } else if (value == 'delete') {
-                    final confirm = await DialogUtils.showDeleteConfirmation(
-                      context,
-                      title: trip.isTrip ? 'Delete Trip' : 'Delete Group',
-                      message: trip.isTrip
-                          ? 'This will delete all trip data. Continue?'
-                          : 'This will delete all group data. Continue?',
-                    );
-                    if (confirm == true) {
-                      await ref
-                          .read(tripServiceProvider)
-                          .deleteTrip(widget.tripId);
-                      ref.invalidate(allTripsProvider);
-                      ref.invalidate(activeTripsProvider);
                       if (mounted) context.pop();
                     }
                   }
                 },
                 itemBuilder: (ctx) => [
-                  PopupMenuItem(
-                    value: 'edit',
-                    child: Row(
-                      children: [
-                        const Icon(LucideIcons.pencil, size: 18),
-                        const SizedBox(width: 12),
-                        Text(trip.isTrip ? 'Edit Trip' : 'Edit Group'),
-                      ],
-                    ),
-                  ),
-                  if (trip.isActive)
-                    PopupMenuItem(
-                      value: 'end',
+                  if (trip.isActive) ...[
+                    const PopupMenuItem(
+                      value: 'edit',
                       child: Row(
                         children: [
-                          const Icon(LucideIcons.circleCheck, size: 18),
-                          const SizedBox(width: 12),
-                          Text(trip.isTrip ? 'End Trip' : 'End Group'),
+                          Icon(LucideIcons.pencil, size: 18),
+                          SizedBox(width: 12),
+                          Text('Edit Trip'),
                         ],
                       ),
                     ),
-                  PopupMenuItem(
-                    value: 'delete',
-                    child: Row(
-                      children: [
-                        Icon(LucideIcons.trash2, size: 18, color: color.error),
-                        const SizedBox(width: 12),
-                        Text(
-                          trip.isTrip ? 'Delete Trip' : 'Delete Group',
-                          style: TextStyle(color: color.error),
-                        ),
-                      ],
+                    const PopupMenuItem(
+                      value: 'archive',
+                      child: Row(
+                        children: [
+                          Icon(LucideIcons.archive, size: 18),
+                          SizedBox(width: 12),
+                          Text('Archive Trip'),
+                        ],
+                      ),
                     ),
-                  ),
+                  ],
                 ],
               ),
             ],
           ),
-          floatingActionButton: !trip.isTrip && trip.isActive
-              ? FloatingActionButton.extended(
-                  onPressed: () {
-                    HapticFeedback.mediumImpact();
-                    context.push(
-                      AppRoutes.addTripTransaction,
-                      extra: trip.id,
-                    );
-                  },
-                  icon: const Icon(LucideIcons.plus),
-                  label: const Text('Split Expense'),
-                )
-              : null,
+          floatingActionButton: null,
           body: Column(
             children: [
               // Summary card
@@ -308,64 +199,20 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
               TabBar(
                 controller: _tabController,
                 tabs: [
-                  Tab(text: trip.isTrip ? 'Expenses' : 'Balances'),
-                  Tab(text: trip.isTrip ? 'Settlements' : 'Expenses'),
+                  const Tab(text: 'Expenses'),
+                  const Tab(text: 'Settlements'),
                   if (!trip.isActive) const Tab(text: 'Report'),
                 ],
               ),
-              // Tab content
               Expanded(
                 child: TabBarView(
                   controller: _tabController,
-                  children: trip.isTrip
-                      ? [
-                          _buildTransactionsTab(
-                            trip,
-                            isGuestMode,
-                            spacing,
-                            color,
-                            textTheme,
-                          ),
-                          _buildSettlementsTab(
-                            trip,
-                            isGuestMode,
-                            spacing,
-                            color,
-                            textTheme,
-                          ),
-                          if (!trip.isActive)
-                            _buildReportTab(
-                              trip,
-                              isGuestMode,
-                              spacing,
-                              color,
-                              textTheme,
-                            ),
-                        ]
-                      : [
-                          _buildSettlementsTab(
-                            trip,
-                            isGuestMode,
-                            spacing,
-                            color,
-                            textTheme,
-                          ),
-                          _buildTransactionsTab(
-                            trip,
-                            isGuestMode,
-                            spacing,
-                            color,
-                            textTheme,
-                          ),
-                          if (!trip.isActive)
-                            _buildReportTab(
-                              trip,
-                              isGuestMode,
-                              spacing,
-                              color,
-                              textTheme,
-                            ),
-                        ],
+                  children: [
+                    _buildTransactionsTab(trip, isGuestMode, spacing, color, textTheme),
+                    _buildSettlementsTab(trip, isGuestMode, spacing, color, textTheme),
+                    if (!trip.isActive)
+                      _buildReportTab(trip, isGuestMode, spacing, color, textTheme),
+                  ],
                 ),
               ),
             ],
@@ -604,7 +451,15 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
     ColorScheme color,
     TextTheme textTheme,
   ) {
-    final transactionsList = trip.transactions.toList();
+    // Exclude settlements from expenses tab
+    final transactionsList = trip.transactions
+        .where((t) => t.splitExpense.value?.description != 'Settlement')
+        .toList()
+      ..sort((a, b) {
+        final aDate = a.resolvedDate ?? DateTime(2000);
+        final bDate = b.resolvedDate ?? DateTime(2000);
+        return bDate.compareTo(aDate);
+      });
     final participants = trip.participants.toList();
 
     final filteredTransactions = transactionsList.where((tripTxn) {
@@ -684,13 +539,18 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
       );
     }
 
-    return ListView(
-      padding: EdgeInsets.symmetric(
-        horizontal: spacing.cardHorizontal,
-        vertical: spacing.cardVertical,
-      ),
-      children: [
-        // Filter chips
+    return RefreshIndicator(
+      onRefresh: () => RefreshHelper.withMinDuration(() async {
+        ref.invalidate(tripByIdProvider(widget.tripId));
+      }),
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: EdgeInsets.symmetric(
+          horizontal: spacing.cardHorizontal,
+          vertical: spacing.cardVertical,
+        ),
+        children: [
+          // Filter chips
         if (participants.isNotEmpty || categories.isNotEmpty)
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -990,6 +850,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
             );
           }),
       ],
+      ),
     );
   }
 
@@ -1049,21 +910,15 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
         final List<Map<String, dynamic>> settlementList = [];
         settlements.forEach((from, toMap) {
           toMap.forEach((to, amount) {
-            final key = '${from}_TO_$to';
-            final isPaid = _settledKeys.contains(key);
             settlementList.add({
               'from': from,
               'to': to,
               'amount': amount,
-              'key': key,
-              'isPaid': isPaid,
-              'settledDate': _settledDates[key],
             });
           });
         });
 
-        final pendingCount =
-            settlementList.where((s) => !(s['isPaid'] as bool)).length;
+        final pendingCount = settlementList.length;
 
         return ListView(
           padding: EdgeInsets.symmetric(
@@ -1085,7 +940,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                     SizedBox(width: spacing.elementGap),
                     Expanded(
                       child: Text(
-                        'End the trip to settle up',
+                        'Archive the trip to settle up',
                         style: textTheme.bodySmall?.copyWith(
                           color: color.onTertiaryContainer,
                         ),
@@ -1142,26 +997,46 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                   fromPerson: settlement['from'],
                   toPerson: settlement['to'],
                   amount: settlement['amount'],
-                  isPaid: settlement['isPaid'],
-                  settledDate: settlement['settledDate'],
-                  onMarkPaid: settlement['isPaid']
+                  isPaid: false,
+                  onMarkPaid: (trip.isTrip && trip.isActive)
                       ? null
-                      // Trip: only after ended. Split: anytime.
-                      : (trip.isTrip && trip.isActive)
-                          ? null
-                          : () async {
-                              HapticFeedback.mediumImpact();
-                              setState(() {
-                                _settledKeys.add(settlement['key']);
-                                _settledDates[settlement['key']] =
-                                    DateTime.now();
-                              });
-                              await _saveSettledData();
-                            },
+                      : () async {
+                          HapticFeedback.mediumImpact();
+                          final fromName = settlement['from'] as String;
+                          final toName = settlement['to'] as String;
+                          final amount = settlement['amount'] as double;
+                          final participants = trip.participants.toList();
+                          final fromP = participants
+                              .where((p) => p.name == fromName)
+                              .firstOrNull;
+                          final toP = participants
+                              .where((p) => p.name == toName)
+                              .firstOrNull;
+
+                          if (fromP != null && toP != null) {
+                            await ref
+                                .read(tripServiceProvider)
+                                .recordSettlement(
+                                  tripId: widget.tripId,
+                                  fromId: fromP.id,
+                                  toId: toP.id,
+                                  amount: amount,
+                                  currencyCode: trip.currencyCode,
+                                );
+                            ref.invalidate(
+                                tripByIdProvider(widget.tripId));
+                            ref.invalidate(
+                                tripSettlementsProvider(widget.tripId));
+                            ref.invalidate(transactionProvider);
+                          }
+                        },
                   spacing: spacing,
                 ),
               ),
             ),
+
+            // Settlement history timeline
+            _buildSettlementHistory(trip, spacing, color, textTheme),
           ],
         );
       },
@@ -1181,6 +1056,102 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildSettlementHistory(
+    Trip trip,
+    AppSpacing spacing,
+    ColorScheme color,
+    TextTheme textTheme,
+  ) {
+    // Find settlement transactions (description == 'Settlement')
+    final settlements = trip.transactions.where((t) {
+      final desc = t.splitExpense.value?.description;
+      return desc == 'Settlement';
+    }).toList()
+      ..sort((a, b) {
+        final aDate = a.resolvedDate ?? DateTime(2000);
+        final bDate = b.resolvedDate ?? DateTime(2000);
+        return bDate.compareTo(aDate);
+      });
+
+    if (settlements.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(height: spacing.sectionGap),
+        Row(
+          children: [
+            Icon(LucideIcons.history, size: 16, color: color.onSurfaceVariant),
+            SizedBox(width: spacing.elementGap),
+            Text(
+              'Settlement History',
+              style: textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: color.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: spacing.elementGap),
+        ...settlements.map((tripTxn) {
+          final paidBy = tripTxn.paidBy.value;
+          final amount = tripTxn.resolvedAmountIn(trip.currencyCode) ?? 0;
+          final date = tripTxn.resolvedDate ?? DateTime.now();
+          // The "to" person is the one in participantIds
+          final toId = tripTxn.participantIds.isNotEmpty
+              ? tripTxn.participantIds.first
+              : null;
+          final toName = toId != null
+              ? trip.participants
+                    .where((p) => p.id == toId)
+                    .firstOrNull
+                    ?.name ??
+                'Unknown'
+              : 'Unknown';
+
+          return Padding(
+            padding: EdgeInsets.only(bottom: spacing.elementGap),
+            child: Row(
+              children: [
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: Colors.green,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                SizedBox(width: spacing.elementGap * 1.5),
+                Expanded(
+                  child: Text(
+                    '${paidBy?.name ?? "Someone"} paid $toName',
+                    style: textTheme.bodySmall?.copyWith(
+                      color: color.onSurface,
+                    ),
+                  ),
+                ),
+                Text(
+                  formatCurrency(amount, code: trip.currencyCode, decimals: 0),
+                  style: textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: Colors.green,
+                  ),
+                ),
+                SizedBox(width: spacing.elementGap),
+                Text(
+                  DateFormat('d MMM').format(date),
+                  style: textTheme.labelSmall?.copyWith(
+                    color: color.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }),
+      ],
     );
   }
 

@@ -53,7 +53,7 @@ import 'package:mudra_manager/features/transactions/presentation/screens/transfe
 import 'package:mudra_manager/features/trip/presentation/screens/add_trip_transaction_screen.dart';
 import 'package:mudra_manager/features/trip/presentation/screens/edit_trip_screen.dart';
 import 'package:mudra_manager/features/trip/presentation/screens/expense_detail_screen.dart';
-import 'package:mudra_manager/features/trip/presentation/screens/trip_detail_screen.dart';
+import 'package:mudra_manager/features/trip/presentation/screens/group_detail_dispatcher.dart';
 import 'package:mudra_manager/features/trip/presentation/screens/trips_screen.dart';
 import 'package:mudra_manager/features/upgrade/presentation/screens/upgrade_screen.dart';
 import 'package:mudra_manager/features/import_export/presentation/screens/import_export_screen.dart';
@@ -326,7 +326,7 @@ class AppRouter {
                 path: AppRoutes.tripDetail,
                 builder: (context, state) {
                   final tripId = state.extra as int;
-                  return TripDetailScreen(tripId: tripId);
+                  return GroupDetailDispatcher(tripId: tripId);
                 },
               ),
               GoRoute(

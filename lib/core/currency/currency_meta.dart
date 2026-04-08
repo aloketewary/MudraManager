@@ -129,3 +129,29 @@ String formatCurrencyFull(double amount, {String? code, int decimals = 0, String
   }
   return '$effectiveCode $formatted';
 }
+
+/// Compact display for non-widget contexts: "₹12.5K", "₹2.3L", "₹1.1Cr"
+/// Below 10K shows full grouped number. Trims trailing .0.
+String formatCurrencyCompact(double amount, {String? code, int decimals = 1}) {
+  final effectiveCode = code ?? 'INR';
+  final meta = kCurrencies[effectiveCode];
+  final symbol = (meta?.cleanSymbol ?? false) ? meta!.symbol : '$effectiveCode ';
+  final abs = amount.abs();
+  final sign = amount < 0 ? '-' : '';
+
+  if (abs >= 10000000) {
+    return '$sign$symbol${_trimTrailing((abs / 10000000).toStringAsFixed(decimals))}Cr';
+  } else if (abs >= 100000) {
+    return '$sign$symbol${_trimTrailing((abs / 100000).toStringAsFixed(decimals))}L';
+  } else if (abs >= 10000) {
+    return '$sign$symbol${_trimTrailing((abs / 1000).toStringAsFixed(decimals))}K';
+  }
+  return formatCurrency(amount, code: code, decimals: 0);
+}
+
+String _trimTrailing(String value) {
+  if (!value.contains('.')) return value;
+  var trimmed = value.replaceAll(RegExp(r'0+$'), '');
+  if (trimmed.endsWith('.')) trimmed = trimmed.substring(0, trimmed.length - 1);
+  return trimmed;
+}

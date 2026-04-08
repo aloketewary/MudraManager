@@ -20,7 +20,8 @@ final categoryListProvider =
   for (final category in categories) {
     await category.parentCategory.load();
   }
-  return categories;
+  // Hide system categories from user management
+  return categories.where((c) => !c.isSystem).toList();
 });
 
 final selectableCategoriesProvider = FutureProvider.autoDispose

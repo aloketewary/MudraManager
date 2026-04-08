@@ -26,6 +26,10 @@ class Category {
 
   String? packId;
 
+  /// System categories are auto-created and hidden from user management.
+  /// Used for trip/split/settlement transactions.
+  bool isSystem = false;
+
   // Isar requires a default constructor
   Category();
 

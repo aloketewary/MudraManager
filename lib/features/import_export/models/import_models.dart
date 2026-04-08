@@ -30,12 +30,14 @@ class ImportResult {
   final int imported;
   final int skipped;
   final int duplicates;
+  final int categoriesCreated;
   final List<String> errors;
 
   const ImportResult({
     this.imported = 0,
     this.skipped = 0,
     this.duplicates = 0,
+    this.categoriesCreated = 0,
     this.errors = const [],
   });
 

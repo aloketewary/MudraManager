@@ -1,5 +1,6 @@
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
+import 'package:mudra_manager/core/db/models/trip.dart';
 import 'package:mudra_manager/core/providers/collection_watchers.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/services/plugin_service.dart';
@@ -399,30 +400,60 @@ class TransactionService {
     log.d('Deleting transaction ID: $transactionId');
     final isar = await isarService.getInstance();
 
-    // Check if linked to a recurring bill — revert due date if so
     final txn = await isar.transactions.get(transactionId);
-    if (txn != null) {
-      await txn.recurringTransactionSource.load();
-      final recurring = txn.recurringTransactionSource.value;
-      if (recurring != null) {
-        final prevDate = _calculatePreviousDueDate(
-          recurring.nextDueDate, recurring.frequency,
-        );
-        await isar.writeTxn(() async {
-          recurring.nextDueDate = prevDate;
-          recurring.isActive = true;
-          await isar.recurringTransactions.put(recurring);
-          await isar.transactions.delete(transactionId);
-        });
-        log.i('Transaction deleted + recurring due date reverted to $prevDate');
-        return;
-      }
+    if (txn == null) return;
+
+    // Check if linked to a recurring bill — revert due date if so
+    await txn.recurringTransactionSource.load();
+    final recurring = txn.recurringTransactionSource.value;
+    if (recurring != null) {
+      final prevDate = _calculatePreviousDueDate(
+        recurring.nextDueDate, recurring.frequency,
+      );
+      await isar.writeTxn(() async {
+        recurring.nextDueDate = prevDate;
+        recurring.isActive = true;
+        await isar.recurringTransactions.put(recurring);
+        await _cleanupTripLink(isar, transactionId);
+        await isar.transactions.delete(transactionId);
+      });
+      log.i('Transaction deleted + recurring due date reverted to $prevDate');
+      return;
     }
 
     await isar.writeTxn(() async {
+      await _cleanupTripLink(isar, transactionId);
       await isar.transactions.delete(transactionId);
     });
     log.i('Transaction deleted successfully');
+  }
+
+  /// Cleans up any TripTransaction + SplitExpense linked to this transaction.
+  Future<void> _cleanupTripLink(Isar isar, int transactionId) async {
+    final tripTxn = await isar.tripTransactions
+        .filter()
+        .transaction((q) => q.idEqualTo(transactionId))
+        .findFirst();
+    if (tripTxn == null) return;
+
+    // Delete linked split expense
+    await tripTxn.splitExpense.load();
+    if (tripTxn.splitExpense.value != null) {
+      await isar.splitExpenses.delete(tripTxn.splitExpense.value!.id);
+    }
+
+    // Remove from trip's transaction list
+    final trip = await isar.trips
+        .filter()
+        .transactions((q) => q.idEqualTo(tripTxn.id))
+        .findFirst();
+    if (trip != null) {
+      await trip.transactions.load();
+      trip.transactions.removeWhere((t) => t.id == tripTxn.id);
+      await trip.transactions.save();
+    }
+
+    await isar.tripTransactions.delete(tripTxn.id);
   }
 
   DateTime _calculatePreviousDueDate(DateTime current, Frequency frequency) {

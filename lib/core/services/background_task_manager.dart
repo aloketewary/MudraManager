@@ -49,7 +49,8 @@ class BackgroundTaskManager {
       await RecurringTransactionService(IsarService(), gamificationService)
           .processRecurringTransactions();
       await SummaryScheduler.checkAndShowSummaries();
-      await BillService.scheduleBillReminders();
+      // Bill reminders handled by SmartNotificationService.checkUpcomingBills()
+      // with proper dedup — don't fire raw notifications here.
       await BillService.createPendingTransactionsForDueBills();
       await BalanceHistoryService.instance.recordDailySnapshots();
       await SmartNotificationService.instance.runSmartChecks();

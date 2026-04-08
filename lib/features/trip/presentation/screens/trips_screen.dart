@@ -5,10 +5,12 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/core/utils/refresh_helper.dart';
 import 'package:mudra_manager/shared/widgets/ambient_brand_section.dart';
 import 'package:mudra_manager/features/trip/data/trip_provider.dart';
 import 'package:mudra_manager/core/db/models/trip.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
+import 'package:mudra_manager/core/utils/refresh_helper.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/features/trip/data/trip_service.dart';
 
@@ -69,11 +71,21 @@ class TripsScreen extends ConsumerWidget {
             return TabBarView(
               children: [
                 _buildListView(
-                  context, ref, trips, spacing, color, textTheme,
+                  context,
+                  ref,
+                  trips,
+                  spacing,
+                  color,
+                  textTheme,
                   isTrip: true,
                 ),
                 _buildListView(
-                  context, ref, splits, spacing, color, textTheme,
+                  context,
+                  ref,
+                  splits,
+                  spacing,
+                  color,
+                  textTheme,
                   isTrip: false,
                 ),
               ],
@@ -162,15 +174,6 @@ class TripsScreen extends ConsumerWidget {
                     ?.copyWith(color: color.onSurfaceVariant),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 24),
-              FilledButton.icon(
-                onPressed: () {
-                  HapticFeedback.mediumImpact();
-                  context.push(AppRoutes.createTrip, extra: {'isTrip': isTrip});
-                },
-                icon: const Icon(LucideIcons.plus),
-                label: Text(isTrip ? 'Create Trip' : 'Create Split Group'),
-              ),
             ],
           ),
         ),
@@ -180,54 +183,61 @@ class TripsScreen extends ConsumerWidget {
     final active = items.where((t) => t.isActive).toList();
     final archived = items.where((t) => !t.isActive).toList();
 
-    return ListView(
-      padding: EdgeInsets.symmetric(
-        horizontal: spacing.cardHorizontal,
-        vertical: spacing.cardVertical,
-      ),
-      children: [
-        if (active.isNotEmpty) ...[
-          _buildTypeHeader(
-            isTrip ? 'ACTIVE' : 'ONGOING',
-            isTrip ? LucideIcons.plane : LucideIcons.split,
-            color.primary,
-            textTheme,
-          ),
-          SizedBox(height: spacing.elementGap),
-          ...active.map(
-            (t) => Padding(
-              padding: EdgeInsets.only(bottom: spacing.cardVertical),
-              child: _buildTripCard(
-                context,
-                ref,
-                t,
-                color,
-                textTheme,
-                spacing,
-                isActive: true,
+    return RefreshIndicator(
+      onRefresh: () => RefreshHelper.withMinDuration(() async {
+        ref.invalidate(allTripsProvider);
+      }),
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: EdgeInsets.symmetric(
+          horizontal: spacing.cardHorizontal,
+          vertical: spacing.cardVertical,
+        ),
+        children: [
+          if (active.isNotEmpty) ...[
+            _buildTypeHeader(
+              isTrip ? 'ACTIVE' : 'ONGOING',
+              isTrip ? LucideIcons.plane : LucideIcons.split,
+              color.primary,
+              textTheme,
+            ),
+            SizedBox(height: spacing.elementGap),
+            ...active.map(
+              (t) => Padding(
+                padding: EdgeInsets.only(bottom: spacing.cardVertical),
+                child: _buildTripCard(
+                  context,
+                  ref,
+                  t,
+                  color,
+                  textTheme,
+                  spacing,
+                  isActive: true,
+                ),
               ),
             ),
-          ),
-          SizedBox(height: spacing.sectionGap),
-        ],
-        if (archived.isNotEmpty) ...[
-          _buildTypeHeader(
-            'ARCHIVE',
-            LucideIcons.archive,
-            color.onSurfaceVariant,
-            textTheme,
-          ),
-          SizedBox(height: spacing.elementGap),
-          ...archived.map(
-            (t) => Padding(
-              padding: EdgeInsets.only(bottom: spacing.cardVertical),
-              child: _buildTripCard(context, ref, t, color, textTheme, spacing),
+            SizedBox(height: spacing.sectionGap),
+          ],
+          if (archived.isNotEmpty) ...[
+            _buildTypeHeader(
+              'ARCHIVE',
+              LucideIcons.archive,
+              color.onSurfaceVariant,
+              textTheme,
             ),
-          ),
+            SizedBox(height: spacing.elementGap),
+            ...archived.map(
+              (t) => Padding(
+                padding: EdgeInsets.only(bottom: spacing.cardVertical),
+                child:
+                    _buildTripCard(context, ref, t, color, textTheme, spacing),
+              ),
+            ),
+          ],
+          const SizedBox(height: 24),
+          const AmbientBrandSection(),
         ],
-        const SizedBox(height: 24),
-        const AmbientBrandSection(),
-      ],
+      ),
     );
   }
 
@@ -264,7 +274,7 @@ class TripsScreen extends ConsumerWidget {
   }) {
     final isSplit = !trip.isTrip;
     final duration = trip.endDate.difference(trip.startDate).inDays + 1;
-    final summaryAsync = ref.watch(tripSummaryProvider(trip));
+    final summaryAsync = ref.watch(tripSummaryProvider(trip.id));
 
     return Card(
       elevation: 0,
@@ -298,8 +308,7 @@ class TripsScreen extends ConsumerWidget {
                     padding: EdgeInsets.all(spacing.elementGap * 1.5),
                     decoration: BoxDecoration(
                       color: color.primary.withValues(alpha: 0.12),
-                      borderRadius:
-                          BorderRadius.circular(spacing.radiusMedium),
+                      borderRadius: BorderRadius.circular(spacing.radiusMedium),
                     ),
                     child: Icon(
                       isSplit ? LucideIcons.users : LucideIcons.plane,
@@ -417,8 +426,7 @@ class TripsScreen extends ConsumerWidget {
                       ?.copyWith(color: color.onSurfaceVariant),
                 ),
                 Text(
-                  formatCurrency(s.ownerShare,
-                      code: currencyCode, decimals: 0),
+                  formatCurrency(s.ownerShare, code: currencyCode, decimals: 0),
                   style: textTheme.bodySmall?.copyWith(
                     fontWeight: FontWeight.w600,
                     color: color.primary,
@@ -435,8 +443,7 @@ class TripsScreen extends ConsumerWidget {
         ),
         Text(
           '${s.participantCount} people',
-          style:
-              textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+          style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
         ),
       ],
     );
@@ -491,8 +498,7 @@ class TripsScreen extends ConsumerWidget {
         ),
         Text(
           '${s.participantCount} people',
-          style:
-              textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+          style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
         ),
       ],
     );
@@ -527,8 +533,8 @@ class TripsScreen extends ConsumerWidget {
               SizedBox(height: spacing.sectionGap),
               Text(
                 'Create Group',
-                style: textTheme.titleLarge
-                    ?.copyWith(fontWeight: FontWeight.bold),
+                style:
+                    textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               SizedBox(height: spacing.sectionGap),
               ListTile(
@@ -538,13 +544,17 @@ class TripsScreen extends ConsumerWidget {
                     color: color.primaryContainer,
                     borderRadius: BorderRadius.circular(spacing.radiusMedium),
                   ),
-                  child: Icon(LucideIcons.plane, color: color.primary, size: 24),
+                  child:
+                      Icon(LucideIcons.plane, color: color.primary, size: 24),
                 ),
                 title: Text('Create Trip',
-                    style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+                    style: textTheme.titleSmall
+                        ?.copyWith(fontWeight: FontWeight.bold)),
                 subtitle: Text('Track travel expenses with dates & budget',
-                    style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant)),
-                trailing: Icon(LucideIcons.chevronRight, size: 18, color: color.onSurfaceVariant),
+                    style: textTheme.bodySmall
+                        ?.copyWith(color: color.onSurfaceVariant)),
+                trailing: Icon(LucideIcons.chevronRight,
+                    size: 18, color: color.onSurfaceVariant),
                 onTap: () {
                   HapticFeedback.mediumImpact();
                   ctx.pop();
@@ -559,13 +569,17 @@ class TripsScreen extends ConsumerWidget {
                     color: color.secondaryContainer,
                     borderRadius: BorderRadius.circular(spacing.radiusMedium),
                   ),
-                  child: Icon(LucideIcons.users, color: color.secondary, size: 24),
+                  child:
+                      Icon(LucideIcons.users, color: color.secondary, size: 24),
                 ),
                 title: Text('Create Shared Group',
-                    style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+                    style: textTheme.titleSmall
+                        ?.copyWith(fontWeight: FontWeight.bold)),
                 subtitle: Text('Split bills with friends',
-                    style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant)),
-                trailing: Icon(LucideIcons.chevronRight, size: 18, color: color.onSurfaceVariant),
+                    style: textTheme.bodySmall
+                        ?.copyWith(color: color.onSurfaceVariant)),
+                trailing: Icon(LucideIcons.chevronRight,
+                    size: 18, color: color.onSurfaceVariant),
                 onTap: () {
                   HapticFeedback.mediumImpact();
                   ctx.pop();

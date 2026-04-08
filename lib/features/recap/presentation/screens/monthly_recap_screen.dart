@@ -75,121 +75,85 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
     final monthName = DateFormat('MMMM yyyy').format(_selectedMonth);
 
     return Scaffold(
+      appBar: AppBar(
+        title: Text('Recap — $monthName'),
+      ),
       body: FutureBuilder<MonthlyRecapData>(
         future: _loadData(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
-            return CustomScrollView(
-              slivers: [
-                SliverAppBar(title: Text('Recap — $monthName'), pinned: true),
-                SliverFillRemaining(
-                  child: ListView(children: List.generate(4, (_) => DashboardCardSkeleton())),
-                ),
-              ],
+            return ListView(
+              padding: EdgeInsets.all(spacing.cardHorizontal),
+              children: List.generate(4, (_) => DashboardCardSkeleton()),
             );
           }
 
           final data = snapshot.data!;
-          return CustomScrollView(
-            slivers: [
-              // ── HERO HEADER ──
-              SliverAppBar(
-                expandedHeight: 220,
-                pinned: true,
-                title: const Text('Monthly Recap'),
-                actions: [
-                  IconButton(
-                    icon: _downloading
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(LucideIcons.download),
-                    onPressed: _downloading ? null : () => _downloadPdf(data),
-                    tooltip: 'Download PDF',
+          return ListView(
+            padding: EdgeInsets.symmetric(
+              horizontal: spacing.cardHorizontal,
+              vertical: spacing.cardVertical,
+            ),
+            children: [
+              // ── HERO SUMMARY ──
+              Container(
+                padding: EdgeInsets.all(spacing.cardInner + spacing.elementGap),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      color.primary.withValues(alpha: isDark ? 0.15 : 0.08),
+                      color.surface,
+                    ],
                   ),
-                ],
-                flexibleSpace: FlexibleSpaceBar(
-                  background: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          color.primary.withValues(alpha: isDark ? 0.2 : 0.12),
-                          color.primaryContainer.withValues(alpha: 0.6),
-                          color.surface,
-                        ],
-                      ),
-                    ),
-                    child: SafeArea(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 60, 20, 16),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              monthName,
-                              style: textTheme.headlineMedium?.copyWith(
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '${data.transactionCount} transactions tracked',
-                              style: textTheme.bodyMedium?.copyWith(
-                                color: color.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
+                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                  border: Border.all(color: color.outlineVariant.withValues(alpha: 0.3)),
                 ),
-              ),
-
-              SliverPadding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: spacing.cardHorizontal,
-                  vertical: spacing.cardVertical,
-                ),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate([
-                    // ── SUMMARY CARDS ──
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     Row(
                       children: [
-                        _summaryTile(
-                          'Income',
-                          data.totalIncome,
-                          color.primary,
-                          color,
-                          textTheme,
-                          spacing,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                monthName,
+                                style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '${data.transactionCount} transactions',
+                                style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+                              ),
+                            ],
+                          ),
                         ),
-                        SizedBox(width: spacing.elementGap),
-                        _summaryTile(
-                          'Expense',
-                          data.totalExpense,
-                          color.error,
-                          color,
-                          textTheme,
-                          spacing,
-                        ),
-                        SizedBox(width: spacing.elementGap),
-                        _summaryTile(
-                          'Saved',
-                          data.netSavings,
-                          color.primary,
-                          color,
-                          textTheme,
-                          spacing,
+                        IconButton(
+                          icon: _downloading
+                              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                              : const Icon(LucideIcons.download),
+                          onPressed: _downloading ? null : () => _downloadPdf(data),
+                          tooltip: 'Download PDF',
                         ),
                       ],
                     ),
-                    SizedBox(height: spacing.sectionGap),
+                    SizedBox(height: spacing.elementGap * 1.5),
+                    Row(
+                      children: [
+                        _summaryTile('Income', data.totalIncome, color.primary, color, textTheme, spacing),
+                        SizedBox(width: spacing.elementGap),
+                        _summaryTile('Expense', data.totalExpense, color.error, color, textTheme, spacing),
+                        SizedBox(width: spacing.elementGap),
+                        _summaryTile('Saved', data.netSavings, color.primary, color, textTheme, spacing),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: spacing.sectionGap),
 
                     // ── MONTH-OVER-MONTH ──
                     if (data.prevMonthIncome > 0 ||
@@ -386,15 +350,12 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
                     ),
                     const SizedBox(height: 24),
                     const AmbientBrandSection(),
-                  ]),
-                ),
-              ),
-            ],
+                  ],
+                );
+              },
+            ),
           );
-        },
-      ),
-    );
-  }
+        }
 
   // ── SUMMARY TILE ──
   Widget _summaryTile(

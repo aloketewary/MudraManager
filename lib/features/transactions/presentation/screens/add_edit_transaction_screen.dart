@@ -1,4 +1,3 @@
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -101,7 +100,6 @@ class _AddEditTransactionScreenState
   bool _smartDefaultsApplied = false;
   bool _accountScrolled = false;
   bool _categoryScrolled = false;
-  static final _notificationsPlugin = FlutterLocalNotificationsPlugin();
   ProviderSubscription? _tripSubscription;
 
   @override
@@ -1523,13 +1521,12 @@ class _AddEditTransactionScreenState
   Future<void> _checkLowBalance(Account? account) async {
     if (account == null) return;
     final accountsService = ref.read(accountServiceProvider);
-    final notificationService = ref.read(notificationRecordServiceProvider);
-    final ctxt = AppLocalizations.of(context)!;
     final currentBalance = await accountsService.getAccountBalance(account.id);
     final lowBalanceThreshold =
         SharedPrefsUtil.instance.getLowBalanceThreshold();
 
     if (currentBalance < lowBalanceThreshold) {
+      final notificationService = ref.read(notificationRecordServiceProvider);
       await notificationService.logNotification(
         title: 'Low Balance Alert',
         body:
@@ -1541,6 +1538,7 @@ class _AddEditTransactionScreenState
         title: 'Low Balance Alert',
         body:
             'Your balance in ${account.name} is ${formatCurrency(currentBalance, decimals: 2)}.',
+        dedupKey: 'low_balance_${account.id}',
       );
     }
   }
@@ -1549,7 +1547,6 @@ class _AddEditTransactionScreenState
     if (!txn.isExpense || txn.isTransfer) return;
     final alertService = BudgetAlertService(
       ref.read(isarServiceProvider),
-      _notificationsPlugin,
     );
 
     final alerts = await alertService.checkBudgetsAfterTransaction(txn);

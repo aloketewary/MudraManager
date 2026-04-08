@@ -203,68 +203,57 @@ class HomePageState extends ConsumerState<HomePage>
               label: 'Activity',
             ),
             NavigationDestination(
-              icon: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  SvgPicture.asset(
-                    'assets/logo/nav/outline/utility.svg',
+              icon: Consumer(
+                builder: (context, ref, _) {
+                  final activeTrips = ref.watch(activeTripsProvider);
+                  final hasActiveTrip = activeTrips.maybeWhen(
+                    data: (trips) {
+                      final now = DateTime.now();
+                      final today = DateTime(now.year, now.month, now.day);
+                      return trips.any((t) {
+                        if (!t.isTrip) return false;
+                        final start = DateTime(t.startDate.year, t.startDate.month, t.startDate.day);
+                        return t.isActive && !today.isBefore(start);
+                      });
+                    },
+                    orElse: () => false,
+                  );
+                  return SvgPicture.asset(
+                    hasActiveTrip
+                        ? 'assets/logo/nav/outline/trip.svg'
+                        : 'assets/logo/nav/outline/utility.svg',
                     colorFilter: ColorFilter.mode(
-                      isDark ? Colors.white : Colors.black,
+                      hasActiveTrip
+                          ? Theme.of(context).colorScheme.primary
+                          : (isDark ? Colors.white : Colors.black),
                       BlendMode.srcIn,
                     ),
-                  ),
-                  Consumer(
-                    builder: (context, ref, _) {
-                      final activeTrips = ref.watch(activeTripsProvider);
-                      return activeTrips.maybeWhen(
-                        data: (trips) {
-                          final now = DateTime.now();
-                          final today = DateTime(now.year, now.month, now.day);
-                          // Only show trips that have actually started
-                          final currentTrips = trips.where((t) {
-                            if (!t.isTrip) return false;
-                            final start = DateTime(
-                              t.startDate.year,
-                              t.startDate.month,
-                              t.startDate.day,
-                            );
-                            return !today.isBefore(start);
-                          }).toList();
-                          if (currentTrips.isEmpty) {
-                            return const SizedBox.shrink();
-                          }
-                          final trip = currentTrips.first;
-                          if (trip.isActive) {
-                            return Positioned(
-                              right: -2,
-                              top: -2,
-                              child: Container(
-                                width: 8,
-                                height: 8,
-                                decoration: BoxDecoration(
-                                  color:
-                                      Theme.of(context).colorScheme.secondary,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                            );
-                          } else {
-                            return const SizedBox.shrink();
-                          }
-                        },
-                        orElse: () => const SizedBox.shrink(),
-                      );
-                    },
-                  ),
-                ],
+                  );
+                },
               ),
-              selectedIcon: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  SvgPicture.asset(
-                    'assets/logo/nav/solid/utility.svg',
+              selectedIcon: Consumer(
+                builder: (context, ref, _) {
+                  final activeTrips = ref.watch(activeTripsProvider);
+                  final hasActiveTrip = activeTrips.maybeWhen(
+                    data: (trips) {
+                      final now = DateTime.now();
+                      final today = DateTime(now.year, now.month, now.day);
+                      return trips.any((t) {
+                        if (!t.isTrip) return false;
+                        final start = DateTime(t.startDate.year, t.startDate.month, t.startDate.day);
+                        return t.isActive && !today.isBefore(start);
+                      });
+                    },
+                    orElse: () => false,
+                  );
+                  return SvgPicture.asset(
+                    hasActiveTrip
+                        ? 'assets/logo/nav/solid/trip.svg'
+                        : 'assets/logo/nav/solid/utility.svg',
                     colorFilter: ColorFilter.mode(
-                      isDark ? Colors.white : Colors.black,
+                      hasActiveTrip
+                          ? Theme.of(context).colorScheme.primary
+                          : (isDark ? Colors.white : Colors.black),
                       BlendMode.srcIn,
                     ),
                   ).animate(target: _selectedIndex == 2 ? 1 : 0).scale(
@@ -272,43 +261,8 @@ class HomePageState extends ConsumerState<HomePage>
                         end: const Offset(1, 1),
                         curve: Curves.easeOutCubic,
                         duration: 250.ms,
-                      ),
-                  Consumer(
-                    builder: (context, ref, _) {
-                      final activeTrips = ref.watch(activeTripsProvider);
-                      return activeTrips.maybeWhen(
-                        data: (trips) {
-                          final now = DateTime.now();
-                          final today = DateTime(now.year, now.month, now.day);
-                          final hasStarted = trips.any((t) {
-                            if (!t.isTrip) return false;
-                            final start = DateTime(
-                              t.startDate.year,
-                              t.startDate.month,
-                              t.startDate.day,
-                            );
-                            return !today.isBefore(start);
-                          });
-                          if (!hasStarted) return const SizedBox.shrink();
-                          return Positioned(
-                            right: -2,
-                            top: -2,
-                            child: Container(
-                              width: 8,
-                              height: 8,
-                              decoration: BoxDecoration(
-                                color:
-                                    Theme.of(context).colorScheme.secondary,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                          );
-                        },
-                        orElse: () => const SizedBox.shrink(),
                       );
-                    },
-                  ),
-                ],
+                },
               ),
               label: 'Manage',
             ),
@@ -415,7 +369,7 @@ class HomePageState extends ConsumerState<HomePage>
                     }
                   },
                 ),
-                UtilityScreen(key: utilityKey),
+                UtilityScreen(key: utilityKey, isTabActive: _selectedIndex == 2),
                 const StatisticsScreen(),
                 const ProfileScreen(),
               ],

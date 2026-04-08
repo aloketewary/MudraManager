@@ -6,6 +6,7 @@ import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
+import 'package:mudra_manager/core/utils/category_resolver.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
 import 'package:mudra_manager/features/import_export/models/column_mapping.dart';
@@ -217,16 +218,19 @@ class ExcelImportService {
   }
 
   /// Import valid rows into the database.
+  /// Auto-creates missing categories with relevant icons/colors/keywords.
   static Future<ImportResult> importRows({
     required List<ImportRow> rows,
     required Account defaultAccount,
     required Map<String, Category> categoryMap,
     required IsarService isarService,
+    bool autoCreateCategories = true,
   }) async {
     final isar = await isarService.getInstance();
     int imported = 0;
     int skipped = 0;
     int duplicates = 0;
+    int categoriesCreated = 0;
     final errors = <String>[];
 
     final validRows = rows.where((r) => r.isValid).toList();
@@ -251,10 +255,24 @@ class ExcelImportService {
 
         txn.account.value = defaultAccount;
 
-        // Match category
+        // Match or auto-create category
         if (row.category != null && row.category!.isNotEmpty) {
           final catKey = row.category!.toLowerCase().trim();
-          txn.category.value = categoryMap[catKey];
+          var matched = categoryMap[catKey];
+
+          if (matched == null && autoCreateCategories) {
+            // Auto-create with relevant icon/color/keywords
+            matched = CategoryResolver.createCategory(row.category!);
+            await isar.writeTxn(() async {
+              await isar.categorys.put(matched!);
+            });
+            // Add to map so subsequent rows reuse it
+            categoryMap[catKey] = matched;
+            categoriesCreated++;
+            _log.i('Auto-created category: ${row.category}');
+          }
+
+          txn.category.value = matched;
         }
 
         txn.isFromSms = false;
@@ -274,13 +292,14 @@ class ExcelImportService {
 
     skipped += rows.where((r) => !r.isValid).length;
 
-    _log.i('Import done: $imported imported, $skipped skipped, $duplicates duplicates');
+    _log.i('Import done: $imported imported, $skipped skipped, $duplicates duplicates, $categoriesCreated categories created');
 
     return ImportResult(
       imported: imported,
       skipped: skipped,
       duplicates: duplicates,
       errors: errors,
+      categoriesCreated: categoriesCreated,
     );
   }
 

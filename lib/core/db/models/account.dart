@@ -30,6 +30,12 @@ class Account {
   @Index() // Index for easily filtering active accounts
   bool isActive = true;
 
+  /// Whether this is the primary/default account.
+  /// Used for auto-assigning trip/split ledger transactions.
+  /// Only one account should be primary at a time.
+  @Index()
+  bool isPrimary = false;
+
   // Maybe add: currency code/symbol if supporting multiple currencies
 
   // Isar requires a default constructor

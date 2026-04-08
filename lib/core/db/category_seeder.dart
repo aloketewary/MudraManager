@@ -376,4 +376,70 @@ class CategorySeeder {
       }
     });
   }
+
+  /// System categories for trip/split/settlement.
+  /// Created once, hidden from user management.
+  static const _systemCategories = [
+    (
+      name: 'Shared Expense',
+      icon: 'split_bill',
+      color: 0xFF3B82F6,
+      type: CategoryType.expense,
+    ),
+    (
+      name: 'Trip Expense',
+      icon: 'card_travel',
+      color: 0xFF8B5CF6,
+      type: CategoryType.expense,
+    ),
+    (
+      name: 'Settlement',
+      icon: 'settlement',
+      color: 0xFF10B981,
+      type: CategoryType.expense,
+    ),
+    (
+      name: 'Settlement Received',
+      icon: 'settlement',
+      color: 0xFF10B981,
+      type: CategoryType.income,
+    ),
+  ];
+
+  /// Seeds system categories if they don't exist.
+  /// Safe to call on every app start — no-op if already seeded.
+  static Future<void> seedSystemCategories(Isar isar) async {
+    final existing = await isar.categorys
+        .filter()
+        .isSystemEqualTo(true)
+        .findAll();
+    final existingNames = existing.map((c) => c.name).toSet();
+
+    final toCreate = <Category>[];
+    for (final def in _systemCategories) {
+      if (existingNames.contains(def.name)) continue;
+      toCreate.add(
+        Category.create(name: def.name, categoryType: def.type)
+          ..iconName = def.icon
+          ..colorValue = def.color
+          ..isSystem = true,
+      );
+    }
+
+    if (toCreate.isEmpty) return;
+
+    await isar.writeTxn(() async {
+      await isar.categorys.putAll(toCreate);
+    });
+  }
+
+  /// Looks up a system category by name. Returns null if not found.
+  static Future<Category?> getSystemCategory(
+      Isar isar, String name) async {
+    return isar.categorys
+        .filter()
+        .isSystemEqualTo(true)
+        .nameEqualTo(name)
+        .findFirst();
+  }
 }

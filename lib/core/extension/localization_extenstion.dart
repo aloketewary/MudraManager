@@ -132,10 +132,10 @@ extension AppLocalizationsHelper on AppLocalizations {
       return '$s${_trimTrailingZeros((amount / 10000000).toStringAsFixed(fixedStringLength))}$currency_crore_short';
     } else if (amount.abs() >= 100000) {
       return '$s${_trimTrailingZeros((amount / 100000).toStringAsFixed(fixedStringLength))}$currency_lakh_short';
-    } else if (amount.abs() >= 1000) {
+    } else if (amount.abs() >= 10000) {
       return '$s${_trimTrailingZeros((amount / 1000).toStringAsFixed(fixedStringLength))}$currency_thousand_short';
     }
-    return formatCurrencyWithSign(fixedStringLength, amount);
+    return formatCurrencyWithSign(0, amount);
   }
 
   String _trimTrailingZeros(String value) {

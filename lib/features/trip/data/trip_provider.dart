@@ -36,7 +36,17 @@ final tripSettlementsProvider = FutureProvider.autoDispose
 });
 
 final tripSummaryProvider = FutureProvider.autoDispose
-    .family<TripSummary, Trip>((ref, trip) async {
+    .family<TripSummary, int>((ref, tripId) async {
   final service = ref.watch(tripServiceProvider);
+  final trip = await service.getTripById(tripId);
+  if (trip == null) {
+    return const TripSummary(
+      participantCount: 0,
+      totalSpent: 0,
+      ownerShare: 0,
+      ownerPaid: 0,
+      netBalance: 0,
+    );
+  }
   return await service.getTripSummary(trip);
 });

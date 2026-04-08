@@ -1,4 +1,3 @@
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
@@ -19,72 +18,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 class SmartNotificationService {
   static final SmartNotificationService instance = SmartNotificationService._();
   static final AppLog _log = AppLog(getLogger(), 'SmartNotificationService');
-  static const _maxDailyPush = 3;
-  static const _pushCountKey = 'smart_push_count';
-  static const _pushDateKey = 'smart_push_date';
-
-  final FlutterLocalNotificationsPlugin _notifications =
-      FlutterLocalNotificationsPlugin();
-  bool _initialized = false;
 
   SmartNotificationService._();
 
-  Future<void> initialize() async {
-    if (_initialized) return;
-    const androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
-    const iosSettings = DarwinInitializationSettings();
-    const settings =
-        InitializationSettings(android: androidSettings, iOS: iosSettings);
-    await _notifications.initialize(settings);
-    _initialized = true;
-    _log.i('Smart notifications initialized');
-  }
-
-  Future<int> _todaysPushCount() async {
-    final prefs = await SharedPreferences.getInstance();
-    final today =
-        '${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}';
-    if (prefs.getString(_pushDateKey) != today) {
-      await prefs.setInt(_pushCountKey, 0);
-      await prefs.setString(_pushDateKey, today);
-      return 0;
-    }
-    return prefs.getInt(_pushCountKey) ?? 0;
-  }
-
-  Future<void> _bumpPushCount() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(_pushCountKey, (prefs.getInt(_pushCountKey) ?? 0) + 1);
-  }
-
-  // ─── DEDUPLICATION ───
-  // Check if we already sent this exact alert type today
-  Future<bool> _alreadySentToday(Isar isar, String type) async {
-    final today = DateTime.now();
-    final startOfDay = DateTime(today.year, today.month, today.day);
-    final existing = await isar.notificationRecords
-        .filter()
-        .typeEqualTo(type)
-        .timestampGreaterThan(startOfDay)
-        .findFirst();
-    return existing != null;
-  }
-
   // ─── 7. WEEKLY SUMMARY (📅) ───
-  Future<void> checkWeeklySummary() async {
-    final prefs = await SharedPreferences.getInstance();
-    final enabled = prefs.getBool('weekly_summary_enabled') ?? true;
-    if (!enabled) return;
+  // Handled by SummaryScheduler in _runAllTasks — skip here to avoid double-fire.
 
-    final targetDay = prefs.getInt('weekly_summary_day') ?? DateTime.sunday;
-    if (DateTime.now().weekday != targetDay) return;
-
-    // Delegate to NotificationService which handles the full computation
-    await NotificationService.showWeeklySummary();
-  }
-
-  // Persist + push OS notification in one shot
+  /// All OS notifications route through NotificationService gateway.
+  /// This method only handles in-app record persistence + dedup.
   Future<void> _emit(
     Isar isar, {
     required String type,
@@ -99,9 +40,7 @@ class SmartNotificationService {
     String? actionData,
     int? budgetId,
   }) async {
-    if (await _alreadySentToday(isar, type)) return;
-
-    // 1. Persist to NotificationRecord (feeds the in-app notification screen)
+    // 1. Save in-app record
     final record = NotificationRecord()
       ..title = title
       ..body = body
@@ -117,41 +56,29 @@ class SmartNotificationService {
 
     await isar.writeTxn(() => isar.notificationRecords.put(record));
 
-    // 2. Fire OS notification
-    if (await _todaysPushCount() < _maxDailyPush) {
-      await _notifications.show(
-        type.hashCode,
-        title,
-        body,
-        NotificationDetails(
-          android: AndroidNotificationDetails(
-            channel,
-            channelName,
-            importance: priority == NotificationPriority.urgent
-                ? Importance.high
-                : Importance.defaultImportance,
-            priority: priority == NotificationPriority.urgent
-                ? Priority.high
-                : Priority.defaultPriority,
-          ),
-          iOS: const DarwinNotificationDetails(),
-        ),
-      );
-      await _bumpPushCount();
-    }
+    // 2. Fire OS notification through the single gateway (handles throttle + dedup)
+    await NotificationService.showLocalNotification(
+      id: type.hashCode.abs() % 2147483647,
+      title: title,
+      body: body,
+      dedupKey: type,
+    );
 
     _log.i('Smart alert emitted: $type');
   }
 
   // ─── 1. BUDGET ALERTS (🚨 Overspending Warning) ───
+  /// Collects all exceeded/warning budgets, fires ONE grouped notification.
   Future<void> checkBudgetAlerts() async {
     final isar = await IsarService().getInstance();
     final now = DateTime.now();
     final budgets =
         await isar.budgets.filter().isArchivedEqualTo(false).findAll();
 
+    final exceeded = <String>[];
+    final warnings = <String>[];
+
     for (final budget in budgets) {
-      // Skip expired one-time budgets
       if (budget.recurrence == BudgetRecurrence.none &&
           budget.endDate.isBefore(now)) {
         continue;
@@ -178,41 +105,56 @@ class SmartNotificationService {
 
       final pct = (spent / budget.amount * 100);
 
-      if (pct >= 100) {
-        await _emit(
-          isar,
-          type: 'budget_exceeded_${budget.id}',
-          title: '🚨 ${budget.name} is over budget',
-          body: Tone.current.budgetExceededNotif(
-            budget.name,
-            spent.toStringAsFixed(0),
-            budget.amount.toStringAsFixed(0),
-          ),
-          channel: 'budget_alerts',
-          channelName: 'Budget Alerts',
-          priority: NotificationPriority.urgent,
-          primaryAction: 'Review Budget',
-          actionData: jsonEncode({'type': 'view_budget'}),
-          budgetId: budget.id,
-        );
-      } else if (pct >= 80) {
-        await _emit(
-          isar,
-          type: 'budget_warning_${budget.id}',
-          title: '⚠️ ${budget.name} is getting tight',
-          body: Tone.current.budgetWarningNotif(
-            budget.name,
-            (budget.amount - spent).toStringAsFixed(0),
-            pct.toStringAsFixed(0),
-          ),
-          channel: 'budget_alerts',
-          channelName: 'Budget Alerts',
-          priority: NotificationPriority.high,
-          primaryAction: 'View Details',
-          actionData: jsonEncode({'type': 'view_budget'}),
-          budgetId: budget.id,
-        );
+      // Reset flags if spending dropped (new period started)
+      if (pct < 80 && (budget.notifiedAt80 || budget.notifiedAt90 || budget.notifiedAt100)) {
+        budget.notifiedAt80 = false;
+        budget.notifiedAt90 = false;
+        budget.notifiedAt100 = false;
+        await isar.writeTxn(() => isar.budgets.put(budget));
       }
+
+      if (pct >= 100 && !budget.notifiedAt100) {
+        exceeded.add(budget.name);
+        budget.notifiedAt100 = true;
+        await isar.writeTxn(() => isar.budgets.put(budget));
+      } else if (pct >= 80 && !budget.notifiedAt80 && !budget.notifiedAt100) {
+        warnings.add(budget.name);
+        budget.notifiedAt80 = true;
+        await isar.writeTxn(() => isar.budgets.put(budget));
+      }
+    }
+
+    // Fire ONE grouped notification instead of one per budget
+    if (exceeded.isNotEmpty) {
+      final n = exceeded.length;
+      await _emit(
+        isar,
+        type: 'budget_exceeded_grouped',
+        title: '🚨 $n budget${n > 1 ? 's' : ''} over limit',
+        body: n == 1
+            ? '${exceeded.first} is over budget — time to review'
+            : '${exceeded.join(', ')} are over budget',
+        channel: 'budget_alerts',
+        channelName: 'Budget Alerts',
+        priority: NotificationPriority.urgent,
+        primaryAction: 'Review Budgets',
+        actionData: jsonEncode({'type': 'view_budget'}),
+      );
+    } else if (warnings.isNotEmpty) {
+      final n = warnings.length;
+      await _emit(
+        isar,
+        type: 'budget_warning_grouped',
+        title: '⚠️ $n budget${n > 1 ? 's' : ''} getting tight',
+        body: n == 1
+            ? '${warnings.first} is nearing the limit'
+            : '${warnings.join(', ')} are nearing their limits',
+        channel: 'budget_alerts',
+        channelName: 'Budget Alerts',
+        priority: NotificationPriority.high,
+        primaryAction: 'View Details',
+        actionData: jsonEncode({'type': 'view_budget'}),
+      );
     }
   }
 
@@ -640,12 +582,10 @@ class SmartNotificationService {
 
   // ─── MASTER RUN ───
   Future<void> runSmartChecks() async {
-    await initialize();
     final prefs = await SharedPreferences.getInstance();
     final smartEnabled = prefs.getBool('smart_alerts_enabled') ?? true;
     if (!smartEnabled) {
-      // Only run non-smart checks
-      await checkWeeklySummary();
+      // Weekly summary handled by SummaryScheduler in _runAllTasks
       await checkReEngagement();
       return;
     }
@@ -656,7 +596,7 @@ class SmartNotificationService {
     await checkPendingSmsTransactions();
     await checkSavingsOpportunity();
     await checkMoneyLeaks();
-    await checkWeeklySummary();
+    // Weekly summary handled by SummaryScheduler in _runAllTasks
     await checkReEngagement();
     _log.i('All smart checks completed');
   }

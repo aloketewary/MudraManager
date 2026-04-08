@@ -361,12 +361,45 @@ class NotificationService {
     return scheduledDate;
   }
 
+  // ── Throttle: max N OS notifications per day ──
+  static const _maxDailyPush = 5;
+  static const _pushCountKey = 'notif_push_count';
+  static const _pushDateKey = 'notif_push_date';
+  static final _sentToday = <String>{}; // in-memory dedup for current session
+
   static Future<void> showLocalNotification({
     required int id,
     required String title,
     required String body,
     String? payload,
+    String? dedupKey,
   }) async {
+    // Dedup: if a dedupKey is provided, skip if already sent today
+    if (dedupKey != null) {
+      if (_sentToday.contains(dedupKey)) return;
+      final prefs = await SharedPreferences.getInstance();
+      final today = '${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}';
+      final stored = prefs.getString('dedup_$dedupKey');
+      if (stored == today) return;
+      await prefs.setString('dedup_$dedupKey', today);
+      _sentToday.add(dedupKey);
+    }
+
+    // Throttle: cap total OS pushes per day
+    final prefs = await SharedPreferences.getInstance();
+    final today = '${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}';
+    if (prefs.getString(_pushDateKey) != today) {
+      await prefs.setInt(_pushCountKey, 0);
+      await prefs.setString(_pushDateKey, today);
+      _sentToday.clear();
+    }
+    final count = prefs.getInt(_pushCountKey) ?? 0;
+    if (count >= _maxDailyPush) {
+      _log.i('Daily push cap reached, skipping: $title');
+      return;
+    }
+    await prefs.setInt(_pushCountKey, count + 1);
+
     _log.i('Showing notification: $title');
     const androidDetails = AndroidNotificationDetails(
       'mudra_channel_id',

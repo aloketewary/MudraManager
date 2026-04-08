@@ -282,22 +282,6 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
     if (mounted) context.pop();
   }
 
-  Future<void> _deleteTrip(Trip trip) async {
-    final confirm = await DialogUtils.showDeleteConfirmation(
-      context,
-      title: _isTrip ? 'Delete Trip' : 'Delete Group',
-      message: _isTrip
-          ? 'This will permanently delete the trip and all expenses. Continue?'
-          : 'This will permanently delete the group and all split data. Continue?',
-      deleteText: 'Delete',
-    );
-    if (confirm != true) return;
-
-    await ref.read(tripServiceProvider).deleteTrip(trip.id);
-    ref.invalidate(allTripsProvider);
-    SnackbarService.success(BuddyMessages.tripDeleted(_isTrip));
-    if (mounted) context.pop();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -987,17 +971,6 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
                     onPressed: () => _finalizeTrip(trip),
                     icon: const Icon(LucideIcons.circleCheck, size: 20),
                     label: Text(_isTrip ? 'Finalize Trip' : 'Finalize Group'),
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: const Size(double.infinity, 48),
-                      side: BorderSide(color: color.error),
-                      foregroundColor: color.error,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  OutlinedButton.icon(
-                    onPressed: () => _deleteTrip(trip),
-                    icon: const Icon(LucideIcons.trash2, size: 20),
-                    label: Text(_isTrip ? 'Delete Trip' : 'Delete Group'),
                     style: OutlinedButton.styleFrom(
                       minimumSize: const Size(double.infinity, 48),
                       side: BorderSide(color: color.error),

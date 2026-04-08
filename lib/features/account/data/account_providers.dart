@@ -30,6 +30,24 @@ final allAccountsProvider = FutureProvider.autoDispose((ref) async {
 final balanceVisibilityProvider =
     StateProvider.autoDispose<bool>((ref) => true);
 
+/// The user's primary/default account.
+final primaryAccountProvider = FutureProvider.autoDispose<Account?>((ref) async {
+  ref.watch(accountChangeProvider);
+  final isar = await ref.watch(isarServiceProvider).getInstance();
+  // Find the primary account
+  var primary = await isar.accounts
+      .filter()
+      .isPrimaryEqualTo(true)
+      .isActiveEqualTo(true)
+      .findFirst();
+  // Fallback: first active account
+  primary ??= await isar.accounts
+      .filter()
+      .isActiveEqualTo(true)
+      .findFirst();
+  return primary;
+});
+
 // Add this new provider:
 final frequencySortedAccountsProvider =
     FutureProvider.autoDispose<List<Account>>((ref) async {
@@ -55,6 +73,28 @@ class AccountsService {
   final AppLog log;
 
   AccountsService(this.isarService, this.log);
+
+  /// Sets the given account as primary, clearing any previous primary.
+  Future<void> setPrimaryAccount(int accountId) async {
+    final isar = await isarService.getInstance();
+    await isar.writeTxn(() async {
+      // Clear existing primary
+      final current = await isar.accounts
+          .filter()
+          .isPrimaryEqualTo(true)
+          .findAll();
+      for (final acc in current) {
+        acc.isPrimary = false;
+        await isar.accounts.put(acc);
+      }
+      // Set new primary
+      final account = await isar.accounts.get(accountId);
+      if (account != null) {
+        account.isPrimary = true;
+        await isar.accounts.put(account);
+      }
+    });
+  }
 
   Future<double> getAccountBalance(int accountId) async {
     final isar = await isarService.getInstance();

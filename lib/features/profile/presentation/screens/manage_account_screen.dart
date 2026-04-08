@@ -411,11 +411,38 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  account.name,
-                                  style: textTheme.bodyLarge?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                                Row(
+                                  children: [
+                                    Flexible(
+                                      child: Text(
+                                        account.name,
+                                        style: textTheme.bodyLarge?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    if (account.isPrimary) ...[
+                                      const SizedBox(width: 6),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 6,
+                                          vertical: 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: color.primary.withValues(alpha: 0.12),
+                                          borderRadius: BorderRadius.circular(4),
+                                        ),
+                                        child: Text(
+                                          'Primary',
+                                          style: textTheme.labelSmall?.copyWith(
+                                            color: color.primary,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ],
                                 ),
                                 if (account.accountNumber != null)
                                   Text(
@@ -584,6 +611,23 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
                       builder: (_) =>
                           InvestmentPortfolioScreen(account: account),
                     ),
+                  );
+                }),
+              if (!account.isPrimary)
+                _sheetOption(
+                    ctx,
+                    Icons.star_outline,
+                    'Set as Primary',
+                    'Default account for splits & trips',
+                    color.primary, () async {
+                  Navigator.pop(ctx);
+                  await ref
+                      .read(accountServiceProvider)
+                      .setPrimaryAccount(account.id);
+                  ref.invalidate(accountsProvider);
+                  ref.invalidate(primaryAccountProvider);
+                  SnackbarService.success(
+                    '${account.name} is now your primary account',
                   );
                 }),
               const Divider(height: 1),
