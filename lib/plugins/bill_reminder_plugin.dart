@@ -11,13 +11,16 @@ class BillReminderPlugin extends MudraPlugin {
   String get version => '1.0.0';
 
   @override
-  void onExpense(ExpenseEvent e) {
+  void onExpense(ExpenseEvent event) {
     // Check for recurring bills
   }
 
   @override
   void onLoad() {}
-  
+
   @override
   void onStart() {}
+
+  @override
+  Set<PluginPermission> get permissions => {};
 }

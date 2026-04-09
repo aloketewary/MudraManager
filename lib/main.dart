@@ -1,3 +1,13 @@
+import 'package:flutter/foundation.dart';
+import 'package:go_router/go_router.dart';
+import 'package:isar_community/isar.dart';
+import 'package:mudra_manager/core/db/models/account.dart';
+import 'package:mudra_manager/core/db/models/category.dart';
+import 'package:mudra_manager/core/db/models/transaction.dart';
+import 'package:mudra_manager/core/db/models/trip.dart';
+import 'package:mudra_manager/core/entitlement/billing_provider.dart';
+import 'package:mudra_manager/core/entitlement/entitlement_provider.dart';
+import 'package:mudra_manager/core/entitlement/entitlement_service.dart';
 import 'package:mudra_manager/core/services/plugin_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,29 +20,21 @@ import 'package:mudra_manager/core/providers/l10n_provider.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/core/router/app_router.dart';
 import 'package:mudra_manager/core/services/app_update_service.dart';
+import 'package:mudra_manager/core/services/background_task_manager.dart';
 import 'package:mudra_manager/core/services/notification_service.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/theme/app_theme.dart';
 import 'package:mudra_manager/core/theme/theme_provider.dart';
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/utils/error_handler.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
-import 'package:mudra_manager/features/account/data/balance_history_service.dart';
-import 'package:mudra_manager/features/budget/data/bill_service.dart';
-import 'package:mudra_manager/features/dashboard/data/summary_scheduler.dart';
-import 'package:mudra_manager/features/notifications/data/smart_notification_service.dart';
-import 'package:mudra_manager/features/sms/data/sms_cleanup_service.dart';
-import 'package:mudra_manager/features/sms/data/sms_processor_service.dart';
-import 'package:mudra_manager/features/transactions/data/recurring_transaction_scheduler.dart';
+import 'package:mudra_manager/features/marketplace/services/marketplace_service.dart';
+import 'package:mudra_manager/features/sms/data/notification_listener_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:another_telephony/telephony.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:responsive_framework/responsive_framework.dart';
-
-export 'main.dart' show setupSmsListener;
-
-final Telephony telephony = Telephony.instance;
 
 void main() async {
   final log = AppLog(getLogger(), 'Main');
@@ -43,6 +45,11 @@ void main() async {
   ]);
   final sharedPrefs = await SharedPreferences.getInstance();
   SharedPrefsUtil.init(sharedPrefs);
+  NotificationListenerBridge.instance.initialize();
+  if (kDebugMode) {
+    sharedPrefs.remove('has_seen_swipe_peek');
+    debugPrint('🔍 PEEK: cleared has_seen_swipe_peek');
+  }
 
   log.i('App starting...');
 
@@ -53,16 +60,25 @@ void main() async {
   await NotificationService.initialize();
 
   final completed = SharedPrefsUtil.instance.isOnboardingComplete();
-  setupSmsListener();
 
   final container = ProviderContainer();
   // Move heavy operations to background
   _initializeBackgroundServices(container);
 
-  runApp(UncontrolledProviderScope(
-    container: container,
-    child: MudraManagerApp(showOnboarding: !completed),
-  ));
+  runApp(
+    UncontrolledProviderScope(
+      container: container,
+      child: MudraManagerApp(showOnboarding: !completed),
+    ),
+  );
+}
+
+void invalidateEntitlementsFromRef(Ref ref) {
+  ref.invalidate(isProProvider);
+  ref.invalidate(proPlanInfoProvider);
+  ref.invalidate(hasFullAccessProvider);
+  ref.invalidate(isInTrialProvider);
+  ref.invalidate(trialDaysRemainingProvider);
 }
 
 // Background initialization to prevent UI blocking
@@ -71,69 +87,179 @@ Future<void> _initializeBackgroundServices(ProviderContainer container) async {
   Future.microtask(() async {
     // 1. Initialize Isar first
     log.i('🔄 Initializing Isar...');
-    final isar = await safeExecute(() => container.read(isarServiceProvider).getInstance());
+    final isar = await safeExecute(
+      () => container.read(isarServiceProvider).getInstance(),
+    );
     if (isar != null) {
       log.i('✅ Isar initialized');
-      
+
       // Seed category keywords
       await safeExecute(() async {
         await CategorySeeder.seedDefaultKeywords(isar);
         log.i('✅ Category keywords seeded');
       });
+
+      // Snapshot grandfathered counts for entitlement system
+      await safeExecute(() async {
+        final entitlement =
+            EntitlementService(container.read(isarServiceProvider));
+        await entitlement.snapshotGrandfatheredCounts();
+        log.i('✅ Entitlement grandfathering complete');
+      });
+
+      // Stamp install date for existing users (no-op if already stamped)
+      await safeExecute(() async {
+        final entitlement =
+            EntitlementService(container.read(isarServiceProvider));
+        await entitlement.stampInstallDate();
+        log.i('✅ Install date stamped');
+      });
+
+      await safeExecute(() async {
+        final entitlement =
+            EntitlementService(container.read(isarServiceProvider));
+        final isPro = await entitlement.isPro();
+        final inTrial = await entitlement.isInTrialPeriod();
+        if (!isPro && !inTrial) {
+          await MarketplaceService().disableProPlugins();
+          log.i('✅ Pro plugins disabled (trial expired)');
+        }
+      });
+
+      // Initialize billing service
+      await safeExecute(() async {
+        final billing = container.read(billingServiceProvider);
+        await billing.initialize();
+        log.i('✅ Billing service initialized');
+      });
+
+      // Sync category icons from pack definitions
+      await safeExecute(() async {
+        await CategorySeeder.seedCategoryIcons(isar);
+        log.i('✅ Category icons synced');
+      });
+
+      // Seed system categories (trip/split/settlement)
+      await safeExecute(() async {
+        await CategorySeeder.seedSystemCategories(isar);
+        log.i('✅ System categories seeded');
+      });
+
+      // Migrate: seed isSettlement + isSharedExpense on old transactions
+      await safeExecute(() async {
+        await _migrateTransactionFields(isar);
+        log.i('✅ Transaction fields migrated');
+      });
+
+      // Migrate: seed isSystem on categories + isOwner on participants
+      await safeExecute(() async {
+        await _migrateCategoryAndParticipantFields(isar);
+        log.i('✅ Category & participant fields migrated');
+      });
     } else {
       log.e('❌ Isar initialization failed');
       return;
     }
-    
+
     // 2. Initialize gamification service (depends on Isar)
     log.i('🔄 Initializing Gamification service...');
-    final gamification = await safeExecute(() => container.read(gamificationServiceInitProvider.future));
+    final gamification = await safeExecute(
+      () => container.read(gamificationServiceInitProvider.future),
+    );
     if (gamification != null) {
       log.i('✅ Gamification service initialized');
     } else {
       log.e('❌ Gamification service initialization failed');
     }
 
-    // 3. Run other services in parallel
-    log.i('🔄 Initializing background services...');
-    await Future.wait(
-      [
-        safeExecute(() async {
-          await RecurringTransactionScheduler.initialize();
-          log.i('✅ RecurringTransactionScheduler initialized');
-        }),
-        safeExecute(() async {
-          await SummaryScheduler.checkAndShowSummaries();
-          log.i('✅ SummaryScheduler initialized');
-        }),
-        safeExecute(() async {
-          await BillService.scheduleBillReminders();
-          log.i('✅ BillService reminders scheduled');
-        }),
-        safeExecute(() async {
-          await BillService.createPendingTransactionsForDueBills();
-          log.i('✅ BillService pending transactions created');
-        }),
-        safeExecute(() async {
-          await _initializeHomeWidget();
-          log.i('✅ HomeWidget initialized');
-        }),
-        safeExecute(() async {
-          await SmsHashCleanupService.cleanupOldHashes();
-          log.i('✅ SmsHashCleanupService initialized');
-        }),
-        safeExecute(() async {
-          await BalanceHistoryService.instance.recordDailySnapshots();
-          log.i('✅ BalanceHistoryService initialized');
-        }),
-        safeExecute(() async {
-          await SmartNotificationService.instance.runSmartChecks();
-          log.i('✅ SmartNotificationService initialized');
-        }),
-      ].map((f) => f.catchError((e) => null)),
-    );
-    log.i('✅ All background services initialized');
+    // 3. Initialize background task manager
+    log.i('🔄 Initializing background tasks...');
+    await safeExecute(() async {
+      await BackgroundTaskManager.initialize();
+      log.i('✅ Background tasks initialized');
+    });
+
+    // 4. Initialize home widget
+    log.i('🔄 Initializing home widget...');
+    await safeExecute(() async {
+      await _initializeHomeWidget();
+      log.i('✅ HomeWidget initialized');
+    });
   });
+}
+
+/// One-time migration: seed isSettlement and isSharedExpense on old transactions.
+/// Isar stores null for fields that didn't exist when the record was created.
+/// This ensures query filters like isSettlementEqualTo(false) work correctly.
+Future<void> _migrateTransactionFields(Isar isar) async {
+  final prefs = await SharedPreferences.getInstance();
+  const key = 'migration_txn_settlement_v1';
+  if (prefs.getBool(key) == true) return; // already done
+
+  final all = await isar.transactions.where().findAll();
+  if (all.isEmpty) {
+    await prefs.setBool(key, true);
+    return;
+  }
+
+  await isar.writeTxn(() async {
+    for (final txn in all) {
+      // Dart defaults are false, but Isar may have null on disk.
+      // Re-putting ensures the field is written.
+      await isar.transactions.put(txn);
+    }
+  });
+
+  await prefs.setBool(key, true);
+}
+
+/// One-time migration: seed isSystem on old categories and isOwner on old participants.
+Future<void> _migrateCategoryAndParticipantFields(Isar isar) async {
+  final prefs = await SharedPreferences.getInstance();
+  const key = 'migration_category_system_v1';
+  if (prefs.getBool(key) == true) return;
+
+  // Re-put all categories to write isSystem = false to disk
+  final categories = await isar.categorys.where().findAll();
+  if (categories.isNotEmpty) {
+    await isar.writeTxn(() async {
+      for (final cat in categories) {
+        await isar.categorys.put(cat);
+      }
+    });
+  }
+
+  // Re-put all trip participants to write isOwner = false to disk
+  final participants = await isar.tripParticipants.where().findAll();
+  if (participants.isNotEmpty) {
+    await isar.writeTxn(() async {
+      for (final p in participants) {
+        await isar.tripParticipants.put(p);
+      }
+    });
+  }
+
+  // Re-put all accounts to write isPrimary = false to disk
+  // Then set the first active account as primary if none exists
+  final accounts = await isar.accounts.where().findAll();
+  if (accounts.isNotEmpty) {
+    final hasPrimary = accounts.any((a) => a.isPrimary);
+    await isar.writeTxn(() async {
+      for (final acc in accounts) {
+        await isar.accounts.put(acc);
+      }
+      // Auto-set first active account as primary
+      if (!hasPrimary) {
+        final first = accounts.where((a) => a.isActive).firstOrNull;
+        if (first != null) {
+          first.isPrimary = true;
+          await isar.accounts.put(first);
+        }
+      }
+    });
+  }
+
+  await prefs.setBool(key, true);
 }
 
 Future<void> _initializeHomeWidget() async {
@@ -149,13 +275,34 @@ void backgroundCallback(Uri? uri) async {
   }
 }
 
-class MudraManagerApp extends ConsumerWidget {
+class MudraManagerApp extends ConsumerStatefulWidget {
   final bool showOnboarding;
 
   const MudraManagerApp({super.key, required this.showOnboarding});
+  @override
+  ConsumerState<MudraManagerApp> createState() => _MudraManagerAppState();
+}
+
+class _MudraManagerAppState extends ConsumerState<MudraManagerApp> {
+  late final GoRouter _router;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  void initState() {
+    super.initState();
+    _router = AppRouter.router(widget.showOnboarding);
+  }
+
+  @override
+  void dispose() {
+    _router.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final activeTone = ref.watch(tonePackProvider);
+    Tone.sync(activeTone);
+
     final appThemeMode = ref.watch(themeModeProvider);
     final appTheme = AppTheme.instance;
     final appColorTheme = ref.watch(themeNotifierProvider);
@@ -172,15 +319,14 @@ class MudraManagerApp extends ConsumerWidget {
           lightScheme = lightDynamic.harmonized();
           darkScheme = darkDynamic.harmonized();
           amoledScheme = darkDynamic.harmonized().copyWith(
-            surface: Colors.black,
-          ); // Using black for amoled
+                surface: Colors.black,
+              );
         } else {
           lightScheme = appColorTheme.lightColorScheme();
           darkScheme = appColorTheme.darkColorScheme();
           amoledScheme = appColorTheme.amoledColorScheme();
         }
 
-        final router = AppRouter.router(showOnboarding);
         return MaterialApp.router(
           title: 'Mudra Manager',
           theme: appTheme.buildTheme(lightScheme),
@@ -195,7 +341,7 @@ class MudraManagerApp extends ConsumerWidget {
           },
           debugShowCheckedModeBanner: false,
           scaffoldMessengerKey: SnackbarService.scaffoldMessengerKey,
-          routerConfig: router,
+          routerConfig: _router,
           locale: ref.watch(localeProvider),
           supportedLocales: AppLocalizations.supportedLocales,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -208,6 +354,8 @@ class MudraManagerApp extends ConsumerWidget {
             );
           },
           builder: (context, child) {
+            final l10n = AppLocalizations.of(context);
+            if (l10n != null) Tone.syncL10n(l10n);
             NotificationService.setContext(context);
             WidgetsBinding.instance.addPostFrameCallback((_) {
               AppUpdateService.checkForUpdate(context);
@@ -228,50 +376,4 @@ class MudraManagerApp extends ConsumerWidget {
       },
     );
   }
-}
-
-Future<void> setupSmsListener() async {
-  final log = AppLog(getLogger(), 'SMS');
-
-  if (!SharedPrefsUtil.instance.getSmsImportEnabled()) {
-    log.i('SMS import disabled');
-    return;
-  }
-
-  final telephony = Telephony.instance;
-
-  final bool? permissionsGranted =
-      await telephony.requestSmsPermissions;
-
-  if (permissionsGranted == true) {
-    log.i('SMS listener setup complete');
-
-    telephony.listenIncomingSms(
-      onNewMessage: (SmsMessage message) {
-        SmsProcessorService.instance.parseAndSaveTransaction(
-          body: message.body ?? '',
-          address: message.address ?? '',
-          sender: message.address ?? '',
-          timestamp: message.date ??
-              DateTime.now().millisecondsSinceEpoch,
-        );
-      },
-      onBackgroundMessage: backgroundMessageHandler,
-      listenInBackground: true,
-    );
-  } else {
-    log.w('SMS permissions not granted');
-  }
-}
-
-@pragma('vm:entry-point')
-void backgroundMessageHandler(SmsMessage message) {
-  final log = AppLog(getLogger(), 'SMS');
-  log.i('Background SMS received from: ${message.address}');
-  SmsProcessorService.instance.parseAndSaveTransaction(
-    body: message.body ?? '',
-    address: message.address ?? '',
-    sender: message.address ?? '',
-    timestamp: message.date ?? DateTime.now().millisecondsSinceEpoch,
-  );
 }

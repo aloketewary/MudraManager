@@ -4,7 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
+import 'package:mudra_manager/core/db/models/exchange_rate.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
+import 'package:mudra_manager/core/providers/collection_watchers.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 
 class StatsData {
@@ -12,6 +14,7 @@ class StatsData {
   final double expense;
   final List<FlSpot> incomeSpots;
   final List<FlSpot> expenseSpots;
+  final List<FlSpot> savingsSpots;
   final Map<String, double> categoryData;
   final Map<String, Category> categoryDataMap;
   final Map<String, double> incomeCategoryData;
@@ -26,6 +29,7 @@ class StatsData {
     required this.expense,
     required this.incomeSpots,
     required this.expenseSpots,
+    required this.savingsSpots,
     required this.categoryData,
     required this.categoryDataMap,
     required this.incomeCategoryData,
@@ -38,10 +42,11 @@ class StatsData {
 }
 
 // 2. The provider - OPTIMIZED:
-final statsProvider = FutureProvider.family<StatsData, String>((
+final statsProvider = FutureProvider.autoDispose.family<StatsData, String>((
   ref,
   period,
 ) async {
+  ref.watch(transactionChangeProvider);
   final isar = await ref.watch(isarServiceProvider).getInstance();
   final now = DateTime.now();
   DateTime start;
@@ -72,6 +77,7 @@ final statsProvider = FutureProvider.family<StatsData, String>((
       .filter()
       .dateBetween(start, end)
       .isTransferEqualTo(false)
+      .isSettlementEqualTo(false)
       .sortByDateDesc()
       .findAll();
 
@@ -88,17 +94,17 @@ final statsProvider = FutureProvider.family<StatsData, String>((
     final catName = txn.category.value?.name ?? 'Unknown';
 
     if (txn.isExpense) {
-      expense += txn.amount;
-      categoryData[catName] = (categoryData[catName] ?? 0) + txn.amount;
+      expense += txn.effectiveAmount;
+      categoryData[catName] = (categoryData[catName] ?? 0) + txn.effectiveAmount;
 
       if (period == 'Year') {
         final month = txn.date.month;
         dailyExpense[month] = dailyExpense[month] ?? {};
-        dailyExpense[month]![0] = (dailyExpense[month]![0] ?? 0) + txn.amount;
+        dailyExpense[month]![0] = (dailyExpense[month]![0] ?? 0) + txn.effectiveAmount;
       } else if (period == 'Today') {
         final hour = txn.date.hour;
         dailyExpense[hour] = dailyExpense[hour] ?? {};
-        dailyExpense[hour]![0] = (dailyExpense[hour]![0] ?? 0) + txn.amount;
+        dailyExpense[hour]![0] = (dailyExpense[hour]![0] ?? 0) + txn.effectiveAmount;
       } else {
         final dayIndex = txn.date.difference(start).inDays;
         dailyExpense[dayIndex] = dailyExpense[dayIndex] ?? {};
@@ -106,18 +112,18 @@ final statsProvider = FutureProvider.family<StatsData, String>((
             (dailyExpense[dayIndex]![0] ?? 0) + txn.amount;
       }
     } else {
-      income += txn.amount;
+      income += txn.effectiveAmount;
       incomeCategoryData[catName] =
-          (incomeCategoryData[catName] ?? 0) + txn.amount;
+          (incomeCategoryData[catName] ?? 0) + txn.effectiveAmount;
 
       if (period == 'Year') {
         final month = txn.date.month;
         dailyIncome[month] = dailyIncome[month] ?? {};
-        dailyIncome[month]![0] = (dailyIncome[month]![0] ?? 0) + txn.amount;
+        dailyIncome[month]![0] = (dailyIncome[month]![0] ?? 0) + txn.effectiveAmount;
       } else if (period == 'Today') {
         final hour = txn.date.hour;
         dailyIncome[hour] = dailyIncome[hour] ?? {};
-        dailyIncome[hour]![0] = (dailyIncome[hour]![0] ?? 0) + txn.amount;
+        dailyIncome[hour]![0] = (dailyIncome[hour]![0] ?? 0) + txn.effectiveAmount;
       } else {
         final dayIndex = txn.date.difference(start).inDays;
         dailyIncome[dayIndex] = dailyIncome[dayIndex] ?? {};
@@ -130,26 +136,33 @@ final statsProvider = FutureProvider.family<StatsData, String>((
   // Build spots
   final List<FlSpot> incomeSpots = [];
   final List<FlSpot> expenseSpots = [];
+  final List<FlSpot> savingsSpots = [];
 
   if (period == 'Year') {
     for (int month = 1; month <= 12; month++) {
-      incomeSpots.add(
-        FlSpot((month - 1).toDouble(), dailyIncome[month]?[0] ?? 0),
-      );
-      expenseSpots.add(
-        FlSpot((month - 1).toDouble(), dailyExpense[month]?[0] ?? 0),
-      );
+      final monthIncome = dailyIncome[month]?[0] ?? 0;
+      final monthExpense = dailyExpense[month]?[0] ?? 0;
+      incomeSpots.add(FlSpot((month - 1).toDouble(), monthIncome));
+      expenseSpots.add(FlSpot((month - 1).toDouble(), monthExpense));
+      savingsSpots
+          .add(FlSpot((month - 1).toDouble(), monthIncome - monthExpense));
     }
   } else if (period == 'Today') {
     for (int hour = 0; hour < 24; hour++) {
-      incomeSpots.add(FlSpot(hour.toDouble(), dailyIncome[hour]?[0] ?? 0));
-      expenseSpots.add(FlSpot(hour.toDouble(), dailyExpense[hour]?[0] ?? 0));
+      final hourIncome = dailyIncome[hour]?[0] ?? 0;
+      final hourExpense = dailyExpense[hour]?[0] ?? 0;
+      incomeSpots.add(FlSpot(hour.toDouble(), hourIncome));
+      expenseSpots.add(FlSpot(hour.toDouble(), hourExpense));
+      savingsSpots.add(FlSpot(hour.toDouble(), hourIncome - hourExpense));
     }
   } else {
     final days = end.difference(start).inDays + 1;
     for (int i = 0; i < days; i++) {
-      incomeSpots.add(FlSpot(i.toDouble(), dailyIncome[i]?[0] ?? 0));
-      expenseSpots.add(FlSpot(i.toDouble(), dailyExpense[i]?[0] ?? 0));
+      final dayIncome = dailyIncome[i]?[0] ?? 0;
+      final dayExpense = dailyExpense[i]?[0] ?? 0;
+      incomeSpots.add(FlSpot(i.toDouble(), dayIncome));
+      expenseSpots.add(FlSpot(i.toDouble(), dayExpense));
+      savingsSpots.add(FlSpot(i.toDouble(), dayIncome - dayExpense));
     }
   }
 
@@ -165,19 +178,17 @@ final statsProvider = FutureProvider.family<StatsData, String>((
   // Calculate category trends for last 12 months
   final Map<Category, List<FlSpot>> categoryTrends = {};
   final trendStart = DateTime(now.year, now.month - 11, 1);
-  final expenseTxns = allTxns
-      .where((t) => t.isExpense && t.date.isAfter(trendStart))
-      .toList();
+  final expenseTxns =
+      allTxns.where((t) => t.isExpense && t.date.isAfter(trendStart)).toList();
 
   for (final cat in cats.where((c) => c.categoryType == CategoryType.expense)) {
     final monthlyData = <int, double>{};
     for (final txn in expenseTxns) {
       txn.category.loadSync();
       if (txn.category.value?.id == cat.id) {
-        final monthIndex =
-            (txn.date.year - trendStart.year) * 12 +
+        final monthIndex = (txn.date.year - trendStart.year) * 12 +
             (txn.date.month - trendStart.month);
-        monthlyData[monthIndex] = (monthlyData[monthIndex] ?? 0) + txn.amount;
+        monthlyData[monthIndex] = (monthlyData[monthIndex] ?? 0) + txn.effectiveAmount;
       }
     }
     if (monthlyData.isNotEmpty) {
@@ -193,6 +204,7 @@ final statsProvider = FutureProvider.family<StatsData, String>((
     expense: expense,
     incomeSpots: incomeSpots,
     expenseSpots: expenseSpots,
+    savingsSpots: savingsSpots,
     categoryData: categoryData,
     categoryDataMap: categoryMapData,
     incomeCategoryData: incomeCategoryData,
@@ -205,7 +217,7 @@ final statsProvider = FutureProvider.family<StatsData, String>((
 });
 
 // Custom date range stats provider - optimized
-final customStatsProvider = FutureProvider.family<StatsData, String>((
+final customStatsProvider = FutureProvider.autoDispose.family<StatsData, String>((
   ref,
   dateKey,
 ) async {
@@ -229,6 +241,7 @@ final customStatsProvider = FutureProvider.family<StatsData, String>((
       .filter()
       .dateBetween(start, end)
       .isTransferEqualTo(false)
+      .isSettlementEqualTo(false)
       .sortByDateDesc()
       .findAll();
 
@@ -245,14 +258,14 @@ final customStatsProvider = FutureProvider.family<StatsData, String>((
     final catName = txn.category.value?.name ?? 'Unknown';
 
     if (txn.isExpense) {
-      expense += txn.amount;
-      dailyExpense[dayIndex] = (dailyExpense[dayIndex] ?? 0) + txn.amount;
-      categoryData[catName] = (categoryData[catName] ?? 0) + txn.amount;
+      expense += txn.effectiveAmount;
+      dailyExpense[dayIndex] = (dailyExpense[dayIndex] ?? 0) + txn.effectiveAmount;
+      categoryData[catName] = (categoryData[catName] ?? 0) + txn.effectiveAmount;
     } else {
-      income += txn.amount;
-      dailyIncome[dayIndex] = (dailyIncome[dayIndex] ?? 0) + txn.amount;
+      income += txn.effectiveAmount;
+      dailyIncome[dayIndex] = (dailyIncome[dayIndex] ?? 0) + txn.effectiveAmount;
       incomeCategoryData[catName] =
-          (incomeCategoryData[catName] ?? 0) + txn.amount;
+          (incomeCategoryData[catName] ?? 0) + txn.effectiveAmount;
     }
   }
 
@@ -263,6 +276,10 @@ final customStatsProvider = FutureProvider.family<StatsData, String>((
   final List<FlSpot> expenseSpots = List.generate(
     days,
     (i) => FlSpot(i.toDouble(), dailyExpense[i] ?? 0),
+  );
+  final List<FlSpot> savingsSpots = List.generate(
+    days,
+    (i) => FlSpot(i.toDouble(), (dailyIncome[i] ?? 0) - (dailyExpense[i] ?? 0)),
   );
   final Map<String, Category> categoryMapData = {for (var c in cats) c.name: c};
   final Map<String, Category> incomeCategoryMapData = {
@@ -276,19 +293,17 @@ final customStatsProvider = FutureProvider.family<StatsData, String>((
   final Map<Category, List<FlSpot>> categoryTrends = {};
   final now = DateTime.now();
   final trendStart = DateTime(now.year, now.month - 11, 1);
-  final expenseTxns = allTxns
-      .where((t) => t.isExpense && t.date.isAfter(trendStart))
-      .toList();
+  final expenseTxns =
+      allTxns.where((t) => t.isExpense && t.date.isAfter(trendStart)).toList();
 
   for (final cat in cats.where((c) => c.categoryType == CategoryType.expense)) {
     final monthlyData = <int, double>{};
     for (final txn in expenseTxns) {
       txn.category.loadSync();
       if (txn.category.value?.id == cat.id) {
-        final monthIndex =
-            (txn.date.year - trendStart.year) * 12 +
+        final monthIndex = (txn.date.year - trendStart.year) * 12 +
             (txn.date.month - trendStart.month);
-        monthlyData[monthIndex] = (monthlyData[monthIndex] ?? 0) + txn.amount;
+        monthlyData[monthIndex] = (monthlyData[monthIndex] ?? 0) + txn.effectiveAmount;
       }
     }
     if (monthlyData.isNotEmpty) {
@@ -304,6 +319,7 @@ final customStatsProvider = FutureProvider.family<StatsData, String>((
     expense: expense,
     incomeSpots: incomeSpots,
     expenseSpots: expenseSpots,
+    savingsSpots: savingsSpots,
     categoryData: categoryData,
     categoryDataMap: categoryMapData,
     incomeCategoryData: incomeCategoryData,
@@ -315,8 +331,11 @@ final customStatsProvider = FutureProvider.family<StatsData, String>((
   );
 });
 
-// Total account balance provider
-final totalAccountBalanceProvider = FutureProvider<double>((ref) async {
+// Total account balance provider (in base currency)
+final totalAccountBalanceProvider =
+    FutureProvider.autoDispose<double>((ref) async {
+  ref.watch(transactionChangeProvider);
+  ref.watch(accountChangeProvider);
   final isar = await ref.watch(isarServiceProvider).getInstance();
   final accounts = await isar.collection<Account>().where().findAll();
 
@@ -327,13 +346,23 @@ final totalAccountBalanceProvider = FutureProvider<double>((ref) async {
         .account((q) => q.idEqualTo(account.id))
         .findAll();
 
-    final balance =
-        account.initialBalance +
+    // Balance in account's own currency
+    final rawBalance = account.initialBalance +
         transactions.fold<double>(
           0,
           (sum, txn) => sum + (txn.isExpense ? -txn.amount : txn.amount),
         );
-    totalBalance += balance;
+
+    // Convert to base currency if account is foreign
+    if (account.currencyCode != null) {
+      final rate = await isar.exchangeRates
+          .filter()
+          .currencyCodeEqualTo(account.currencyCode!)
+          .findFirst();
+      totalBalance += rawBalance * (rate?.rateToBase ?? 1.0);
+    } else {
+      totalBalance += rawBalance;
+    }
   }
 
   return totalBalance;

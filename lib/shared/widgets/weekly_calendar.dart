@@ -58,8 +58,8 @@ class _WeeklyCalendarState extends State<WeeklyCalendar> {
   }
 
   Widget _buildDay(DateTime day) {
-    var color = Theme.of(context).colorScheme;
-    var textTheme = Theme.of(context).textTheme;
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     final isSameDay =
         day.year == _currentDate.year &&

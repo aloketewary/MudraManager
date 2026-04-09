@@ -23,8 +23,8 @@ void main() {
 
       final remaining =
           SharedPrefsUtil.instance.getStringList('processed_sms_hashes') ?? [];
-      expect(remaining.length, SmsHashCleanupService.maxHashCount);
-      expect(remaining.first, 'hash_500'); // Should keep last 1000
+      expect(remaining.length, 500);
+      expect(remaining.first, 'hash_1000'); // Should keep last 500
     });
 
     test('cleanupOldHashes does nothing when under limit', () async {
@@ -55,11 +55,11 @@ void main() {
       expect(remaining.length, 0);
     });
 
-    test('getProcessedCount returns correct count', () {
+    test('getProcessedCount returns correct count', () async {
       final hashes = List.generate(50, (i) => 'hash_$i');
       SharedPrefsUtil.instance.setStringList('processed_sms_hashes', hashes);
 
-      final count = SmsHashCleanupService.getProcessedCount();
+      final count = await SmsHashCleanupService.getProcessedCount();
       expect(count, 50);
     });
   });

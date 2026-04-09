@@ -1,15 +1,23 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
+import 'package:mudra_manager/core/db/models/trip.dart';
+import 'package:mudra_manager/core/providers/collection_watchers.dart';
+import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/services/plugin_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
+import 'package:mudra_manager/core/db/models/exchange_rate.dart';
+import 'package:mudra_manager/core/db/models/frequency.dart';
+import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
+import 'package:mudra_manager/core/db/models/tag.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
-import 'package:mudra_manager/core/db/models/sms_activity.dart';
-import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
 import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
+import 'package:mudra_manager/features/gamification/services/gamification_service.dart';
 import 'package:mudra_manager/features/transactions/presentation/widgets/transaction_group.dart';
 
 final transactionProvider = Provider<TransactionService>((ref) {
@@ -19,356 +27,229 @@ final transactionProvider = Provider<TransactionService>((ref) {
   return TransactionService(isarService, log, gamificationService);
 });
 
-final filteredTransactionProvider =
-    FutureProvider.autoDispose.family<List<Transaction>, String>((ref, type) async {
-      final service = ref.watch(transactionProvider);
+final filteredTransactionProvider = FutureProvider.autoDispose
+    .family<List<Transaction>, String>((ref, type) async {
+  final service = ref.watch(transactionProvider);
 
-      if (type == 'income') {
-        return await service.getByType(isExpense: false);
-      } else if (type == 'expense') {
-        return await service.getByType(isExpense: true);
-      } else {
-        return await service.getAll();
-      }
-    });
+  if (type == 'income') {
+    return await service.getByType(isExpense: false);
+  } else if (type == 'expense') {
+    return await service.getByType(isExpense: true);
+  } else {
+    return await service.getAll();
+  }
+});
 
-final transactionsByMonthProvider =
-    FutureProvider.autoDispose.family<List<Transaction>, DateTime>((ref, monthDate) async {
-      final service = ref.watch(transactionProvider);
+final transactionsByMonthProvider = FutureProvider.autoDispose
+    .family<List<Transaction>, DateTime>((ref, monthDate) async {
+  final service = ref.watch(transactionProvider);
 
-      final start = DateTime(monthDate.year, monthDate.month);
-      final end = DateTime(monthDate.year, monthDate.month + 1);
+  final start = DateTime(monthDate.year, monthDate.month);
+  final end = DateTime(monthDate.year, monthDate.month + 1);
 
-      return await service.getByDateRange(start, end);
-    });
+  return await service.getByDateRange(start, end);
+});
 
-final transactionsByMonthAndTypeProvider =
-    FutureProvider.autoDispose.family<List<Transaction>, ({DateTime month, String type})>((
-      ref,
-      arg,
-    ) async {
-      final service = ref.watch(transactionProvider);
-      final start = DateTime(arg.month.year, arg.month.month, 1);
-      final end = DateTime(
-        arg.month.year,
-        arg.month.month + 1,
-        1,
-      ).subtract(const Duration(microseconds: 1));
+final transactionsByMonthAndTypeProvider = FutureProvider.autoDispose
+    .family<List<Transaction>, ({DateTime month, String type})>((
+  ref,
+  arg,
+) async {
+  final service = ref.watch(transactionProvider);
+  final start = DateTime(arg.month.year, arg.month.month, 1);
+  final end = DateTime(
+    arg.month.year,
+    arg.month.month + 1,
+    1,
+  ).subtract(const Duration(microseconds: 1));
 
-      if (arg.type == 'all') {
-        return service.getByDateRange(start, end);
-      } else {
-        return service.getByTypeAndDateRange(
-          isExpense: arg.type == 'expense',
-          start: start,
-          end: end,
-        );
-      }
-    });
+  if (arg.type == 'all') {
+    return service.getByDateRange(start, end);
+  } else {
+    return service.getByTypeAndDateRange(
+      isExpense: arg.type == 'expense',
+      start: start,
+      end: end,
+    );
+  }
+});
 
-final transactionsByDateRangeProvider =
-    FutureProvider.autoDispose.family<
-      List<Transaction>,
-      ({DateTime start, DateTime end, String type})
-    >((ref, arg) async {
-      final service = ref.watch(transactionProvider);
-      if (arg.type == 'all') {
-        return service.getByDateRange(arg.start, arg.end);
-      } else {
-        return service.getByTypeAndDateRange(
-          isExpense: arg.type == 'expense',
-          start: arg.start,
-          end: arg.end,
-        );
-      }
-    });
+final transactionsByDateRangeProvider = FutureProvider.autoDispose
+    .family<List<Transaction>, ({DateTime start, DateTime end, String type})>(
+        (ref, arg) async {
+  final service = ref.watch(transactionProvider);
+  if (arg.type == 'all') {
+    return service.getByDateRange(arg.start, arg.end);
+  } else {
+    return service.getByTypeAndDateRange(
+      isExpense: arg.type == 'expense',
+      start: arg.start,
+      end: arg.end,
+    );
+  }
+});
 
-final sectionedTransactionsProvider =
-    FutureProvider.autoDispose.family<List<TxListEntry>, ({DateTime month, String type})>((
-      ref,
-      arg,
-    ) async {
-      final transactions = await ref.watch(
-        transactionsByMonthAndTypeProvider(arg).future,
-      );
+final sectionedTransactionsProvider = FutureProvider.autoDispose
+    .family<List<TxListEntry>, ({DateTime month, String type})>((
+  ref,
+  arg,
+) async {
+  ref.watch(transactionChangeProvider);
+  final transactions = await ref.watch(
+    transactionsByMonthAndTypeProvider(arg).future,
+  );
 
-      // Get pending SMS activities for this month
-      final service = ref.watch(transactionProvider);
-      final isar = await service.isarService.getInstance();
-      final start = DateTime(arg.month.year, arg.month.month, 1);
-      final end = DateTime(arg.month.year, arg.month.month + 1, 1);
-      
-      final pendingActivities = await isar.smsActivitys
-          .filter()
-          .dateBetween(start, end)
-          .and()
-          .not()
-          .statusEqualTo(ActivityStatus.approved)
-          .and()
-          .not()
-          .statusEqualTo(ActivityStatus.rejected)
-          .sortByDateDesc()
-          .findAll();
+  if (transactions.isEmpty) return [];
 
-      // Combine
-      final combined = <dynamic>[
-        ...transactions,
-        ...pendingActivities,
-      ];
+  final List<TxListEntry> sectioned = [];
+  DateTime? currentDate;
 
-      combined.sort((a, b) {
-        final dateA = a is Transaction ? a.date : (a as SmsActivity).date;
-        final dateB = b is Transaction ? b.date : (b as SmsActivity).date;
-        return dateB.compareTo(dateA);
-      });
+  for (var tx in transactions) {
+    final txDate = DateTime(tx.date.year, tx.date.month, tx.date.day);
+    if (currentDate == null || txDate != currentDate) {
+      currentDate = txDate;
+      sectioned.add(TxHeader(txDate));
+    }
+    sectioned.add(TxItem(tx));
+  }
 
-      if (combined.isEmpty) return [];
+  return sectioned;
+});
 
-      final List<TxListEntry> sectioned = [];
-      DateTime? currentDate;
+final sectionedTransactionsByDateRangeProvider = FutureProvider.autoDispose
+    .family<List<TxListEntry>, ({DateTime start, DateTime end, String type})>(
+        (ref, arg) async {
+  ref.watch(transactionChangeProvider);
+  final startDate = DateTime(
+    arg.start.year,
+    arg.start.month,
+    arg.start.day,
+  );
+  final endDate = DateTime(
+    arg.end.year,
+    arg.end.month,
+    arg.end.day,
+    23,
+    59,
+    59,
+  );
 
-      for (var item in combined) {
-        final date = item is Transaction ? item.date : (item as SmsActivity).date;
-        final txDate = DateTime(date.year, date.month, date.day);
-        if (currentDate == null || txDate != currentDate) {
-          currentDate = txDate;
-          sectioned.add(TxHeader(txDate));
-        }
-        if (item is Transaction) {
-          sectioned.add(TxItem(item));
-        } else {
-          sectioned.add(SmsActivityItem(item as SmsActivity));
-        }
-      }
+  final transactions = await ref.watch(
+    transactionsByDateRangeProvider(
+      (
+        start: startDate,
+        end: endDate,
+        type: arg.type,
+      ),
+    ).future,
+  );
 
-      return sectioned;
-    });
+  if (transactions.isEmpty) return [];
 
-final sectionedTransactionsByDateRangeProvider =
-    FutureProvider.autoDispose.family<
-      List<TxListEntry>,
-      ({DateTime start, DateTime end, String type})
-    >((ref, arg) async {
-      final startDate = DateTime(
-        arg.start.year,
-        arg.start.month,
-        arg.start.day,
-      );
-      final endDate = DateTime(
-        arg.end.year,
-        arg.end.month,
-        arg.end.day,
-        23,
-        59,
-        59,
-      );
+  final List<TxListEntry> sectioned = [];
+  DateTime? currentDate;
 
-      final transactions = await ref.watch(
-        transactionsByDateRangeProvider((
-          start: startDate,
-          end: endDate,
-          type: arg.type,
-        )).future,
-      );
+  for (var tx in transactions) {
+    final txDate = DateTime(tx.date.year, tx.date.month, tx.date.day);
+    if (currentDate == null ||
+        currentDate.year != txDate.year ||
+        currentDate.month != txDate.month ||
+        currentDate.day != txDate.day) {
+      currentDate = txDate;
+      sectioned.add(TxHeader(txDate));
+    }
+    sectioned.add(TxItem(tx));
+  }
 
-      // Get pending SMS activities for this date range
-      final service = ref.watch(transactionProvider);
-      final isar = await service.isarService.getInstance();
-      
-      final pendingActivities = await isar.smsActivitys
-          .filter()
-          .dateBetween(startDate, endDate)
-          .and()
-          .not()
-          .statusEqualTo(ActivityStatus.approved)
-          .and()
-          .not()
-          .statusEqualTo(ActivityStatus.rejected)
-          .sortByDateDesc()
-          .findAll();
+  return sectioned;
+});
 
-      // Combine
-      final combined = <dynamic>[
-        ...transactions,
-        ...pendingActivities,
-      ];
+final allSectionedTransactionsProvider = FutureProvider.autoDispose
+    .family<List<TxListEntry>, String>((ref, type) async {
+  ref.watch(transactionChangeProvider);
+  final service = ref.watch(transactionProvider);
 
-      combined.sort((a, b) {
-        final dateA = a is Transaction ? a.date : (a as SmsActivity).date;
-        final dateB = b is Transaction ? b.date : (b as SmsActivity).date;
-        return dateB.compareTo(dateA);
-      });
+  List<Transaction> transactions;
+  if (type == 'income') {
+    transactions = await service.getByType(isExpense: false);
+  } else if (type == 'expense') {
+    transactions = await service.getByType(isExpense: true);
+  } else {
+    transactions = await service.getAll();
+  }
 
-      if (combined.isEmpty) return [];
+  if (transactions.isEmpty) return [];
 
-      final List<TxListEntry> sectioned = [];
-      DateTime? currentDate;
+  final List<TxListEntry> sectioned = [];
+  DateTime? currentDate;
 
-      for (var item in combined) {
-        final date = item is Transaction ? item.date : (item as SmsActivity).date;
-        final txDate = DateTime(date.year, date.month, date.day);
-        if (currentDate == null ||
-            currentDate.year != txDate.year ||
-            currentDate.month != txDate.month ||
-            currentDate.day != txDate.day) {
-          currentDate = txDate;
-          sectioned.add(TxHeader(txDate));
-        }
-        if (item is Transaction) {
-          sectioned.add(TxItem(item));
-        } else {
-          sectioned.add(SmsActivityItem(item as SmsActivity));
-        }
-      }
+  for (var tx in transactions) {
+    final txDate = DateTime(tx.date.year, tx.date.month, tx.date.day);
+    if (currentDate == null ||
+        currentDate.year != txDate.year ||
+        currentDate.month != txDate.month ||
+        currentDate.day != txDate.day) {
+      currentDate = txDate;
+      sectioned.add(TxHeader(txDate));
+    }
+    sectioned.add(TxItem(tx));
+  }
 
-      return sectioned;
-    });
-
-final allSectionedTransactionsProvider =
-    FutureProvider.autoDispose.family<List<TxListEntry>, String>((ref, type) async {
-      final service = ref.watch(transactionProvider);
-
-      // Handle needsReview filter - only show SMS activities
-      if (type == 'needsReview') {
-        final isar = await service.isarService.getInstance();
-        final needsReviewActivities = await isar.smsActivitys
-            .filter()
-            .statusEqualTo(ActivityStatus.needsReview)
-            .or()
-            .statusEqualTo(ActivityStatus.pending)
-            .or()
-            .statusEqualTo(ActivityStatus.duplicate)
-            .sortByDateDesc()
-            .findAll();
-
-        if (needsReviewActivities.isEmpty) return [];
-
-        final List<TxListEntry> sectioned = [];
-        DateTime? currentDate;
-
-        for (var activity in needsReviewActivities) {
-          final txDate = DateTime(activity.date.year, activity.date.month, activity.date.day);
-          if (currentDate == null ||
-              currentDate.year != txDate.year ||
-              currentDate.month != txDate.month ||
-              currentDate.day != txDate.day) {
-            currentDate = txDate;
-            sectioned.add(TxHeader(txDate));
-          }
-          sectioned.add(SmsActivityItem(activity));
-        }
-
-        return sectioned;
-      }
-
-      List<Transaction> transactions;
-      if (type == 'income') {
-        transactions = await service.getByType(isExpense: false);
-      } else if (type == 'expense') {
-        transactions = await service.getByType(isExpense: true);
-      } else {
-        transactions = await service.getAll();
-      }
-
-      // Get pending SMS activities
-      final isar = await service.isarService.getInstance();
-      final pendingActivities = await isar.smsActivitys
-          .filter()
-          .not()
-          .statusEqualTo(ActivityStatus.approved)
-          .and()
-          .not()
-          .statusEqualTo(ActivityStatus.rejected)
-          .sortByDateDesc()
-          .findAll();
-
-      // Combine transactions and activities
-      final combined = <dynamic>[
-        ...transactions,
-        ...pendingActivities,
-      ];
-
-      // Sort by date
-      combined.sort((a, b) {
-        final dateA = a is Transaction ? a.date : (a as SmsActivity).date;
-        final dateB = b is Transaction ? b.date : (b as SmsActivity).date;
-        return dateB.compareTo(dateA);
-      });
-
-      if (combined.isEmpty) return [];
-
-      final List<TxListEntry> sectioned = [];
-      DateTime? currentDate;
-
-      for (var item in combined) {
-        final date = item is Transaction ? item.date : (item as SmsActivity).date;
-        final txDate = DateTime(date.year, date.month, date.day);
-        if (currentDate == null ||
-            currentDate.year != txDate.year ||
-            currentDate.month != txDate.month ||
-            currentDate.day != txDate.day) {
-          currentDate = txDate;
-          sectioned.add(TxHeader(txDate));
-        }
-        if (item is Transaction) {
-          sectioned.add(TxItem(item));
-        } else {
-          sectioned.add(SmsActivityItem(item as SmsActivity));
-        }
-      }
-
-      return sectioned;
-    });
+  return sectioned;
+});
 
 // OPTIMIZED: Filter at database level
-final filteredSectionedTransactionsProvider =
-    FutureProvider.autoDispose.family<
-      List<TxListEntry>,
-      ({String type, int? categoryId, String? searchQuery})
-    >((ref, arg) async {
-      final service = ref.watch(transactionProvider);
+final filteredSectionedTransactionsProvider = FutureProvider.autoDispose.family<
+    List<TxListEntry>,
+    ({String type, int? categoryId, int? tagId, String? searchQuery})>((ref, arg) async {
+  final service = ref.watch(transactionProvider);
 
-      List<Transaction> transactions;
-      if (arg.categoryId != null) {
-        transactions = await service.getByCategoryAndType(
-          categoryId: arg.categoryId!,
-          type: arg.type,
-        );
-      } else if (arg.type == 'income') {
-        transactions = await service.getByType(isExpense: false);
-      } else if (arg.type == 'expense') {
-        transactions = await service.getByType(isExpense: true);
-      } else {
-        transactions = await service.getAll();
-      }
+  List<Transaction> transactions;
+  if (arg.tagId != null) {
+    transactions = await service.getByTagAndType(
+      tagId: arg.tagId!,
+      type: arg.type,
+    );
+  } else if (arg.categoryId != null) {
+    transactions = await service.getByCategoryAndType(
+      categoryId: arg.categoryId!,
+      type: arg.type,
+    );
+  } else if (arg.type == 'income') {
+    transactions = await service.getByType(isExpense: false);
+  } else if (arg.type == 'expense') {
+    transactions = await service.getByType(isExpense: true);
+  } else {
+    transactions = await service.getAll();
+  }
 
-      // Apply search filter in memory (can't index text search efficiently)
-      if (arg.searchQuery != null && arg.searchQuery!.isNotEmpty) {
-        final query = arg.searchQuery!.toLowerCase();
-        transactions = transactions
-            .where((tx) => tx.description?.toLowerCase().contains(query) ?? false)
-            .toList();
-      }
+  // Apply search filter in memory (can't index text search efficiently)
+  if (arg.searchQuery != null && arg.searchQuery!.isNotEmpty) {
+    final query = arg.searchQuery!.toLowerCase();
+    transactions = transactions
+        .where((tx) => tx.description?.toLowerCase().contains(query) ?? false)
+        .toList();
+  }
 
-      if (transactions.isEmpty) return [];
+  if (transactions.isEmpty) return [];
 
-      final List<TxListEntry> sectioned = [];
-      DateTime? currentDate;
+  final List<TxListEntry> sectioned = [];
+  DateTime? currentDate;
 
-      for (var tx in transactions) {
-        final txDate = DateTime(tx.date.year, tx.date.month, tx.date.day);
-        if (currentDate == null ||
-            currentDate.year != txDate.year ||
-            currentDate.month != txDate.month ||
-            currentDate.day != txDate.day) {
-          currentDate = txDate;
-          sectioned.add(TxHeader(txDate));
-        }
-        sectioned.add(TxItem(tx));
-      }
+  for (var tx in transactions) {
+    final txDate = DateTime(tx.date.year, tx.date.month, tx.date.day);
+    if (currentDate == null ||
+        currentDate.year != txDate.year ||
+        currentDate.month != txDate.month ||
+        currentDate.day != txDate.day) {
+      currentDate = txDate;
+      sectioned.add(TxHeader(txDate));
+    }
+    sectioned.add(TxItem(tx));
+  }
 
-      return sectioned;
-    });
+  return sectioned;
+});
 
 final transactionCountsProvider = FutureProvider.autoDispose<Map<Id, int>>((
   ref,
@@ -393,26 +274,37 @@ final transactionCountsProvider = FutureProvider.autoDispose<Map<Id, int>>((
 class TransactionService {
   final IsarService isarService;
   final AppLog log;
-  final gamificationService;
+  final GamificationService? gamificationService;
 
   TransactionService(this.isarService, this.log, this.gamificationService);
 
   Future<void> addTransaction(Transaction txn) async {
-    log.d('Adding transaction: ${txn.isExpense ? "Expense" : "Income"} of ₹${txn.amount}');
-    log.d('Transaction date: ${txn.date}');
-    log.d('Transaction account: ${txn.account.value?.name}');
-    log.d('Transaction category: ${txn.category.value?.name}');
-    
+    log.d(
+      'Adding transaction: ${txn.isExpense ? "Expense" : "Income"} of ${BaseCurrency.symbol}${txn.amount}',
+    );
+
     final isar = await isarService.getInstance();
-    await isar.writeTxn(() async {
-      final id = await isar.transactions.put(txn);
-      log.d('Transaction put returned ID: $id');
-      await txn.category.save();
-      await txn.account.save();
-      await txn.tags.save();
-    });
+
+    // Capture tags BEFORE entering writeTxn — toList() triggers loadSync()
+    // which can't run inside a write transaction
+    final tagsToSave = txn.tags.toList();
+
+    try {
+      await isar.writeTxn(() async {
+        await isar.transactions.put(txn);
+        await txn.category.save();
+        await txn.account.save();
+        await txn.tags.reset();
+        txn.tags.addAll(tagsToSave);
+        await txn.tags.save();
+      });
+    } catch (e) {
+      log.e('Failed to save transaction: ${BaseCurrency.symbol}${txn.amount}', e);
+      rethrow;
+    }
+
     log.i('Transaction saved successfully with ID: ${txn.id}');
-    
+
     // Emit transaction event to plugins
     if (!txn.isTransfer) {
       if (txn.isExpense) {
@@ -429,35 +321,26 @@ class TransactionService {
         );
       }
     }
-    
-    // Verify the transaction was saved
-    final saved = await isar.transactions.get(txn.id);
-    if (saved != null) {
-      log.d('Verified: Transaction ${txn.id} exists in DB with date: ${saved.date}');
-    } else {
-      log.e('ERROR: Transaction ${txn.id} not found in DB after save!');
-    }
-    
+
     // Track gamification
-    await gamificationService.track(GamificationEvent.transactionAdded);
+    await gamificationService?.track(GamificationEvent.transactionAdded);
+    await gamificationService?.track(GamificationEvent.transactionTrackedToday);
+
     if (txn.isTransfer) {
-      await gamificationService.track(GamificationEvent.transferCompleted);
+      await gamificationService?.track(GamificationEvent.transferCompleted);
     }
-    if (txn.tags.isNotEmpty) {
-      await gamificationService.track(GamificationEvent.tagUsed);
+    if (tagsToSave.isNotEmpty) {
+      await gamificationService?.track(GamificationEvent.tagUsed);
     }
   }
 
   Future<List<Transaction>> getAll() async {
     final isar = await isarService.getInstance();
-    final allTransactions = await isar.transactions
-        .where()
-        .sortByDateDesc()
-        .findAll();
+    final allTransactions =
+        await isar.transactions.where().sortByDateDesc().findAll();
 
     final filteredTransactions = allTransactions.where((tx) {
       if (tx.isTransfer) {
-        // Only show the 'source' transaction, not the linked one
         return !tx.isExpense;
       }
       return true;
@@ -490,8 +373,8 @@ class TransactionService {
   Stream<List<Transaction>> watchAll() async* {
     final isar = await isarService.getInstance();
     yield* isar.transactions.where().sortByDateDesc().watch(
-      fireImmediately: true,
-    );
+          fireImmediately: true,
+        );
   }
 
   Stream<List<Transaction>> watchByType({required bool isExpense}) async* {
@@ -516,10 +399,74 @@ class TransactionService {
   Future<void> deleteTransaction(int transactionId) async {
     log.d('Deleting transaction ID: $transactionId');
     final isar = await isarService.getInstance();
+
+    final txn = await isar.transactions.get(transactionId);
+    if (txn == null) return;
+
+    // Check if linked to a recurring bill — revert due date if so
+    await txn.recurringTransactionSource.load();
+    final recurring = txn.recurringTransactionSource.value;
+    if (recurring != null) {
+      final prevDate = _calculatePreviousDueDate(
+        recurring.nextDueDate, recurring.frequency,
+      );
+      await isar.writeTxn(() async {
+        recurring.nextDueDate = prevDate;
+        recurring.isActive = true;
+        await isar.recurringTransactions.put(recurring);
+        await _cleanupTripLink(isar, transactionId);
+        await isar.transactions.delete(transactionId);
+      });
+      log.i('Transaction deleted + recurring due date reverted to $prevDate');
+      return;
+    }
+
     await isar.writeTxn(() async {
+      await _cleanupTripLink(isar, transactionId);
       await isar.transactions.delete(transactionId);
     });
     log.i('Transaction deleted successfully');
+  }
+
+  /// Cleans up any TripTransaction + SplitExpense linked to this transaction.
+  Future<void> _cleanupTripLink(Isar isar, int transactionId) async {
+    final tripTxn = await isar.tripTransactions
+        .filter()
+        .transaction((q) => q.idEqualTo(transactionId))
+        .findFirst();
+    if (tripTxn == null) return;
+
+    // Delete linked split expense
+    await tripTxn.splitExpense.load();
+    if (tripTxn.splitExpense.value != null) {
+      await isar.splitExpenses.delete(tripTxn.splitExpense.value!.id);
+    }
+
+    // Remove from trip's transaction list
+    final trip = await isar.trips
+        .filter()
+        .transactions((q) => q.idEqualTo(tripTxn.id))
+        .findFirst();
+    if (trip != null) {
+      await trip.transactions.load();
+      trip.transactions.removeWhere((t) => t.id == tripTxn.id);
+      await trip.transactions.save();
+    }
+
+    await isar.tripTransactions.delete(tripTxn.id);
+  }
+
+  DateTime _calculatePreviousDueDate(DateTime current, Frequency frequency) {
+    switch (frequency) {
+      case Frequency.daily:
+        return current.subtract(const Duration(days: 1));
+      case Frequency.weekly:
+        return current.subtract(const Duration(days: 7));
+      case Frequency.monthly:
+        return DateTime(current.year, current.month - 1, current.day);
+      case Frequency.yearly:
+        return DateTime(current.year - 1, current.month, current.day);
+    }
   }
 
   /// Perform a transfer between two accounts
@@ -527,55 +474,88 @@ class TransactionService {
     required Account from,
     required Account to,
     required double amount,
+    double? creditAmount,
     required DateTime date,
     String? note,
     int? fromId,
     int? toId,
   }) async {
-    log.d('Transfer: ₹$amount from ${from.name} to ${to.name}');
+    log.d('Transfer: $amount from ${from.name} to ${to.name}');
     final isar = await isarService.getInstance();
-    final debit =
-        Transaction.create(
-            date: date,
-            amount: amount,
-            isExpense: true,
-            description: note,
-          )
-          ..isTransfer = true
-          ..account.value = from;
+
+    final fromCur = from.currencyCode;
+    final toCur = to.currencyCode;
+
+    // Snapshot conversion for debit side
+    double? debitConverted;
+    double? debitRate;
+    if (fromCur != null) {
+      final rate = await isar.exchangeRates
+          .filter()
+          .currencyCodeEqualTo(fromCur)
+          .findFirst();
+      if (rate != null) {
+        debitConverted = amount * rate.rateToBase;
+        debitRate = rate.rateToBase;
+      }
+    }
+
+    // Snapshot conversion for credit side
+    final effectiveCreditAmount = creditAmount ?? amount;
+    double? creditConverted;
+    double? creditRate;
+    if (toCur != null) {
+      final rate = await isar.exchangeRates
+          .filter()
+          .currencyCodeEqualTo(toCur)
+          .findFirst();
+      if (rate != null) {
+        creditConverted = effectiveCreditAmount * rate.rateToBase;
+        creditRate = rate.rateToBase;
+      }
+    }
+
+    final debit = Transaction.create(
+      date: date,
+      amount: amount,
+      isExpense: true,
+      description: note,
+      currencyCode: fromCur,
+      convertedAmount: debitConverted,
+      rateUsed: debitRate,
+    )
+      ..isTransfer = true
+      ..account.value = from;
     if (fromId != null) debit.id = fromId;
-    final credit =
-        Transaction.create(
-            date: date,
-            amount: amount,
-            isExpense: false,
-            description: note,
-          )
-          ..isTransfer = true
-          ..account.value = to;
+    final credit = Transaction.create(
+      date: date,
+      amount: effectiveCreditAmount,
+      isExpense: false,
+      description: note,
+      currencyCode: toCur,
+      convertedAmount: creditConverted,
+      rateUsed: creditRate,
+    )
+      ..isTransfer = true
+      ..account.value = to;
     if (toId != null) credit.id = toId;
-    await isar.writeTxnSync(() async {
+    await isar.writeTxn(() async {
       debit.related.value = credit;
       credit.related.value = debit;
-      isar.transactions.putSync(debit, saveLinks: true);
-      isar.transactions.putSync(credit, saveLinks: true);
+      await isar.transactions.put(debit);
+      await isar.transactions.put(credit);
+      await debit.related.save();
+      await credit.related.save();
       await debit.category.save();
       await debit.account.save();
       await credit.category.save();
       await credit.account.save();
     });
     log.i('Transfer completed successfully');
-    
-    // Track gamification
-    await gamificationService.track(GamificationEvent.transferCompleted);
-    
-    // Emit transfer event to plugins
-    PluginService().emitTransfer(
-      from.name,
-      to.name,
-      amount,
-      date,
-    );
+
+    await gamificationService?.track(GamificationEvent.transferCompleted);
+
+    PluginService().emitTransfer(from.name, to.name, amount, date);
   }
 
   Future<List<Transaction>> getByDateRange(DateTime start, DateTime end) async {
@@ -613,23 +593,74 @@ class TransactionService {
         .findAll();
   }
 
+  Future<List<Transaction>> getByTagAndType({
+    required int tagId,
+    required String type,
+  }) async {
+    final isar = await isarService.getInstance();
+    final tag = await isar.tags.get(tagId);
+    if (tag == null) return [];
+
+    // Query all transactions linked to this tag via backlink
+    var allTxns = await isar.transactions
+        .filter()
+        .tags((q) => q.idEqualTo(tagId))
+        .sortByDateDesc()
+        .findAll();
+
+    if (type == 'income') {
+      allTxns = allTxns.where((t) => !t.isExpense && !t.isTransfer).toList();
+    } else if (type == 'expense') {
+      allTxns = allTxns.where((t) => t.isExpense && !t.isTransfer).toList();
+    }
+
+    return allTxns;
+  }
+
   // OPTIMIZED: Filter by category at database level
   Future<List<Transaction>> getByCategoryAndType({
     required int categoryId,
     required String type,
   }) async {
     final isar = await isarService.getInstance();
-    
-    var query = isar.transactions
-        .filter()
-        .category((q) => q.idEqualTo(categoryId));
-    
+
+    var query =
+        isar.transactions.filter().category((q) => q.idEqualTo(categoryId));
+
     if (type == 'income') {
       query = query.isExpenseEqualTo(false).isTransferEqualTo(false);
     } else if (type == 'expense') {
       query = query.isExpenseEqualTo(true).isTransferEqualTo(false);
     }
-    
+
     return await query.sortByDateDesc().findAll();
   }
+}
+
+final quickAmountsProvider = FutureProvider.autoDispose<List<int>>((ref) async {
+  final service = ref.watch(transactionProvider);
+  final transactions = await service.getByType(isExpense: true);
+
+  if (transactions.length < 5) return [100, 500, 1000, 2000, 5000];
+
+  // Round to nearest "clean" number and count frequency
+  final freq = <int, int>{};
+  for (final tx in transactions.take(200)) {
+    final rounded = _roundToClean(tx.amount);
+    if (rounded > 0) freq[rounded] = (freq[rounded] ?? 0) + 1;
+  }
+
+  final sorted = freq.entries.toList()
+    ..sort((a, b) => b.value.compareTo(a.value));
+
+  final top = sorted.take(5).map((e) => e.key).toList()..sort();
+  return top.isEmpty ? [100, 500, 1000, 2000, 5000] : top;
+});
+
+int _roundToClean(double amount) {
+  if (amount <= 0) return 0;
+  if (amount <= 50) return (amount / 10).round() * 10;
+  if (amount <= 500) return (amount / 50).round() * 50;
+  if (amount <= 5000) return (amount / 100).round() * 100;
+  return (amount / 500).round() * 500;
 }

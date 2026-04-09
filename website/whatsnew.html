@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What's New — Mudra Manager</title>
+    <meta name="description" content="Latest updates and release notes for Mudra Manager">
+    <link rel="icon" href="assets/logo.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#6366f1',
+                        secondary: '#8b5cf6',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        html { scroll-behavior: smooth; }
+        .timeline-line { position: absolute; left: 23px; top: 0; bottom: 0; width: 2px; background: linear-gradient(to bottom, #6366f1, #e2e8f0); }
+    </style>
+</head>
+
+<body class="bg-white">
+    <!-- Navigation -->
+    <nav class="fixed w-full bg-white/95 backdrop-blur-sm z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <a href="index.html" class="flex items-center space-x-3">
+                    <img src="assets/logo.png" alt="Mudra Manager" class="h-12 w-12">
+                    <span class="text-2xl font-bold text-slate-900">Mudra Manager</span>
+                </a>
+                <a href="https://play.google.com/store/apps/details?id=com.mudramanager.app" target="_blank"
+                    class="bg-primary text-white px-8 py-3 rounded-xl font-semibold hover:bg-primary/90 transition-all duration-300 shadow-lg shadow-primary/30">
+                    Update Now
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <section class="pt-32 pb-12 px-4 bg-gradient-to-b from-slate-50 to-white">
+        <div class="max-w-3xl mx-auto text-center">
+            <h1 class="text-5xl font-bold text-slate-900 mb-4">What's New</h1>
+            <p class="text-xl text-slate-600">Every update, every improvement — all in one place</p>
+        </div>
+    </section>
+
+    <!-- Changelog Timeline (rendered by JS) -->
+    <section class="pb-24 px-4">
+        <div id="changelog" class="max-w-3xl mx-auto relative">
+            <div class="timeline-line hidden md:block"></div>
+            <!-- Loading state -->
+            <div id="changelog-loading" class="text-center py-12 text-slate-400">
+                <i class="fas fa-spinner fa-spin text-2xl mb-4"></i>
+                <p>Loading changelog...</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="flex items-center space-x-3">
+                    <img src="assets/logo.png" alt="Mudra Manager" class="h-10 w-10">
+                    <span class="text-xl font-bold">Mudra Manager</span>
+                </div>
+                <div class="flex items-center space-x-6 text-slate-400 text-sm">
+                    <a href="index.html" class="hover:text-white transition">Home</a>
+                    <a href="privacy.html" class="hover:text-white transition">Privacy</a>
+                    <a href="terms.html" class="hover:text-white transition">Terms</a>
+                    <a href="support.html" class="hover:text-white transition">Support</a>
+                </div>
+                <p class="text-slate-500 text-sm">&copy; 2025 Mudra Manager</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const typeConfig = {
+            new:      { icon: 'plus',   bg: 'bg-primary/10',   color: 'text-primary' },
+            improved: { icon: 'wrench', bg: 'bg-amber-500/10', color: 'text-amber-600' },
+            removed:  { icon: 'minus',  bg: 'bg-red-500/10',   color: 'text-red-500' },
+        };
+
+        function formatDate(dateStr) {
+            const d = new Date(dateStr + 'T00:00:00');
+            return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        }
+
+        function renderFeature(f) {
+            const cfg = typeConfig[f.type] || typeConfig.new;
+            return `
+                <div class="flex items-start gap-3">
+                    <span class="mt-1 flex-shrink-0 w-6 h-6 ${cfg.bg} rounded-full flex items-center justify-center">
+                        <i class="fas fa-${cfg.icon} ${cfg.color} text-xs"></i>
+                    </span>
+                    <div>
+                        <span class="font-semibold text-slate-900">${f.title}</span>
+                        <span class="text-slate-500"> — ${f.description}</span>
+                    </div>
+                </div>`;
+        }
+
+        function renderFixes(fixes) {
+            if (!fixes || fixes.length === 0) return '';
+            return `
+                <div class="mt-6 pt-6 border-t border-slate-100">
+                    <p class="text-sm font-semibold text-slate-700 mb-3">Bug Fixes</p>
+                    <ul class="space-y-2 text-sm text-slate-500">
+                        ${fixes.map(fix => `
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check text-green-500 mt-1 text-xs"></i>
+                                ${fix}
+                            </li>`).join('')}
+                    </ul>
+                </div>`;
+        }
+
+        function renderRelease(release, isFirst) {
+            const dotColor = isFirst ? 'bg-primary shadow-lg shadow-primary/30' : 'bg-slate-300';
+            const tagHtml = release.tag
+                ? `<span class="bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full">${release.tag}</span>`
+                : '';
+            const versionColor = isFirst ? 'bg-primary' : 'bg-slate-700';
+
+            return `
+                <div class="relative pl-0 md:pl-16 mb-16">
+                    <div class="hidden md:flex absolute left-0 top-1 w-12 h-12 ${dotColor} rounded-full items-center justify-center z-10">
+                        <i class="fas fa-${release.icon || 'code-branch'} text-white text-lg"></i>
+                    </div>
+                    <div class="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow">
+                        <div class="flex flex-wrap items-center gap-3 mb-6">
+                            <span class="${versionColor} text-white text-sm font-bold px-4 py-1.5 rounded-full">v${release.version}</span>
+                            <span class="text-slate-500 text-sm font-medium">${formatDate(release.date)}</span>
+                            ${tagHtml}
+                        </div>
+                        <h2 class="text-2xl font-bold text-slate-900 mb-2">${release.title}</h2>
+                        <p class="text-slate-500 mb-6">${release.summary}</p>
+                        <div class="space-y-4">
+                            ${release.features.map(renderFeature).join('')}
+                        </div>
+                        ${renderFixes(release.fixes)}
+                    </div>
+                </div>`;
+        }
+
+        function renderEndMarker() {
+            return `
+                <div class="relative pl-0 md:pl-16">
+                    <div class="hidden md:flex absolute left-0 top-0 w-12 h-12 bg-slate-200 rounded-full items-center justify-center z-10">
+                        <i class="fas fa-flag text-slate-400 text-lg"></i>
+                    </div>
+                    <p class="text-slate-400 text-sm font-medium pt-3">You're all caught up!</p>
+                </div>`;
+        }
+
+        // Fetch and render
+        fetch('changelog.json')
+            .then(res => res.json())
+            .then(releases => {
+                const container = document.getElementById('changelog');
+                const loading = document.getElementById('changelog-loading');
+                loading.remove();
+
+                const html = releases.map((r, i) => renderRelease(r, i === 0)).join('') + renderEndMarker();
+                // Keep the timeline line, append after it
+                container.insertAdjacentHTML('beforeend', html);
+            })
+            .catch(err => {
+                document.getElementById('changelog-loading').innerHTML = `
+                    <i class="fas fa-exclamation-triangle text-2xl mb-4 text-amber-500"></i>
+                    <p>Could not load changelog. <a href="changelog.json" class="text-primary underline">View raw</a></p>`;
+            });
+    </script>
+</body>
+
+</html>

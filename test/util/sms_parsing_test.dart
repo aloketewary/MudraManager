@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mudra_manager/core/utils/transaction_msg_util.dart';
+import 'package:mudra_manager/features/sms/data/sms_processor_service.dart';
 
 void main() {
   group('SMS Transaction Parsing', () {
@@ -69,23 +70,21 @@ void main() {
   group('SMS Hash Generation', () {
     test('generates consistent hash for same input', () {
       const address = 'HDFCBK';
-      const timestamp = 1234567890;
       const body = 'Test SMS';
 
-      final hash1 = generateSmsHash(address, timestamp, body);
-      final hash2 = generateSmsHash(address, timestamp, body);
+      final hash1 = SmsProcessorService.instance.generateSmsHash(address, body);
+      final hash2 = SmsProcessorService.instance.generateSmsHash(address, body);
 
       expect(hash1, equals(hash2));
     });
 
     test('generates different hash for different input', () {
       const address = 'HDFCBK';
-      const timestamp1 = 1234567890;
-      const timestamp2 = 1234567891;
-      const body = 'Test SMS';
+      const body1 = 'Test SMS';
+      const body2 = 'Different SMS';
 
-      final hash1 = generateSmsHash(address, timestamp1, body);
-      final hash2 = generateSmsHash(address, timestamp2, body);
+      final hash1 = SmsProcessorService.instance.generateSmsHash(address, body1);
+      final hash2 = SmsProcessorService.instance.generateSmsHash(address, body2);
 
       expect(hash1, isNot(equals(hash2)));
     });

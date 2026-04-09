@@ -1,5 +1,7 @@
 import 'package:isar_community/isar.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
+import 'package:mudra_manager/core/db/models/exchange_rate.dart';
 import 'package:mudra_manager/core/db/models/frequency.dart';
 import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
@@ -7,7 +9,6 @@ import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
 import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
 import 'package:mudra_manager/features/gamification/services/gamification_service.dart';
-
 
 class RecurringTransactionService {
   final IsarService isarService;
@@ -21,39 +22,152 @@ class RecurringTransactionService {
   Future<void> processRecurringTransactions() async {
     final isar = await isarService.getInstance();
     final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
 
     final dueRecurring = await isar.recurringTransactions
         .filter()
         .isActiveEqualTo(true)
-        .nextDueDateLessThan(now.add(const Duration(days: 1)))
         .findAll();
 
-    log.i('Processing ${dueRecurring.length} recurring transactions');
+    log.i('Checking ${dueRecurring.length} recurring transactions');
 
+    int processed = 0;
+    int matched = 0;
+    int skipped = 0;
     for (final recurring in dueRecurring) {
       await recurring.category.load();
       await recurring.account.load();
 
-      if (recurring.nextDueDate.isBefore(now) || 
-          recurring.nextDueDate.isAtSameMomentAs(now)) {
+      final dueDate = DateTime(
+        recurring.nextDueDate.year,
+        recurring.nextDueDate.month,
+        recurring.nextDueDate.day,
+      );
+
+      if (dueDate.isAfter(today)) continue;
+
+      // Check if already processed for this period
+      final exists =
+          await _transactionExists(isar, recurring, recurring.nextDueDate);
+      if (exists) {
+        skipped++;
+        continue;
+      }
+
+      // Try to match with an existing SMS-imported transaction
+      final smsMatch = await _findSmsMatch(isar, recurring);
+      if (smsMatch != null) {
+        // Link the existing transaction to this recurring bill
+        await _linkTransactionToRecurring(isar, smsMatch, recurring);
+        await _updateNextDueDate(isar, recurring);
+        log.i('Matched SMS transaction to recurring: ${recurring.description}');
+        matched++;
+        continue;
+      }
+
+      // No SMS match — only auto-create if overdue by 2+ days
+      // (gives SMS import time to pick it up)
+      final daysOverdue = today.difference(dueDate).inDays;
+      if (daysOverdue >= 2) {
         await _createTransaction(isar, recurring);
         await _updateNextDueDate(isar, recurring);
-        log.i('Created recurring transaction: ${recurring.description}');
+        log.i('Auto-created overdue recurring: ${recurring.description}');
+        processed++;
       }
     }
+
+    log.i(
+        'Recurring: $processed created, $matched SMS-matched, $skipped already done');
   }
 
-  Future<void> _createTransaction(dynamic isar, RecurringTransaction recurring) async {
+  /// Find an unlinked transaction that matches this recurring bill
+  /// (exact amount, within the billing period, same account)
+  Future<Transaction?> _findSmsMatch(
+      Isar isar, RecurringTransaction recurring) async {
+    final dueDate = recurring.nextDueDate;
+    // Search from 5 days before due to 2 days after (payments can be early/late)
+    final searchStart = DateTime(
+      dueDate.year, dueDate.month, dueDate.day,
+    ).subtract(const Duration(days: 5));
+    final searchEnd = DateTime(
+      dueDate.year, dueDate.month, dueDate.day, 23, 59, 59,
+    ).add(const Duration(days: 2));
+
+    final candidates = await isar.transactions
+        .filter()
+        .isExpenseEqualTo(recurring.isExpense)
+        .isTransferEqualTo(false)
+        .dateBetween(searchStart, searchEnd)
+        .amountBetween(recurring.amount - 0.01, recurring.amount + 0.01)
+        .findAll();
+
+    // Find one that isn't already linked to a recurring source
+    for (final txn in candidates) {
+      await txn.recurringTransactionSource.load();
+      await txn.account.load();
+      if (txn.recurringTransactionSource.value == null &&
+          txn.account.value?.id == recurring.account.value?.id) {
+        return txn;
+      }
+    }
+    return null;
+  }
+
+  Future<void> _linkTransactionToRecurring(
+      Isar isar, Transaction txn, RecurringTransaction recurring) async {
+    txn.recurringTransactionSource.value = recurring;
+    await isar.writeTxn(() async {
+      await isar.transactions.put(txn);
+      await txn.recurringTransactionSource.save();
+    });
+  }
+
+  Future<bool> _transactionExists(
+      Isar isar, RecurringTransaction recurring, DateTime dueDate) async {
+    final startOfDay = DateTime(dueDate.year, dueDate.month, dueDate.day);
+    final endOfDay =
+        DateTime(dueDate.year, dueDate.month, dueDate.day, 23, 59, 59);
+
+    final existing = await isar.transactions
+        .filter()
+        .recurringTransactionSource((q) => q.idEqualTo(recurring.id))
+        .dateBetween(startOfDay, endOfDay)
+        .findFirst();
+
+    return existing != null;
+  }
+
+  Future<void> _createTransaction(
+      Isar isar, RecurringTransaction recurring) async {
     final frequencyText = _getFrequencyText(recurring.frequency);
-    final description = recurring.description?.isNotEmpty == true 
+    final description = recurring.description?.isNotEmpty == true
         ? '${recurring.description} (🔄 $frequencyText)'
         : '🔄 $frequencyText - ${recurring.category.value?.name ?? ""}';
-    
+
+    // Inherit currency from linked account
+    final accountCurrency = recurring.account.value?.currencyCode;
+    double? convertedAmount;
+    double? rateUsed;
+
+    if (accountCurrency != null) {
+      final rate = await isar.exchangeRates
+          .filter()
+          .currencyCodeEqualTo(accountCurrency)
+          .findFirst();
+      if (rate != null) {
+        convertedAmount = recurring.amount * rate.rateToBase;
+        rateUsed = rate.rateToBase;
+      }
+    }
+
     final transaction = Transaction.create(
       date: recurring.nextDueDate,
       amount: recurring.amount,
       isExpense: recurring.isExpense,
       description: description,
+      currencyCode: accountCurrency,
+      convertedAmount: convertedAmount,
+      rateUsed: rateUsed,
     )
       ..account.value = recurring.account.value
       ..category.value = recurring.category.value
@@ -80,7 +194,8 @@ class RecurringTransactionService {
     }
   }
 
-  Future<void> _updateNextDueDate(dynamic isar, RecurringTransaction recurring) async {
+  Future<void> _updateNextDueDate(
+      Isar isar, RecurringTransaction recurring) async {
     final nextDate = calculateNextDueDate(
       recurring.nextDueDate,
       recurring.frequency,
@@ -106,8 +221,9 @@ class RecurringTransactionService {
       await recurring.account.save();
       await recurring.category.save();
     });
-    if (isNew) {
-      await gamificationService?.track(GamificationEvent.recurringTransactionCreated);
+    if (isNew && gamificationService != null) {
+      await gamificationService!
+          .track(GamificationEvent.recurringTransactionCreated);
     }
   }
 
@@ -130,7 +246,8 @@ class RecurringTransactionService {
 
   Stream<List<RecurringTransaction>> watchAll() async* {
     final isar = await isarService.getInstance();
-    await for (final list in isar.recurringTransactions.where().watch(fireImmediately: true)) {
+    await for (final list
+        in isar.recurringTransactions.where().watch(fireImmediately: true)) {
       for (var r in list) {
         await r.category.load();
         await r.account.load();

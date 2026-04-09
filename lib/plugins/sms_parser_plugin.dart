@@ -1,5 +1,4 @@
 import 'package:mudra_plugin_sdk/plugin.dart';
-import 'package:mudra_plugin_sdk/events.dart';
 
 abstract class SmsParserPlugin extends MudraPlugin {
   ParsedSms? parseSms(String sender, String body);
@@ -16,6 +15,7 @@ class ParsedSms {
   final String? transactionType;
   final String? merchant;
   final double? balance;
+  final bool isLikelyTransfer;
 
   ParsedSms({
     required this.amount,
@@ -24,5 +24,6 @@ class ParsedSms {
     this.transactionType,
     this.merchant,
     this.balance,
+    this.isLikelyTransfer = false,
   });
 }

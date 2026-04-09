@@ -24,7 +24,9 @@ class NotificationRecordService {
       ..body = body
       ..timestamp = DateTime.now()
       ..isRead = false
-      ..type = type;
+      ..type = type
+      ..priority = NotificationPriority.normal
+      ..category = NotificationCategory.financial;
     final isar = await isarService.getInstance();
     await isar.writeTxn(() => isar.notificationRecords.put(record));
   }
@@ -42,7 +44,11 @@ class NotificationRecordService {
 
   Future<void> markAllAsRead() async {
     final isar = await isarService.getInstance();
-    final unread = await isar.notificationRecords.where().filter().isReadEqualTo(false).findAll();
+    final unread = await isar.notificationRecords
+        .where()
+        .filter()
+        .isReadEqualTo(false)
+        .findAll();
     await isar.writeTxn(() async {
       for (final record in unread) {
         record.isRead = true;
@@ -54,8 +60,8 @@ class NotificationRecordService {
   Stream<List<NotificationRecord>> watchNotifications() async* {
     final isar = await isarService.getInstance();
     yield* isar.notificationRecords.where().sortByTimestampDesc().watch(
-      fireImmediately: true,
-    );
+          fireImmediately: true,
+        );
   }
 
   Future<void> clearAllNotifications() async {
@@ -70,5 +76,11 @@ class NotificationRecordService {
         .filter()
         .isReadEqualTo(false)
         .count();
+  }
+
+  Future<void> archiveNotification(NotificationRecord record) async {
+    final isar = await isarService.getInstance();
+    record.isArchived = true;
+    await isar.writeTxn(() => isar.notificationRecords.put(record));
   }
 }

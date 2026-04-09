@@ -23,9 +23,18 @@ class Account {
 
   String? accountNumber;
 
+  /// Currency code for this account (e.g. "USD"). Null = base currency.
+  String? currencyCode;
+
   // A field to mark if the account is active or closed/hidden
   @Index() // Index for easily filtering active accounts
   bool isActive = true;
+
+  /// Whether this is the primary/default account.
+  /// Used for auto-assigning trip/split ledger transactions.
+  /// Only one account should be primary at a time.
+  @Index()
+  bool isPrimary = false;
 
   // Maybe add: currency code/symbol if supporting multiple currencies
 

@@ -3,7 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/features/trip/data/trip_provider.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 
 class ActiveTripMiniCard extends ConsumerWidget {
   final double globalPadding;
@@ -12,169 +14,159 @@ class ActiveTripMiniCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tripsAsync = ref.watch(activeTripsProvider);
+    final tripsAsync = ref.watch(allTripsProvider);
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
     return tripsAsync.when(
       data: (trips) {
+        final activeTrip = trips.where((t) => t.isActive).firstOrNull;
+        if (activeTrip == null) return const SizedBox.shrink();
+
+        final trip = activeTrip;
+        final duration = trip.endDate.difference(trip.startDate).inDays + 1;
         final now = DateTime.now();
         final today = DateTime(now.year, now.month, now.day);
-
-        final activeTrips = trips.where((trip) {
-          final start = DateTime(
-            trip.startDate.year,
-            trip.startDate.month,
-            trip.startDate.day,
-          );
-          final end = DateTime(
-            trip.endDate.year,
-            trip.endDate.month,
-            trip.endDate.day,
-          );
-          return (start.isBefore(today) || start.isAtSameMomentAs(today)) &&
-              (end.isAfter(today) || end.isAtSameMomentAs(today));
-        }).toList();
-
-        if (activeTrips.isEmpty) return const SizedBox.shrink();
-
-        final trip = activeTrips.first;
-        final duration = trip.endDate.difference(trip.startDate).inDays + 1;
         final daysLeft = trip.endDate.difference(today).inDays + 1;
 
         return Padding(
           padding: const EdgeInsets.only(top: 16),
-          child: GestureDetector(
-            onTap: () {
-              HapticFeedback.lightImpact();
-              context.push('/trip-detail', extra: trip.id);
-            },
+          child: SizedBox(
+            width: double.infinity,
             child: Container(
               margin: EdgeInsets.symmetric(horizontal: globalPadding),
               child: Card(
                 elevation: 0,
-                color: color.surfaceContainerLow,
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: color.tertiaryContainer,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Icon(
-                              Icons.flight_takeoff,
-                              color: color.onTertiaryContainer,
-                              size: 24,
-                            ),
+                color: color.errorContainer,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  side: BorderSide(color: color.error, width: 2),
+                ),
+                child: InkWell(
+                  onTap: () {
+                    HapticFeedback.mediumImpact();
+                    context.push(AppRoutes.tripDetail, extra: trip.id);
+                  },
+                  borderRadius: BorderRadius.circular(20),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            color: color.error,
+                            shape: BoxShape.circle,
                           ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Active Trip',
-                                  style: textTheme.labelMedium?.copyWith(
-                                    color: color.onSurfaceVariant,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Icon(
+                                LucideIcons.plane,
+                                color: color.onError,
+                                size: 28,
+                              ),
+                              Positioned(
+                                top: 8,
+                                right: 8,
+                                child: Container(
+                                  width: 10,
+                                  height: 10,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: color.error,
+                                      width: 2,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  trip.name,
-                                  style: textTheme.titleLarge?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
-                          ),
-                          Icon(
-                            Icons.chevron_right,
-                            color: color.onSurfaceVariant,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _MetricItem(
-                              icon: Icons.calendar_today,
-                              label: 'Duration',
-                              value: '$duration days',
-                              color: color,
-                              textTheme: textTheme,
-                            ),
-                          ),
-                          Expanded(
-                            child: _MetricItem(
-                              icon: Icons.hourglass_bottom,
-                              label: 'Days Left',
-                              value: '$daysLeft days',
-                              color: color,
-                              textTheme: textTheme,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _MetricItem(
-                              icon: Icons.people,
-                              label: 'Participants',
-                              value: '${trip.participants.length}',
-                              color: color,
-                              textTheme: textTheme,
-                            ),
-                          ),
-                          Expanded(
-                            child: _MetricItem(
-                              icon: Icons.receipt_long,
-                              label: 'Expenses',
-                              value: '${trip.transactions.length}',
-                              color: color,
-                              textTheme: textTheme,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: color.tertiaryContainer.withValues(alpha: 0.5),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.info_outline,
-                              size: 16,
-                              color: color.onTertiaryContainer,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                '${DateFormat.MMMd().format(trip.startDate)} - ${DateFormat.MMMd().format(trip.endDate)}',
-                                style: textTheme.bodySmall?.copyWith(
-                                  color: color.onTertiaryContainer,
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Text(
+                                    'TRIP MODE',
+                                    style: textTheme.labelSmall?.copyWith(
+                                      color: color.error,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 1.2,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: color.error,
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      'LIVE',
+                                      style: textTheme.labelSmall?.copyWith(
+                                        color: color.onError,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 9,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                trip.name,
+                                style: textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: color.onErrorContainer,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 12),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildMetricItem(
+                                      '$daysLeft days left',
+                                      '${trip.transactions.length} expenses',
+                                      LucideIcons.clock,
+                                      color.primary,
+                                      color,
+                                      textTheme,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: _buildMetricItem(
+                                      '${trip.participants.length} people',
+                                      DateFormat.MMMd().format(trip.endDate),
+                                      LucideIcons.users,
+                                      color.tertiary,
+                                      color,
+                                      textTheme,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        Icon(
+                          LucideIcons.chevronRight,
+                          color: color.onErrorContainer,
+                          size: 20,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -186,45 +178,40 @@ class ActiveTripMiniCard extends ConsumerWidget {
       error: (_, __) => const SizedBox.shrink(),
     );
   }
-}
 
-class _MetricItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final ColorScheme color;
-  final TextTheme textTheme;
-
-  const _MetricItem({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.color,
-    required this.textTheme,
-  });
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildMetricItem(
+    String label,
+    String value,
+    IconData icon,
+    Color itemColor,
+    ColorScheme color,
+    TextTheme textTheme,
+  ) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: color.onSurfaceVariant),
+        Icon(icon, color: itemColor, size: 16),
         const SizedBox(width: 6),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: textTheme.labelSmall?.copyWith(
-                color: color.onSurfaceVariant,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: textTheme.bodySmall?.copyWith(
+                  color: color.onSurfaceVariant,
+                  fontSize: 11,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
-            ),
-            Text(
-              value,
-              style: textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
+              Text(
+                value,
+                style: textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );

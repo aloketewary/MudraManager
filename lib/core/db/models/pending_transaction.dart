@@ -19,7 +19,7 @@ class PendingTransaction {
   String? toAccount;
   String? transactionRef;
   String? category;
-  @Index(unique: true)
+  @Index(unique: true, replace: true)
   late String smsHash;
 
   PendingTransaction();

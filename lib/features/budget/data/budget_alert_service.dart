@@ -1,15 +1,15 @@
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:isar_community/isar.dart';
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/budget.dart';
-import 'package:mudra_manager/core/db/models/notification_record.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
+import 'package:mudra_manager/core/services/notification_service.dart';
 
 class BudgetAlertService {
   final IsarService isarService;
-  final FlutterLocalNotificationsPlugin notificationsPlugin;
 
-  BudgetAlertService(this.isarService, this.notificationsPlugin);
+  BudgetAlertService(this.isarService);
 
   Future<List<BudgetAlert>> checkBudgetsAfterTransaction(
     Transaction transaction,
@@ -39,36 +39,39 @@ class BudgetAlertService {
       final spent = await _calculateSpent(isar, budget, start, end);
       final percentage = (spent / budget.amount) * 100;
 
-      final threshold = _getThreshold(percentage);
-      if (threshold != null) {
-        final alreadyNotified = await _hasNotified(
-          isar,
-          budget.id,
-          threshold,
-          start,
-        );
-        if (!alreadyNotified) {
-          final alert = BudgetAlert(
-            budget: budget,
-            spent: spent,
-            percentage: percentage,
-            threshold: threshold,
-          );
-          alerts.add(alert);
-          await _sendNotification(alert);
-          await _saveNotificationRecord(isar, budget.id, threshold, start, end);
-        }
+      if (percentage >= 100 && !budget.notifiedAt100) {
+        alerts.add(BudgetAlert(
+          budget: budget, spent: spent,
+          percentage: percentage, threshold: 100,
+        ));
+        budget.notifiedAt100 = true;
+        await isar.writeTxn(() => isar.budgets.put(budget));
+      } else if (percentage >= 90 && !budget.notifiedAt90 && !budget.notifiedAt100) {
+        alerts.add(BudgetAlert(
+          budget: budget, spent: spent,
+          percentage: percentage, threshold: 90,
+        ));
+        budget.notifiedAt90 = true;
+        await isar.writeTxn(() => isar.budgets.put(budget));
+      } else if (percentage >= 80 && !budget.notifiedAt80 && !budget.notifiedAt90) {
+        alerts.add(BudgetAlert(
+          budget: budget, spent: spent,
+          percentage: percentage, threshold: 80,
+        ));
+        budget.notifiedAt80 = true;
+        await isar.writeTxn(() => isar.budgets.put(budget));
       }
+    }
+
+    if (alerts.isNotEmpty) {
+      await _sendNotification(alerts);
     }
 
     return alerts;
   }
 
   Future<double> _calculateSpent(
-    Isar isar,
-    Budget budget,
-    DateTime start,
-    DateTime end,
+    Isar isar, Budget budget, DateTime start, DateTime end,
   ) async {
     final categoryIds = budget.categories.map((c) => c.id).toList();
     final transactions = await isar.transactions
@@ -78,78 +81,42 @@ class BudgetAlertService {
         .findAll();
 
     return transactions
-        .where(
-          (t) =>
-              t.category.value != null &&
-              categoryIds.contains(t.category.value!.id),
-        )
-        .fold<double>(0.0, (sum, t) => sum + t.amount);
+        .where((t) =>
+            t.category.value != null &&
+            categoryIds.contains(t.category.value!.id))
+        .fold<double>(0.0, (sum, t) => sum + t.baseAmount);
   }
 
-  int? _getThreshold(double percentage) {
-    if (percentage >= 100 && percentage < 105) return 100;
-    if (percentage >= 90 && percentage < 100) return 90;
-    if (percentage >= 80 && percentage < 90) return 80;
-    return null;
-  }
+  /// Routes through NotificationService gateway — single grouped notification.
+  Future<void> _sendNotification(List<BudgetAlert> alerts) async {
+    final exceeded = alerts.where((a) => a.threshold == 100).toList();
+    final warnings = alerts.where((a) => a.threshold != 100).toList();
 
-  Future<bool> _hasNotified(
-    Isar isar,
-    int budgetId,
-    int threshold,
-    DateTime periodStart,
-  ) async {
-    final existing = await isar.notificationRecords
-        .filter()
-        .typeContains('budget_alert_${budgetId}_$threshold')
-        .timestampGreaterThan(periodStart)
-        .findFirst();
-    return existing != null;
-  }
+    if (exceeded.isNotEmpty) {
+      final n = exceeded.length;
+      final names = exceeded.map((a) => a.budget.name).join(', ');
+      await NotificationService.showLocalNotification(
+        id: 9000,
+        title: '🚨 $n budget${n > 1 ? 's' : ''} exceeded!',
+        body: n == 1
+            ? '${exceeded.first.budget.name}: ${formatCurrency(exceeded.first.spent, code: BaseCurrency.code)} / ${formatCurrency(exceeded.first.budget.amount, code: BaseCurrency.code)}'
+            : '$names are over budget',
+        dedupKey: 'budget_exceeded_txn',
+      );
+    }
 
-  Future<void> _sendNotification(BudgetAlert alert) async {
-    final title = alert.threshold == 100
-        ? '🚨 Budget Exceeded!'
-        : alert.threshold == 90
-        ? '⚠️ Budget Alert: 90%'
-        : '⚠️ Budget Alert: 80%';
-
-    final body =
-        '${alert.budget.name}: ₹${alert.spent.toStringAsFixed(0)} / ₹${alert.budget.amount.toStringAsFixed(0)} (${alert.percentage.toStringAsFixed(1)}%)';
-
-    await notificationsPlugin.show(
-      alert.budget.id,
-      title,
-      body,
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'budget_alerts',
-          'Budget Alerts',
-          channelDescription: 'Notifications for budget thresholds',
-          importance: Importance.high,
-          priority: Priority.high,
-        ),
-      ),
-    );
-  }
-
-  Future<void> _saveNotificationRecord(
-    Isar isar,
-    int budgetId,
-    int threshold,
-    DateTime start,
-    DateTime end,
-  ) async {
-    final record = NotificationRecord()
-      ..title = 'Budget Alert'
-      ..body = 'Budget threshold $threshold% reached'
-      ..type = 'budget_alert_${budgetId}_$threshold'
-      ..timestamp = DateTime.now()
-      ..isRead = false;
-
-    await isar.writeTxn(() async {
-      await isar.notificationRecords.put(record);
-    });
+    if (warnings.isNotEmpty) {
+      final n = warnings.length;
+      final names = warnings.map((a) => a.budget.name).join(', ');
+      await NotificationService.showLocalNotification(
+        id: 9001,
+        title: '⚠️ $n budget${n > 1 ? 's' : ''} near limit',
+        body: n == 1
+            ? '${warnings.first.budget.name}: ${warnings.first.percentage.toStringAsFixed(0)}% used'
+            : '$names are nearing their limits',
+        dedupKey: 'budget_warning_txn',
+      );
+    }
   }
 }
 

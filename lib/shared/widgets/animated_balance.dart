@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mudra_manager/core/extension/localization_extenstion.dart';
-import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
-import 'package:mudra_manager/shared/widgets/adaptive_text.dart';
+import 'package:mudra_manager/shared/widgets/currency_text.dart';
 
 class AnimatedBalance extends ConsumerWidget {
   final double value;
@@ -15,6 +13,7 @@ class AnimatedBalance extends ConsumerWidget {
   final String? suffix;
   final String? prefix;
   final bool compact;
+  final String? currencyCode;
 
   const AnimatedBalance({
     super.key,
@@ -27,33 +26,28 @@ class AnimatedBalance extends ConsumerWidget {
     this.suffix,
     this.prefix,
     this.compact = true,
+    this.currencyCode,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ctxt = AppLocalizations.of(context)!;
-    final showBalance = ref.watch(balanceVisibilityProvider);
+    ref.watch(balanceVisibilityProvider);
 
     return TweenAnimationBuilder<double>(
       tween: Tween<double>(begin: 0, end: value),
       duration: duration,
       builder: (context, animatedValue, _) {
-        final formattedValue = compact
-            ? ctxt.formatCompactCurrency(animatedValue)
-            : ctxt.formatCurrencyWithSign(fixedStringLength, animatedValue);
-        final fullValue = ctxt.formatCurrencyWithSign(
-          fixedStringLength,
-          animatedValue,
-        );
-
-        return Tooltip(
-          message: fullValue,
-          child: AdaptiveText(
-            '${prefix ?? ""}$formattedValue${suffix ?? ""}',
-            style: style ?? Theme.of(context).textTheme.headlineMedium,
-            textAlign: textAlign,
-            isNumeric: true,
-          ),
+        return CurrencyText(
+          amount: animatedValue,
+          currencyCode: currencyCode,
+          style: style ?? Theme.of(context).textTheme.headlineMedium,
+          textAlign: textAlign,
+          compact: compact,
+          fixedLength: fixedStringLength,
+          prefixText: prefix,
+          suffixText: suffix,
+          showSign: true,
+          showPositiveSign: false,
         );
       },
     );

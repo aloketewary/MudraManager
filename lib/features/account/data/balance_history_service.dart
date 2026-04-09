@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
@@ -13,7 +14,8 @@ class BalanceHistoryService {
   BalanceHistoryService._();
 
   Future<void> recordDailySnapshots() async {
-    final isar = await IsarService.initIsar();
+    final isar = await IsarService().getInstance();
+
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
@@ -25,7 +27,10 @@ class BalanceHistoryService {
           .filter()
           .account((q) => q.idEqualTo(account.id))
           .and()
-          .dateBetween(today, DateTime(now.year, now.month, now.day, 23, 59, 59))
+          .dateBetween(
+            today,
+            DateTime(now.year, now.month, now.day, 23, 59, 59),
+          )
           .findFirst();
 
       if (existingSnapshot != null) continue;
@@ -47,7 +52,7 @@ class BalanceHistoryService {
           .amountProperty()
           .sum();
 
-      final balance = account.accountType.name == 'creditCard'
+      final balance = account.accountType == AccountType.creditCard
           ? account.initialBalance + expense - income
           : account.initialBalance + income - expense;
 
@@ -58,15 +63,19 @@ class BalanceHistoryService {
         await snapshot.account.save();
       });
 
-      _log.i('Snapshot recorded for ${account.name}: ₹$balance');
+      _log.i('Snapshot recorded for ${account.name}: ${BaseCurrency.symbol}$balance');
     }
   }
 
-  Future<List<BalanceSnapshot>> getBalanceHistory(int accountId,
-      {DateTime? startDate, DateTime? endDate}) async {
+  Future<List<BalanceSnapshot>> getBalanceHistory(
+    int accountId, {
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
     final isar = await IsarService.initIsar();
 
-    final start = startDate ?? DateTime.now().subtract(const Duration(days: 30));
+    final start =
+        startDate ?? DateTime.now().subtract(const Duration(days: 30));
     final end = endDate ?? DateTime.now();
 
     return await isar.balanceSnapshots
@@ -81,13 +90,12 @@ class BalanceHistoryService {
   Future<double?> getBalanceOnDate(int accountId, DateTime date) async {
     final isar = await IsarService.initIsar();
 
+    final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);
     final snapshot = await isar.balanceSnapshots
         .filter()
         .account((q) => q.idEqualTo(accountId))
         .and()
-        .dateLessThan(date)
-        .or()
-        .dateEqualTo(date)
+        .dateLessThan(endOfDay, include: true)
         .sortByDateDesc()
         .findFirst();
 

@@ -12,26 +12,25 @@ class AdvancedAnalyticsService {
     final now = DateTime.now();
     final transactions = await _transactionService.getAllForDashBoard();
 
-    final last3Months = <double>[];
+    double total = 0;
+    int count = 0;
+
     for (int i = 1; i <= 3; i++) {
       final month = DateTime(now.year, now.month - i);
-      final monthTxns = transactions.where(
-        (tx) =>
-            tx.isExpense &&
-            tx.date.year == month.year &&
-            tx.date.month == month.month,
-      );
-      final total = monthTxns.fold(0.0, (sum, tx) => sum + tx.amount);
-      last3Months.add(total);
+      final monthTotal = transactions
+          .where((tx) =>
+              tx.isExpense &&
+              tx.date.year == month.year &&
+              tx.date.month == month.month)
+          .fold(0.0, (sum, tx) => sum + tx.effectiveAmount);
+      
+      if (monthTotal > 0) {
+        total += monthTotal;
+        count++;
+      }
     }
 
-    if (last3Months.isEmpty) return 0;
-
-    // Simple average with trend
-    final avg = last3Months.reduce((a, b) => a + b) / last3Months.length;
-    final trend = (last3Months.first - last3Months.last) / 3;
-
-    return avg + trend;
+    return count > 0 ? total / count : 0;
   }
 
   // Calculate financial health score (0-100)
@@ -40,15 +39,15 @@ class AdvancedAnalyticsService {
     final transactions = await _transactionService.getAllForDashBoard();
 
     final thisMonth = transactions.where(
-      (tx) => tx.date.year == now.year && tx.date.month == now.month,
+      (tx) => tx.date.year == now.year && tx.date.month == now.month && tx.affectsStats,
     );
 
     final income = thisMonth
         .where((tx) => !tx.isExpense)
-        .fold(0.0, (sum, tx) => sum + tx.amount);
+        .fold(0.0, (sum, tx) => sum + tx.effectiveAmount);
     final expense = thisMonth
         .where((tx) => tx.isExpense)
-        .fold(0.0, (sum, tx) => sum + tx.amount);
+        .fold(0.0, (sum, tx) => sum + tx.effectiveAmount);
 
     if (income == 0) {
       return FinancialHealthScore(
@@ -154,9 +153,9 @@ class AdvancedAnalyticsService {
       }
 
       if (tx.date.year == now.year && tx.date.month == now.month) {
-        trends[categoryName]!.thisMonth += tx.amount;
+        trends[categoryName]!.thisMonth += tx.effectiveAmount;
       } else if (tx.date.year == now.year && tx.date.month == now.month - 1) {
-        trends[categoryName]!.lastMonth += tx.amount;
+        trends[categoryName]!.lastMonth += tx.effectiveAmount;
       }
     }
 
@@ -175,7 +174,7 @@ class AdvancedAnalyticsService {
           tx.date.month == now.month,
     );
 
-    final spent = thisMonth.fold(0.0, (sum, tx) => sum + tx.amount);
+    final spent = thisMonth.fold(0.0, (sum, tx) => sum + tx.effectiveAmount);
     final remaining = budgetAmount - spent;
 
     if (remaining <= 0) return now;
@@ -210,7 +209,7 @@ class AdvancedAnalyticsService {
       (t) => t.isExpense && t.date.isAfter(now.subtract(const Duration(days: 90))),
     )) {
       final dayName = days[tx.date.weekday - 1];
-      byDay[dayName] = (byDay[dayName] ?? 0) + tx.amount;
+      byDay[dayName] = (byDay[dayName] ?? 0) + tx.effectiveAmount;
     }
 
     return byDay;

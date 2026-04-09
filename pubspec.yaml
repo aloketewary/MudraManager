@@ -2,7 +2,7 @@ name: mudra_manager
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -16,13 +16,13 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 3.3.0+20
+version: 3.5.1+41
 minSdk: 29
 targetSdk: 33
 ndkVersion: 27.0.12077973
 
 environment:
-  sdk: '>=3.5.0 <4.0.0'
+  sdk: ">=3.5.0 <4.0.0"
   flutter: 3.41.2
 
 # Dependencies specify other packages that your package needs in order to work.
@@ -60,7 +60,6 @@ dependencies:
   flutter_secure_storage: ^9.2.4
   shared_preferences: ^2.5.3
   permission_handler: ^12.0.0+1
-  another_telephony: ^0.5.0-pre.1
   crypto: ^3.0.6
   package_info_plus: ^8.3.0
   flutter_local_notifications: ^19.1.0
@@ -80,19 +79,23 @@ dependencies:
   url_launcher: ^6.3.1
   table_calendar: ^3.1.2
   in_app_update: ^4.2.5
+  in_app_review: ^2.0.10
   workmanager: ^0.9.0+3
   logger: ^2.6.2
   lucide_icons_flutter: ^3.1.9
   confetti: ^0.8.0
   flutter_svg: ^2.0.10+1
+  flutter_boring_avatars: ^2.1.0
   mudra_plugin_sdk:
     path: ./mudra_plugin_sdk
   # Cloud providers for backup sync
   google_sign_in: ^6.2.1
   googleapis: ^13.2.0
   http: ^1.2.2
-
-
+  visibility_detector: ^0.4.0+2
+  in_app_purchase: ^3.2.3
+  in_app_purchase_android: ^0.4.0+8
+  async: ^2.13.0
 
 dev_dependencies:
   flutter_test:
@@ -107,7 +110,7 @@ dev_dependencies:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/logo/rupee.png" # your app icon path
+  image_path: "assets/logo/logo.png" # your app icon path
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -120,53 +123,13 @@ flutter:
     - family: MudraManagerAvatar
       fonts:
         - asset: assets/fonts/MudraManagerAvatar.ttf
-
-    - family: Parkinsans
+    - family: NotoSansDevanagari
       fonts:
-        - asset: assets/fonts/Parkinsans-Bold.ttf
-        - asset: assets/fonts/Parkinsans-ExtraBold.ttf
-        - asset: assets/fonts/Parkinsans-Light.ttf
-        - asset: assets/fonts/Parkinsans-Medium.ttf
-        - asset: assets/fonts/Parkinsans-Regular.ttf
-        - asset: assets/fonts/Parkinsans-SemiBold.ttf
-    - family: Onest
-      fonts:
-        - asset: assets/fonts/Onest/static/Onest-Black.ttf
-          weight: 900 # Black
-        - asset: assets/fonts/Onest/static/Onest-Bold.ttf
-          weight: 700 # Bold
-        - asset: assets/fonts/Onest/static/Onest-ExtraBold.ttf
-          weight: 800 # ExtraBold
-        - asset: assets/fonts/Onest/static/Onest-ExtraLight.ttf
-          weight: 200 # ExtraLight
-        - asset: assets/fonts/Onest/static/Onest-Light.ttf
-          weight: 300 # Light
-        - asset: assets/fonts/Onest/static/Onest-Medium.ttf
-          weight: 500 # Medium
-        - asset: assets/fonts/Onest/static/Onest-Regular.ttf
-          weight: 400 # Regular
-        - asset: assets/fonts/Onest/static/Onest-SemiBold.ttf
-          weight: 600 # SemiBold
-        - asset: assets/fonts/Onest/static/Onest-Thin.ttf
-          weight: 100 # Thin
-
-    - family: Tuffy
-      fonts:
-        - asset: assets/fonts/Tuffy/Tuffy-Bold.ttf
-        - asset: assets/fonts/Tuffy/Tuffy-BoldItalic.ttf
-        - asset: assets/fonts/Tuffy/Tuffy-Italic.ttf
-        - asset: assets/fonts/Tuffy/Tuffy-Regular.ttf
-
-
-
-
+        - asset: assets/fonts/NotoSansDevanagari-VariableFont_wdth,wght.ttf
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/icons/48/
-    - assets/icons/96/
-    - assets/icons/128/
-    - assets/icons/512/
+    - assets/data/
     - assets/icons/100/
     - assets/icons/20/
     - assets/icons/medals/
@@ -174,7 +137,8 @@ flutter:
     - assets/logo/file/
     - assets/logo/nav/outline/
     - assets/logo/nav/solid/
-    - assets/logo/rupee.png
+    - assets/logo/personality/
+    - assets/logo/logo.png
     - assets/fonts/NotoSans-Regular.ttf
     - assets/help_content.json
     - assets/plugins/manifest.json

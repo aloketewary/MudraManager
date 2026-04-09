@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_plugin_sdk/mudra_plugin_sdk.dart';
 
 class SmsAlertPlugin extends MudraPlugin {
@@ -8,7 +10,7 @@ class SmsAlertPlugin extends MudraPlugin {
   String get name => 'SMS Alert';
 
   @override
-  String get version => '1.1.0';
+  String get version => '1.2.0';
 
   @override
   void onSms(SmsEvent event) {
@@ -21,13 +23,32 @@ class SmsAlertPlugin extends MudraPlugin {
   void onIncome(IncomeEvent event) {
     final threshold = config?.get<double>('min_amount') ?? 0.0;
     if (event.amount > threshold) {
-      api.showNotification('💵 Income received: ₹${event.amount.toStringAsFixed(0)}');
+      api.showNotification(
+        '💵 Income received: ${formatCurrency(event.amount, code: BaseCurrency.code, decimals: 0)}',
+      );
     }
   }
 
   @override
+  PluginNotification? onTransactionSaved(TransactionSavedEvent event) {
+    if (event.isExpense) return null;
+    return PluginNotification(
+      title:
+          '${formatCurrency(event.amount, code: BaseCurrency.code, decimals: 2)} just landed in ${event.account ?? "your account"}',
+      body:
+          '${formatCurrency(event.amount, code: BaseCurrency.code, decimals: 2)} credited to ${event.account ?? "your account"}',
+      priority: 5,
+    );
+  }
+
+  @override
   void onLoad() {}
-  
+
   @override
   void onStart() {}
+
+  @override
+  Set<PluginPermission> get permissions => {
+        PluginPermission.notifications,
+      };
 }

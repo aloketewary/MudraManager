@@ -37,4 +37,4 @@ class ReconciliationStatus {
   Map<String, dynamic> toJson() => _$ReconciliationStatusToJson(this);
 }
 
-enum ReconciliationState { pending, verified, discrepancy }
+enum ReconciliationState { pending, verified, discrepancy, unrecognized }

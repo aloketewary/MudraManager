@@ -1,16 +1,36 @@
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/shared/widgets/ambient_brand_section.dart';
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:mudra_manager/features/analytics/data/analytics_provider.dart';
+import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
+import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 
-class AnalyticsScreen extends ConsumerWidget {
+class AnalyticsScreen extends ConsumerStatefulWidget {
   const AnalyticsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AnalyticsScreen> createState() => _AnalyticsScreenState();
+}
+
+class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      ref
+          .read(gamificationServiceProvider)
+          ?.track(GamificationEvent.analyticsViewed);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final healthAsync = ref.watch(financialHealthProvider);
     final predictionAsync = ref.watch(predictedSpendingProvider);
     final categoryTrendsAsync = ref.watch(categoryTrendsProvider);
@@ -21,7 +41,7 @@ class AnalyticsScreen extends ConsumerWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Analytics'), elevation: 0),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.title_analytics), elevation: 0),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -42,7 +62,7 @@ class AnalyticsScreen extends ConsumerWidget {
                           Icon(Icons.favorite, color: color.primary, size: 28),
                           const SizedBox(width: 12),
                           Text(
-                            'Financial Health Score',
+                            AppLocalizations.of(context)!.analytics_financialHealthScore,
                             style: textTheme.headlineSmall?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -71,14 +91,14 @@ class AnalyticsScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 24),
                       _buildMetricRow(
-                        'Savings Rate',
+                        AppLocalizations.of(context)!.analytics_savingsRate,
                         '${GuestModeUtil.applyGuestMode(health.savingsRate, isGuestMode).toStringAsFixed(1)}%',
                         color,
                         textTheme,
                       ),
                       const SizedBox(height: 12),
                       _buildMetricRow(
-                        'Expense Ratio',
+                        AppLocalizations.of(context)!.analytics_expenseRatio,
                         '${GuestModeUtil.applyGuestMode(health.expenseRatio, isGuestMode).toStringAsFixed(1)}%',
                         color,
                         textTheme,
@@ -88,7 +108,7 @@ class AnalyticsScreen extends ConsumerWidget {
                         const Divider(),
                         const SizedBox(height: 12),
                         Text(
-                          'Insights',
+                          AppLocalizations.of(context)!.analytics_insights,
                           style: textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -122,7 +142,7 @@ class AnalyticsScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => const DashboardCardSkeleton(),
               error: (_, __) => const SizedBox.shrink(),
             ),
 
@@ -147,7 +167,7 @@ class AnalyticsScreen extends ConsumerWidget {
                           ),
                           const SizedBox(width: 12),
                           Text(
-                            'Spending Prediction',
+                            AppLocalizations.of(context)!.analytics_spendingPrediction,
                             style: textTheme.headlineSmall?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -159,14 +179,15 @@ class AnalyticsScreen extends ConsumerWidget {
                         child: Column(
                           children: [
                             Text(
-                              'Next Month',
+                              AppLocalizations.of(context)!.analytics_nextMonth,
                               style: textTheme.bodyLarge?.copyWith(
                                 color: color.onSurfaceVariant,
                               ),
                             ),
                             const SizedBox(height: 8),
                             CurrencyText(
-                              amount: GuestModeUtil.applyGuestMode(predicted, isGuestMode),
+                              amount: GuestModeUtil.applyGuestMode(
+                                  predicted, isGuestMode),
                               style: textTheme.displayMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: color.primary,
@@ -178,7 +199,7 @@ class AnalyticsScreen extends ConsumerWidget {
                       const SizedBox(height: 16),
                       Center(
                         child: Text(
-                          'Based on last 3 months average',
+                          AppLocalizations.of(context)!.analytics_basedOnAvg,
                           style: textTheme.bodySmall?.copyWith(
                             color: color.onSurfaceVariant,
                             fontStyle: FontStyle.italic,
@@ -189,7 +210,7 @@ class AnalyticsScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => const DashboardCardSkeleton(),
               error: (_, __) => const SizedBox.shrink(),
             ),
 
@@ -219,7 +240,7 @@ class AnalyticsScreen extends ConsumerWidget {
                             ),
                             const SizedBox(width: 12),
                             Text(
-                              'Category Trends',
+                              AppLocalizations.of(context)!.analytics_categoryTrends,
                               style: textTheme.headlineSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -227,9 +248,7 @@ class AnalyticsScreen extends ConsumerWidget {
                           ],
                         ),
                         const SizedBox(height: 20),
-                        ...sortedTrends
-                            .take(5)
-                            .map(
+                        ...sortedTrends.take(5).map(
                               (trend) => Padding(
                                 padding: const EdgeInsets.symmetric(
                                   vertical: 8,
@@ -250,7 +269,10 @@ class AnalyticsScreen extends ConsumerWidget {
                                         Row(
                                           children: [
                                             CurrencyText(
-                                              amount: GuestModeUtil.applyGuestMode(trend.thisMonth, isGuestMode),
+                                              amount:
+                                                  GuestModeUtil.applyGuestMode(
+                                                      trend.thisMonth,
+                                                      isGuestMode),
                                               style: textTheme.titleSmall,
                                             ),
                                             if (trend.changePercent != 0) ...[
@@ -268,12 +290,10 @@ class AnalyticsScreen extends ConsumerWidget {
                                                 '${trend.changePercent.abs().toStringAsFixed(0)}%',
                                                 style: textTheme.bodySmall
                                                     ?.copyWith(
-                                                      color:
-                                                          trend.changePercent >
-                                                              0
-                                                          ? Colors.red
-                                                          : Colors.green,
-                                                    ),
+                                                  color: trend.changePercent > 0
+                                                      ? Colors.red
+                                                      : Colors.green,
+                                                ),
                                               ),
                                             ],
                                           ],
@@ -282,10 +302,9 @@ class AnalyticsScreen extends ConsumerWidget {
                                     ),
                                     const SizedBox(height: 4),
                                     LinearProgressIndicator(
-                                      value:
-                                          (trend.thisMonth /
-                                                  sortedTrends.first.thisMonth)
-                                              .clamp(0.0, 1.0),
+                                      value: (trend.thisMonth /
+                                              sortedTrends.first.thisMonth)
+                                          .clamp(0.0, 1.0),
                                       backgroundColor:
                                           color.surfaceContainerHighest,
                                       color: color.primary,
@@ -299,7 +318,7 @@ class AnalyticsScreen extends ConsumerWidget {
                   ),
                 );
               },
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => const DashboardCardSkeleton(),
               error: (_, __) => const SizedBox.shrink(),
             ),
 
@@ -330,7 +349,7 @@ class AnalyticsScreen extends ConsumerWidget {
                             ),
                             const SizedBox(width: 12),
                             Text(
-                              'Spending by Day',
+                              AppLocalizations.of(context)!.analytics_spendingByDay,
                               style: textTheme.headlineSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -396,11 +415,12 @@ class AnalyticsScreen extends ConsumerWidget {
                   ),
                 );
               },
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => const DashboardCardSkeleton(),
               error: (_, __) => const SizedBox.shrink(),
             ),
 
-            const SizedBox(height: 100),
+            const SizedBox(height: 24),
+            const AmbientBrandSection(),
           ],
         ),
       ),

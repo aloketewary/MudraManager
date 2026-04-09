@@ -4,7 +4,8 @@ import 'package:mudra_manager/features/gamification/models/achievement.dart';
 import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
 import 'package:mudra_manager/features/gamification/widgets/achievement_unlock_dialog.dart';
 
-final achievementUnlockListenerProvider = Provider<AchievementUnlockListener>((ref) {
+final achievementUnlockListenerProvider =
+    Provider<AchievementUnlockListener>((ref) {
   return AchievementUnlockListener(ref);
 });
 
@@ -15,45 +16,48 @@ class AchievementUnlockListener {
   AchievementUnlockListener(this.ref);
 
   void initialize(BuildContext context) {
-    ref.listen<AsyncValue<List<Achievement>>>(
-      achievementsProvider,
-      (previous, next) {
-        next.whenData((achievements) {
+    ref.listen<AsyncValue<List<Achievement>>>(achievementsProvider,
+        (previous, next) {
+      next.maybeWhen(
+        data: (achievements) {
           final now = DateTime.now();
-          
+
           for (final achievement in achievements) {
-            if (achievement.isUnlocked && 
+            if (achievement.isUnlocked &&
                 achievement.unlockedAt != null &&
                 !_shownAchievements.contains(achievement.key)) {
-              
               final timeSinceUnlock = now.difference(achievement.unlockedAt!);
               if (timeSinceUnlock.inSeconds < 10) {
                 _shownAchievements.add(achievement.key);
                 Future.delayed(const Duration(milliseconds: 500), () {
                   if (context.mounted) {
-                    _showAchievementDialog(context, achievement);
+                    _showAchievementShowcase(context, achievement);
                   }
                 });
               }
             }
           }
-        });
-      },
-    );
+        },
+        orElse: () {},
+      );
+    });
   }
 
-  void _showAchievementDialog(BuildContext context, Achievement achievement) {
+  void _showAchievementShowcase(BuildContext context, Achievement achievement) {
     if (!context.mounted) return;
-    
-    showDialog(
+
+    showGeneralDialog(
       context: context,
-      barrierDismissible: false,
-      builder: (context) => AchievementUnlockDialog(
-        title: achievement.title,
-        description: achievement.description,
-        icon: achievement.icon,
-        xpReward: achievement.rewardXP,
-      ),
+      barrierDismissible: true,
+      barrierLabel: 'Dismiss',
+      barrierColor: Colors.black.withValues(alpha: 0.75),
+      transitionDuration: const Duration(milliseconds: 300),
+      transitionBuilder: (_, anim, __, child) {
+        return FadeTransition(opacity: anim, child: child);
+      },
+      pageBuilder: (_, __, ___) {
+        return AchievementUnlockDialog(achievement: achievement);
+      },
     );
   }
 

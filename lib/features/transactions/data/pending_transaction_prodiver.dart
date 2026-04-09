@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
@@ -172,7 +173,7 @@ class PendingTransactionService {
       await txn.category.save();
 
       await isar.pendingTransactions.delete(pending.id);
-      log.i('Transaction auto-enabled: ${pending.sender} ₹${pending.amount} -> ${match.category.name} (${match.account.name})');
+      log.i('Transaction auto-enabled: ${pending.sender} ${BaseCurrency.symbol}${pending.amount} -> ${match.category.name} (${match.account.name})');
 
       return true;
     } else {

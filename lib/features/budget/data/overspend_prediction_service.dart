@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/db/models/budget.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
@@ -42,8 +44,8 @@ class OverspendPredictionService {
 
     _log.i(
       'Prediction for ${budget.name}: '
-      'Spent: ₹$currentSpent, Daily Avg: ₹${dailyAverage.toStringAsFixed(2)}, '
-      'Projected: ₹${projectedTotal.toStringAsFixed(0)}, '
+      'Spent: ${formatCurrency(currentSpent.toDouble(), decimals: 0)}, Daily Avg: ${formatCurrency(dailyAverage.toDouble(), decimals: 2)}, '
+      'Projected: ${formatCurrency(projectedTotal.toDouble(), decimals: 0)}, '
       'Will Overspend: $willOverspend',
     );
 

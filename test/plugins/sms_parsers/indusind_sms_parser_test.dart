@@ -17,7 +17,7 @@ void main() {
       expect(result, isNotNull);
       expect(result!.amount, equals(45000.00));
       expect(result.isIncome, isTrue);
-      expect(result.account, equals('XX6988'));
+      expect(result.account, equals('6988'));
       expect(result.balance, equals(657767.0));
     });
 
@@ -29,7 +29,7 @@ void main() {
       expect(result, isNotNull);
       expect(result!.amount, equals(1500.00));
       expect(result.isIncome, isFalse);
-      expect(result.account, equals('XX6988'));
+      expect(result.account, equals('6988'));
       expect(result.balance, equals(656267.0));
     });
 
@@ -41,7 +41,7 @@ void main() {
       expect(result, isNotNull);
       expect(result!.amount, equals(2500.50));
       expect(result.isIncome, isTrue);
-      expect(result.account, equals('xx1234'));
+      expect(result.account, equals('1234'));
       expect(result.balance, equals(10000.75));
     });
 

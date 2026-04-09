@@ -1,3 +1,6 @@
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -27,7 +30,7 @@ class ExportOptionsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Export Options'),
+        title: Text(AppLocalizations.of(context)!.title_exportOptions),
         backgroundColor: color.surfaceContainer,
         actions: [
           IconButton(
@@ -40,8 +43,8 @@ class ExportOptionsScreen extends ConsumerWidget {
         ],
       ),
       body: formatsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text('Error: $err')),
+        loading: () => const Padding(padding: EdgeInsets.all(16), child: DashboardCardSkeleton()),
+        error: (err, stack) => Center(child: Text(BuddyMessages.errorWith('$err'))),
         data: (formats) {
           if (formats.isEmpty) {
             return Center(
@@ -74,16 +77,16 @@ class ExportOptionsScreen extends ConsumerWidget {
               final templatesAsync = ref.watch(exportTemplatesProvider(format));
 
               return templatesAsync.when(
-                loading: () => const Card(
+                loading: () => Card(
                   child: ListTile(
-                    leading: CircularProgressIndicator(),
-                    title: Text('Loading...'),
+                    leading: const CircularProgressIndicator(),
+                    title: Text(AppLocalizations.of(context)!.common_loading),
                   ),
                 ),
                 error: (err, stack) => Card(
                   child: ListTile(
                     leading: const Icon(Icons.error),
-                    title: Text('Error: $err'),
+                    title: Text(BuddyMessages.errorWith('$err')),
                   ),
                 ),
                 data: (templates) {

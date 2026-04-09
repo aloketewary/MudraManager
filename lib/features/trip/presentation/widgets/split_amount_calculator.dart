@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -35,14 +37,14 @@ class SplitAmountCalculator extends StatelessWidget {
                   style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 Chip(
-                  label: Text('₹${equalSplit.toStringAsFixed(2)} each'),
+                  label: Text('${formatCurrency(equalSplit.toDouble(), decimals: equalSplit.truncateToDouble() == equalSplit ? 0 : 2)} each'),
                   backgroundColor: color.primaryContainer,
                 ),
               ],
             ),
             const SizedBox(height: 12),
             Text(
-              'Total: ₹${totalAmount.toStringAsFixed(2)}',
+              'Total: ${formatCurrency(totalAmount, decimals: 2)}',
               style: textTheme.bodyLarge,
             ),
             Text(

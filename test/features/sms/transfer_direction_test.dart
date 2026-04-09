@@ -1,7 +1,21 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mudra_manager/features/sms/data/bank_sms_parser.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUp(() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+      const MethodChannel('plugins.flutter.io/shared_preferences'),
+      (call) async {
+        if (call.method == 'getAll') return <String, dynamic>{};
+        return null;
+      },
+    );
+  });
+
   test('should parse NPS transfer as debit (money going OUT)', () async {
     const sms = 'cam nps tier 2 recieved Rs 1000.00 from your A/c 3373 via NEFT';
     final result = await BankSmsParser.parse('UNKNOWN', sms);

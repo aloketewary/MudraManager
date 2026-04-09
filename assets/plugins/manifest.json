@@ -71,5 +71,19 @@
     "packageUrl": "bundled",
     "group": "utility",
     "enabled": true
+  },
+  {
+    "id": "com.mudra.regional_categories",
+    "name": "Regional Categories",
+    "configOptions": [
+      {
+        "key": "regions",
+        "label": "Select Regions",
+        "type": "multi_select",
+        "defaultValue": [
+          "common"
+        ]
+      }
+    ]
   }
 ]

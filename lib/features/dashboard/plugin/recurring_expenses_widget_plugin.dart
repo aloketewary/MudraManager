@@ -1,0 +1,45 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
+import 'package:mudra_manager/core/widgets/dashboard_widget_plugin.dart';
+import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
+import 'package:mudra_manager/features/dashboard/presentation/widgets/recurring_expenses_card.dart';
+
+class RecurringExpensesWidgetPlugin extends DashboardWidgetPlugin {
+  @override
+  String get id => 'recurring_expenses';
+
+  @override
+  String get title => 'Bill Control Center';
+
+  @override
+  IconData get icon => Icons.repeat;
+
+  @override
+  int get defaultOrder => 5;
+
+  @override
+  WidgetCategory get category => WidgetCategory.finance;
+
+  @override
+  WidgetSize get defaultSize => WidgetSize.small;
+
+  @override
+  String get description => 'Upcoming bills and recurring expenses';
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return const RepaintBoundary(child: RecurringExpensesCard());
+  }
+
+  @override
+  void onTap(BuildContext context, WidgetRef ref) {
+    context.push(AppRoutes.recurringTransactions);
+  }
+
+  @override
+  Future<void> refresh(WidgetRef ref) async {
+    ref.invalidate(dashboardRecurringExpensesProvider);
+  }
+}

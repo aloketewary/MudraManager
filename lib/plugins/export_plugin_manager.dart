@@ -1,3 +1,6 @@
+import 'package:mudra_manager/core/db/isar_service.dart';
+import 'package:mudra_manager/core/entitlement/entitlement_service.dart';
+
 import 'export_plugin.dart';
 import 'export_plugins/standard_excel_export.dart';
 import 'export_plugins/standard_pdf_export.dart';
@@ -8,10 +11,10 @@ import 'package:mudra_manager/features/marketplace/services/marketplace_service.
 class ExportPluginManager {
   static final ExportPluginManager _instance = ExportPluginManager._();
   static ExportPluginManager get instance => _instance;
-  
+
   final Map<String, ExportPlugin> _allPlugins = {};
   final _marketplaceService = MarketplaceService();
-  
+
   ExportPluginManager._() {
     _registerAllPlugins();
   }
@@ -23,7 +26,7 @@ class ExportPluginManager {
       BusinessExcelExportPlugin(),
       BusinessPdfExportPlugin(),
     ];
-    
+
     for (final plugin in plugins) {
       _allPlugins[plugin.id] = plugin;
       plugin.onLoad();
@@ -32,14 +35,28 @@ class ExportPluginManager {
   }
 
   Future<List<ExportPlugin>> getPluginsByType(String exportType) async {
-    final enabledIds = await _marketplaceService.getEnabledExportTemplates(exportType);
+    final enabledIds =
+        await _marketplaceService.getEnabledExportTemplates(exportType);
+    final isPro = await EntitlementService(IsarService()).isPro();
+
     return _allPlugins.entries
-        .where((e) => enabledIds.contains(e.key) && e.value.exportType == exportType)
+        .where(
+          (e) =>
+              enabledIds.contains(e.key) &&
+              e.value.exportType == exportType &&
+              (isPro || !_isBusinessPlugin(e.key)),
+        )
         .map((e) => e.value)
         .toList();
   }
 
-  Future<ExportPlugin?> getPlugin(String exportType, String templateName) async {
+  static bool _isBusinessPlugin(String id) =>
+      id == 'business_excel_export' || id == 'business_pdf_export';
+
+  Future<ExportPlugin?> getPlugin(
+    String exportType,
+    String templateName,
+  ) async {
     final plugins = await getPluginsByType(exportType);
     return plugins.firstWhere(
       (p) => p.templateName == templateName,
@@ -52,7 +69,7 @@ class ExportPluginManager {
       _marketplaceService.getEnabledExportTemplates('Excel'),
       _marketplaceService.getEnabledExportTemplates('PDF'),
     ]);
-    
+
     final formats = <String>{};
     for (final ids in allEnabled) {
       for (final id in ids) {

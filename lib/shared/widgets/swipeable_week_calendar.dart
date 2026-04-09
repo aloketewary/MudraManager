@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -87,7 +88,7 @@ class _SwipeableWeeklyCalendarState extends State<SwipeableWeeklyCalendar> {
         });
       } else {
         // Optionally show a message to the user that future dates are not allowed
-        SnackbarService.warning('Future dates are not allowed.');
+        SnackbarService.warning(BuddyMessages.futureDate);
       }
     }
   }
@@ -148,7 +149,7 @@ class _SwipeableWeeklyCalendarState extends State<SwipeableWeeklyCalendar> {
                 widget.onDateSelected(day);
               });
             } else {
-              SnackbarService.warning('Future dates are not allowed.');
+              SnackbarService.warning(BuddyMessages.futureDate);
             }
           },
           child: Container(

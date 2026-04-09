@@ -1,144 +1,145 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:mudra_manager/features/goal/data/goal_provider.dart';
-import 'package:mudra_manager/shared/widgets/currency_text.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
+import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
+import 'dart:math' as math;
 
 class GoalCard extends ConsumerWidget {
-  final double globalPadding;
-
-  const GoalCard({super.key, required this.globalPadding});
+  const GoalCard({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final goalsAsync = ref.watch(goalsProvider);
+    final spacing = ref.watch(spacingProvider);
+    final goals = ref.watch(dashboardGoalsProvider);
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    return goalsAsync.when(
-      data: (goals) {
-        if (goals.isEmpty) return const SizedBox.shrink();
+    if (goals.isEmpty) return const SizedBox.shrink();
 
-        final goal = goals.first;
-        final percent = (goal.currentAmount / goal.targetAmount * 100).clamp(
-          0.0,
-          100.0,
-        );
-        final remaining = goal.targetAmount - goal.currentAmount;
-        final isCompleted = goal.currentAmount >= goal.targetAmount;
+    final activeGoals = goals.where((g) => g.isActive).toList();
+    if (activeGoals.isEmpty) return const SizedBox.shrink();
 
-        return Padding(
-          padding: const EdgeInsets.only(top: 16),
-          child: Container(
-            margin: EdgeInsets.symmetric(horizontal: globalPadding),
-            child: Card(
-              elevation: 0,
-              color: color.surfaceContainerLow,
-              child: InkWell(
-                onTap: () {
-                  HapticFeedback.mediumImpact();
-                  context.push('/goal-screen');
-                },
-                borderRadius: BorderRadius.circular(20),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
+    final totalTarget = activeGoals.fold(0.0, (sum, g) => sum + g.targetAmount);
+    final totalSaved = activeGoals.fold(0.0, (sum, g) => sum + g.currentAmount);
+    final progress = totalTarget > 0 ? totalSaved / totalTarget : 0.0;
+
+    return Container(
+      margin: EdgeInsets.symmetric(
+        horizontal: spacing.cardHorizontal,
+        vertical: spacing.cardVertical,
+      ),
+      child: Card(
+        elevation: 0,
+        margin: EdgeInsets.zero,
+        color: color.surfaceContainerLow,
+        child: InkWell(
+          onTap: () {
+            HapticFeedback.mediumImpact();
+            context.push(AppRoutes.goalScreen);
+          },
+          borderRadius: BorderRadius.circular(spacing.radiusLarge),
+          child: Padding(
+            padding: EdgeInsets.all(spacing.cardInner),
+            child: Row(
+              children: [
+                TweenAnimationBuilder<double>(
+                  duration: const Duration(milliseconds: 1500),
+                  curve: Curves.easeOutCubic,
+                  tween: Tween(begin: 0.0, end: progress),
+                  builder: (context, value, child) {
+                    return Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        SizedBox(
+                          width: 60,
+                          height: 60,
+                          child: CustomPaint(
+                            painter: _CompactRingPainter(
+                              progress: value,
+                              color: color.primary,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          '${(value * 100).toInt()}%',
+                          style: textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w900,
+                            color: color.primary,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+                const SizedBox(width: 16),
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          Icon(Icons.emoji_flags, color: color.primary),
-                          const SizedBox(width: 8),
-                          Text(
-                            goal.name,
-                            style: textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const Spacer(),
-                          Icon(
-                            Icons.chevron_right,
-                            color: color.onSurfaceVariant,
-                          ),
-                        ],
+                      Text(
+                        'Savings Goals',
+                        style: textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              children: [
-                                TweenAnimationBuilder<double>(
-                                  duration: const Duration(milliseconds: 1500),
-                                  curve: Curves.easeOutCubic,
-                                  tween: Tween(begin: 0.0, end: percent),
-                                  builder: (context, value, child) {
-                                    return Text(
-                                      '${value.toInt()}%',
-                                      style: textTheme.displayMedium?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        color: isCompleted
-                                            ? Colors.green
-                                            : Colors.blue,
-                                      ),
-                                    );
-                                  },
-                                ),
-                                Text(
-                                  isCompleted ? 'Completed' : 'Progress',
-                                  style: textTheme.titleMedium?.copyWith(
-                                    color: isCompleted
-                                        ? Colors.green
-                                        : Colors.blue,
+                      const SizedBox(height: 12),
+                      Container(
+                        height: 10,
+                        decoration: BoxDecoration(
+                          color: color.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: TweenAnimationBuilder<double>(
+                            duration: const Duration(milliseconds: 1500),
+                            curve: Curves.easeOutCubic,
+                            tween: Tween(begin: 0.0, end: progress),
+                            builder: (context, value, child) {
+                              return FractionallySizedBox(
+                                widthFactor: value,
+                                alignment: Alignment.centerLeft,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [color.primary, color.tertiary],
+                                    ),
                                   ),
                                 ),
-                              ],
-                            ),
+                              );
+                            },
                           ),
-                          Expanded(
-                            flex: 2,
-                            child: Column(
-                              children: [
-                                _buildMetric(
-                                  'Saved',
-                                  goal.currentAmount,
-                                  color,
-                                  textTheme,
-                                ),
-                                const SizedBox(height: 8),
-                                _buildMetric(
-                                  'Target',
-                                  goal.targetAmount,
-                                  color,
-                                  textTheme,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
-                      const SizedBox(height: 16),
-                      const Divider(),
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          Icon(
-                            isCompleted
-                                ? Icons.celebration
-                                : Icons.lightbulb_outline,
-                            size: 16,
-                            color: color.primary,
-                          ),
-                          const SizedBox(width: 8),
                           Expanded(
-                            child: Text(
-                              isCompleted
-                                  ? 'Congratulations! You achieved your goal'
-                                  : 'You need ${remaining.toStringAsFixed(0)} more to reach your goal',
-                              style: textTheme.bodySmall?.copyWith(
-                                color: color.onSurfaceVariant,
-                              ),
+                            child: _buildMetricItem(
+                              '${activeGoals.length} active',
+                              formatCurrency(totalSaved, decimals: 0),
+                              LucideIcons.target,
+                              color.primary,
+                              color,
+                              textTheme,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _buildMetricItem(
+                              'Remaining',
+                              formatCurrency((totalTarget - totalSaved), decimals: 0),
+                              LucideIcons.trendingUp,
+                              color.tertiary,
+                              color,
+                              textTheme,
                             ),
                           ),
                         ],
@@ -146,34 +147,101 @@ class GoalCard extends ConsumerWidget {
                     ],
                   ),
                 ),
-              ),
+                Icon(
+                  LucideIcons.chevronRight,
+                  color: color.onSurfaceVariant,
+                  size: 20,
+                ),
+              ],
             ),
           ),
-        );
-      },
-      loading: () => const SizedBox.shrink(),
-      error: (_, __) => const SizedBox.shrink(),
+        ),
+      ),
     );
   }
 
-  Widget _buildMetric(
+  Widget _buildMetricItem(
     String label,
-    double value,
+    String value,
+    IconData icon,
+    Color itemColor,
     ColorScheme color,
     TextTheme textTheme,
   ) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          label,
-          style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
-        ),
-        CurrencyText(
-          amount: value,
-          style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+        Icon(icon, color: itemColor, size: 16),
+        const SizedBox(width: 6),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: textTheme.bodySmall?.copyWith(
+                  color: color.onSurfaceVariant,
+                  fontSize: 11,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+              Text(
+                value,
+                style: textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
         ),
       ],
     );
   }
+}
+
+class _CompactRingPainter extends CustomPainter {
+  final double progress;
+  final Color color;
+
+  _CompactRingPainter({required this.progress, required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 2 - 4;
+    const strokeWidth = 6.0;
+
+    final bgPaint = Paint()
+      ..color = color.withValues(alpha: 0.15)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawCircle(center, radius, bgPaint);
+
+    final rect = Rect.fromCircle(center: center, radius: radius);
+    final gradient = SweepGradient(
+      colors: [color, color.withValues(alpha: 0.6), color],
+      stops: const [0.0, 0.5, 1.0],
+      transform: const GradientRotation(-math.pi / 2),
+    );
+
+    final progressPaint = Paint()
+      ..shader = gradient.createShader(rect)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawArc(
+      rect,
+      -math.pi / 2,
+      2 * math.pi * progress,
+      false,
+      progressPaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_CompactRingPainter oldDelegate) =>
+      oldDelegate.progress != progress || oldDelegate.color != color;
 }

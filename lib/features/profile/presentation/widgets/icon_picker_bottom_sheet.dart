@@ -1,324 +1,256 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/extension/case_extention.dart';
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/icon_helper.dart';
-import 'package:mudra_manager/shared/widgets/adaptive_text.dart';
 
-class IconPickerBottomSheet extends StatefulWidget {
+class IconPickerBottomSheet extends ConsumerStatefulWidget {
   final Color? backgroundColor;
+  final String? selectedIcon;
 
   const IconPickerBottomSheet({
     super.key,
-    this.backgroundColor = Colors.blueAccent,
+    this.backgroundColor,
+    this.selectedIcon,
   });
 
   @override
-  State<IconPickerBottomSheet> createState() => _IconPickerBottomSheetState();
+  ConsumerState<IconPickerBottomSheet> createState() => _IconPickerBottomSheetState();
 }
 
-class _IconPickerBottomSheetState extends State<IconPickerBottomSheet>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-  final Map<String, IconData> _iconMap = IconHelper.iconMap;
+class _IconPickerBottomSheetState extends ConsumerState<IconPickerBottomSheet> {
+  late String _query;
+  late String? _selected;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
+    _query = '';
+    _selected = widget.selectedIcon;
   }
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
     final color = Theme.of(context).colorScheme;
-    final headerColor = widget.backgroundColor ?? color.primary;
+    final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
+    final ctxt = AppLocalizations.of(context)!;
+    final accentColor = widget.backgroundColor ?? color.primary;
 
     return Container(
       decoration: BoxDecoration(
         color: color.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusLarge)),
       ),
       child: Column(
         children: [
-          const SizedBox(height: 12),
+          SizedBox(height: spacing.elementGap),
           Container(
-            width: 40,
-            height: 4,
+            width: 40, height: 4,
             decoration: BoxDecoration(
-              color: color.onSurfaceVariant.withValues(alpha: 0.4),
+              color: color.onSurfaceVariant.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
+          SizedBox(height: spacing.sectionGap),
+
+          // Header
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.symmetric(horizontal: spacing.cardHorizontal),
             child: Row(
               children: [
-                Icon(Icons.category, color: color.primary),
-                const SizedBox(width: 12),
-                Text(
-                  'Pick an Icon',
-                  style: textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
+                Container(
+                  padding: EdgeInsets.all(spacing.elementGap),
+                  decoration: BoxDecoration(
+                    color: accentColor.withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    _selected != null ? IconHelper.iconFromName(_selected!) : LucideIcons.shapes,
+                    color: accentColor, size: 22,
                   ),
                 ),
+                SizedBox(width: spacing.elementGap),
+                Expanded(
+                  child: Text(
+                    ctxt.iconPicker_title,
+                    style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                if (_selected != null)
+                  TextButton(
+                    onPressed: () {
+                      HapticFeedback.mediumImpact();
+                      context.pop(_selected);
+                    },
+                    child: Text(
+                      ctxt.common_done,
+                      style: textTheme.titleSmall?.copyWith(color: color.primary, fontWeight: FontWeight.w700),
+                    ),
+                  ),
               ],
             ),
           ),
-          TabBar(
-            controller: _tabController,
-            tabs: const [
-              Tab(text: 'All Icons'),
-              Tab(text: 'By Category'),
-            ],
+          SizedBox(height: spacing.elementGap),
+
+          // Search
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: spacing.cardHorizontal),
+            child: TextField(
+              onChanged: (v) => setState(() => _query = v.toLowerCase()),
+              decoration: InputDecoration(
+                hintText: ctxt.iconPicker_search,
+                prefixIcon: Icon(LucideIcons.search, size: 18, color: color.onSurfaceVariant),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                  borderSide: BorderSide(color: color.outlineVariant.withValues(alpha: 0.3)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                  borderSide: BorderSide(color: color.outlineVariant.withValues(alpha: 0.3)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                  borderSide: BorderSide(color: accentColor, width: 2),
+                ),
+                filled: true,
+                fillColor: color.surfaceContainerLow,
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: spacing.cardHorizontal,
+                  vertical: spacing.elementGap,
+                ),
+              ),
+            ),
           ),
+          SizedBox(height: spacing.elementGap),
+          Divider(height: 1, color: color.outlineVariant.withValues(alpha: 0.3)),
+
+          // Icon grid
           Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _buildAllIconsTab(color, textTheme, headerColor, context),
-                _buildCategoryIconsTab(color, textTheme, context),
-              ],
-            ),
+            child: _query.isEmpty
+                ? _buildGroupedView(color, textTheme, accentColor, spacing)
+                : _buildSearchResults(color, textTheme, accentColor, spacing),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildAllIconsTab(
-    ColorScheme color,
-    TextTheme textTheme,
-    Color headerColor,
-    BuildContext context,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: GridView.count(
-        crossAxisCount: 4,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        children: _iconMap.entries.map((entry) {
-          return InkWell(
-            onTap: () {
-              HapticFeedback.mediumImpact();
-              context.pop(entry.key);
-            },
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              decoration: BoxDecoration(
-                color: color.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(entry.value, size: 32, color: headerColor),
-                  const SizedBox(height: 4),
-                  AdaptiveText(
-                    entry.key.toTitleCase().split('_').first,
-                    style: textTheme.labelSmall?.copyWith(
-                      color: color.onSurfaceVariant,
-                    ),
-                    maxLines: 1,
-                  ),
-                ],
-              ),
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
-
-  Widget _buildCategoryIconsTab(
-    ColorScheme color,
-    TextTheme textTheme,
-    BuildContext context,
-  ) {
-    final iconCategories = {
-      'Financial': [
-        'bank',
-        'attach_money',
-        'credit_card',
-        'savings',
-        'wallet',
-        'atm',
-        'investment',
-        'salary',
-      ],
-      'Food & Dining': [
-        'restaurant',
-        'coffee',
-        'fastfood',
-        'groceries',
-        'wine',
-        'nightlife',
-        'cake',
-      ],
-      'Shopping': [
-        'shopping_cart',
-        'shopping_bag',
-        'groceries',
-        'clothing',
-        'gift',
-        'electronics',
-        'furniture',
-      ],
-      'Transportation': [
-        'directions_car',
-        'gas',
-        'bus',
-        'train',
-        'flight',
-        'taxi',
-        'bike',
-        'walk',
-      ],
-      'Entertainment': [
-        'entertainment',
-        'games',
-        'music',
-        'sports',
-        'camera',
-        'photo',
-        'tv',
-        'videogame',
-      ],
-      'Health & Fitness': [
-        'local_hospital',
-        'medical',
-        'pharmacy',
-        'fitness',
-        'spa',
-        'beauty',
-      ],
-      'Education': ['school', 'book', 'library', 'work', 'business'],
-      'Home & Utilities': [
-        'home',
-        'electric',
-        'water',
-        'wifi',
-        'phone',
-        'bills',
-        'cleaning',
-        'laundry',
-      ],
-      'Travel': ['flight', 'hotel', 'travel', 'beach', 'park'],
-      'Family & Social': [
-        'pets',
-        'child',
-        'baby',
-        'toys',
-        'celebration',
-        'donation',
-        'charity',
-      ],
-      'Work & Business': [
-        'work',
-        'business',
-        'computer',
-        'phone_mobile',
-        'print',
-        'mail',
-      ],
-      'Personal Care': ['beauty', 'spa', 'watch', 'clothing', 'headphones'],
-      'Maintenance': [
-        'repair',
-        'tools',
-        'garden',
-        'cleaning',
-        'laundry',
-        'delivery',
-      ],
-      'Other': [
-        'subscriptions',
-        'insurance',
-        'tax',
-        'refund',
-        'bonus',
-        'trending_up',
-        'parking',
-        'others',
-      ],
-    };
-
+  Widget _buildGroupedView(ColorScheme color, TextTheme textTheme, Color accentColor, AppSpacing spacing) {
+    final groups = IconHelper.iconGroups;
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: iconCategories.length,
+      padding: EdgeInsets.fromLTRB(spacing.cardHorizontal, spacing.elementGap, spacing.cardHorizontal, spacing.sectionGap),
+      itemCount: groups.length,
       itemBuilder: (context, index) {
-        final category = iconCategories.keys.elementAt(index);
-        final icons = iconCategories[category]!;
+        final category = groups.keys.elementAt(index);
+        final icons = groups[category]!.keys.toList();
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12),
+              padding: EdgeInsets.only(top: spacing.elementGap, bottom: spacing.elementGap, left: spacing.elementGapMin),
               child: Text(
                 category,
-                style: textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: color.primary,
+                style: textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700, color: color.primary, letterSpacing: 0.3,
                 ),
               ),
             ),
             GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 4,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 5,
+                crossAxisSpacing: spacing.elementGap,
+                mainAxisSpacing: spacing.elementGap,
               ),
               itemCount: icons.length,
-              itemBuilder: (context, iconIndex) {
-                final iconName = icons[iconIndex];
-                final iconData = IconHelper.iconFromName(iconName);
-
-                return InkWell(
-                  onTap: () {
-                    HapticFeedback.mediumImpact();
-                    context.pop(iconName);
-                  },
-                  borderRadius: BorderRadius.circular(12),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: color.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          iconData,
-                          size: 28,
-                          color: widget.backgroundColor ?? color.primary,
-                        ),
-                        const SizedBox(height: 4),
-                        AdaptiveText(
-                          iconName.split('_').first,
-                          style: textTheme.labelSmall?.copyWith(
-                            color: color.onSurfaceVariant,
-                          ),
-                          maxLines: 1,
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
+              itemBuilder: (context, i) => _buildIconTile(icons[i], color, textTheme, accentColor, spacing),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: spacing.elementGapMin),
           ],
         );
       },
+    );
+  }
+
+  Widget _buildSearchResults(ColorScheme color, TextTheme textTheme, Color accentColor, AppSpacing spacing) {
+    final ctxt = AppLocalizations.of(context)!;
+    final results = IconHelper.iconMap.keys.where((k) => k.contains(_query)).toList();
+
+    if (results.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(LucideIcons.searchX, size: 48, color: color.onSurfaceVariant.withValues(alpha: 0.3)),
+            SizedBox(height: spacing.elementGap),
+            Text(ctxt.iconPicker_noResults, style: textTheme.bodyMedium?.copyWith(color: color.onSurfaceVariant)),
+          ],
+        ),
+      );
+    }
+
+    return Padding(
+      padding: EdgeInsets.all(spacing.cardHorizontal),
+      child: GridView.builder(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 5,
+          crossAxisSpacing: spacing.elementGap,
+          mainAxisSpacing: spacing.elementGap,
+        ),
+        itemCount: results.length,
+        itemBuilder: (context, i) => _buildIconTile(results[i], color, textTheme, accentColor, spacing),
+      ),
+    );
+  }
+
+  Widget _buildIconTile(String iconName, ColorScheme color, TextTheme textTheme, Color accentColor, AppSpacing spacing) {
+    final iconData = IconHelper.iconFromName(iconName);
+    final isSelected = _selected == iconName;
+
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.lightImpact();
+        setState(() => _selected = iconName);
+      },
+      onDoubleTap: () {
+        HapticFeedback.mediumImpact();
+        context.pop(iconName);
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        decoration: BoxDecoration(
+          color: isSelected ? accentColor.withValues(alpha: 0.15) : color.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(spacing.radiusMedium),
+          border: Border.all(
+            color: isSelected ? accentColor : color.outlineVariant.withValues(alpha: 0.2),
+            width: isSelected ? 1.5 : 1,
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(iconData, size: 24, color: isSelected ? accentColor : color.onSurfaceVariant),
+            SizedBox(height: spacing.elementGapUltraMin),
+            Text(
+              iconName.split('_').first.toTitleCase(),
+              style: textTheme.labelSmall?.copyWith(
+                fontSize: 9,
+                color: isSelected ? accentColor : color.onSurfaceVariant.withValues(alpha: 0.7),
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

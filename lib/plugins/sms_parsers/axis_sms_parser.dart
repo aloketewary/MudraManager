@@ -8,7 +8,7 @@ class AxisSmsParserPlugin extends SmsParserPlugin {
   String get name => 'Axis Bank SMS Parser';
   
   @override
-  String get version => '1.0.0';
+  String get version => '1.0.1';
   
   @override
   String get bankName => 'AXIS';
@@ -39,6 +39,11 @@ class AxisSmsParserPlugin extends SmsParserPlugin {
     final type = typeRegex.firstMatch(body)?.group(1)?.toLowerCase();
     final merchant = _cleanMerchantName(merchantRegex.firstMatch(body)?.group(1));
     final balance = _extractAmount(balanceRegex, body);
+    final bodyLower = body.toLowerCase();
+    final isLikelyTransfer = bodyLower.contains('neft') ||
+        bodyLower.contains('imps') ||
+        bodyLower.contains('rtgs') ||
+        bodyLower.contains('transfer');
 
     if (amount == null) return null;
 
@@ -49,6 +54,7 @@ class AxisSmsParserPlugin extends SmsParserPlugin {
       transactionType: 'Card',
       merchant: merchant,
       balance: balance,
+      isLikelyTransfer: isLikelyTransfer,
     );
   }
 

@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -64,7 +65,7 @@ class GuestModeToggle extends ConsumerWidget {
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          child: const Text('Cancel'),
+                          child: Text(AppLocalizations.of(context)!.common_cancel),
                         ),
                       ),
                       const SizedBox(width: 12),

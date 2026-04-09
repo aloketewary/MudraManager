@@ -108,7 +108,9 @@ class BusinessExcelExportPlugin extends ExportPlugin {
     sheet.cell(CellIndex.indexByString('B1')).value = 'Description';
     sheet.cell(CellIndex.indexByString('C1')).value = 'Category';
     sheet.cell(CellIndex.indexByString('D1')).value = 'Amount';
-    sheet.cell(CellIndex.indexByString('E1')).value = 'Type';
+    sheet.cell(CellIndex.indexByString('E1')).value = 'Currency';
+    sheet.cell(CellIndex.indexByString('F1')).value = 'Base Amount';
+    sheet.cell(CellIndex.indexByString('G1')).value = 'Type';
 
     int row = 2;
     for (var txn in data.transactions) {
@@ -117,7 +119,9 @@ class BusinessExcelExportPlugin extends ExportPlugin {
       sheet.cell(CellIndex.indexByString('B$row')).value = txn.description;
       sheet.cell(CellIndex.indexByString('C$row')).value = txn.category.value?.name ?? 'Unknown';
       sheet.cell(CellIndex.indexByString('D$row')).value = txn.amount;
-      sheet.cell(CellIndex.indexByString('E$row')).value = txn.isExpense ? 'Expense' : 'Income';
+      sheet.cell(CellIndex.indexByString('E$row')).value = txn.currencyCode ?? data.currency;
+      sheet.cell(CellIndex.indexByString('F$row')).value = txn.baseAmount;
+      sheet.cell(CellIndex.indexByString('G$row')).value = txn.isExpense ? 'Expense' : 'Income';
       row++;
     }
   }

@@ -4,6 +4,23 @@ import 'account.dart'; // Import for optional linking
 
 part 'goal.g.dart';
 
+@embedded
+@JsonSerializable()
+class GoalContribution {
+  double amount = 0.0;
+  DateTime date = DateTime.now();
+
+  GoalContribution();
+
+  factory GoalContribution.create(double amount) => GoalContribution()
+    ..amount = amount
+    ..date = DateTime.now();
+
+  factory GoalContribution.fromJson(Map<String, dynamic> json) =>
+      _$GoalContributionFromJson(json);
+  Map<String, dynamic> toJson() => _$GoalContributionToJson(this);
+}
+
 @collection
 @JsonSerializable()
 class Goal {
@@ -13,6 +30,9 @@ class Goal {
   late String name; // e.g., "New Laptop", "Down Payment", "Vacation Fund"
 
   late double targetAmount; // The total amount the user wants to save
+
+  /// Currency code for this goal. Null = base currency.
+  String? currencyCode;
 
   // Amount currently saved.
   // IMPORTANT: This needs careful management.
@@ -36,9 +56,10 @@ class Goal {
 
   String? iconName;
   int? colorValue;
-  String? description; // Optional description for the goal
+  String? description;
 
-  // Isar requires a default constructor
+  List<GoalContribution> contributions = [];
+
   Goal();
 
   // Optional: Convenience constructor

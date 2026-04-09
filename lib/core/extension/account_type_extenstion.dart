@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 
 extension AccountTypeX on AccountType {
@@ -22,17 +23,17 @@ extension AccountTypeX on AccountType {
   IconData get icon {
     switch (this) {
       case AccountType.bank:
-        return Icons.account_balance;
+        return LucideIcons.landmark;
       case AccountType.cash:
-        return Icons.money;
+        return LucideIcons.banknote;
       case AccountType.creditCard:
-        return Icons.credit_card;
+        return LucideIcons.creditCard;
       case AccountType.eWallet:
-        return Icons.account_balance_wallet;
+        return LucideIcons.wallet;
       case AccountType.investment:
-        return Icons.trending_up;
+        return LucideIcons.trendingUp;
       case AccountType.other:
-        return Icons.more_horiz;
+        return LucideIcons.ellipsis;
     }
   }
 }

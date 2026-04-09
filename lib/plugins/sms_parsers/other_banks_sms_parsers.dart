@@ -6,7 +6,7 @@ class YesBankSmsParserPlugin extends SmsParserPlugin {
   @override
   String get name => 'Yes Bank SMS Parser';
   @override
-  String get version => '1.0.0';
+  String get version => '1.0.1';
   @override
   String get bankName => 'YES';
 
@@ -29,12 +29,18 @@ class YesBankSmsParserPlugin extends SmsParserPlugin {
     final amountRegex = RegExp(r'Rs\.?\s*(\d+(?:,\d+)*(?:\.\d{2})?)');
     final accountRegex = RegExp(r'A/c\s*[xX]*(\d{4})');
     final typeRegex = RegExp(r'(debited|credited)', caseSensitive: false);
-    final balanceRegex = RegExp(r'Avl\s*Bal[:\s]*Rs\.?\s*(\d+(?:,\d+)*(?:\.\d{2})?)');
+    final balanceRegex =
+        RegExp(r'Avl\s*Bal[:\s]*Rs\.?\s*(\d+(?:,\d+)*(?:\.\d{2})?)');
 
     final amount = _extractAmount(amountRegex, body);
     final account = accountRegex.firstMatch(body)?.group(1);
     final type = typeRegex.firstMatch(body)?.group(1)?.toLowerCase();
     final balance = _extractAmount(balanceRegex, body);
+    final bodyLower = body.toLowerCase();
+    final isLikelyTransfer = bodyLower.contains('neft') ||
+        bodyLower.contains('imps') ||
+        bodyLower.contains('rtgs') ||
+        bodyLower.contains('transfer');
 
     if (amount == null) return null;
 
@@ -43,6 +49,7 @@ class YesBankSmsParserPlugin extends SmsParserPlugin {
       isIncome: type == 'credited',
       account: account,
       balance: balance,
+      isLikelyTransfer: isLikelyTransfer,
     );
   }
 
@@ -71,7 +78,7 @@ class IndusIndSmsParserPlugin extends SmsParserPlugin {
   @override
   String get name => 'IndusInd Bank SMS Parser';
   @override
-  String get version => '1.0.0';
+  String get version => '1.0.1';
   @override
   String get bankName => 'INDUSIND';
 
@@ -88,17 +95,34 @@ class IndusIndSmsParserPlugin extends SmsParserPlugin {
   ParsedSms? parseSms(String sender, String body) {
     if (!_hasTransactionKeywords(body)) return null;
 
+    // Updated regex to handle formats like "Rs 10000.00" and "Rs. 10000.00"
     final amountRegex = RegExp(r'Rs\.?\s*(\d+(?:,\d+)*(?:\.\d{2})?)');
-    final accountRegex = RegExp(r'A/C?\s*\*?[xX]*([xX]*\d{4})', caseSensitive: false);
+    // Updated to handle *XX6988 format
+    final accountRegex =
+        RegExp(r'A/C?\s*\*?[xX]*([xX]*\d{4})', caseSensitive: false);
     final typeRegex = RegExp(r'(debited|credited)', caseSensitive: false);
+    // Extract UPI ID from "from 891223@jupiteraxis" format
+    final upiRegex = RegExp(r'from\s+([\w.-]+@[\w.-]+)');
     final merchantRegex = RegExp(r'at\s+(.+?)\s+on');
-    final balanceRegex = RegExp(r'Avl\s*(?:Bal|Lmt)[:\s]*Rs\.?\s*(\d+(?:,\d+)*(?:\.\d{2})?)');
+    // Updated to handle "Avl bal:676767.27" format
+    final balanceRegex = RegExp(
+      r'Avl\s*(?:bal|Bal|Lmt)[:\s]*(?:Rs?\.?\s*)?(\d+(?:,\d+)*(?:\.\d{1,2})?)',
+      caseSensitive: false,
+    );
 
     final amount = _extractAmount(amountRegex, body);
     final account = accountRegex.firstMatch(body)?.group(1);
     final type = typeRegex.firstMatch(body)?.group(1)?.toLowerCase();
-    final merchant = _cleanMerchantName(merchantRegex.firstMatch(body)?.group(1));
+    final upiId = upiRegex.firstMatch(body)?.group(1);
+    final merchant =
+        _cleanMerchantName(merchantRegex.firstMatch(body)?.group(1)) ?? upiId;
     final balance = _extractAmount(balanceRegex, body);
+    final bodyLower = body.toLowerCase();
+
+    final isLikelyTransfer = bodyLower.contains('neft') ||
+        bodyLower.contains('imps') ||
+        bodyLower.contains('rtgs') ||
+        bodyLower.contains('transfer');
 
     if (amount == null) return null;
 
@@ -108,6 +132,8 @@ class IndusIndSmsParserPlugin extends SmsParserPlugin {
       account: account,
       merchant: merchant,
       balance: balance,
+      transactionType: type == 'credited' ? 'Income' : 'Expense',
+      isLikelyTransfer: isLikelyTransfer,
     );
   }
 
@@ -142,7 +168,7 @@ class IdfcSmsParserPlugin extends SmsParserPlugin {
   @override
   String get name => 'IDFC Bank SMS Parser';
   @override
-  String get version => '1.0.0';
+  String get version => '1.0.1';
   @override
   String get bankName => 'IDFC';
 
@@ -162,12 +188,18 @@ class IdfcSmsParserPlugin extends SmsParserPlugin {
     final amountRegex = RegExp(r'Rs\.?\s*(\d+(?:,\d+)*(?:\.\d{2})?)');
     final accountRegex = RegExp(r'A/c\s*[xX]*(\d{4})');
     final typeRegex = RegExp(r'(debited|credited)', caseSensitive: false);
-    final balanceRegex = RegExp(r'Avl\s*Bal[:\s]*Rs\.?\s*(\d+(?:,\d+)*(?:\.\d{2})?)');
+    final balanceRegex =
+        RegExp(r'Avl\s*Bal[:\s]*Rs\.?\s*(\d+(?:,\d+)*(?:\.\d{2})?)');
 
     final amount = _extractAmount(amountRegex, body);
     final account = accountRegex.firstMatch(body)?.group(1);
     final type = typeRegex.firstMatch(body)?.group(1)?.toLowerCase();
     final balance = _extractAmount(balanceRegex, body);
+    final bodyLower = body.toLowerCase();
+    final isLikelyTransfer = bodyLower.contains('neft') ||
+        bodyLower.contains('imps') ||
+        bodyLower.contains('rtgs') ||
+        bodyLower.contains('transfer');
 
     if (amount == null) return null;
 
@@ -176,6 +208,7 @@ class IdfcSmsParserPlugin extends SmsParserPlugin {
       isIncome: type == 'credited',
       account: account,
       balance: balance,
+      isLikelyTransfer: isLikelyTransfer,
     );
   }
 
@@ -204,7 +237,7 @@ class AuBankSmsParserPlugin extends SmsParserPlugin {
   @override
   String get name => 'AU Bank SMS Parser';
   @override
-  String get version => '1.0.0';
+  String get version => '1.0.1';
   @override
   String get bankName => 'AU';
 
@@ -224,12 +257,18 @@ class AuBankSmsParserPlugin extends SmsParserPlugin {
     final amountRegex = RegExp(r'Rs\.?\s*(\d+(?:,\d+)*(?:\.\d{2})?)');
     final accountRegex = RegExp(r'A/c\s*[xX]*(\d{4})');
     final typeRegex = RegExp(r'(debited|credited)', caseSensitive: false);
-    final balanceRegex = RegExp(r'Avl\s*Bal[:\s]*Rs\.?\s*(\d+(?:,\d+)*(?:\.\d{2})?)');
+    final balanceRegex =
+        RegExp(r'Avl\s*Bal[:\s]*Rs\.?\s*(\d+(?:,\d+)*(?:\.\d{2})?)');
 
     final amount = _extractAmount(amountRegex, body);
     final account = accountRegex.firstMatch(body)?.group(1);
     final type = typeRegex.firstMatch(body)?.group(1)?.toLowerCase();
     final balance = _extractAmount(balanceRegex, body);
+    final bodyLower = body.toLowerCase();
+    final isLikelyTransfer = bodyLower.contains('neft') ||
+        bodyLower.contains('imps') ||
+        bodyLower.contains('rtgs') ||
+        bodyLower.contains('transfer');
 
     if (amount == null) return null;
 
@@ -238,6 +277,7 @@ class AuBankSmsParserPlugin extends SmsParserPlugin {
       isIncome: type == 'credited',
       account: account,
       balance: balance,
+      isLikelyTransfer: isLikelyTransfer,
     );
   }
 

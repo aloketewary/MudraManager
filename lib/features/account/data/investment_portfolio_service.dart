@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
@@ -39,7 +40,7 @@ class InvestmentPortfolioService {
     if (holding != null) {
       holding.currentPrice = newPrice;
       await isar.writeTxn(() => isar.investmentHoldings.put(holding));
-      _log.i('Price updated for ${holding.symbol}: ₹$newPrice');
+      _log.i('Price updated for ${holding.symbol}: ${BaseCurrency.symbol}$newPrice');
     }
   }
 

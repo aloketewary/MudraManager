@@ -6,7 +6,7 @@ class AchievementRegistry {
     'first_transaction': Achievement()
       ..key = 'first_transaction'
       ..title = 'First Step'
-      ..description = 'Record your first transaction'
+      ..description = 'Log your very first transaction'
       ..icon = 'target'
       ..category = AchievementCategory.tracking
       ..type = AchievementType.badge
@@ -20,7 +20,7 @@ class AchievementRegistry {
     'transaction_10': Achievement()
       ..key = 'transaction_10'
       ..title = 'Getting Started'
-      ..description = 'Track 10 transactions'
+      ..description = 'Get to 10 transactions — you\'re building a habit'
       ..icon = 'note'
       ..category = AchievementCategory.tracking
       ..progress = 0
@@ -77,7 +77,7 @@ class AchievementRegistry {
     'streak_3_days': Achievement()
       ..key = 'streak_3_days'
       ..title = 'On Fire'
-      ..description = 'Check in for 3 days straight'
+      ..description = 'Show up 3 days in a row'
       ..icon = 'flame'
       ..category = AchievementCategory.engagement
       ..progress = 0
@@ -91,7 +91,7 @@ class AchievementRegistry {
     'streak_7_days': Achievement()
       ..key = 'streak_7_days'
       ..title = 'Week Warrior'
-      ..description = 'Check in for 7 days straight'
+      ..description = 'A full week without missing a day'
       ..icon = 'bolt'
       ..category = AchievementCategory.engagement
       ..progress = 0
@@ -105,7 +105,7 @@ class AchievementRegistry {
     'streak_30_days': Achievement()
       ..key = 'streak_30_days'
       ..title = 'Unstoppable'
-      ..description = 'Check in for 30 days straight'
+      ..description = '30 days straight — that\'s commitment'
       ..icon = 'medal'
       ..category = AchievementCategory.engagement
       ..progress = 0
@@ -119,7 +119,7 @@ class AchievementRegistry {
     'streak_100_days': Achievement()
       ..key = 'streak_100_days'
       ..title = 'Legend'
-      ..description = 'Check in for 100 days straight'
+      ..description = '100 days. You\'re a legend now'
       ..icon = 'crown'
       ..category = AchievementCategory.engagement
       ..progress = 0
@@ -148,7 +148,7 @@ class AchievementRegistry {
     'budget_master': Achievement()
       ..key = 'budget_master'
       ..title = 'Budget Master'
-      ..description = 'Stay within budget for a month'
+      ..description = 'A whole month under budget — respect'
       ..icon = 'budget-master'
       ..category = AchievementCategory.budgeting
       ..progress = 0
@@ -475,6 +475,221 @@ class AchievementRegistry {
       ..rewardCoins = 0
       ..type = AchievementType.badge
       ..series = 'trips'
+      ..seriesOrder = 2,
+
+    // ==================== BACKUP ACHIEVEMENTS ====================
+    'first_backup': Achievement()
+      ..key = 'first_backup'
+      ..title = 'Safety First'
+      ..description = 'Create your first backup'
+      ..icon = 'shield'
+      ..category = AchievementCategory.engagement
+      ..type = AchievementType.badge
+      ..progress = 0
+      ..target = 1
+      ..rewardXP = 25
+      ..rewardCoins = 0
+      ..series = 'backup'
+      ..seriesOrder = 1,
+
+    'backup_10': Achievement()
+      ..key = 'backup_10'
+      ..title = 'Data Guardian'
+      ..description = 'Create 10 backups'
+      ..icon = 'vault'
+      ..category = AchievementCategory.engagement
+      ..type = AchievementType.badge
+      ..progress = 0
+      ..target = 10
+      ..rewardXP = 75
+      ..rewardCoins = 0
+      ..series = 'backup'
+      ..seriesOrder = 2,
+
+// ==================== SPLIT/SETTLEMENT ACHIEVEMENTS ====================
+    'first_split': Achievement()
+      ..key = 'first_split'
+      ..title = 'Fair Share'
+      ..description = 'Split your first expense'
+      ..icon = 'split'
+      ..category = AchievementCategory.tracking
+      ..type = AchievementType.badge
+      ..progress = 0
+      ..target = 1
+      ..rewardXP = 20
+      ..rewardCoins = 0
+      ..series = 'splits'
+      ..seriesOrder = 1,
+
+    'split_20': Achievement()
+      ..key = 'split_20'
+      ..title = 'Split Master'
+      ..description = 'Split 20 expenses with friends'
+      ..icon = 'users'
+      ..category = AchievementCategory.tracking
+      ..type = AchievementType.badge
+      ..progress = 0
+      ..target = 20
+      ..rewardXP = 75
+      ..rewardCoins = 0
+      ..series = 'splits'
+      ..seriesOrder = 2,
+
+// ==================== SAVINGS MILESTONES ====================
+    'savings_streak_7': Achievement()
+      ..key = 'savings_streak_7'
+      ..title = 'Saver\'s Habit'
+      ..description = '7 days of spending less than you earn'
+      ..icon = 'piggy'
+      ..category = AchievementCategory.saving
+      ..type = AchievementType.streak
+      ..progress = 0
+      ..target = 7
+      ..rewardXP = 50
+      ..rewardCoins = 0
+      ..series = 'savings_streak'
+      ..seriesOrder = 1,
+
+    'savings_streak_30': Achievement()
+      ..key = 'savings_streak_30'
+      ..title = 'Frugal Champion'
+      ..description = '30 days in the green — champion status'
+      ..icon = 'trophy'
+      ..category = AchievementCategory.saving
+      ..type = AchievementType.streak
+      ..progress = 0
+      ..target = 30
+      ..rewardXP = 200
+      ..rewardCoins = 0
+      ..series = 'savings_streak'
+      ..seriesOrder = 2,
+
+// ==================== ZERO SPEND DAY ====================
+    'zero_spend_1': Achievement()
+      ..key = 'zero_spend_1'
+      ..title = 'No Spend Day'
+      ..description = 'Have a day with zero expenses'
+      ..icon = 'ban'
+      ..category = AchievementCategory.saving
+      ..type = AchievementType.badge
+      ..progress = 0
+      ..target = 1
+      ..rewardXP = 15
+      ..rewardCoins = 0
+      ..series = 'zero_spend'
+      ..seriesOrder = 1,
+
+    'zero_spend_10': Achievement()
+      ..key = 'zero_spend_10'
+      ..title = 'Minimalist'
+      ..description = 'Have 10 zero-spend days'
+      ..icon = 'minimalist'
+      ..category = AchievementCategory.saving
+      ..type = AchievementType.badge
+      ..progress = 0
+      ..target = 10
+      ..rewardXP = 60
+      ..rewardCoins = 0
+      ..series = 'zero_spend'
+      ..seriesOrder = 2,
+
+// ==================== RECONCILIATION ====================
+    'reconcile_first': Achievement()
+      ..key = 'reconcile_first'
+      ..title = 'Balance Checker'
+      ..description = 'Reconcile your first transaction'
+      ..icon = 'check-circle'
+      ..category = AchievementCategory.tracking
+      ..type = AchievementType.badge
+      ..progress = 0
+      ..target = 1
+      ..rewardXP = 20
+      ..rewardCoins = 0
+      ..series = 'reconcile'
+      ..seriesOrder = 1,
+
+    'reconcile_50': Achievement()
+      ..key = 'reconcile_50'
+      ..title = 'Audit Pro'
+      ..description = 'Reconcile 50 transactions'
+      ..icon = 'clipboard-check'
+      ..category = AchievementCategory.tracking
+      ..type = AchievementType.badge
+      ..progress = 0
+      ..target = 50
+      ..rewardXP = 100
+      ..rewardCoins = 0
+      ..series = 'reconcile'
+      ..seriesOrder = 2,
+
+    'tracking_streak_3': Achievement()
+      ..key = 'tracking_streak_3'
+      ..title = 'Consistent Logger'
+      ..description = 'Log expenses 3 days in a row'
+      ..icon = 'note'
+      ..category = AchievementCategory.tracking
+      ..type = AchievementType.streak
+      ..progress = 0
+      ..target = 3
+      ..rewardXP = 15
+      ..rewardCoins = 0
+      ..series = 'tracking_streak'
+      ..seriesOrder = 1,
+
+    'tracking_streak_7': Achievement()
+      ..key = 'tracking_streak_7'
+      ..title = 'Week of Discipline'
+      ..description = 'Log expenses 7 days in a row'
+      ..icon = 'chart'
+      ..category = AchievementCategory.tracking
+      ..type = AchievementType.streak
+      ..progress = 0
+      ..target = 7
+      ..rewardXP = 40
+      ..rewardCoins = 0
+      ..series = 'tracking_streak'
+      ..seriesOrder = 2,
+
+    'tracking_streak_30': Achievement()
+      ..key = 'tracking_streak_30'
+      ..title = 'Tracking Machine'
+      ..description = 'Log expenses 30 days in a row'
+      ..icon = 'medal'
+      ..category = AchievementCategory.tracking
+      ..type = AchievementType.streak
+      ..progress = 0
+      ..target = 30
+      ..rewardXP = 150
+      ..rewardCoins = 0
+      ..series = 'tracking_streak'
+      ..seriesOrder = 3,
+
+    'budget_month_complete': Achievement()
+      ..key = 'budget_month_complete'
+      ..title = 'Budget Champion'
+      ..description = 'Complete a month under budget in all categories'
+      ..icon = 'trophy'
+      ..category = AchievementCategory.budgeting
+      ..type = AchievementType.badge
+      ..progress = 0
+      ..target = 1
+      ..rewardXP = 100
+      ..rewardCoins = 0
+      ..series = 'budget_completion'
+      ..seriesOrder = 1,
+
+    'budget_month_complete_3': Achievement()
+      ..key = 'budget_month_complete_3'
+      ..title = 'Budget Veteran'
+      ..description = 'Complete 3 months under budget'
+      ..icon = 'crown'
+      ..category = AchievementCategory.budgeting
+      ..type = AchievementType.badge
+      ..progress = 0
+      ..target = 3
+      ..rewardXP = 250
+      ..rewardCoins = 0
+      ..series = 'budget_completion'
       ..seriesOrder = 2,
   };
 }

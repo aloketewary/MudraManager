@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/extension/localization_extenstion.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
@@ -68,9 +69,9 @@ class LanguageService {
     required bool isSelected,
   }) {
     return ListTile(
-      leading: const Icon(Icons.language),
+      leading: const Icon(LucideIcons.languages),
       title: Text(language),
-      trailing: isSelected ? const Icon(Icons.check, color: Colors.blue) : null,
+      trailing: isSelected ? const Icon(LucideIcons.check, color: Colors.blue) : null,
       onTap: () => changeLanguage(context, ref, locale),
     );
   }

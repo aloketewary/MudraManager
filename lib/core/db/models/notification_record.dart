@@ -3,6 +3,9 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'notification_record.g.dart';
 
+enum NotificationPriority { low, normal, high, urgent }
+enum NotificationCategory { system, financial, trip, budget }
+
 @collection
 @JsonSerializable()
 class NotificationRecord {
@@ -12,9 +15,29 @@ class NotificationRecord {
   late String body;
   late DateTime timestamp;
 
-  // Optional: Type of notification (e.g., 'low_balance', 'budget')
   String? type;
   late bool isRead;
+  
+  // Action-oriented fields
+  @enumerated
+  @JsonKey(defaultValue: NotificationPriority.normal)
+  late NotificationPriority priority;
+  
+  @enumerated
+  @JsonKey(defaultValue: NotificationCategory.system)
+  late NotificationCategory category;
+  
+  // Action metadata (JSON string)
+  String? actionData; // {"type": "settle_up", "tripId": 123, "amount": 500}
+  String? primaryAction; // "Settle Now", "View Details", "Split Equal"
+  String? secondaryAction; // "Remind", "Ignore", "View Trip"
+  
+  // Related entity IDs
+  int? tripId;
+  int? expenseId;
+  int? budgetId;
+  
+  bool isArchived = false;
 
   NotificationRecord();
 

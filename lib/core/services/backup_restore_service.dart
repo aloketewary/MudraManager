@@ -1,21 +1,23 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/backup_metadata.dart';
+import 'package:mudra_manager/core/db/models/exchange_rate.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/db/models/budget.dart';
 import 'package:mudra_manager/core/db/models/budget_category_allocation.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/goal.dart';
 import 'package:mudra_manager/core/db/models/notification_record.dart';
-import 'package:mudra_manager/core/db/models/pending_transaction.dart';
+
 import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
 import 'package:mudra_manager/core/db/models/tag.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
@@ -30,11 +32,13 @@ import 'package:mudra_manager/features/backup/data/budget_category_allocation_ba
 import 'package:mudra_manager/features/backup/data/category_backup.dart';
 import 'package:mudra_manager/features/backup/data/goal_backup.dart';
 import 'package:mudra_manager/features/backup/data/notification_backup.dart';
-import 'package:mudra_manager/features/backup/data/pending_transaction_backup.dart';
+
 import 'package:mudra_manager/features/backup/data/recurring_transaction_backup.dart';
 import 'package:mudra_manager/features/backup/data/tag_backup.dart';
 import 'package:mudra_manager/features/backup/data/transaction_backup.dart';
+import 'package:mudra_manager/features/backup/data/gamification_backup.dart';
 import 'package:mudra_manager/features/backup/data/user_profile_backup.dart';
+import 'package:mudra_manager/features/gamification/models/achievement.dart';
 import 'package:path_provider/path_provider.dart';
 
 class BackupService {
@@ -46,55 +50,70 @@ class BackupService {
   static Future<String?> createEncryptedBackup(
     String password, {
     bool includeAttachments = true,
+    bool interactive = true,
   }) async {
-    final isar = Isar.getInstance();
-    if (isar == null) return null;
+    try {
+      final isar = Isar.getInstance();
+      if (isar == null) {
+        _log.e('Isar instance not available');
+        SnackbarService.error(BuddyMessages.genericError);
+        return null;
+      }
 
-    final dbData = await exportAll(isar);
-    final settings = await SharedPrefsUtil.instance.exportAll();
-    final recordCount = dbData.values.fold<int>(
-      0,
-      (sum, list) => sum + list.length,
-    );
-
-    final content = jsonEncode({
-      'db': dbData,
-      'settings': settings,
-      'includeAttachments': includeAttachments,
-      'version': '1.0',
-      'timestamp': DateTime.now().toIso8601String(),
-    });
-
-    final key = _deriveKey(password);
-    final iv = encrypt.IV.fromSecureRandom(16);
-    final encrypter = encrypt.Encrypter(encrypt.AES(key));
-    final encrypted = encrypter.encrypt(content, iv: iv);
-
-    final hash = sha256.convert(utf8.encode(content)).toString();
-    final finalData = jsonEncode({
-      'data': encrypted.base64,
-      'iv': iv.base64,
-      'hash': hash,
-    });
-
-    final dateTime = DateTime.now();
-    final filePath = await saveBackupFile(utf8.encode(finalData), dateTime);
-
-    if (filePath != null) {
-      final fileSize = File(filePath).lengthSync();
-      await _saveBackupMetadata(
-        isar,
-        dateTime,
-        fileSize,
-        filePath,
-        includeAttachments,
-        recordCount,
+      final dbData = await exportAll(isar);
+      final settings = await SharedPrefsUtil.instance.exportAll();
+      final recordCount = dbData.values.fold<int>(
+        0,
+        (sum, list) => sum + list.length,
       );
-      await SharedPrefsUtil.instance.saveBackupDate(dateTime);
-      _log.i('Backup created: $filePath ($recordCount records)');
-    }
 
-    return filePath;
+      final content = jsonEncode({
+        'db': dbData,
+        'settings': settings,
+        'includeAttachments': includeAttachments,
+        'version': '1.0',
+        'timestamp': DateTime.now().toIso8601String(),
+      });
+
+      final key = _deriveKey(password);
+      final iv = encrypt.IV.fromSecureRandom(16);
+      final encrypter = encrypt.Encrypter(encrypt.AES(key));
+      final encrypted = encrypter.encrypt(content, iv: iv);
+
+      final hash = sha256.convert(utf8.encode(content)).toString();
+      final finalData = jsonEncode({
+        'data': encrypted.base64,
+        'iv': iv.base64,
+        'hash': hash,
+      });
+
+      final dateTime = DateTime.now();
+      final filePath = await saveBackupFile(
+        utf8.encode(finalData),
+        dateTime,
+        interactive: interactive,
+      );
+
+      if (filePath != null) {
+        final fileSize = File(filePath).lengthSync();
+        await _saveBackupMetadata(
+          isar,
+          dateTime,
+          fileSize,
+          filePath,
+          includeAttachments,
+          recordCount,
+        );
+        await SharedPrefsUtil.instance.saveBackupDate(dateTime);
+        _log.i('Backup created: $filePath ($recordCount records)');
+      }
+
+      return filePath;
+    } catch (e, stackTrace) {
+      _log.e('Backup creation failed', e, stackTrace);
+      SnackbarService.error(BuddyMessages.backupFailed);
+      return null;
+    }
   }
 
   /// Restore backup with password
@@ -103,20 +122,24 @@ class BackupService {
     Isar isar,
     String password,
   ) async {
-    await FilePicker.platform.clearTemporaryFiles();
-    final result = await FilePicker.platform.pickFiles(
-      allowMultiple: false,
-      type: FileType.any,
-      dialogTitle: 'Select Backup File',
-    );
-
-    if (result == null || result.files.single.path == null) return null;
-    if (result.files.first.extension != 'mudra') {
-      SnackbarService.error('Invalid file type, select `.mudra` file');
-      return null;
-    }
-
     try {
+      await FilePicker.platform.clearTemporaryFiles();
+      final result = await FilePicker.platform.pickFiles(
+        allowMultiple: false,
+        type: FileType.any,
+        dialogTitle: 'Select Backup File',
+      );
+
+      if (result == null || result.files.single.path == null) {
+        _log.w('No file selected');
+        return null;
+      }
+
+      if (result.files.first.extension != 'mudra') {
+        SnackbarService.error(BuddyMessages.invalidBackupFile);
+        return null;
+      }
+
       final selectedFile = File(result.files.single.path!);
       final fileContent = await selectedFile.readAsString();
       final backupData = jsonDecode(fileContent);
@@ -130,7 +153,7 @@ class BackupService {
 
       final hash = sha256.convert(utf8.encode(decrypted)).toString();
       if (hash != backupData['hash']) {
-        SnackbarService.error('Backup file corrupted or tampered');
+        SnackbarService.error(BuddyMessages.corruptBackup);
         return null;
       }
 
@@ -143,9 +166,11 @@ class BackupService {
 
       _log.i('Backup restored successfully');
       return 'success';
-    } catch (e) {
-      _log.e('Restore failed', e);
-      SnackbarService.error('Invalid password or corrupted file');
+    } catch (e, stackTrace) {
+      _log.e('Restore failed', e, stackTrace);
+      SnackbarService.error(
+        'Restore failed: Invalid password or corrupted file',
+      );
       return null;
     }
   }
@@ -209,14 +234,12 @@ class BackupService {
 
     // Backup Tags
     final tags = await isar.tags.where().findAll();
-    backupData['Tag'] = tags
-        .map((tag) => TagBackup.fromTag(tag).toBackupJson())
-        .toList();
+    backupData['Tag'] =
+        tags.map((tag) => TagBackup.fromTag(tag).toBackupJson()).toList();
 
     // Backup Recurring Transactions
-    final recurringTransactions = await isar.recurringTransactions
-        .where()
-        .findAll();
+    final recurringTransactions =
+        await isar.recurringTransactions.where().findAll();
     backupData['RecurringTransaction'] = recurringTransactions
         .map(
           (rt) => RecurringTransactionBackup.fromRecurringTransaction(
@@ -226,25 +249,12 @@ class BackupService {
         .toList();
 
     // Backup Notification Records
-    final notificationRecords = await isar.notificationRecords
-        .where()
-        .findAll();
+    final notificationRecords =
+        await isar.notificationRecords.where().findAll();
     backupData['NotificationRecord'] = notificationRecords
         .map(
           (nr) => NotificationRecordBackup.fromNotificationRecord(
             nr,
-          ).toBackupJson(),
-        )
-        .toList();
-
-    // Backup Pending Transactions
-    final pendingTransactions = await isar.pendingTransactions
-        .where()
-        .findAll();
-    backupData['PendingTransaction'] = pendingTransactions
-        .map(
-          (pt) => PendingTransactionBackup.fromPendingTransaction(
-            pt,
           ).toBackupJson(),
         )
         .toList();
@@ -257,9 +267,8 @@ class BackupService {
 
     // Backup Goals
     final goals = await isar.goals.where().findAll();
-    backupData['Goal'] = goals
-        .map((goal) => GoalBackup.fromGoal(goal).toBackupJson())
-        .toList();
+    backupData['Goal'] =
+        goals.map((goal) => GoalBackup.fromGoal(goal).toBackupJson()).toList();
 
     // Backup Budgets
     final budgets = await isar.budgets.where().findAll();
@@ -268,9 +277,8 @@ class BackupService {
         .toList();
 
     // Backup Budget Category Allocations
-    final budgetCategoryAllocations = await isar.budgetCategoryAllocations
-        .where()
-        .findAll();
+    final budgetCategoryAllocations =
+        await isar.budgetCategoryAllocations.where().findAll();
     backupData['BudgetCategoryAllocation'] = budgetCategoryAllocations
         .map(
           (bca) => BudgetCategoryAllocationBackup.fromBudgetCategoryAllocation(
@@ -285,7 +293,50 @@ class BackupService {
         .map((tx) => TransactionBackup.fromTransaction(tx).toBackupJson())
         .toList();
 
-    _log.i('DB export completed: ${backupData.values.fold<int>(0, (sum, list) => sum + list.length)} records');
+    // Backup Achievements
+    final achievements = await isar.achievements.where().findAll();
+    backupData['Achievement'] = achievements
+        .map((a) => AchievementBackup.fromAchievement(a).toBackupJson())
+        .toList();
+
+    // Backup Streaks
+    final streaks = await isar.streaks.where().findAll();
+    backupData['Streak'] =
+        streaks.map((s) => StreakBackup.fromStreak(s).toBackupJson()).toList();
+
+    // Backup User Levels
+    final userLevels = await isar.userLevels.where().findAll();
+    backupData['UserLevel'] = userLevels
+        .map((ul) => UserLevelBackup.fromUserLevel(ul).toBackupJson())
+        .toList();
+
+    _log.i(
+      'DB export completed: ${backupData.values.fold<int>(0, (sum, list) => sum + list.length)} records',
+    );
+
+    // Backup AppConfig (includes base_currency)
+    final appConfigs = await isar.appConfigs.where().findAll();
+    backupData['AppConfig'] = appConfigs
+        .map((c) => {
+              'key': c.key,
+              'stringValue': c.stringValue,
+              'intValue': c.intValue,
+              'doubleValue': c.doubleValue,
+              'boolValue': c.boolValue,
+              'dateValue': c.dateValue?.toIso8601String(),
+            })
+        .toList();
+
+    // Backup ExchangeRates
+    final rates = await isar.exchangeRates.where().findAll();
+    backupData['ExchangeRate'] = rates
+        .map((r) => {
+              'currencyCode': r.currencyCode,
+              'rateToBase': r.rateToBase,
+              'updatedAt': r.updatedAt.toIso8601String(),
+            })
+        .toList();
+
     return backupData;
   }
 
@@ -332,12 +383,7 @@ class BackupService {
               {},
             );
             break;
-          case 'PendingTransaction':
-            model = PendingTransactionBackup().fromBackupJson(
-              Map<String, dynamic>.from(itemJson),
-              {},
-            );
-            break;
+
           case 'UserProfile':
             model = UserProfileBackup().fromBackupJson(
               Map<String, dynamic>.from(itemJson),
@@ -364,6 +410,24 @@ class BackupService {
             break;
           case 'Transaction':
             model = TransactionBackup().fromBackupJson(
+              Map<String, dynamic>.from(itemJson),
+              {},
+            );
+            break;
+          case 'Achievement':
+            model = AchievementBackup().fromBackupJson(
+              Map<String, dynamic>.from(itemJson),
+              {},
+            );
+            break;
+          case 'Streak':
+            model = StreakBackup().fromBackupJson(
+              Map<String, dynamic>.from(itemJson),
+              {},
+            );
+            break;
+          case 'UserLevel':
+            model = UserLevelBackup().fromBackupJson(
               Map<String, dynamic>.from(itemJson),
               {},
             );
@@ -425,13 +489,7 @@ class BackupService {
                 );
                 await isar.notificationRecords.put(fullyLinkedModel);
                 break;
-              case 'PendingTransaction':
-                fullyLinkedModel = PendingTransactionBackup().fromBackupJson(
-                  Map<String, dynamic>.from(itemJson),
-                  restoredObjects,
-                );
-                await isar.pendingTransactions.put(fullyLinkedModel);
-                break;
+
               case 'UserProfile':
                 fullyLinkedModel = UserProfileBackup().fromBackupJson(
                   Map<String, dynamic>.from(itemJson),
@@ -481,11 +539,75 @@ class BackupService {
                 await tx.tags.save();
                 fullyLinkedModel = tx;
                 break;
+              case 'Achievement':
+                fullyLinkedModel = AchievementBackup().fromBackupJson(
+                  Map<String, dynamic>.from(itemJson),
+                  restoredObjects,
+                );
+                await isar.achievements.put(fullyLinkedModel);
+                break;
+              case 'Streak':
+                fullyLinkedModel = StreakBackup().fromBackupJson(
+                  Map<String, dynamic>.from(itemJson),
+                  restoredObjects,
+                );
+                await isar.streaks.put(fullyLinkedModel);
+                break;
+              case 'UserLevel':
+                fullyLinkedModel = UserLevelBackup().fromBackupJson(
+                  Map<String, dynamic>.from(itemJson),
+                  restoredObjects,
+                );
+                await isar.userLevels.put(fullyLinkedModel);
+                break;
             }
           }
         }
       }
     });
+
+    // --- Restore AppConfig (base_currency etc.) ---
+    if (backupData.containsKey('AppConfig')) {
+      final configs = backupData['AppConfig'] as List<dynamic>;
+      await isar.writeTxn(() async {
+        for (final item in configs) {
+          final map = Map<String, dynamic>.from(item);
+          final config = AppConfig()
+            ..key = map['key'] as String
+            ..stringValue = map['stringValue'] as String?
+            ..intValue = map['intValue'] as int?
+            ..doubleValue = (map['doubleValue'] as num?)?.toDouble()
+            ..boolValue = map['boolValue'] as bool?
+            ..dateValue = map['dateValue'] != null
+                ? DateTime.tryParse(map['dateValue'] as String)
+                : null;
+          await isar.appConfigs.put(config);
+        }
+      });
+    }
+
+    // --- Restore ExchangeRates ---
+    if (backupData.containsKey('ExchangeRate')) {
+      final rates = backupData['ExchangeRate'] as List<dynamic>;
+      await isar.writeTxn(() async {
+        for (final item in rates) {
+          final map = Map<String, dynamic>.from(item);
+          final rate = ExchangeRate()
+            ..currencyCode = map['currencyCode'] as String
+            ..rateToBase = (map['rateToBase'] as num).toDouble()
+            ..updatedAt = DateTime.parse(map['updatedAt'] as String);
+          await isar.exchangeRates.put(rate);
+        }
+      });
+    }
+
+    // Sync BaseCurrency from restored AppConfig
+    final baseCurrencyConfig = await isar.appConfigs
+        .filter()
+        .keyEqualTo('base_currency')
+        .findFirst();
+    BaseCurrency.sync(baseCurrencyConfig?.stringValue ?? 'INR');
+
     _log.i('Restore completed successfully');
   }
 
@@ -499,11 +621,16 @@ class BackupService {
 
   static Future<String?> saveBackupFile(
     Uint8List content,
-    DateTime dateTime,
-  ) async {
-    final userDir = await pickBackupFolder();
-    final dir = await getApplicationDocumentsDirectory();
-    final directory = userDir ?? dir;
+    DateTime dateTime, {
+    bool interactive = true,
+  }) async {
+    final Directory directory;
+    if (interactive) {
+      final userDir = await pickBackupFolder();
+      directory = userDir ?? await getApplicationDocumentsDirectory();
+    } else {
+      directory = await getApplicationDocumentsDirectory();
+    }
     final fileName =
         '${_backupFileName}_${DateFormat('yyyyMMdd_HHmmss').format(dateTime)}$_backupFileNameExtension';
     final file = File('${directory.path}/$fileName');

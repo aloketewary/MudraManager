@@ -30,8 +30,10 @@ class SmsActivity {
   String? paymentType;
   String? transactionType; // UPI, Card, ATM, NEFT, etc.
   double? balance; // Available balance after transaction
+  bool? isLikelyTransfer;
+  int? pairedActivityId;
 
-  @Index(unique: true)
+  @Index(unique: true, replace: true)
   late String smsHash;
 
   @Enumerated(EnumType.name)

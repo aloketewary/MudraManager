@@ -1,9 +1,12 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/sms_activity.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
+import 'package:mudra_manager/core/db/models/exchange_rate.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
 import 'package:mudra_manager/features/sms/data/bank_sms_parser.dart';
@@ -93,10 +96,14 @@ class SmsActivityService {
     // Use bank parser for better extraction
     final parsed = await BankSmsParser.parse(sender, body);
 
+    // Clamp date to now if it's in the future (SMS parsing error)
+    final now = DateTime.now();
+    final safeDate = date.isAfter(now) ? now : date;
+
     final activity = SmsActivity()
       ..sender = sender
       ..body = body
-      ..date = date
+      ..date = safeDate
       ..createdAt = DateTime.now()
       ..smsHash = smsHash
       ..amount = parsed?.amount ?? amount
@@ -110,12 +117,69 @@ class SmsActivityService {
       ..balance = parsed?.balance
       ..merchant = parsed?.merchant ??
           CategoryMatcherService.detectMerchant(body, categories)
+      ..isLikelyTransfer = parsed?.isLikelyTransfer ?? false
       ..paymentType = CategoryMatcherService.detectPaymentType(body);
 
     // Calculate confidence
     activity.confidence = _calculateConfidence(activity);
 
-    // Check for duplicates (within 5 minutes)
+    // ── 1. Check for transfer pair (opposite direction, same amount, different account, within 15 min)
+    final transferPair = await _findTransferPair(activity);
+    if (transferPair != null) {
+      // Link both activities as a transfer pair
+      activity.isLikelyTransfer = true;
+      activity.pairedActivityId = transferPair.id;
+      activity.transactionType = 'Transfer';
+
+      // If the paired activity was already auto-approved as a regular transaction,
+      // we need to convert it: delete the expense and let user create a proper transfer
+      if (transferPair.status == ActivityStatus.approved && transferPair.transactionId != null) {
+        // Delete the incorrectly created expense transaction
+        await isar.writeTxn(() async {
+          await isar.transactions.delete(transferPair.transactionId!);
+
+          // Reset the paired activity to pending transfer
+          transferPair.isLikelyTransfer = true;
+          transferPair.pairedActivityId = activity.id;
+          transferPair.transactionType = 'Transfer';
+          transferPair.status = ActivityStatus.pending;
+          transferPair.transactionId = null;
+          await isar.smsActivitys.put(transferPair);
+
+          activity.status = ActivityStatus.pending;
+          await isar.smsActivitys.put(activity);
+        });
+
+        _log.i(
+          'Transfer pair detected (converted existing txn ${transferPair.transactionId}): '
+          '${activity.id} <-> ${transferPair.id} (${BaseCurrency.symbol}${activity.amount})',
+        );
+        return activity;
+      }
+
+      // Normal case: neither was auto-approved yet
+      activity.status = ActivityStatus.pending;
+
+      await isar.writeTxn(() async {
+        await isar.smsActivitys.put(activity);
+        transferPair.isLikelyTransfer = true;
+        transferPair.pairedActivityId = activity.id;
+        transferPair.transactionType = 'Transfer';
+        // If the pair was marked as duplicate, upgrade it to pending
+        if (transferPair.status == ActivityStatus.duplicate) {
+          transferPair.status = ActivityStatus.pending;
+          transferPair.isPotentialDuplicate = false;
+        }
+        await isar.smsActivitys.put(transferPair);
+      });
+
+      _log.i(
+        'Transfer pair detected: ${activity.id} <-> ${transferPair.id} (${BaseCurrency.symbol}${activity.amount})',
+      );
+      return activity;
+    }
+
+    // ── 2. Check for duplicates (same direction, same amount, within 5 min)
     final duplicates = await _findPotentialDuplicates(
       activity,
       const Duration(minutes: 5),
@@ -129,7 +193,8 @@ class SmsActivityService {
       final manualCount = duplicates.whereType<Transaction>().length;
       final smsCount = duplicates.whereType<SmsActivity>().length;
       _log.w(
-          'Potential duplicate detected: $smsCount SMS + $manualCount manual transactions');
+        'Potential duplicate detected: $smsCount SMS + $manualCount manual transactions',
+      );
     } else if (activity.confidence! < 60) {
       activity.status = ActivityStatus.needsReview;
       _log.i('Low confidence (${activity.confidence}%), needs review');
@@ -145,13 +210,31 @@ class SmsActivityService {
       );
 
       if (matchResult != null) {
-        // Auto-approve and create transaction
+        // Inherit currency from matched account
+        final accountCurrency = matchResult.account.currencyCode;
+        double? convertedAmount;
+        double? rateUsed;
+        if (accountCurrency != null) {
+          final rate = await isar.exchangeRates
+              .filter()
+              .currencyCodeEqualTo(accountCurrency)
+              .findFirst();
+          if (rate != null) {
+            convertedAmount = (activity.amount ?? 0) * rate.rateToBase;
+            rateUsed = rate.rateToBase;
+          }
+        }
+
         final transaction = Transaction()
           ..amount = activity.amount ?? 0
-          ..date = activity.date
+          ..date = safeDate
           ..description = activity.body
           ..isExpense = !(activity.isIncome == true)
-          ..isTransfer = false;
+          ..isTransfer = false
+          ..isFromSms = true
+          ..currencyCode = accountCurrency
+          ..convertedAmount = convertedAmount
+          ..rateUsed = rateUsed;
 
         transaction.account.value = matchResult.account;
         transaction.category.value = matchResult.category;
@@ -161,19 +244,18 @@ class SmsActivityService {
           await transaction.account.save();
           await transaction.category.save();
 
+          // Set smsActivityId after transaction has an ID
+          transaction.smsActivityId = activity.id;
+          await isar.transactions.put(transaction);
+
           activity.status = ActivityStatus.approved;
           activity.transactionId = transaction.id;
           await isar.smsActivitys.put(activity);
         });
 
-        transaction.isFromSms = true;
-        transaction.smsActivityId = activity.id;
-        await isar.writeTxn(() async {
-          await isar.transactions.put(transaction);
-        });
-
         _log.i(
-            'Auto-approved with confidence ${activity.confidence}% -> Transaction ${transaction.id}');
+          'Auto-approved with confidence ${activity.confidence}% -> Transaction ${transaction.id}',
+        );
         return activity;
       } else {
         activity.status = ActivityStatus.pending;
@@ -185,7 +267,7 @@ class SmsActivityService {
       await isar.smsActivitys.put(activity);
     });
 
-    _log.i('Activity added: ${activity.status.name} - ₹${activity.amount}');
+    _log.i('Activity added: ${activity.status.name} - ${BaseCurrency.symbol}${activity.amount}');
     return activity;
   }
 
@@ -196,12 +278,31 @@ class SmsActivityService {
   ) async {
     final isar = await _getIsar();
 
+    // Clamp date to now if it's in the future
+    final now = DateTime.now();
+    final safeDate = activity.date.isAfter(now) ? now : activity.date;
+
     final transaction = Transaction()
       ..amount = activity.amount ?? 0
-      ..date = activity.date
+      ..date = safeDate
       ..description = activity.body
       ..isExpense = !(activity.isIncome == true)
       ..isTransfer = false;
+
+    // Inherit currency from account
+    final accountCurrency = account.currencyCode;
+    if (accountCurrency != null) {
+      transaction.currencyCode = accountCurrency;
+      final rate = await isar.exchangeRates
+          .filter()
+          .currencyCodeEqualTo(accountCurrency)
+          .findFirst();
+      if (rate != null) {
+        transaction.convertedAmount =
+            (activity.amount ?? 0) * rate.rateToBase;
+        transaction.rateUsed = rate.rateToBase;
+      }
+    }
 
     transaction.account.value = account;
     transaction.category.value = category;
@@ -239,8 +340,12 @@ class SmsActivityService {
 
     // Extract potential merchant names (3-15 chars, alphabetic)
     final potentialKeywords = words
-        .where((w) =>
-            w.length >= 3 && w.length <= 15 && RegExp(r'^[a-z]+$').hasMatch(w))
+        .where(
+          (w) =>
+              w.length >= 3 &&
+              w.length <= 15 &&
+              RegExp(r'^[a-z]+$').hasMatch(w),
+        )
         .toList();
 
     if (potentialKeywords.isEmpty) return;
@@ -258,7 +363,8 @@ class SmsActivityService {
         await isar.categorys.put(category);
       });
       _log.i(
-          'Learned new keywords for ${category.name}: ${newKeywords.join(", ")}');
+        'Learned new keywords for ${category.name}: ${newKeywords.join(", ")}',
+      );
     }
   }
 
@@ -272,6 +378,27 @@ class SmsActivityService {
     });
 
     _log.i('Activity rejected: ID ${activity.id}');
+  }
+
+  /// Marks a transfer activity (and its paired activity) as approved.
+  Future<void> markTransferApproved(SmsActivity activity) async {
+    final isar = await _getIsar();
+
+    await isar.writeTxn(() async {
+      activity.status = ActivityStatus.approved;
+      await isar.smsActivitys.put(activity);
+
+      // Also mark the paired activity if it exists
+      if (activity.pairedActivityId != null) {
+        final pair = await isar.smsActivitys.get(activity.pairedActivityId!);
+        if (pair != null && pair.status != ActivityStatus.approved) {
+          pair.status = ActivityStatus.approved;
+          await isar.smsActivitys.put(pair);
+        }
+      }
+    });
+
+    _log.i('Transfer activity approved: ID ${activity.id} (pair: ${activity.pairedActivityId})');
   }
 
   Future<void> markAsNotDuplicate(SmsActivity activity) async {
@@ -324,6 +451,67 @@ class SmsActivityService {
       toAccount: activity.toAccount,
       fromBank: activity.fromBank,
     );
+  }
+
+  /// Finds a matching opposite-direction SMS that forms a transfer pair.
+  /// e.g. A/c X9684 debited Rs.5000 + Card X1234 credited Rs.5000 within 15 min
+  Future<SmsActivity?> _findTransferPair(SmsActivity activity) async {
+    if (activity.amount == null || activity.isIncome == null) return null;
+    if (activity.account == null || activity.account!.isEmpty) return null;
+
+    final isar = await _getIsar();
+    final window = const Duration(days: 1);
+    final startTime = activity.date.subtract(window);
+    final endTime = activity.date.add(window);
+
+    // Look for opposite direction, same amount, different account
+    final candidates = await isar.smsActivitys
+        .filter()
+        .dateBetween(startTime, endTime)
+        .and()
+        .amountEqualTo(activity.amount)
+        .and()
+        .isIncomeEqualTo(!activity.isIncome!) // opposite direction
+        .and()
+        .not()
+        .smsHashEqualTo(activity.smsHash)
+        .and()
+        .not()
+        .accountEqualTo(activity.account) // different account
+        .and()
+        .pairedActivityIdIsNull() // not already paired
+        .findAll();
+
+    if (candidates.isEmpty) return null;
+
+    // Prefer candidates that are also flagged as transfer
+    final transferCandidates =
+        candidates.where((c) => c.isLikelyTransfer == true).toList();
+    return transferCandidates.isNotEmpty
+        ? transferCandidates.first
+        : candidates.first;
+  }
+
+  Future<void> approveTransferPair(
+    int activityId1,
+    int activityId2,
+    int transactionId,
+  ) async {
+    final isar = await _getIsar();
+    await isar.writeTxn(() async {
+      final a1 = await isar.smsActivitys.get(activityId1);
+      final a2 = await isar.smsActivitys.get(activityId2);
+      if (a1 != null) {
+        a1.status = ActivityStatus.approved;
+        a1.transactionId = transactionId;
+        await isar.smsActivitys.put(a1);
+      }
+      if (a2 != null) {
+        a2.status = ActivityStatus.approved;
+        a2.transactionId = transactionId;
+        await isar.smsActivitys.put(a2);
+      }
+    });
   }
 }
 

@@ -1,124 +1,175 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 
-class DashboardActionButton extends StatefulWidget {
+class QuickActionButton extends ConsumerWidget {
+  const QuickActionButton({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final spacing = ref.watch(spacingProvider);
+    final color = Theme.of(context).colorScheme;
+    final ctxt = AppLocalizations.of(context)!;
+
+    final actions = [
+      _ActionData(
+        label: 'Add Expense',
+        icon: LucideIcons.trendingDown,
+        color: color.error,
+        onTap: () => context.push(
+          AppRoutes.addTransaction,
+          extra: {'isIncome': false},
+        ),
+      ),
+      _ActionData(
+        label: 'Add Income',
+        icon: LucideIcons.trendingUp,
+        color: color.primary,
+        onTap: () => context.push(
+          AppRoutes.addTransaction,
+          extra: {'isIncome': true},
+        ),
+      ),
+      _ActionData(
+        label: ctxt.dashboard_add_transfer_text,
+        icon: LucideIcons.arrowLeftRight,
+        color: color.tertiary,
+        onTap: () => context.push(AppRoutes.transfer),
+      ),
+    ];
+
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: spacing.cardHorizontal),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final isNarrow = constraints.maxWidth < 350;
+          final isLargeText =
+              MediaQuery.textScalerOf(context).scale(14) > 18;
+
+          if (isLargeText || isNarrow) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (int i = 0; i < actions.length; i++) ...[
+                  if (i > 0) const SizedBox(height: 8),
+                  _DashboardActionButton(
+                    data: actions[i],
+                    borderRadius: BorderRadius.circular(16),
+                    isRow: true,
+                  ),
+                ],
+              ],
+            );
+          }
+
+          return Row(
+            children: [
+              for (int i = 0; i < actions.length; i++) ...[
+                if (i > 0) const SizedBox(width: 4),
+                Expanded(
+                  child: _DashboardActionButton(
+                    data: actions[i],
+                    borderRadius: BorderRadius.horizontal(
+                      left: Radius.circular(i == 0 ? 16 : 0),
+                      right: Radius.circular(
+                        i == actions.length - 1 ? 16 : 0,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _ActionData {
   final String label;
   final IconData icon;
+  final Color color;
   final VoidCallback onTap;
-  final Color? backgroundColor;
-  final Color? iconColor;
-  final Color? textColor;
-  final String? heroTag;
 
-  const DashboardActionButton({
-    super.key,
+  const _ActionData({
     required this.label,
     required this.icon,
+    required this.color,
     required this.onTap,
-    this.backgroundColor,
-    this.iconColor,
-    this.textColor,
-    this.heroTag,
+  });
+}
+
+class _DashboardActionButton extends StatelessWidget {
+  final _ActionData data;
+  final BorderRadius borderRadius;
+  final bool isRow;
+
+  const _DashboardActionButton({
+    required this.data,
+    required this.borderRadius,
+    this.isRow = false,
   });
 
   @override
-  State<DashboardActionButton> createState() => _DashboardActionButtonState();
-}
-
-class _DashboardActionButtonState extends State<DashboardActionButton> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 100),
-      vsync: this,
-    );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    
-    final isPrimary = widget.backgroundColor == null;
-    final bgColor = widget.backgroundColor ?? color.primaryContainer;
-    final fgColor = widget.iconColor ?? color.primary;
-    final txtColor = widget.textColor ?? color.onPrimaryContainer;
+    final colorScheme = Theme.of(context).colorScheme;
 
-    final button = ScaleTransition(
-      scale: _scaleAnimation,
-      child: Container(
-        decoration: BoxDecoration(
-          color: bgColor,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isPrimary 
-                ? color.primary.withValues(alpha: 0.3)
-                : color.outline.withValues(alpha: 0.2),
-            width: 1.5,
+    return Material(
+      color: data.color.withValues(alpha: 0.1),
+      borderRadius: borderRadius,
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.mediumImpact();
+          data.onTap();
+        },
+        borderRadius: borderRadius,
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            vertical: isRow ? 12 : 14,
+            horizontal: isRow ? 16 : 4,
           ),
-          boxShadow: isPrimary ? [
-            BoxShadow(
-              color: color.primary.withValues(alpha: 0.15),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ] : null,
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(12),
-            onTapDown: (_) => _controller.forward(),
-            onTapUp: (_) {
-              _controller.reverse();
-              HapticFeedback.mediumImpact();
-              widget.onTap();
-            },
-            onTapCancel: () => _controller.reverse(),
-            child: Container(
-              height: 50,
-              padding: const EdgeInsets.all(12.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircleAvatar(
-                    radius: 16,
-                    backgroundColor: fgColor.withValues(alpha: 0.15),
-                    child: Icon(widget.icon, size: 20, color: fgColor),
-                  ),
-                  const SizedBox(width: 8),
-                  Flexible(
-                    child: Text(
-                      widget.label.toUpperCase(),
-                      textAlign: TextAlign.center,
+          child: isRow
+              ? Row(
+                  children: [
+                    Icon(data.icon, color: data.color, size: 22),
+                    const SizedBox(width: 12),
+                    Text(
+                      data.label,
                       style: textTheme.labelMedium?.copyWith(
-                        color: txtColor,
+                        color: colorScheme.onSurface,
                         fontWeight: FontWeight.w600,
                       ),
-                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+                  ],
+                )
+              : Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(data.icon, color: data.color, size: 24),
+                    const SizedBox(height: 6),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        data.label,
+                        style: textTheme.labelSmall?.copyWith(
+                          color: colorScheme.onSurface,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                      ),
+                    ),
+                  ],
+                ),
         ),
       ),
     );
-
-    return widget.heroTag != null ? Hero(tag: widget.heroTag!, child: button) : button;
   }
 }

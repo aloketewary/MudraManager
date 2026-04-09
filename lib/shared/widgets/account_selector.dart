@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
+import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -84,6 +86,17 @@ class AccountSelector extends ConsumerWidget {
                           color: isSelected ? color.onPrimaryContainer : color.onSurface,
                         ),
                       ),
+                      if (account.currencyCode != null) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          account.currencyCode!,
+                          style: textTheme.labelSmall?.copyWith(
+                            color: isSelected ? color.primary : color.onSurfaceVariant,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 9,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -92,8 +105,16 @@ class AccountSelector extends ConsumerWidget {
           ),
         );
       },
-      loading: () => const SizedBox(height: 60, child: Center(child: CircularProgressIndicator())),
-      error: (_, __) => const SizedBox(height: 60, child: Text('Error loading accounts')),
+      loading: () => SizedBox(
+        height: 120,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          itemCount: 3,
+          separatorBuilder: (_, __) => const SizedBox(width: 8),
+          itemBuilder: (_, __) => const AccountCardSkeleton(),
+        ),
+      ),
+      error: (_, __) => SizedBox(height: 60, child: Text(BuddyMessages.genericError)),
     );
   }
 

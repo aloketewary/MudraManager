@@ -24,15 +24,15 @@ class SkeletonLoader extends StatelessWidget {
     final color = Theme.of(context).colorScheme;
 
     return Container(
-          width: width,
-          height: height,
-          margin: margin,
-          decoration: BoxDecoration(
-            color: color.surfaceContainerHighest,
-            borderRadius: borderRadius ?? DesignTokens.borderRadiusSmall,
-          ),
-        )
-        .animate(onPlay: (controller) => controller.repeat())
+      width: width,
+      height: height,
+      margin: margin,
+      decoration: BoxDecoration(
+        color: color.surfaceContainerHighest,
+        borderRadius: borderRadius ?? DesignTokens.borderRadiusSmall,
+      ),
+    )
+        .animate(onComplete: (controller) => controller.repeat())
         .shimmer(
           duration: 1500.ms,
           color: color.surface.withValues(alpha: 0.5),
@@ -53,6 +53,8 @@ class TransactionCardSkeleton extends StatelessWidget {
         horizontal: DesignTokens.spacing16,
         vertical: DesignTokens.spacing8,
       ),
+      elevation: 0,
+      color: color.surfaceContainerLow,
       shape: RoundedRectangleBorder(
         borderRadius: DesignTokens.borderRadiusMedium,
       ),
@@ -60,14 +62,12 @@ class TransactionCardSkeleton extends StatelessWidget {
         padding: const EdgeInsets.all(DesignTokens.spacing16),
         child: Row(
           children: [
-            // Icon placeholder
             SkeletonLoader(
               width: 48,
               height: 48,
-              borderRadius: DesignTokens.borderRadiusMedium,
+              borderRadius: BorderRadius.circular(12),
             ),
             const SizedBox(width: DesignTokens.spacing16),
-            // Text content placeholders
             const Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -82,22 +82,26 @@ class TransactionCardSkeleton extends StatelessWidget {
               ),
             ),
             const SizedBox(width: DesignTokens.spacing16),
-            // Amount placeholder
             const Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 SkeletonLoader(
                   width: 80,
                   height: 20,
-                  margin: EdgeInsets.only(bottom: DesignTokens.spacing8),
+                  margin: EdgeInsets.only(bottom: DesignTokens.spacing4),
                 ),
-                SkeletonLoader(width: 100, height: 12),
+                SkeletonLoader(width: 60, height: 12),
               ],
             ),
           ],
         ),
       ),
-    );
+    )
+        .animate(onComplete: (controller) => controller.repeat())
+        .shimmer(
+          duration: 1500.ms,
+          color: color.surface.withValues(alpha: 0.5),
+        );
   }
 }
 
@@ -130,7 +134,7 @@ class AccountCardSkeleton extends StatelessWidget {
             ],
           ),
         )
-        .animate(onPlay: (controller) => controller.repeat())
+        .animate(onComplete: (controller) => controller.repeat())
         .shimmer(
           duration: 1500.ms,
           color: color.surface.withValues(alpha: 0.5),
@@ -144,41 +148,181 @@ class BudgetCardSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme;
+
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: DesignTokens.spacing16,
         vertical: DesignTokens.spacing8,
       ),
       child: Container(
-        height: 210,
         padding: const EdgeInsets.all(DesignTokens.spacing16),
         decoration: BoxDecoration(
-          borderRadius: DesignTokens.borderRadiusMedium,
-          border: Border.all(color: Theme.of(context).colorScheme.outline),
+          color: color.surfaceContainerLow,
+          borderRadius: DesignTokens.borderRadiusLarge,
         ),
         child: Row(
           children: [
+            SkeletonLoader(
+              width: 60,
+              height: 60,
+              borderRadius: BorderRadius.circular(30),
+            ),
+            const SizedBox(width: DesignTokens.spacing16),
             const Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  SkeletonLoader(width: 120, height: 16),
-                  SkeletonLoader(width: 100, height: 24),
-                  SkeletonLoader(width: 140, height: 14),
-                  SkeletonLoader(width: 90, height: 24),
+                  SkeletonLoader(
+                    width: 120,
+                    height: 16,
+                    margin: EdgeInsets.only(bottom: DesignTokens.spacing12),
+                  ),
+                  SkeletonLoader(
+                    width: double.infinity,
+                    height: 10,
+                    margin: EdgeInsets.only(bottom: DesignTokens.spacing8),
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: SkeletonLoader(width: 80, height: 14),
+                      ),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: SkeletonLoader(width: 80, height: 14),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
-            const SizedBox(width: DesignTokens.spacing16),
+          ],
+        ),
+      )
+          .animate(onComplete: (controller) => controller.repeat())
+          .shimmer(
+            duration: 1500.ms,
+            color: color.surface.withValues(alpha: 0.5),
+          ),
+    );
+  }
+}
+
+/// Skeleton loader for goal/net worth cards
+class DashboardCardSkeleton extends StatelessWidget {
+  const DashboardCardSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 16),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 8),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: color.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          children: [
             SkeletonLoader(
-              width: 90,
-              height: 90,
-              borderRadius: BorderRadius.circular(45),
+              width: 60,
+              height: 60,
+              borderRadius: BorderRadius.circular(30),
+            ),
+            const SizedBox(width: 16),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SkeletonLoader(
+                    width: 100,
+                    height: 16,
+                    margin: EdgeInsets.only(bottom: 12),
+                  ),
+                  SkeletonLoader(
+                    width: double.infinity,
+                    height: 10,
+                    margin: EdgeInsets.only(bottom: 8),
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: SkeletonLoader(width: 70, height: 14),
+                      ),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: SkeletonLoader(width: 70, height: 14),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ],
         ),
-      ),
+      )
+          .animate(onComplete: (controller) => controller.repeat())
+          .shimmer(
+            duration: 1500.ms,
+            color: color.surface.withValues(alpha: 0.5),
+          ),
+    );
+  }
+}
+
+/// Skeleton loader for spending personality card
+class PersonalityCardSkeleton extends StatelessWidget {
+  const PersonalityCardSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 16),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 8),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: color.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          children: [
+            SkeletonLoader(
+              width: 64,
+              height: 64,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            const SizedBox(width: 16),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SkeletonLoader(
+                    width: 140,
+                    height: 16,
+                    margin: EdgeInsets.only(bottom: 8),
+                  ),
+                  SkeletonLoader(
+                    width: double.infinity,
+                    height: 14,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      )
+          .animate(onComplete: (controller) => controller.repeat())
+          .shimmer(
+            duration: 1500.ms,
+            color: color.surface.withValues(alpha: 0.5),
+          ),
     );
   }
 }

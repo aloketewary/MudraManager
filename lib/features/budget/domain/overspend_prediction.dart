@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 class OverspendPrediction {
   final int budgetId;
   final String budgetName;
@@ -25,7 +27,7 @@ class OverspendPrediction {
 
   String get warningMessage {
     if (!willOverspend) {
-      return 'On track! You have ₹${(budgetAmount - currentSpent).toStringAsFixed(0)} remaining.';
+      return 'On track! You have ${formatCurrency((budgetAmount - currentSpent), code: BaseCurrency.code)} remaining.';
     }
     return 'At this rate, you will exceed $budgetName budget in $daysUntilOverspend ${daysUntilOverspend == 1 ? 'day' : 'days'}';
   }

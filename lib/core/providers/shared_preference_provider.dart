@@ -16,6 +16,14 @@ class SharedPrefsUtil {
     instance = SharedPrefsUtil._(prefs);
   }
 
+  static const _accountDisplayStyleKey = 'account_display_style';
+
+  String getAccountDisplayStyle() =>
+      _prefs.getString(_accountDisplayStyleKey) ?? 'carousel';
+
+  Future<void> setAccountDisplayStyle(String style) =>
+      _prefs.setString(_accountDisplayStyleKey, style);
+
   // Save onboarding completion
   void setOnboardingComplete() {
     _prefs.setBool('onboarding_complete', true);
@@ -40,6 +48,10 @@ class SharedPrefsUtil {
     final hashes = _prefs.getStringList('processed_sms_hashes') ?? [];
     if (!hashes.contains(hash)) {
       hashes.add(hash);
+      // FIFO eviction: keep only the last 500 hashes
+      if (hashes.length > 500) {
+        hashes.removeRange(0, hashes.length - 500);
+      }
       _prefs.setStringList('processed_sms_hashes', hashes);
     }
   }
@@ -147,5 +159,21 @@ class SharedPrefsUtil {
 
   String? getString(String configKey) {
     return _prefs.getString(configKey);
+  }
+
+  bool getHighContrastMode() {
+    return _prefs.getBool('high_contrast_mode') ?? false;
+  }
+
+  Future<void> setHighContrastMode(bool enabled) async {
+    await _prefs.setBool('high_contrast_mode', enabled);
+  }
+
+  Future<void> setSmsBannerDismiss() async{
+    await _prefs.setBool('sms_banner_dismissed', true);
+  }
+
+  bool getSmsbannerDismiss() {
+    return _prefs.getBool('sms_banner_dismissed') ?? false;
   }
 }

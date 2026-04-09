@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 enum PeriodType { day, week, month, year, custom }
@@ -10,6 +11,7 @@ class PeriodCalendarSelector extends StatefulWidget {
   final DateTime? customStart;
   final DateTime? customEnd;
   final Function(PeriodType period, DateTime? start, DateTime? end) onChanged;
+  final AppSpacing spacing;
 
   const PeriodCalendarSelector({
     super.key,
@@ -17,6 +19,7 @@ class PeriodCalendarSelector extends StatefulWidget {
     this.customStart,
     this.customEnd,
     required this.onChanged,
+    required this.spacing,
   });
 
   @override
@@ -24,11 +27,9 @@ class PeriodCalendarSelector extends StatefulWidget {
 }
 
 class _PeriodCalendarSelectorState extends State<PeriodCalendarSelector> {
-  bool _showCalendar = false;
-  bool _isSelectingCustom = false;
-  DateTime _focusedDay = DateTime.now();
   DateTime? _rangeStart;
   DateTime? _rangeEnd;
+  AppSpacing get spacing => widget.spacing;
 
   @override
   void initState() {
@@ -73,168 +74,230 @@ class _PeriodCalendarSelectorState extends State<PeriodCalendarSelector> {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: color.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: color.outlineVariant.withValues(alpha: 0.5),
-          width: 1,
-        ),
-      ),
-      child: Column(
-        children: [
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () {
-                HapticFeedback.mediumImpact();
-                setState(() => _showCalendar = !_showCalendar);
-              },
-              borderRadius: BorderRadius.circular(20),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: color.primaryContainer,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(
-                        Icons.calendar_today_rounded,
-                        color: color.primary,
-                        size: 20,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        _getPeriodText(),
-                        style: textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: color.onSurface,
-                        ),
-                      ),
-                    ),
-                    Icon(
-                      _showCalendar
-                          ? Icons.keyboard_arrow_up_rounded
-                          : Icons.keyboard_arrow_down_rounded,
-                      color: color.onSurfaceVariant,
-                    ),
-                  ],
-                ),
-              ),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.mediumImpact();
+          _showPeriodSelector(context);
+        },
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        child: Container(
+          decoration: BoxDecoration(
+            color: color.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(spacing.radiusMedium),
+            border: Border.all(
+              color: color.outlineVariant.withValues(alpha: 0.5),
             ),
           ),
-          if (_showCalendar) ...[
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  _buildPeriodChip(PeriodType.day, 'Day', Icons.today_rounded),
-                  _buildPeriodChip(
-                    PeriodType.week,
-                    'Week',
-                    Icons.view_week_rounded,
-                  ),
-                  _buildPeriodChip(
-                    PeriodType.month,
-                    'Month',
-                    Icons.calendar_view_month_rounded,
-                  ),
-                  _buildPeriodChip(
-                    PeriodType.year,
-                    'Year',
-                    Icons.calendar_view_day_rounded,
-                  ),
-                  _buildPeriodChip(
-                    PeriodType.custom,
-                    'Custom',
-                    Icons.date_range_rounded,
-                  ),
-                ],
+          padding: EdgeInsets.all(spacing.cardInner),
+          child: Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(spacing.elementGap),
+                decoration: BoxDecoration(
+                  color: color.primaryContainer,
+                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                ),
+                child: Icon(
+                  Icons.calendar_today_rounded,
+                  color: color.primary,
+                  size: 20,
+                ),
               ),
-            ),
-            if (widget.selectedPeriod == PeriodType.custom ||
-                _isSelectingCustom)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
-                child: TableCalendar(
-                  firstDay: DateTime(2020),
-                  lastDay: DateTime.now(),
-                  focusedDay: _focusedDay,
-                  calendarFormat: CalendarFormat.month,
-                  rangeSelectionMode: RangeSelectionMode.toggledOn,
-                  rangeStartDay: _rangeStart,
-                  rangeEndDay: _rangeEnd,
-                  selectedDayPredicate: (day) => false,
-                  onRangeSelected: (start, end, focusedDay) {
-                    setState(() {
-                      _rangeStart = start;
-                      _rangeEnd = end;
-                      _focusedDay = focusedDay;
-                    });
-                    if (start != null && end != null) {
-                      HapticFeedback.lightImpact();
-                      widget.onChanged(PeriodType.custom, start, end);
-                      setState(() => _showCalendar = false);
-                    }
-                  },
-                  onPageChanged: (focusedDay) {
-                    setState(() => _focusedDay = focusedDay);
-                  },
-                  enabledDayPredicate: (day) => !day.isAfter(DateTime.now()),
-                  calendarStyle: CalendarStyle(
-                    todayDecoration: const BoxDecoration(
-                      color: Colors.transparent,
-                      shape: BoxShape.circle,
-                    ),
-                    rangeStartDecoration: BoxDecoration(
-                      color: color.primary,
-                      shape: BoxShape.circle,
-                    ),
-                    rangeEndDecoration: BoxDecoration(
-                      color: color.primary,
-                      shape: BoxShape.circle,
-                    ),
-                    rangeHighlightColor: color.primaryContainer.withValues(
-                      alpha: 0.3,
-                    ),
-                    todayTextStyle: TextStyle(color: color.onSurface),
-                    rangeStartTextStyle: TextStyle(color: color.onPrimary),
-                    rangeEndTextStyle: TextStyle(color: color.onPrimary),
-                    disabledTextStyle: TextStyle(
-                      color: color.onSurface.withValues(alpha: 0.3),
-                    ),
-                    weekendTextStyle: TextStyle(color: color.onSurface),
-                    outsideDaysVisible: false,
-                  ),
-                  headerStyle: HeaderStyle(
-                    formatButtonVisible: false,
-                    titleCentered: true,
-                    titleTextStyle: textTheme.titleMedium!.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+              SizedBox(width: spacing.elementGap),
+              Expanded(
+                child: Text(
+                  _getPeriodText(),
+                  style: textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: color.onSurface,
                   ),
                 ),
               ),
-          ],
-        ],
+              Icon(
+                Icons.keyboard_arrow_down_rounded,
+                color: color.onSurfaceVariant,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buildPeriodChip(PeriodType period, String label, IconData icon) {
+  void _showPeriodSelector(BuildContext context) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final isSelected =
-        widget.selectedPeriod == period ||
-        (period == PeriodType.custom && _isSelectingCustom);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setModalState) {
+          bool showCalendar = false;
+          DateTime focusedDay = DateTime.now();
+
+          return Container(
+            decoration: BoxDecoration(
+              color: color.surface,
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            padding: EdgeInsets.fromLTRB(
+              spacing.cardHorizontal,
+              spacing.cardVertical,
+              spacing.cardHorizontal,
+              spacing.cardVerticalMax + MediaQuery.of(ctx).padding.bottom,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Handle
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: color.onSurfaceVariant.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                SizedBox(height: spacing.sectionGap),
+                Text(
+                  'Select Period',
+                  style: textTheme.titleLarge
+                      ?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: spacing.sectionGap),
+
+                // Period grid — 2 columns, full width
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildGridChip(
+                        PeriodType.day, 'Today', Icons.today_rounded,
+                        color, textTheme, ctx, setModalState,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: _buildGridChip(
+                        PeriodType.week, 'This Week', Icons.view_week_rounded,
+                        color, textTheme, ctx, setModalState,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildGridChip(
+                        PeriodType.month, 'This Month', Icons.calendar_view_month_rounded,
+                        color, textTheme, ctx, setModalState,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: _buildGridChip(
+                        PeriodType.year, 'This Year', Icons.calendar_view_day_rounded,
+                        color, textTheme, ctx, setModalState,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+
+                // Custom range — full width, same height
+                _buildGridChip(
+                  PeriodType.custom, 'Custom Range', Icons.date_range_rounded,
+                  color, textTheme, ctx, setModalState,
+                ),
+
+                // Calendar (shown when custom is tapped)
+                if (widget.selectedPeriod == PeriodType.custom ||
+                    showCalendar) ...[
+                  SizedBox(height: spacing.elementGap),
+                  TableCalendar(
+                    firstDay: DateTime(2020),
+                    lastDay: DateTime.now(),
+                    focusedDay: focusedDay,
+                    calendarFormat: CalendarFormat.month,
+                    rangeSelectionMode: RangeSelectionMode.toggledOn,
+                    rangeStartDay: _rangeStart,
+                    rangeEndDay: _rangeEnd,
+                    selectedDayPredicate: (day) => false,
+                    onRangeSelected: (start, end, focused) {
+                      setModalState(() {
+                        _rangeStart = start;
+                        _rangeEnd = end;
+                        focusedDay = focused;
+                      });
+                      if (start != null && end != null) {
+                        HapticFeedback.lightImpact();
+                        setState(() {
+                          _rangeStart = start;
+                          _rangeEnd = end;
+                        });
+                        widget.onChanged(PeriodType.custom, start, end);
+                        Navigator.pop(ctx);
+                      }
+                    },
+                    onPageChanged: (focused) {
+                      setModalState(() => focusedDay = focused);
+                    },
+                    enabledDayPredicate: (day) => !day.isAfter(DateTime.now()),
+                    calendarStyle: CalendarStyle(
+                      todayDecoration: const BoxDecoration(
+                        color: Colors.transparent,
+                        shape: BoxShape.circle,
+                      ),
+                      rangeStartDecoration: BoxDecoration(
+                        color: color.primary,
+                        shape: BoxShape.circle,
+                      ),
+                      rangeEndDecoration: BoxDecoration(
+                        color: color.primary,
+                        shape: BoxShape.circle,
+                      ),
+                      rangeHighlightColor:
+                          color.primaryContainer.withValues(alpha: 0.3),
+                      todayTextStyle: TextStyle(color: color.onSurface),
+                      rangeStartTextStyle: TextStyle(color: color.onPrimary),
+                      rangeEndTextStyle: TextStyle(color: color.onPrimary),
+                      disabledTextStyle: TextStyle(
+                        color: color.onSurface.withValues(alpha: 0.3),
+                      ),
+                      weekendTextStyle: TextStyle(color: color.onSurface),
+                      outsideDaysVisible: false,
+                    ),
+                    headerStyle: HeaderStyle(
+                      formatButtonVisible: false,
+                      titleCentered: true,
+                      titleTextStyle: textTheme.titleMedium!
+                          .copyWith(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildGridChip(
+    PeriodType period,
+    String label,
+    IconData icon,
+    ColorScheme color,
+    TextTheme textTheme,
+    BuildContext ctx,
+    StateSetter setModalState,
+  ) {
+    final isSelected = widget.selectedPeriod == period;
 
     return Material(
       color: Colors.transparent,
@@ -242,40 +305,47 @@ class _PeriodCalendarSelectorState extends State<PeriodCalendarSelector> {
         onTap: () {
           HapticFeedback.lightImpact();
           if (period == PeriodType.custom) {
-            setState(() => _isSelectingCustom = true);
+            setModalState(() {});
+            setState(() {});
+            widget.onChanged(PeriodType.custom, _rangeStart, _rangeEnd);
           } else {
-            setState(() => _isSelectingCustom = false);
             widget.onChanged(period, null, null);
-            setState(() => _showCalendar = false);
+            Navigator.pop(ctx);
           }
         },
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          padding: EdgeInsets.symmetric(
+            horizontal: spacing.cardHorizontal,
+            vertical: spacing.cardVertical,
+          ),
           decoration: BoxDecoration(
             color: isSelected
                 ? color.primaryContainer
                 : color.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(spacing.radiusMedium),
             border: Border.all(
-              color: isSelected ? color.primary : Colors.transparent,
-              width: 2,
+              color: isSelected
+                  ? color.primary.withValues(alpha: 0.5)
+                  : color.outlineVariant.withValues(alpha: 0.3),
+              width: isSelected ? 1.5 : 1,
             ),
           ),
           child: Row(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
                 icon,
                 size: 18,
-                color: isSelected ? color.primary : color.onSurface,
+                color: isSelected ? color.primary : color.onSurfaceVariant,
               ),
-              const SizedBox(width: 6),
+              SizedBox(width: spacing.elementGap),
               Text(
                 label,
                 style: textTheme.labelLarge?.copyWith(
                   color: isSelected ? color.primary : color.onSurface,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                  fontWeight:
+                      isSelected ? FontWeight.bold : FontWeight.w500,
                 ),
               ),
             ],

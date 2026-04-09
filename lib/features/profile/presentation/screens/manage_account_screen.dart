@@ -1,18 +1,27 @@
+import 'package:mudra_manager/core/currency/currency_service.dart';
+import 'package:mudra_manager/shared/widgets/currency_badge.dart';
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/extension/account_type_extenstion.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/dialog_utils.dart';
+import 'package:mudra_manager/core/utils/refresh_helper.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
+import 'package:mudra_manager/features/account/data/account_access_provider.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/account/presentation/screens/balance_history_screen.dart';
 import 'package:mudra_manager/features/account/presentation/screens/reconciliation_screen.dart';
 import 'package:mudra_manager/features/account/presentation/screens/investment_portfolio_screen.dart';
+import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
+import 'package:mudra_manager/core/widgets/skeleton_loader.dart';
 
 class ManageAccountScreen extends ConsumerStatefulWidget {
   const ManageAccountScreen({super.key});
@@ -24,30 +33,36 @@ class ManageAccountScreen extends ConsumerStatefulWidget {
 
 class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
   Map<int, double> _balanceMap = {};
+  Map<int, double> _baseBalanceMap = {};
   bool _initialized = false;
+
+  AppLocalizations get ctxt => AppLocalizations.of(context)!;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_initialized) {
-      final balanceMap = ref
-          .watch(accountServiceProvider)
-          .getAccountBalanceMap();
-      balanceMap.then(
-        (val) => {
-          setState(() {
-            _balanceMap = val;
-          }),
-        },
-      );
       _initialized = true;
+      final service = ref.read(accountServiceProvider);
+      Future.wait([
+        service.getAccountBalanceMap(),
+        service.getAccountBalanceMapInBase(),
+      ]).then((results) {
+        if (mounted) {
+          setState(() {
+            _balanceMap = results[0];
+            _baseBalanceMap = results[1];
+          });
+        }
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final spacing = ref.watch(spacingProvider);
     final color = Theme.of(context).colorScheme;
-    final accountsAsync = ref.watch(accountsProvider);
+    final allAccountsAsync = ref.watch(allAccountsProvider);
     final textTheme = Theme.of(context).textTheme;
     final ctxt = AppLocalizations.of(context)!;
 
@@ -60,155 +75,767 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.info_outline),
+            icon: const Icon(LucideIcons.plus),
             onPressed: () {
               HapticFeedback.mediumImpact();
-              showModalBottomSheet(
-                context: context,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                ),
-                builder: (ctx) => Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 40,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: color.onSurfaceVariant.withValues(alpha: 0.3),
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Icon(Icons.account_balance_wallet, size: 64, color: color.primary),
-                      const SizedBox(height: 16),
-                      Text(
-                        'How Accounts Work',
-                        style: textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Manage all your bank accounts, wallets, and cash in one place. Track balances and transactions across multiple accounts.',
-                        style: textTheme.bodyMedium,
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 24),
-                      FilledButton(
-                        onPressed: () => ctx.pop(),
-                        style: FilledButton.styleFrom(
-                          minimumSize: const Size(double.infinity, 48),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: const Text('Got it'),
-                      ),
-                    ],
-                  ),
-                ),
-              );
+              context.push('/manage-accounts/add');
+            },
+            tooltip: ctxt.accounts_addAccountLabel,
+          ),
+          IconButton(
+            icon: const Icon(LucideIcons.info),
+            onPressed: () {
+              HapticFeedback.mediumImpact();
+              _showInfoBottomSheet(context, color, textTheme, spacing);
             },
           ),
         ],
       ),
-      body: accountsAsync.when(
-        data: (accounts) {
-          if (accounts.isEmpty) {
+      body: allAccountsAsync.when(
+        data: (allAccounts) {
+          if (allAccounts.isEmpty) {
             return NoDataFound(
-              message: 'No accounts added yet',
-              iconData: Icons.account_balance_wallet_outlined,
+              message: BuddyMessages.noAccounts,
+              iconData: LucideIcons.wallet,
               action: ElevatedButton.icon(
                 onPressed: () => context.push('/manage-accounts/add'),
-                icon: const Icon(Icons.add),
+                icon: const Icon(LucideIcons.plus),
                 label: Text(ctxt.accounts_addAccountLabel),
               ),
             );
           }
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: accounts.length + 1,
-            itemBuilder: (context, index) {
-              if (accounts.length != index) {
-                final account = accounts[index];
-                return _AccountListCard(
-                  account: account,
-                  balance: _balanceMap[account.id]?.toStringAsFixed(2) ?? '0.0',
-                  onArchive: () {
-                    if (accounts.length == 1) {
-                      SnackbarService.warning(
-                        ctxt.accounts_atLeastOneAccountRequired,
-                      );
-                    } else {
-                      showArchiveConfirmation(context, ref, account);
-                    }
-                  },
-                  onEdit: () {
-                    context.push(
-                      '/manage-accounts/add',
-                      extra: {'account': account},
-                    );
-                  },
-                  onRemove: () =>
-                      showDeleteConfirmation(context, ref, account, ctxt),
-                  onViewHistory: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (ctx) => BalanceHistoryScreen(account: account),
-                      ),
-                    );
-                  },
-                  onReconcile: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (ctx) => ReconciliationScreen(account: account),
-                      ),
-                    );
-                  },
-                  onViewPortfolio: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (ctx) => InvestmentPortfolioScreen(account: account),
-                      ),
-                    );
-                  },
-                );
-              } else {
-                return const Padding(padding: EdgeInsets.only(bottom: 80.0));
+
+          final activeAccounts = allAccounts.where((a) => a.isActive).toList();
+          final archivedAccounts =
+              allAccounts.where((a) => !a.isActive).toList();
+
+          // Group active accounts by type
+          final grouped = <AccountType, List<Account>>{};
+          for (final account in activeAccounts) {
+            grouped.putIfAbsent(account.accountType, () => []).add(account);
+          }
+
+          final totalBalance =
+              _baseBalanceMap.values.fold(0.0, (a, b) => a + b);
+
+          return RefreshIndicator(
+            onRefresh: () => RefreshHelper.withMinDuration(() async {
+              ref.invalidate(allAccountsProvider);
+              ref.invalidate(accountsProvider);
+              final service = ref.read(accountServiceProvider);
+              final results = await Future.wait([
+                service.getAccountBalanceMap(),
+                service.getAccountBalanceMapInBase(),
+              ]);
+              if (mounted) {
+                setState(() {
+                  _balanceMap = results[0];
+                  _baseBalanceMap = results[1];
+                });
               }
-            },
+            }),
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: EdgeInsets.symmetric(
+                horizontal: spacing.cardHorizontal,
+                vertical: spacing.cardVertical,
+              ),
+              children: [
+                _buildSummaryCard(
+                  totalBalance,
+                  activeAccounts.length,
+                  color,
+                  textTheme,
+                  spacing,
+                ),
+                SizedBox(height: spacing.sectionGap),
+
+                // Active grouped sections
+                ...grouped.entries.map((entry) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildTypeHeader(entry.key, color, textTheme),
+                      SizedBox(height: spacing.elementGap),
+                      _buildAccountGroup(
+                        entry.value,
+                        false,
+                        activeAccounts.length,
+                        color,
+                        textTheme,
+                        ctxt,
+                        spacing,
+                      ),
+                      SizedBox(height: spacing.sectionGap),
+                    ],
+                  );
+                }),
+
+                // Archived section
+                if (archivedAccounts.isNotEmpty) ...[
+                  SizedBox(height: spacing.elementGapMin),
+                  _buildArchivedHeader(color, textTheme, spacing),
+                  SizedBox(height: spacing.elementGap),
+                  _buildAccountGroup(
+                    archivedAccounts,
+                    true,
+                    activeAccounts.length,
+                    color,
+                    textTheme,
+                    ctxt,
+                    spacing,
+                  ),
+                  SizedBox(height: spacing.sectionGap),
+                ],
+                SizedBox(
+                  height: MediaQuery.of(context).padding.bottom +
+                      kBottomNavigationBarHeight +
+                      16,
+                ),
+              ],
+            ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text('Error: $err')),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          context.push('/manage-accounts/add');
-        },
-        icon: const Icon(Icons.add),
-        label: Text(ctxt.accounts_addAccountLabel),
+        loading: () => ListView.builder(
+          padding: EdgeInsets.fromLTRB(
+            spacing.cardHorizontal,
+            spacing.cardVertical,
+            spacing.cardHorizontal,
+            100,
+          ),
+          itemCount: 5,
+          itemBuilder: (context, index) => TransactionCardSkeleton(),
+        ),
+        error: (err, stack) =>
+            Center(child: Text(BuddyMessages.errorWith('$err'))),
       ),
     );
   }
 
-  Future<void> showDeleteConfirmation(
+  // ── SUMMARY CARD ── (unchanged)
+  Widget _buildSummaryCard(
+    double totalBalance,
+    int accountCount,
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
+    final isDark = color.brightness == Brightness.dark;
+    return Container(
+      padding: EdgeInsets.all(spacing.cardInner + spacing.elementGap),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            color.primary.withValues(alpha: isDark ? 0.15 : 0.08),
+            color.surface,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        border: Border.all(color: color.outlineVariant.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '${ctxt.accounts_totalBalance} (${BaseCurrency.code})',
+            style:
+                textTheme.labelLarge?.copyWith(color: color.onSurfaceVariant),
+          ),
+          SizedBox(height: spacing.elementGap),
+          CurrencyText(
+            amount: totalBalance,
+            compact: false,
+            style:
+                textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w900),
+          ),
+          SizedBox(height: spacing.elementGap),
+          Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: spacing.elementGap,
+              vertical: spacing.elementGapMin,
+            ),
+            decoration: BoxDecoration(
+              color: color.primary.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(spacing.radiusSmall),
+            ),
+            child: Text(
+              '$accountCount ${ctxt.accounts_accountsCount}',
+              style: textTheme.labelSmall
+                  ?.copyWith(color: color.primary, fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── TYPE HEADER ── (unchanged)
+  Widget _buildTypeHeader(
+    AccountType type,
+    ColorScheme color,
+    TextTheme textTheme,
+  ) {
+    return Row(
+      children: [
+        Icon(type.icon, size: 16, color: color.primary),
+        const SizedBox(width: 8),
+        Text(
+          type.label,
+          style: textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: color.primary,
+            letterSpacing: 0.5,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildArchivedHeader(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
+    return Row(
+      children: [
+        Icon(LucideIcons.archive, size: 16, color: color.onSurfaceVariant),
+        const SizedBox(width: 8),
+        Text(
+          ctxt.accounts_archived,
+          style: textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: color.onSurfaceVariant,
+            letterSpacing: 0.5,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ── GROUPED ACCOUNT CARD ──
+  Widget _buildAccountGroup(
+    List<Account> accounts,
+    bool isArchived,
+    int activeCount,
+    ColorScheme color,
+    TextTheme textTheme,
+    AppLocalizations ctxt,
+    AppSpacing spacing,
+  ) {
+    return Card(
+      elevation: 0,
+      margin: const EdgeInsets.only(),
+      color: isArchived
+          ? color.surfaceContainerLow.withValues(alpha: 0.5)
+          : color.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        side: isArchived
+            ? BorderSide(
+                color: color.onSurfaceVariant.withValues(alpha: 0.3),
+                style: BorderStyle.solid,
+                strokeAlign: BorderSide.strokeAlignInside,
+              )
+            : BorderSide(
+                color: color.outlineVariant.withValues(alpha: 0.5),
+              ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: CustomPaint(
+        foregroundPainter: isArchived
+            ? _DottedBorderPainter(
+                color: color.onSurfaceVariant.withValues(alpha: 0.4),
+                radius: spacing.radiusMedium,
+              )
+            : null,
+        child: Column(
+          children: accounts.asMap().entries.map((entry) {
+            final account = entry.value;
+            final isLast = entry.key == accounts.length - 1;
+            final accountColor =
+                Color(account.colorValue ?? Colors.blue.toARGB32());
+            final balance = _balanceMap[account.id] ?? 0.0;
+
+            return Column(
+              children: [
+                Opacity(
+                  opacity: isArchived ? 0.55 : 1.0,
+                  child: InkWell(
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      if (isArchived) {
+                        _showArchivedContextOptions(
+                          context,
+                          account,
+                          balance,
+                          ctxt,
+                        );
+                      } else {
+                        _showContextOptions(
+                          context,
+                          account,
+                          balance,
+                          activeCount,
+                          ctxt,
+                        );
+                      }
+                    },
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: spacing.cardInner,
+                        vertical: spacing.elementGap * 1.5,
+                      ),
+                      child: Row(
+                        children: [
+                          Hero(
+                            tag: 'account_${account.id}',
+                            child: Container(
+                              padding: EdgeInsets.all(spacing.elementGap),
+                              decoration: BoxDecoration(
+                                color: isArchived
+                                    ? color.onSurfaceVariant
+                                        .withValues(alpha: 0.08)
+                                    : accountColor.withValues(alpha: 0.1),
+                                borderRadius:
+                                    BorderRadius.circular(spacing.radiusMedium),
+                              ),
+                              child: Icon(
+                                account.accountType.icon,
+                                color: isArchived
+                                    ? color.onSurfaceVariant
+                                    : accountColor,
+                                size: 20,
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: spacing.elementGap * 1.5),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Flexible(
+                                      child: Text(
+                                        account.name,
+                                        style: textTheme.bodyLarge?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    if (account.isPrimary) ...[
+                                      SizedBox(width: spacing.elementGapMin),
+                                      Container(
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: spacing.elementGapMin,
+                                          vertical: spacing.elementGapUltraMin,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: color.primary.withValues(alpha: 0.12),
+                                          borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                                        ),
+                                        child: Text(
+                                          ctxt.accounts_primary,
+                                          style: textTheme.labelSmall?.copyWith(
+                                            color: color.primary,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                                // Account number + currency inline
+                                if (account.accountNumber != null || account.currencyCode != null)
+                                  Row(
+                                    children: [
+                                      if (account.accountNumber != null)
+                                        Text(
+                                          '•••• ${account.accountNumber}',
+                                          style: textTheme.labelSmall?.copyWith(
+                                            color: color.onSurfaceVariant.withValues(alpha: 0.5),
+                                            letterSpacing: 1.2,
+                                          ),
+                                        ),
+                                      if (account.accountNumber != null && account.currencyCode != null)
+                                        Text(
+                                          '  •  ',
+                                          style: textTheme.labelSmall?.copyWith(
+                                            color: color.outlineVariant,
+                                          ),
+                                        ),
+                                      if (account.currencyCode != null)
+                                        CurrencyBadge(
+                                          code: account.currencyCode!,
+                                          size: 11,
+                                          color: accountColor.withValues(alpha: 0.7),
+                                        ),
+                                    ],
+                                  ),
+                              ],
+                            ),
+                          ),
+                          CurrencyText(
+                            currencyCode: account.currencyCode,
+                            amount: balance,
+                            style: textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: isArchived
+                                  ? color.onSurfaceVariant
+                                  : (balance >= 0 ? accountColor : color.error),
+                            ),
+                          ),
+                          Consumer(
+                            builder: (context, ref, _) {
+                              final unlockedIds =
+                                  ref.watch(unlockedAccountIdsProvider);
+                              final isUnlocked = unlockedIds.valueOrNull
+                                      ?.contains(account.id) ??
+                                  true;
+                              if (isUnlocked || isArchived) {
+                                return const SizedBox.shrink();
+                              }
+                              return Padding(
+                                padding: EdgeInsets.only(left: spacing.elementGapMin),
+                                child: Icon(
+                                  LucideIcons.lock,
+                                  size: 12,
+                                  color: color.primary,
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                if (!isLast)
+                  Divider(
+                    height: 1,
+                    indent: 60,
+                    color: color.outlineVariant.withValues(alpha: 0.4),
+                  ),
+              ],
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  // ── ACTIVE ACCOUNT CONTEXT SHEET ──
+  void _showContextOptions(
     BuildContext context,
-    WidgetRef ref,
+    Account account,
+    double balance,
+    int activeCount,
+    AppLocalizations ctxt,
+  ) {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.read(spacingProvider);
+    final accountColor = Color(account.colorValue ?? Colors.blue.toARGB32());
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: color.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius:
+            BorderRadius.vertical(top: Radius.circular(spacing.radiusLarge)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(height: spacing.elementGap),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: color.onSurfaceVariant.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              SizedBox(height: spacing.sectionGap),
+              _buildSheetHeader(
+                account,
+                accountColor,
+                spacing,
+                textTheme,
+                balance,
+              ),
+              SizedBox(height: spacing.elementGap),
+              const Divider(height: 1),
+              _sheetOption(
+                  ctx, LucideIcons.pen, ctxt.accounts_edit, null, color.primary,
+                  () {
+                Navigator.pop(ctx);
+                context
+                    .push('/manage-accounts/add', extra: {'account': account});
+              }),
+              _sheetOption(ctx, LucideIcons.history, ctxt.accounts_balanceHistory, null,
+                  color.primary, () {
+                Navigator.pop(ctx);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => BalanceHistoryScreen(account: account),
+                  ),
+                );
+              }),
+              _sheetOption(ctx, LucideIcons.scale, ctxt.reconcile_title,
+                  ctxt.accounts_matchBank, color.primary, () {
+                Navigator.pop(ctx);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ReconciliationScreen(account: account),
+                  ),
+                );
+              }),
+              if (account.accountType == AccountType.investment)
+                _sheetOption(ctx, LucideIcons.chartLine, ctxt.accounts_viewPortfolio, null,
+                    color.primary, () {
+                  Navigator.pop(ctx);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          InvestmentPortfolioScreen(account: account),
+                    ),
+                  );
+                }),
+              if (!account.isPrimary)
+                _sheetOption(
+                    ctx,
+                    LucideIcons.star,
+                    ctxt.accounts_setAsPrimary,
+                    ctxt.accounts_primaryDesc,
+                    color.primary, () async {
+                  Navigator.pop(ctx);
+                  await ref
+                      .read(accountServiceProvider)
+                      .setPrimaryAccount(account.id);
+                  ref.invalidate(accountsProvider);
+                  ref.invalidate(primaryAccountProvider);
+                  SnackbarService.success(
+                    '${account.name} is now your primary account',
+                  );
+                }),
+              const Divider(height: 1),
+              _sheetOption(ctx, LucideIcons.archive, ctxt.accounts_archive,
+                  ctxt.accounts_archiveDesc, color.onSurfaceVariant, () {
+                Navigator.pop(ctx);
+                if (activeCount <= 1) {
+                  SnackbarService.warning(
+                    ctxt.accounts_atLeastOneAccountRequired,
+                  );
+                } else {
+                  _showArchiveConfirmation(account, ctxt);
+                }
+              }),
+              SizedBox(height: spacing.elementGap),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ── ARCHIVED ACCOUNT CONTEXT SHEET ──
+  void _showArchivedContextOptions(
+    BuildContext context,
+    Account account,
+    double balance,
+    AppLocalizations ctxt,
+  ) {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.read(spacingProvider);
+    final accountColor = Color(account.colorValue ?? Colors.blue.toARGB32());
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: color.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius:
+            BorderRadius.vertical(top: Radius.circular(spacing.radiusLarge)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(height: spacing.elementGap),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: color.onSurfaceVariant.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              SizedBox(height: spacing.sectionGap),
+              _buildSheetHeader(
+                account,
+                accountColor,
+                spacing,
+                textTheme,
+                balance,
+              ),
+              SizedBox(height: spacing.elementGap),
+              const Divider(height: 1),
+              _sheetOption(ctx, LucideIcons.archiveRestore, ctxt.accounts_unarchive,
+                  ctxt.accounts_unarchiveDesc, color.primary, () {
+                Navigator.pop(ctx);
+                _unarchiveAccount(account, ctxt);
+              }),
+              _sheetOption(ctx, LucideIcons.trash2, ctxt.common_delete,
+                  ctxt.accounts_deleteDesc, color.error, () {
+                Navigator.pop(ctx);
+                _showDeleteConfirmation(account, ctxt);
+              }),
+              SizedBox(height: spacing.elementGap),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ── SHARED SHEET HEADER ──
+  Widget _buildSheetHeader(
+    Account account,
+    Color accountColor,
+    AppSpacing spacing,
+    TextTheme textTheme,
+    double balance,
+  ) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: spacing.cardInner),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.all(spacing.radiusMedium),
+            decoration: BoxDecoration(
+              color: accountColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(spacing.radiusMedium),
+            ),
+            child:
+                Icon(account.accountType.icon, color: accountColor, size: 24),
+          ),
+          SizedBox(width: spacing.elementGap + 4),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        account.name,
+                        style: textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    if (!account.isActive) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurfaceVariant
+                              .withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          ctxt.accounts_archived,
+                          style: textTheme.labelSmall?.copyWith(
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+                CurrencyText(
+                  currencyCode: account.currencyCode,
+                  amount: balance,
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: accountColor,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _sheetOption(
+    BuildContext ctx,
+    IconData icon,
+    String title,
+    String? subtitle,
+    Color iconColor,
+    VoidCallback onTap,
+  ) {
+    return ListTile(
+      leading: Icon(icon, color: iconColor),
+      title: Text(
+        title,
+        style: iconColor == Theme.of(ctx).colorScheme.error
+            ? TextStyle(color: iconColor)
+            : null,
+      ),
+      subtitle: subtitle != null ? Text(subtitle) : null,
+      onTap: () {
+        HapticFeedback.mediumImpact();
+        onTap();
+      },
+    );
+  }
+
+  // ── ACTIONS ──
+
+  Future<void> _unarchiveAccount(
+    Account account,
+    AppLocalizations ctxt,
+  ) async {
+    final isarService = ref.read(isarServiceProvider);
+    final isar = await isarService.getInstance();
+    await isar.writeTxn(() async {
+      account.isActive = true;
+      await isar.accounts.put(account);
+    });
+    ref.invalidate(allAccountsProvider);
+    ref.invalidate(accountsProvider);
+
+    if (mounted) {
+      SnackbarService.success('${account.name} restored');
+    }
+  }
+
+  Future<void> _showDeleteConfirmation(
     Account account,
     AppLocalizations ctxt,
   ) async {
     final confirmed = await DialogUtils.showDeleteConfirmation(
       context,
-      title: ctxt.accounts_deleteAccountTitle,
-      message: ctxt.accounts_deleteAccountMessage(account.name),
+      title: BuddyMessages.deleteTitle,
+      message: BuddyMessages.deleteMessage(account.name),
     );
 
     if (confirmed == true) {
@@ -217,240 +844,132 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
       await isar.writeTxn(() async {
         await isar.accounts.delete(account.id);
       });
+      ref.invalidate(allAccountsProvider);
       ref.invalidate(accountsProvider);
     }
   }
 
-  Future<void> showArchiveConfirmation(
-    BuildContext context,
-    WidgetRef ref,
+  Future<void> _showArchiveConfirmation(
     Account account,
+    AppLocalizations ctxt,
   ) async {
-    final isarService = ref.read(isarServiceProvider);
-    final isar = await isarService.getInstance();
-    final textTheme = Theme.of(context).textTheme;
-    final color = Theme.of(context).colorScheme;
-    final ctxt = AppLocalizations.of(context)!;
-
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(ctxt.accounts_archiveAccountTitle),
-        content: Text(ctxt.accounts_archiveAccountMessage(account.name)),
-        actions: [
-          OutlinedButton(
-            onPressed: () {
-              HapticFeedback.mediumImpact();
-              context.pop(false);
-            },
-            child: Text(
-              ctxt.accounts_cancelLabel,
-              style: textTheme.titleMedium?.copyWith(color: color.onSurface),
-            ),
-          ),
-          OutlinedButton(
-            onPressed: () {
-              HapticFeedback.mediumImpact();
-              context.pop(true);
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: color.secondary),
-            child: Text(
-              ctxt.accounts_archiveLabel,
-              style: textTheme.titleMedium?.copyWith(color: color.onPrimary),
-            ),
-          ),
-        ],
-      ),
+    final confirmed = await DialogUtils.showConfirmation(
+      context,
+      title: BuddyMessages.deleteTitle,
+      message: ctxt.accounts_archiveAccountMessage(account.name),
+      icon: LucideIcons.archive,
     );
 
     if (confirmed == true) {
+      final isarService = ref.read(isarServiceProvider);
+      final isar = await isarService.getInstance();
       await isar.writeTxn(() async {
         account.isActive = false;
         await isar.accounts.put(account);
       });
+      ref.invalidate(allAccountsProvider);
       ref.invalidate(accountsProvider);
 
-      SnackbarService.success(
-        ctxt.accounts_accountArchivedMessage(account.name),
-      );
+      if (mounted) {
+        SnackbarService.success(
+          ctxt.accounts_accountArchivedMessage(account.name),
+        );
+      }
     }
   }
-}
 
-class _AccountListCard extends StatelessWidget {
-  final Account account;
-  final String balance;
-  final VoidCallback onEdit;
-  final VoidCallback onArchive;
-  final VoidCallback onRemove;
-  final VoidCallback onViewHistory;
-  final VoidCallback onReconcile;
-  final VoidCallback onViewPortfolio;
-
-  const _AccountListCard({
-    required this.account,
-    required this.balance,
-    required this.onEdit,
-    required this.onArchive,
-    required this.onRemove,
-    required this.onViewHistory,
-    required this.onReconcile,
-    required this.onViewPortfolio,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final color = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    final accountColor = Color(account.colorValue ?? Colors.blue.toARGB32());
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: 0,
-      color: color.surfaceContainerHighest,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: onEdit,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: accountColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  account.accountType.icon,
-                  color: accountColor,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      account.name,
-                      style: textTheme.titleMedium?.copyWith(
-                        color: color.onSurface,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '•••• ${account.accountNumber ?? "XXXX"}',
-                      style: textTheme.bodySmall?.copyWith(
-                        color: color.onSurfaceVariant,
-                        letterSpacing: 1.5,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    balance,
-                    style: textTheme.titleMedium?.copyWith(
-                      color: accountColor,
-                      fontWeight: FontWeight.bold,
-                    ),
+  void _showInfoBottomSheet(
+    BuildContext context,
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: color.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius:
+            BorderRadius.vertical(top: Radius.circular(spacing.radiusLarge)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.all(spacing.sectionGap),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: color.onSurfaceVariant.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2),
                   ),
-                  const SizedBox(height: 4),
-                  SizedBox(
-                    height: 24,
-                    child: PopupMenuButton<String>(
-                      icon: Icon(
-                        Icons.more_vert,
-                        color: color.onSurfaceVariant,
-                      ),
-                      padding: EdgeInsets.zero,
-                      onSelected: (value) {
-                        if (value == 'edit') onEdit();
-                        if (value == 'history') onViewHistory();
-                        if (value == 'reconcile') onReconcile();
-                        if (value == 'portfolio') onViewPortfolio();
-                        if (value == 'archive') onArchive();
-                        if (value == 'delete') onRemove();
-                      },
-                      itemBuilder: (context) => [
-                        PopupMenuItem(
-                          value: 'edit',
-                          child: Row(
-                            children: [
-                              Icon(Icons.edit, color: color.primary),
-                              const SizedBox(width: 8),
-                              const Text('Edit'),
-                            ],
-                          ),
-                        ),
-                        PopupMenuItem(
-                          value: 'history',
-                          child: Row(
-                            children: [
-                              Icon(Icons.history, color: color.primary),
-                              const SizedBox(width: 8),
-                              const Text('History'),
-                            ],
-                          ),
-                        ),
-                        PopupMenuItem(
-                          value: 'reconcile',
-                          child: Row(
-                            children: [
-                              Icon(Icons.verified_user, color: color.primary),
-                              const SizedBox(width: 8),
-                              const Text('Reconcile'),
-                            ],
-                          ),
-                        ),
-                        if (account.accountType.name == 'investment')
-                          PopupMenuItem(
-                            value: 'portfolio',
-                            child: Row(
-                              children: [
-                                Icon(Icons.trending_up, color: color.primary),
-                                const SizedBox(width: 8),
-                                const Text('Portfolio'),
-                              ],
-                            ),
-                          ),
-                        PopupMenuItem(
-                          value: 'archive',
-                          child: Row(
-                            children: [
-                              Icon(Icons.archive, color: color.primary),
-                              const SizedBox(width: 8),
-                              const Text('Archive'),
-                            ],
-                          ),
-                        ),
-                        PopupMenuItem(
-                          value: 'delete',
-                          child: Row(
-                            children: [
-                              Icon(Icons.delete, color: color.error),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Delete',
-                                style: TextStyle(color: color.error),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ],
+                ),
+                SizedBox(height: spacing.sectionGap),
+                Icon(LucideIcons.wallet, size: 64, color: color.primary),
+                SizedBox(height: spacing.sectionGap),
+                Text(
+                  ctxt.accounts_howItWorks,
+                  style: textTheme.titleLarge
+                      ?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: spacing.sectionGap),
+                Text(
+                  ctxt.accounts_howItWorksDesc,
+                  style: textTheme.bodyMedium,
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: spacing.sectionGap),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
+}
+
+// ── DOTTED BORDER PAINTER ──
+class _DottedBorderPainter extends CustomPainter {
+  final Color color;
+  final double radius;
+
+  _DottedBorderPainter({required this.color, required this.radius});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1.5
+      ..style = PaintingStyle.stroke;
+
+    final path = Path()
+      ..addRRect(
+        RRect.fromRectAndRadius(
+          Offset.zero & size,
+          Radius.circular(radius),
+        ),
+      );
+
+    final dashPath = _createDashedPath(path, 6, 4);
+    canvas.drawPath(dashPath, paint);
+  }
+
+  Path _createDashedPath(Path source, double dashLen, double gapLen) {
+    final dest = Path();
+    for (final metric in source.computeMetrics()) {
+      var distance = 0.0;
+      while (distance < metric.length) {
+        final end = (distance + dashLen).clamp(0, metric.length).toDouble();
+        dest.addPath(metric.extractPath(distance, end), Offset.zero);
+        distance += dashLen + gapLen;
+      }
+    }
+    return dest;
+  }
+
+  @override
+  bool shouldRepaint(covariant _DottedBorderPainter old) =>
+      old.color != color || old.radius != radius;
 }
