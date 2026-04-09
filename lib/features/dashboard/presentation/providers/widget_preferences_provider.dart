@@ -147,7 +147,7 @@ final smartOrderEnabledProvider = Provider<bool>((ref) {
   final prefs = SharedPrefsUtil.instance;
   final hasAccess = ref.watch(hasFullAccessProvider).valueOrNull ?? false;
   if (!hasAccess) return false;
-  return prefs.getString('smart_order_enabled') != 'false';
+  return prefs.getString('smart_order_enabled') == 'true';
 });
 
 final orderedDashboardWidgetsProvider =

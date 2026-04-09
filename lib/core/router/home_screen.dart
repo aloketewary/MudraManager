@@ -200,7 +200,7 @@ class HomePageState extends ConsumerState<HomePage>
                     curve: Curves.easeOutCubic,
                     duration: 250.ms,
                   ),
-              label: 'Activity',
+              label: ctxt.nav_activity,
             ),
             NavigationDestination(
               icon: Consumer(
@@ -264,7 +264,7 @@ class HomePageState extends ConsumerState<HomePage>
                       );
                 },
               ),
-              label: 'Manage',
+              label: ctxt.nav_manage,
             ),
             NavigationDestination(
               icon: SvgPicture.asset(
@@ -286,66 +286,44 @@ class HomePageState extends ConsumerState<HomePage>
                     curve: Curves.easeOutCubic,
                     duration: 250.ms,
                   ),
-              label: 'Insights',
+              label: ctxt.nav_insights,
             ),
             NavigationDestination(
               icon: Consumer(
                 builder: (context, ref, _) {
                   final isPro = ref.watch(isProProvider).valueOrNull ?? false;
-                  return Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      SvgPicture.asset(
-                        'assets/logo/nav/outline/profile.svg',
-                        colorFilter: ColorFilter.mode(
-                          isDark ? Colors.white : Colors.black,
-                          BlendMode.srcIn,
-                        ),
-                      ),
-                      if (isPro)
-                        const Positioned(
-                          right: -4,
-                          top: -4,
-                          child: Icon(
-                            LucideIcons.crown,
-                            size: 10,
-                            color: Color(0xFFD4AF37),
-                          ),
-                        ),
-                    ],
+                  return SvgPicture.asset(
+                    isPro
+                        ? 'assets/logo/nav/outline/pro_profile.svg'
+                        : 'assets/logo/nav/outline/profile.svg',
+                    colorFilter: ColorFilter.mode(
+                      isPro
+                          ? const Color(0xFFD4AF37)
+                          : (isDark ? Colors.white : Colors.black),
+                      BlendMode.srcIn,
+                    ),
                   );
                 },
               ),
               selectedIcon: Consumer(
                 builder: (context, ref, _) {
                   final isPro = ref.watch(isProProvider).valueOrNull ?? false;
-                  return Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      SvgPicture.asset(
-                        'assets/logo/nav/solid/profile.svg',
-                        colorFilter: ColorFilter.mode(
-                          isDark ? Colors.white : Colors.black,
-                          BlendMode.srcIn,
-                        ),
-                      ).animate(target: _selectedIndex == 4 ? 1 : 0).scale(
-                            begin: const Offset(0.9, 0.9),
-                            end: const Offset(1, 1),
-                            curve: Curves.easeOutCubic,
-                            duration: 250.ms,
-                          ),
-                      if (isPro)
-                        const Positioned(
-                          right: -4,
-                          top: -4,
-                          child: Icon(
-                            LucideIcons.crown,
-                            size: 10,
-                            color: Color(0xFFD4AF37),
-                          ),
-                        ),
-                    ],
-                  );
+                  return SvgPicture.asset(
+                    isPro
+                        ? 'assets/logo/nav/solid/pro_profile.svg'
+                        : 'assets/logo/nav/solid/profile.svg',
+                    colorFilter: ColorFilter.mode(
+                      isPro
+                          ? const Color(0xFFD4AF37)
+                          : (isDark ? Colors.white : Colors.black),
+                      BlendMode.srcIn,
+                    ),
+                  ).animate(target: _selectedIndex == 4 ? 1 : 0).scale(
+                        begin: const Offset(0.9, 0.9),
+                        end: const Offset(1, 1),
+                        curve: Curves.easeOutCubic,
+                        duration: 250.ms,
+                      );
                 },
               ),
               label: ctxt.profile_screen_title,

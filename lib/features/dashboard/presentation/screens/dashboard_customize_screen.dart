@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 // lib/features/dashboard/presentation/screens/dashboard_customize_screen.dart
@@ -27,9 +28,9 @@ class DashboardCustomizeScreen extends ConsumerStatefulWidget {
 
 class _DashboardCustomizeScreenState
     extends ConsumerState<DashboardCustomizeScreen> {
-  /// Local ordered list for drag reorder — synced from provider on first load.
   List<_WidgetEntry> _entries = [];
   bool _initialized = false;
+  AppLocalizations get ctxt => AppLocalizations.of(context)!;
 
   void _syncFromPreferences(List<DashboardWidgetPreference> prefs) {
     final prefMap = {for (var p in prefs) p.widgetId: p};
@@ -97,12 +98,12 @@ class _DashboardCustomizeScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Dashboard Layout'),
+        title: Text(AppLocalizations.of(context)!.title_dashboardLayout),
         actions: [
           TextButton.icon(
             onPressed: _restoreDefaults,
             icon: const Icon(LucideIcons.rotateCcw, size: 16),
-            label: const Text('Reset'),
+            label: Text(AppLocalizations.of(context)!.common_reset),
           ),
         ],
       ),
@@ -218,41 +219,41 @@ class _DashboardCustomizeScreenState
               ),
             ),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: spacing.sectionGap),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '$visibleCount of ${_entries.length} cards active',
+                  ctxt.dashboard_cardsActive(visibleCount, _entries.length),
                   style: textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                     color: accent,
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: spacing.elementGapMin),
                 Text(
-                  'Drag to reorder, toggle to show or hide',
+                  ctxt.dashboard_dragToReorder,
                   style: textTheme.bodySmall?.copyWith(
                     color: color.onSurfaceVariant,
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: spacing.elementGap),
                 Consumer(
                   builder: (context, ref, _) {
                     final isPro = ref.watch(hasFullAccessProvider).valueOrNull ?? false;
                     return Row(
                       children: [
                         Icon(LucideIcons.sparkles, size: 14, color: accent),
-                        const SizedBox(width: 6),
+                        SizedBox(width: spacing.elementGapMin),
                         Text(
-                          'Smart ordering',
+                          ctxt.dashboard_smartOrdering,
                           style: textTheme.labelMedium?.copyWith(
                             color: color.onSurfaceVariant,
                           ),
                         ),
                         if (!isPro) ...[
-                          const SizedBox(width: 6),
+                          SizedBox(width: spacing.elementGapMin),
                           const ProBadge(),
                         ],
                         const Spacer(),
@@ -304,15 +305,15 @@ class _DashboardCustomizeScreenState
       ),
       clipBehavior: Clip.antiAlias,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: EdgeInsets.symmetric(horizontal: spacing.cardInner, vertical: spacing.elementGap),
         child: Row(
           children: [
             // Icon
             Container(
-              padding: const EdgeInsets.all(8),
+              padding: EdgeInsets.all(spacing.elementGap),
               decoration: BoxDecoration(
                 color: color.primary.withValues(alpha: 0.12 * alpha),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(spacing.radiusMedium),
               ),
               child: Icon(
                 entry.plugin.icon,
@@ -320,7 +321,7 @@ class _DashboardCustomizeScreenState
                 size: 20,
               ),
             ),
-            const SizedBox(width: 14),
+            SizedBox(width: spacing.elementGap * 1.5),
 
             // Title + category
             Expanded(
@@ -352,7 +353,7 @@ class _DashboardCustomizeScreenState
                   ? (_) => _toggleVisibility(entry)
                   : null,
             ),
-            const SizedBox(width: 4),
+            SizedBox(width: spacing.elementGapMin),
 
             // Drag handle
             Icon(
@@ -369,17 +370,17 @@ class _DashboardCustomizeScreenState
   String? _categoryLabel(WidgetCategory category) {
     switch (category) {
       case WidgetCategory.essential:
-        return 'Essential';
+        return ctxt.dashboard_catEssential;
       case WidgetCategory.finance:
-        return 'Finance';
+        return ctxt.dashboard_catFinance;
       case WidgetCategory.analytics:
-        return 'Analytics';
+        return ctxt.dashboard_catAnalytics;
       case WidgetCategory.actions:
-        return 'Actions';
+        return ctxt.dashboard_catActions;
       case WidgetCategory.ai:
-        return 'AI Insights';
+        return ctxt.dashboard_catAI;
       case WidgetCategory.contextual:
-        return 'Contextual';
+        return ctxt.dashboard_catContextual;
       case WidgetCategory.custom:
         return null;
     }

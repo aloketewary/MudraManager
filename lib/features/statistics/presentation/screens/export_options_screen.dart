@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
@@ -29,7 +30,7 @@ class ExportOptionsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Export Options'),
+        title: Text(AppLocalizations.of(context)!.title_exportOptions),
         backgroundColor: color.surfaceContainer,
         actions: [
           IconButton(
@@ -76,10 +77,10 @@ class ExportOptionsScreen extends ConsumerWidget {
               final templatesAsync = ref.watch(exportTemplatesProvider(format));
 
               return templatesAsync.when(
-                loading: () => const Card(
+                loading: () => Card(
                   child: ListTile(
-                    leading: CircularProgressIndicator(),
-                    title: Text('Loading...'),
+                    leading: const CircularProgressIndicator(),
+                    title: Text(AppLocalizations.of(context)!.common_loading),
                   ),
                 ),
                 error: (err, stack) => Card(

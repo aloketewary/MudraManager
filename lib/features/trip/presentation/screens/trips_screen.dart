@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -55,11 +56,11 @@ class TripsScreen extends ConsumerWidget {
                 ],
               );
             },
-            loading: () => const TabBar(
-              tabs: [Tab(text: 'Trips'), Tab(text: 'Shared')],
+            loading: () => TabBar(
+              tabs: [Tab(text: AppLocalizations.of(context)!.title_trips), Tab(text: AppLocalizations.of(context)!.title_shared)],
             ),
-            error: (_, __) => const TabBar(
-              tabs: [Tab(text: 'Trips'), Tab(text: 'Shared')],
+            error: (_, __) => TabBar(
+              tabs: [Tab(text: AppLocalizations.of(context)!.title_trips), Tab(text: AppLocalizations.of(context)!.title_shared)],
             ),
           ),
         ),
@@ -196,7 +197,7 @@ class TripsScreen extends ConsumerWidget {
         children: [
           if (active.isNotEmpty) ...[
             _buildTypeHeader(
-              isTrip ? 'ACTIVE' : 'ONGOING',
+              isTrip ? 'ACTIVE' : AppLocalizations.of(context)!.section_ongoing.toUpperCase(),
               isTrip ? LucideIcons.plane : LucideIcons.split,
               color.primary,
               textTheme,
@@ -220,7 +221,7 @@ class TripsScreen extends ConsumerWidget {
           ],
           if (archived.isNotEmpty) ...[
             _buildTypeHeader(
-              'ARCHIVE',
+              AppLocalizations.of(context)!.section_archive.toUpperCase(),
               LucideIcons.archive,
               color.onSurfaceVariant,
               textTheme,
@@ -350,7 +351,7 @@ class TripsScreen extends ConsumerWidget {
                             BorderRadius.circular(spacing.radiusSmall),
                       ),
                       child: Text(
-                        isSplit ? 'Active' : 'Live',
+                        isSplit ? AppLocalizations.of(context)!.section_active : AppLocalizations.of(context)!.trip_live,
                         style: textTheme.labelSmall?.copyWith(
                           color: color.primary,
                           fontWeight: FontWeight.bold,
@@ -381,7 +382,7 @@ class TripsScreen extends ConsumerWidget {
                     padding: EdgeInsets.only(top: spacing.elementGap),
                     child: isSplit
                         ? _buildSplitSummary(
-                            s, trip.currencyCode, color, textTheme, spacing)
+                            context, s, trip.currencyCode, color, textTheme, spacing)
                         : _buildTripSummary(
                             s, trip.currencyCode, color, textTheme, spacing),
                   );
@@ -451,6 +452,7 @@ class TripsScreen extends ConsumerWidget {
 
   /// Split card summary: net balance + people count
   Widget _buildSplitSummary(
+    BuildContext context,
     TripSummary s,
     String? currencyCode,
     ColorScheme color,
@@ -470,7 +472,7 @@ class TripsScreen extends ConsumerWidget {
           'You owe ${formatCurrency(s.netBalance.abs(), code: currencyCode, decimals: 0)}';
     } else if (s.settled) {
       balanceColor = Colors.green;
-      balanceText = 'All settled';
+      balanceText = AppLocalizations.of(context)!.trip_allSettled;
     } else {
       balanceColor = color.onSurfaceVariant;
       balanceText = 'No expenses yet';
@@ -547,10 +549,10 @@ class TripsScreen extends ConsumerWidget {
                   child:
                       Icon(LucideIcons.plane, color: color.primary, size: 24),
                 ),
-                title: Text('Create Trip',
+                title: Text(AppLocalizations.of(context)!.trip_createTrip,
                     style: textTheme.titleSmall
                         ?.copyWith(fontWeight: FontWeight.bold)),
-                subtitle: Text('Track travel expenses with dates & budget',
+                subtitle: Text(AppLocalizations.of(context)!.trip_trackTravel,
                     style: textTheme.bodySmall
                         ?.copyWith(color: color.onSurfaceVariant)),
                 trailing: Icon(LucideIcons.chevronRight,
@@ -572,10 +574,10 @@ class TripsScreen extends ConsumerWidget {
                   child:
                       Icon(LucideIcons.users, color: color.secondary, size: 24),
                 ),
-                title: Text('Create Shared Group',
+                title: Text(AppLocalizations.of(context)!.trip_createGroup,
                     style: textTheme.titleSmall
                         ?.copyWith(fontWeight: FontWeight.bold)),
-                subtitle: Text('Split bills with friends',
+                subtitle: Text(AppLocalizations.of(context)!.trip_splitBills,
                     style: textTheme.bodySmall
                         ?.copyWith(color: color.onSurfaceVariant)),
                 trailing: Icon(LucideIcons.chevronRight,

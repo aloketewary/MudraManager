@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 // lib/features/profile/presentation/screens/setting_screen.dart
@@ -51,6 +52,7 @@ class _SecuritySettingsScreenState
   Future<void> _toggleBiometric(bool on) async {
     HapticFeedback.mediumImpact();
     final auth = ref.read(authServiceProvider);
+    final ctxt = AppLocalizations.of(context)!;
     if (on) {
       final ok = await auth.authenticateBiometric();
       if (!ok) {
@@ -60,7 +62,9 @@ class _SecuritySettingsScreenState
     }
     await auth.setBiometricEnabled(on);
     setState(() => _bioEnabled = on);
-    SnackbarService.success(on ? 'Biometric enabled' : 'Biometric disabled');
+    SnackbarService.success(
+      on ? ctxt.security_biometricEnabled : ctxt.security_biometricDisabled,
+    );
   }
 
   Future<void> _togglePin(bool on) async {
@@ -118,15 +122,23 @@ class _SecuritySettingsScreenState
     return score;
   }
 
-  String get _securityLabel {
+  String _securityLabel(AppLocalizations ctxt) {
     switch (_securityScore) {
       case 0:
-        return 'Unprotected';
+        return ctxt.security_unprotected;
       case 1:
-        return 'Basic';
+        return ctxt.security_basic;
       default:
-        return 'Strong';
+        return ctxt.security_strong;
     }
+  }
+
+  String _securityDescription(AppLocalizations ctxt) {
+    if (_securityScore == 0) return ctxt.security_unprotectedDesc;
+    return ctxt.security_protectionsActive(
+      _securityScore,
+      _biometricAvailable ? 2 : 1,
+    );
   }
 
   Color _securityColor(ColorScheme color) {
@@ -157,12 +169,22 @@ class _SecuritySettingsScreenState
     final textTheme = Theme.of(context).textTheme;
     final spacing = ref.watch(spacingProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ctxt = AppLocalizations.of(context)!;
     final secColor = _securityColor(color);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Security')),
+      appBar: AppBar(title: Text(ctxt.security_title)),
       body: !_loaded
-          ? const Padding(padding: EdgeInsets.all(16), child: Column(children: [DashboardCardSkeleton(), SizedBox(height: 12), DashboardCardSkeleton()]))
+          ? Padding(
+              padding: EdgeInsets.all(spacing.cardHorizontal),
+              child: Column(
+                children: [
+                  const DashboardCardSkeleton(),
+                  SizedBox(height: spacing.elementGap),
+                  const DashboardCardSkeleton(),
+                ],
+              ),
+            )
           : ListView(
               padding: EdgeInsets.symmetric(
                 horizontal: spacing.cardHorizontal,
@@ -216,7 +238,7 @@ class _SecuritySettingsScreenState
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              _securityLabel,
+                              _securityLabel(ctxt),
                               style: textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.w700,
                                 color: secColor,
@@ -224,9 +246,7 @@ class _SecuritySettingsScreenState
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              _securityScore == 0
-                                  ? 'Enable PIN or biometrics to protect your data'
-                                  : '$_securityScore of ${_biometricAvailable ? 2 : 1} protection${_securityScore > 1 ? 's' : ''} active',
+                              _securityDescription(ctxt),
                               style: textTheme.bodySmall?.copyWith(
                                 color: color.onSurfaceVariant,
                               ),
@@ -239,8 +259,11 @@ class _SecuritySettingsScreenState
                 ),
                 const SizedBox(height: 24),
 
-                // ── AUTHENTICATION GROUP ──
-                _buildSectionHeader('Authentication', color, textTheme),
+                _buildSectionHeader(
+                  ctxt.security_authentication,
+                  color,
+                  textTheme,
+                ),
                 const SizedBox(height: 10),
                 Card(
                   elevation: 0,
@@ -258,14 +281,15 @@ class _SecuritySettingsScreenState
                       // PIN toggle
                       _buildToggleRow(
                         icon: LucideIcons.keyRound,
-                        title: 'PIN Lock',
+                        title: ctxt.security_pinLock,
                         subtitle: _pinEnabled
-                            ? '4-digit PIN active'
-                            : 'Set a 4-digit PIN',
+                            ? ctxt.security_pinActive
+                            : ctxt.security_pinSet,
                         value: _pinEnabled,
                         onChanged: _togglePin,
                         color: color,
                         textTheme: textTheme,
+                        ctxt: ctxt,
                       ),
                       // Biometric toggle (conditional)
                       if (_biometricAvailable) ...[
@@ -276,13 +300,14 @@ class _SecuritySettingsScreenState
                         ),
                         _buildToggleRow(
                           icon: LucideIcons.fingerprintPattern,
-                          title: 'Biometric Unlock',
-                          subtitle: 'Fingerprint or Face ID',
+                          title: ctxt.security_biometric,
+                          subtitle: ctxt.security_biometricDesc,
                           value: _bioEnabled,
                           onChanged: _pinEnabled ? _toggleBiometric : null,
                           color: color,
                           textTheme: textTheme,
                           disabled: !_pinEnabled,
+                          ctxt: ctxt,
                         ),
                       ],
                     ],
@@ -292,7 +317,7 @@ class _SecuritySettingsScreenState
                 // ── MANAGE GROUP (only when PIN is active) ──
                 if (_pinEnabled) ...[
                   const SizedBox(height: 24),
-                  _buildSectionHeader('Manage', color, textTheme),
+                  _buildSectionHeader(ctxt.security_manage, color, textTheme),
                   const SizedBox(height: 10),
                   Card(
                     elevation: 0,
@@ -332,13 +357,13 @@ class _SecuritySettingsScreenState
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Change PIN',
+                                    ctxt.security_changePin,
                                     style: textTheme.bodyLarge?.copyWith(
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),
                                   Text(
-                                    'Update your 4-digit PIN',
+                                    ctxt.security_changePinDesc,
                                     style: textTheme.bodySmall?.copyWith(
                                       color: color.onSurfaceVariant,
                                     ),
@@ -347,7 +372,7 @@ class _SecuritySettingsScreenState
                               ),
                             ),
                             Icon(
-                              Icons.chevron_right,
+                              LucideIcons.chevronRight,
                               color: color.onSurfaceVariant,
                               size: 20,
                             ),
@@ -380,7 +405,7 @@ class _SecuritySettingsScreenState
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          'Your PIN is stored securely on this device — it never touches a server. Digits are randomized on entry for extra protection.',
+                          ctxt.security_infoText,
                           style: textTheme.bodySmall?.copyWith(
                             color: color.onSurfaceVariant,
                             height: 1.4,
@@ -422,6 +447,7 @@ class _SecuritySettingsScreenState
     required ColorScheme color,
     required TextTheme textTheme,
     bool disabled = false,
+    required AppLocalizations ctxt,
   }) {
     final alpha = disabled ? 0.4 : 1.0;
     return Padding(
@@ -453,7 +479,7 @@ class _SecuritySettingsScreenState
                   ),
                 ),
                 Text(
-                  disabled ? 'Enable PIN first' : subtitle,
+                  disabled ? ctxt.security_enablePinFirst : subtitle,
                   style: textTheme.bodySmall?.copyWith(
                     color: color.onSurfaceVariant.withValues(alpha: alpha),
                   ),

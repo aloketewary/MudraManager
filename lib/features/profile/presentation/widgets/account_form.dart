@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -14,6 +15,7 @@ import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/simple_color_picker.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
+import 'package:mudra_manager/shared/widgets/currency_text.dart';
 
 class AccountForm extends ConsumerStatefulWidget {
   final Account? account;
@@ -43,6 +45,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
   bool _saving = false;
 
   bool get _isEditing => widget.account != null;
+  AppLocalizations get ctxt => AppLocalizations.of(context)!;
 
   // Subset from SimpleColorPickerDialog's palette
   static const _quickColors = [
@@ -101,9 +104,8 @@ class _AccountFormState extends ConsumerState<AccountForm> {
             context.pop();
           },
         ),
-        title: Text(
-          _isEditing ? 'Edit Account' : 'New Account',
-        ),
+        title:
+            Text(_isEditing ? ctxt.account_editTitle : ctxt.account_newTitle),
         actions: [
           TextButton(
             onPressed: _saving
@@ -122,7 +124,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                     ),
                   )
                 : Text(
-                    _isEditing ? 'Update' : 'Create',
+                    _isEditing ? ctxt.common_update : ctxt.common_create,
                     style: textTheme.titleSmall?.copyWith(
                       color: color.primary,
                       fontWeight: FontWeight.w700,
@@ -138,16 +140,19 @@ class _AccountFormState extends ConsumerState<AccountForm> {
             left: spacing.cardHorizontal,
             right: spacing.cardHorizontal,
             top: spacing.cardVertical,
-            bottom: MediaQuery.of(context).padding.bottom + kBottomNavigationBarHeight + spacing.sectionGap,
+            bottom: MediaQuery.of(context).padding.bottom +
+                kBottomNavigationBarHeight +
+                spacing.sectionGap,
           ),
           children: [
             _buildHeroPreview(
               color,
               textTheme,
               spacing,
+              ctxt,
             ),
             SizedBox(height: spacing.sectionGap),
-            _sectionLabel('Account Type', textTheme),
+            _sectionLabel(ctxt.account_typeLabel, textTheme),
             SizedBox(
               height: spacing.sectionGap,
             ),
@@ -157,7 +162,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               spacing,
             ),
             SizedBox(height: spacing.sectionGap),
-            _sectionLabel('Details', textTheme),
+            _sectionLabel(ctxt.account_detailsLabel, textTheme),
             SizedBox(height: spacing.sectionGap),
             _buildDetailsCard(
               color,
@@ -165,7 +170,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               spacing,
             ),
             SizedBox(height: spacing.sectionGap),
-            _sectionLabel('Color', textTheme),
+            _sectionLabel(ctxt.account_colorLabel, textTheme),
             SizedBox(height: spacing.sectionGap),
             _buildColorSection(
               color,
@@ -173,7 +178,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               spacing,
             ),
             SizedBox(height: spacing.sectionGap),
-            _sectionLabel('Currency', textTheme),
+            _sectionLabel(ctxt.account_currencyLabel, textTheme),
             SizedBox(height: spacing.sectionGap),
             _buildCurrencySelector(color, textTheme, spacing),
           ],
@@ -187,6 +192,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
     ColorScheme color,
     TextTheme textTheme,
     AppSpacing spacing,
+    AppLocalizations ctxt,
   ) {
     final name = _nameController.text.trim();
     final number = _accountNumberController.text.trim();
@@ -228,7 +234,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(spacing.cardInner),
                 decoration: BoxDecoration(
                   color: _selectedColor.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
@@ -237,19 +243,16 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                     width: 1.5,
                   ),
                 ),
-                child: Icon(
-                  _selectedType.icon,
-                  size: 28,
-                  color: _selectedColor,
-                ),
+                child:
+                    Icon(_selectedType.icon, size: 28, color: _selectedColor),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: spacing.sectionGap),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      name.isEmpty ? 'Account Name' : name,
+                      name.isEmpty ? ctxt.account_name : name,
                       style: textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
                         color: name.isEmpty
@@ -257,17 +260,18 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                             : color.onSurface,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: spacing.elementGapUltraMin),
                     Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 2,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: spacing.elementGap,
+                            vertical: spacing.elementGapUltraMin,
                           ),
                           decoration: BoxDecoration(
                             color: _selectedColor.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius:
+                                BorderRadius.circular(spacing.radiusMedium),
                           ),
                           child: Text(
                             _selectedType.label,
@@ -278,7 +282,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                           ),
                         ),
                         if (number.isNotEmpty) ...[
-                          const SizedBox(width: 8),
+                          SizedBox(width: spacing.elementGap),
                           Text(
                             '•••• $number',
                             style: textTheme.labelSmall?.copyWith(
@@ -289,15 +293,20 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                         ],
                       ],
                     ),
-                    const SizedBox(height: 10),
+                    SizedBox(height: spacing.elementGap),
                     Text(
-                      isCreditCard ? 'Outstanding' : 'Balance',
+                      isCreditCard
+                          ? ctxt.account_outstanding
+                          : ctxt.account_balance,
                       style: textTheme.labelSmall?.copyWith(
                         color: color.onSurfaceVariant.withValues(alpha: 0.6),
                       ),
                     ),
-                    Text(
-                      formatCurrency(balance, code: _selectedCurrency, decimals: 2),
+                    CurrencyText(
+                      amount: balance,
+                      currencyCode: _selectedCurrency,
+                      compact: false,
+                      fixedLength: 2,
                       style: textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w900,
                         color: _selectedColor,
@@ -323,8 +332,8 @@ class _AccountFormState extends ConsumerState<AccountForm> {
       crossAxisCount: 3,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: 10,
-      crossAxisSpacing: 10,
+      mainAxisSpacing: spacing.elementGap,
+      crossAxisSpacing: spacing.elementGap,
       childAspectRatio: 1.4,
       children: AccountType.values.map((type) {
         final isSelected = _selectedType == type;
@@ -339,7 +348,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               color: isSelected
                   ? _selectedColor.withValues(alpha: 0.12)
                   : color.surfaceContainerLow,
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(spacing.radiusMedium),
               border: Border.all(
                 color: isSelected
                     ? _selectedColor
@@ -355,7 +364,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                   size: 22,
                   color: isSelected ? _selectedColor : color.onSurfaceVariant,
                 ),
-                const SizedBox(height: 6),
+                SizedBox(height: spacing.elementGapMin),
                 Text(
                   type.label,
                   style: textTheme.labelSmall?.copyWith(
@@ -371,7 +380,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
     );
   }
 
-  // ── DETAILS CARD ──
+  // ── DETAILS FIELDS ──
   Widget _buildDetailsCard(
     ColorScheme color,
     TextTheme textTheme,
@@ -379,108 +388,82 @@ class _AccountFormState extends ConsumerState<AccountForm> {
   ) {
     final isCreditCard = _selectedType == AccountType.creditCard;
 
-    return Card(
-      elevation: 0,
-      color: color.surfaceContainerLow,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(spacing.radiusMedium),
-        side: BorderSide(
-          color: color.outlineVariant.withValues(alpha: 0.3),
+    return Column(
+      children: [
+        TextFormField(
+          controller: _nameController,
+          onChanged: (_) => setState(() {}),
+          decoration: InputDecoration(
+            labelText: ctxt.account_name,
+            prefixIcon:
+                Icon(LucideIcons.wallet, size: 18, color: _selectedColor),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(spacing.radiusMedium),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(spacing.radiusMedium),
+              borderSide: BorderSide(color: _selectedColor, width: 2),
+            ),
+          ),
+          style: textTheme.bodyLarge,
+          validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
         ),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        children: [
-          TextFormField(
-            controller: _nameController,
-            onChanged: (_) => setState(() {}),
-            decoration: InputDecoration(
-              hintText: 'Account Name',
-              prefixIcon: Icon(
-                LucideIcons.wallet,
-                size: 18,
-                color: _selectedColor,
-              ),
-              border: InputBorder.none,
-              contentPadding: EdgeInsets.symmetric(
-                horizontal: spacing.cardHorizontal,
-                vertical: spacing.cardVertical,
-              ),
+        SizedBox(height: spacing.sectionGap),
+        TextFormField(
+          controller: _accountNumberController,
+          keyboardType: TextInputType.number,
+          onChanged: (_) => setState(() {}),
+          decoration: InputDecoration(
+            labelText: ctxt.account_last4,
+            helperText: ctxt.account_last4Helper,
+            helperStyle: textTheme.labelSmall?.copyWith(
+              color: color.onSurfaceVariant.withValues(alpha: 0.6),
             ),
-            style: textTheme.bodyLarge,
-            validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
-          ),
-          Divider(
-            height: 1,
-            indent: 48,
-            color: color.outlineVariant.withValues(alpha: 0.3),
-          ),
-          SizedBox(
-            height: spacing.elementGap,
-          ),
-          TextFormField(
-            controller: _accountNumberController,
-            keyboardType: TextInputType.number,
-            onChanged: (_) => setState(() {}),
-            decoration: InputDecoration(
-              hintText: 'Last 4 digits',
-              helperText: 'For SMS auto-matching',
-              helperStyle: textTheme.labelSmall?.copyWith(
-                color: color.onSurfaceVariant.withValues(alpha: 0.6),
-              ),
-              prefixIcon: Icon(
-                LucideIcons.hash,
-                size: 18,
-                color: _selectedColor,
-              ),
-              border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 16,
-              ),
+            prefixIcon: Icon(LucideIcons.hash, size: 18, color: _selectedColor),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(spacing.radiusMedium),
             ),
-            style: textTheme.bodyLarge,
-            validator: (v) {
-              if (v == null || v.isEmpty) return 'Required';
-              if (v.length < 4) return 'At least 4 digits';
-              if (v.length > 4) return 'Only last 4 digits';
-              return null;
-            },
-          ),
-          Divider(
-            height: 1,
-            indent: 48,
-            color: color.outlineVariant.withValues(alpha: 0.3),
-          ),
-          SizedBox(
-            height: spacing.elementGap,
-          ),
-          TextFormField(
-            controller: _balanceController,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            onChanged: (_) => setState(() {}),
-            decoration: InputDecoration(
-              hintText: isCreditCard ? 'Outstanding amount' : 'Initial balance',
-              helperText: isCreditCard ? 'Enter 0 if card is paid off' : null,
-              helperStyle: textTheme.labelSmall?.copyWith(
-                color: color.onSurfaceVariant.withValues(alpha: 0.6),
-              ),
-              prefixIcon: Icon(
-                currencyIcon(_selectedCurrency),
-                size: 18,
-                color: _selectedColor,
-              ),
-              border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 16,
-              ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(spacing.radiusMedium),
+              borderSide: BorderSide(color: _selectedColor, width: 2),
             ),
-            style: textTheme.bodyLarge,
-            validator: (v) => v == null || v.isEmpty ? 'Required' : null,
           ),
-        ],
-      ),
+          style: textTheme.bodyLarge,
+          validator: (v) {
+            if (v == null || v.isEmpty) return ctxt.common_required;
+            if (v.length < 4) return ctxt.account_min4;
+            if (v.length > 4) return ctxt.account_max4;
+            return null;
+          },
+        ),
+        SizedBox(height: spacing.sectionGap),
+        TextFormField(
+          controller: _balanceController,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          onChanged: (_) => setState(() {}),
+          decoration: InputDecoration(
+            labelText: isCreditCard ? ctxt.account_outstanding : ctxt.account_initialBalance,
+            helperText: isCreditCard ? ctxt.account_cardPaidOff : null,
+            helperStyle: textTheme.labelSmall?.copyWith(
+              color: color.onSurfaceVariant.withValues(alpha: 0.6),
+            ),
+            prefixIcon: Icon(
+              currencyIcon(_selectedCurrency),
+              size: 18,
+              color: _selectedColor,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(spacing.radiusMedium),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(spacing.radiusMedium),
+              borderSide: BorderSide(color: _selectedColor, width: 2),
+            ),
+          ),
+          style: textTheme.bodyLarge,
+          validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+        ),
+      ],
     );
   }
 
@@ -505,8 +488,8 @@ class _AccountFormState extends ConsumerState<AccountForm> {
           children: [
             Expanded(
               child: Wrap(
-                spacing: 10,
-                runSpacing: 10,
+                spacing: spacing.elementGap,
+                runSpacing: spacing.elementGap,
                 children: _quickColors.map((c) {
                   final isSelected = _selectedColor.toARGB32() == c.toARGB32();
                   return GestureDetector(
@@ -548,7 +531,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                 }).toList(),
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: spacing.elementGap),
             GestureDetector(
               onTap: () {
                 HapticFeedback.mediumImpact();
@@ -635,7 +618,12 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               if (_isEditing && oldCode != (newIsBase ? null : picked)) {
                 if (!context.mounted) return;
                 final confirmed = await _showCurrencyChangeWarning(
-                  context, oldCode ?? baseCurrency, picked, color, textTheme, spacing,
+                  context,
+                  oldCode ?? baseCurrency,
+                  picked,
+                  color,
+                  textTheme,
+                  spacing,
                 );
                 if (confirmed != true) return;
               }
@@ -645,7 +633,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               });
             },
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(spacing.cardInner),
               child: Row(
                 children: [
                   Container(
@@ -664,7 +652,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 14),
+                  SizedBox(width: spacing.elementGap * 1.5),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -693,20 +681,29 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                         onTap: () async {
                           HapticFeedback.lightImpact();
                           final confirmed = await _showCurrencyChangeWarning(
-                            context, displayCode, baseCurrency, color, textTheme, spacing,
+                            context,
+                            displayCode,
+                            baseCurrency,
+                            color,
+                            textTheme,
+                            spacing,
                           );
                           if (confirmed == true) {
                             setState(() => _selectedCurrency = null);
                           }
                         },
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: color.primary.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                            borderRadius:
+                                BorderRadius.circular(spacing.radiusSmall),
                           ),
                           child: Text(
-                            'Reset to $baseCurrency',
+                            ctxt.account_resetTo(baseCurrency),
                             style: textTheme.labelSmall?.copyWith(
                               color: color.primary,
                               fontWeight: FontWeight.w600,
@@ -716,7 +713,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                       ),
                     ),
                   Icon(
-                    Icons.chevron_right,
+                    LucideIcons.chevronRight,
                     color: color.onSurfaceVariant,
                     size: 20,
                   ),
@@ -730,8 +727,8 @@ class _AccountFormState extends ConsumerState<AccountForm> {
           padding: EdgeInsets.symmetric(horizontal: spacing.elementGap),
           child: Text(
             isBase
-                ? 'Transactions in this account use your base currency.'
-                : 'Transactions will be recorded in $displayCode and converted to $baseCurrency for totals.',
+                ? ctxt.account_baseCurrencyInfo
+                : ctxt.account_foreignCurrencyInfo(displayCode, baseCurrency),
             style: textTheme.bodySmall?.copyWith(
               color: color.onSurfaceVariant.withValues(alpha: 0.6),
               height: 1.3,
@@ -756,12 +753,18 @@ class _AccountFormState extends ConsumerState<AccountForm> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (ctx) => Padding(
-        padding: EdgeInsets.fromLTRB(24, 24, 24, 24 + MediaQuery.of(ctx).padding.bottom),
+        padding: EdgeInsets.fromLTRB(
+          24,
+          24,
+          24,
+          24 + MediaQuery.of(ctx).padding.bottom,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 40, height: 4,
+              width: 40,
+              height: 4,
               decoration: BoxDecoration(
                 color: color.onSurfaceVariant.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(2),
@@ -771,8 +774,9 @@ class _AccountFormState extends ConsumerState<AccountForm> {
             Icon(LucideIcons.triangleAlert, size: 36, color: color.error),
             SizedBox(height: spacing.elementGap * 1.5),
             Text(
-              'Change Currency?',
-              style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ctxt.account_changeCurrency,
+              style:
+                  textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             SizedBox(height: spacing.elementGap),
             // From → To
@@ -785,12 +789,26 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(fromCode, style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: spacing.elementGap * 1.5),
-                    child: Icon(LucideIcons.arrowRight, size: 18, color: color.error),
+                  Text(
+                    fromCode,
+                    style: textTheme.titleMedium
+                        ?.copyWith(fontWeight: FontWeight.bold),
                   ),
-                  Text(toCode, style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: spacing.elementGap * 1.5,
+                    ),
+                    child: Icon(
+                      LucideIcons.arrowRight,
+                      size: 18,
+                      color: color.error,
+                    ),
+                  ),
+                  Text(
+                    toCode,
+                    style: textTheme.titleMedium
+                        ?.copyWith(fontWeight: FontWeight.bold),
+                  ),
                 ],
               ),
             ),
@@ -805,11 +823,23 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _infoRow('Existing balances will NOT be converted automatically.', color, textTheme),
+                  _infoRow(
+                    ctxt.account_warningNoConvert,
+                    color,
+                    textTheme,
+                  ),
                   SizedBox(height: spacing.elementGap),
-                  _infoRow('New transactions will use the new currency.', color, textTheme),
+                  _infoRow(
+                    ctxt.account_warningNewCurrency,
+                    color,
+                    textTheme,
+                  ),
                   SizedBox(height: spacing.elementGap),
-                  _infoRow('You may need to manually adjust the balance.', color, textTheme),
+                  _infoRow(
+                    ctxt.account_warningManualAdjust,
+                    color,
+                    textTheme,
+                  ),
                 ],
               ),
             ),
@@ -822,10 +852,11 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                        borderRadius:
+                            BorderRadius.circular(spacing.radiusMedium),
                       ),
                     ),
-                    child: const Text('Cancel'),
+                    child: Text(AppLocalizations.of(context)!.common_cancel),
                   ),
                 ),
                 SizedBox(width: spacing.elementGap * 1.5),
@@ -835,10 +866,11 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                     style: FilledButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                        borderRadius:
+                            BorderRadius.circular(spacing.radiusMedium),
                       ),
                     ),
-                    child: const Text('Change'),
+                    child: Text(ctxt.common_change),
                   ),
                 ),
               ],
@@ -984,6 +1016,7 @@ class _CurrencyPickerInlineState extends State<_CurrencyPickerInline> {
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final ctxt = AppLocalizations.of(context)!;
 
     return DraggableScrollableSheet(
       initialChildSize: 0.7,
@@ -1006,8 +1039,8 @@ class _CurrencyPickerInlineState extends State<_CurrencyPickerInline> {
             child: TextField(
               autofocus: true,
               decoration: InputDecoration(
-                hintText: 'Search currency...',
-                prefixIcon: const Icon(Icons.search, size: 20),
+                hintText: ctxt.common_searchCurrency,
+                prefixIcon: const Icon(LucideIcons.search, size: 20),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(color: color.outlineVariant),
@@ -1050,7 +1083,7 @@ class _CurrencyPickerInlineState extends State<_CurrencyPickerInline> {
                   title: Text(c.code),
                   subtitle: Text(c.name, style: textTheme.bodySmall),
                   trailing: isSelected
-                      ? Icon(Icons.check_circle, color: color.primary)
+                      ? Icon(LucideIcons.circleCheck, color: color.primary)
                       : null,
                   onTap: () {
                     HapticFeedback.lightImpact();

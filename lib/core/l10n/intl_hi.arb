@@ -1,42 +1,42 @@
 {
   "@@locale": "hi",
-  "onboard_manageYourMoneyDescription": "अपने पैसे को स्मार्ट तरीके से और सहजता से प्रबंधित करें।",
+  "onboard_manageYourMoneyDescription": "पैसों को smart तरीके से manage करें, बिना किसी झंझट के।",
   "@onboard_manageYourMoneyDescription": {
     "description": "Manage your money smartly & effortlessly."
   },
-  "onboard_welcomeToApp": " {appName} में आपका स्वागत है",
+  "onboard_welcomeToApp": "{appName} में आपका स्वागत है",
   "@onboard_welcomeToApp": {
     "description": "Welcome to Application"
   },
-  "onboard_TrackYourTransactions": "अपने लेनदेन को ट्रैक करें",
+  "onboard_TrackYourTransactions": "खर्चे track करें",
   "@onboard_TrackYourTransactions": {
     "description": "Track your Transactions"
   },
-  "onboard_SeeWhereYourMoneyGoes": "देखें कि आपका पैसा कहाँ जाता है, हर दिन।",
+  "onboard_SeeWhereYourMoneyGoes": "पैसा कहाँ जा रहा है, रोज़ देखें।",
   "@onboard_SeeWhereYourMoneyGoes": {
     "description": "See where your money goes, every day."
   },
-  "onboard_SetBudgetsAndGoals": "बजट और लक्ष्य निर्धारित करें",
+  "onboard_SetBudgetsAndGoals": "Budget और Goals सेट करें",
   "@onboard_SetBudgetsAndGoals": {
     "description": "Set Budgets and Goals"
   },
-  "onboard_stayOnTrackAndAchieveYourDream": "पटरी पर रहें और अपने सपनों को प्राप्त करें।",
+  "onboard_stayOnTrackAndAchieveYourDream": "Track पर रहें, सपने पूरे करें।",
   "@onboard_stayOnTrackAndAchieveYourDream": {
     "description": "Stay on track and achieve your dreams."
   },
-  "onboard_GetStarted": "शुरू हो जाओ!",
+  "onboard_GetStarted": "चलो शुरू करें!",
   "@onboard_GetStarted": {
     "description": "Get Started!"
   },
-  "onboard_letsSetupYourAccount": "चलिए, आपका खाता सेट अप करते हैं।",
+  "onboard_letsSetupYourAccount": "चलिए, आपका account set up करते हैं।",
   "@onboard_letsSetupYourAccount": {
     "description": "Let's set up your account."
   },
-  "onboard_howShouldWeCallYou": "हम आपको कैसे बुलाएं?",
+  "onboard_howShouldWeCallYou": "आपको क्या बुलाएं?",
   "@onboard_howShouldWeCallYou": {
     "description": "How should we call you?"
   },
-  "onboard_enterYourNameToPersonalizeYourExperience": "अपने अनुभव को व्यक्तिगत बनाने के लिए अपना नाम दर्ज करें।",
+  "onboard_enterYourNameToPersonalizeYourExperience": "अपना नाम डालें ताकि app आपके हिसाब से हो।",
   "@onboard_enterYourNameToPersonalizeYourExperience": {
     "description": "Enter your name to personalize your experience."
   },
@@ -44,11 +44,11 @@
   "@onboard_enterYourName": {
     "description": "Enter your name"
   },
-  "onboard_setupYourFirstAccount": "अपना पहला खाता सेटअप करें",
+  "onboard_setupYourFirstAccount": "पहला Account बनाएं",
   "@onboard_setupYourFirstAccount": {
     "description": "Setup Your First Account"
   },
-  "onboard_letsCreateYourFirstAccount": "आइए अपना पहला खाता बनाते हैं (मान लीजिए: नकद)।",
+  "onboard_letsCreateYourFirstAccount": "चलिए पहला account बनाते हैं (जैसे: Cash)।",
   "@onboard_letsCreateYourFirstAccount": {
     "description": "Let's start managing your money wisely."
   },
@@ -60,7 +60,7 @@
   "@onboard_initialBalance": {
     "description": "Initial Balance"
   },
-  "onboard_youCanUpdateOtherDetailsLaterAsWell": "आप बाद में भी अन्य विवरण अपडेट कर सकते हैं।",
+  "onboard_youCanUpdateOtherDetailsLaterAsWell": "बाकी details बाद में भी update कर सकते हैं।",
   "@onboard_youCanUpdateOtherDetailsLaterAsWell": {
     "description": "You can update other details later as well."
   },
@@ -72,11 +72,11 @@
   "@onboard_pleaseEnterAValidNumberFor": {
     "description": "Please enter a valid number for "
   },
-  "onboard_youAreAllSet": "आप सब तैयार हैं!",
+  "onboard_youAreAllSet": "बस, सब तैयार है!",
   "@onboard_youAreAllSet": {
     "description": "You're all set!"
   },
-  "onboard_letsStartManagingYourMoneyWisely": "आइए अपने पैसे का बुद्धिमानी से प्रबंधन करना शुरू करें।",
+  "onboard_letsStartManagingYourMoneyWisely": "अब पैसों को समझदारी से manage करें।",
   "@onboard_letsStartManagingYourMoneyWisely": {
     "description": "Let's start managing your money wisely."
   },
@@ -100,11 +100,11 @@
   "@app_settings_theme_mode_title": {
     "description": "This is title of Theme Mode tile"
   },
-  "app_settings_theme_mode_light": "प्रकाश",
+  "app_settings_theme_mode_light": "Light",
   "@app_settings_theme_mode_light": {
     "description": "This is text of Theme Mode light"
   },
-  "app_settings_theme_mode_dark": "गहरा",
+  "app_settings_theme_mode_dark": "Dark",
   "@app_settings_theme_mode_dark": {
     "description": "This is text of Theme Mode dark"
   },
@@ -120,7 +120,7 @@
   "@app_settings_theme_mode_subtitle": {
     "description": "This is subtitle of Theme Mode tile"
   },
-  "app_settings_daily_reminder_title": "दैनिक व्यय अनुस्मारक",
+  "app_settings_daily_reminder_title": "Daily खर्च Reminder",
   "@app_settings_daily_reminder_title": {
     "description": "This is text of Daily reminder title"
   },
@@ -152,7 +152,7 @@
   "@greeting_good_morning_text": {
     "description": "This is text of Good Morning"
   },
-  "greeting_good_afternoon_text": "सुसंध्या",
+  "greeting_good_afternoon_text": "नमस्ते",
   "@greeting_good_afternoon_text": {
     "description": "This is text of Good Afternoon"
   },
@@ -180,11 +180,11 @@
   "@dashboard_add_transaction_text": {
     "description": "This is text of add transaction button"
   },
-  "dashboard_add_transfer_text": "स्थानांतरण",
+  "dashboard_add_transfer_text": "Transfer",
   "@dashboard_add_transfer_text": {
     "description": "This is text of add Transfer button"
   },
-  "dashboard_cash_flow_text": "नकदी प्रवाह",
+  "dashboard_cash_flow_text": "Cash Flow",
   "@dashboard_cash_flow_text": {
     "description": "This is text of Cash Flow"
   },
@@ -208,7 +208,7 @@
   "@dashboard_mini_budget_text": {
     "description": "This is text of Budget"
   },
-  "dashboard_mini_budget_not_found_text": "कोई बजट परिभाषित नहीं है, एक जोड़ें!",
+  "dashboard_mini_budget_not_found_text": "कोई Budget नहीं है, एक बनाएं!",
   "@dashboard_mini_budget_not_found_text": {
     "description": "This is text of budget not found"
   },
@@ -240,23 +240,23 @@
   "@transaction_listViewGroupYesterdayLabel": {
     "description": "This is text of Yesterday"
   },
-  "transaction_list_pending_transaction_message_text" : "⚡ नए लेनदेन मिले! अभी समीक्षा करें",
-  "@transaction_list_pending_transaction_message_text" : {
-    "description" : "This is text of pending transaction message"
+  "transaction_list_pending_transaction_message_text": "⚡ नए transactions मिले! अभी देखें",
+  "@transaction_list_pending_transaction_message_text": {
+    "description": "This is text of pending transaction message"
   },
-  "transaction_listPendingTransactionMessageActionLabel" : "समीक्षा",
-  "@transaction_listPendingTransactionMessageActionLabel" : {
-    "description" : "This is text of pending transaction message action"
+  "transaction_listPendingTransactionMessageActionLabel": "समीक्षा",
+  "@transaction_listPendingTransactionMessageActionLabel": {
+    "description": "This is text of pending transaction message action"
   },
-  "transaction_noTransactionFoundText" : "कोई लेन-देन नहीं मिला।",
-  "@transaction_noTransactionFoundText" : {
-    "description" : "This is text of no transaction found"
+  "transaction_noTransactionFoundText": "कोई transaction नहीं मिला।",
+  "@transaction_noTransactionFoundText": {
+    "description": "This is text of no transaction found"
   },
   "transaction_deleteAlertTitleText": "लेन-देन हटाएं?",
   "@transaction_deleteAlertTitleText": {
     "description": "This is text of Delete Transaction"
   },
-  "transaction_deleteAlertBodyText": "यह क्रिया पूर्ववत नहीं की जा सकती है।",
+  "transaction_deleteAlertBodyText": "ये वापस नहीं होगा।",
   "@transaction_deleteAlertBodyText": {
     "description": "This is text of Delete Transaction body"
   },
@@ -276,35 +276,35 @@
   "@transaction_noteDescriptionText": {
     "description": "This is text of note description"
   },
-  "calendar_week_monday_initial_text" : "सो",
-  "@calendar_week_monday_initial_text" : {
-    "description" : "This is text of Monday initial"
+  "calendar_week_monday_initial_text": "सो",
+  "@calendar_week_monday_initial_text": {
+    "description": "This is text of Monday initial"
   },
-  "calendar_week_tuesday_initial_text" : "मं",
-  "@calendar_week_tuesday_initial_text" : {
-    "description" : "This is text of Tuesday initial"
+  "calendar_week_tuesday_initial_text": "मं",
+  "@calendar_week_tuesday_initial_text": {
+    "description": "This is text of Tuesday initial"
   },
-  "calendar_week_wednesday_initial_text" : "बु",
-  "@calendar_week_wednesday_initial_text" : {
-    "description" : "This is text of Wednesday initial"
+  "calendar_week_wednesday_initial_text": "बु",
+  "@calendar_week_wednesday_initial_text": {
+    "description": "This is text of Wednesday initial"
   },
-  "calendar_week_thursday_initial_text" : "गु",
-  "@calendar_week_thursday_initial_text" : {
-    "description" : "This is text of Thursday initial"
+  "calendar_week_thursday_initial_text": "गु",
+  "@calendar_week_thursday_initial_text": {
+    "description": "This is text of Thursday initial"
   },
-  "calendar_week_friday_initial_text" : "शु",
-  "@calendar_week_friday_initial_text" : {
-    "description" : "This is text of Friday initial"
+  "calendar_week_friday_initial_text": "शु",
+  "@calendar_week_friday_initial_text": {
+    "description": "This is text of Friday initial"
   },
-  "calendar_week_saturday_initial_text" : "श",
-  "@calendar_week_saturday_initial_text" : {
-    "description" : "This is text of Saturday initial"
+  "calendar_week_saturday_initial_text": "श",
+  "@calendar_week_saturday_initial_text": {
+    "description": "This is text of Saturday initial"
   },
-  "calendar_week_sunday_initial_text" : "र",
-  "@calendar_week_sunday_initial_text" : {
-    "description" : "This is text of Sunday initial"
+  "calendar_week_sunday_initial_text": "र",
+  "@calendar_week_sunday_initial_text": {
+    "description": "This is text of Sunday initial"
   },
-  "dashboard_netWorthTitle": "निवल मूल्य",
+  "dashboard_netWorthTitle": "कुल संपत्ति",
   "@dashboard_netWorthTitle": {
     "description": "This is title of Net Worth"
   },
@@ -320,7 +320,7 @@
   "@budget_dashboardPageTitle": {
     "description": "This is title of Budgets Details"
   },
-  "budget_dashboardNotFoundText": "कोई बजट परिभाषित नहीं है, एक जोड़ें!",
+  "budget_dashboardNotFoundText": "कोई Budget नहीं है, एक बनाएं!",
   "@budget_dashboardNotFoundText": {
     "description": "This is text of budget not found"
   },
@@ -340,7 +340,7 @@
   "@budget_buttonDeleteTitleText": {
     "description": "This is text of delete title"
   },
-  "budget_buttonDeleteBodyText": "यह बजट और उसके आवंटन को हटा देगा, यह क्रिया पूर्ववत नहीं की जा सकती है।",
+  "budget_buttonDeleteBodyText": "Budget और उसके allocations हट जाएंगे, ये वापस नहीं होगा।",
   "@budget_buttonDeleteBodyText": {
     "description": "This is text of delete body"
   },
@@ -404,9 +404,9 @@
   "@budget_allocateAmountText": {
     "description": "This is text of Allocate Amount"
   },
-  "budget_categoryMessageInfoText" : "आप मैन्युअल रूप से श्रेणी आवंटन दर्ज कर सकते हैं, या शेष राशि को समान रूप से स्वतः वितरित करने के लिए उन्हें खाली छोड़ सकते हैं।",
-  "@budget_categoryMessageInfoText" : {
-    "description" : "This is text of category message info"
+  "budget_categoryMessageInfoText": "Category का amount खुद डालें, या खाली छोड़ दें — बाकी बराबर बंट जाएगा।",
+  "@budget_categoryMessageInfoText": {
+    "description": "This is text of category message info"
   },
   "budget_totalAllocatedBudgetText": "कुल आवंटित: {totalAlloc}",
   "@budget_totalAllocatedBudgetText": {
@@ -516,7 +516,7 @@
   "@transaction_expenseButtonLabel": {
     "description": "This is text of Expense"
   },
-  "statistics_weTrimDownDecimalInfoText": "हम दशमलव स्थानों को कम करते हैं, यदि आवश्यक हो तो राउंड ऑफ करें।",
+  "statistics_weTrimDownDecimalInfoText": "Decimal हटा दिए हैं, ज़रूरत हो तो round off कर लें।",
   "@statistics_weTrimDownDecimalInfoText": {
     "description": "This is text of We trim down decimal places, please round off if required."
   },
@@ -624,7 +624,7 @@
   "@profile_phoneControllerHintText": {
     "description": "This is text of Enter your phone number"
   },
-  "profile_weAreNotStoringInfoText": "आपका सारा डेटा इसी डिवाइस पर सुरक्षित रहता है। न कोई सर्वर, न क्लाउड, न ही कोई ट्रैकिंग।",
+  "profile_weAreNotStoringInfoText": "आपका सारा data इसी phone में है। कोई server नहीं, कोई cloud नहीं, कोई tracking नहीं।",
   "@profile_weAreNotStoringInfoText": {
     "description": "This is text of We are not storing"
   },
@@ -676,7 +676,7 @@
   "@statistics_recentTransactionsModalTitle": {
     "description": "This is title for recent transactions modal"
   },
-  "transfer_screenTitle": "धन स्थानांतरण",
+  "transfer_screenTitle": "पैसे Transfer करें",
   "@transfer_screenTitle": {
     "description": "This is title of Transfer screen"
   },
@@ -684,7 +684,7 @@
   "@transfer_resetTooltip": {
     "description": "This is tooltip for reset button"
   },
-  "transfer_selectAccountsLabel": "खाते चुनें",
+  "transfer_selectAccountsLabel": "ACCOUNTS चुनें",
   "@transfer_selectAccountsLabel": {
     "description": "This is label for select accounts section"
   },
@@ -696,7 +696,7 @@
   "@transfer_toLabel": {
     "description": "This is label for to account"
   },
-  "transfer_detailsLabel": "स्थानांतरण विवरण",
+  "transfer_detailsLabel": "TRANSFER विवरण",
   "@transfer_detailsLabel": {
     "description": "This is label for transfer details section"
   },
@@ -716,15 +716,15 @@
   "@transfer_noteLabel": {
     "description": "This is label for note field"
   },
-  "transfer_buttonLabel": "स्थानांतरण",
+  "transfer_buttonLabel": "Transfer करें",
   "@transfer_buttonLabel": {
     "description": "This is label for transfer button"
   },
-  "transfer_updateButtonLabel": "स्थानांतरण अपडेट करें",
+  "transfer_updateButtonLabel": "Transfer अपडेट करें",
   "@transfer_updateButtonLabel": {
     "description": "This is label for update transfer button"
   },
-  "transfer_errorLoadingAccounts": "खाते लोड करने में त्रुटि",
+  "transfer_errorLoadingAccounts": "Accounts load नहीं हो पाए",
   "@transfer_errorLoadingAccounts": {
     "description": "This is error message for loading accounts"
   },
@@ -860,7 +860,7 @@
   "@common_noAccountsYet": {
     "description": "Message when no accounts are available"
   },
-  "common_loading": "लोड हो रहा है",
+  "common_loading": "लोड हो रहा है...",
   "@common_loading": {
     "description": "Loading text"
   },
@@ -1072,19 +1072,1753 @@
   "@sms_approveTransactionTitle": {
     "description": "Title for approve transaction dialog"
   },
-  "onboard_SmartSmsTracking": "स्मार्ट SMS ट्रैकिंग",
-  "onboard_SmartSmsTrackingDesc": "बैंक SMS से लेनदेन स्वचालित रूप से पहचानें और आयात करें।",
-  "onboard_InsightsAndAnalytics": "इनसाइट्स और एनालिटिक्स",
-  "onboard_InsightsAndAnalyticsDesc": "विस्तृत चार्ट, ट्रेंड और स्मार्ट इनसाइट्स से अपनी खर्च की आदतें समझें।",
-  "onboard_SecureAndPrivate": "सुरक्षित और निजी",
-  "onboard_SecureAndPrivateDesc": "आपका डेटा आपके डिवाइस पर रहता है। कोई क्लाउड नहीं, कोई ट्रैकिंग नहीं।",
+  "onboard_SmartSmsTracking": "Smart SMS Tracking",
+  "onboard_SmartSmsTrackingDesc": "Bank SMS से transactions अपने आप detect और import होंगे।",
+  "onboard_InsightsAndAnalytics": "Insights और Analytics",
+  "onboard_InsightsAndAnalyticsDesc": "Charts, trends और smart insights से अपनी spending habits समझें।",
+  "onboard_SecureAndPrivate": "Safe और Private",
+  "onboard_SecureAndPrivateDesc": "Data आपके phone में ही रहता है। कोई cloud नहीं, कोई tracking नहीं।",
   "onboard_SmartAutoTracking": "Smart Auto Tracking",
   "@onboard_SmartAutoTracking": {
     "description": "Auto-detect transactions from notifications"
   },
-  "onboard_SmartAutoTrackingDesc": "Automatically detect and import transactions from your bank notifications.",
+  "onboard_SmartAutoTrackingDesc": "Bank notifications से transactions अपने आप detect और import होंगे।",
   "@onboard_SmartAutoTrackingDesc": {
     "description": "Description for auto tracking onboarding page"
-  }
-
+  },
+  "nav_activity": "गतिविधि",
+  "nav_manage": "प्रबंधन",
+  "nav_insights": "विश्लेषण",
+  "common_save": "सहेजें",
+  "common_cancel": "रद्द करें",
+  "common_next": "आगे",
+  "common_back": "पीछे",
+  "common_delete": "हटाएं",
+  "common_edit": "संपादित करें",
+  "common_add": "जोड़ें",
+  "common_done": "हो गया",
+  "common_close": "बंद करें",
+  "common_confirm": "पुष्टि करें",
+  "common_archive": "संग्रह करें",
+  "common_create": "बनाएं",
+  "common_update": "अपडेट करें",
+  "common_remove": "निकालें",
+  "common_search": "खोजें",
+  "common_filter": "फ़िल्टर",
+  "common_reset": "रीसेट",
+  "common_apply": "लागू करें",
+  "common_yes": "हाँ",
+  "common_no": "नहीं",
+  "common_ok": "ठीक है",
+  "common_retry": "पुनः प्रयास",
+  "common_noData": "कोई डेटा नहीं",
+  "common_error": "कुछ गड़बड़ हो गई",
+  "common_required": "आवश्यक",
+  "title_budgets": "बजट",
+  "title_goals": "Goals",
+  "title_bills": "बिल",
+  "title_groups": "समूह",
+  "title_trips": "यात्राएं",
+  "title_shared": "साझा",
+  "title_achievements": "उपलब्धियां",
+  "title_notifications": "सूचनाएं",
+  "title_appearance": "दिखावट",
+  "title_currency": "मुद्रा",
+  "title_security": "सुरक्षा",
+  "title_about": "जानकारी",
+  "title_analytics": "विश्लेषण",
+  "title_netWorth": "कुल संपत्ति",
+  "title_financialHealth": "वित्तीय स्वास्थ्य",
+  "title_spendingPersonality": "खर्च की शैली",
+  "title_monthlyRecap": "मासिक सारांश",
+  "title_compareMonths": "महीनों की तुलना",
+  "title_smsImport": "SMS आयात",
+  "title_backupShare": "बैकअप और शेयर",
+  "title_exchangeRates": "विनिमय दरें",
+  "title_recurringTransactions": "आवर्ती लेनदेन",
+  "title_billControlCenter": "बिल नियंत्रण केंद्र",
+  "title_plugins": "प्लगइन",
+  "title_editCategory": "श्रेणी संपादित करें",
+  "title_allCategories": "सभी श्रेणियां",
+  "title_exportOptions": "निर्यात विकल्प",
+  "title_dashboardLayout": "डैशबोर्ड लेआउट",
+  "section_activeMoney": "सक्रिय धन",
+  "section_planning": "योजना",
+  "section_insights": "अंतर्दृष्टि",
+  "section_coreSettings": "मुख्य सेटिंग्स",
+  "section_appData": "ऐप और डेटा",
+  "section_appearance": "दिखावट",
+  "section_advanced": "उन्नत",
+  "section_supportLegal": "सहायता और कानूनी",
+  "section_active": "सक्रिय",
+  "section_ongoing": "चालू",
+  "section_archive": "संग्रह",
+  "label_income": "आय",
+  "label_expense": "खर्च",
+  "label_balance": "शेष",
+  "label_savings": "बचत",
+  "label_total": "कुल",
+  "label_amount": "राशि",
+  "label_date": "तारीख",
+  "label_category": "श्रेणी",
+  "label_account": "खाता",
+  "label_description": "विवरण",
+  "label_type": "प्रकार",
+  "label_transfer": "ट्रांसफर",
+  "label_from": "से",
+  "label_to": "को",
+  "label_all": "सभी",
+  "label_today": "आज",
+  "label_yesterday": "कल",
+  "label_thisWeek": "इस सप्ताह",
+  "label_thisMonth": "इस महीने",
+  "label_thisYear": "इस साल",
+  "label_custom": "कस्टम",
+  "label_daily": "दैनिक",
+  "label_weekly": "साप्ताहिक",
+  "label_monthly": "मासिक",
+  "label_yearly": "वार्षिक",
+  "label_none": "कोई नहीं",
+  "trip_expenses": "खर्चे",
+  "trip_settlements": "निपटान",
+  "trip_balances": "शेष राशि",
+  "trip_report": "रिपोर्ट",
+  "trip_createTrip": "यात्रा बनाएं",
+  "trip_createGroup": "साझा समूह बनाएं",
+  "trip_editTrip": "यात्रा संपादित करें",
+  "trip_editGroup": "समूह संपादित करें",
+  "trip_archiveTrip": "यात्रा संग्रह करें",
+  "trip_archiveGroup": "समूह संग्रह करें",
+  "trip_allSettled": "सब निपट गया!",
+  "trip_archiveToSettle": "निपटान के लिए संग्रह करें",
+  "trip_trackTravel": "Travel खर्चे dates और budget के साथ track करें",
+  "trip_splitBills": "दोस्तों के साथ bill split करें",
+  "trip_live": "लाइव",
+  "budget_spendingLimits": "खर्च सीमा",
+  "budget_savingsProgress": "बचत प्रगति",
+  "budget_upcomingRecurring": "आगामी और आवर्ती",
+  "budget_tripsAndSplits": "Trips और splits",
+  "import_importing": "{count} लेनदेन आयात हो रहे हैं...",
+  "@import_importing": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "import_dontClose": "App बंद मत करें",
+  "import_complete": "Import हो गया!",
+  "import_failed": "Import नहीं हो पाया",
+  "import_imported": "आयातित",
+  "import_duplicatesSkipped": "डुप्लिकेट छोड़े गए",
+  "import_errorsSkipped": "त्रुटियां/छोड़े गए",
+  "import_categoriesCreated": "श्रेणियां बनाई गईं",
+  "import_previewImport": "आयात पूर्वावलोकन",
+  "recap_yourMonthAtGlance": "इस महीने का हाल",
+  "recap_trackProgressOverTime": "Progress track करें",
+  "recap_transactions": "{count} लेनदेन",
+  "@recap_transactions": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recap_downloadPdf": "PDF डाउनलोड करें",
+  "comparison_current": "वर्तमान",
+  "comparison_byDay": "दिन {day} तक",
+  "@comparison_byDay": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "comparison_topCategories": "शीर्ष श्रेणियां",
+  "comparison_categoryImpact": "श्रेणी प्रभाव",
+  "comparison_dailySpendingPace": "Daily खर्च की रफ्तार",
+  "comparison_projected": "अनुमान: इस महीने {amount} खर्च होंगे",
+  "@comparison_projected": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "utility_customizeUtilities": "उपयोगिताएं अनुकूलित करें",
+  "utility_addUtilities": "उपयोगिताएं जोड़ें",
+  "profile_accounts": "खाते",
+  "profile_manageAccounts": "अपने खाते प्रबंधित करें",
+  "profile_categories": "श्रेणियां",
+  "profile_manageCategories": "अपनी श्रेणियां प्रबंधित करें",
+  "profile_language": "भाषा",
+  "profile_notifications": "सूचनाएं",
+  "profile_dailyWeeklySummaries": "दैनिक और साप्ताहिक सारांश",
+  "profile_autoImport": "ऑटो आयात",
+  "profile_autoImportDesc": "Bank notifications से auto import",
+  "profile_importExport": "आयात और निर्यात",
+  "profile_importExportDesc": "Excel import और export",
+  "profile_backupRestore": "बैकअप और पुनर्स्थापना",
+  "profile_manageData": "अपना डेटा प्रबंधित करें",
+  "profile_themeDisplay": "Theme, tone और display",
+  "profile_customizeWidgets": "Widgets और cards customize करें",
+  "profile_manageExtensions": "एक्सटेंशन प्रबंधित करें",
+  "profile_helpSupport": "सहायता और समर्थन",
+  "profile_faqs": "FAQs और feature guides",
+  "profile_aboutApp": "ऐप के बारे में",
+  "profile_versionInfo": "संस्करण और जानकारी",
+  "profile_pinFingerprint": "PIN या फिंगरप्रिंट",
+  "profile_upgradePro": "Pro में अपग्रेड करें",
+  "profile_unlimitedFeatures": "Unlimited accounts, analytics और बहुत कुछ",
+  "profile_freeTier": "मुफ्त योजना",
+  "profile_fullAccess": "पूर्ण पहुँच",
+  "profile_proActive": "Pro सक्रिय",
+  "profile_yourAchievements": "आपकी उपलब्धियां",
+  "profile_bestStreak": "सर्वश्रेष्ठ स्ट्रीक",
+  "trips_active": "सक्रिय",
+  "trips_live": "लाइव",
+  "trips_allSettled": "सब निपट गया",
+  "tone_friendly_txnAdded": "Done! Transaction save हो गया ✨|बन गया! सब note हो गया 👍|Save हो गया! आप track पर हैं ✨|Note हो गया! एक और track 📝",
+  "tone_friendly_txnUpdated": "Update हो गया! 👍|Changes save हो गए! ✓|सब update! 👌",
+  "tone_friendly_txnDeleted": "हट गया! Transaction remove 🗑️|Delete हो गया! एक कम|Remove! साफ़ 🗑️",
+  "tone_friendly_txnFailed": "Save नहीं हो पाया, फिर try करें?",
+  "tone_friendly_enterAmount": "कितना था? Amount डालें",
+  "tone_friendly_pickAccount": "कौन सा account? एक चुनें",
+  "tone_friendly_pickCategory": "किसके लिए था? Category चुनें",
+  "tone_friendly_fillAllFields": "बस थोड़ा बाकी — सब fields भरें",
+  "tone_friendly_invalidAmount": "ये सही नहीं लग रहा — सही amount डालें",
+  "tone_friendly_budgetCreated": "Budget set! Track पर रहें 💪|Budget lock! Planning अच्छी है 💪|बढ़िया! Budget ready 📊",
+  "tone_friendly_budgetUpdated": "Budget update हो गया!",
+  "tone_friendly_budgetDeleted": "Budget हटा दिया",
+  "tone_friendly_goalCreated": "Goal set! आप कर सकते हैं 🎯|नया goal! चलो पूरा करें 🎯|Goal lock! नज़र रखें 🎯",
+  "tone_friendly_goalUpdated": "Goal update हो गया!",
+  "tone_friendly_goalDeleted": "Goal हटा दिया",
+  "tone_friendly_accountCreated": "Account बन गया! 🏦",
+  "tone_friendly_billAdded": "Bill track हो रहा! Remind करेंगे 🔔",
+  "tone_friendly_billPaid": "बढ़िया, bill paid! ✅|Bill done! एक tension कम ✅|Paid! राहत ✅",
+  "tone_friendly_backupSuccess": "Backup हो गया! Data safe है 🛡️",
+  "tone_friendly_restoreSuccess": "Restore हो गया! Welcome back 🎉",
+  "tone_friendly_noTransactions": "अभी कुछ नहीं है\nपहला transaction डालकर शुरू करें|अभी खाली है\nTracking शुरू करें — बस एक sec|कोई transaction नहीं\nआपकी financial journey यहीं से शुरू",
+  "tone_friendly_noBudgets": "कोई budget नहीं\nएक बनाएं, spending track होगी",
+  "tone_friendly_noGoals": "कोई goal नहीं\nबड़ा सोचें — पहला goal set करें!",
+  "tone_friendly_genericError": "कुछ गड़बड़ हो गई। फिर try करें?",
+  "tone_friendly_smsImportEnabled": "Auto import on! Transactions track होंगे 📩",
+  "tone_friendly_dashboardAllCaughtUp": "सब up to date! 🎉|कुछ pending नहीं — मज़े करें! ✨|सब ठीक है! दिन enjoy करें 🎉",
+  "tone_friendly_dailySummaryEmpty": "कल कुछ record नहीं हुआ — zero-spend win या catch up का time!|कल शांत दिन था — wallet खुश!|कल कोई transaction नहीं — आज fresh start!",
+  "tone_friendly_streakMessage": "{days} दिन की streak! जारी रखें! 🔥",
+  "@tone_friendly_streakMessage": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_friendly_budgetExceededBy": "Budget {amount} से ज़्यादा हो गया 😬",
+  "@tone_friendly_budgetExceededBy": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_professional_txnAdded": "Transaction record हो गया।|Entry save हो गई।|Transaction log हो गया।",
+  "tone_professional_txnUpdated": "Transaction update हो गया।|Changes apply हो गए।|Record update हो गया।",
+  "tone_professional_txnDeleted": "Transaction delete हो गया।|Record remove हो गया।|Entry delete हो गई।",
+  "tone_professional_txnFailed": "Transaction save नहीं हो पाया। फिर try करें।",
+  "tone_professional_enterAmount": "सही amount डालें।",
+  "tone_professional_pickAccount": "Account select करें।",
+  "tone_professional_pickCategory": "Category select करें।",
+  "tone_professional_fillAllFields": "सभी ज़रूरी fields भरें।",
+  "tone_professional_invalidAmount": "गलत amount डाला गया।",
+  "tone_professional_budgetCreated": "Budget बन गया।|Budget configure हो गया।|नया budget active है।",
+  "tone_professional_budgetUpdated": "Budget update हो गया।",
+  "tone_professional_budgetDeleted": "Budget delete हो गया।",
+  "tone_professional_goalCreated": "Goal बन गया।|Savings goal configure हो गया।|नया goal active है।",
+  "tone_professional_goalUpdated": "Goal update हो गया।",
+  "tone_professional_goalDeleted": "Goal delete हो गया।",
+  "tone_professional_accountCreated": "Account बन गया।",
+  "tone_professional_billAdded": "Bill add हो गया। Remind किया जाएगा।",
+  "tone_professional_billPaid": "Bill paid mark हो गया।|Payment record हो गया।|Bill settle हो गया।",
+  "tone_professional_backupSuccess": "Backup पूरा हो गया।",
+  "tone_professional_restoreSuccess": "Data restore हो गया।",
+  "tone_professional_noTransactions": "कोई transaction record नहीं।\nपहली entry डालें।|कोई record नहीं।\nTransaction डालकर शुरू करें।|Transaction history खाली है।\nRecording शुरू करें।",
+  "tone_professional_noBudgets": "कोई budget configure नहीं।",
+  "tone_professional_noGoals": "कोई goal set नहीं।",
+  "tone_professional_genericError": "Error आ गई।",
+  "tone_professional_smsImportEnabled": "Auto-import on हो गया।",
+  "tone_professional_dashboardAllCaughtUp": "सब up to date है।|कोई pending action नहीं।|सब current है।",
+  "tone_professional_dailySummaryEmpty": "कल कोई transaction record नहीं।|कल कोई activity नहीं।|पिछले दिन कोई entry नहीं।",
+  "tone_professional_streakMessage": "लगातार {days} दिन tracking।",
+  "@tone_professional_streakMessage": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_professional_budgetExceededBy": "Budget {amount} से exceed हो गया।",
+  "@tone_professional_budgetExceededBy": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_motivational_txnAdded": "बढ़िया! Transaction save हो गया! 💪|Log हो गया! आप रुक नहीं रहे 💪|एक और track! Momentum बनाए रखें! ✨|Save! हर entry एक कदम आगे! 🚀",
+  "tone_motivational_txnUpdated": "अच्छा update! Sharp बने रहें! ✨|Update! Precision matters! ✨|Changes save! आप इस पर हैं! 👍",
+  "tone_motivational_txnDeleted": "साफ़! एक कम tension|Remove! चीज़ें clean रखें! 💪|गया! जो ज़रूरी है उस पर focus",
+  "tone_motivational_txnFailed": "नहीं हो पाया — एक और try दें!",
+  "tone_motivational_enterAmount": "हर रुपया count होता है — amount डालें!",
+  "tone_motivational_pickAccount": "Account चुनें, organized रहें!",
+  "tone_motivational_pickCategory": "Category दें — बाद में खुद को thank करेंगे!",
+  "tone_motivational_fillAllFields": "बस थोड़ा बाकी! सब भरें",
+  "tone_motivational_invalidAmount": "ये amount सही नहीं लग रहा — फिर try!",
+  "tone_motivational_budgetCreated": "Smart move! Budget set! 💪|Budget lock! Control आपके हाथ में! 💪|Discipline! Budget ready! 📊",
+  "tone_motivational_budgetUpdated": "Budget adjust — flexible बने रहें!",
+  "tone_motivational_budgetDeleted": "Budget हटा दिया",
+  "tone_motivational_goalCreated": "Ambition! Goal set! 🎯|बड़े सपने यहीं से! Goal lock! 🎯|ये spirit! नया goal ready! 🚀",
+  "tone_motivational_goalUpdated": "Goal refine — push करते रहें!",
+  "tone_motivational_goalDeleted": "Goal हटा — नई priorities, नई plans",
+  "tone_motivational_accountCreated": "Account बन गया! Organized हो रहे हैं! 🏦",
+  "tone_motivational_billAdded": "Bill track! आप आगे हैं! 🔔",
+  "tone_motivational_billPaid": "Bill paid! एक tension कम! ✅|Crush कर दिया! Bill done! ✅|Paid! Game से आगे! 💪",
+  "tone_motivational_backupSuccess": "Backup हो गया! Progress safe! 🛡️",
+  "tone_motivational_restoreSuccess": "Restore! वापस track पर! 🎉",
+  "tone_motivational_noTransactions": "Fresh start! 🌟\nपहला transaction डालें — हर journey एक कदम से शुरू|खाली slate! 🌟\nपहली entry wait कर रही — चलो!|अभी कुछ नहीं! 💪\nएक transaction और आप रास्ते पर!",
+  "tone_motivational_noBudgets": "कोई budget नहीं\nएक बनाएं — future self thank करेगा! 💪",
+  "tone_motivational_noGoals": "कोई goal नहीं\nबड़ा सोचें — पहला goal set करें! 🎯",
+  "tone_motivational_genericError": "कुछ गड़बड़ हो गई — फिर try!",
+  "tone_motivational_smsImportEnabled": "Auto-import on! Finances खुद track होंगे! 📩",
+  "tone_motivational_dashboardAllCaughtUp": "सब caught up — game से आगे! 🏆|कुछ pending नहीं — top पर हैं 💪|All clear! ये energy बनाए रखें 🏆",
+  "tone_motivational_dailySummaryEmpty": "कल zero spend — wallet खुश! ✨|कल कुछ खर्च नहीं — willpower! 💪|No-spend day! ये win है! 🏆",
+  "tone_motivational_streakMessage": "{days} दिन की streak! रुकने वाले नहीं! 🔥",
+  "@tone_motivational_streakMessage": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_motivational_budgetExceededBy": "{amount} ज़्यादा — course correct कर सकते हैं! 💪",
+  "@tone_motivational_budgetExceededBy": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_calm_txnAdded": "Note हो गया।|Record हो गया।|चुपचाप save।",
+  "tone_calm_txnUpdated": "Update।|Adjust।|Changes save।",
+  "tone_calm_txnDeleted": "छोड़ दिया।|हटा दिया।|जाने दिया।",
+  "tone_calm_txnFailed": "नहीं हो पाया। एक बार और।",
+  "tone_calm_enterAmount": "Amount चाहिए।",
+  "tone_calm_pickAccount": "ये कहाँ belongs है, चुनें।",
+  "tone_calm_pickCategory": "इसे एक purpose दें।",
+  "tone_calm_fillAllFields": "कुछ चीज़ें अभी खाली हैं।",
+  "tone_calm_invalidAmount": "Amount ठीक करना होगा।",
+  "tone_calm_budgetCreated": "सीमा तय।|Budget बन गया।|Limits set।",
+  "tone_calm_budgetUpdated": "Adjust हो गया।",
+  "tone_calm_budgetDeleted": "छोड़ दिया।",
+  "tone_calm_goalCreated": "इरादा तय।|नई दिशा।|Goal बोया।",
+  "tone_calm_goalUpdated": "Refine हो गया।",
+  "tone_calm_goalDeleted": "छोड़ दिया।",
+  "tone_calm_accountCreated": "Account खुल गया।",
+  "tone_calm_billAdded": "Note हो गया। Remind करेंगे।",
+  "tone_calm_billPaid": "Settle हो गया।|Paid। एक कम।|हो गया। शांति।",
+  "tone_calm_backupSuccess": "सुरक्षित रख लिया।",
+  "tone_calm_restoreSuccess": "Restore हो गया। Welcome back।",
+  "tone_calm_noTransactions": "साफ़ slate।\nजब तैयार हों, शुरू करें।|अभी कुछ नहीं।\nधीरे से शुरू करें।|खाली।\nनई शुरुआत इंतज़ार कर रही।",
+  "tone_calm_noBudgets": "कोई सीमा नहीं।\nजब सही लगे, बनाएं।",
+  "tone_calm_noGoals": "कोई इरादा नहीं।\nजब तैयार हों, set करें।",
+  "tone_calm_genericError": "कुछ बदल गया। फिर try करें।",
+  "tone_calm_smsImportEnabled": "चुपचाप transactions देख रहे हैं।",
+  "tone_calm_dashboardAllCaughtUp": "सब ठीक है।|कुछ attention नहीं चाहिए।|सब शांत।",
+  "tone_calm_dailySummaryEmpty": "शांत दिन। कुछ record नहीं।|कल स्थिर था। कोई entry नहीं।|कुछ खर्च नहीं। आराम का दिन।",
+  "tone_calm_streakMessage": "{days} दिन mindful tracking।",
+  "@tone_calm_streakMessage": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_calm_budgetExceededBy": "{amount} ऊपर। सोचने का पल।",
+  "@tone_calm_budgetExceededBy": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_friendly_insightBillsDueSoon": "ध्यान दें — bills आ रहे हैं",
+  "tone_friendly_insightOverBudget": "Budget पार हो गया",
+  "tone_friendly_insightNearBudget": "Budget के करीब...",
+  "tone_friendly_insightOverspending": "खर्च आमदनी से ज्यादा",
+  "tone_friendly_insightSpendingSpike": "आज खर्च ज्यादा है",
+  "tone_friendly_insightWeekendAlert": "Weekend खर्च alert",
+  "tone_friendly_insightGetStarted": "चलो शुरू करें! 🚀",
+  "tone_friendly_insightGetStartedMessage": "पहला transaction डालें — बस एक sec",
+  "tone_friendly_insightBillsDueMessage": "{count} bill(s) जल्दी due हैं, भूलना मत!",
+  "@tone_friendly_insightBillsDueMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_friendly_insightOverBudgetMessage": "{count} budget(s) इस महीने पार हो गए — एक नज़र डालें",
+  "@tone_friendly_insightOverBudgetMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_friendly_insightNearBudgetMessage": "{count} budget(s) 80% से ऊपर — अभी समय है",
+  "@tone_friendly_insightNearBudgetMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_friendly_insightOverspendingMessage": "इस महीने income से {amount} ज्यादा खर्च — थोड़ा slow करें",
+  "@tone_friendly_insightOverspendingMessage": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_friendly_insightSpendingSpikeMessage": "आप रोज़ {avg}/day खर्च करते हैं। आज {today} हो चुका।",
+  "@tone_friendly_insightSpendingSpikeMessage": {
+    "placeholders": {
+      "avg": {
+        "type": "String"
+      },
+      "today": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_friendly_insightWeekendAlertMessage": "Weekend पर आमतौर पर {avg} खर्च। इस बार {current} हो चुका।",
+  "@tone_friendly_insightWeekendAlertMessage": {
+    "placeholders": {
+      "avg": {
+        "type": "String"
+      },
+      "current": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_professional_insightBillsDueSoon": "आगामी bills",
+  "tone_professional_insightOverBudget": "Budget exceed",
+  "tone_professional_insightNearBudget": "Budget limit के करीब",
+  "tone_professional_insightOverspending": "खर्च income से ज्यादा",
+  "tone_professional_insightSpendingSpike": "आज खर्च बढ़ा हुआ",
+  "tone_professional_insightWeekendAlert": "Weekend खर्च बढ़ा",
+  "tone_professional_insightGetStarted": "शुरू करें",
+  "tone_professional_insightGetStartedMessage": "Tracking शुरू करने के लिए पहला transaction record करें।",
+  "tone_professional_insightBillsDueMessage": "{count} bill(s) कुছ दिनों में due हैं।",
+  "@tone_professional_insightBillsDueMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_professional_insightOverBudgetMessage": "इस महीने {count} budget(s) exceed हो गए।",
+  "@tone_professional_insightOverBudgetMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_professional_insightNearBudgetMessage": "{count} budget(s) 80% से ऊपर।",
+  "@tone_professional_insightNearBudgetMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_professional_insightOverspendingMessage": "इस महीने खर्च income से {amount} ज्यादा है।",
+  "@tone_professional_insightOverspendingMessage": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_professional_insightSpendingSpikeMessage": "Daily average: {avg}। आज: {today}।",
+  "@tone_professional_insightSpendingSpikeMessage": {
+    "placeholders": {
+      "avg": {
+        "type": "String"
+      },
+      "today": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_professional_insightWeekendAlertMessage": "Weekend average: {avg}। अभी: {current}।",
+  "@tone_professional_insightWeekendAlertMessage": {
+    "placeholders": {
+      "avg": {
+        "type": "String"
+      },
+      "current": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_motivational_insightBillsDueSoon": "Bills आ रहे हैं! 📋",
+  "tone_motivational_insightOverBudget": "Budget पार — वापस आएं",
+  "tone_motivational_insightNearBudget": "Limit के करीब",
+  "tone_motivational_insightOverspending": "खर्च income से ज्यादा",
+  "tone_motivational_insightSpendingSpike": "आज खर्च spike",
+  "tone_motivational_insightWeekendAlert": "Weekend खर्च alert",
+  "tone_motivational_insightGetStarted": "कुছ बड़ा बनाते हैं! 🚀",
+  "tone_motivational_insightGetStartedMessage": "पहला transaction डालें — बस एक step!",
+  "tone_motivational_insightBillsDueMessage": "{count} bill(s) जल्दी due — आगे रहें!",
+  "@tone_motivational_insightBillsDueMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_motivational_insightOverBudgetMessage": "{count} budget(s) exceed — course-correct कर सकते हैं!",
+  "@tone_motivational_insightOverBudgetMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_motivational_insightNearBudgetMessage": "{count} budget(s) 80% से ऊपर — आप कर सकते हैं!",
+  "@tone_motivational_insightNearBudgetMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_motivational_insightOverspendingMessage": "Income से {amount} ज्यादा — छोटे adjustments बड़ा फर्क लाते हैं!",
+  "@tone_motivational_insightOverspendingMessage": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_motivational_insightSpendingSpikeMessage": "आमतौर पर {avg}/day। आज {today} — intentional रहें!",
+  "@tone_motivational_insightSpendingSpikeMessage": {
+    "placeholders": {
+      "avg": {
+        "type": "String"
+      },
+      "today": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_motivational_insightWeekendAlertMessage": "Weekend avg: {avg}। इस बार {current} — aware रहें!",
+  "@tone_motivational_insightWeekendAlertMessage": {
+    "placeholders": {
+      "avg": {
+        "type": "String"
+      },
+      "current": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_calm_insightBillsDueSoon": "Bills आ रहे हैं",
+  "tone_calm_insightOverBudget": "सीमा पार",
+  "tone_calm_insightNearBudget": "सीमा के करीब",
+  "tone_calm_insightOverspending": "खर्च आमदनी से ज्यादा",
+  "tone_calm_insightSpendingSpike": "भारी दिन",
+  "tone_calm_insightWeekendAlert": "Weekend खर्च",
+  "tone_calm_insightGetStarted": "नई शुरुआत",
+  "tone_calm_insightGetStartedMessage": "पहले transaction से शुरू करें।",
+  "tone_calm_insightBillsDueMessage": "{count} bill(s) जल्दी आएंगे।",
+  "@tone_calm_insightBillsDueMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_calm_insightOverBudgetMessage": "{count} budget(s) पार। सोचें और adjust करें।",
+  "@tone_calm_insightOverBudgetMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_calm_insightNearBudgetMessage": "{count} budget(s) 80% से ऊपर। सोच-समझ कर खर्च करें।",
+  "@tone_calm_insightNearBudgetMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_calm_insightOverspendingMessage": "आमदनी से {amount} ज्यादा खर्च। रुकें।",
+  "@tone_calm_insightOverspendingMessage": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_calm_insightSpendingSpikeMessage": "आमतौर पर {avg}/day। आज {today}।",
+  "@tone_calm_insightSpendingSpikeMessage": {
+    "placeholders": {
+      "avg": {
+        "type": "String"
+      },
+      "today": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_calm_insightWeekendAlertMessage": "आमतौर पर {avg}। इस weekend {current}।",
+  "@tone_calm_insightWeekendAlertMessage": {
+    "placeholders": {
+      "avg": {
+        "type": "String"
+      },
+      "current": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_friendly_insightMoneyLeak": "{category}: इस महीने {count} बार, कुल {total} — छोटे खर्च भी जोड़ लेते हैं",
+  "@tone_friendly_insightMoneyLeak": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_friendly_insightBestDay": "{worst}s पर avg {wAvg} vs {best}s पर {bAvg} — {saving} बचा सकते हैं",
+  "@tone_friendly_insightBestDay": {
+    "placeholders": {
+      "worst": {
+        "type": "String"
+      },
+      "wAvg": {
+        "type": "String"
+      },
+      "best": {
+        "type": "String"
+      },
+      "bAvg": {
+        "type": "String"
+      },
+      "saving": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_professional_insightMoneyLeak": "{category}: {count} transactions, कुल {total} इस महीने।",
+  "@tone_professional_insightMoneyLeak": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_professional_insightBestDay": "{worst}s पर avg {wAvg} vs {best}s पर {bAvg}। बचत की संभावना: {saving}।",
+  "@tone_professional_insightBestDay": {
+    "placeholders": {
+      "worst": {
+        "type": "String"
+      },
+      "wAvg": {
+        "type": "String"
+      },
+      "best": {
+        "type": "String"
+      },
+      "bAvg": {
+        "type": "String"
+      },
+      "saving": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_motivational_insightMoneyLeak": "{category}: {count} बार, {total} — छोटी जीत बड़ा फर्क लाती है!",
+  "@tone_motivational_insightMoneyLeak": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_motivational_insightBestDay": "{worst}s पर {wAvg} vs {best}s पर {bAvg} — {saving} बचा सकते हैं!",
+  "@tone_motivational_insightBestDay": {
+    "placeholders": {
+      "worst": {
+        "type": "String"
+      },
+      "wAvg": {
+        "type": "String"
+      },
+      "best": {
+        "type": "String"
+      },
+      "bAvg": {
+        "type": "String"
+      },
+      "saving": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_calm_insightMoneyLeak": "{category}: {count} बार, {total}। छोटी धाराएं नदी बनाती हैं।",
+  "@tone_calm_insightMoneyLeak": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_calm_insightBestDay": "{worst}s: {wAvg}। {best}s: {bAvg}। {saving} बचा सकते हैं।",
+  "@tone_calm_insightBestDay": {
+    "placeholders": {
+      "worst": {
+        "type": "String"
+      },
+      "wAvg": {
+        "type": "String"
+      },
+      "best": {
+        "type": "String"
+      },
+      "bAvg": {
+        "type": "String"
+      },
+      "saving": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_friendly_txnNotFound": "Can't find that transaction",
+  "tone_friendly_futureDate": "Pick today or earlier",
+  "tone_friendly_selectAccountAndCategory": "Pick an account & category first",
+  "tone_friendly_addParticipant": "Add at least one person to split with",
+  "tone_friendly_budgetExceededAdjust": "You've exceeded this budget. Maybe ease up a bit?",
+  "tone_friendly_budgetGreatDiscipline": "Great discipline! You're well within your budget ✨",
+  "tone_friendly_comparisonSpentSame": "Spending is about the same as last month — steady!",
+  "tone_friendly_accountUpdated": "Account updated!",
+  "tone_friendly_accountDeleted": "Account removed",
+  "tone_friendly_accountLocked": "This account is locked — upgrade to Pro to use it 🔒",
+  "tone_friendly_categoryCreated": "Category added!",
+  "tone_friendly_categoryDeleted": "Category removed",
+  "tone_friendly_categoryNameRequired": "Give it a name!",
+  "tone_friendly_billDeleted": "Bill removed",
+  "tone_friendly_backupFailed": "Backup didn't work — try again?",
+  "tone_friendly_restoreFailed": "Restore failed — is the file okay?",
+  "tone_friendly_invalidBackupFile": "That doesn't look like a valid backup file",
+  "tone_friendly_corruptBackup": "This backup looks corrupted 😕",
+  "tone_friendly_settingsSaved": "Saved! ✓",
+  "tone_friendly_reminderUpdated": "Reminder updated ⏰",
+  "tone_friendly_biometricFailed": "Authentication failed — try again",
+  "tone_friendly_incorrectPin": "Wrong PIN — give it another shot",
+  "tone_friendly_notificationAccessDenied": "Need notification access to auto-import transactions",
+  "tone_friendly_noBills": "No bills tracked\\nAdd recurring bills so you never miss a payment",
+  "tone_friendly_noAccounts": "No accounts yet\\nAdd one to start tracking",
+  "tone_friendly_noCategories": "No categories yet",
+  "tone_friendly_noNotifications": "All quiet here\\nNo notifications yet",
+  "tone_friendly_noData": "Not enough data yet\\nKeep tracking to unlock insights",
+  "tone_friendly_noRecurring": "No recurring transactions\\nAdd bills to auto-track them",
+  "tone_friendly_exportSuccess": "Report exported! 📄",
+  "tone_friendly_purchaseFailed": "Purchase didn't go through — try again?",
+  "tone_friendly_playNotAvailable": "Google Play isn't available on this device",
+  "tone_friendly_deleteTitle": "Are you sure?",
+  "tone_friendly_deleteCancel": "Keep it",
+  "tone_friendly_deleteConfirm": "Delete",
+  "tone_friendly_logoutTitle": "Leaving already?",
+  "tone_friendly_logoutMessage": "All your data will be cleared from this device.",
+  "tone_friendly_logoutConfirm": "Logout",
+  "tone_friendly_currencyChanged": "Base currency updated! 💱",
+  "tone_friendly_currencyChangeTitle": "Change base currency?",
+  "tone_friendly_currencyChangeCancel": "Keep it",
+  "tone_friendly_currencyPickerTitle": "Choose Your Currency",
+  "tone_friendly_dashboardWelcomeBack": "Welcome back! Let's see where you stand",
+  "tone_professional_txnNotFound": "Transaction not found.",
+  "tone_professional_futureDate": "Future dates are not permitted.",
+  "tone_professional_selectAccountAndCategory": "Account and category are required.",
+  "tone_professional_addParticipant": "At least one participant is required.",
+  "tone_professional_budgetExceededAdjust": "Budget exceeded. Review spending or adjust the limit.",
+  "tone_professional_budgetGreatDiscipline": "Well within budget. Good financial discipline.",
+  "tone_professional_comparisonSpentSame": "Spending is consistent with last month.",
+  "tone_professional_accountUpdated": "Account updated.",
+  "tone_professional_accountDeleted": "Account removed.",
+  "tone_professional_accountLocked": "Account locked. Pro subscription required.",
+  "tone_professional_categoryCreated": "Category added.",
+  "tone_professional_categoryDeleted": "Category removed.",
+  "tone_professional_categoryNameRequired": "Category name is required.",
+  "tone_professional_billDeleted": "Bill removed.",
+  "tone_professional_backupFailed": "Backup failed. Please try again.",
+  "tone_professional_restoreFailed": "Restore failed. Verify the backup file.",
+  "tone_professional_invalidBackupFile": "Invalid backup file format.",
+  "tone_professional_corruptBackup": "Backup file is corrupted.",
+  "tone_professional_settingsSaved": "Settings saved.",
+  "tone_professional_reminderUpdated": "Reminder time updated.",
+  "tone_professional_biometricFailed": "Authentication failed.",
+  "tone_professional_incorrectPin": "Incorrect PIN.",
+  "tone_professional_notificationAccessDenied": "Notification access is required for auto-import.",
+  "tone_professional_noBills": "No recurring bills.",
+  "tone_professional_noAccounts": "No accounts configured.",
+  "tone_professional_noCategories": "No categories defined.",
+  "tone_professional_noNotifications": "No notifications.",
+  "tone_professional_noData": "Insufficient data.\\nContinue recording transactions.",
+  "tone_professional_noRecurring": "No recurring transactions configured.",
+  "tone_professional_exportSuccess": "Report exported.",
+  "tone_professional_purchaseFailed": "Purchase failed. Please retry.",
+  "tone_professional_playNotAvailable": "Google Play Services unavailable.",
+  "tone_professional_deleteTitle": "Confirm Deletion",
+  "tone_professional_deleteCancel": "Cancel",
+  "tone_professional_deleteConfirm": "Delete",
+  "tone_professional_logoutTitle": "Confirm Logout",
+  "tone_professional_logoutMessage": "All local data will be erased.",
+  "tone_professional_logoutConfirm": "Logout",
+  "tone_professional_currencyChanged": "Base currency updated.",
+  "tone_professional_currencyChangeTitle": "Change Base Currency",
+  "tone_professional_currencyChangeCancel": "Cancel",
+  "tone_professional_currencyPickerTitle": "Select Currency",
+  "tone_professional_dashboardWelcomeBack": "Welcome back. Here is your summary.",
+  "tone_motivational_txnNotFound": "Can't find that one — it may have been removed",
+  "tone_motivational_futureDate": "Let's stay in the present — pick today or earlier",
+  "tone_motivational_selectAccountAndCategory": "Account & category first — you're almost done!",
+  "tone_motivational_addParticipant": "Add at least one person to split with!",
+  "tone_motivational_budgetExceededAdjust": "Over budget — but every day is a chance to reset! 💪",
+  "tone_motivational_budgetGreatDiscipline": "Amazing discipline! You're way ahead! 🏆",
+  "tone_motivational_comparisonSpentSame": "Holding steady! Consistent spending shows control 💪",
+  "tone_motivational_accountUpdated": "Account updated!",
+  "tone_motivational_accountDeleted": "Account removed",
+  "tone_motivational_accountLocked": "This account is locked — Go Pro to unlock! 🔒",
+  "tone_motivational_categoryCreated": "New category added!",
+  "tone_motivational_categoryDeleted": "Category removed",
+  "tone_motivational_categoryNameRequired": "Give it a name!",
+  "tone_motivational_billDeleted": "Bill removed",
+  "tone_motivational_backupFailed": "Backup didn't work — try again!",
+  "tone_motivational_restoreFailed": "Restore failed — check the file and retry",
+  "tone_motivational_invalidBackupFile": "That doesn't look like a valid backup",
+  "tone_motivational_corruptBackup": "This backup seems damaged",
+  "tone_motivational_settingsSaved": "Saved! ✓",
+  "tone_motivational_reminderUpdated": "Reminder set! ⏰",
+  "tone_motivational_biometricFailed": "Authentication failed — try again!",
+  "tone_motivational_incorrectPin": "Wrong PIN — you've got this, try again!",
+  "tone_motivational_notificationAccessDenied": "Need notification access to auto-track transactions",
+  "tone_motivational_noBills": "No bills tracked\\nStay ahead by adding your recurring bills",
+  "tone_motivational_noAccounts": "No accounts yet\\nAdd one to start your financial journey!",
+  "tone_motivational_noCategories": "No categories yet",
+  "tone_motivational_noNotifications": "All clear!\\nNo notifications — you're on top of things",
+  "tone_motivational_noData": "Keep going! 📈\\nMore data means better insights",
+  "tone_motivational_noRecurring": "No recurring transactions\\nAutomate your bills to stay ahead!",
+  "tone_motivational_exportSuccess": "Report exported! 📄",
+  "tone_motivational_purchaseFailed": "Purchase didn't go through — try again!",
+  "tone_motivational_playNotAvailable": "Google Play isn't available on this device",
+  "tone_motivational_deleteTitle": "Are you sure?",
+  "tone_motivational_deleteCancel": "Keep it",
+  "tone_motivational_deleteConfirm": "Delete",
+  "tone_motivational_logoutTitle": "Heading out?",
+  "tone_motivational_logoutMessage": "All data on this device will be cleared.",
+  "tone_motivational_logoutConfirm": "Logout",
+  "tone_motivational_currencyChanged": "Currency switched! New chapter! 💱",
+  "tone_motivational_currencyChangeTitle": "Ready to switch?",
+  "tone_motivational_currencyChangeCancel": "Not yet",
+  "tone_motivational_currencyPickerTitle": "Pick Your Currency! 🌍",
+  "tone_motivational_dashboardWelcomeBack": "You're back! Let's keep the progress going! 🚀",
+  "tone_calm_txnNotFound": "Not found. It may have moved on.",
+  "tone_calm_futureDate": "Stay in the present.",
+  "tone_calm_selectAccountAndCategory": "Account and category, please.",
+  "tone_calm_addParticipant": "Add someone to share with.",
+  "tone_calm_budgetExceededAdjust": "Past the boundary. Pause and reconsider.",
+  "tone_calm_budgetGreatDiscipline": "Well within bounds. Peaceful.",
+  "tone_calm_comparisonSpentSame": "Spending flows at the same pace.",
+  "tone_calm_accountUpdated": "Adjusted.",
+  "tone_calm_accountDeleted": "Closed.",
+  "tone_calm_accountLocked": "This one is resting. Pro unlocks it.",
+  "tone_calm_categoryCreated": "Added.",
+  "tone_calm_categoryDeleted": "Removed.",
+  "tone_calm_categoryNameRequired": "A name, please.",
+  "tone_calm_billDeleted": "Released.",
+  "tone_calm_backupFailed": "Couldn't save. Try again gently.",
+  "tone_calm_restoreFailed": "Couldn't restore. Check the file.",
+  "tone_calm_invalidBackupFile": "This file doesn't feel right.",
+  "tone_calm_corruptBackup": "The file seems damaged.",
+  "tone_calm_settingsSaved": "Saved.",
+  "tone_calm_reminderUpdated": "Reminder adjusted.",
+  "tone_calm_biometricFailed": "Not recognized. Try again.",
+  "tone_calm_incorrectPin": "Not quite. Try again.",
+  "tone_calm_notificationAccessDenied": "Permission needed for quiet tracking.",
+  "tone_calm_noBills": "Nothing recurring.\\nPeaceful.",
+  "tone_calm_noAccounts": "No accounts yet.\\nStart simply.",
+  "tone_calm_noCategories": "No categories yet.",
+  "tone_calm_noNotifications": "Silence.\\nNothing needs attention.",
+  "tone_calm_noData": "Not enough yet.\\nIt will come with time.",
+  "tone_calm_noRecurring": "Nothing recurring.\\nAdd when ready.",
+  "tone_calm_exportSuccess": "Exported.",
+  "tone_calm_purchaseFailed": "Purchase didn't complete. Try again.",
+  "tone_calm_playNotAvailable": "Play Store not available here.",
+  "tone_calm_deleteTitle": "Let go?",
+  "tone_calm_deleteCancel": "Hold on",
+  "tone_calm_deleteConfirm": "Release",
+  "tone_calm_logoutTitle": "Moving on?",
+  "tone_calm_logoutMessage": "Your data here will be cleared.",
+  "tone_calm_logoutConfirm": "Leave",
+  "tone_calm_currencyChanged": "Currency shifted.",
+  "tone_calm_currencyChangeTitle": "A new currency?",
+  "tone_calm_currencyChangeCancel": "Stay",
+  "tone_calm_currencyPickerTitle": "Choose your currency",
+  "tone_calm_dashboardWelcomeBack": "Welcome back.",
+  "notif_quietDayTitle": "📊 कल शांत दिन रहा",
+  "notif_heresYesterdayTitle": "📊 कल का हाल",
+  "notif_weekInReviewTitle": "📅 हफ्ते का सारांश",
+  "notif_yourWeekInReviewTitle": "📅 आपके हफ्ते का सारांश",
+  "notif_niceOneTitle": "🏆 शानदार!",
+  "notif_streakDaysTitle": "🔥 {days} दिन लगातार!",
+  "notif_levelUpTitle": "🎉 Level {level}!",
+  "notif_budgetsOverLimitTitle": "🚨 {count} budget limit पार",
+  "notif_budgetsGettingTightTitle": "⚠️ {count} budget tight हो रहे हैं",
+  "notif_billDueTitle": "📅 {name} {label} को देय है",
+  "notif_fundsGettingLowTitle": "📉 पैसे कम हो रहे हैं",
+  "notif_categoryCreepingUpTitle": "💡 {category} बढ़ रहा है",
+  "notif_bigDayTitle": "📈 बड़ा दिन रहा",
+  "notif_smsFoundTitle": "📱 {count} SMS transactions मिले",
+  "notif_smallSpendsTitle": "💧 छोटे खर्च जुड़ रहे हैं",
+  "notif_missYouTitle": "👋 आपकी याद आती है",
+  "notif_daysUntrackedTitle": "📊 {days} दिन untracked",
+  "notif_streakEndedTitle": "💔 {days} दिन की streak टूटी",
+  "notif_fewDaysUntrackedTitle": "📊 कुछ दिन untracked",
+  "insight_moneyLeakTitle": "चुपचाप पैसा बह रहा है 💧",
+  "insight_bestDayTitle": "{day} को सबसे ज़्यादा खर्च होता है",
+  "@notif_streakDaysTitle": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "@notif_levelUpTitle": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "@notif_budgetsOverLimitTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@notif_budgetsGettingTightTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@notif_billDueTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "@notif_categoryCreepingUpTitle": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "@notif_smsFoundTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@notif_daysUntrackedTitle": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "@notif_streakEndedTitle": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "@insight_bestDayTitle": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "bills_howBillsWorkTitle": "बिल कैसे काम करते हैं",
+  "bills_howBillsWorkDesc": "किराया, subscription और utility जैसे नियमित बिल track करें",
+  "bills_gotIt": "समझ गया",
+  "bills_addBill": "बिल जोड़ें",
+  "bills_markAsPaid": "भुगतान किया",
+  "bills_deleteBill": "बिल हटाएं",
+  "bills_addNewBill": "नया बिल जोड़ें",
+  "bills_billName": "बिल का नाम",
+  "bills_amount": "राशि",
+  "bills_frequency": "आवृत्ति",
+  "bills_monthly": "मासिक",
+  "bills_quarterly": "तिमाही",
+  "bills_yearly": "वार्षिक",
+  "bills_dueDate": "देय तारीख",
+  "goal_deleteGoalTitle": "Goal हटाएं?",
+  "goal_editGoal": "Goal संपादित करें",
+  "goal_deleteGoal": "Goal हटाएं",
+  "goal_saved": "बचाया",
+  "goal_target": "लक्ष्य",
+  "goal_quickDeposit": "जल्दी जमा करें",
+  "goal_targetDate": "लक्ष्य तारीख",
+  "goal_milestones": "पड़ाव",
+  "goal_recentActivity": "हाल की गतिविधि",
+  "goal_addToGoal": "Goal में जोड़ें",
+  "goal_goalReached": "Goal पूरा हुआ! 🎉",
+  "goal_whatsThisAbout": "यह goal किसलिए है?",
+  "goal_icon": "आइकॉन",
+  "goal_color": "रंग",
+  "dashboard_enableCards": "Cards सक्षम करें",
+  "recurring_fixedExpenses": "नियमित खर्च",
+  "goal_freePlanLimit": "Free plan में 2 goals तक। Pro में unlimited।",
+  "goal_editGoalTitle": "Goal संपादित करें",
+  "goal_newGoalTitle": "नया Goal",
+  "goal_yourGoal": "आपका Goal",
+  "goal_appearance": "दिखावट",
+  "goal_goalName": "Goal का नाम",
+  "goal_giveGoalName": "अपने goal का नाम दें",
+  "goal_targetAmount": "लक्ष्य राशि",
+  "goal_enterValidTarget": "सही target राशि दर्ज करें",
+  "goal_alreadySaved": "पहले से बचाया",
+  "goal_targetDateLabel": "लक्ष्य तारीख",
+  "goal_setTargetDate": "Target तारीख सेट करें (वैकल्पिक)",
+  "goal_smartInsight": "Smart जानकारी",
+  "goal_onTrack": "सही राह पर",
+  "goal_onTrackDesc": "यह goal आसानी से पूरा हो सकता है 👍",
+  "goal_needsEffort": "मेहनत चाहिए",
+  "goal_needsEffortDesc": "थोड़ी और बचत की ज़रूरत",
+  "goal_ambitious": "महत्वाकांक्षी",
+  "goal_ambitiousDesc": "Deadline बढ़ाने पर विचार करें",
+  "goal_addNote": "नोट जोड़ें (वैकल्पिक)",
+  "goal_note": "नोट",
+  "goal_updateGoal": "Goal अपडेट करें",
+  "goal_createGoal": "Goal बनाएं",
+  "profile_developerMode": "Developer Mode सक्रिय! 🚀",
+  "profile_couldNotOpenLink": "लिंक नहीं खुल सका",
+  "profile_about": "बारे में",
+  "profile_unableToCheckUpdates": "Updates check नहीं हो सका",
+  "profile_openSourceLicenses": "Open Source Licenses",
+  "account_totalValue": "कुल मूल्य",
+  "account_gainLoss": "लाभ/हानि",
+  "account_holdings": "Holdings",
+  "account_addHolding": "Holding जोड़ें",
+  "account_addMissingTransaction": "छूटा हुआ Transaction जोड़ें",
+  "account_whatWasThisFor": "यह transaction किसलिए था?",
+  "budget_used": "उपयोग किया",
+  "budget_selectAtLeastOneTag": "कम से कम एक tag चुनें",
+  "budget_over": "ज़्यादा",
+  "budget_left": "बाकी",
+  "budget_breakdown": "विवरण",
+  "budget_basicInfo": "बुनियादी जानकारी",
+  "budget_duration": "अवधि",
+  "budget_budgetType": "Budget का प्रकार",
+  "budget_selectType": "प्रकार चुनें",
+  "budget_categoryAllocation": "Category Allocation",
+  "budget_totalBudget": "कुल Budget",
+  "budget_allocated": "आवंटित",
+  "budget_remaining": "बाकी",
+  "budget_overBudget": "Budget से ज़्यादा",
+  "budget_safeToSpend": "खर्च करना सही",
+  "budget_startDate": "शुरू की तारीख",
+  "budget_endDate": "आखिरी तारीख",
+  "budget_selectTags": "Tags चुनें",
+  "budget_tagInfo": "चुने हुए tags वाले सभी खर्च इस budget में गिने जाएंगे।",
+  "budget_noTags": "अभी कोई tag नहीं है। पहले transactions में tags जोड़ें।",
+  "budget_freePlanLimit": "Free plan में 2 budgets बना सकते हैं। ज़्यादा के लिए Pro लें।",
+  "budget_daysRemaining": "{count} दिन",
+  "budget_delete": "हटाएं",
+  "budget_emotionUnderControl": "खर्च control में है 💪",
+  "budget_emotionHalfway": "महीने का आधा हिस्सा ✨",
+  "budget_emotionAlmostThere": "थोड़ा संभलकर, ध्यान रखें ⚠️",
+  "budget_emotionExceeded": "Budget पार हो गया, संभालें 🔴",
+  "budget_highlightLabel": "ध्यान दें",
+  "budget_overBudgetSection": "Budget से ज़्यादा",
+  "budget_activeBudgets": "Active budgets",
+  "budget_onTrackSection": "सही चल रहा है",
+  "budget_spendingPace": "खर्च की रफ़्तार",
+  "budget_dailyActual": "{amount}/दिन खर्च",
+  "budget_dailyAllowed": "{amount}/दिन सीमा",
+  "budget_stepNote0": "Budget का नाम और कितना खर्च करना है सेट करें।",
+  "budget_stepNote1": "Budget कितनी बार repeat हो और dates चुनें।",
+  "budget_stepNote2": "कौन सी categories या tags track करनी हैं चुनें।",
+  "budget_stepNote3": "Save करने से पहले सब चेक करें। Edit करने के लिए tap करें।",
+  "budget_autoDistributed": "auto",
+  "budget_categoriesCount": "{count, plural, =1{1 category} other{{count} categories}}",
+  "@budget_categoriesCount": { "placeholders": { "count": {} } },
+  "budget_tagsCount": "{count, plural, =1{1 tag} other{{count} tags}}",
+  "@budget_tagsCount": { "placeholders": { "count": {} } },
+  "budget_typeCategoryWise": "Category अनुसार",
+  "budget_typeTagWise": "Tag अनुसार",
+  "budget_typeDayWise": "रोज़ाना",
+  "budget_typeFestival": "त्योहार",
+  "budget_typeTravel": "यात्रा",
+  "budget_typeDescCategoryWise": "खास categories के लिए budget सेट करें",
+  "budget_typeDescTagWise": "खास tags के लिए budget सेट करें",
+  "budget_typeDescDayWise": "रोज़ की खर्च सीमा सेट करें",
+  "budget_typeDescFestival": "त्योहार और events के लिए budget",
+  "budget_typeDescTravel": "यात्रा के खर्चों के लिए budget",
+  "budget_reviewTitle": "देखें और Save करें",
+  "budget_selectCategories": "Categories चुनें",
+  "budget_noActiveTrip": "कोई active trip नहीं है। Travel budget के लिए पहले trip शुरू करें।",
+  "budget_categoryDeleteWarning": "यह category {count} budget(s) में है। हटाने से budget tracking प्रभावित होगी।",
+  "budget_invalidCategories": "कुछ categories हटा दी गई हैं। ठीक करने के लिए budget edit करें।",
+  "category_categoryName": "श्रेणी का नाम",
+  "category_keywords": "Keywords (अल्पविराम से अलग)",
+  "category_noneTopLevel": "कोई नहीं (शीर्ष-स्तर)",
+  "common_searchCurrency": "मुद्रा खोजें...",
+  "common_selectCategory": "श्रेणी चुनें",
+  "common_noDescription": "कोई विवरण नहीं",
+  "common_errors": "त्रुटियां",
+  "dashboard_enableCardsDesc": "Dashboard cards सक्षम करें अपना वित्तीय सारांश देखने के लिए",
+  "dashboard_customizeDashboard": "Dashboard customize करें",
+  "dashboard_newToApp": "Mudra Manager में नए हैं?",
+  "dashboard_tapToExploreHelp": "Help guide देखने के लिए टैप करें",
+  "dashboard_tapToReviewTxn": "Transactions review करने के लिए टैप करें",
+  "dashboard_autoImportPaused": "Auto Import रुका हुआ",
+  "dashboard_enable": "सक्षम करें",
+  "dashboard_enableAutoImport": "Auto Import सक्षम करें",
+  "dashboard_autoTrackDesc": "Bank notifications से transactions auto-track करें",
+  "profile_awesomeUser": "शानदार User",
+  "profile_logout": "लॉगआउट",
+  "profile_proActiveLabel": "Pro सक्रिय",
+  "profile_freeTierLabel": "Free Tier",
+  "profile_fullAccessLabel": "पूरा Access",
+  "profile_upgradeToProLabel": "Pro में Upgrade करें",
+  "profile_fullAccessEnjoy": "पूरा access — सभी features का आनंद लें!",
+  "profile_fullAccessDaysRemaining": "पूरा access — {days} दिन बाकी",
+  "profile_fullAccessEndsIn": "पूरा access {days} दिन में समाप्त",
+  "profile_trialEnded": "Trial खत्म — सभी features रखने के लिए upgrade करें",
+  "profile_unlimitedDesc": "Unlimited accounts, analytics और बहुत कुछ",
+  "profile_expiredRenew": "समाप्त — renew करने के लिए टैप करें",
+  "profile_expiresToday": "आज समाप्त होगा",
+  "profile_renewsTomorrow": "कल renew होगा",
+  "profile_renewsInDays": "{days} दिन में renew होगा",
+  "profile_activeSubscription": "सक्रिय सदस्यता",
+  "profile_unknown": "अज्ञात",
+  "profile_accountsLabel": "खाते",
+  "profile_categoriesLabel": "श्रेणियां",
+  "profile_budgetsLabel": "बजट",
+  "profile_bestStreakLabel": "सर्वश्रेष्ठ Streak",
+  "profile_yourAchievementsLabel": "आपकी उपलब्धियां",
+  "profile_aboutMudra": "Mudra Manager के बारे में",
+  "profile_aboutMudraDesc": "आपका पर्सनल फाइनेंस साथी। खर्च track करें, budget संभालें",
+  "txnList_searchHint": "Transactions खोजें...",
+  "txnList_category": "श्रेणी",
+  "txnList_dateRange": "तारीख सीमा",
+  "txnList_tag": "Tag",
+  "txnList_allTransactions": "सभी लेनदेन",
+  "txnList_tapStartEnd": "शुरू और अंत तारीख टैप करें",
+  "txnList_scrollToLoad": "और लोड करने के लिए scroll करें",
+  "txnList_month": "महीना",
+  "txnList_previousMonth": "पिछला महीना",
+  "txnList_resetToCurrentMonth": "इस महीने पर वापस जाएं",
+  "txnList_selectMonth": "महीना चुनें",
+  "txnList_nextMonth": "अगला महीना",
+  "txnList_monthView": "महीना दृश्य",
+  "txnList_subscriptionTagRemoved": "Subscription tag हटाया गया",
+  "txnList_filterByTag": "Tag से filter करें",
+  "txnList_noTagsYet": "अभी कोई tag नहीं। पहले transactions में tag जोड़ें।",
+  "txnList_clear": "साफ़ करें",
+  "txnList_filterOptions": "Filter विकल्प",
+  "txnList_transactionType": "Transaction प्रकार",
+  "txnList_allCategories": "सभी श्रेणियां",
+  "txnList_selectDateRange": "तारीख सीमा चुनें",
+  "txnList_clearDateRange": "तारीख सीमा हटाएं",
+  "stats_today": "आज",
+  "stats_week": "हफ्ता",
+  "stats_month": "महीना",
+  "stats_year": "साल",
+  "stats_custom": "कस्टम",
+  "stats_unableToLoad": "Statistics लोड नहीं हो सका",
+  "stats_overview": "सारांश",
+  "stats_income": "आय",
+  "stats_expense": "खर्च",
+  "stats_trends": "रुझान",
+  "stats_spendingByDay": "दिन के हिसाब से खर्च",
+  "stats_insights": "जानकारी",
+  "stats_nextMonthForecast": "अगले महीने का अनुमान",
+  "stats_topSpending": "सबसे ज़्यादा खर्च",
+  "@profile_fullAccessDaysRemaining": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "@profile_fullAccessEndsIn": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "@profile_renewsInDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "notifSettings_dailySummary": "दैनिक सारांश",
+  "notifSettings_weeklySummary": "साप्ताहिक सारांश",
+  "notifSettings_comeBackNudges": "वापसी की याद",
+  "notifSettings_streakReminder": "Streak Reminder",
+  "notifSettings_smartAlerts": "Smart Alerts",
+  "notifSettings_selectDay": "दिन चुनें",
+  "notifSettings_summariesDesc": "सारांश में खर्च, आय, शीर्ष श्रेणी और शेष दिखता है",
+  "notifSettings_reminderTime": "Reminder का समय",
+  "notifSettings_sendTestNotif": "Test Notification भेजें",
+  "notifSettings_testNotifSent": "Test notification भेजी गई",
+  "notifSettings_dailyNudgeStreak": "Streak बनाए रखने की दैनिक याद",
+  "notifSettings_summaryDay": "सारांश का दिन",
+  "notifSettings_gentleReminders": "ऐप पर वापस आने की हल्की याद",
+  "notifSettings_budgetWarningsDesc": "Budget चेतावनी, खर्च spike, बिल reminder",
+  "notifSettings_localNotifDisclaimer": "Notifications आपके device पर locally deliver होती हैं। कोई data बाहर नहीं जाता।",
+  "smsImport_autoImport": "Auto Import",
+  "smsImport_permissions": "अनुमतियां",
+  "smsImport_notifAccess": "Notification Access",
+  "smsImport_notifAccessEnabled": "Notification access सक्षम",
+  "smsImport_allowReadingNotif": "Bank notifications पढ़ने की अनुमति दें",
+  "smsImport_autoDetectTxn": "Notifications से transactions auto-detect करें",
+  "smsImport_privacyNote": "Notifications are read locally on your device to detect transactions. Nothing is uploaded or shared.",
+  "smsImport_tools": "टूल्स",
+  "smsImport_txnActivity": "Transaction Activity",
+  "smsImport_viewDetectedTxn": "सभी detect की गई transactions देखें",
+  "smsImport_clearHistory": "Processing History साफ़ करें",
+  "smsImport_resetDetection": "Detection history reset करें",
+  "smsImport_howItWorks": "यह कैसे काम करता है",
+  "smsImport_readsBankNotif": "Reads bank and wallet notifications",
+  "smsImport_dataStaysOnDevice": "सारा data आपके device पर रहता है",
+  "smsImport_autoCreatesTxn": "Transactions अपने आप बनाता है",
+  "smsImport_personalIgnored": "Personal notifications नज़रअंदाज़ की जाती हैं",
+  "smsImport_noDataSent": "कोई data किसी server को नहीं भेजा जाता",
+  "smsImport_active": "सक्रिय",
+  "smsImport_inactive": "निष्क्रिय",
+  "smsImport_grantAccess": "शुरू करने के लिए notification access दें",
+  "smsImport_notAvailableIos": "iOS पर उपलब्ध नहीं",
+  "smsImport_enableAccessFirst": "पहले notification access सक्षम करें",
+  "smsImport_notifAccessRequired": "Notification Access ज़रूरी",
+  "smsImport_notifAccessDesc": "Mudra Manager को transactions auto-detect करने के लिए notification access चाहिए",
+  "smsImport_onlyBankRead": "सिर्फ bank/wallet notifications पढ़ी जाती हैं",
+  "smsImport_personalNeverRead": "Personal messages कभी नहीं पढ़े जाते",
+  "smsImport_openSettings": "Settings खोलें",
+  "smsImport_clearHistoryConfirm": "Processing History साफ़ करें?",
+  "smsImport_clearHistoryWarning": "पहले detect की गई notifications फिर से process होंगी",
+  "smsImport_tapAgainSettings": "System settings खोलने के लिए फिर टैप करें",
+  "upgrade_purchaseFailed": "खरीदारी विफल हुई। कृपया पुनः प्रयास करें।",
+  "upgrade_purchasePending": "Purchase pending। Payment पूरा होने पर Pro activate होगा।",
+  "upgrade_welcomePro": "Pro में स्वागत है!",
+  "upgrade_allFeaturesUnlocked": "सभी features unlock हो गए। आपके support के लिए धन्यवाद!",
+  "upgrade_startExploring": "Explore शुरू करें",
+  "upgrade_yourProFeatures": "आपके Pro features",
+  "upgrade_manageSubscription": "Subscription manage करने के लिए Google Play Store > Subscriptions पर जाएं",
+  "upgrade_everythingInPro": "Pro में सब कुछ",
+  "upgrade_chooseYourPlan": "अपना plan चुनें",
+  "upgrade_yearly": "वार्षिक",
+  "upgrade_save43": "43% बचाएं",
+  "upgrade_monthly": "मासिक",
+  "upgrade_continue": "जारी रखें",
+  "upgrade_restorePurchases": "Purchases restore करें",
+  "upgrade_renewsToday": "आज renew होगा",
+  "upgrade_mudraManagerPro": "Mudra Manager Pro",
+  "upgrade_unlockFullPower": "अपने finances की पूरी ताकत unlock करें",
+  "day_monday": "सोमवार",
+  "day_tuesday": "मंगलवार",
+  "day_wednesday": "बुधवार",
+  "day_thursday": "गुरुवार",
+  "day_friday": "शुक्रवार",
+  "day_saturday": "शनिवार",
+  "day_sunday": "रविवार",
+  "recap_income": "आय",
+  "recap_expense": "खर्च",
+  "recap_saved": "बचाया",
+  "recap_dailySpending": "दैनिक खर्च",
+  "recap_spendingPace": "खर्च की गति",
+  "recap_recurringVsOneTime": "नियमित vs एकबारगी",
+  "recap_topCategories": "शीर्ष श्रेणियां",
+  "recap_mostFrequent": "सबसे ज़्यादा बार",
+  "recap_incomeSources": "आय के स्रोत",
+  "recap_byAccount": "खाते के अनुसार",
+  "recap_budgetHealth": "Budget स्वास्थ्य",
+  "recap_biggestExpenses": "सबसे बड़े खर्च",
+  "recap_biggestIncome": "सबसे बड़ी आय",
+  "recap_generating": "तैयार हो रहा है...",
+  "recap_avgPerDay": "औसत/दिन",
+  "recap_weekdayAvg": "कार्यदिवस औसत",
+  "recap_weekendAvg": "वीकेंड औसत",
+  "recap_budgets": "बजट",
+  "recap_badges": "बैज",
+  "recap_streak": "Streak",
+  "recap_best": "सर्वश्रेष्ठ",
+  "recap_savings": "बचत",
+  "about_developerMode": "Developer Mode सक्रिय!",
+  "about_couldNotOpenLink": "लिंक नहीं खुल सका",
+  "about_title": "बारे में",
+  "about_privacyDesc": "सब कुछ आपके device पर रहता है। कोई account नहीं, कोई cloud नहीं।",
+  "about_legalTransparency": "कानूनी और पारदर्शिता",
+  "about_privacyPolicy": "Privacy Policy",
+  "about_privacyPolicyDesc": "हम आपका data कैसे सुरक्षित रखते हैं",
+  "about_termsOfService": "सेवा की शर्तें",
+  "about_termsDesc": "App उपयोग की शर्तें",
+  "about_openSourceLicenses": "Open Source Licenses",
+  "about_openSourceDesc": "हमारे द्वारा उपयोग की गई third-party libraries",
+  "about_supportConnect": "Support और Connect",
+  "about_checkForUpdates": "Updates चेक करें",
+  "about_checkForUpdatesDesc": "App version मैन्युअली चेक करें",
+  "about_latestVersion": "आप latest version पर हैं",
+  "about_unableToCheck": "Updates चेक नहीं हो सका",
+  "about_officialWebsite": "आधिकारिक वेबसाइट",
+  "about_visitWebsite": "mudramanager.com पर जाएं",
+  "about_contactSupport": "Support से संपर्क करें",
+  "about_contactSupportDesc": "मदद लें या समस्या बताएं",
+  "about_rateApp": "App को Rate करें",
+  "about_rateAppDesc": "Store पर अपना अनुभव साझा करें",
+  "about_developerModeSection": "Developer Mode",
+  "about_mudraManager": "Mudra Manager",
+  "about_secureFinancial": "सुरक्षित वित्तीय नियंत्रण",
+  "about_loadingLicenses": "Licenses लोड हो रहे हैं...",
+  "appearance_title": "दिखावट",
+  "appearance_themeMode": "Theme Mode",
+  "appearance_display": "Display",
+  "appearance_toneVoice": "Tone और Voice",
+  "appearance_changesApplyInstantly": "Theme और display बदलाव तुरंत लागू होते हैं।",
+  "appearance_darkAppearance": "Dark दिखावट",
+  "appearance_lightAppearance": "Light दिखावट",
+  "appearance_accountStyle": "Account शैली",
+  "appearance_cards": "Cards",
+  "appearance_stack": "Stack",
+  "appearance_bento": "Bento",
+  "appearance_highContrast": "High Contrast",
+  "appearance_highContrastDesc": "कम दृष्टि के लिए पठनीयता बेहतर करता है",
+  "appearance_guestMode": "Guest Mode",
+  "appearance_guestModeOnDesc": "असली राशि छुपी हुई है",
+  "appearance_guestModeOffDesc": "संवेदनशील वित्तीय data छुपाएं",
+  "appearance_lightMode": "Light Mode",
+  "appearance_darkMode": "Dark Mode",
+  "appearance_systemDefault": "System Default",
+  "analytics_financialHealthScore": "वित्तीय स्वास्थ्य Score",
+  "analytics_savingsRate": "बचत दर",
+  "analytics_expenseRatio": "खर्च अनुपात",
+  "analytics_insights": "जानकारी",
+  "analytics_spendingPrediction": "खर्च का अनुमान",
+  "analytics_nextMonth": "अगला महीना",
+  "analytics_basedOnAvg": "पिछले 3 महीनों के औसत पर आधारित",
+  "analytics_categoryTrends": "श्रेणी रुझान",
+  "analytics_spendingByDay": "दिन के हिसाब से खर्च",
+  "trip_notFound": "Trip नहीं मिली",
+  "trip_notFoundMsg": "Trip नहीं मिली",
+  "trip_tripLabel": "Trip",
+  "trip_groupLabel": "Group",
+  "trip_archiveTripTitle": "Trip Archive करें",
+  "trip_archiveMsg": "यह trip archive हो जाएगी। सारा data और settlement सुरक्षित रहेगा।",
+  "trip_archiveConfirm": "Archive करें",
+  "trip_totalSpent": "कुल खर्च",
+  "trip_splitExpense": "खर्च बांटें",
+  "trip_allPeople": "सभी लोग",
+  "trip_allCategories": "सभी श्रेणियां",
+  "trip_uncategorized": "बिना श्रेणी",
+  "trip_removeExpense": "खर्च हटाएं",
+  "trip_removeFromTrip": "इस खर्च को trip से हटाएं?",
+  "trip_removeFromGroup": "इस खर्च को group से हटाएं?",
+  "trip_removeConfirm": "हटाएं",
+  "trip_unknown": "अज्ञात",
+  "trip_youPaid": "आपने दिया",
+  "trip_noPendingSettlements": "इस trip के लिए कोई pending settlement नहीं",
+  "trip_everyoneSquare": "सबका हिसाब बराबर",
+  "trip_archiveGroupTitle": "Group Archive करें",
+  "trip_archiveGroupMsg": "यह group archive हो जाएगा। सारा data और settlement सुरक्षित रहेगा।",
+  "editTrip_addParticipant": "प्रतिभागी जोड़ें",
+  "editTrip_name": "नाम",
+  "editTrip_enterName": "प्रतिभागी का नाम दर्ज करें",
+  "editTrip_finalizeTrip": "Trip अंतिम करें",
+  "editTrip_closeGroup": "Group बंद करें",
+  "editTrip_finalizeMsg": "Trip समाप्त हो जाएगी। इसके बाद खर्च नहीं जोड़ सकते।",
+  "editTrip_closeGroupMsg": "यह group बंद हो जाएगा। इसके बाद खर्च नहीं जोड़ सकते।",
+  "editTrip_finalize": "अंतिम करें",
+  "editTrip_close": "बंद करें",
+  "editTrip_groupNotFound": "Group नहीं मिला",
+  "editTrip_groupNotFoundMsg": "Group नहीं मिला",
+  "editTrip_editTrip": "Trip संपादित करें",
+  "editTrip_editGroup": "Group संपादित करें",
+  "editTrip_editSplitGroup": "Split Group संपादित करें",
+  "editTrip_createTrip": "Trip बनाएं",
+  "editTrip_createSplitGroup": "Split Group बनाएं",
+  "editTrip_travelTrip": "Travel Trip",
+  "editTrip_splitGroup": "Split Group",
+  "editTrip_tripDetails": "Trip विवरण",
+  "editTrip_groupDetails": "Group विवरण",
+  "editTrip_tripName": "Trip का नाम",
+  "editTrip_groupName": "Group का नाम",
+  "editTrip_descriptionOptional": "विवरण (वैकल्पिक)",
+  "editTrip_tripHint": "दोस्तों के साथ beach vacation",
+  "editTrip_groupHint": "दोस्तों के साथ खर्च बांटें",
+  "editTrip_budgetOptional": "Budget (वैकल्पिक)",
+  "editTrip_currency": "मुद्रा",
+  "editTrip_baseCurrencyDefault": "Base currency (default)",
+  "editTrip_duration": "अवधि",
+  "editTrip_warningDateChange": "चेतावनी: तारीख बदलाव",
+  "expense_notFound": "नहीं मिला",
+  "expense_notFoundMsg": "खर्च नहीं मिला",
+  "expense_details": "खर्च विवरण",
+  "expense_paidBy": "किसने दिया",
+  "expense_you": "You",
+  "expense_yourShare": "आपका हिस्सा",
+  "expense_noteLabel": "नोट",
+  "expense_editSplit": "Split संपादित करें",
+  "expense_splitType": "Split प्रकार",
+  "expense_equal": "बराबर",
+  "expense_custom": "कस्टम",
+  "expense_participants": "प्रतिभागी",
+  "expense_autoFillRemaining": "बाकी auto-fill करें",
+  "expense_deleteExpense": "खर्च हटाएं",
+  "expense_deleteExpenseMsg": "इससे सबका balance बदलेगा। जारी रखें?",
+  "billCenter_overdue": "बकाया",
+  "billCenter_thisWeek": "इस हफ्ते",
+  "billCenter_thisMonth": "इस महीने",
+  "billCenter_later": "बाद में",
+  "billCenter_totalUpcoming": "कुल आगामी",
+  "billCenter_today": "आज",
+  "billCenter_tomorrow": "कल",
+  "billCenter_afterUpcoming": "आगामी बिलों के बाद",
+  "billCenter_dueToday": "आज देय",
+  "billCenter_paid": "भुगतान किया",
+  "billCenter_pay": "Pay",
+  "billCenter_existingTxnFound": "मौजूदा Transaction मिला",
+  "billCenter_linkTransaction": "यह Transaction जोड़ें",
+  "billCenter_createNewEntry": "नई Entry बनाएं",
+  "comparison_steady": "स्थिर चल रहा है",
+  "comparison_steadyDesc": "आपका खर्च एक जैसा है — यही अनुशासन है।",
+  "comparison_doingGreat": "बहुत अच्छा कर रहे हैं",
+  "comparison_headsUp": "ध्यान दें — खर्च बढ़ा है",
+  "reconcile_title": "मिलान करें",
+  "reconcile_info": "अपने बैंक ऐप या पासबुक में दिखाई गई वर्तमान शेष राशि दर्ज करें। हम अंतर को स्वचालित रूप से समायोजित करेंगे।",
+  "reconcile_balanceInApp": "ऐप में शेष",
+  "reconcile_actualBalance": "वास्तविक बैंक शेष",
+  "reconcile_balanced": "संतुलित!",
+  "reconcile_difference": "अंतर",
+  "reconcile_incomeAdjustment": "{amount} का आय समायोजन जोड़ा जाएगा।",
+  "reconcile_expenseAdjustment": "{amount} का व्यय समायोजन जोड़ा जाएगा।",
+  "balanceHistory_currentBalance": "वर्तमान शेष",
+  "balanceHistory_highest": "सर्वाधिक",
+  "balanceHistory_lowest": "न्यूनतम",
+  "balanceHistory_average": "औसत",
+  "common_errorLoading": "डेटा लोड करने में विफल",
+  "balanceHistory_trend": "30 दिन का रुझान",
+  "balanceHistory_growing": "आपका बैलेंस बढ़ रहा है 📈",
+  "balanceHistory_declining": "बैलेंस कम हुआ है — रिकवर करें 💪",
+  "balanceHistory_steady": "स्थिर बना हुआ है ⚖️",
+  "account_editTitle": "खाता संपादित करें",
+  "account_newTitle": "नया खाता",
+  "account_name": "खाते का नाम",
+  "account_typeLabel": "खाता प्रकार",
+  "account_detailsLabel": "विवरण",
+  "account_colorLabel": "रंग",
+  "account_currencyLabel": "मुद्रा",
+  "account_balance": "शेष",
+  "account_outstanding": "बकाया",
+  "account_last4": "अंतिम 4 अंक",
+  "account_last4Helper": "SMS ऑटो-मैचिंग के लिए",
+  "account_initialBalance": "प्रारंभिक शेष",
+  "account_cardPaidOff": "कार्ड चुका हो तो 0 दर्ज करें",
+  "account_min4": "कम से कम 4 अंक",
+  "account_max4": "केवल अंतिम 4 अंक",
+  "iconPicker_title": "आइकॉन चुनें",
+  "iconPicker_search": "आइकॉन खोजें...",
+  "iconPicker_noResults": "कोई आइकॉन नहीं मिला",
+  "colorPicker_title": "रंग चुनें",
+  "color_red": "लाल",
+  "color_pink": "गुलाबी",
+  "color_purple": "बैंगनी",
+  "color_indigo": "नील",
+  "color_blue": "नीला",
+  "color_cyan": "सायन",
+  "color_teal": "टील",
+  "color_green": "हरा",
+  "color_orange": "नारंगी",
+  "color_brown": "भूरा",
+  "color_grey": "सलेटी",
+  "accounts_totalBalance": "कुल शेष",
+  "accounts_accountsCount": "खाते",
+  "accounts_archived": "संग्रहित",
+  "accounts_howItWorks": "खाते कैसे काम करते हैं",
+  "accounts_howItWorksDesc": "अपने सभी बैंक खाते, वॉलेट और नकद एक जगह प्रबंधित करें। कई खातों में शेष और लेनदेन ट्रैक करें।",
+  "accounts_primary": "प्राथमिक",
+  "categories_label": "श्रेणियाँ",
+  "categories_transactionsLabel": "लेनदेन",
+  "categories_deleteWithTransactions": "यह \"{name}\" और {count} जुड़े लेनदेन स्थायी रूप से हटा देगा। यह क्रिया वापस नहीं हो सकती।",
+  "categories_deleteAll": "सब हटाएं",
+  "categories_edit": "श्रेणी संपादित करें",
+  "categories_delete": "श्रेणी हटाएं",
+  "categories_deleteSubtitle": "सभी जुड़े लेनदेन हटा देता है",
+  "category_save": "सहेजें",
+  "category_detailsLabel": "विवरण",
+  "category_parentLabel": "मूल श्रेणी",
+  "category_nameHint": "श्रेणी का नाम",
+  "category_keywordsHint": "कीवर्ड (अल्पविराम से अलग)",
+  "category_keywordsHelper": "SMS ऑटो-डिटेक्शन के लिए",
+  "currency_title": "मुद्रा",
+  "currency_baseCurrency": "मूल मुद्रा",
+  "currency_baseDescription": "सभी कुल, बजट और विश्लेषण इस मुद्रा का उपयोग करते हैं।",
+  "currency_exchangeRates": "विनिमय दरें",
+  "currency_exchangeRatesDesc": "रूपांतरण दरें देखें और संपादित करें",
+  "currency_archivedDesc": "पिछली मुद्राओं के लेनदेन देखें",
+  "exchange_unitInfo": "विदेशी मुद्रा की 1 इकाई = X {base}। संपादित करने के लिए टैप करें।",
+  "exchange_search": "मुद्रा खोजें...",
+  "exchange_rateUpdated": "{code} दर अपडेट हो गई",
+  "exchange_editRate": "{code} दर संपादित करें",
+  "exchange_rateLabel": "दर",
+  "exchange_invalidRate": "एक वैध दर दर्ज करें",
+  "archived_transaction": "लेनदेन",
+  "currency_changingCurrency": "मुद्रा बदल रही है...",
+  "currency_pleaseWait": "लेनदेन संग्रहित और सेटिंग्स अपडेट हो रही हैं",
+  "security_title": "सुरक्षा",
+  "security_unprotected": "असुरक्षित",
+  "security_basic": "बुनियादी",
+  "security_strong": "मजबूत",
+  "security_unprotectedDesc": "अपने डेटा की सुरक्षा के लिए PIN या बायोमेट्रिक्स सक्षम करें",
+  "security_protectionsActive": "{total} में से {count} सुरक्षा सक्रिय",
+  "security_authentication": "प्रमाणीकरण",
+  "security_pinLock": "PIN लॉक",
+  "security_pinActive": "4 अंकों का PIN सक्रिय",
+  "security_pinSet": "4 अंकों का PIN सेट करें",
+  "security_biometric": "बायोमेट्रिक अनलॉक",
+  "security_biometricDesc": "फिंगरप्रिंट या Face ID",
+  "security_manage": "प्रबंधन",
+  "security_changePin": "PIN बदलें",
+  "security_changePinDesc": "अपना 4 अंकों का PIN अपडेट करें",
+  "security_enablePinFirst": "पहले PIN सक्षम करें",
+  "security_biometricEnabled": "बायोमेट्रिक सक्षम",
+  "security_biometricDisabled": "बायोमेट्रिक अक्षम",
+  "security_infoText": "आपका PIN इस डिवाइस पर सुरक्षित रूप से संग्रहित है — यह कभी सर्वर तक नहीं पहुँचता।",
+  "notifSettings_activeCount": "3 में से {count} सक्रिय",
+  "notifSettings_summaryDesc": "सारांश में खर्च, आय, शीर्ष श्रेणी और शेष दिखाता है",
+  "notifSettings_dailySummaryDesc": "कल के खर्च का सारांश",
+  "notifSettings_weeklySchedule": "हर {day} सुबह 9:00 बजे",
+  "smsImport_autoImporting": "लेनदेन ऑटोमैटिक import हो रहे हैं",
+  "smsImport_enableToStart": "Auto import सक्षम करें tracking शुरू करने के लिए",
+  "smsImport_iosRestriction": "iOS प्लेटफॉर्म की सीमाओं के कारण Auto import केवल Android पर उपलब्ध है।",
+  "common_change": "बदलें",
+  "goal_whatSavingFor": "किसलिए बचत कर रहे हैं?",
+  "netWorth_totalLabel": "कुल Net Worth",
+  "netWorth_notEnoughData": "अभी पर्याप्त data नहीं",
+  "netWorth_assets": "संपत्ति",
+  "netWorth_liabilities": "देनदारी",
+  "netWorth_composition": "संपत्ति संरचना",
+  "goal_milestoneStarted": "शुरुआत",
+  "goal_milestoneStartedDesc": "आपकी यात्रा शुरू हुई",
+  "goal_milestone25": "25%",
+  "goal_milestone25Desc": "एक चौथाई पूरा",
+  "goal_milestone50": "50%",
+  "goal_milestone50Desc": "आधा पूरा!",
+  "goal_milestone75": "75%",
+  "goal_milestone75Desc": "लगभग पहुंच गए",
+  "goal_milestone100": "100%",
+  "goal_milestone100Desc": "Goal पूरा हुआ! 🎉",
+  "goal_flexibleTimeline": "लचीली समयसीमा",
+  "goal_amount": "राशि",
+  "goal_emotionReached": "Goal पूरा हो गया! 🎉",
+  "goal_emotionProgress": "बढ़िया progress ✨",
+  "goal_emotionMoreToGo": "बस {amount} और चाहिए 💪",
+  "goal_emotionSetTarget": "Target सेट करें 🎯",
+  "goal_emotionWhatSaving": "किसके लिए बचत कर रहे हैं?",
+  "goal_exceededTarget": "Target से ज़्यादा बचा लिया! 🎉",
+  "goal_alreadyReached": "Goal पहले से पूरा है! 🎉",
+  "goal_progressLeft": "{percent}% हो गया • {amount} बाकी",
+  "goal_paceDaily": "इस रफ़्तार से {daily}/दिन चाहिए।\nयानी {monthly}/महीना।",
+  "goal_daysRemaining": "{count} दिन बाकी",
+  "goal_daysLeft": "{count} दिन बचे हैं",
+  "goal_startSaving": "{amount} बचाना शुरू करें",
+  "common_today": "आज",
+  "common_yesterday": "कल",
+  "common_amount": "राशि",
+  "accounts_edit": "खाता संपादित करें",
+  "accounts_balanceHistory": "शेष इतिहास",
+  "accounts_matchBank": "Bank statement से मिलाएं",
+  "accounts_viewPortfolio": "Portfolio देखें",
+  "accounts_setAsPrimary": "प्राथमिक बनाएं",
+  "accounts_primaryDesc": "Splits और trips के लिए default खाता",
+  "accounts_archive": "Archive करें",
+  "accounts_archiveDesc": "सक्रिय खातों से छुपाएं",
+  "accounts_unarchive": "Unarchive करें",
+  "accounts_unarchiveDesc": "सक्रिय खातों में वापस लाएं",
+  "accounts_deleteDesc": "खाता स्थायी रूप से हटाएं",
+  "smsActivity_title": "Transaction Activity",
+  "smsActivity_approved": "स्वीकृत",
+  "smsActivity_pending": "लंबित",
+  "smsActivity_rejected": "अस्वीकृत",
+  "smsActivity_needsReview": "Review ज़रूरी",
+  "smsActivity_duplicates": "डुप्लीकेट",
+  "smsActivity_filterByStatus": "Status से filter करें",
+  "smsActivity_transactionCount": "{count} Transactions",
+  "smsActivity_needsAttention": "{count} पर ध्यान दें",
+  "smsActivity_resultCount": "{count} परिणाम",
+  "smsActivity_noActivities": "कोई मिलती-जुलती activity नहीं",
+  "smsActivity_status": "Status",
+  "smsActivity_confidence": "विश्वसनीयता",
+  "smsActivity_account": "खाता",
+  "smsActivity_bank": "Bank",
+  "smsActivity_type": "प्रकार",
+  "smsActivity_merchant": "Merchant",
+  "smsActivity_balance": "शेष",
+  "smsActivity_reference": "Reference",
+  "smsActivity_duplicateLabel": "DUPLICATE",
+  "smsActivity_transferLabel": "TRANSFER",
+  "smsActivity_reject": "अस्वीकार",
+  "smsActivity_approve": "स्वीकार",
+  "smsActivity_transfer": "Transfer",
+  "smsActivity_addAccount": "खाता जोड़ें",
+  "smsActivity_duplicateWarning": "यह duplicate transaction हो सकता है। Approve करने से पहले ध्यान से देखें।",
+  "smsActivity_noAccountWarning": "\"{account}\" से मिलता खाता नहीं मिला। Approve करने के लिए पहले जोड़ें।",
+  "smsActivity_transferWarning": "यह आपके खातों के बीच transfer लगता है। Approve करने पर transfer screen खुलेगा।",
+  "common_all": "सभी",
+  "backup_lastBackup": "आखिरी backup",
+  "backup_noBackups": "अभी कोई backup नहीं",
+  "backup_createFirst": "अपना data सुरक्षित करने के लिए पहला backup बनाएं",
+  "backup_actions": "कार्रवाई",
+  "backup_history": "इतिहास",
+  "backup_noHistory": "कोई backup इतिहास नहीं",
+  "backup_infoText": "Backups आपके password से encrypt होकर .mudra files में save होते हैं। Password सुरक्षित रखें — इसे recover नहीं किया जा सकता।",
+  "backup_justNow": "अभी-अभी",
+  "backup_minutesAgo": "{count} मिनट पहले",
+  "backup_hoursAgo": "{count} घंटे पहले",
+  "backup_daysAgo": "{count} दिन पहले",
+  "backup_recordCount": "{count} records",
+  "account_changeCurrency": "मुद्रा बदलें?",
+  "account_resetTo": "{code} पर reset करें",
+  "account_baseCurrencyInfo": "इस खाते के transactions आपकी base currency में हैं।",
+  "account_foreignCurrencyInfo": "Transactions {code} में record होंगे और {base} में convert होंगे।",
+  "account_warningNoConvert": "मौजूदा balance अपने आप convert नहीं होगा।",
+  "account_warningNewCurrency": "नए transactions नई मुद्रा में होंगे।",
+  "account_warningManualAdjust": "आपको balance मैन्युअली adjust करना पड़ सकता है।",
+  "category_selectParent": "मूल श्रेणी चुनें",
+  "appearance_colorTheme": "Color Theme",
+  "appearance_amoledMode": "AMOLED Mode",
+  "appearance_toneActivated": "{name} tone सक्रिय",
+  "dashboard_cardsActive": "{total} में से {visible} cards सक्रिय",
+  "dashboard_dragToReorder": "क्रम बदलने के लिए drag करें, दिखाने/छुपाने के लिए toggle करें",
+  "dashboard_smartOrdering": "Smart क्रम",
+  "dashboard_catEssential": "ज़रूरी",
+  "dashboard_catFinance": "वित्त",
+  "dashboard_catAnalytics": "विश्लेषण",
+  "dashboard_catActions": "कार्रवाई",
+  "dashboard_catAI": "AI जानकारी",
+  "dashboard_catContextual": "संदर्भ आधारित",
+  "importExport_title": "Import और Export",
+  "importExport_export": "Export",
+  "importExport_import": "Import",
+  "importExport_exportTitle": "Transactions Export करें",
+  "importExport_exportDesc": "अपने transactions Excel file में download करें।",
+  "importExport_exporting": "Export हो रहा है...",
+  "importExport_exportAsExcel": "Excel में Export करें",
+  "importExport_importTitle": "Excel से Import करें",
+  "importExport_importDesc": ".xlsx file से transactions import करें। Import से पहले preview और column mapping कर सकते हैं।",
+  "importExport_excelFormat": "Excel (.xlsx)",
+  "importExport_bankStatement": "Bank Statement",
+  "importExport_otherApps": "अन्य Apps",
+  "importExport_pickFile": "Excel File चुनें",
+  "importExport_infoText": "Export सभी transaction details के साथ Excel file बनाता है। Import अन्य finance apps या manual spreadsheets से .xlsx files support करता है।",
+  "plugins_subtitle": "Mudra Manager को powerful plugins से बढ़ाएं",
+  "plugins_official": "Official",
+  "plugins_enabled": "{name} सक्षम",
+  "plugins_disabled": "{name} अक्षम",
+  "plugins_configure": "Plugin configure करें",
+  "plugins_activeCount": "{total} में से {active} सक्रिय",
+  "plugins_toggleDesc": "App features बढ़ाने के लिए plugins toggle करें",
+  "plugins_default": "Default",
+  "plugins_configureSettings": "Plugin settings configure करें",
+  "plugins_creditCardReminders": "Credit Card Reminders",
+  "plugins_remindBefore": "कितने दिन पहले याद दिलाएं",
+  "plugins_noCreditCards": "कोई credit card account नहीं मिला। पहले एक जोड़ें।",
+  "plugins_creditCardAccounts": "Credit Card खाते",
+  "plugins_billDay": "Bill Day (1-31)",
+  "plugins_remindersConfigured": "Credit card reminders set हो गए",
+  "plugins_infoText": "Plugins app features बढ़ाते हैं। कुछ plugins को अतिरिक्त permissions या configuration चाहिए।",
+  "help_title": "मदद और सहायता",
+  "help_searchHint": "Help topics खोजें...",
+  "help_heroTitle": "हम कैसे मदद कर सकते हैं?",
+  "help_heroDesc": "Guides देखें या कोई topic खोजें",
+  "help_topics": "विषय",
+  "help_tryDifferent": "कोई और शब्द आज़माएं",
+  "help_howToUse": "कैसे इस्तेमाल करें",
+  "help_tips": "सुझाव",
+  "help_articleCount": "{count} लेख",
+  "help_resultCount": "{count} परिणाम",
+  "help_infoText": "जो चाहिए वो नहीं मिला? About → Contact Support पर जाएं।",
+  "about_legalCount": "3 आइटम",
+  "about_supportCount": "4 आइटम",
+  "about_packageCount": "{count} open source packages",
+  "onboard_continue": "आगे बढ़ें",
+  "onboard_restoreFromBackup": "Backup से restore करें",
+  "onboard_accountNameRequired": "खाते का नाम ज़रूरी है",
+  "onboard_balanceRequired": "शेष ज़रूरी है",
+  "onboard_enterValidNumber": "सही नंबर दर्ज करें",
+  "onboard_accountHint": "जैसे Cash, Bank",
+  "onboard_browseAllCurrencies": "सभी मुद्राएं देखें",
+  "onboard_toneTitle": "Mudra आपसे कैसे बात करे?",
+  "onboard_toneDesc": "एक शैली चुनें। बाद में बदल सकते हैं।",
+  "onboard_categoriesTitle": "अपनी श्रेणियां चुनें",
+  "onboard_categoriesDesc": "अपनी जीवनशैली से मिलते packs चुनें। बाद में बदल सकते हैं।",
+  "onboard_startFresh": "नए सिरे से शुरू",
+  "onboard_startFreshDesc": "कोई श्रेणी नहीं — बाद में खुद जोड़ें",
+  "onboard_currencyWarning": "बाद में base currency बदलने पर मौजूदा transactions archive हो जाएंगे।"
 }

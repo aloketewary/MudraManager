@@ -1,40 +1,36 @@
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 
 enum BudgetType {
-  categoryWise,    // Budget for specific categories
-  tagWise,         // Budget for specific tags
-  dayWise,         // Daily budget limit
-  festival,        // Festival/event specific budget
-  travel,          // Travel specific budget
+  categoryWise,
+  tagWise,
+  dayWise,
+  festival,
+  travel,
 }
 
 extension BudgetTypeExtension on BudgetType {
-  String get displayName {
-    switch (this) {
-      case BudgetType.categoryWise:
-        return 'Category-wise';
-      case BudgetType.tagWise:
-        return 'Tag-wise';
-      case BudgetType.dayWise:
-        return 'Daily';
-      case BudgetType.festival:
-        return 'Festival';
-      case BudgetType.travel:
-        return 'Travel';
-    }
-  }
+  String localizedName(AppLocalizations ctxt) => switch (this) {
+    BudgetType.categoryWise => ctxt.budget_typeCategoryWise,
+    BudgetType.tagWise => ctxt.budget_typeTagWise,
+    BudgetType.dayWise => ctxt.budget_typeDayWise,
+    BudgetType.festival => ctxt.budget_typeFestival,
+    BudgetType.travel => ctxt.budget_typeTravel,
+  };
 
-  String get description {
-    switch (this) {
-      case BudgetType.categoryWise:
-        return 'Set budgets for specific spending categories';
-      case BudgetType.tagWise:
-        return 'Set budgets for specific tags (e.g., Wedding, Vacation)';
-      case BudgetType.dayWise:
-        return 'Set a daily spending limit';
-      case BudgetType.festival:
-        return 'Budget for festivals and special events';
-      case BudgetType.travel:
-        return 'Budget for travel expenses';
-    }
-  }
+  String localizedDesc(AppLocalizations ctxt) => switch (this) {
+    BudgetType.categoryWise => ctxt.budget_typeDescCategoryWise,
+    BudgetType.tagWise => ctxt.budget_typeDescTagWise,
+    BudgetType.dayWise => ctxt.budget_typeDescDayWise,
+    BudgetType.festival => ctxt.budget_typeDescFestival,
+    BudgetType.travel => ctxt.budget_typeDescTravel,
+  };
+
+  /// Fallback for non-UI contexts (backup, serialization)
+  String get displayName => switch (this) {
+    BudgetType.categoryWise => 'Category-wise',
+    BudgetType.tagWise => 'Tag-wise',
+    BudgetType.dayWise => 'Daily',
+    BudgetType.festival => 'Festival',
+    BudgetType.travel => 'Travel',
+  };
 }

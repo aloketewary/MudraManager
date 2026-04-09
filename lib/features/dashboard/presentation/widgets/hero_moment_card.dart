@@ -1,10 +1,9 @@
 import 'package:mudra_manager/core/currency/currency_meta.dart';
-import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
-import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
@@ -183,7 +182,7 @@ final heroMomentProvider = Provider<HeroMoment?>((ref) {
   if (data.transactions.isNotEmpty) {
     return HeroMoment(
       icon: LucideIcons.circleCheck,
-      message: Tone.current.dashboardAllCaughtUp,
+      message: BuddyMessages.dashboardAllCaughtUp,
       accentColor: const Color(0xFF4CAF50),
     );
   }

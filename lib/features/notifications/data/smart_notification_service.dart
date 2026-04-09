@@ -130,7 +130,7 @@ class SmartNotificationService {
       await _emit(
         isar,
         type: 'budget_exceeded_grouped',
-        title: '🚨 $n budget${n > 1 ? 's' : ''} over limit',
+        title: Tone.appL10n?.notif_budgetsOverLimitTitle(n) ?? '🚨 $n budget${n > 1 ? 's' : ''} over limit',
         body: n == 1
             ? '${exceeded.first} is over budget — time to review'
             : '${exceeded.join(', ')} are over budget',
@@ -145,7 +145,7 @@ class SmartNotificationService {
       await _emit(
         isar,
         type: 'budget_warning_grouped',
-        title: '⚠️ $n budget${n > 1 ? 's' : ''} getting tight',
+        title: Tone.appL10n?.notif_budgetsGettingTightTitle(n) ?? '⚠️ $n budget${n > 1 ? 's' : ''} getting tight',
         body: n == 1
             ? '${warnings.first} is nearing the limit'
             : '${warnings.join(', ')} are nearing their limits',
@@ -182,7 +182,7 @@ class SmartNotificationService {
       await _emit(
         isar,
         type: 'bill_due_${bill.id}',
-        title: '📅 ${bill.description ?? "Bill"} is due $label',
+        title: Tone.appL10n?.notif_billDueTitle(bill.description ?? 'Bill', label) ?? '📅 ${bill.description ?? "Bill"} is due $label',
         body: Tone.current.billDueNotif(
           bill.description ?? 'Bill',
           bill.amount.toStringAsFixed(0),
@@ -254,7 +254,7 @@ class SmartNotificationService {
       await _emit(
         isar,
         type: 'balance_drop_prediction',
-        title: '📉 Funds getting low',
+        title: Tone.appL10n?.notif_fundsGettingLowTitle ?? '📉 Funds getting low',
         body: Tone.current.balanceDropNotif(daysUntilZero.toStringAsFixed(0)),
         channel: 'smart_alerts',
         channelName: 'Smart Alerts',
@@ -333,7 +333,7 @@ class SmartNotificationService {
       await _emit(
         isar,
         type: 'savings_opportunity',
-        title: '💡 $spikeCategory is creeping up',
+        title: Tone.appL10n?.notif_categoryCreepingUpTitle(spikeCategory) ?? '💡 $spikeCategory is creeping up',
         body: Tone.current.savingsOpportunityNotif(
           spikeCategory,
           spikeAmount.toStringAsFixed(0),
@@ -378,7 +378,7 @@ class SmartNotificationService {
       await _emit(
         isar,
         type: 'unusual_spending',
-        title: '📈 Whoa, big day',
+        title: Tone.appL10n?.notif_bigDayTitle ?? '📈 Whoa, big day',
         body: Tone.current.unusualSpendingNotif(
             todaySpend.toStringAsFixed(0),
             (todaySpend / avgDaily).toStringAsFixed(1),
@@ -406,7 +406,7 @@ class SmartNotificationService {
       await _emit(
         isar,
         type: 'pending_sms',
-        title: '📱 $pendingCount SMS transactions found',
+        title: Tone.appL10n?.notif_smsFoundTitle(pendingCount) ?? '📱 $pendingCount SMS transactions found',
         body: Tone.current.pendingSmsNotif(pendingCount),
         channel: 'pending_transactions',
         channelName: 'Pending Transactions',
@@ -455,7 +455,7 @@ class SmartNotificationService {
     await _emit(
       isar,
       type: 'money_leak',
-      title: '💧 Small spends adding up',
+      title: Tone.appL10n?.notif_smallSpendsTitle ?? '💧 Small spends adding up',
       body: Tone.current.moneyLeakNotif(
           top.key,
           top.value.count,
@@ -492,7 +492,7 @@ class SmartNotificationService {
       await _emit(
         isar,
         type: 're_engage_day14',
-        title: '👋 We miss you',
+        title: Tone.appL10n?.notif_missYouTitle ?? '👋 We miss you',
         body: Tone.current.reEngageMissYou(lost),
         channel: 're_engagement',
         channelName: 'Re-engagement',
@@ -515,7 +515,7 @@ class SmartNotificationService {
       await _emit(
         isar,
         type: 're_engage_day5',
-        title: '📊 $daysSince days untracked',
+        title: Tone.appL10n?.notif_daysUntrackedTitle(daysSince) ?? '📊 $daysSince days untracked',
         body: missed > 0
             ? Tone.current.reEngageUntracked(daysSince, _formatAmount(missed))
             : Tone.current.reEngageQuickNudge,
@@ -533,7 +533,7 @@ class SmartNotificationService {
         await _emit(
           isar,
           type: 're_engage_streak_lost',
-          title: '💔 $lostStreak-day streak ended',
+          title: Tone.appL10n?.notif_streakEndedTitle(lostStreak) ?? '💔 $lostStreak-day streak ended',
           body: Tone.current.streakLost(lostStreak),
           channel: 're_engagement',
           channelName: 'Re-engagement',
@@ -544,7 +544,7 @@ class SmartNotificationService {
         await _emit(
           isar,
           type: 're_engage_day3',
-          title: '📊 A few days untracked',
+          title: Tone.appL10n?.notif_fewDaysUntrackedTitle ?? '📊 A few days untracked',
           body: Tone.current.reEngageQuickNudge,
           channel: 're_engagement',
           channelName: 'Re-engagement',

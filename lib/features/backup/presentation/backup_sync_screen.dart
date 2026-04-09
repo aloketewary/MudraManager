@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/features/backup/data/enhanced_backup_service.dart';
@@ -22,7 +23,7 @@ class _BackupSyncScreenState extends ConsumerState<BackupSyncScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Backup & Share'),
+        title: Text(AppLocalizations.of(context)!.title_backupShare),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),

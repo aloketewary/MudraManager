@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
@@ -103,7 +104,7 @@ class _BillControlCenterScreenState
     return Scaffold(
       backgroundColor: color.surface,
       appBar: AppBar(
-        title: const Text('Bill Control Center'),
+        title: Text(AppLocalizations.of(context)!.title_billControlCenter),
         elevation: 0,
         actions: [
           IconButton(
@@ -184,7 +185,7 @@ class _BillControlCenterScreenState
                   // 4. Grouped lists
                   if (overdue.isNotEmpty)
                     _buildGroup(
-                      'Overdue',
+                      AppLocalizations.of(context)!.billCenter_overdue,
                       overdue,
                       FinanceColors.expenseColor(brightness),
                       LucideIcons.circleAlert,
@@ -195,7 +196,7 @@ class _BillControlCenterScreenState
                     ),
                   if (dueSoon.isNotEmpty)
                     _buildGroup(
-                      'This Week',
+                      AppLocalizations.of(context)!.billCenter_thisWeek,
                       dueSoon,
                       color.tertiary,
                       LucideIcons.clock,
@@ -206,7 +207,7 @@ class _BillControlCenterScreenState
                     ),
                   if (thisMonth.isNotEmpty)
                     _buildGroup(
-                      'This Month',
+                      AppLocalizations.of(context)!.billCenter_thisMonth,
                       thisMonth,
                       color.primary,
                       LucideIcons.calendar,
@@ -217,7 +218,7 @@ class _BillControlCenterScreenState
                     ),
                   if (later.isNotEmpty)
                     _buildGroup(
-                      'Later',
+                      AppLocalizations.of(context)!.billCenter_later,
                       later,
                       color.onSurfaceVariant,
                       LucideIcons.calendarDays,
@@ -376,7 +377,7 @@ class _BillControlCenterScreenState
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Total upcoming',
+                  AppLocalizations.of(context)!.billCenter_totalUpcoming,
                   style: textTheme.bodySmall?.copyWith(
                     color: color.onPrimaryContainer.withValues(alpha: 0.7),
                   ),
@@ -450,7 +451,7 @@ class _BillControlCenterScreenState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'After upcoming bills',
+                    AppLocalizations.of(context)!.billCenter_afterUpcoming,
                     style: textTheme.bodySmall?.copyWith(
                       color: color.onSurfaceVariant,
                     ),

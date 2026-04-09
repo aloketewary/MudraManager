@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -59,6 +60,7 @@ class PluginGroupsScreen extends ConsumerStatefulWidget {
 
 class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
   final Set<PluginGroup> _expanded = {};
+  AppLocalizations get ctxt => AppLocalizations.of(context)!;
 
   bool _isStandardTemplate(String id) =>
       id == 'standard_excel_export' || id == 'standard_pdf_export';
@@ -105,12 +107,12 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Plugins')),
+      appBar: AppBar(title: Text(ctxt.title_plugins)),
       body: groupedAsync.when(
         loading: () => ListView.builder(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(spacing.cardHorizontal),
           itemCount: 6,
-          itemBuilder: (_, __) => TransactionCardSkeleton(),
+          itemBuilder: (_, __) => const TransactionCardSkeleton(),
         ),
         error: (err, _) => Center(child: Text(BuddyMessages.errorWith('$err'))),
         data: (grouped) {
@@ -143,7 +145,7 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
                 allPlugins.length,
                 totalActive,
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: spacing.sectionGap),
 
               // ── COLLAPSIBLE GROUPS ──
               ...activeGroups.map((entry) {
@@ -167,11 +169,11 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
                 );
               }),
 
-              const SizedBox(height: 16),
+              SizedBox(height: spacing.sectionGap),
 
               // ── INFO ──
               Container(
-                padding: const EdgeInsets.all(14),
+                padding: EdgeInsets.all(spacing.cardInner),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(spacing.radiusMedium),
                   color: color.primary.withValues(alpha: 0.06),
@@ -183,11 +185,10 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Icon(LucideIcons.info, color: color.primary, size: 18),
-                    const SizedBox(width: 12),
+                    SizedBox(width: spacing.elementGap),
                     Expanded(
                       child: Text(
-                        'Plugins extend app features. Some plugins '
-                        'require additional permissions or configuration.',
+                        ctxt.plugins_infoText,
                         style: textTheme.bodySmall?.copyWith(
                           color: color.onSurfaceVariant,
                           height: 1.4,
@@ -245,21 +246,21 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
               child: Icon(LucideIcons.puzzle, color: accent, size: 28),
             ),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: spacing.sectionGap),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '$active of $total active',
+                  ctxt.plugins_activeCount(active, total),
                   style: textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                     color: accent,
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: spacing.elementGapMin),
                 Text(
-                  'Toggle plugins to extend app features',
+                  ctxt.plugins_toggleDesc,
                   style: textTheme.bodySmall?.copyWith(
                     color: color.onSurfaceVariant,
                   ),
@@ -271,7 +272,6 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
       ),
     );
   }
-
 
   // ── COLLAPSIBLE GROUP ──
   Widget _buildCollapsibleGroup({
@@ -312,14 +312,17 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
               });
             },
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              padding: EdgeInsets.symmetric(
+                horizontal: spacing.cardInner,
+                vertical: spacing.elementGap * 1.5,
+              ),
               child: Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(8),
+                    padding: EdgeInsets.all(spacing.elementGap),
                     decoration: BoxDecoration(
                       color: color.primary.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(spacing.radiusMedium),
                     ),
                     child: Icon(
                       _groupIcon(group),
@@ -327,7 +330,7 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
                       size: 20,
                     ),
                   ),
-                  const SizedBox(width: 14),
+                  SizedBox(width: spacing.elementGap * 1.5),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -349,11 +352,13 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
                   ),
                   // Active count pill
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: spacing.elementGap,
+                      vertical: spacing.elementGapUltraMin,
+                    ),
                     decoration: BoxDecoration(
                       color: color.primary.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(spacing.radiusMedium),
                     ),
                     child: Text(
                       '$groupActive/${plugins.length}',
@@ -363,7 +368,7 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: spacing.elementGap),
                   AnimatedRotation(
                     turns: isOpen ? 0.5 : 0.0,
                     duration: const Duration(milliseconds: 200),
@@ -415,7 +420,7 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
                                 child: _pluginIcon(plugin, color),
                               ),
                             ),
-                            const SizedBox(width: 12),
+                            SizedBox(width: spacing.elementGap),
 
                             // Name + description
                             Expanded(
@@ -466,10 +471,12 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
                                 ),
                                 decoration: BoxDecoration(
                                   color: color.secondaryContainer,
-                                  borderRadius: BorderRadius.circular(10),
+                                  borderRadius: BorderRadius.circular(
+                                    spacing.radiusMedium,
+                                  ),
                                 ),
                                 child: Text(
-                                  'Default',
+                                  ctxt.plugins_default,
                                   style: textTheme.labelSmall?.copyWith(
                                     color: color.onSecondaryContainer,
                                     fontWeight: FontWeight.w600,
@@ -503,8 +510,11 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
                                         }
                                         SnackbarService.info(
                                           val
-                                              ? '${plugin.name} enabled'
-                                              : '${plugin.name} disabled',
+                                              ? ctxt
+                                                  .plugins_enabled(plugin.name)
+                                              : ctxt.plugins_disabled(
+                                                  plugin.name,
+                                                ),
                                         );
                                       },
                                     );
@@ -534,8 +544,8 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
                                   }
                                   SnackbarService.info(
                                     val
-                                        ? '${plugin.name} enabled'
-                                        : '${plugin.name} disabled',
+                                        ? ctxt.plugins_enabled(plugin.name)
+                                        : ctxt.plugins_disabled(plugin.name),
                                   );
                                 },
                               ),
@@ -573,6 +583,7 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final service = ref.read(marketplaceServiceProvider);
+    final spacing = ref.read(spacingProvider);
 
     showModalBottomSheet(
       context: context,
@@ -606,21 +617,21 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: spacing.sectionGap),
               Icon(LucideIcons.settings, size: 48, color: color.primary),
-              const SizedBox(height: 16),
+              SizedBox(height: spacing.sectionGap),
               Text(
                 plugin.name,
                 style:
                     textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: spacing.elementGap),
               Text(
-                'Configure plugin settings',
+                ctxt.plugins_configureSettings,
                 style: textTheme.bodyMedium
                     ?.copyWith(color: color.onSurfaceVariant),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: spacing.sectionGap),
               ...plugin.configOptions!.map(
                 (option) => Padding(
                   padding: const EdgeInsets.only(bottom: 16),
@@ -643,7 +654,7 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: spacing.elementGap),
               Row(
                 children: [
                   Expanded(
@@ -655,10 +666,10 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text('Cancel'),
+                      child: Text(AppLocalizations.of(context)!.common_cancel),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: spacing.elementGap),
                   Expanded(
                     child: FilledButton(
                       onPressed: () async {
@@ -685,12 +696,12 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text('Save'),
+                      child: Text(AppLocalizations.of(context)!.common_save),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: spacing.sectionGap),
             ],
           ),
         );
@@ -740,6 +751,7 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
     final service = ref.read(marketplaceServiceProvider);
     final reminderController = TextEditingController(text: '1');
     final cardConfigs = <Map<String, dynamic>>[];
+    final spacing = ref.read(spacingProvider);
 
     showModalBottomSheet(
       context: context,
@@ -753,8 +765,12 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
             final accountsAsync = ref.watch(accountsProvider);
 
             return accountsAsync.when(
-              loading: () => ListView(children: List.generate(3, (_) => DashboardCardSkeleton())),
-              error: (err, _) => Center(child: Text(BuddyMessages.errorWith('$err'))),
+              loading: () => ListView(
+                children:
+                    List.generate(3, (_) => const DashboardCardSkeleton()),
+              ),
+              error: (err, _) =>
+                  Center(child: Text(BuddyMessages.errorWith('$err'))),
               data: (accounts) {
                 final creditCards = accounts
                     .where((a) => a.accountType == AccountType.creditCard)
@@ -782,34 +798,34 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
                                 borderRadius: BorderRadius.circular(2),
                               ),
                             ),
-                            const SizedBox(height: 24),
+                            SizedBox(height: spacing.sectionGap),
                             Icon(
                               LucideIcons.creditCard,
                               size: 48,
                               color: color.primary,
                             ),
-                            const SizedBox(height: 16),
+                            SizedBox(height: spacing.sectionGap),
                             Text(
-                              'Credit Card Reminders',
+                              ctxt.plugins_creditCardReminders,
                               style: textTheme.titleLarge?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const SizedBox(height: 24),
+                            SizedBox(height: spacing.sectionGap),
                             TextField(
                               controller: reminderController,
                               keyboardType: TextInputType.number,
                               decoration: InputDecoration(
-                                labelText: 'Remind me before (days)',
+                                labelText: ctxt.plugins_remindBefore,
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 16),
+                            SizedBox(height: spacing.sectionGap),
                             if (creditCards.isEmpty)
                               Container(
-                                padding: const EdgeInsets.all(14),
+                                padding: EdgeInsets.all(spacing.cardInner),
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(12),
                                   color: color.primary.withValues(alpha: 0.06),
@@ -825,10 +841,10 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
                                       color: color.primary,
                                       size: 18,
                                     ),
-                                    const SizedBox(width: 12),
+                                    SizedBox(width: spacing.elementGap),
                                     Expanded(
                                       child: Text(
-                                        'No credit card accounts found. Add one first.',
+                                        ctxt.plugins_noCreditCards,
                                         style: textTheme.bodySmall?.copyWith(
                                           color: color.onSurfaceVariant,
                                         ),
@@ -841,13 +857,13 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
                               Align(
                                 alignment: Alignment.centerLeft,
                                 child: Text(
-                                  'Credit Card Accounts',
+                                  ctxt.plugins_creditCardAccounts,
                                   style: textTheme.titleSmall?.copyWith(
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: 8),
+                              SizedBox(height: spacing.elementGap),
                               ...creditCards.map((account) {
                                 final existing = cardConfigs.firstWhere(
                                   (c) => c['accountId'] == account.id,
@@ -906,7 +922,7 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
                                                         TextInputType.number,
                                                     decoration: InputDecoration(
                                                       labelText:
-                                                          'Bill Day (1-31)',
+                                                          ctxt.plugins_billDay,
                                                       border:
                                                           OutlineInputBorder(
                                                         borderRadius:
@@ -946,7 +962,7 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
                                 );
                               }),
                             ],
-                            const SizedBox(height: 16),
+                            SizedBox(height: spacing.sectionGap),
                             Row(
                               children: [
                                 Expanded(
@@ -960,10 +976,13 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                     ),
-                                    child: const Text('Cancel'),
+                                    child: Text(
+                                      AppLocalizations.of(context)!
+                                          .common_cancel,
+                                    ),
                                   ),
                                 ),
-                                const SizedBox(width: 12),
+                                SizedBox(width: spacing.elementGap),
                                 Expanded(
                                   child: FilledButton(
                                     onPressed: () async {
@@ -995,7 +1014,7 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
                                       if (ctx.mounted) {
                                         Navigator.pop(ctx);
                                         SnackbarService.success(
-                                          'Credit card reminders configured',
+                                          ctxt.plugins_remindersConfigured,
                                         );
                                       }
                                     },
@@ -1007,12 +1026,14 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                     ),
-                                    child: const Text('Save'),
+                                    child: Text(
+                                      AppLocalizations.of(context)!.common_save,
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 24),
+                            SizedBox(height: spacing.sectionGap),
                           ],
                         ),
                       ),

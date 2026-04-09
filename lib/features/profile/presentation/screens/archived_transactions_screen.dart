@@ -1,10 +1,11 @@
+import 'package:mudra_manager/core/utils/safe_date_format.dart';
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:isar_community/isar.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/db/models/archived_transaction.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
@@ -30,6 +31,7 @@ class ArchivedTransactionsScreen extends ConsumerWidget {
     final textTheme = Theme.of(context).textTheme;
     final spacing = ref.watch(spacingProvider);
     final asyncTxns = ref.watch(_archivedTxnProvider);
+    final ctxt = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(title: Text(BuddyMessages.archivedTransactionsTitle)),
@@ -42,11 +44,10 @@ class ArchivedTransactionsScreen extends ConsumerWidget {
             );
           }
 
-          // Group by archivedAt date (each currency change batch)
           final grouped = <String, List<ArchivedTransaction>>{};
           for (final txn in txns) {
             final key =
-                '${txn.archivedFromBase} → ${txn.archivedToBase}  •  ${DateFormat('MMM dd, yyyy').format(txn.archivedAt)}';
+                '${txn.archivedFromBase} → ${txn.archivedToBase}  •  ${safeDateFormat('MMM dd, yyyy').format(txn.archivedAt)}';
             grouped.putIfAbsent(key, () => []).add(txn);
           }
 
@@ -63,55 +64,46 @@ class ArchivedTransactionsScreen extends ConsumerWidget {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (i > 0) const SizedBox(height: 16),
+                  if (i > 0) SizedBox(height: spacing.sectionGap),
                   // Batch header
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: spacing.elementGap,
+                      vertical: spacing.elementGapMin,
                     ),
                     decoration: BoxDecoration(
-                      color: color.primaryContainer.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(10),
+                      color: color.primary.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(spacing.radiusSmall),
                     ),
                     child: Row(
                       children: [
-                        Icon(
-                          LucideIcons.arrowLeftRight,
-                          size: 14,
-                          color: color.primary,
-                        ),
-                        const SizedBox(width: 8),
+                        Icon(LucideIcons.arrowLeftRight, size: 14, color: color.primary),
+                        SizedBox(width: spacing.elementGap),
                         Expanded(
                           child: Text(
                             entry.key,
                             style: textTheme.labelMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: color.primary,
+                              fontWeight: FontWeight.w600, color: color.primary,
                             ),
                           ),
                         ),
                         Text(
                           '${batch.length}',
-                          style: textTheme.labelSmall?.copyWith(
-                            color: color.onSurfaceVariant,
-                          ),
+                          style: textTheme.labelSmall?.copyWith(color: color.onSurfaceVariant),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: spacing.elementGap),
                   // Transaction cards
-                  ...batch.map(
-                    (txn) => _ArchivedTxnCard(txn: txn),
-                  ),
+                  ...batch.map((txn) => _ArchivedTxnCard(txn: txn, spacing: spacing, ctxt: ctxt)),
                 ],
               );
             },
           );
         },
         loading: () => ListView(children: List.generate(5, (_) => TransactionCardSkeleton())),
-        error: (e, _) => Center(child: Text(BuddyMessages.errorWith('$e'))),
+        error: (e, _) => Center(child: Text(ctxt.common_errorLoading)),
       ),
     );
   }
@@ -119,7 +111,10 @@ class ArchivedTransactionsScreen extends ConsumerWidget {
 
 class _ArchivedTxnCard extends StatelessWidget {
   final ArchivedTransaction txn;
-  const _ArchivedTxnCard({required this.txn});
+  final AppSpacing spacing;
+  final AppLocalizations ctxt;
+
+  const _ArchivedTxnCard({required this.txn, required this.spacing, required this.ctxt});
 
   @override
   Widget build(BuildContext context) {
@@ -129,60 +124,51 @@ class _ArchivedTxnCard extends StatelessWidget {
 
     return Card(
       elevation: 0,
-      margin: const EdgeInsets.only(bottom: 6),
+      margin: EdgeInsets.only(bottom: spacing.elementGapMin),
       color: color.surfaceContainerLow,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: color.outlineVariant.withValues(alpha: 0.3),
-        ),
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        side: BorderSide(color: color.outlineVariant.withValues(alpha: 0.3)),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        padding: EdgeInsets.symmetric(
+          horizontal: spacing.cardInner,
+          vertical: spacing.elementGap,
+        ),
         child: Row(
           children: [
-            // Category icon placeholder
             Container(
-              width: 40,
-              height: 40,
+              width: 40, height: 40,
               decoration: BoxDecoration(
                 color: accentColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(spacing.radiusMedium),
               ),
               child: Icon(
                 txn.isExpense ? LucideIcons.arrowUpRight : LucideIcons.arrowDownLeft,
-                size: 18,
-                color: accentColor,
+                size: 18, color: accentColor,
               ),
             ),
-            const SizedBox(width: 12),
-            // Details
+            SizedBox(width: spacing.elementGap),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    txn.categoryName ?? txn.description ?? 'Transaction',
-                    style: textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                    txn.categoryName ?? txn.description ?? ctxt.archived_transaction,
+                    style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                    maxLines: 1, overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 2),
+                  SizedBox(height: spacing.elementGapUltraMin),
                   Text(
                     [
                       if (txn.accountName != null) txn.accountName!,
-                      DateFormat('MMM dd, yyyy').format(txn.date),
+                      safeDateFormat('MMM dd, yyyy').format(txn.date),
                     ].join(' • '),
-                    style: textTheme.bodySmall?.copyWith(
-                      color: color.onSurfaceVariant,
-                    ),
+                    style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
                   ),
                 ],
               ),
             ),
-            // Amount
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -193,13 +179,15 @@ class _ArchivedTxnCard extends StatelessWidget {
                   isExpense: txn.isExpense,
                   compact: false,
                   style: textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: accentColor,
+                    fontWeight: FontWeight.w700, color: accentColor,
                   ),
                 ),
                 if (txn.convertedAmount != null)
-                  Text(
-                    '${formatCurrency(txn.convertedAmount!, code: txn.archivedFromBase, decimals: 2)}',
+                  CurrencyText(
+                    amount: txn.convertedAmount!,
+                    currencyCode: txn.archivedFromBase,
+                    compact: false,
+                    fixedLength: 2,
                     style: textTheme.labelSmall?.copyWith(
                       color: color.onSurfaceVariant.withValues(alpha: 0.6),
                     ),

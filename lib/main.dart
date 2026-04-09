@@ -354,6 +354,8 @@ class _MudraManagerAppState extends ConsumerState<MudraManagerApp> {
             );
           },
           builder: (context, child) {
+            final l10n = AppLocalizations.of(context);
+            if (l10n != null) Tone.syncL10n(l10n);
             NotificationService.setContext(context);
             WidgetsBinding.instance.addPostFrameCallback((_) {
               AppUpdateService.checkForUpdate(context);

@@ -36,6 +36,8 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
   Map<int, double> _baseBalanceMap = {};
   bool _initialized = false;
 
+  AppLocalizations get ctxt => AppLocalizations.of(context)!;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -81,10 +83,10 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
             tooltip: ctxt.accounts_addAccountLabel,
           ),
           IconButton(
-            icon: const Icon(Icons.info_outline),
+            icon: const Icon(LucideIcons.info),
             onPressed: () {
               HapticFeedback.mediumImpact();
-              _showInfoBottomSheet(context, color, textTheme);
+              _showInfoBottomSheet(context, color, textTheme, spacing);
             },
           ),
         ],
@@ -94,10 +96,10 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
           if (allAccounts.isEmpty) {
             return NoDataFound(
               message: BuddyMessages.noAccounts,
-              iconData: Icons.account_balance_wallet_outlined,
+              iconData: LucideIcons.wallet,
               action: ElevatedButton.icon(
                 onPressed: () => context.push('/manage-accounts/add'),
-                icon: const Icon(Icons.add),
+                icon: const Icon(LucideIcons.plus),
                 label: Text(ctxt.accounts_addAccountLabel),
               ),
             );
@@ -113,7 +115,8 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
             grouped.putIfAbsent(account.accountType, () => []).add(account);
           }
 
-          final totalBalance = _baseBalanceMap.values.fold(0.0, (a, b) => a + b);
+          final totalBalance =
+              _baseBalanceMap.values.fold(0.0, (a, b) => a + b);
 
           return RefreshIndicator(
             onRefresh: () => RefreshHelper.withMinDuration(() async {
@@ -153,7 +156,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildTypeHeader(entry.key, color, textTheme),
-                      const SizedBox(height: 8),
+                      SizedBox(height: spacing.elementGap),
                       _buildAccountGroup(
                         entry.value,
                         false,
@@ -163,16 +166,16 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
                         ctxt,
                         spacing,
                       ),
-                      const SizedBox(height: 20),
+                      SizedBox(height: spacing.sectionGap),
                     ],
                   );
                 }),
 
                 // Archived section
                 if (archivedAccounts.isNotEmpty) ...[
-                  const SizedBox(height: 4),
-                  _buildArchivedHeader(color, textTheme),
-                  const SizedBox(height: 8),
+                  SizedBox(height: spacing.elementGapMin),
+                  _buildArchivedHeader(color, textTheme, spacing),
+                  SizedBox(height: spacing.elementGap),
                   _buildAccountGroup(
                     archivedAccounts,
                     true,
@@ -182,7 +185,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
                     ctxt,
                     spacing,
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: spacing.sectionGap),
                 ],
                 SizedBox(
                   height: MediaQuery.of(context).padding.bottom +
@@ -194,11 +197,17 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
           );
         },
         loading: () => ListView.builder(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+          padding: EdgeInsets.fromLTRB(
+            spacing.cardHorizontal,
+            spacing.cardVertical,
+            spacing.cardHorizontal,
+            100,
+          ),
           itemCount: 5,
           itemBuilder: (context, index) => TransactionCardSkeleton(),
         ),
-        error: (err, stack) => Center(child: Text(BuddyMessages.errorWith('$err'))),
+        error: (err, stack) =>
+            Center(child: Text(BuddyMessages.errorWith('$err'))),
       ),
     );
   }
@@ -211,53 +220,50 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
     TextTheme textTheme,
     AppSpacing spacing,
   ) {
+    final isDark = color.brightness == Brightness.dark;
     return Container(
-      padding: EdgeInsets.all(spacing.cardInner),
+      padding: EdgeInsets.all(spacing.cardInner + spacing.elementGap),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            color.primaryContainer,
-            color.secondaryContainer,
+            color.primary.withValues(alpha: isDark ? 0.15 : 0.08),
+            color.surface,
           ],
         ),
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        border: Border.all(color: color.outlineVariant.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Total Balance (in ${BaseCurrency.code})',
-            style: textTheme.labelLarge?.copyWith(
-              color: color.onPrimaryContainer.withValues(alpha: 0.7),
-            ),
+            '${ctxt.accounts_totalBalance} (${BaseCurrency.code})',
+            style:
+                textTheme.labelLarge?.copyWith(color: color.onSurfaceVariant),
           ),
           SizedBox(height: spacing.elementGap),
           CurrencyText(
             amount: totalBalance,
             compact: false,
-            style: textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.w900,
-              color: color.onPrimaryContainer,
-            ),
+            style:
+                textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w900),
           ),
-          SizedBox(height: spacing.sectionGap),
+          SizedBox(height: spacing.elementGap),
           Container(
             padding: EdgeInsets.symmetric(
-              horizontal: spacing.cardHorizontal,
-              vertical: spacing.cardVertical,
+              horizontal: spacing.elementGap,
+              vertical: spacing.elementGapMin,
             ),
             decoration: BoxDecoration(
-              color: color.onPrimaryContainer.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(spacing.radiusMedium),
+              color: color.primary.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(spacing.radiusSmall),
             ),
             child: Text(
-              '$accountCount accounts',
-              style: textTheme.labelSmall?.copyWith(
-                color: color.onPrimaryContainer,
-                fontWeight: FontWeight.w600,
-              ),
+              '$accountCount ${ctxt.accounts_accountsCount}',
+              style: textTheme.labelSmall
+                  ?.copyWith(color: color.primary, fontWeight: FontWeight.w600),
             ),
           ),
         ],
@@ -271,43 +277,40 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
     ColorScheme color,
     TextTheme textTheme,
   ) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 4),
-      child: Row(
-        children: [
-          Icon(type.icon, size: 16, color: color.primary),
-          const SizedBox(width: 8),
-          Text(
-            type.label,
-            style: textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: color.primary,
-              letterSpacing: 0.5,
-            ),
+    return Row(
+      children: [
+        Icon(type.icon, size: 16, color: color.primary),
+        const SizedBox(width: 8),
+        Text(
+          type.label,
+          style: textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: color.primary,
+            letterSpacing: 0.5,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
-  // ── ARCHIVED HEADER ──
-  Widget _buildArchivedHeader(ColorScheme color, TextTheme textTheme) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 4),
-      child: Row(
-        children: [
-          Icon(LucideIcons.archive, size: 16, color: color.onSurfaceVariant),
-          const SizedBox(width: 8),
-          Text(
-            'Archived',
-            style: textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: color.onSurfaceVariant,
-              letterSpacing: 0.5,
-            ),
+  Widget _buildArchivedHeader(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
+    return Row(
+      children: [
+        Icon(LucideIcons.archive, size: 16, color: color.onSurfaceVariant),
+        const SizedBox(width: 8),
+        Text(
+          ctxt.accounts_archived,
+          style: textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: color.onSurfaceVariant,
+            letterSpacing: 0.5,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -380,22 +383,23 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
                       }
                     },
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: spacing.cardInner,
+                        vertical: spacing.elementGap * 1.5,
                       ),
                       child: Row(
                         children: [
                           Hero(
                             tag: 'account_${account.id}',
                             child: Container(
-                              padding: const EdgeInsets.all(10),
+                              padding: EdgeInsets.all(spacing.elementGap),
                               decoration: BoxDecoration(
                                 color: isArchived
                                     ? color.onSurfaceVariant
                                         .withValues(alpha: 0.08)
                                     : accountColor.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius:
+                                    BorderRadius.circular(spacing.radiusMedium),
                               ),
                               child: Icon(
                                 account.accountType.icon,
@@ -406,7 +410,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
                               ),
                             ),
                           ),
-                          const SizedBox(width: 14),
+                          SizedBox(width: spacing.elementGap * 1.5),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -423,18 +427,18 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
                                       ),
                                     ),
                                     if (account.isPrimary) ...[
-                                      const SizedBox(width: 6),
+                                      SizedBox(width: spacing.elementGapMin),
                                       Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 6,
-                                          vertical: 2,
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: spacing.elementGapMin,
+                                          vertical: spacing.elementGapUltraMin,
                                         ),
                                         decoration: BoxDecoration(
                                           color: color.primary.withValues(alpha: 0.12),
-                                          borderRadius: BorderRadius.circular(4),
+                                          borderRadius: BorderRadius.circular(spacing.radiusSmall),
                                         ),
                                         child: Text(
-                                          'Primary',
+                                          ctxt.accounts_primary,
                                           style: textTheme.labelSmall?.copyWith(
                                             color: color.primary,
                                             fontWeight: FontWeight.bold,
@@ -444,32 +448,32 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
                                     ],
                                   ],
                                 ),
-                                if (account.accountNumber != null)
-                                  Text(
-                                    '•••• ${account.accountNumber}',
-                                    style: textTheme.bodySmall?.copyWith(
-                                      color: color.onSurfaceVariant,
-                                      letterSpacing: 1.2,
-                                    ),
-                                  ),
-                                if (account.currencyCode != null)
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 4),
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 6,
-                                        vertical: 2,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: accountColor.withValues(alpha: 0.1),
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
-                                      child: CurrencyBadge(
-                                        code: account.currencyCode!,
-                                        size: 12,
-                                        color: accountColor,
-                                      ),
-                                    ),
+                                // Account number + currency inline
+                                if (account.accountNumber != null || account.currencyCode != null)
+                                  Row(
+                                    children: [
+                                      if (account.accountNumber != null)
+                                        Text(
+                                          '•••• ${account.accountNumber}',
+                                          style: textTheme.labelSmall?.copyWith(
+                                            color: color.onSurfaceVariant.withValues(alpha: 0.5),
+                                            letterSpacing: 1.2,
+                                          ),
+                                        ),
+                                      if (account.accountNumber != null && account.currencyCode != null)
+                                        Text(
+                                          '  •  ',
+                                          style: textTheme.labelSmall?.copyWith(
+                                            color: color.outlineVariant,
+                                          ),
+                                        ),
+                                      if (account.currencyCode != null)
+                                        CurrencyBadge(
+                                          code: account.currencyCode!,
+                                          size: 11,
+                                          color: accountColor.withValues(alpha: 0.7),
+                                        ),
+                                    ],
                                   ),
                               ],
                             ),
@@ -495,7 +499,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
                                 return const SizedBox.shrink();
                               }
                               return Padding(
-                                padding: const EdgeInsets.only(left: 4),
+                                padding: EdgeInsets.only(left: spacing.elementGapMin),
                                 child: Icon(
                                   LucideIcons.lock,
                                   size: 12,
@@ -503,12 +507,6 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
                                 ),
                               );
                             },
-                          ),
-                          const SizedBox(width: 4),
-                          Icon(
-                            LucideIcons.chevronRight,
-                            color: color.onSurfaceVariant,
-                            size: 16,
                           ),
                         ],
                       ),
@@ -574,15 +572,14 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
               SizedBox(height: spacing.elementGap),
               const Divider(height: 1),
               _sheetOption(
-                  ctx, Icons.edit_outlined, 'Edit Account', null, color.primary,
+                  ctx, LucideIcons.pen, ctxt.accounts_edit, null, color.primary,
                   () {
                 Navigator.pop(ctx);
                 context
                     .push('/manage-accounts/add', extra: {'account': account});
               }),
-              _sheetOption(
-                  ctx, Icons.history, 'Balance History', null, color.primary,
-                  () {
+              _sheetOption(ctx, LucideIcons.history, ctxt.accounts_balanceHistory, null,
+                  color.primary, () {
                 Navigator.pop(ctx);
                 Navigator.push(
                   context,
@@ -591,8 +588,8 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
                   ),
                 );
               }),
-              _sheetOption(ctx, Icons.verified_user_outlined, 'Reconcile',
-                  'Match with bank statement', color.primary, () {
+              _sheetOption(ctx, LucideIcons.scale, ctxt.reconcile_title,
+                  ctxt.accounts_matchBank, color.primary, () {
                 Navigator.pop(ctx);
                 Navigator.push(
                   context,
@@ -602,7 +599,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
                 );
               }),
               if (account.accountType == AccountType.investment)
-                _sheetOption(ctx, Icons.trending_up, 'View Portfolio', null,
+                _sheetOption(ctx, LucideIcons.chartLine, ctxt.accounts_viewPortfolio, null,
                     color.primary, () {
                   Navigator.pop(ctx);
                   Navigator.push(
@@ -616,9 +613,9 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
               if (!account.isPrimary)
                 _sheetOption(
                     ctx,
-                    Icons.star_outline,
-                    'Set as Primary',
-                    'Default account for splits & trips',
+                    LucideIcons.star,
+                    ctxt.accounts_setAsPrimary,
+                    ctxt.accounts_primaryDesc,
                     color.primary, () async {
                   Navigator.pop(ctx);
                   await ref
@@ -631,8 +628,8 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
                   );
                 }),
               const Divider(height: 1),
-              _sheetOption(ctx, Icons.archive_outlined, 'Archive',
-                  'Hide from active accounts', color.onSurfaceVariant, () {
+              _sheetOption(ctx, LucideIcons.archive, ctxt.accounts_archive,
+                  ctxt.accounts_archiveDesc, color.onSurfaceVariant, () {
                 Navigator.pop(ctx);
                 if (activeCount <= 1) {
                   SnackbarService.warning(
@@ -693,13 +690,13 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
               ),
               SizedBox(height: spacing.elementGap),
               const Divider(height: 1),
-              _sheetOption(ctx, LucideIcons.archiveRestore, 'Unarchive',
-                  'Restore to active accounts', color.primary, () {
+              _sheetOption(ctx, LucideIcons.archiveRestore, ctxt.accounts_unarchive,
+                  ctxt.accounts_unarchiveDesc, color.primary, () {
                 Navigator.pop(ctx);
                 _unarchiveAccount(account, ctxt);
               }),
-              _sheetOption(ctx, Icons.delete_outline, 'Delete',
-                  'Permanently remove account', color.error, () {
+              _sheetOption(ctx, LucideIcons.trash2, ctxt.common_delete,
+                  ctxt.accounts_deleteDesc, color.error, () {
                 Navigator.pop(ctx);
                 _showDeleteConfirmation(account, ctxt);
               }),
@@ -761,7 +758,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
-                          'Archived',
+                          ctxt.accounts_archived,
                           style: textTheme.labelSmall?.copyWith(
                             color:
                                 Theme.of(context).colorScheme.onSurfaceVariant,
@@ -885,17 +882,19 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
     BuildContext context,
     ColorScheme color,
     TextTheme textTheme,
+    AppSpacing spacing,
   ) {
     showModalBottomSheet(
       context: context,
       backgroundColor: color.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      shape: RoundedRectangleBorder(
+        borderRadius:
+            BorderRadius.vertical(top: Radius.circular(spacing.radiusLarge)),
       ),
       builder: (ctx) => SafeArea(
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.all(24),
+            padding: EdgeInsets.all(spacing.sectionGap),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -907,25 +906,21 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-                const SizedBox(height: 24),
-                Icon(
-                  Icons.account_balance_wallet,
-                  size: 64,
-                  color: color.primary,
-                ),
-                const SizedBox(height: 16),
+                SizedBox(height: spacing.sectionGap),
+                Icon(LucideIcons.wallet, size: 64, color: color.primary),
+                SizedBox(height: spacing.sectionGap),
                 Text(
-                  'How Accounts Work',
+                  ctxt.accounts_howItWorks,
                   style: textTheme.titleLarge
                       ?.copyWith(fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: spacing.sectionGap),
                 Text(
-                  'Manage all your bank accounts, wallets, and cash in one place. Track balances and transactions across multiple accounts.',
+                  ctxt.accounts_howItWorksDesc,
                   style: textTheme.bodyMedium,
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: spacing.sectionGap),
               ],
             ),
           ),

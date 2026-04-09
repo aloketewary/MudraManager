@@ -1442,7 +1442,7 @@ class _AddEditTransactionScreenState
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text('Done'),
+                  child: Text(AppLocalizations.of(context)!.common_done),
                 ),
               ],
             ),

@@ -1,11 +1,13 @@
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/extension/account_type_extenstion.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/features/account/data/balance_history_provider.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/features/account/presentation/widgets/balance_history_chart.dart';
@@ -21,8 +23,10 @@ class BalanceHistoryScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final balanceHistory = ref.watch(balanceHistoryProvider(account.id));
     final isGuestMode = ref.watch(guestModeProvider);
+    final spacing = ref.watch(spacingProvider);
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final ctxt = AppLocalizations.of(context)!;
     final accountColor = Color(account.colorValue ?? Colors.blue.toARGB32());
 
     return Scaffold(
@@ -45,53 +49,51 @@ class BalanceHistoryScreen extends ConsumerWidget {
           final changePercent =
               firstBalance != 0 ? (change / firstBalance.abs() * 100) : 0.0;
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                // Hero balance card
-                _buildHeroCard(
-                  currentBalance,
-                  change,
-                  changePercent,
-                  accountColor,
-                  isGuestMode,
-                  color,
-                  textTheme,
-                ),
-                const SizedBox(height: 20),
+          // Emotional context
+          final emotionLine = change > 0
+              ? ctxt.balanceHistory_growing
+              : change < 0
+                  ? ctxt.balanceHistory_declining
+                  : ctxt.balanceHistory_steady;
 
-                // Chart
-                BalanceHistoryChart(
-                  snapshots: snapshots,
-                  accountColor: accountColor,
-                  isGuestMode: isGuestMode,
-                ),
-                const SizedBox(height: 20),
-
-                // Stats row
-                _buildStatsRow(
-                  snapshots,
-                  isGuestMode,
-                  color,
-                  textTheme,
-                ),
-                const SizedBox(height: 32),
-              ],
+          return ListView(
+            padding: EdgeInsets.symmetric(
+              horizontal: spacing.cardHorizontal,
+              vertical: spacing.cardVertical,
             ),
+            children: [
+              // Hero
+              _buildHeroCard(
+                currentBalance, change, changePercent, emotionLine,
+                accountColor, isGuestMode, color, textTheme, spacing, ctxt,
+              ),
+              SizedBox(height: spacing.sectionGap),
+
+              // Chart — the star
+              BalanceHistoryChart(
+                snapshots: snapshots,
+                accountColor: accountColor,
+                isGuestMode: isGuestMode,
+              ),
+              SizedBox(height: spacing.sectionGap),
+
+              // Stats
+              _buildStatsRow(snapshots, isGuestMode, color, textTheme, spacing, ctxt),
+              SizedBox(height: spacing.sectionGap * 2),
+            ],
           );
         },
-        loading: () => const Padding(padding: EdgeInsets.all(16), child: DashboardCardSkeleton()),
+        loading: () => Padding(
+          padding: EdgeInsets.all(spacing.cardHorizontal),
+          child: const DashboardCardSkeleton(),
+        ),
         error: (err, _) => Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.error_outline, size: 64, color: color.error),
-              const SizedBox(height: 16),
-              Text(
-                'Failed to load history',
-                style: textTheme.titleMedium?.copyWith(color: color.error),
-              ),
+              Icon(LucideIcons.circleAlert, size: 64, color: color.error),
+              SizedBox(height: spacing.sectionGap),
+              Text(ctxt.common_errorLoading, style: textTheme.titleMedium?.copyWith(color: color.error)),
             ],
           ),
         ),
@@ -103,18 +105,20 @@ class BalanceHistoryScreen extends ConsumerWidget {
     double currentBalance,
     double change,
     double changePercent,
+    String emotionLine,
     Color accountColor,
     bool isGuestMode,
     ColorScheme color,
     TextTheme textTheme,
+    AppSpacing spacing,
+    AppLocalizations ctxt,
   ) {
     final isPositive = change >= 0;
-    final changeColor =
-        isPositive ? color.primary : color.error;
+    final changeColor = isPositive ? color.primary : color.error;
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(spacing.cardInner + spacing.elementGap),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -124,84 +128,74 @@ class BalanceHistoryScreen extends ConsumerWidget {
             color.surfaceContainerLow,
           ],
         ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: color.outlineVariant.withValues(alpha: 0.3),
-        ),
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        border: Border.all(color: color.outlineVariant.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Emotional headline
+          Text(
+            emotionLine,
+            style: textTheme.bodySmall?.copyWith(
+              color: changeColor,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          SizedBox(height: spacing.elementGap),
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(10),
+                padding: EdgeInsets.all(spacing.elementGap),
                 decoration: BoxDecoration(
                   color: accountColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
                 ),
-                child: Icon(
-                  account.accountType.icon,
-                  color: accountColor,
-                  size: 20,
-                ),
+                child: Icon(account.accountType.icon, color: accountColor, size: 20),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: spacing.elementGap),
               Text(
-                'Current Balance',
-                style: textTheme.labelLarge?.copyWith(
-                  color: color.onSurfaceVariant,
-                ),
+                ctxt.balanceHistory_currentBalance,
+                style: textTheme.labelLarge?.copyWith(color: color.onSurfaceVariant),
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          SizedBox(height: spacing.elementGap * 1.5),
           CurrencyText(
-            amount: GuestModeUtil.applyGuestMode(
-              currentBalance,
-              isGuestMode,
-            ),
+            amount: GuestModeUtil.applyGuestMode(currentBalance, isGuestMode),
+            currencyCode: account.currencyCode,
             compact: false,
-            style: textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.w900,
-            ),
+            style: textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w900),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: spacing.elementGap),
           Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 10,
-              vertical: 5,
+            padding: EdgeInsets.symmetric(
+              horizontal: spacing.elementGap,
+              vertical: spacing.elementGapMin,
             ),
             decoration: BoxDecoration(
               color: changeColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(spacing.radiusSmall),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  isPositive
-                      ? LucideIcons.trendingUp
-                      : LucideIcons.trendingDown,
-                  size: 14,
-                  color: changeColor,
+                  isPositive ? LucideIcons.trendingUp : LucideIcons.trendingDown,
+                  size: 14, color: changeColor,
                 ),
-                const SizedBox(width: 4),
+                SizedBox(width: spacing.elementGapMin),
                 CurrencyText(
-                  amount: GuestModeUtil.applyGuestMode(
-                    change.abs(),
-                    isGuestMode,
-                  ),
+                  amount: GuestModeUtil.applyGuestMode(change.abs(), isGuestMode),
+                  currencyCode: account.currencyCode,
                   style: textTheme.labelMedium?.copyWith(
-                    color: changeColor,
-                    fontWeight: FontWeight.w600,
+                    color: changeColor, fontWeight: FontWeight.w600,
                   ),
                 ),
                 Text(
                   ' (${changePercent.abs().toStringAsFixed(1)}%)',
                   style: textTheme.labelMedium?.copyWith(
-                    color: changeColor,
-                    fontWeight: FontWeight.w600,
+                    color: changeColor, fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
@@ -217,6 +211,8 @@ class BalanceHistoryScreen extends ConsumerWidget {
     bool isGuestMode,
     ColorScheme color,
     TextTheme textTheme,
+    AppSpacing spacing,
+    AppLocalizations ctxt,
   ) {
     final balances = snapshots.map((s) => s.balance as double).toList();
     final highest = balances.reduce((a, b) => a > b ? a : b);
@@ -225,38 +221,23 @@ class BalanceHistoryScreen extends ConsumerWidget {
 
     return Row(
       children: [
-        Expanded(
-          child: _statPill(
-            'Highest',
-            GuestModeUtil.applyGuestMode(highest, isGuestMode),
-            LucideIcons.arrowUp,
-            color.primary,
-            color,
-            textTheme,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _statPill(
-            'Lowest',
-            GuestModeUtil.applyGuestMode(lowest, isGuestMode),
-            LucideIcons.arrowDown,
-            color.error,
-            color,
-            textTheme,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _statPill(
-            'Average',
-            GuestModeUtil.applyGuestMode(avg, isGuestMode),
-            LucideIcons.minus,
-            color.secondary,
-            color,
-            textTheme,
-          ),
-        ),
+        Expanded(child: _statPill(
+          ctxt.balanceHistory_highest,
+          GuestModeUtil.applyGuestMode(highest, isGuestMode),
+          LucideIcons.arrowUp, color.primary, color, textTheme, spacing,
+        )),
+        SizedBox(width: spacing.elementGap),
+        Expanded(child: _statPill(
+          ctxt.balanceHistory_lowest,
+          GuestModeUtil.applyGuestMode(lowest, isGuestMode),
+          LucideIcons.arrowDown, color.error, color, textTheme, spacing,
+        )),
+        SizedBox(width: spacing.elementGap),
+        Expanded(child: _statPill(
+          ctxt.balanceHistory_average,
+          GuestModeUtil.applyGuestMode(avg, isGuestMode),
+          LucideIcons.minus, color.secondary, color, textTheme, spacing,
+        )),
       ],
     );
   }
@@ -268,33 +249,26 @@ class BalanceHistoryScreen extends ConsumerWidget {
     Color pillColor,
     ColorScheme color,
     TextTheme textTheme,
+    AppSpacing spacing,
   ) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: EdgeInsets.all(spacing.cardInner),
       decoration: BoxDecoration(
         color: color.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: color.outlineVariant.withValues(alpha: 0.3),
-        ),
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        border: Border.all(color: color.outlineVariant.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [
           Icon(icon, size: 16, color: pillColor),
-          const SizedBox(height: 6),
+          SizedBox(height: spacing.elementGapMin),
           CurrencyText(
             amount: value,
-            style: textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+            currencyCode: account.currencyCode,
+            style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 2),
-          Text(
-            label,
-            style: textTheme.labelSmall?.copyWith(
-              color: color.onSurfaceVariant,
-            ),
-          ),
+          SizedBox(height: spacing.elementGapUltraMin),
+          Text(label, style: textTheme.labelSmall?.copyWith(color: color.onSurfaceVariant)),
         ],
       ),
     );

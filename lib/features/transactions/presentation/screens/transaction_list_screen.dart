@@ -357,7 +357,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
             });
           },
           decoration: InputDecoration(
-            hintText: 'Search transactions...',
+            hintText: AppLocalizations.of(context)!.txnList_searchHint,
             hintStyle: TextStyle(
               color: color.onSurfaceVariant.withValues(alpha: 0.6),
             ),
@@ -413,7 +413,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
             Chip(
               avatar:
                   Icon(Icons.category_rounded, size: 18, color: color.primary),
-              label: Text('Category', style: textTheme.labelMedium),
+              label: Text(AppLocalizations.of(context)!.txnList_category, style: textTheme.labelMedium),
               deleteIcon: const Icon(Icons.close_rounded, size: 18),
               backgroundColor: color.primaryContainer,
               side: BorderSide.none,
@@ -432,7 +432,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                 size: 18,
                 color: color.primary,
               ),
-              label: Text('Date Range', style: textTheme.labelMedium),
+              label: Text(AppLocalizations.of(context)!.txnList_dateRange, style: textTheme.labelMedium),
               deleteIcon: const Icon(Icons.close_rounded, size: 18),
               backgroundColor: color.primaryContainer,
               side: BorderSide.none,
@@ -448,7 +448,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
           if (_selectedTagId != null)
             Chip(
               avatar: Icon(Icons.label_rounded, size: 18, color: color.tertiary),
-              label: Text(_selectedTagName ?? 'Tag', style: textTheme.labelMedium),
+              label: Text(_selectedTagName ?? AppLocalizations.of(context)!.txnList_tag, style: textTheme.labelMedium),
               deleteIcon: const Icon(Icons.close_rounded, size: 18),
               backgroundColor: color.tertiaryContainer,
               side: BorderSide.none,
@@ -530,7 +530,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                             children: [
                               Text(
                                 _useInfiniteScroll && _filterStartDate == null
-                                    ? 'All Transactions'
+                                    ? AppLocalizations.of(context)!.txnList_allTransactions
                                     : _getDateRangeText(),
                                 style: textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
@@ -540,14 +540,14 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                               if (_rangeSelectionMode ==
                                   RangeSelectionMode.toggledOn)
                                 Text(
-                                  'Tap start and end date',
+                                  AppLocalizations.of(context)!.txnList_tapStartEnd,
                                   style: textTheme.bodySmall
                                       ?.copyWith(color: color.primary),
                                 )
                               else if (_useInfiniteScroll &&
                                   _filterStartDate == null)
                                 Text(
-                                  'Scroll to load more',
+                                  AppLocalizations.of(context)!.txnList_scrollToLoad,
                                   style: textTheme.bodySmall?.copyWith(
                                     color: color.onSurfaceVariant,
                                   ),
@@ -573,10 +573,10 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                       Padding(
                         padding: EdgeInsets.only(top: spacing.radiusMedium),
                         child: SegmentedButton<RangeSelectionMode>(
-                          segments: const [
+                          segments: [
                             ButtonSegment(
                               value: RangeSelectionMode.toggledOff,
-                              label: Text('Month'),
+                              label: Text(AppLocalizations.of(context)!.txnList_month),
                               icon: Icon(
                                 Icons.calendar_view_month_rounded,
                                 size: 16,
@@ -584,7 +584,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                             ),
                             ButtonSegment(
                               value: RangeSelectionMode.toggledOn,
-                              label: Text('Date Range'),
+                              label: Text(AppLocalizations.of(context)!.txnList_dateRange),
                               icon: Icon(Icons.date_range_rounded, size: 16),
                             ),
                           ],
@@ -637,7 +637,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
           if (!_useInfiniteScroll || _filterStartDate != null) ...[
             IconButton(
               icon: const Icon(Icons.chevron_left_rounded, size: 22),
-              tooltip: 'Previous Month',
+              tooltip: AppLocalizations.of(context)!.txnList_previousMonth,
               onPressed: () {
                 HapticFeedback.lightImpact();
                 setState(() {
@@ -654,7 +654,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
               IconButton(
                 icon:
                     Icon(Icons.refresh_rounded, size: 20, color: color.primary),
-                tooltip: 'Reset to Current Month',
+                tooltip: AppLocalizations.of(context)!.txnList_resetToCurrentMonth,
                 onPressed: () {
                   HapticFeedback.mediumImpact();
                   setState(() {
@@ -671,7 +671,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                   size: 20,
                   color: color.primary,
                 ),
-                tooltip: 'Select Month',
+                tooltip: AppLocalizations.of(context)!.txnList_selectMonth,
                 onPressed: () {
                   HapticFeedback.mediumImpact();
                   setState(() => _showMonthPicker = !_showMonthPicker);
@@ -679,7 +679,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
               ),
             IconButton(
               icon: const Icon(Icons.chevron_right_rounded, size: 22),
-              tooltip: 'Next Month',
+              tooltip: AppLocalizations.of(context)!.txnList_nextMonth,
               onPressed: isSameMonth(_selectedDate, DateTime.now())
                   ? null
                   : () {
@@ -703,7 +703,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
               size: 20,
               color: color.primary,
             ),
-            tooltip: _useInfiniteScroll ? 'Month View' : 'All Transactions',
+            tooltip: _useInfiniteScroll ? AppLocalizations.of(context)!.txnList_monthView : AppLocalizations.of(context)!.txnList_allTransactions,
             onPressed: () {
               HapticFeedback.mediumImpact();
               setState(() {
@@ -1151,7 +1151,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
     });
     _invalidateTransactionProviders();
     setState(() => _clearCache());
-    if (mounted) SnackbarService.success('Subscription tag removed');
+    if (mounted) SnackbarService.success(AppLocalizations.of(context)!.txnList_subscriptionTagRemoved);
   }
 
   Future<void> _onRemoveTransaction(transaction, AppLocalizations ctxt) async {
@@ -1274,7 +1274,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Filter by Tag',
+                    AppLocalizations.of(context)!.txnList_filterByTag,
                     style: textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -1285,7 +1285,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                       padding: const EdgeInsets.symmetric(vertical: 24),
                       child: Center(
                         child: Text(
-                          'No tags yet. Add tags to your transactions first.',
+                          AppLocalizations.of(context)!.txnList_noTagsYet,
                           style: textTheme.bodyMedium?.copyWith(
                             color: color.onSurfaceVariant,
                           ),
@@ -1299,7 +1299,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                       children: [
                         if (_selectedTagId != null)
                           ActionChip(
-                            label: const Text('Clear'),
+                            label: Text(AppLocalizations.of(context)!.txnList_clear),
                             avatar: const Icon(Icons.close, size: 16),
                             onPressed: () {
                               setState(() {
@@ -1375,7 +1375,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                   Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Text(
-                      'Filter Options',
+                      AppLocalizations.of(context)!.txnList_filterOptions,
                       style: textTheme.titleLarge?.copyWith(
                         color: color.primary,
                         fontWeight: FontWeight.bold,
@@ -1393,7 +1393,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                             vertical: spacing.cardVertical,
                           ),
                           child: Text(
-                            'Transaction Type',
+                            AppLocalizations.of(context)!.txnList_transactionType,
                             style: textTheme.titleSmall?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -1426,7 +1426,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                             vertical: spacing.cardVertical,
                           ),
                           child: Text(
-                            'Category',
+                            AppLocalizations.of(context)!.txnList_category,
                             style: textTheme.titleSmall?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -1435,7 +1435,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                         RadioListTile<int?>(
                           value: null,
                           groupValue: _selectedCategoryId,
-                          title: const Text('All Categories'),
+                          title: Text(AppLocalizations.of(context)!.txnList_allCategories),
                           onChanged: (value) {
                             HapticFeedback.mediumImpact();
                             setState(() {
@@ -1532,7 +1532,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                             vertical: spacing.cardVertical,
                           ),
                           child: Text(
-                            'Date Range',
+                            AppLocalizations.of(context)!.txnList_dateRange,
                             style: textTheme.titleSmall?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -1543,7 +1543,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                           title: Text(
                             _filterStartDate != null && _filterEndDate != null
                                 ? '${DateFormat.yMMMd().format(_filterStartDate!)} - ${DateFormat.yMMMd().format(_filterEndDate!)}'
-                                : 'Select Date Range',
+                                : AppLocalizations.of(context)!.txnList_selectDateRange,
                           ),
                           trailing: const Icon(Icons.chevron_right),
                           onTap: () async {
@@ -1585,7 +1585,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                                 setModalState(() {});
                               },
                               icon: const Icon(Icons.clear),
-                              label: const Text('Clear Date Range'),
+                              label: Text(AppLocalizations.of(context)!.txnList_clearDateRange),
                             ),
                           ),
                       ],

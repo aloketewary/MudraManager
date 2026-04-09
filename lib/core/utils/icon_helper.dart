@@ -34,6 +34,7 @@ class IconHelper {
       'bank': LucideIcons.landmark,
       'insurance': LucideIcons.shieldCheck,
       'account_balance_wallet': LucideIcons.wallet,
+      'banknote': LucideIcons.banknote,
     },
     'Payments & Transfers': {
       'upi': LucideIcons.qrCode,
@@ -367,6 +368,7 @@ class IconHelper {
       'trophy': LucideIcons.trophy,
       'download': LucideIcons.download,
       'currency_exchange': LucideIcons.currency,
+      'circle': LucideIcons.circle,
     },
   };
 

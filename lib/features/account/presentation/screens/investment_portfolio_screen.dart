@@ -1,8 +1,6 @@
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:mudra_manager/shared/widgets/no_data_found.dart';
-import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -27,7 +25,8 @@ class InvestmentPortfolioScreen extends ConsumerStatefulWidget {
       _InvestmentPortfolioScreenState();
 }
 
-class _InvestmentPortfolioScreenState extends ConsumerState<InvestmentPortfolioScreen> {
+class _InvestmentPortfolioScreenState
+    extends ConsumerState<InvestmentPortfolioScreen> {
   late Future<List<InvestmentHolding>> _holdingsFuture;
   late Future<Map<String, double>> _metricsFuture;
 
@@ -63,7 +62,9 @@ class _InvestmentPortfolioScreenState extends ConsumerState<InvestmentPortfolioS
             return Center(child: Text(BuddyMessages.genericError));
           }
           if (!metricsSnapshot.hasData) {
-            return ListView(children: List.generate(3, (_) => DashboardCardSkeleton()));
+            return ListView(
+              children: List.generate(3, (_) => const DashboardCardSkeleton()),
+            );
           }
 
           final metrics = metricsSnapshot.data!;
@@ -86,10 +87,18 @@ class _InvestmentPortfolioScreenState extends ConsumerState<InvestmentPortfolioS
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Total Value',
-                                      style: textTheme.labelMedium,),
                                   Text(
-                                    '${formatCurrency(GuestModeUtil.applyGuestMode(metrics['totalValue'] ?? 0, isGuestMode), decimals: 0)}',
+                                    'Total Value',
+                                    style: textTheme.labelMedium,
+                                  ),
+                                  Text(
+                                    formatCurrency(
+                                      GuestModeUtil.applyGuestMode(
+                                        metrics['totalValue'] ?? 0,
+                                        isGuestMode,
+                                      ),
+                                      decimals: 0,
+                                    ),
                                     style: textTheme.headlineSmall
                                         ?.copyWith(fontWeight: FontWeight.bold),
                                   ),
@@ -98,8 +107,10 @@ class _InvestmentPortfolioScreenState extends ConsumerState<InvestmentPortfolioS
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
-                                  Text('Gain/Loss',
-                                      style: textTheme.labelMedium,),
+                                  Text(
+                                    'Gain/Loss',
+                                    style: textTheme.labelMedium,
+                                  ),
                                   Text(
                                     '${formatCurrency(GuestModeUtil.applyGuestMode(gainLoss, isGuestMode), decimals: 0)} (${GuestModeUtil.applyGuestMode(gainLossPercent, isGuestMode).toStringAsFixed(2)}%)',
                                     style: textTheme.titleMedium?.copyWith(
@@ -130,9 +141,11 @@ class _InvestmentPortfolioScreenState extends ConsumerState<InvestmentPortfolioS
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text('Holdings',
-                      style: textTheme.titleMedium
-                          ?.copyWith(fontWeight: FontWeight.bold),),
+                  child: Text(
+                    'Holdings',
+                    style: textTheme.titleMedium
+                        ?.copyWith(fontWeight: FontWeight.bold),
+                  ),
                 ),
                 FutureBuilder<List<InvestmentHolding>>(
                   future: _holdingsFuture,
@@ -141,13 +154,18 @@ class _InvestmentPortfolioScreenState extends ConsumerState<InvestmentPortfolioS
                       return Center(child: Text(BuddyMessages.genericError));
                     }
                     if (!holdingsSnapshot.hasData) {
-                      return Column(children: List.generate(3, (_) => DashboardCardSkeleton()));
+                      return Column(
+                        children: List.generate(
+                          3,
+                          (_) => const DashboardCardSkeleton(),
+                        ),
+                      );
                     }
 
                     final holdings = holdingsSnapshot.data!;
                     if (holdings.isEmpty) {
                       return Padding(
-                        padding: EdgeInsets.all(32),
+                        padding: const EdgeInsets.all(32),
                         child: Text(BuddyMessages.noTransactions),
                       );
                     }
@@ -173,15 +191,20 @@ class _InvestmentPortfolioScreenState extends ConsumerState<InvestmentPortfolioS
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      Text(holding.symbol,
-                                          style: textTheme.titleSmall
-                                              ?.copyWith(
-                                                  fontWeight: FontWeight.bold,),),
-                                      Text(holding.name,
-                                          style: textTheme.bodySmall,),
                                       Text(
-                                          '${holding.quantity} @ ${formatCurrency(holding.currentPrice, decimals: 2)}',
-                                          style: textTheme.labelSmall,),
+                                        holding.symbol,
+                                        style: textTheme.titleSmall?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Text(
+                                        holding.name,
+                                        style: textTheme.bodySmall,
+                                      ),
+                                      Text(
+                                        '${holding.quantity} @ ${formatCurrency(holding.currentPrice, decimals: 2)}',
+                                        style: textTheme.labelSmall,
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -189,10 +212,16 @@ class _InvestmentPortfolioScreenState extends ConsumerState<InvestmentPortfolioS
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
                                     Text(
-                                      '${formatCurrency(GuestModeUtil.applyGuestMode(holding.currentValue, isGuestMode), decimals: 0)}',
-                                      style: textTheme.titleSmall
-                                          ?.copyWith(
-                                              fontWeight: FontWeight.bold,),
+                                      formatCurrency(
+                                        GuestModeUtil.applyGuestMode(
+                                          holding.currentValue,
+                                          isGuestMode,
+                                        ),
+                                        decimals: 0,
+                                      ),
+                                      style: textTheme.titleSmall?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                     Text(
                                       '${isGain ? '+' : ''}${formatCurrency(GuestModeUtil.applyGuestMode(gainLoss, isGuestMode), decimals: 0)}',
@@ -254,11 +283,13 @@ class _InvestmentPortfolioScreenState extends ConsumerState<InvestmentPortfolioS
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('Add Holding',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge
-                          ?.copyWith(fontWeight: FontWeight.bold),),
+                  Text(
+                    'Add Holding',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleLarge
+                        ?.copyWith(fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: symbolController,
@@ -298,10 +329,12 @@ class _InvestmentPortfolioScreenState extends ConsumerState<InvestmentPortfolioS
                       return null;
                     },
                     items: HoldingType.values
-                        .map((type) => DropdownMenuItem(
-                              value: type,
-                              child: Text(type.name),
-                            ),)
+                        .map(
+                          (type) => DropdownMenuItem(
+                            value: type,
+                            child: Text(type.name),
+                          ),
+                        )
                         .toList(),
                   ),
                   const SizedBox(height: 12),
@@ -338,7 +371,8 @@ class _InvestmentPortfolioScreenState extends ConsumerState<InvestmentPortfolioS
                   TextFormField(
                     controller: currentPriceController,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(labelText: 'Current Price'),
+                    decoration:
+                        const InputDecoration(labelText: 'Current Price'),
                     validator: (value) {
                       if (value?.isEmpty ?? true) {
                         return 'Current Price is required';
@@ -355,7 +389,8 @@ class _InvestmentPortfolioScreenState extends ConsumerState<InvestmentPortfolioS
                       Expanded(
                         child: OutlinedButton(
                           onPressed: () => ctx.pop(),
-                          child: const Text('Cancel'),
+                          child:
+                              Text(AppLocalizations.of(context)!.common_cancel),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -366,16 +401,20 @@ class _InvestmentPortfolioScreenState extends ConsumerState<InvestmentPortfolioS
                               return;
                             }
                             try {
+                              final formContext = Navigator.of(context);
                               final holding = InvestmentHolding.create(
                                 symbol: symbolController.text,
                                 name: nameController.text,
                                 type: selectedType!,
                                 quantity:
-                                    double.tryParse(quantityController.text) ?? 0,
+                                    double.tryParse(quantityController.text) ??
+                                        0,
                                 buyPrice:
-                                    double.tryParse(buyPriceController.text) ?? 0,
+                                    double.tryParse(buyPriceController.text) ??
+                                        0,
                                 currentPrice: double.tryParse(
-                                        currentPriceController.text,) ??
+                                      currentPriceController.text,
+                                    ) ??
                                     0,
                                 purchaseDate: DateTime.now(),
                               );
@@ -383,9 +422,13 @@ class _InvestmentPortfolioScreenState extends ConsumerState<InvestmentPortfolioS
                                   .addHolding(holding, widget.account.id);
                               _loadData();
                               SnackbarService.info(BuddyMessages.txnAdded);
-                              if (mounted) context.pop();
+                              if (mounted) {
+                                formContext.pop();
+                              }
                             } catch (e) {
-                              SnackbarService.error(BuddyMessages.errorWith('$e'));
+                              SnackbarService.error(
+                                BuddyMessages.errorWith('$e'),
+                              );
                             }
                           },
                           child: const Text('Add'),

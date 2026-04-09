@@ -1,4 +1,6 @@
+import 'package:mudra_manager/core/extension/localization_extenstion.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
@@ -32,16 +34,16 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
   static const _activeMoney = [
     _UtilityDef(
       id: 'recurring',
-      title: 'Bills',
-      subtitle: 'Upcoming & recurring',
+      titleKey: 'title_bills',
+      subtitleKey: 'budget_upcomingRecurring',
       icon: LucideIcons.repeat,
       route: AppRoutes.recurringTransactions,
       section: _Section.active,
     ),
     _UtilityDef(
       id: 'trips',
-      title: 'Groups',
-      subtitle: 'Trips & splits',
+      titleKey: 'title_groups',
+      subtitleKey: 'budget_tripsAndSplits',
       icon: LucideIcons.users,
       route: AppRoutes.trips,
       section: _Section.active,
@@ -51,16 +53,16 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
   static const _planning = [
     _UtilityDef(
       id: 'budgets',
-      title: 'Budgets',
-      subtitle: 'Spending limits',
+      titleKey: 'title_budgets',
+      subtitleKey: 'budget_spendingLimits',
       icon: LucideIcons.chartPie,
       route: AppRoutes.budgetDashboard,
       section: _Section.planning,
     ),
     _UtilityDef(
       id: 'goals',
-      title: 'Goals',
-      subtitle: 'Savings progress',
+      titleKey: 'title_goals',
+      subtitleKey: 'budget_savingsProgress',
       icon: LucideIcons.target,
       route: AppRoutes.goalScreen,
       section: _Section.planning,
@@ -70,16 +72,16 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
   static const _insights = [
     _UtilityDef(
       id: 'monthly_recap',
-      title: 'Monthly Recap',
-      subtitle: 'Your month at a glance',
+      titleKey: 'title_monthlyRecap',
+      subtitleKey: 'recap_yourMonthAtGlance',
       icon: LucideIcons.calendarCheck,
       route: AppRoutes.monthlyRecap,
       section: _Section.insights,
     ),
     _UtilityDef(
       id: 'monthly_comparison',
-      title: 'Compare Months',
-      subtitle: 'Track progress over time',
+      titleKey: 'title_compareMonths',
+      subtitleKey: 'recap_trackProgressOverTime',
       icon: LucideIcons.arrowLeftRight,
       route: AppRoutes.monthlyComparison,
       section: _Section.insights,
@@ -141,6 +143,7 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final spacing = ref.read(spacingProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     showModalBottomSheet(
       context: context,
@@ -177,7 +180,7 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
                         ),
                         SizedBox(width: spacing.elementGap),
                         Text(
-                          'Customize Utilities',
+                          l10n.utility_customizeUtilities,
                           style: textTheme.titleLarge
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
@@ -189,7 +192,7 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
                             _savePreferences();
                             SnackbarService.info(BuddyMessages.settingsSaved);
                           },
-                          child: const Text('Reset'),
+                          child: Text(AppLocalizations.of(context)!.common_reset),
                         ),
                       ],
                     ),
@@ -222,12 +225,12 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
                         },
                         secondary: Icon(u.icon, color: color.primary, size: 22),
                         title: Text(
-                          u.title,
+                          l10n.translate(u.titleKey),
                           style: textTheme.titleSmall
                               ?.copyWith(fontWeight: FontWeight.w600),
                         ),
                         subtitle: Text(
-                          u.subtitle,
+                          l10n.translate(u.subtitleKey),
                           style: textTheme.bodySmall
                               ?.copyWith(color: color.onSurfaceVariant),
                         ),
@@ -248,6 +251,7 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
     final spacing = ref.watch(spacingProvider);
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final l10n = AppLocalizations.of(context)!;
 
     if (_isLoading) {
       return Padding(
@@ -283,7 +287,7 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
         action: FilledButton.icon(
           onPressed: _showCustomizeSheet,
           icon: const Icon(LucideIcons.plus),
-          label: const Text('Add Utilities'),
+          label: Text(l10n.utility_addUtilities),
         ),
       );
     }
@@ -302,7 +306,7 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
           // 1. Active Money
           if (activeVisible.isNotEmpty) ...[
             _sectionHeader(
-              'Active Money',
+              l10n.section_activeMoney,
               LucideIcons.zap,
               color.error,
               textTheme,
@@ -328,6 +332,7 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
                           textTheme,
                           spacing,
                           e.key,
+                          l10n,
                         ),
                       ),
                     ),
@@ -340,7 +345,7 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
           // 2. Planning
           if (planningVisible.isNotEmpty) ...[
             _sectionHeader(
-              'Planning',
+              l10n.section_planning,
               LucideIcons.compass,
               color.primary,
               textTheme,
@@ -366,6 +371,7 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
                           textTheme,
                           spacing,
                           e.key + 2,
+                          l10n,
                         ),
                       ),
                     ),
@@ -378,7 +384,7 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
           // 3. Insights
           if (insightsVisible.isNotEmpty) ...[
             _sectionHeader(
-              'Insights',
+              l10n.section_insights,
               LucideIcons.lightbulb,
               color.secondary,
               textTheme,
@@ -395,6 +401,7 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
                       textTheme,
                       spacing,
                       e.key + 4,
+                      l10n,
                     ),
                   ),
                 ),
@@ -536,6 +543,7 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
     TextTheme textTheme,
     AppSpacing spacing,
     int index,
+    AppLocalizations l10n,
   ) {
     return Card(
       elevation: 0,
@@ -597,13 +605,13 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
                     ),
                     const Spacer(),
                     Text(
-                      item.title,
+                      l10n.translate(item.titleKey),
                       style: textTheme.titleSmall
                           ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     SizedBox(height: spacing.elementGapUltraMin),
                     Text(
-                      item.subtitle,
+                      l10n.translate(item.subtitleKey),
                       style: textTheme.bodySmall
                           ?.copyWith(color: color.onSurfaceVariant),
                       maxLines: 1,
@@ -632,6 +640,7 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
     TextTheme textTheme,
     AppSpacing spacing,
     int index,
+    AppLocalizations l10n,
   ) {
     return Card(
       elevation: 0,
@@ -689,12 +698,12 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          item.title,
+                          l10n.translate(item.titleKey),
                           style: textTheme.titleSmall
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         Text(
-                          item.subtitle,
+                          l10n.translate(item.subtitleKey),
                           style: textTheme.bodySmall
                               ?.copyWith(color: color.onSurfaceVariant),
                         ),
@@ -724,16 +733,16 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
 
 class _UtilityDef {
   final String id;
-  final String title;
-  final String subtitle;
+  final String titleKey;
+  final String subtitleKey;
   final IconData icon;
   final String route;
   final _Section section;
 
   const _UtilityDef({
     required this.id,
-    required this.title,
-    required this.subtitle,
+    required this.titleKey,
+    required this.subtitleKey,
     required this.icon,
     required this.route,
     required this.section,

@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:flutter/material.dart';
@@ -76,7 +78,10 @@ class _ReconciliationScreenState extends ConsumerState<ReconciliationScreen> {
         if (adj.abs() < 0.01) {
           SnackbarService.success(BuddyMessages.txnAdded);
         } else {
-          SnackbarService.success('Balance adjusted by ${adj > 0 ? "+" : ""}${adj.toStringAsFixed(2)}');
+          final sign = adj > 0 ? '+' : '';
+          SnackbarService.success(
+            'Balance adjusted by $sign${formatCurrency(adj, code: widget.account.currencyCode, decimals: 2)}',
+          );
         }
         Navigator.pop(context, true);
       }
@@ -93,24 +98,50 @@ class _ReconciliationScreenState extends ConsumerState<ReconciliationScreen> {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final spacing = ref.watch(spacingProvider);
+    final ctxt = AppLocalizations.of(context)!;
     final diff = _difference;
 
     return Scaffold(
-      appBar: AppBar(title: Text('Reconcile ${widget.account.name}')),
+      appBar: AppBar(
+        title: Text('${ctxt.reconcile_title} ${widget.account.name}'),
+        actions: [
+          TextButton(
+            onPressed: _saving || _enteredBalance == null
+                ? null
+                : () {
+                    HapticFeedback.mediumImpact();
+                    _reconcile();
+                  },
+            child: _saving
+                ? SizedBox(
+                    width: 18, height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2, color: color.primary),
+                  )
+                : Text(
+                    diff != null && diff.abs() < 0.01 ? ctxt.common_confirm : ctxt.reconcile_title,
+                    style: textTheme.titleSmall?.copyWith(
+                      color: _enteredBalance != null ? color.primary : color.onSurfaceVariant,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+          ),
+        ],
+      ),
       body: _calculatedBalance == null
-          ? ListView(children: List.generate(3, (_) => DashboardCardSkeleton()))
+          ? ListView(children: List.generate(3, (_) => const DashboardCardSkeleton()))
           : ListView(
-              padding: EdgeInsets.all(spacing.cardInner + 8),
+              padding: EdgeInsets.symmetric(
+                horizontal: spacing.cardHorizontal,
+                vertical: spacing.cardVertical,
+              ),
               children: [
                 // Info card
                 Container(
                   padding: EdgeInsets.all(spacing.cardInner),
                   decoration: BoxDecoration(
-                    color: color.primaryContainer.withValues(alpha: 0.3),
+                    color: color.surfaceContainerLow,
                     borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                    border: Border.all(
-                      color: color.primary.withValues(alpha: 0.3),
-                    ),
+                    border: Border.all(color: color.outlineVariant.withValues(alpha: 0.5)),
                   ),
                   child: Row(
                     children: [
@@ -118,16 +149,14 @@ class _ReconciliationScreenState extends ConsumerState<ReconciliationScreen> {
                       SizedBox(width: spacing.elementGap),
                       Expanded(
                         child: Text(
-                          'Enter the current balance shown in your bank app or passbook. We\'ll adjust the difference automatically.',
-                          style: textTheme.bodySmall?.copyWith(
-                            color: color.onPrimaryContainer,
-                          ),
+                          ctxt.reconcile_info,
+                          style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
                         ),
                       ),
                     ],
                   ),
                 ),
-                SizedBox(height: spacing.sectionGap + 8),
+                SizedBox(height: spacing.sectionGap),
 
                 // Calculated balance
                 Container(
@@ -135,24 +164,16 @@ class _ReconciliationScreenState extends ConsumerState<ReconciliationScreen> {
                   decoration: BoxDecoration(
                     color: color.surfaceContainerLow,
                     borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                    border: Border.all(
-                      color: color.outlineVariant.withValues(alpha: 0.3),
-                    ),
+                    border: Border.all(color: color.outlineVariant.withValues(alpha: 0.3)),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'Balance in App',
-                        style: textTheme.titleSmall?.copyWith(
-                          color: color.onSurfaceVariant,
-                        ),
-                      ),
+                      Text(ctxt.reconcile_balanceInApp, style: textTheme.titleSmall?.copyWith(color: color.onSurfaceVariant)),
                       CurrencyText(
                         amount: _calculatedBalance!,
-                        style: textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        currencyCode: widget.account.currencyCode,
+                        style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                         compact: false,
                       ),
                     ],
@@ -163,19 +184,16 @@ class _ReconciliationScreenState extends ConsumerState<ReconciliationScreen> {
                 // Actual balance input
                 TextFormField(
                   controller: _balanceController,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  style: textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  style: textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
                   decoration: InputDecoration(
-                    labelText: 'Actual Bank Balance',
+                    labelText: ctxt.reconcile_actualBalance,
                     hintText: '0.00',
-                    prefixIcon: const Icon(Icons.account_balance, size: 22),
-                    border: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(spacing.radiusMedium),
+                    prefixIcon: Icon(LucideIcons.landmark, size: 22, color: color.primary),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(spacing.radiusMedium)),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                      borderSide: BorderSide(color: color.primary, width: 2),
                     ),
                   ),
                   onChanged: (_) => setState(() {}),
@@ -188,13 +206,12 @@ class _ReconciliationScreenState extends ConsumerState<ReconciliationScreen> {
                     padding: EdgeInsets.all(spacing.cardInner),
                     decoration: BoxDecoration(
                       color: diff.abs() < 0.01
-                          ? color.primary.withValues(alpha: 0.1)
-                          : color.errorContainer.withValues(alpha: 0.3),
-                      borderRadius:
-                          BorderRadius.circular(spacing.radiusMedium),
+                          ? Colors.green.withValues(alpha: 0.08)
+                          : color.error.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(spacing.radiusMedium),
                       border: Border.all(
                         color: diff.abs() < 0.01
-                            ? color.primary.withValues(alpha: 0.4)
+                            ? Colors.green.withValues(alpha: 0.3)
                             : color.error.withValues(alpha: 0.3),
                       ),
                     ),
@@ -204,24 +221,16 @@ class _ReconciliationScreenState extends ConsumerState<ReconciliationScreen> {
                         Row(
                           children: [
                             Icon(
-                              diff.abs() < 0.01
-                                  ? LucideIcons.circleCheck
-                                  : LucideIcons.arrowLeftRight,
+                              diff.abs() < 0.01 ? LucideIcons.circleCheck : LucideIcons.arrowLeftRight,
                               size: 18,
-                              color: diff.abs() < 0.01
-                                  ? color.primary
-                                  : color.error,
+                              color: diff.abs() < 0.01 ? Colors.green : color.error,
                             ),
                             SizedBox(width: spacing.elementGap),
                             Text(
-                              diff.abs() < 0.01
-                                  ? 'Balanced!'
-                                  : 'Difference',
+                              diff.abs() < 0.01 ? ctxt.reconcile_balanced : ctxt.reconcile_difference,
                               style: textTheme.titleSmall?.copyWith(
                                 fontWeight: FontWeight.w600,
-                                color: diff.abs() < 0.01
-                                    ? color.primary
-                                    : color.error,
+                                color: diff.abs() < 0.01 ? Colors.green : color.error,
                               ),
                             ),
                           ],
@@ -229,13 +238,12 @@ class _ReconciliationScreenState extends ConsumerState<ReconciliationScreen> {
                         if (diff.abs() >= 0.01)
                           CurrencyText(
                             amount: diff.abs(),
+                            currencyCode: widget.account.currencyCode,
                             showSign: true,
                             isExpense: diff < 0,
                             style: textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: diff > 0
-                                  ? color.primary
-                                  : color.error,
+                              color: diff > 0 ? Colors.green : color.error,
                             ),
                             compact: false,
                           ),
@@ -247,50 +255,12 @@ class _ReconciliationScreenState extends ConsumerState<ReconciliationScreen> {
                   SizedBox(height: spacing.elementGap),
                   Text(
                     diff > 0
-                        ? 'An income adjustment of ${diff.toStringAsFixed(2)} will be added.'
-                        : 'An expense adjustment of ${diff.abs().toStringAsFixed(2)} will be added.',
-                    style: textTheme.bodySmall?.copyWith(
-                      color: color.onSurfaceVariant,
-                    ),
+                        ? ctxt.reconcile_incomeAdjustment(formatCurrency(diff, code: widget.account.currencyCode, decimals: 2))
+                        : ctxt.reconcile_expenseAdjustment(formatCurrency(diff.abs(), code: widget.account.currencyCode, decimals: 2)),
+                    style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
                     textAlign: TextAlign.center,
                   ),
                 ],
-
-                SizedBox(height: spacing.sectionGap + 16),
-
-                // Reconcile button
-                FilledButton.icon(
-                  onPressed: _saving || _enteredBalance == null
-                      ? null
-                      : () {
-                          HapticFeedback.mediumImpact();
-                          _reconcile();
-                        },
-                  icon: _saving
-                      ? const SizedBox(
-                          height: 18,
-                          width: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Icon(LucideIcons.check),
-                  label: Text(
-                    diff != null && diff.abs() < 0.01
-                        ? 'Confirm Balance'
-                        : 'Adjust & Reconcile',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  style: FilledButton.styleFrom(
-                    padding: EdgeInsets.symmetric(vertical: spacing.cardInner),
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(spacing.radiusMedium),
-                    ),
-                    minimumSize: const Size(double.infinity, 52),
-                  ),
-                ),
               ],
             ),
     );

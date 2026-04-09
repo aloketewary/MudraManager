@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -25,7 +26,7 @@ class FinancialHealthScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: color.surface,
       appBar: AppBar(
-        title: const Text('Financial Health'),
+        title: Text(AppLocalizations.of(context)!.title_financialHealth),
         elevation: 0,
       ),
       body: healthAsync.when(

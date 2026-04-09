@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/shared/widgets/ambient_brand_section.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
@@ -27,7 +28,7 @@ class SpendingPersonalityScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: color.surface,
       appBar: AppBar(
-        title: const Text('Spending Personality'),
+        title: Text(AppLocalizations.of(context)!.title_spendingPersonality),
         elevation: 0,
       ),
       body: personality.when(

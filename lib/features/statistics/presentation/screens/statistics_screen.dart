@@ -1,4 +1,5 @@
 import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/features/dashboard/presentation/widgets/financial_health_card.dart';
 import 'package:mudra_manager/shared/widgets/ambient_brand_section.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
@@ -93,14 +94,14 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                           _customStart = start;
                           _customEnd = end;
                           _period = period == PeriodType.day
-                              ? 'Today'
+                              ? AppLocalizations.of(context)!.stats_today
                               : period == PeriodType.week
-                                  ? 'Week'
+                                  ? AppLocalizations.of(context)!.stats_week
                                   : period == PeriodType.month
-                                      ? 'Month'
+                                      ? AppLocalizations.of(context)!.stats_month
                                       : period == PeriodType.year
-                                          ? 'Year'
-                                          : 'Custom';
+                                          ? AppLocalizations.of(context)!.stats_year
+                                          : AppLocalizations.of(context)!.stats_custom;
                         });
                       },
                     ),
@@ -238,7 +239,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Overview',
+          AppLocalizations.of(context)!.stats_overview,
           style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
         SizedBox(height: spacing.sectionGap),
@@ -246,7 +247,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
           children: [
             Expanded(
               child: _buildPulseCard(
-                'Income',
+                AppLocalizations.of(context)!.stats_income,
                 d.income,
                 color.primary,
                 Icons.arrow_upward,
@@ -260,7 +261,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
             SizedBox(width: spacing.elementGap),
             Expanded(
               child: _buildPulseCard(
-                'Expense',
+                AppLocalizations.of(context)!.stats_expense,
                 d.expense,
                 color.error,
                 Icons.arrow_downward,
@@ -319,7 +320,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Trends',
+          AppLocalizations.of(context)!.stats_trends,
           style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
         SizedBox(height: spacing.sectionGap),
@@ -347,7 +348,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                     SizedBox(width: spacing.elementGap),
                     Expanded(
                       child: _buildTabButton(
-                        'Spending by Day',
+                        AppLocalizations.of(context)!.stats_spendingByDay,
                         1,
                         color,
                         textTheme,
@@ -623,7 +624,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Insights',
+          AppLocalizations.of(context)!.stats_insights,
           style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
         SizedBox(height: spacing.sectionGap),
@@ -654,7 +655,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Next Month Forecast',
+                              AppLocalizations.of(context)!.stats_nextMonthForecast,
                               style: textTheme.labelLarge?.copyWith(
                                 color: color.onPrimaryContainer,
                               ),
@@ -684,7 +685,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
             children: [
               Expanded(
                 child: _buildInsightCard(
-                  'Top Spending',
+                  AppLocalizations.of(context)!.stats_topSpending,
                   (d.categoryData.entries.toList()
                         ..sort((a, b) => b.value.compareTo(a.value)))
                       .first

@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 // lib/features/profile/presentation/screens/notification_settings_screen.dart
@@ -68,7 +69,7 @@ class _NotificationSettingsScreenState
       SnackbarService.success(BuddyMessages.toggledOn('Daily summary'));
     } else {
       await NotificationService.cancelReminder();
-      SnackbarService.success(BuddyMessages.toggledOff('Daily summary'));
+      SnackbarService.success(BuddyMessages.toggledOff(AppLocalizations.of(context)!.notifSettings_dailySummary));
     }
     setState(() => _dailySummaryEnabled = enabled);
   }
@@ -79,9 +80,9 @@ class _NotificationSettingsScreenState
     await prefs.setBool('weekly_summary_enabled', enabled);
     if (enabled) {
       await NotificationService.scheduleWeeklySummary(_weeklyDay);
-      SnackbarService.success(BuddyMessages.toggledOn('Weekly summary'));
+      SnackbarService.success(BuddyMessages.toggledOn(AppLocalizations.of(context)!.notifSettings_weeklySummary));
     } else {
-      SnackbarService.success(BuddyMessages.toggledOff('Weekly summary'));
+      SnackbarService.success(BuddyMessages.toggledOff(AppLocalizations.of(context)!.notifSettings_weeklySummary));
     }
     setState(() => _weeklySummaryEnabled = enabled);
   }
@@ -91,9 +92,9 @@ class _NotificationSettingsScreenState
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('streak_reminder_enabled', enabled);
     if (enabled) {
-      SnackbarService.success(BuddyMessages.toggledOn('Come-back Nudges'));
+      SnackbarService.success(BuddyMessages.toggledOn(AppLocalizations.of(context)!.notifSettings_comeBackNudges));
     } else {
-      SnackbarService.success(BuddyMessages.toggledOff('Come-back Nudges'));
+      SnackbarService.success(BuddyMessages.toggledOff(AppLocalizations.of(context)!.notifSettings_comeBackNudges));
     }
     setState(() => _reEngagementEnabled = enabled);
   }
@@ -103,10 +104,10 @@ class _NotificationSettingsScreenState
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('re_engagement_enabled', enabled);
     if (enabled) {
-      SnackbarService.success(BuddyMessages.toggledOn('Streak reminder'));
+      SnackbarService.success(BuddyMessages.toggledOn(AppLocalizations.of(context)!.notifSettings_streakReminder));
     } else {
       await NotificationService.cancelStreakReminder();
-      SnackbarService.success(BuddyMessages.toggledOff('Streak reminder'));
+      SnackbarService.success(BuddyMessages.toggledOff(AppLocalizations.of(context)!.notifSettings_streakReminder));
     }
     setState(() => _streakReminderEnabled = enabled);
   }
@@ -116,9 +117,9 @@ class _NotificationSettingsScreenState
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('smart_alerts_enabled', enabled);
     if (enabled) {
-      SnackbarService.success(BuddyMessages.toggledOn('Smart alerts'));
+      SnackbarService.success(BuddyMessages.toggledOn(AppLocalizations.of(context)!.notifSettings_smartAlerts));
     } else {
-      SnackbarService.success(BuddyMessages.toggledOff('Smart alerts'));
+      SnackbarService.success(BuddyMessages.toggledOff(AppLocalizations.of(context)!.notifSettings_smartAlerts));
     }
     setState(() => _smartAlertsEnabled = enabled);
   }
@@ -171,7 +172,7 @@ class _NotificationSettingsScreenState
             ),
             const SizedBox(height: 16),
             Text(
-              'Select Day',
+              AppLocalizations.of(context)!.notifSettings_selectDay,
               style:
                   textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
@@ -221,16 +222,17 @@ class _NotificationSettingsScreenState
   }
 
   String _getDayName(int day) {
-    const names = {
-      DateTime.monday: 'Monday',
-      DateTime.tuesday: 'Tuesday',
-      DateTime.wednesday: 'Wednesday',
-      DateTime.thursday: 'Thursday',
-      DateTime.friday: 'Friday',
-      DateTime.saturday: 'Saturday',
-      DateTime.sunday: 'Sunday',
+    final ctxt = AppLocalizations.of(context)!;
+    final names = {
+      DateTime.monday: ctxt.day_monday,
+      DateTime.tuesday: ctxt.day_tuesday,
+      DateTime.wednesday: ctxt.day_wednesday,
+      DateTime.thursday: ctxt.day_thursday,
+      DateTime.friday: ctxt.day_friday,
+      DateTime.saturday: ctxt.day_saturday,
+      DateTime.sunday: ctxt.day_sunday,
     };
-    return names[day] ?? 'Sunday';
+    return names[day] ?? ctxt.day_sunday;
   }
 
   int get _activeCount =>
@@ -246,9 +248,9 @@ class _NotificationSettingsScreenState
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Notifications')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.title_notifications)),
       body: !_loaded
-          ? const Padding(padding: EdgeInsets.all(16), child: Column(children: [DashboardCardSkeleton(), SizedBox(height: 12), DashboardCardSkeleton()]))
+          ? Padding(padding: EdgeInsets.all(spacing.cardHorizontal), child: Column(children: [DashboardCardSkeleton(), SizedBox(height: spacing.elementGap), DashboardCardSkeleton()]))
           : ListView(
               padding: EdgeInsets.symmetric(
                 horizontal: spacing.cardHorizontal,
@@ -267,7 +269,7 @@ class _NotificationSettingsScreenState
                         color.primary.withValues(
                           alpha: isDark ? 0.2 : 0.12,
                         ),
-                        color.primaryContainer.withValues(alpha: 0.4),
+                        color.primary.withValues(alpha: isDark ? 0.08 : 0.04),
                       ],
                     ),
                     border: Border.all(
@@ -297,21 +299,21 @@ class _NotificationSettingsScreenState
                           ),
                         ),
                       ),
-                      const SizedBox(width: 16),
+                      SizedBox(width: spacing.sectionGap),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              '$_activeCount of 3 active',
+                              AppLocalizations.of(context)!.notifSettings_activeCount(_activeCount),
                               style: textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.w700,
                                 color: color.primary,
                               ),
                             ),
-                            const SizedBox(height: 4),
+                            SizedBox(height: spacing.elementGapMin),
                             Text(
-                              'Summaries show spending, income, top category & balance',
+                              AppLocalizations.of(context)!.notifSettings_summaryDesc,
                               style: textTheme.bodySmall?.copyWith(
                                 color: color.onSurfaceVariant,
                               ),
@@ -325,7 +327,7 @@ class _NotificationSettingsScreenState
                 const SizedBox(height: 24),
 
                 // ── DAILY SUMMARY ──
-                _buildSectionHeader('Daily Summary', color, textTheme),
+                _buildSectionHeader(AppLocalizations.of(context)!.notifSettings_dailySummary, color, textTheme),
                 const SizedBox(height: 10),
                 _buildGroupedCard(
                   color: color,
@@ -334,8 +336,8 @@ class _NotificationSettingsScreenState
                   children: [
                     _buildToggleRow(
                       icon: LucideIcons.calendarDays,
-                      title: 'Daily Summary',
-                      subtitle: "Yesterday's spending overview",
+                      title: AppLocalizations.of(context)!.notifSettings_dailySummary,
+                      subtitle: AppLocalizations.of(context)!.notifSettings_dailySummaryDesc,
                       value: _dailySummaryEnabled,
                       onChanged: _toggleDailySummary,
                       color: color,
@@ -345,7 +347,7 @@ class _NotificationSettingsScreenState
                       _divider(color),
                       _buildTapRow(
                         icon: LucideIcons.clock,
-                        title: 'Reminder Time',
+                        title: AppLocalizations.of(context)!.notifSettings_reminderTime,
                         trailing: _reminderTime.format(context),
                         onTap: _selectTime,
                         color: color,
@@ -354,12 +356,12 @@ class _NotificationSettingsScreenState
                       _divider(color),
                       _buildTapRow(
                         icon: LucideIcons.send,
-                        title: 'Send Test Notification',
+                        title: AppLocalizations.of(context)!.notifSettings_sendTestNotif,
                         onTap: () async {
                           HapticFeedback.mediumImpact();
                           await NotificationService.showDailySummary();
                           SnackbarService.success(
-                            'Test notification sent',
+                            AppLocalizations.of(context)!.notifSettings_testNotifSent,
                           );
                         },
                         color: color,
@@ -372,7 +374,7 @@ class _NotificationSettingsScreenState
 
                 // ── STREAK REMINDER ──
                 _buildSectionHeader(
-                  'Streak Reminder',
+                  AppLocalizations.of(context)!.notifSettings_streakReminder,
                   color,
                   textTheme,
                 ),
@@ -384,8 +386,8 @@ class _NotificationSettingsScreenState
                   children: [
                     _buildToggleRow(
                       icon: LucideIcons.flame,
-                      title: 'Streak Reminder',
-                      subtitle: 'Daily nudge to keep your streak',
+                      title: AppLocalizations.of(context)!.notifSettings_streakReminder,
+                      subtitle: AppLocalizations.of(context)!.notifSettings_dailyNudgeStreak,
                       value: _streakReminderEnabled,
                       onChanged: _toggleStreakReminder,
                       color: color,
@@ -396,7 +398,7 @@ class _NotificationSettingsScreenState
                       _divider(color),
                       _buildTapRow(
                         icon: LucideIcons.clock,
-                        title: 'Reminder Time',
+                        title: AppLocalizations.of(context)!.notifSettings_reminderTime,
                         trailing: _streakReminderTime.format(context),
                         onTap: _selectStreakReminderTime,
                         color: color,
@@ -409,7 +411,7 @@ class _NotificationSettingsScreenState
 
                 // ── WEEKLY SUMMARY ──
                 _buildSectionHeader(
-                  'Weekly Summary',
+                  AppLocalizations.of(context)!.notifSettings_weeklySummary,
                   color,
                   textTheme,
                 ),
@@ -421,8 +423,8 @@ class _NotificationSettingsScreenState
                   children: [
                     _buildToggleRow(
                       icon: LucideIcons.calendarRange,
-                      title: 'Weekly Summary',
-                      subtitle: 'Every ${_getDayName(_weeklyDay)} at 9:00 AM',
+                      title: AppLocalizations.of(context)!.notifSettings_weeklySummary,
+                      subtitle: AppLocalizations.of(context)!.notifSettings_weeklySchedule(_getDayName(_weeklyDay)),
                       value: _weeklySummaryEnabled,
                       onChanged: _toggleWeeklySummary,
                       color: color,
@@ -432,7 +434,7 @@ class _NotificationSettingsScreenState
                       _divider(color),
                       _buildTapRow(
                         icon: LucideIcons.calendarCheck,
-                        title: 'Summary Day',
+                        title: AppLocalizations.of(context)!.notifSettings_summaryDay,
                         trailing: _getDayName(_weeklyDay),
                         onTap: _selectWeeklyDay,
                         color: color,
@@ -441,12 +443,12 @@ class _NotificationSettingsScreenState
                       _divider(color),
                       _buildTapRow(
                         icon: LucideIcons.send,
-                        title: 'Send Test Notification',
+                        title: AppLocalizations.of(context)!.notifSettings_sendTestNotif,
                         onTap: () async {
                           HapticFeedback.mediumImpact();
                           await NotificationService.showWeeklySummary();
                           SnackbarService.success(
-                            'Test notification sent',
+                            AppLocalizations.of(context)!.notifSettings_testNotifSent,
                           );
                         },
                         color: color,
@@ -465,9 +467,9 @@ class _NotificationSettingsScreenState
                   children: [
                     _buildToggleRow(
                       icon: LucideIcons.userCheck,
-                      title: 'Come-back Nudges',
+                      title: AppLocalizations.of(context)!.notifSettings_comeBackNudges,
                       subtitle:
-                          'Gentle reminders if you haven\'t opened the app',
+                          AppLocalizations.of(context)!.notifSettings_gentleReminders,
                       value: _reEngagementEnabled,
                       onChanged: _toggleReEngagement,
                       color: color,
@@ -485,9 +487,9 @@ class _NotificationSettingsScreenState
                   children: [
                     _buildToggleRow(
                       icon: LucideIcons.brain,
-                      title: 'Smart Alerts',
+                      title: AppLocalizations.of(context)!.notifSettings_smartAlerts,
                       subtitle:
-                          'Budget warnings, spending spikes, bill reminders',
+                          AppLocalizations.of(context)!.notifSettings_budgetWarningsDesc,
                       value: _smartAlertsEnabled,
                       onChanged: _toggleSmartAlerts,
                       color: color,
@@ -519,7 +521,7 @@ class _NotificationSettingsScreenState
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          'Notifications are delivered locally on your device. No data is sent to any server.',
+                          AppLocalizations.of(context)!.notifSettings_localNotifDisclaimer,
                           style: textTheme.bodySmall?.copyWith(
                             color: color.onSurfaceVariant,
                             height: 1.4,
@@ -671,7 +673,7 @@ class _NotificationSettingsScreenState
               ),
             const SizedBox(width: 8),
             Icon(
-              Icons.chevron_right,
+              LucideIcons.chevronRight,
               color: color.onSurfaceVariant,
               size: 20,
             ),

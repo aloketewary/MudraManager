@@ -45,6 +45,7 @@ import 'package:mudra_manager/features/profile/presentation/screens/theme_picker
 import 'package:mudra_manager/features/profile/presentation/widgets/account_form.dart';
 import 'package:mudra_manager/features/recap/presentation/screens/monthly_recap_screen.dart';
 import 'package:mudra_manager/features/sms/presentation/screens/sms_activity_screen.dart';
+import 'package:mudra_manager/core/db/models/sms_activity.dart';
 import 'package:mudra_manager/features/statistics/presentation/screens/monthly_comparison_screen.dart';
 import 'package:mudra_manager/features/transactions/presentation/screens/add_edit_transaction_screen.dart';
 import 'package:mudra_manager/features/transactions/presentation/screens/add_recurring_transaction_screen.dart';
@@ -163,6 +164,7 @@ class AppRouter {
                     initialToAccount: extra?['toAccount'] as Account?,
                     editFromId: extra?['fromId'] as int?,
                     editToId: extra?['toId'] as int?,
+                    smsActivity: extra?['smsActivity'] as SmsActivity?,
                   );
                 },
               ),

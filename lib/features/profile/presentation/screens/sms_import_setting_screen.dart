@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'dart:io';
@@ -72,9 +73,9 @@ class _SmsImportSettingsScreenState
     if (Platform.isIOS) return _buildIosPlaceholder(color, textTheme, spacing);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Auto Import')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.smsImport_autoImport)),
       body: !_loaded
-          ? ListView(children: List.generate(3, (_) => DashboardCardSkeleton()))
+          ? ListView(children: List.generate(3, (_) => const DashboardCardSkeleton()))
           : ListView(
               padding: EdgeInsets.symmetric(
                 horizontal: spacing.cardHorizontal,
@@ -86,7 +87,7 @@ class _SmsImportSettingsScreenState
                 SizedBox(height: spacing.sectionGap),
 
                 // ── PERMISSIONS ──
-                _buildSectionHeader('Permissions', color, textTheme),
+                _buildSectionHeader(AppLocalizations.of(context)!.smsImport_permissions, color, textTheme),
                 SizedBox(height: spacing.sectionGap),
                 _buildGroupedCard(
                   spacing: spacing,
@@ -94,10 +95,10 @@ class _SmsImportSettingsScreenState
                   children: [
                     _buildToggleRow(
                       icon: LucideIcons.shieldCheck,
-                      title: 'Notification Access',
+                      title: AppLocalizations.of(context)!.smsImport_notifAccess,
                       subtitle: _permissionGranted
-                          ? 'Notification access enabled'
-                          : 'Allow reading bank notifications',
+                          ? AppLocalizations.of(context)!.smsImport_notifAccessEnabled
+                          : AppLocalizations.of(context)!.smsImport_allowReadingNotif,
                       value: _permissionGranted,
                       onChanged: _handlePermissionToggle,
                       color: color,
@@ -106,8 +107,8 @@ class _SmsImportSettingsScreenState
                     _divider(color),
                     _buildToggleRow(
                       icon: LucideIcons.messageSquare,
-                      title: 'Auto Import',
-                      subtitle: 'Auto-detect transactions from notifications',
+                      title: AppLocalizations.of(context)!.smsImport_autoImport,
+                      subtitle: AppLocalizations.of(context)!.smsImport_autoDetectTxn,
                       value: _smsImportEnabled && _permissionGranted,
                       onChanged:
                           _permissionGranted ? _handleAutoImportToggle : null,
@@ -138,7 +139,7 @@ class _SmsImportSettingsScreenState
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          'Notifications are read locally on your device to detect transactions. Nothing is uploaded or shared — ever.',
+                          AppLocalizations.of(context)!.smsImport_privacyNote,
                           style: textTheme.bodySmall?.copyWith(
                             color: color.onSurfaceVariant,
                             height: 1.4,
@@ -149,7 +150,7 @@ class _SmsImportSettingsScreenState
                   ),
                 ),
                 // ── TOOLS ──
-                _buildSectionHeader('Tools', color, textTheme),
+                _buildSectionHeader(AppLocalizations.of(context)!.smsImport_tools, color, textTheme),
                 SizedBox(height: spacing.sectionGap),
                 _buildGroupedCard(
                   spacing: spacing,
@@ -157,8 +158,8 @@ class _SmsImportSettingsScreenState
                   children: [
                     _buildTapRow(
                       icon: LucideIcons.activity,
-                      title: 'Transaction Activity',
-                      subtitle: 'View all detected transactions',
+                      title: AppLocalizations.of(context)!.smsImport_txnActivity,
+                      subtitle: AppLocalizations.of(context)!.smsImport_viewDetectedTxn,
                       onTap: () => context.push(AppRoutes.smsActivity),
                       color: color,
                       textTheme: textTheme,
@@ -172,8 +173,8 @@ class _SmsImportSettingsScreenState
                     _divider(color),
                     _buildTapRow(
                       icon: LucideIcons.trash2,
-                      title: 'Clear Processing History',
-                      subtitle: 'Reset detection history',
+                      title: AppLocalizations.of(context)!.smsImport_clearHistory,
+                      subtitle: AppLocalizations.of(context)!.smsImport_resetDetection,
                       onTap: _permissionGranted
                           ? () => _showClearHistoryConfirmation(context)
                           : null,
@@ -187,7 +188,7 @@ class _SmsImportSettingsScreenState
                 SizedBox(height: spacing.sectionGap),
 
                 // ── HOW IT WORKS ──
-                _buildSectionHeader('How It Works', color, textTheme),
+                _buildSectionHeader(AppLocalizations.of(context)!.smsImport_howItWorks, color, textTheme),
                 const SizedBox(height: 10),
                 Container(
                   padding: const EdgeInsets.all(16),
@@ -202,35 +203,35 @@ class _SmsImportSettingsScreenState
                     children: [
                       _buildInfoPoint(
                         LucideIcons.landmark,
-                        'Reads bank & wallet notifications',
+                        AppLocalizations.of(context)!.smsImport_readsBankNotif,
                         color,
                         textTheme,
                       ),
                       SizedBox(height: spacing.elementGap),
                       _buildInfoPoint(
                         LucideIcons.lock,
-                        'All data stays on your device',
+                        AppLocalizations.of(context)!.smsImport_dataStaysOnDevice,
                         color,
                         textTheme,
                       ),
                       SizedBox(height: spacing.elementGap),
                       _buildInfoPoint(
                         LucideIcons.sparkles,
-                        'Automatically creates transactions',
+                        AppLocalizations.of(context)!.smsImport_autoCreatesTxn,
                         color,
                         textTheme,
                       ),
                       SizedBox(height: spacing.elementGap),
                       _buildInfoPoint(
                         LucideIcons.eyeOff,
-                        'Personal notifications are ignored',
+                        AppLocalizations.of(context)!.smsImport_personalIgnored,
                         color,
                         textTheme,
                       ),
                       SizedBox(height: spacing.elementGap),
                       _buildInfoPoint(
                         LucideIcons.cloudOff,
-                        'No data sent to any server',
+                        AppLocalizations.of(context)!.smsImport_noDataSent,
                         color,
                         textTheme,
                       ),
@@ -298,7 +299,7 @@ class _SmsImportSettingsScreenState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  active ? 'Active' : 'Inactive',
+                  active ? AppLocalizations.of(context)!.smsImport_active : AppLocalizations.of(context)!.smsImport_inactive,
                   style: textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                     color: heroColor,
@@ -307,10 +308,10 @@ class _SmsImportSettingsScreenState
                 const SizedBox(height: 4),
                 Text(
                   active
-                      ? 'Transactions are being imported automatically'
+                      ? AppLocalizations.of(context)!.smsImport_autoImporting
                       : _permissionGranted
-                          ? 'Enable auto import to start tracking'
-                          : 'Grant notification access to get started',
+                          ? AppLocalizations.of(context)!.smsImport_enableToStart
+                          : AppLocalizations.of(context)!.smsImport_grantAccess,
                   style: textTheme.bodySmall?.copyWith(
                     color: color.onSurfaceVariant,
                   ),
@@ -331,7 +332,7 @@ class _SmsImportSettingsScreenState
     AppSpacing spacing,
   ) {
     return Scaffold(
-      appBar: AppBar(title: const Text('SMS Import')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.smsImport_autoImport)),
       body: Center(
         child: Padding(
           padding: EdgeInsets.all(spacing.cardHorizontalMax),
@@ -352,7 +353,7 @@ class _SmsImportSettingsScreenState
               ),
               const SizedBox(height: 20),
               Text(
-                'Not Available on iOS',
+                AppLocalizations.of(context)!.smsImport_notAvailableIos,
                 style: textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: color.primary,
@@ -360,7 +361,7 @@ class _SmsImportSettingsScreenState
               ),
               const SizedBox(height: 8),
               Text(
-                'Auto import is only available on Android due to iOS platform restrictions.',
+                AppLocalizations.of(context)!.smsImport_iosRestriction,
                 textAlign: TextAlign.center,
                 style: textTheme.bodyMedium?.copyWith(
                   color: color.onSurfaceVariant,
@@ -461,7 +462,7 @@ class _SmsImportSettingsScreenState
                   ),
                 ),
                 Text(
-                  disabled ? 'Enable notification access first' : subtitle,
+                  disabled ? AppLocalizations.of(context)!.smsImport_enableAccessFirst : subtitle,
                   style: textTheme.bodySmall?.copyWith(
                     color: color.onSurfaceVariant.withValues(alpha: alpha),
                   ),
@@ -549,7 +550,7 @@ class _SmsImportSettingsScreenState
                 ),
               ),
             Icon(
-              Icons.chevron_right,
+              LucideIcons.chevronRight,
               color: color.onSurfaceVariant.withValues(alpha: alpha),
               size: 20,
             ),
@@ -617,14 +618,14 @@ class _SmsImportSettingsScreenState
             ),
             const SizedBox(height: 20),
             Text(
-              'Notification Access Required',
+              AppLocalizations.of(context)!.smsImport_notifAccessRequired,
               style:
                   textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
-              'Mudra Manager needs notification access to automatically detect transactions from your bank and wallet apps.',
+              AppLocalizations.of(context)!.smsImport_notifAccessDesc,
               style:
                   textTheme.bodyMedium?.copyWith(color: color.onSurfaceVariant),
               textAlign: TextAlign.center,
@@ -643,28 +644,28 @@ class _SmsImportSettingsScreenState
                 children: [
                   _disclosurePoint(
                     LucideIcons.listFilter,
-                    'Only bank/wallet notifications are read',
+                    AppLocalizations.of(context)!.smsImport_onlyBankRead,
                     color,
                     textTheme,
                   ),
                   const SizedBox(height: 12),
                   _disclosurePoint(
                     LucideIcons.smartphone,
-                    'All data stays on your device',
+                    AppLocalizations.of(context)!.smsImport_dataStaysOnDevice,
                     color,
                     textTheme,
                   ),
                   const SizedBox(height: 12),
                   _disclosurePoint(
                     LucideIcons.ban,
-                    'Personal messages are never read',
+                    AppLocalizations.of(context)!.smsImport_personalNeverRead,
                     color,
                     textTheme,
                   ),
                   const SizedBox(height: 12),
                   _disclosurePoint(
                     LucideIcons.cloudOff,
-                    'No data sent to servers',
+                    AppLocalizations.of(context)!.smsImport_noDataSent,
                     color,
                     textTheme,
                   ),
@@ -683,7 +684,7 @@ class _SmsImportSettingsScreenState
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text('Cancel'),
+                    child: Text(AppLocalizations.of(context)!.common_cancel),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -697,7 +698,7 @@ class _SmsImportSettingsScreenState
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text('Open Settings'),
+                    child: Text(AppLocalizations.of(context)!.smsImport_openSettings),
                   ),
                 ),
               ],
@@ -762,7 +763,7 @@ class _SmsImportSettingsScreenState
             ),
             const SizedBox(height: 20),
             Text(
-              'Clear Processing History?',
+              AppLocalizations.of(context)!.smsImport_clearHistoryConfirm,
               style:
                   textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
@@ -782,7 +783,7 @@ class _SmsImportSettingsScreenState
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'Previously detected notifications will be processed again, which may create duplicate transactions.',
+                      AppLocalizations.of(context)!.smsImport_clearHistoryWarning,
                       style: textTheme.bodySmall?.copyWith(
                         color: color.onSurfaceVariant,
                         height: 1.4,
@@ -805,7 +806,7 @@ class _SmsImportSettingsScreenState
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text('Cancel'),
+                    child: Text(AppLocalizations.of(context)!.common_cancel),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -820,7 +821,7 @@ class _SmsImportSettingsScreenState
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text('Clear'),
+                    child: Text(AppLocalizations.of(context)!.txnList_clear),
                   ),
                 ),
               ],
@@ -860,7 +861,7 @@ class _SmsImportSettingsScreenState
         await NotificationListenerBridge.openSettings();
         _permissionDisableTapCount = 0;
       } else {
-        SnackbarService.info('Tap again to open system settings');
+        SnackbarService.info(AppLocalizations.of(context)!.smsImport_tapAgainSettings);
       }
     }
   }
@@ -874,7 +875,7 @@ class _SmsImportSettingsScreenState
       if (!mounted) return;
       SnackbarService.success(BuddyMessages.smsImportEnabled);
     } else {
-      SnackbarService.info(BuddyMessages.toggledOff('Auto import'));
+      SnackbarService.info(BuddyMessages.toggledOff(AppLocalizations.of(context)!.smsImport_autoImport));
     }
   }
 }

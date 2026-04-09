@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/utils/safe_date_format.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
@@ -44,6 +45,7 @@ class SmsActivityScreen extends ConsumerStatefulWidget {
 class _SmsActivityScreenState extends ConsumerState<SmsActivityScreen>
     with WidgetsBindingObserver {
   ActivityStatus? _filterStatus;
+  AppLocalizations get ctxt => AppLocalizations.of(context)!;
 
   @override
   void initState() {
@@ -75,7 +77,7 @@ class _SmsActivityScreenState extends ConsumerState<SmsActivityScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Transaction Activity'),
+        title: Text(ctxt.smsActivity_title),
         actions: [
           IconButton(
             icon: Icon(
@@ -152,7 +154,7 @@ class _SmsActivityScreenState extends ConsumerState<SmsActivityScreen>
                           ),
                           const Spacer(),
                           Text(
-                            '${filtered.length} result${filtered.length == 1 ? '' : 's'}',
+                            ctxt.smsActivity_resultCount(filtered.length),
                             style: textTheme.bodySmall?.copyWith(
                               color: color.onSurfaceVariant,
                             ),
@@ -179,7 +181,7 @@ class _SmsActivityScreenState extends ConsumerState<SmsActivityScreen>
                           const SizedBox(height: 12),
                           Text(
                             _filterStatus != null
-                                ? 'No ${_statusLabel(_filterStatus!).toLowerCase()} activities'
+                                ? ctxt.smsActivity_noActivities
                                 : BuddyMessages.noTransactions,
                             style: textTheme.bodyLarge?.copyWith(
                               color: color.onSurfaceVariant,
@@ -292,7 +294,7 @@ class _SmsActivityScreenState extends ConsumerState<SmsActivityScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '${all.length} Transactions',
+                      ctxt.smsActivity_transactionCount(all.length),
                       style: textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
                         color: color.primary,
@@ -301,7 +303,7 @@ class _SmsActivityScreenState extends ConsumerState<SmsActivityScreen>
                     const SizedBox(height: 4),
                     Text(
                       pendingCount > 0
-                          ? '$pendingCount need${pendingCount == 1 ? 's' : ''} attention'
+                          ? ctxt.smsActivity_needsAttention(pendingCount)
                           : BuddyMessages.noNotifications,
                       style: textTheme.bodySmall?.copyWith(
                         color: color.onSurfaceVariant,
@@ -318,7 +320,7 @@ class _SmsActivityScreenState extends ConsumerState<SmsActivityScreen>
             children: [
               _statPill(
                 '$approved',
-                'Approved',
+                ctxt.smsActivity_approved,
                 color.primary,
                 color,
                 textTheme,
@@ -326,7 +328,7 @@ class _SmsActivityScreenState extends ConsumerState<SmsActivityScreen>
               const SizedBox(width: 8),
               _statPill(
                 '$pendingCount',
-                'Pending',
+                ctxt.smsActivity_pending,
                 color.tertiary,
                 color,
                 textTheme,
@@ -334,7 +336,7 @@ class _SmsActivityScreenState extends ConsumerState<SmsActivityScreen>
               const SizedBox(width: 8),
               _statPill(
                 '$rejected',
-                'Rejected',
+                ctxt.smsActivity_rejected,
                 color.error,
                 color,
                 textTheme,
@@ -405,7 +407,7 @@ class _SmsActivityScreenState extends ConsumerState<SmsActivityScreen>
             ),
             const SizedBox(height: 16),
             Text(
-              'Filter by Status',
+              ctxt.smsActivity_filterByStatus,
               style:
                   textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
@@ -419,7 +421,7 @@ class _SmsActivityScreenState extends ConsumerState<SmsActivityScreen>
               ActivityStatus.rejected,
             ].map((status) {
               final selected = _filterStatus == status;
-              final label = status == null ? 'All' : _statusLabel(status);
+              final label = status == null ? ctxt.common_all : _statusLabel(status);
               return ListTile(
                 dense: true,
                 shape: RoundedRectangleBorder(
@@ -467,15 +469,15 @@ class _SmsActivityScreenState extends ConsumerState<SmsActivityScreen>
   String _statusLabel(ActivityStatus status) {
     switch (status) {
       case ActivityStatus.pending:
-        return 'Pending';
+        return ctxt.smsActivity_pending;
       case ActivityStatus.needsReview:
-        return 'Needs Review';
+        return ctxt.smsActivity_needsReview;
       case ActivityStatus.duplicate:
-        return 'Duplicates';
+        return ctxt.smsActivity_duplicates;
       case ActivityStatus.approved:
-        return 'Approved';
+        return ctxt.smsActivity_approved;
       case ActivityStatus.rejected:
-        return 'Rejected';
+        return ctxt.smsActivity_rejected;
     }
   }
 
@@ -525,6 +527,7 @@ class _ActivityCard extends ConsumerWidget {
     final spacing = ref.watch(spacingProvider);
     final isIncome = activity.isIncome == true;
     final statusColor = _getStatusColor(color);
+    final ctxt = AppLocalizations.of(context)!;
 
     return Card(
       margin: EdgeInsets.zero,
@@ -577,7 +580,7 @@ class _ActivityCard extends ConsumerWidget {
                     Row(
                       children: [
                         Text(
-                          DateFormat('dd MMM, hh:mm a').format(activity.date),
+                          safeDateFormat('dd MMM, hh:mm a').format(activity.date),
                           style: textTheme.bodySmall?.copyWith(
                             color: color.onSurfaceVariant,
                           ),
@@ -604,7 +607,7 @@ class _ActivityCard extends ConsumerWidget {
                         ),
                         if (activity.isPotentialDuplicate == true)
                           _StatusChip(
-                            label: 'DUPLICATE',
+                            label: ctxt.smsActivity_duplicateLabel,
                             color: color.error,
                           ),
                         if (activity.transactionType != null)
@@ -614,7 +617,7 @@ class _ActivityCard extends ConsumerWidget {
                           ),
                         if (activity.isLikelyTransfer == true)
                           _StatusChip(
-                            label: 'TRANSFER',
+                            label: ctxt.smsActivity_transferLabel,
                             color: color.secondary,
                           ),
                       ],
@@ -808,7 +811,7 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
     final isActionable = widget.activity.status == ActivityStatus.pending ||
         widget.activity.status == ActivityStatus.needsReview ||
         widget.activity.status == ActivityStatus.duplicate;
-    final ctxt = AppLocalizations.of(context);
+    final ctxt = AppLocalizations.of(context)!;
 
     return SafeArea(
       child: Padding(
@@ -851,7 +854,7 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          DateFormat('dd MMM yyyy, hh:mm a')
+                          safeDateFormat('dd MMM yyyy, hh:mm a')
                               .format(widget.activity.date),
                           style: textTheme.bodySmall?.copyWith(
                             color: color.onSurfaceVariant,
@@ -911,7 +914,7 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                 child: Column(
                   children: [
                     _detailRow(
-                      'Status',
+                      ctxt.smsActivity_status,
                       widget.activity.status.name.toUpperCase(),
                       color,
                       textTheme,
@@ -919,7 +922,7 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                     if (widget.activity.confidence != null) ...[
                       _divider(color),
                       _detailRow(
-                        'Confidence',
+                        ctxt.smsActivity_confidence,
                         '${widget.activity.confidence}%',
                         color,
                         textTheme,
@@ -928,7 +931,7 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                     if (widget.activity.account != null) ...[
                       _divider(color),
                       _detailRow(
-                        'Account',
+                        ctxt.smsActivity_account,
                         widget.activity.account!,
                         color,
                         textTheme,
@@ -937,7 +940,7 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                     if (widget.activity.fromBank != null) ...[
                       _divider(color),
                       _detailRow(
-                        'Bank',
+                        ctxt.smsActivity_bank,
                         widget.activity.fromBank!,
                         color,
                         textTheme,
@@ -946,7 +949,7 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                     if (widget.activity.transactionType != null) ...[
                       _divider(color),
                       _detailRow(
-                        'Type',
+                        ctxt.smsActivity_type,
                         widget.activity.transactionType!,
                         color,
                         textTheme,
@@ -955,7 +958,7 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                     if (widget.activity.merchant != null) ...[
                       _divider(color),
                       _detailRow(
-                        'Merchant',
+                        ctxt.smsActivity_merchant,
                         widget.activity.merchant!,
                         color,
                         textTheme,
@@ -964,7 +967,7 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                     if (widget.activity.balance != null) ...[
                       _divider(color),
                       _detailRow(
-                        'Balance',
+                        ctxt.smsActivity_balance,
                         formatCurrency(widget.activity.balance!, code: BaseCurrency.code, decimals: 0),
                         color,
                         textTheme,
@@ -973,7 +976,7 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                     if (widget.activity.transactionRef != null) ...[
                       _divider(color),
                       _detailRow(
-                        'Reference',
+                        ctxt.smsActivity_reference,
                         widget.activity.transactionRef!,
                         color,
                         textTheme,
@@ -1011,7 +1014,7 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
-                              'This may be a duplicate transaction. Review carefully before approving.',
+                              ctxt.smsActivity_duplicateWarning,
                               style: textTheme.bodySmall?.copyWith(
                                 color: color.onSurfaceVariant,
                                 height: 1.4,
@@ -1046,7 +1049,7 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
-                              'No account found matching "${widget.activity.account}". Add one to approve.',
+                              ctxt.smsActivity_noAccountWarning(widget.activity.account ?? ''),
                               style: textTheme.bodySmall?.copyWith(
                                 color: color.onSurfaceVariant,
                                 height: 1.4,
@@ -1081,7 +1084,7 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
-                              'This looks like a transfer between your accounts. Approving will open the transfer screen.',
+                              ctxt.smsActivity_transferWarning,
                               style: textTheme.bodySmall?.copyWith(
                                 color: color.onSurfaceVariant,
                                 height: 1.4,
@@ -1107,7 +1110,7 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                           ref.read(smsRefreshProvider.notifier).state++;
                         },
                         icon: const Icon(LucideIcons.x, size: 16),
-                        label: const Text('Reject'),
+                        label: Text(ctxt.smsActivity_reject),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: color.error,
                           side: BorderSide(color: color.error),
@@ -1142,7 +1145,7 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                             });
                           },
                           icon: const Icon(LucideIcons.plus, size: 16),
-                          label: const Text('Add A/C'),
+                          label: Text(ctxt.smsActivity_addAccount),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: color.tertiary,
                             side: BorderSide(color: color.tertiary),
@@ -1217,6 +1220,7 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                                 'note':
                                     'Auto: ${widget.activity.merchant ?? widget.activity.sender}',
                                 'date': widget.activity.date,
+                                'smsActivity': widget.activity,
                                 if (fromAccount != null)
                                   'fromAccount': fromAccount,
                                 if (toAccount != null)
@@ -1241,8 +1245,8 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                         ),
                         label: Text(
                           widget.activity.isLikelyTransfer == true
-                              ? 'Transfer'
-                              : 'Approve',
+                              ? ctxt.smsActivity_transfer
+                              : ctxt.smsActivity_approve,
                         ),
                         style: FilledButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 12),

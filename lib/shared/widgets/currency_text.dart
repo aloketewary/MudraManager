@@ -63,7 +63,7 @@ class CurrencyText extends StatelessWidget {
     if (isBase && compact) {
       numberText = _formatCompact(ctxt, amount.abs(), fixedLength);
     } else {
-      final locale = ctxt.localeName == 'hi' ? 'hi_IN' : ctxt.localeName;
+      final locale = _safeNumericLocale(ctxt.localeName);
       final fmt = NumberFormat.currency(
         locale: locale,
         symbol: '',
@@ -145,7 +145,7 @@ class CurrencyText extends StatelessWidget {
       return '${_trimTrailing((value / 1000).toStringAsFixed(decimals))}${ctxt.currency_thousand_short}';
     }
     // Below 10K: full grouped number
-    final locale = ctxt.localeName == 'hi' ? 'hi_IN' : ctxt.localeName;
+    final locale = _safeNumericLocale(ctxt.localeName);
     final fmt = NumberFormat.currency(
       locale: locale,
       symbol: '',
@@ -171,7 +171,7 @@ class CurrencyText extends StatelessWidget {
     String sign,
   ) {
     final digits = meta?.decimalDigits ?? 2;
-    final locale = ctxt.localeName == 'hi' ? 'hi_IN' : ctxt.localeName;
+    final locale = _safeNumericLocale(ctxt.localeName);
     final fmt = NumberFormat.currency(
       locale: locale,
       symbol: '',
@@ -181,6 +181,17 @@ class CurrencyText extends StatelessWidget {
     final hasClean = meta?.cleanSymbol ?? false;
     if (hasClean) return '$sign${meta!.symbol}$formatted';
     return '$sign$code $formatted';
+  }
+
+  /// Returns a locale safe for NumberFormat (Western digits).
+  /// Locales like bn, mr, ar use non-Latin numerals — fall back to
+  /// hi_IN (for Indian grouping) or en.
+  static String _safeNumericLocale(String localeName) {
+    const nonLatinNumeralLocales = {'bn', 'mr', 'ar', 'fa', 'ne', 'pa', 'as', 'ks'};
+    final lang = localeName.split('_').first;
+    if (lang == 'hi') return 'hi_IN';
+    if (nonLatinNumeralLocales.contains(lang)) return 'hi_IN';
+    return localeName;
   }
 
   String _getSign() {

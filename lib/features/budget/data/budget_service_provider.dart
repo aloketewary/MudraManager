@@ -204,7 +204,8 @@ class BudgetService {
         if (budget.allocations.isNotEmpty) {
           // Category-wise: use allocations
           for (final alloc in budget.allocations) {
-            final cat = alloc.category.value!;
+            final cat = alloc.category.value;
+            if (cat == null) continue; // deleted category — skip
             final catTxns = expensesByCat[cat.id] ?? [];
             final spent = catTxns
                 .where((t) => !t.date.isBefore(s) && !t.date.isAfter(e))
@@ -244,6 +245,13 @@ class BudgetService {
           catSpendings.sort((a, b2) => b2.spent.compareTo(a.spent));
         }
 
+        // Detect deleted categories
+        final expectedAllocCount = budget.allocations.length;
+        final validAllocCount = catSpendings.length;
+        final hasInvalid = budget.budgetType == BudgetType.categoryWise &&
+            expectedAllocCount > 0 &&
+            validAllocCount < expectedAllocCount;
+
         if (totalSpent > budget.amount) {
           PluginService().emitBudget(totalSpent, budget.amount);
         }
@@ -255,6 +263,7 @@ class BudgetService {
             categorySpendings: catSpendings,
             startDate: s,
             endDate: e,
+            hasInvalidCategories: hasInvalid,
           ),
         );
       }
@@ -262,27 +271,21 @@ class BudgetService {
     }
   }
 
-  Future<void> save(Budget bud) async {
+  Future<void> save(Budget bud, {List<BudgetCategoryAllocation> newAllocations = const []}) async {
     final isar = await isarService.getInstance();
     final isNew = bud.id == Isar.autoIncrement;
-    // Capture allocations before writeTxn — iterating IsarLinks inside a txn causes nested txn error
-    final allocations = bud.allocations.toList();
     await isar.writeTxn(() async {
       await isar.budgets.put(bud);
       await bud.categories.save();
       await bud.budgetTags.save();
-      // Put each allocation, then save its single links (budget + category)
-      for (final alloc in allocations) {
+      for (final alloc in newAllocations) {
         alloc.budget.value = bud;
         await isar.budgetCategoryAllocations.put(alloc);
         await alloc.category.save();
         await alloc.budget.save();
       }
-      // Update the budget → allocations link (other direction)
-      bud.allocations.addAll(allocations);
-      await bud.allocations.save();
     });
-    log.i('Budget saved: ${bud.name}');
+    log.i('Budget saved: ${bud.name} with ${newAllocations.length} allocations');
     if (isNew) {
       await gamificationService?.track(GamificationEvent.budgetCreated);
     }
@@ -364,6 +367,7 @@ class BudgetWithProgress {
   final List<CategorySpending> categorySpendings;
   final DateTime startDate;
   final DateTime endDate;
+  final bool hasInvalidCategories;
 
   BudgetWithProgress({
     required this.budget,
@@ -371,5 +375,6 @@ class BudgetWithProgress {
     required this.categorySpendings,
     required this.startDate,
     required this.endDate,
+    this.hasInvalidCategories = false,
   });
 }

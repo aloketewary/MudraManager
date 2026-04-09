@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/shared/widgets/ambient_brand_section.dart';
@@ -40,7 +41,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Analytics'), elevation: 0),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.title_analytics), elevation: 0),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -61,7 +62,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                           Icon(Icons.favorite, color: color.primary, size: 28),
                           const SizedBox(width: 12),
                           Text(
-                            'Financial Health Score',
+                            AppLocalizations.of(context)!.analytics_financialHealthScore,
                             style: textTheme.headlineSmall?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -90,14 +91,14 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                       ),
                       const SizedBox(height: 24),
                       _buildMetricRow(
-                        'Savings Rate',
+                        AppLocalizations.of(context)!.analytics_savingsRate,
                         '${GuestModeUtil.applyGuestMode(health.savingsRate, isGuestMode).toStringAsFixed(1)}%',
                         color,
                         textTheme,
                       ),
                       const SizedBox(height: 12),
                       _buildMetricRow(
-                        'Expense Ratio',
+                        AppLocalizations.of(context)!.analytics_expenseRatio,
                         '${GuestModeUtil.applyGuestMode(health.expenseRatio, isGuestMode).toStringAsFixed(1)}%',
                         color,
                         textTheme,
@@ -107,7 +108,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                         const Divider(),
                         const SizedBox(height: 12),
                         Text(
-                          'Insights',
+                          AppLocalizations.of(context)!.analytics_insights,
                           style: textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -166,7 +167,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                           ),
                           const SizedBox(width: 12),
                           Text(
-                            'Spending Prediction',
+                            AppLocalizations.of(context)!.analytics_spendingPrediction,
                             style: textTheme.headlineSmall?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -178,7 +179,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                         child: Column(
                           children: [
                             Text(
-                              'Next Month',
+                              AppLocalizations.of(context)!.analytics_nextMonth,
                               style: textTheme.bodyLarge?.copyWith(
                                 color: color.onSurfaceVariant,
                               ),
@@ -198,7 +199,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                       const SizedBox(height: 16),
                       Center(
                         child: Text(
-                          'Based on last 3 months average',
+                          AppLocalizations.of(context)!.analytics_basedOnAvg,
                           style: textTheme.bodySmall?.copyWith(
                             color: color.onSurfaceVariant,
                             fontStyle: FontStyle.italic,
@@ -239,7 +240,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                             ),
                             const SizedBox(width: 12),
                             Text(
-                              'Category Trends',
+                              AppLocalizations.of(context)!.analytics_categoryTrends,
                               style: textTheme.headlineSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -348,7 +349,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                             ),
                             const SizedBox(width: 12),
                             Text(
-                              'Spending by Day',
+                              AppLocalizations.of(context)!.analytics_spendingByDay,
                               style: textTheme.headlineSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),

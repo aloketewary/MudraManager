@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/utils/safe_date_format.dart';
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
@@ -27,6 +29,7 @@ class _ImportExportScreenState extends ConsumerState<ImportExportScreen> {
   DateTime _exportStart = DateTime.now().subtract(const Duration(days: 30));
   DateTime _exportEnd = DateTime.now();
   bool _exporting = false;
+  AppLocalizations get ctxt => AppLocalizations.of(context)!;
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +40,7 @@ class _ImportExportScreenState extends ConsumerState<ImportExportScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Import & Export',
+          ctxt.importExport_title,
           style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
       ),
@@ -48,15 +51,17 @@ class _ImportExportScreenState extends ConsumerState<ImportExportScreen> {
         ),
         children: [
           // ── EXPORT SECTION ──
-          _buildSectionHeader('Export', LucideIcons.upload, color, textTheme),
+          _buildSectionHeader(
+              ctxt.importExport_export, LucideIcons.upload, color, textTheme),
           SizedBox(height: spacing.elementGap),
           _buildExportCard(color, textTheme, spacing),
           SizedBox(height: spacing.sectionGap),
 
           // ── IMPORT SECTION ──
-          _buildSectionHeader('Import', LucideIcons.download, color, textTheme),
+          _buildSectionHeader(
+              ctxt.importExport_import, LucideIcons.download, color, textTheme),
           SizedBox(height: spacing.elementGap),
-          _buildImportCard(color, textTheme, spacing),
+          _buildImportCard(color, textTheme, spacing, ctxt),
           SizedBox(height: spacing.sectionGap),
 
           // ── INFO ──
@@ -76,8 +81,7 @@ class _ImportExportScreenState extends ConsumerState<ImportExportScreen> {
                 SizedBox(width: spacing.elementGap + 4),
                 Expanded(
                   child: Text(
-                    'Export creates an Excel file with all transaction details. '
-                    'Import supports .xlsx files from other finance apps or manual spreadsheets.',
+                    ctxt.importExport_infoText,
                     style: textTheme.bodySmall?.copyWith(
                       color: color.onSurfaceVariant,
                       height: 1.4,
@@ -118,7 +122,7 @@ class _ImportExportScreenState extends ConsumerState<ImportExportScreen> {
     TextTheme textTheme,
     AppSpacing spacing,
   ) {
-    final dateFmt = DateFormat('MMM dd, yyyy');
+    final dateFmt = safeDateFormat('MMM dd, yyyy');
 
     return Card(
       elevation: 0,
@@ -136,14 +140,14 @@ class _ImportExportScreenState extends ConsumerState<ImportExportScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Export Transactions',
+              ctxt.importExport_exportTitle,
               style: textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
             ),
             SizedBox(height: spacing.elementGap),
             Text(
-              'Download your transactions as an Excel file.',
+              ctxt.importExport_exportDesc,
               style: textTheme.bodySmall?.copyWith(
                 color: color.onSurfaceVariant,
               ),
@@ -184,7 +188,8 @@ class _ImportExportScreenState extends ConsumerState<ImportExportScreen> {
                 ),
                 child: Row(
                   children: [
-                    Icon(LucideIcons.calendarRange, size: 18, color: color.primary),
+                    Icon(LucideIcons.calendarRange,
+                        size: 18, color: color.primary),
                     SizedBox(width: spacing.elementGap),
                     Text(
                       '${dateFmt.format(_exportStart)} — ${dateFmt.format(_exportEnd)}',
@@ -219,9 +224,12 @@ class _ImportExportScreenState extends ConsumerState<ImportExportScreen> {
                         ),
                       )
                     : const Icon(LucideIcons.fileSpreadsheet, size: 18),
-                label: Text(_exporting ? 'Exporting...' : 'Export as Excel'),
+                label: Text(_exporting
+                    ? ctxt.importExport_exporting
+                    : ctxt.importExport_exportAsExcel),
                 style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  padding:
+                      EdgeInsets.symmetric(vertical: spacing.elementGap * 1.5),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(spacing.radiusMedium),
                   ),
@@ -238,6 +246,7 @@ class _ImportExportScreenState extends ConsumerState<ImportExportScreen> {
     ColorScheme color,
     TextTheme textTheme,
     AppSpacing spacing,
+    AppLocalizations ctxt,
   ) {
     return Card(
       elevation: 0,
@@ -255,15 +264,14 @@ class _ImportExportScreenState extends ConsumerState<ImportExportScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Import from Excel',
+              ctxt.importExport_importTitle,
               style: textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
             ),
             SizedBox(height: spacing.elementGap),
             Text(
-              'Import transactions from an .xlsx file. '
-              'You\'ll be able to preview and map columns before importing.',
+              ctxt.importExport_importDesc,
               style: textTheme.bodySmall?.copyWith(
                 color: color.onSurfaceVariant,
               ),
@@ -275,9 +283,27 @@ class _ImportExportScreenState extends ConsumerState<ImportExportScreen> {
               spacing: 8,
               runSpacing: 8,
               children: [
-                _buildChip('Excel (.xlsx)', LucideIcons.fileSpreadsheet, color, textTheme),
-                _buildChip('Bank Statement', LucideIcons.landmark, color, textTheme),
-                _buildChip('Other Apps', LucideIcons.arrowLeftRight, color, textTheme),
+                _buildChip(
+                  ctxt.importExport_excelFormat,
+                  LucideIcons.fileSpreadsheet,
+                  color,
+                  textTheme,
+                  spacing,
+                ),
+                _buildChip(
+                  ctxt.importExport_bankStatement,
+                  LucideIcons.landmark,
+                  color,
+                  textTheme,
+                  spacing,
+                ),
+                _buildChip(
+                  ctxt.importExport_otherApps,
+                  LucideIcons.arrowLeftRight,
+                  color,
+                  textTheme,
+                  spacing,
+                ),
               ],
             ),
             SizedBox(height: spacing.sectionGap),
@@ -288,9 +314,10 @@ class _ImportExportScreenState extends ConsumerState<ImportExportScreen> {
               child: FilledButton.tonalIcon(
                 onPressed: _pickAndImport,
                 icon: const Icon(LucideIcons.filePlus, size: 18),
-                label: const Text('Pick Excel File'),
+                label: Text(ctxt.importExport_pickFile),
                 style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  padding:
+                      EdgeInsets.symmetric(vertical: spacing.elementGap * 1.5),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(spacing.radiusMedium),
                   ),
@@ -308,18 +335,20 @@ class _ImportExportScreenState extends ConsumerState<ImportExportScreen> {
     IconData icon,
     ColorScheme color,
     TextTheme textTheme,
+    AppSpacing spacing,
   ) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: EdgeInsets.symmetric(
+          horizontal: spacing.elementGap, vertical: spacing.elementGapMin),
       decoration: BoxDecoration(
         color: color.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(spacing.radiusSmall),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 14, color: color.onSurfaceVariant),
-          const SizedBox(width: 6),
+          SizedBox(width: spacing.elementGapMin),
           Text(
             label,
             style: textTheme.labelSmall?.copyWith(
@@ -337,10 +366,11 @@ class _ImportExportScreenState extends ConsumerState<ImportExportScreen> {
       final bytes = await ExcelExportService.exportTransactions(
         isarService: ref.read(isarServiceProvider),
         startDate: _exportStart,
-        endDate: DateTime(_exportEnd.year, _exportEnd.month, _exportEnd.day, 23, 59, 59),
+        endDate: DateTime(
+            _exportEnd.year, _exportEnd.month, _exportEnd.day, 23, 59, 59),
       );
       final fileName =
-          'Mudra_${DateFormat('yyyyMMdd').format(_exportStart)}_${DateFormat('yyyyMMdd').format(_exportEnd)}.xlsx';
+          'Mudra_${safeDateFormat('yyyyMMdd').format(_exportStart)}_${DateFormat('yyyyMMdd').format(_exportEnd)}.xlsx';
       await saveExportedFile(bytes, fileName, askUser: true);
       SnackbarService.success(BuddyMessages.exportSuccess);
     } catch (e) {
@@ -365,7 +395,8 @@ class _ImportExportScreenState extends ConsumerState<ImportExportScreen> {
         return;
       }
       final file = result.files.first;
-      debugPrint('[Import] File: name=${file.name}, size=${file.size}, path=${file.path}, hasBytes=${file.bytes != null}');
+      debugPrint(
+          '[Import] File: name=${file.name}, size=${file.size}, path=${file.path}, hasBytes=${file.bytes != null}');
 
       Uint8List? bytes = file.bytes;
 
@@ -386,7 +417,8 @@ class _ImportExportScreenState extends ConsumerState<ImportExportScreen> {
         return;
       }
 
-      debugPrint('[Import] SUCCESS: ${bytes.length} bytes, navigating to preview');
+      debugPrint(
+          '[Import] SUCCESS: ${bytes.length} bytes, navigating to preview');
 
       if (mounted) {
         context.push(

@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -120,7 +121,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Add Participant',
+              AppLocalizations.of(context)!.editTrip_addParticipant,
               style: textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -129,8 +130,8 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
             TextField(
               controller: nameController,
               decoration: InputDecoration(
-                labelText: 'Name',
-                hintText: 'Enter participant name',
+                labelText: AppLocalizations.of(context)!.editTrip_name,
+                hintText: AppLocalizations.of(context)!.editTrip_enterName,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -150,7 +151,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text('Cancel'),
+                    child: Text(AppLocalizations.of(context)!.common_cancel),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -436,7 +437,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
                     Icon(LucideIcons.info, color: color.primary, size: 20),
                     const SizedBox(width: 8),
                     Text(
-                      _isTrip ? 'Trip Details' : 'Group Details',
+                      _isTrip ? AppLocalizations.of(context)!.editTrip_tripDetails : AppLocalizations.of(context)!.editTrip_groupDetails,
                       style: textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -463,7 +464,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
                 TextField(
                   controller: _descController,
                   decoration: InputDecoration(
-                    labelText: 'Description (Optional)',
+                    labelText: AppLocalizations.of(context)!.editTrip_descriptionOptional,
                     hintText: _isTrip
                         ? 'Beach vacation with friends'
                         : 'Split expenses with friends',
@@ -479,7 +480,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
                   TextField(
                     controller: _budgetController,
                     decoration: InputDecoration(
-                      labelText: 'Budget (Optional)',
+                      labelText: AppLocalizations.of(context)!.editTrip_budgetOptional,
                       hintText: 'e.g., 50000',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(spacing.radiusMedium),
@@ -567,7 +568,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
                     Icon(LucideIcons.calendar, color: color.primary, size: 20),
                     const SizedBox(width: 8),
                     Text(
-                      'Duration',
+                      AppLocalizations.of(context)!.editTrip_duration,
                       style: textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),

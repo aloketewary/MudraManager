@@ -3,6 +3,8 @@ import 'package:mudra_manager/shared/widgets/currency_badge.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/currency/currency_provider.dart';
+import 'package:mudra_manager/core/db/models/sms_activity.dart';
+import 'package:mudra_manager/features/sms/data/sms_activity_service.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:go_router/go_router.dart';
@@ -30,6 +32,7 @@ class TransferScreenNew extends ConsumerStatefulWidget {
   final Account? initialToAccount;
   final int? editFromId;
   final int? editToId;
+  final SmsActivity? smsActivity;
 
   const TransferScreenNew({
     super.key,
@@ -40,6 +43,7 @@ class TransferScreenNew extends ConsumerStatefulWidget {
     this.initialToAccount,
     this.editFromId,
     this.editToId,
+    this.smsActivity,
   });
 
   @override
@@ -175,6 +179,14 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
         SnackbarService.success(
           _isEditing ? 'Transfer updated' : 'Transfer completed',
         );
+
+        // Mark SMS activity as approved if this came from SMS
+        if (widget.smsActivity != null) {
+          await SmsActivityService.instance.markTransferApproved(
+            widget.smsActivity!,
+          );
+        }
+
         context.pop(true); // return true so list screen knows to refresh
       }
     } finally {

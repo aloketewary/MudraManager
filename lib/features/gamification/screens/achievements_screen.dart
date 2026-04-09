@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'dart:math';
@@ -99,7 +100,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
                   SliverAppBar(
                     expandedHeight: 260,
                     pinned: true,
-                    title: const Text('Achievements'),
+                    title: Text(AppLocalizations.of(context)!.title_achievements),
                     flexibleSpace: FlexibleSpaceBar(
                       background: levelAsync.when(
                         data: (level) => level != null

@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +24,7 @@ class _HelpScreenState extends ConsumerState<HelpScreen> {
   bool _isLoading = true;
   final _searchController = TextEditingController();
   bool _isSearching = false;
+  AppLocalizations get ctxt => AppLocalizations.of(context)!;
 
   @override
   void initState() {
@@ -66,6 +69,7 @@ class _HelpScreenState extends ConsumerState<HelpScreen> {
     final textTheme = Theme.of(context).textTheme;
     final spacing = ref.watch(spacingProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ctxt = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
@@ -76,14 +80,14 @@ class _HelpScreenState extends ConsumerState<HelpScreen> {
                 autofocus: true,
                 style: textTheme.bodyLarge,
                 decoration: InputDecoration(
-                  hintText: 'Search help topics...',
+                  hintText: ctxt.help_searchHint,
                   hintStyle: textTheme.bodyLarge?.copyWith(
                     color: color.onSurfaceVariant,
                   ),
                   border: InputBorder.none,
                 ),
               )
-            : const Text('Help & Support'),
+            : Text(ctxt.help_title),
         actions: [
           IconButton(
             icon: Icon(_isSearching ? LucideIcons.x : LucideIcons.search),
@@ -100,7 +104,8 @@ class _HelpScreenState extends ConsumerState<HelpScreen> {
         ],
       ),
       body: _isLoading
-          ? ListView(children: List.generate(4, (_) => DashboardCardSkeleton()))
+          ? ListView(
+              children: List.generate(4, (_) => const DashboardCardSkeleton()))
           : ListView(
               padding: EdgeInsets.symmetric(
                 horizontal: spacing.cardHorizontal,
@@ -109,17 +114,27 @@ class _HelpScreenState extends ConsumerState<HelpScreen> {
               children: [
                 // ── HERO CARD ──
                 if (!_isSearching)
-                  _buildHeroCard(color, textTheme, spacing, isDark),
+                  _buildHeroCard(
+                    color,
+                    textTheme,
+                    spacing,
+                    isDark,
+                    ctxt,
+                  ),
                 if (!_isSearching) const SizedBox(height: 24),
 
                 // ── CONTENT ──
                 if (_filteredItems.isEmpty)
-                  _buildEmptyState(color, textTheme)
+                  _buildEmptyState(
+                    color,
+                    textTheme,
+                    ctxt,
+                  )
                 else ...[
                   if (!_isSearching)
                     _buildSectionHeader(
-                      'Topics',
-                      '${_items.length} articles',
+                      ctxt.help_topics,
+                      ctxt.help_articleCount(_items.length),
                       color,
                       textTheme,
                     ),
@@ -127,7 +142,7 @@ class _HelpScreenState extends ConsumerState<HelpScreen> {
                     Padding(
                       padding: const EdgeInsets.only(left: 4, bottom: 8),
                       child: Text(
-                        '${_filteredItems.length} result${_filteredItems.length == 1 ? '' : 's'}',
+                        ctxt.help_resultCount(_filteredItems.length),
                         style: textTheme.bodySmall?.copyWith(
                           color: color.onSurfaceVariant,
                         ),
@@ -139,6 +154,7 @@ class _HelpScreenState extends ConsumerState<HelpScreen> {
                     color,
                     textTheme,
                     spacing,
+                    ctxt,
                   ),
                 ],
 
@@ -162,8 +178,7 @@ class _HelpScreenState extends ConsumerState<HelpScreen> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
-                            'Can\'t find what you need? Visit About → '
-                            'Contact Support for direct help.',
+                            ctxt.help_infoText,
                             style: textTheme.bodySmall?.copyWith(
                               color: color.onSurfaceVariant,
                               height: 1.4,
@@ -184,6 +199,7 @@ class _HelpScreenState extends ConsumerState<HelpScreen> {
     TextTheme textTheme,
     AppSpacing spacing,
     bool isDark,
+    AppLocalizations ctxt,
   ) {
     final accent = color.primary;
     return Container(
@@ -223,7 +239,7 @@ class _HelpScreenState extends ConsumerState<HelpScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'How can we help?',
+                  ctxt.help_heroTitle,
                   style: textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                     color: accent,
@@ -231,7 +247,7 @@ class _HelpScreenState extends ConsumerState<HelpScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Browse guides or search for a topic',
+                  ctxt.help_heroDesc,
                   style: textTheme.bodySmall?.copyWith(
                     color: color.onSurfaceVariant,
                   ),
@@ -281,6 +297,7 @@ class _HelpScreenState extends ConsumerState<HelpScreen> {
     ColorScheme color,
     TextTheme textTheme,
     AppSpacing spacing,
+    AppLocalizations ctxt,
   ) {
     return Card(
       elevation: 0,
@@ -304,7 +321,13 @@ class _HelpScreenState extends ConsumerState<HelpScreen> {
               InkWell(
                 onTap: () {
                   HapticFeedback.mediumImpact();
-                  _showHelpDetail(item, color, textTheme, spacing);
+                  _showHelpDetail(
+                    item,
+                    color,
+                    textTheme,
+                    spacing,
+                    ctxt,
+                  );
                 },
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
@@ -366,7 +389,11 @@ class _HelpScreenState extends ConsumerState<HelpScreen> {
   }
 
   // ── EMPTY STATE ──
-  Widget _buildEmptyState(ColorScheme color, TextTheme textTheme) {
+  Widget _buildEmptyState(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppLocalizations ctxt,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 64),
       child: Column(
@@ -381,7 +408,7 @@ class _HelpScreenState extends ConsumerState<HelpScreen> {
           ),
           const SizedBox(height: 4),
           Text(
-            'Try a different search term',
+            ctxt.help_tryDifferent,
             style: textTheme.bodySmall?.copyWith(
               color: color.onSurfaceVariant,
             ),
@@ -397,6 +424,7 @@ class _HelpScreenState extends ConsumerState<HelpScreen> {
     ColorScheme color,
     TextTheme textTheme,
     AppSpacing spacing,
+    AppLocalizations ctxt,
   ) {
     final icon = IconHelper.iconFromName(item.icon);
 
@@ -462,7 +490,7 @@ class _HelpScreenState extends ConsumerState<HelpScreen> {
 
             // Steps — grouped card
             _buildDetailSectionHeader(
-              'How to use',
+              ctxt.help_howToUse,
               LucideIcons.listOrdered,
               color,
               textTheme,
@@ -528,7 +556,7 @@ class _HelpScreenState extends ConsumerState<HelpScreen> {
             if (item.tips.isNotEmpty) ...[
               const SizedBox(height: 24),
               _buildDetailSectionHeader(
-                'Tips',
+                ctxt.help_tips,
                 LucideIcons.lightbulb,
                 color,
                 textTheme,

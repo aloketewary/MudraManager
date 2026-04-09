@@ -1,4 +1,5 @@
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
@@ -54,13 +55,15 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
         _showSuccessSheet();
         break;
       case PurchaseStatus.error:
-        SnackbarService.error(error ?? 'Purchase failed. Please try again.');
+        SnackbarService.error(
+          error ?? AppLocalizations.of(context)!.upgrade_purchaseFailed,
+        );
         break;
       case PurchaseStatus.canceled:
         break;
       case PurchaseStatus.pending:
         SnackbarService.info(
-          'Purchase pending. Pro will activate once payment completes.',
+          AppLocalizations.of(context)!.upgrade_purchasePending,
         );
         break;
     }
@@ -97,13 +100,13 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
             ),
             const SizedBox(height: 20),
             Text(
-              'Welcome to Pro! 🎉',
+              AppLocalizations.of(context)!.upgrade_welcomePro,
               style: textTheme.headlineSmall
                   ?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 8),
             Text(
-              'All features are now unlocked. Thank you for your support!',
+              AppLocalizations.of(context)!.upgrade_allFeaturesUnlocked,
               style:
                   textTheme.bodyMedium?.copyWith(color: color.onSurfaceVariant),
               textAlign: TextAlign.center,
@@ -123,9 +126,12 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
                     borderRadius: BorderRadius.circular(14),
                   ),
                 ),
-                child: const Text(
-                  'Start Exploring',
-                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+                child: Text(
+                  AppLocalizations.of(context)!.upgrade_startExploring,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                  ),
                 ),
               ),
             ),
@@ -170,7 +176,8 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
                     ? _buildProStatusContent(color, textTheme, spacing)
                     : _buildFreeUserContent(color, textTheme, spacing, billing),
                 loading: () => [const DashboardCardSkeleton()],
-                error: (_, __) => _buildFreeUserContent(color, textTheme, spacing, billing),
+                error: (_, __) =>
+                    _buildFreeUserContent(color, textTheme, spacing, billing),
               ),
               const SizedBox(height: 80),
             ],
@@ -257,8 +264,7 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
                                 vertical: 3,
                               ),
                               decoration: BoxDecoration(
-                                color: color.primary
-                                    .withValues(alpha: 0.12),
+                                color: color.primary.withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
@@ -294,7 +300,11 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
       const SizedBox(height: 28),
 
       // Features list (still show — reinforces value)
-      _buildSectionLabel('Your Pro features', color, textTheme),
+      _buildSectionLabel(
+        AppLocalizations.of(context)!.upgrade_yourProFeatures,
+        color,
+        textTheme,
+      ),
       const SizedBox(height: 12),
       _buildFeaturesList(color, textTheme, spacing),
       const SizedBox(height: 28),
@@ -316,7 +326,7 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                'To manage your subscription, go to Google Play Store → Subscriptions.',
+                AppLocalizations.of(context)!.upgrade_manageSubscription,
                 style: textTheme.bodySmall?.copyWith(
                   color: color.onSurfaceVariant,
                   height: 1.4,
@@ -337,18 +347,26 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
   ) {
     return [
       const SizedBox(height: 8),
-      _buildSectionLabel('Everything in Pro', color, textTheme),
+      _buildSectionLabel(
+        AppLocalizations.of(context)!.upgrade_everythingInPro,
+        color,
+        textTheme,
+      ),
       const SizedBox(height: 12),
       _buildFeaturesList(color, textTheme, spacing),
       const SizedBox(height: 28),
 
-      _buildSectionLabel('Choose your plan', color, textTheme),
+      _buildSectionLabel(
+        AppLocalizations.of(context)!.upgrade_chooseYourPlan,
+        color,
+        textTheme,
+      ),
       const SizedBox(height: 12),
       _buildPlanCard(
         id: EntitlementProducts.yearlyPlan,
-        label: 'Yearly',
+        label: AppLocalizations.of(context)!.upgrade_yearly,
         fallbackPrice: '₹199/year',
-        savings: 'Save 43%',
+        savings: AppLocalizations.of(context)!.upgrade_save43,
         perMonth: '₹16.6/mo',
         billing: billing,
         color: color,
@@ -358,7 +376,7 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
       const SizedBox(height: 10),
       _buildPlanCard(
         id: EntitlementProducts.monthlyPlan,
-        label: 'Monthly',
+        label: AppLocalizations.of(context)!.upgrade_monthly,
         fallbackPrice: '₹29/month',
         billing: billing,
         color: color,
@@ -394,7 +412,7 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
                     const Icon(LucideIcons.sparkles, size: 20),
                     const SizedBox(width: 10),
                     Text(
-                      'Continue',
+                      AppLocalizations.of(context)!.upgrade_continue,
                       style: textTheme.titleMedium?.copyWith(
                         color: color.onPrimary,
                         fontWeight: FontWeight.w700,
@@ -411,7 +429,7 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
         child: TextButton(
           onPressed: _purchasing ? null : _handleRestore,
           child: Text(
-            'Restore purchases',
+            AppLocalizations.of(context)!.upgrade_restorePurchases,
             style: textTheme.bodyMedium?.copyWith(
               color: color.onSurfaceVariant,
             ),
@@ -449,9 +467,7 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
   // ── HERO ──
   Widget _buildHero(ColorScheme color, TextTheme textTheme, bool isDark) {
     return Container(
-      decoration: const BoxDecoration(
-        
-      ),
+      decoration: const BoxDecoration(),
       child: SafeArea(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -497,7 +513,7 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
             ),
             const SizedBox(height: 20),
             Text(
-              'Mudra Manager Pro',
+              AppLocalizations.of(context)!.upgrade_mudraManagerPro,
               style: textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.w800,
                 letterSpacing: -0.5,
@@ -505,7 +521,7 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
             ),
             const SizedBox(height: 6),
             Text(
-              'Unlock the full power of your finances',
+              AppLocalizations.of(context)!.upgrade_unlockFullPower,
               style: textTheme.bodyLarge?.copyWith(
                 color: color.onSurfaceVariant,
               ),
@@ -525,8 +541,7 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
                                   vertical: 6,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: color.primary
-                                      .withValues(alpha: 0.15),
+                                  color: color.primary.withValues(alpha: 0.15),
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Text(

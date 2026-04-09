@@ -1,4 +1,6 @@
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
+import 'package:mudra_manager/core/extension/localization_extenstion.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 
 import 'package:fl_chart/fl_chart.dart';
@@ -157,23 +159,23 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                 },
                 itemBuilder: (ctx) => [
                   if (trip.isActive) ...[
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'edit',
                       child: Row(
                         children: [
-                          Icon(LucideIcons.pencil, size: 18),
-                          SizedBox(width: 12),
-                          Text('Edit Trip'),
+                          const Icon(LucideIcons.pencil, size: 18),
+                          const SizedBox(width: 12),
+                          Text(AppLocalizations.of(context)!.trip_editTrip),
                         ],
                       ),
                     ),
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'archive',
                       child: Row(
                         children: [
-                          Icon(LucideIcons.archive, size: 18),
-                          SizedBox(width: 12),
-                          Text('Archive Trip'),
+                          const Icon(LucideIcons.archive, size: 18),
+                          const SizedBox(width: 12),
+                          Text(AppLocalizations.of(context)!.trip_archiveTrip),
                         ],
                       ),
                     ),
@@ -199,9 +201,9 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
               TabBar(
                 controller: _tabController,
                 tabs: [
-                  const Tab(text: 'Expenses'),
-                  const Tab(text: 'Settlements'),
-                  if (!trip.isActive) const Tab(text: 'Report'),
+                  Tab(text: AppLocalizations.of(context)!.trip_expenses),
+                  Tab(text: AppLocalizations.of(context)!.trip_settlements),
+                  if (!trip.isActive) Tab(text: AppLocalizations.of(context)!.trip_report),
                 ],
               ),
               Expanded(
@@ -220,7 +222,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
         );
       },
       loading: () => Scaffold(
-        appBar: AppBar(title: const Text('Loading...')),
+        appBar: AppBar(title: Text(AppLocalizations.of(context)!.common_loading)),
         body: ListView.builder(
           itemCount: 5,
           itemBuilder: (context, index) => const Padding(
@@ -354,7 +356,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Total Spent',
+                        AppLocalizations.of(context)!.trip_totalSpent,
                         style: textTheme.labelMedium?.copyWith(
                           color: color.onSurfaceVariant,
                         ),
@@ -530,7 +532,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                     );
                   },
                   icon: const Icon(LucideIcons.plus, size: 18),
-                  label: const Text('Split Expense'),
+                  label: Text(AppLocalizations.of(context)!.trip_splitExpense),
                 ),
               ],
             ],
@@ -571,7 +573,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                             ? participants
                                 .firstWhere((p) => p.id == _filterParticipantId)
                                 .name
-                            : 'All People',
+                            : AppLocalizations.of(context)!.trip_allPeople,
                       ),
                       deleteIcon: _filterParticipantId != null
                           ? const Icon(LucideIcons.x, size: 16)
@@ -591,9 +593,9 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                       setState(() => _filterParticipantId = id);
                     },
                     itemBuilder: (context) => [
-                      const PopupMenuItem<int?>(
+                      PopupMenuItem<int?>(
                         value: null,
-                        child: Text('All People'),
+                        child: Text(AppLocalizations.of(context)!.trip_allPeople),
                       ),
                       ...participants.map(
                         (p) => PopupMenuItem<int?>(
@@ -615,7 +617,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                             ? color.secondary
                             : color.onSurfaceVariant,
                       ),
-                      label: Text(_filterCategory ?? 'All Categories'),
+                      label: Text(_filterCategory ?? AppLocalizations.of(context)!.trip_allCategories),
                       deleteIcon: _filterCategory != null
                           ? const Icon(LucideIcons.x, size: 16)
                           : null,
@@ -634,9 +636,9 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                       setState(() => _filterCategory = cat);
                     },
                     itemBuilder: (context) => [
-                      const PopupMenuItem<String?>(
+                      PopupMenuItem<String?>(
                         value: null,
-                        child: Text('All Categories'),
+                        child: Text(AppLocalizations.of(context)!.trip_allCategories),
                       ),
                       ...categories.map(
                         (c) =>
@@ -656,7 +658,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                       });
                     },
                     icon: const Icon(LucideIcons.x, size: 16),
-                    label: const Text('Clear'),
+                    label: Text(AppLocalizations.of(context)!.txnList_clear),
                     style: TextButton.styleFrom(foregroundColor: color.error),
                   ),
                 ],
@@ -886,7 +888,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    'All settled up!',
+                    AppLocalizations.of(context)!.trip_allSettled,
                     style: textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),

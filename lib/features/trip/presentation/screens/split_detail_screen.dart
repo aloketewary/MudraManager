@@ -1,4 +1,5 @@
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -153,12 +154,15 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                     final confirm = await DialogUtils.showConfirmation(
                       context,
                       title: 'Archive $label',
-                      message: 'This ${label.toLowerCase()} will be moved to archive. All data and settlements will be preserved.',
+                      message:
+                          'This ${label.toLowerCase()} will be moved to archive. All data and settlements will be preserved.',
                       confirmText: 'Archive',
                       icon: LucideIcons.archive,
                     );
                     if (confirm == true) {
-                      await ref.read(tripServiceProvider).archiveTrip(widget.tripId);
+                      await ref
+                          .read(tripServiceProvider)
+                          .archiveTrip(widget.tripId);
                       ref.invalidate(allTripsProvider);
                       ref.invalidate(activeTripsProvider);
                       ref.invalidate(tripByIdProvider(widget.tripId));
@@ -174,7 +178,11 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                         children: [
                           const Icon(LucideIcons.pencil, size: 18),
                           const SizedBox(width: 12),
-                          Text(trip.isTrip ? 'Edit Trip' : 'Edit Group'),
+                          Text(
+                            trip.isTrip
+                                ? AppLocalizations.of(context)!.trip_editTrip
+                                : AppLocalizations.of(context)!.trip_editGroup,
+                          ),
                         ],
                       ),
                     ),
@@ -184,7 +192,12 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                         children: [
                           const Icon(LucideIcons.archive, size: 18),
                           const SizedBox(width: 12),
-                          Text(trip.isTrip ? 'Archive Trip' : 'Archive Group'),
+                          Text(
+                            trip.isTrip
+                                ? AppLocalizations.of(context)!.trip_archiveTrip
+                                : AppLocalizations.of(context)!
+                                    .trip_archiveGroup,
+                          ),
                         ],
                       ),
                     ),
@@ -203,7 +216,7 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                     );
                   },
                   icon: const Icon(LucideIcons.plus),
-                  label: const Text('Split Expense'),
+                  label: Text(AppLocalizations.of(context)!.trip_splitExpense),
                 )
               : null,
           body: Column(
@@ -222,9 +235,18 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
               TabBar(
                 controller: _tabController,
                 tabs: [
-                  Tab(text: trip.isTrip ? 'Expenses' : 'Balances'),
-                  Tab(text: trip.isTrip ? 'Settlements' : 'Expenses'),
-                  if (!trip.isActive) const Tab(text: 'Report'),
+                  Tab(
+                    text: trip.isTrip
+                        ? AppLocalizations.of(context)!.trip_expenses
+                        : AppLocalizations.of(context)!.trip_balances,
+                  ),
+                  Tab(
+                    text: trip.isTrip
+                        ? AppLocalizations.of(context)!.trip_settlements
+                        : AppLocalizations.of(context)!.trip_expenses,
+                  ),
+                  if (!trip.isActive)
+                    Tab(text: AppLocalizations.of(context)!.trip_report),
                 ],
               ),
               // Tab content
@@ -287,7 +309,8 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
         );
       },
       loading: () => Scaffold(
-        appBar: AppBar(title: const Text('Loading...')),
+        appBar:
+            AppBar(title: Text(AppLocalizations.of(context)!.common_loading)),
         body: ListView.builder(
           itemCount: 5,
           itemBuilder: (context, index) => const Padding(
@@ -421,7 +444,7 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Total Spent',
+                        AppLocalizations.of(context)!.trip_totalSpent,
                         style: textTheme.labelMedium?.copyWith(
                           color: color.onSurfaceVariant,
                         ),
@@ -596,7 +619,7 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                     );
                   },
                   icon: const Icon(LucideIcons.plus, size: 18),
-                  label: const Text('Split Expense'),
+                  label: Text(AppLocalizations.of(context)!.trip_splitExpense),
                 ),
               ],
             ],
@@ -632,7 +655,7 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                             ? participants
                                 .firstWhere((p) => p.id == _filterParticipantId)
                                 .name
-                            : 'All People',
+                            : AppLocalizations.of(context)!.trip_allPeople,
                       ),
                       deleteIcon: _filterParticipantId != null
                           ? const Icon(LucideIcons.x, size: 16)
@@ -652,9 +675,10 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                       setState(() => _filterParticipantId = id);
                     },
                     itemBuilder: (context) => [
-                      const PopupMenuItem<int?>(
+                      PopupMenuItem<int?>(
                         value: null,
-                        child: Text('All People'),
+                        child:
+                            Text(AppLocalizations.of(context)!.trip_allPeople),
                       ),
                       ...participants.map(
                         (p) => PopupMenuItem<int?>(
@@ -676,7 +700,10 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                             ? color.secondary
                             : color.onSurfaceVariant,
                       ),
-                      label: Text(_filterCategory ?? 'All Categories'),
+                      label: Text(
+                        _filterCategory ??
+                            AppLocalizations.of(context)!.trip_allCategories,
+                      ),
                       deleteIcon: _filterCategory != null
                           ? const Icon(LucideIcons.x, size: 16)
                           : null,
@@ -695,9 +722,11 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                       setState(() => _filterCategory = cat);
                     },
                     itemBuilder: (context) => [
-                      const PopupMenuItem<String?>(
+                      PopupMenuItem<String?>(
                         value: null,
-                        child: Text('All Categories'),
+                        child: Text(
+                          AppLocalizations.of(context)!.trip_allCategories,
+                        ),
                       ),
                       ...categories.map(
                         (c) =>
@@ -717,7 +746,7 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                       });
                     },
                     icon: const Icon(LucideIcons.x, size: 16),
-                    label: const Text('Clear'),
+                    label: Text(AppLocalizations.of(context)!.txnList_clear),
                     style: TextButton.styleFrom(foregroundColor: color.error),
                   ),
                 ],
@@ -1089,7 +1118,8 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                                 );
                             ref.invalidate(tripByIdProvider(widget.tripId));
                             ref.invalidate(
-                                tripSettlementsProvider(widget.tripId));
+                              tripSettlementsProvider(widget.tripId),
+                            );
                             ref.invalidate(transactionProvider);
                           }
                         },
@@ -1182,7 +1212,7 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                 Container(
                   width: 8,
                   height: 8,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: Colors.green,
                     shape: BoxShape.circle,
                   ),

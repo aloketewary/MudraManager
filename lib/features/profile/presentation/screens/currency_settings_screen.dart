@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -23,9 +24,10 @@ class CurrencySettingsScreen extends ConsumerWidget {
     final spacing = ref.watch(spacingProvider);
     final baseCurrencyAsync = ref.watch(baseCurrencyProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ctxt = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Currency')),
+      appBar: AppBar(title: Text(ctxt.currency_title)),
       body: baseCurrencyAsync.when(
         data: (baseCurrency) {
           final meta = kCurrencies[baseCurrency];
@@ -34,7 +36,9 @@ class CurrencySettingsScreen extends ConsumerWidget {
               left: spacing.cardHorizontal,
               right: spacing.cardHorizontal,
               top: spacing.cardVertical,
-              bottom: MediaQuery.of(context).padding.bottom + kBottomNavigationBarHeight + spacing.sectionGap,
+              bottom: MediaQuery.of(context).padding.bottom +
+                  kBottomNavigationBarHeight +
+                  spacing.sectionGap,
             ),
             children: [
               // Hero card
@@ -57,7 +61,7 @@ class CurrencySettingsScreen extends ConsumerWidget {
                 child: Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(16),
+                      padding: EdgeInsets.all(spacing.cardInner),
                       decoration: BoxDecoration(
                         color: color.primary.withValues(alpha: 0.15),
                         shape: BoxShape.circle,
@@ -70,13 +74,13 @@ class CurrencySettingsScreen extends ConsumerWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    SizedBox(width: spacing.sectionGap),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Base Currency',
+                            ctxt.currency_baseCurrency,
                             style: textTheme.labelMedium?.copyWith(
                               color: color.onSurfaceVariant,
                             ),
@@ -87,9 +91,9 @@ class CurrencySettingsScreen extends ConsumerWidget {
                               fontWeight: FontWeight.w700,
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          SizedBox(height: spacing.elementGapMin),
                           Text(
-                            'All totals, budgets, and analytics use this currency.',
+                            ctxt.currency_baseDescription,
                             style: textTheme.bodySmall?.copyWith(
                               color: color.onSurfaceVariant,
                             ),
@@ -100,7 +104,7 @@ class CurrencySettingsScreen extends ConsumerWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: spacing.sectionGap),
 
               // Change button
               Card(
@@ -124,17 +128,18 @@ class CurrencySettingsScreen extends ConsumerWidget {
                     spacing,
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 14,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: spacing.cardInner,
+                      vertical: spacing.elementGap * 1.5,
                     ),
                     child: Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(8),
+                          padding: EdgeInsets.all(spacing.elementGap),
                           decoration: BoxDecoration(
                             color: color.error.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius:
+                                BorderRadius.circular(spacing.radiusMedium),
                           ),
                           child: Icon(
                             LucideIcons.arrowLeftRight,
@@ -142,7 +147,7 @@ class CurrencySettingsScreen extends ConsumerWidget {
                             size: 20,
                           ),
                         ),
-                        const SizedBox(width: 14),
+                        SizedBox(width: spacing.elementGap * 1.5),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -165,7 +170,7 @@ class CurrencySettingsScreen extends ConsumerWidget {
                           ),
                         ),
                         Icon(
-                          Icons.chevron_right,
+                          LucideIcons.chevronRight,
                           color: color.onSurfaceVariant,
                           size: 20,
                         ),
@@ -174,7 +179,7 @@ class CurrencySettingsScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: spacing.elementGap),
 
               // Manage exchange rates
               Card(
@@ -191,17 +196,18 @@ class CurrencySettingsScreen extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(spacing.radiusMedium),
                   onTap: () => context.push(AppRoutes.exchangeRates),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 14,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: spacing.cardInner,
+                      vertical: spacing.elementGap * 1.5,
                     ),
                     child: Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(8),
+                          padding: EdgeInsets.all(spacing.elementGap),
                           decoration: BoxDecoration(
                             color: color.tertiary.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius:
+                                BorderRadius.circular(spacing.radiusMedium),
                           ),
                           child: Icon(
                             LucideIcons.arrowLeftRight,
@@ -209,19 +215,19 @@ class CurrencySettingsScreen extends ConsumerWidget {
                             size: 20,
                           ),
                         ),
-                        const SizedBox(width: 14),
+                        SizedBox(width: spacing.elementGap * 1.5),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Exchange Rates',
+                                ctxt.currency_exchangeRates,
                                 style: textTheme.bodyLarge?.copyWith(
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
                               Text(
-                                'View and edit conversion rates',
+                                ctxt.currency_exchangeRatesDesc,
                                 style: textTheme.bodySmall?.copyWith(
                                   color: color.onSurfaceVariant,
                                 ),
@@ -230,7 +236,7 @@ class CurrencySettingsScreen extends ConsumerWidget {
                           ),
                         ),
                         Icon(
-                          Icons.chevron_right,
+                          LucideIcons.chevronRight,
                           color: color.onSurfaceVariant,
                           size: 20,
                         ),
@@ -239,7 +245,7 @@ class CurrencySettingsScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: spacing.elementGap),
 
               // View archived
               Card(
@@ -256,17 +262,18 @@ class CurrencySettingsScreen extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(spacing.radiusMedium),
                   onTap: () => context.push(AppRoutes.archivedTransactions),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 14,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: spacing.cardInner,
+                      vertical: spacing.elementGap * 1.5,
                     ),
                     child: Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(8),
+                          padding: EdgeInsets.all(spacing.elementGap),
                           decoration: BoxDecoration(
                             color: color.primary.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius:
+                                BorderRadius.circular(spacing.radiusMedium),
                           ),
                           child: Icon(
                             LucideIcons.archive,
@@ -274,7 +281,7 @@ class CurrencySettingsScreen extends ConsumerWidget {
                             size: 20,
                           ),
                         ),
-                        const SizedBox(width: 14),
+                        SizedBox(width: spacing.elementGap * 1.5),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -286,7 +293,7 @@ class CurrencySettingsScreen extends ConsumerWidget {
                                 ),
                               ),
                               Text(
-                                'View transactions from previous currencies',
+                                ctxt.currency_archivedDesc,
                                 style: textTheme.bodySmall?.copyWith(
                                   color: color.onSurfaceVariant,
                                 ),
@@ -295,7 +302,7 @@ class CurrencySettingsScreen extends ConsumerWidget {
                           ),
                         ),
                         Icon(
-                          Icons.chevron_right,
+                          LucideIcons.chevronRight,
                           color: color.onSurfaceVariant,
                           size: 20,
                         ),
@@ -304,11 +311,11 @@ class CurrencySettingsScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: spacing.sectionGap),
 
               // Warning info
               Container(
-                padding: const EdgeInsets.all(14),
+                padding: EdgeInsets.all(spacing.cardInner),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(spacing.radiusMedium),
                   color: color.error.withValues(alpha: 0.06),
@@ -319,8 +326,12 @@ class CurrencySettingsScreen extends ConsumerWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(LucideIcons.triangleAlert, color: color.error, size: 18),
-                    const SizedBox(width: 12),
+                    Icon(
+                      LucideIcons.triangleAlert,
+                      color: color.error,
+                      size: 18,
+                    ),
+                    SizedBox(width: spacing.elementGap),
                     Expanded(
                       child: Text(
                         BuddyMessages.currencyChangeWarning,
@@ -336,8 +347,11 @@ class CurrencySettingsScreen extends ConsumerWidget {
             ],
           );
         },
-        loading: () => const Padding(padding: EdgeInsets.all(16), child: DashboardCardSkeleton()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        loading: () => const Padding(
+          padding: EdgeInsets.all(16),
+          child: DashboardCardSkeleton(),
+        ),
+        error: (e, _) => Center(child: Text(ctxt.common_errorLoading)),
       ),
     );
   }
@@ -350,7 +364,9 @@ class CurrencySettingsScreen extends ConsumerWidget {
     TextTheme textTheme,
     AppSpacing spacing,
   ) async {
-    final newCurrency = await showCurrencyPicker(context, selected: currentBase);
+    final ctxt = AppLocalizations.of(context)!;
+    final newCurrency =
+        await showCurrencyPicker(context, selected: currentBase);
     if (newCurrency == null || newCurrency == currentBase) return;
     if (!context.mounted) return;
 
@@ -359,11 +375,17 @@ class CurrencySettingsScreen extends ConsumerWidget {
 
     final confirmed = await showModalBottomSheet<bool>(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      shape: RoundedRectangleBorder(
+        borderRadius:
+            BorderRadius.vertical(top: Radius.circular(spacing.radiusLarge)),
       ),
       builder: (ctx) => Padding(
-        padding: EdgeInsets.fromLTRB(24, 24, 24, 24 + MediaQuery.of(ctx).padding.bottom),
+        padding: EdgeInsets.fromLTRB(
+          spacing.sectionGap,
+          spacing.sectionGap,
+          spacing.sectionGap,
+          spacing.sectionGap + MediaQuery.of(ctx).padding.bottom,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -375,50 +397,75 @@ class CurrencySettingsScreen extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: spacing.sectionGap),
             Icon(LucideIcons.triangleAlert, size: 40, color: color.error),
-            const SizedBox(height: 16),
+            SizedBox(height: spacing.sectionGap),
             Text(
               BuddyMessages.currencyChangeTitle,
               style: textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: spacing.sectionGap),
             // From → To visual
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: EdgeInsets.symmetric(
+                horizontal: spacing.cardInner,
+                vertical: spacing.elementGap,
+              ),
               decoration: BoxDecoration(
                 color: color.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(spacing.radiusMedium),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _currencyBadge(currentBase, oldMeta?.symbol ?? currentBase, color, textTheme),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Icon(LucideIcons.arrowRight, size: 20, color: color.error),
+                  _currencyBadge(
+                    currentBase,
+                    oldMeta?.symbol ?? currentBase,
+                    color,
+                    textTheme,
+                    spacing,
                   ),
-                  _currencyBadge(newCurrency, newMeta?.symbol ?? newCurrency, color, textTheme),
+                  Padding(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: spacing.elementGap),
+                    child: Icon(
+                      LucideIcons.arrowRight,
+                      size: 20,
+                      color: color.error,
+                    ),
+                  ),
+                  _currencyBadge(
+                    newCurrency,
+                    newMeta?.symbol ?? newCurrency,
+                    color,
+                    textTheme,
+                    spacing,
+                  ),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: spacing.sectionGap),
             // Warning bullets
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(14),
+              padding: EdgeInsets.all(spacing.cardInner),
               decoration: BoxDecoration(
                 color: color.error.withValues(alpha: 0.06),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(spacing.radiusMedium),
                 border: Border.all(color: color.error.withValues(alpha: 0.15)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _warningRow(BuddyMessages.currencyChangeWarning, color, textTheme),
-                  const SizedBox(height: 10),
+                  _warningRow(
+                    BuddyMessages.currencyChangeWarning,
+                    color,
+                    textTheme,
+                    spacing,
+                  ),
+                  SizedBox(height: spacing.elementGap),
                   Text(
                     BuddyMessages.currencyChangeIrreversible,
                     style: textTheme.labelSmall?.copyWith(
@@ -429,30 +476,36 @@ class CurrencySettingsScreen extends ConsumerWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: spacing.sectionGap),
             Row(
               children: [
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () => ctx.pop(false),
                     style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      padding: EdgeInsets.symmetric(
+                        vertical: spacing.elementGap * 1.5,
+                      ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius:
+                            BorderRadius.circular(spacing.radiusMedium),
                       ),
                     ),
                     child: Text(BuddyMessages.currencyChangeCancel),
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: spacing.elementGap),
                 Expanded(
                   child: FilledButton(
                     onPressed: () => ctx.pop(true),
                     style: FilledButton.styleFrom(
                       backgroundColor: color.error,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      padding: EdgeInsets.symmetric(
+                        vertical: spacing.elementGap * 1.5,
+                      ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius:
+                            BorderRadius.circular(spacing.radiusMedium),
                       ),
                     ),
                     child: Text(
@@ -470,16 +523,58 @@ class CurrencySettingsScreen extends ConsumerWidget {
 
     if (confirmed != true || !context.mounted) return;
 
-    final currencyService = await ref.read(currencyServiceProvider.future);
-    final archivedCount = await currencyService.changeBaseCurrency(newCurrency);
+    // Show blocking loading overlay
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => PopScope(
+        canPop: false,
+        child: Center(
+          child: Card(
+            margin: EdgeInsets.symmetric(horizontal: spacing.sectionGap * 2),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(spacing.radiusMedium)),
+            child: Padding(
+              padding: EdgeInsets.all(spacing.sectionGap),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(color: color.primary),
+                  SizedBox(height: spacing.sectionGap),
+                  Text(
+                    ctxt.currency_changingCurrency,
+                    style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                  SizedBox(height: spacing.elementGapMin),
+                  Text(
+                    ctxt.currency_pleaseWait,
+                    style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
 
-    BaseCurrency.sync(newCurrency);
-    invalidateAll(ref);
+    try {
+      final currencyService = await ref.read(currencyServiceProvider.future);
+      final archivedCount = await currencyService.changeBaseCurrency(newCurrency);
 
-    if (context.mounted) {
-      SnackbarService.success(
-        BuddyMessages.currencyArchivedCount(archivedCount, newCurrency),
-      );
+      BaseCurrency.sync(newCurrency);
+      invalidateAll(ref);
+
+      if (context.mounted) {
+        Navigator.of(context).pop(); // dismiss loading
+        SnackbarService.success(
+          BuddyMessages.currencyArchivedCount(archivedCount, newCurrency),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.of(context).pop(); // dismiss loading
+        SnackbarService.error(BuddyMessages.genericError);
+      }
     }
   }
 
@@ -488,6 +583,7 @@ class CurrencySettingsScreen extends ConsumerWidget {
     String symbol,
     ColorScheme color,
     TextTheme textTheme,
+    AppSpacing spacing,
   ) {
     return Column(
       children: [
@@ -507,7 +603,7 @@ class CurrencySettingsScreen extends ConsumerWidget {
             ),
           ),
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: spacing.elementGapMin),
         Text(
           code,
           style: textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w600),
@@ -516,15 +612,20 @@ class CurrencySettingsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _warningRow(String text, ColorScheme color, TextTheme textTheme) {
+  Widget _warningRow(
+    String text,
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(top: 2),
+          padding: EdgeInsets.only(top: spacing.elementGapUltraMin),
           child: Icon(LucideIcons.dot, size: 16, color: color.error),
         ),
-        const SizedBox(width: 4),
+        SizedBox(width: spacing.elementGapMin),
         Expanded(
           child: Text(
             text,

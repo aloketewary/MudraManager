@@ -132,7 +132,7 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
                     ),
                   )
                 : Text(
-                    _isEditing ? 'UPDATE' : 'SAVE',
+                    _isEditing ? ctxt.common_update : ctxt.category_save,
                     style: textTheme.titleSmall?.copyWith(
                       color: color.primary,
                       fontWeight: FontWeight.w700,
@@ -154,6 +154,7 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
               color,
               textTheme,
               spacing,
+              ctxt,
             ),
             SizedBox(height: spacing.sectionGap),
 
@@ -185,17 +186,13 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
             SizedBox(height: spacing.sectionGap),
 
             // ── DETAILS ──
-            _sectionLabel('Details', textTheme),
+            _sectionLabel(ctxt.category_detailsLabel, textTheme),
             SizedBox(height: spacing.sectionGap),
-            _buildDetailsCard(
-              color,
-              textTheme,
-              spacing,
-            ),
+            _buildDetailsFields(color, textTheme, spacing),
             SizedBox(height: spacing.sectionGap),
 
             // ── PARENT CATEGORY ──
-            _sectionLabel('Parent Category', textTheme),
+            _sectionLabel(ctxt.category_parentLabel, textTheme),
             SizedBox(height: spacing.sectionGap),
             _buildParentPicker(color, textTheme),
             SizedBox(height: spacing.sectionGap),
@@ -216,6 +213,7 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
     ColorScheme color,
     TextTheme textTheme,
     AppSpacing spacing,
+    AppLocalizations ctxt,
   ) {
     final name = _nameController.text.trim();
     final iconData = _selectedIcon != null
@@ -262,7 +260,7 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(spacing.cardInner),
                   decoration: BoxDecoration(
                     color: _selectedColor.withValues(alpha: 0.15),
                     shape: BoxShape.circle,
@@ -274,13 +272,13 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
                   child:
                       Icon(iconData, size: 28, color: color.onSurfaceVariant),
                 ),
-                const SizedBox(width: 16),
+                SizedBox(width: spacing.sectionGap),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        name.isEmpty ? 'Category Name' : name,
+                        name.isEmpty ? ctxt.category_nameHint : name,
                         style: textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w700,
                           color: name.isEmpty
@@ -292,13 +290,14 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
                       Row(
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 2,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: spacing.elementGap,
+                              vertical: spacing.elementGapUltraMin,
                             ),
                             decoration: BoxDecoration(
                               color: _selectedColor.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius:
+                                  BorderRadius.circular(spacing.radiusMedium),
                             ),
                             child: Text(
                               _selectedType.name.toUpperCase(),
@@ -309,7 +308,7 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
                             ),
                           ),
                           if (_selectedParent != null) ...[
-                            const SizedBox(width: 8),
+                            SizedBox(width: spacing.elementGap),
                             Icon(
                               LucideIcons.folderOpen,
                               size: 12,
@@ -325,9 +324,9 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
                           ],
                         ],
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: spacing.elementGap),
                       Text(
-                        'Tap to change icon',
+                        ctxt.category_tapToChangeIcon,
                         style: textTheme.labelSmall?.copyWith(
                           color: color.onSurfaceVariant.withValues(alpha: 0.9),
                           fontStyle: FontStyle.italic,
@@ -344,86 +343,71 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
     );
   }
 
-  // ── DETAILS CARD ──
-  Widget _buildDetailsCard(
+  // ── DETAILS FIELDS ──
+  Widget _buildDetailsFields(
     ColorScheme color,
     TextTheme textTheme,
     AppSpacing spacing,
   ) {
-    return Card(
-      elevation: 0,
-      color: color.surfaceContainerLow,
-      margin: const EdgeInsets.only(),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(spacing.radiusMedium),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        children: [
-          TextFormField(
-            controller: _nameController,
-            onChanged: (_) => setState(() {}),
-            decoration: InputDecoration(
-              hintText: 'Category Name',
-              prefixIcon: Icon(
-                LucideIcons.pencil,
-                size: 18,
-                color: _selectedColor,
-              ),
-              border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 16,
-              ),
+    final ctxt = AppLocalizations.of(context)!;
+    return Column(
+      children: [
+        TextFormField(
+          controller: _nameController,
+          onChanged: (_) => setState(() {}),
+          decoration: InputDecoration(
+            labelText: ctxt.category_nameHint,
+            prefixIcon:
+                Icon(LucideIcons.pencil, size: 18, color: _selectedColor),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(spacing.radiusMedium),
             ),
-            style: textTheme.bodyLarge,
-            validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
-          ),
-          Divider(
-            height: 1,
-            indent: 48,
-            color: color.outlineVariant.withValues(alpha: 0.3),
-          ),
-          SizedBox(height: spacing.elementGap),
-          TextFormField(
-            controller: _keywordsController,
-            decoration: InputDecoration(
-              hintText: 'Keywords (comma-separated)',
-              helperText: 'For SMS auto-detection (e.g. swiggy, zomato)',
-              helperStyle: textTheme.labelSmall?.copyWith(
-                color: color.onSurfaceVariant.withValues(alpha: 0.6),
-              ),
-              prefixIcon: Icon(
-                LucideIcons.tag,
-                size: 18,
-                color: _selectedColor,
-              ),
-              border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 16,
-              ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(spacing.radiusMedium),
+              borderSide: BorderSide(color: _selectedColor, width: 2),
             ),
-            style: textTheme.bodyLarge,
           ),
-        ],
-      ),
+          style: textTheme.bodyLarge,
+          validator: (v) =>
+              v == null || v.trim().isEmpty ? ctxt.common_required : null,
+        ),
+        SizedBox(height: spacing.sectionGap),
+        TextFormField(
+          controller: _keywordsController,
+          decoration: InputDecoration(
+            labelText: ctxt.category_keywordsHint,
+            helperText: ctxt.category_keywordsHelper,
+            helperStyle: textTheme.labelSmall?.copyWith(
+              color: color.onSurfaceVariant.withValues(alpha: 0.6),
+            ),
+            prefixIcon: Icon(LucideIcons.tag, size: 18, color: _selectedColor),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(spacing.radiusMedium),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(spacing.radiusMedium),
+              borderSide: BorderSide(color: _selectedColor, width: 2),
+            ),
+          ),
+          style: textTheme.bodyLarge,
+        ),
+      ],
     );
   }
 
   // ── PARENT CATEGORY PICKER ──
   Widget _buildParentPicker(ColorScheme color, TextTheme textTheme) {
+    final spacing = ref.watch(spacingProvider);
+    final ctxt = AppLocalizations.of(context)!;
     return Card(
       elevation: 0,
       color: color.surfaceContainerLow,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: color.outlineVariant.withValues(alpha: 0.3),
-        ),
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        side: BorderSide(color: color.outlineVariant.withValues(alpha: 0.3)),
       ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
         onTap: () async {
           HapticFeedback.lightImpact();
           final categories = await ref.read(categoryListProvider.future);
@@ -454,18 +438,14 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
           }
         },
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          padding: EdgeInsets.all(spacing.cardInner),
           child: Row(
             children: [
-              Icon(
-                LucideIcons.folderOpen,
-                size: 18,
-                color: _selectedColor,
-              ),
-              const SizedBox(width: 14),
+              Icon(LucideIcons.folderOpen, size: 18, color: _selectedColor),
+              SizedBox(width: spacing.elementGap * 1.5),
               Expanded(
                 child: Text(
-                  _selectedParent?.name ?? 'None (Top-level)',
+                  _selectedParent?.name ?? ctxt.category_noneTopLevel,
                   style: textTheme.bodyLarge?.copyWith(
                     color: _selectedParent != null
                         ? color.onSurface
@@ -503,23 +483,22 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
 
   // ── COLOR SECTION ──
   Widget _buildColorSection(ColorScheme color, TextTheme textTheme) {
+    final spacing = ref.watch(spacingProvider);
     return Card(
       elevation: 0,
       color: color.surfaceContainerLow,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: color.outlineVariant.withValues(alpha: 0.3),
-        ),
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        side: BorderSide(color: color.outlineVariant.withValues(alpha: 0.3)),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(spacing.cardInner),
         child: Row(
           children: [
             Expanded(
               child: Wrap(
-                spacing: 10,
-                runSpacing: 10,
+                spacing: spacing.elementGap,
+                runSpacing: spacing.elementGap,
                 children: _quickColors.map((c) {
                   final isSelected = _selectedColor.toARGB32() == c.toARGB32();
                   return GestureDetector(
@@ -674,6 +653,7 @@ class _ParentCategoryPicker extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final color = Theme.of(context).colorScheme;
+    final ctxt = AppLocalizations.of(context)!;
 
     return DraggableScrollableSheet(
       initialChildSize: 0.5,
@@ -694,7 +674,7 @@ class _ParentCategoryPicker extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(16),
             child: Text(
-              'Select Parent Category',
+              AppLocalizations.of(context)!.category_selectParent,
               style: textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -710,7 +690,7 @@ class _ParentCategoryPicker extends StatelessWidget {
               children: [
                 ListTile(
                   leading: Icon(LucideIcons.minus, color: color.primary),
-                  title: const Text('None (Top-level)'),
+                  title: Text(ctxt.category_noneTopLevel),
                   selected: selected == null,
                   onTap: () {
                     HapticFeedback.lightImpact();

@@ -7,8 +7,8 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
-import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/core/utils/dialog_utils.dart';
+import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
 import 'package:mudra_manager/core/utils/icon_helper.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/core/widgets/skeleton_loader.dart';
@@ -94,18 +94,19 @@ class ManageCategoriesScreen extends ConsumerWidget {
                 color,
                 textTheme,
                 spacing,
+                ctxt,
               ),
               SizedBox(height: spacing.sectionGap),
 
               // ── EXPENSE CATEGORIES ──
               if (expenses.isNotEmpty) ...[
                 _buildTypeHeader(
-                  'Expense',
+                  ctxt.transaction_type_expense,
                   LucideIcons.arrowUpRight,
                   color.error,
                   textTheme,
                 ),
-                SizedBox(height: spacing.sectionGap),
+                SizedBox(height: spacing.elementGap),
                 _buildCategoryGroup(
                   context,
                   ref,
@@ -123,12 +124,12 @@ class ManageCategoriesScreen extends ConsumerWidget {
               // ── INCOME CATEGORIES ──
               if (incomes.isNotEmpty) ...[
                 _buildTypeHeader(
-                  'Income',
+                  ctxt.transaction_type_income,
                   LucideIcons.arrowDownLeft,
                   color.primary,
                   textTheme,
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: spacing.elementGap),
                 _buildCategoryGroup(
                   context,
                   ref,
@@ -140,15 +141,20 @@ class ManageCategoriesScreen extends ConsumerWidget {
                   ctxt,
                   spacing,
                 ),
-                const SizedBox(height: 100),
+                SizedBox(height: spacing.sectionGap * 3),
               ],
             ],
           );
         },
         loading: () => ListView.builder(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+          padding: EdgeInsets.fromLTRB(
+            spacing.cardHorizontal,
+            spacing.cardVertical,
+            spacing.cardHorizontal,
+            100,
+          ),
           itemCount: 6,
-          itemBuilder: (_, __) => TransactionCardSkeleton(),
+          itemBuilder: (_, __) => const TransactionCardSkeleton(),
         ),
         error: (err, _) => Center(child: Text(BuddyMessages.errorWith('$err'))),
       ),
@@ -162,19 +168,22 @@ class ManageCategoriesScreen extends ConsumerWidget {
     ColorScheme color,
     TextTheme textTheme,
     AppSpacing spacing,
+    AppLocalizations ctxt,
   ) {
+    final isDark = color.brightness == Brightness.dark;
     return Container(
-      padding: EdgeInsets.all(spacing.cardInner),
+      padding: EdgeInsets.all(spacing.cardInner + spacing.elementGap),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            color.primaryContainer,
-            color.secondaryContainer,
+            color.primary.withValues(alpha: isDark ? 0.15 : 0.08),
+            color.surface,
           ],
         ),
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        border: Border.all(color: color.outlineVariant.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
@@ -183,37 +192,17 @@ class ManageCategoriesScreen extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Categories',
-                  style: textTheme.labelLarge?.copyWith(
-                    color: color.onPrimaryContainer.withValues(alpha: 0.7),
-                  ),
+                  '$categoryCount ${ctxt.categories_label}',
+                  style: textTheme.labelLarge
+                      ?.copyWith(color: color.onSurfaceVariant),
                 ),
-                const SizedBox(height: 2),
+                SizedBox(height: spacing.elementGapMin),
                 Text(
-                  '$categoryCount',
-                  style: textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.w900,
-                    color: color.onPrimaryContainer,
-                  ),
+                  '$totalTransactions ${ctxt.categories_transactionsLabel}',
+                  style: textTheme.titleMedium
+                      ?.copyWith(fontWeight: FontWeight.w700),
                 ),
               ],
-            ),
-          ),
-          Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: spacing.cardHorizontal,
-              vertical: spacing.cardVertical,
-            ),
-            decoration: BoxDecoration(
-              color: color.onPrimaryContainer.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(spacing.radiusMedium),
-            ),
-            child: Text(
-              '$totalTransactions transactions',
-              style: textTheme.labelSmall?.copyWith(
-                color: color.onPrimaryContainer,
-                fontWeight: FontWeight.w600,
-              ),
             ),
           ),
         ],
@@ -228,22 +217,19 @@ class ManageCategoriesScreen extends ConsumerWidget {
     Color iconColor,
     TextTheme textTheme,
   ) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 4),
-      child: Row(
-        children: [
-          Icon(icon, size: 16, color: iconColor),
-          const SizedBox(width: 8),
-          Text(
-            label,
-            style: textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: iconColor,
-              letterSpacing: 0.5,
-            ),
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: iconColor),
+        const SizedBox(width: 8),
+        Text(
+          label,
+          style: textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: iconColor,
+            letterSpacing: 0.5,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -313,22 +299,26 @@ class ManageCategoriesScreen extends ConsumerWidget {
   ) async {
     final service = ref.read(categoryServiceProvider);
     final txCount = await service.getLinkedTransactionCount(category.id);
+    final budgetCount = await service.getLinkedBudgetCount(category.id);
 
     if (!context.mounted) return;
 
-    final String message;
+    final parts = <String>[];
     if (txCount > 0) {
-      message =
-          'This will permanently delete "${category.name}" and $txCount linked transaction${txCount == 1 ? '' : 's'}. This action cannot be undone.';
-    } else {
-      message = BuddyMessages.deleteMessage(category.name);
+      parts.add(ctxt.categories_deleteWithTransactions(category.name, txCount));
     }
+    if (budgetCount > 0) {
+      parts.add(ctxt.budget_categoryDeleteWarning(budgetCount));
+    }
+    final message = parts.isNotEmpty
+        ? parts.join('\n\n')
+        : BuddyMessages.deleteMessage(category.name);
 
     final shouldDelete = await DialogUtils.showDeleteConfirmation(
       context,
       title: BuddyMessages.deleteTitle,
       message: message,
-      deleteText: txCount > 0 ? 'Delete All' : null,
+      deleteText: (txCount > 0 || budgetCount > 0) ? ctxt.categories_deleteAll : null,
     );
 
     if (shouldDelete == true) {
@@ -336,6 +326,7 @@ class ManageCategoriesScreen extends ConsumerWidget {
       ref.invalidate(categoryListProvider);
       ref.invalidate(transactionCountsProvider);
       ref.invalidate(transactionProvider);
+      if (budgetCount > 0) ref.invalidate(budgetsWithProgressProvider);
       SnackbarService.success(BuddyMessages.categoryDeleted);
     }
   }
@@ -586,6 +577,7 @@ class _CategoryRowState extends State<_CategoryRow> {
     required VoidCallback onDelete,
   }) {
     final catColor = Color(category.colorValue ?? Colors.grey.toARGB32());
+    final ctxt = AppLocalizations.of(context)!;
 
     showModalBottomSheet(
       context: context,
@@ -651,7 +643,7 @@ class _CategoryRowState extends State<_CategoryRow> {
             const Divider(height: 1),
             ListTile(
               leading: Icon(LucideIcons.pencil, color: color.primary),
-              title: const Text('Edit Category'),
+              title: Text(ctxt.categories_edit),
               onTap: () {
                 HapticFeedback.mediumImpact();
                 Navigator.pop(ctx);
@@ -661,10 +653,10 @@ class _CategoryRowState extends State<_CategoryRow> {
             ListTile(
               leading: Icon(LucideIcons.trash2, color: color.error),
               title: Text(
-                'Delete Category',
+                ctxt.categories_delete,
                 style: TextStyle(color: color.error),
               ),
-              subtitle: const Text('Removes all linked transactions'),
+              subtitle: Text(ctxt.categories_deleteSubtitle),
               onTap: () {
                 HapticFeedback.mediumImpact();
                 Navigator.pop(ctx);

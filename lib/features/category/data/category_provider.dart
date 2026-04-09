@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
+import 'package:mudra_manager/core/db/models/budget_category_allocation.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/entitlement/entitlement_provider.dart';
@@ -44,6 +45,7 @@ final incomeCategoriesProvider =
   final categories = await isar.categorys
       .filter()
       .categoryTypeEqualTo(CategoryType.income)
+      .isSystemEqualTo(false)
       .findAll();
   for (final category in categories) {
     await category.parentCategory.load();
@@ -58,6 +60,7 @@ final expenseCategoriesProvider =
   final categories = await isar.categorys
       .filter()
       .categoryTypeEqualTo(CategoryType.expense)
+      .isSystemEqualTo(false)
       .findAll();
   for (final category in categories) {
     await category.parentCategory.load();
@@ -80,7 +83,7 @@ final frequencySortedCategoriesProvider = FutureProvider.autoDispose
   final isar = await ref.watch(isarServiceProvider).getInstance();
 
   final categories =
-      await isar.categorys.filter().categoryTypeEqualTo(type).findAll();
+      await isar.categorys.filter().categoryTypeEqualTo(type).isSystemEqualTo(false).findAll();
 
   for (final cat in categories) {
     await cat.parentCategory.load();
@@ -153,13 +156,22 @@ class CategoryService {
         .count();
   }
 
-  /// Deletes category and unlinks all its transactions.
-  /// Orphaned transactions will have no category (uncategorized).
-  /// Call [getLinkedTransactionCount] first to show confirmation UI.
+  Future<int> getLinkedBudgetCount(int categoryId) async {
+    final isar = await isarService.getInstance();
+    return await isar.budgetCategoryAllocations
+        .filter()
+        .category((q) => q.idEqualTo(categoryId))
+        .count();
+  }
+
+  /// Deletes category, unlinks transactions, and cleans up budget allocations.
+  /// Call [getLinkedTransactionCount] and [getLinkedBudgetCount] first for UI.
   Future<void> deleteCategory(int id) async {
     final isar = await isarService.getInstance();
     int txCount = 0;
+    int allocCount = 0;
     await isar.writeTxn(() async {
+      // Unlink transactions
       final linked = await isar.transactions
           .filter()
           .category((q) => q.idEqualTo(id))
@@ -169,9 +181,26 @@ class CategoryService {
         tx.category.value = null;
         await tx.category.save();
       }
+      // Remove budget allocations for this category
+      final allocs = await isar.budgetCategoryAllocations
+          .filter()
+          .category((q) => q.idEqualTo(id))
+          .findAll();
+      allocCount = allocs.length;
+      for (final alloc in allocs) {
+        await alloc.budget.load();
+        final budget = alloc.budget.value;
+        if (budget != null) {
+          budget.allocations.remove(alloc);
+          budget.categories.removeWhere((c) => c.id == id);
+          await budget.allocations.save();
+          await budget.categories.save();
+        }
+        await isar.budgetCategoryAllocations.delete(alloc.id);
+      }
       await isar.categorys.delete(id);
     });
-    log.i('Category $id deleted, $txCount transactions unlinked');
+    log.i('Category $id deleted, $txCount txns unlinked, $allocCount budget allocs removed');
   }
 
   Future<List<Category>> getAllCategories() async {

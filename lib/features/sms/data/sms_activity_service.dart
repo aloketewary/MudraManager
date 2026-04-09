@@ -129,12 +129,39 @@ class SmsActivityService {
       // Link both activities as a transfer pair
       activity.isLikelyTransfer = true;
       activity.pairedActivityId = transferPair.id;
-      activity.status = ActivityStatus.pending;
       activity.transactionType = 'Transfer';
+
+      // If the paired activity was already auto-approved as a regular transaction,
+      // we need to convert it: delete the expense and let user create a proper transfer
+      if (transferPair.status == ActivityStatus.approved && transferPair.transactionId != null) {
+        // Delete the incorrectly created expense transaction
+        await isar.writeTxn(() async {
+          await isar.transactions.delete(transferPair.transactionId!);
+
+          // Reset the paired activity to pending transfer
+          transferPair.isLikelyTransfer = true;
+          transferPair.pairedActivityId = activity.id;
+          transferPair.transactionType = 'Transfer';
+          transferPair.status = ActivityStatus.pending;
+          transferPair.transactionId = null;
+          await isar.smsActivitys.put(transferPair);
+
+          activity.status = ActivityStatus.pending;
+          await isar.smsActivitys.put(activity);
+        });
+
+        _log.i(
+          'Transfer pair detected (converted existing txn ${transferPair.transactionId}): '
+          '${activity.id} <-> ${transferPair.id} (${BaseCurrency.symbol}${activity.amount})',
+        );
+        return activity;
+      }
+
+      // Normal case: neither was auto-approved yet
+      activity.status = ActivityStatus.pending;
 
       await isar.writeTxn(() async {
         await isar.smsActivitys.put(activity);
-        // Update the paired activity too
         transferPair.isLikelyTransfer = true;
         transferPair.pairedActivityId = activity.id;
         transferPair.transactionType = 'Transfer';
@@ -351,6 +378,27 @@ class SmsActivityService {
     });
 
     _log.i('Activity rejected: ID ${activity.id}');
+  }
+
+  /// Marks a transfer activity (and its paired activity) as approved.
+  Future<void> markTransferApproved(SmsActivity activity) async {
+    final isar = await _getIsar();
+
+    await isar.writeTxn(() async {
+      activity.status = ActivityStatus.approved;
+      await isar.smsActivitys.put(activity);
+
+      // Also mark the paired activity if it exists
+      if (activity.pairedActivityId != null) {
+        final pair = await isar.smsActivitys.get(activity.pairedActivityId!);
+        if (pair != null && pair.status != ActivityStatus.approved) {
+          pair.status = ActivityStatus.approved;
+          await isar.smsActivitys.put(pair);
+        }
+      }
+    });
+
+    _log.i('Transfer activity approved: ID ${activity.id} (pair: ${activity.pairedActivityId})');
   }
 
   Future<void> markAsNotDuplicate(SmsActivity activity) async {

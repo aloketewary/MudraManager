@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 import 'package:intl/intl.dart';
@@ -192,7 +193,7 @@ class _MonthlyComparisonScreenState
     return Scaffold(
       backgroundColor: color.surface,
       appBar: AppBar(
-        title: const Text('Compare Months'),
+        title: Text(AppLocalizations.of(context)!.title_compareMonths),
         elevation: 0,
         actions: [
           GestureDetector(

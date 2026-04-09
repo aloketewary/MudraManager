@@ -1,5 +1,5 @@
-import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'dart:io' show Platform;
 
 import 'package:go_router/go_router.dart';
@@ -79,7 +79,7 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
         );
         if (streakCount != null && streakCount > 1) {
           SnackbarService.success(
-            '🔥 ${Tone.current.streakMessage(streakCount)}',
+            '🔥 ${BuddyMessages.streakMessage(streakCount)}',
           );
         } else {
           SnackbarService.success('🔥 $result');
@@ -227,7 +227,7 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Enable dashboard cards to see your financial overview',
+                          AppLocalizations.of(context)!.dashboard_enableCardsDesc,
                           style: textTheme.bodyMedium
                               ?.copyWith(color: color.onSurfaceVariant),
                           textAlign: TextAlign.center,
@@ -237,7 +237,7 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                           onPressed: () =>
                               context.push(AppRoutes.dashboardCustomize),
                           icon: const Icon(LucideIcons.plus),
-                          label: const Text('Enable Cards'),
+                          label: Text(AppLocalizations.of(context)!.dashboard_enableCards),
                         ),
                       ],
                     ),
@@ -258,7 +258,7 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                         color: color.onSurfaceVariant,
                       ),
                       label: Text(
-                        'Customize Dashboard',
+                        AppLocalizations.of(context)!.dashboard_customizeDashboard,
                         style: textTheme.labelMedium
                             ?.copyWith(color: color.onSurfaceVariant),
                       ),
@@ -393,7 +393,7 @@ class _HelpBanner extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'New to Mudra Manager?',
+                        AppLocalizations.of(context)!.dashboard_newToApp,
                         style: textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.w700,
                           color: color.onSurface,
@@ -401,7 +401,7 @@ class _HelpBanner extends ConsumerWidget {
                       ),
                       SizedBox(height: spacing.elementGapUltraMin),
                       Text(
-                        'Tap to explore the help guide',
+                        AppLocalizations.of(context)!.dashboard_tapToExploreHelp,
                         style: textTheme.bodySmall?.copyWith(
                           color: color.onSurfaceVariant,
                         ),
@@ -518,7 +518,7 @@ class _AutoImportBanner extends ConsumerWidget {
                       ),
                     ),
                     Text(
-                      'Tap to review transactions',
+                      AppLocalizations.of(context)!.dashboard_tapToReviewTxn,
                       style: textTheme.bodySmall?.copyWith(
                         color: color.onSurfaceVariant,
                       ),
@@ -590,7 +590,7 @@ class _AutoImportBanner extends ConsumerWidget {
               ),
               SizedBox(width: spacing.elementGap + 2),
               Text(
-                'Auto Import Paused',
+                AppLocalizations.of(context)!.dashboard_autoImportPaused,
                 style: textTheme.labelMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: color.onTertiaryContainer,
@@ -598,7 +598,7 @@ class _AutoImportBanner extends ConsumerWidget {
               ),
               const Spacer(),
               Text(
-                'Enable',
+                AppLocalizations.of(context)!.dashboard_enable,
                 style: textTheme.labelSmall?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: color.onSurfaceVariant,
@@ -669,7 +669,7 @@ class _AutoImportBanner extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Enable Auto Import',
+                        AppLocalizations.of(context)!.dashboard_enableAutoImport,
                         style: textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.w700,
                           color: color.onSurface,
@@ -677,7 +677,7 @@ class _AutoImportBanner extends ConsumerWidget {
                       ),
                       SizedBox(height: spacing.cardVerticalMin / 2),
                       Text(
-                        'Auto-track transactions from bank notifications',
+                        AppLocalizations.of(context)!.dashboard_autoTrackDesc,
                         style: textTheme.bodySmall?.copyWith(
                           color: color.onSurfaceVariant,
                         ),

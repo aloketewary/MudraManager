@@ -3,6 +3,7 @@ import 'package:flutter_boring_avatars/flutter_boring_avatars.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -38,6 +39,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final spacing = ref.watch(spacingProvider);
+    final l10n = AppLocalizations.of(context)!;
     final profileAsync = ref.watch(userProfileProvider);
     final accountsAsync = ref.watch(accountsProvider);
     final categoriesAsync = ref.watch(categoryListProvider);
@@ -72,7 +74,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ? Padding(
                           padding: const EdgeInsets.only(right: 16),
                           child: Text(
-                            profile?.name ?? 'Awesome User',
+                            profile?.name ?? AppLocalizations.of(context)!.profile_awesomeUser,
                             style: textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: color.onSurface,
@@ -116,7 +118,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 // ── SUBSCRIPTION STATUS ──
                 _buildSubscriptionCard(color, textTheme, spacing, isDark),
                 // ── CORE SETTINGS ──
-                _buildSectionHeader('Core Settings', color, textTheme),
+                _buildSectionHeader(l10n.section_coreSettings, color, textTheme),
                 const SizedBox(height: 10),
                 _buildGroupedCard(
                   color,
@@ -125,26 +127,26 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   items: [
                     _SettingItem(
                       Icons.account_balance_wallet_outlined,
-                      'Accounts',
-                      'Manage your accounts',
+                      AppLocalizations.of(context)!.profile_accounts,
+                      AppLocalizations.of(context)!.profile_manageAccounts,
                       () => context.push(AppRoutes.manageAccounts),
                     ),
                     _SettingItem(
                       Icons.category_outlined,
-                      'Categories',
-                      'Manage your categories',
+                      AppLocalizations.of(context)!.profile_categories,
+                      AppLocalizations.of(context)!.profile_manageCategories,
                       () => context.push(AppRoutes.manageCategories),
                     ),
                     _SettingItem(
                       LucideIcons.coins,
-                      'Currency',
+                      l10n.title_currency,
                       _baseCurrencySubtitle(ref),
                       () => context.push(AppRoutes.currencySettings),
                     ),
                     _SettingItem(
                       Icons.lock,
-                      'Security',
-                      'PIN or Fingerprint',
+                      l10n.title_security,
+                      AppLocalizations.of(context)!.profile_pinFingerprint,
                       () => context.push(AppRoutes.security),
                     ),
                   ],
@@ -152,7 +154,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 const SizedBox(height: 24),
 
                 // ── APP & DATA ──
-                _buildSectionHeader('App & Data', color, textTheme),
+                _buildSectionHeader(l10n.section_appData, color, textTheme),
                 const SizedBox(height: 10),
                 _buildAppDataGroup(
                   color,
@@ -163,7 +165,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
                 // ── APPEARANCE ──
                 // ── APPEARANCE ──
-                _buildSectionHeader('Appearance', color, textTheme),
+                _buildSectionHeader(l10n.section_appearance, color, textTheme),
                 const SizedBox(height: 10),
                 _buildGroupedCard(
                   color,
@@ -172,13 +174,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   items: [
                     _SettingItem(
                       LucideIcons.palette,
-                      'Appearance',
-                      'Theme, tone & display',
+                      l10n.title_appearance,
+                      AppLocalizations.of(context)!.profile_themeDisplay,
                       () => context.push(AppRoutes.appearance),
                     ),
                     _SettingItem(
                       LucideIcons.languages,
-                      'Language',
+                      AppLocalizations.of(context)!.profile_language,
                       Locale(SharedPrefsUtil.instance.getLanguage())
                           .displayName(),
                       () => context.push(AppRoutes.chooseLanguage),
@@ -189,7 +191,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 const SizedBox(height: 24),
 
                 // ── ADVANCED ──
-                _buildSectionHeader('Advanced', color, textTheme),
+                _buildSectionHeader(l10n.section_advanced, color, textTheme),
                 const SizedBox(height: 10),
                 _buildGroupedCard(
                   color,
@@ -198,21 +200,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   items: [
                     _SettingItem(
                       LucideIcons.layoutDashboard,
-                      'Dashboard Layout',
-                      'Customize widgets & cards',
+                      l10n.title_dashboardLayout,
+                      AppLocalizations.of(context)!.profile_customizeWidgets,
                       () => context.push(AppRoutes.dashboardCustomize),
                       trailing: const ProBadge(),
                     ),
                     _SettingItem(
                       LucideIcons.arrowLeftRight,
-                      'Import & Export',
-                      'Excel import & export',
+                      AppLocalizations.of(context)!.profile_importExport,
+                      AppLocalizations.of(context)!.profile_importExportDesc,
                       () => context.push(AppRoutes.importExport),
                     ),
                     _SettingItem(
                       LucideIcons.puzzle,
-                      'Plugins',
-                      'Manage extensions',
+                      l10n.title_plugins,
+                      AppLocalizations.of(context)!.profile_manageExtensions,
                       () => context.push(AppRoutes.marketplace),
                     ),
                   ],
@@ -220,7 +222,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 const SizedBox(height: 24),
 
                 // ── SUPPORT & LEGAL ──
-                _buildSectionHeader('Support & Legal', color, textTheme),
+                _buildSectionHeader(l10n.section_supportLegal, color, textTheme),
                 const SizedBox(height: 10),
                 _buildGroupedCard(
                   color,
@@ -229,14 +231,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   items: [
                     _SettingItem(
                       Icons.help_outline,
-                      'Help & Support',
-                      'FAQs and feature guides',
+                      AppLocalizations.of(context)!.profile_helpSupport,
+                      AppLocalizations.of(context)!.profile_faqs,
                       () => context.push(AppRoutes.help),
                     ),
                     _SettingItem(
                       Icons.info_outline,
-                      'About App',
-                      'Version & Info',
+                      AppLocalizations.of(context)!.profile_aboutApp,
+                      AppLocalizations.of(context)!.profile_versionInfo,
                       () => context.push(AppRoutes.about),
                     ),
                   ],
@@ -256,7 +258,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         _showLogoutBottomSheet(context, ref, color, textTheme),
                     icon: Icon(Icons.logout, size: 18, color: color.error),
                     label: Text(
-                      'Logout',
+                      AppLocalizations.of(context)!.profile_logout,
                       style: textTheme.bodyMedium?.copyWith(color: color.error),
                     ),
                     style: TextButton.styleFrom(
@@ -347,7 +349,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     const SizedBox(width: 14),
                     Expanded(
                       child: Text(
-                        isPro ? 'Pro Active' : 'Free Tier',
+                        isPro ? AppLocalizations.of(context)!.profile_proActiveLabel : AppLocalizations.of(context)!.profile_freeTierLabel,
                         style: textTheme.bodyLarge?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
@@ -615,8 +617,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                   info.isPro
                                       ? info.label
                                       : info.isTrial
-                                          ? 'Full Access'
-                                          : 'Upgrade to Pro',
+                                          ? AppLocalizations.of(context)!.profile_fullAccessLabel
+                                          : AppLocalizations.of(context)!.profile_upgradeToProLabel,
                                   style: textTheme.titleSmall?.copyWith(
                                     fontWeight: FontWeight.w700,
                                   ),
@@ -699,21 +701,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   String _subscriptionSubtitle(ProPlanInfo info) {
     if (info.isTrial) {
       final days = info.trialDaysRemaining ?? 0;
-      if (days > 30) return 'Full access — enjoy all features!';
-      if (days > 7) return 'Full access — $days days remaining';
-      if (days > 0) return 'Full access ends in $days days';
-      return 'Trial ended — upgrade to keep all features';
+      if (days > 30) return AppLocalizations.of(context)!.profile_fullAccessEnjoy;
+      if (days > 7) return AppLocalizations.of(context)!.profile_fullAccessDaysRemaining(days);
+      if (days > 0) return AppLocalizations.of(context)!.profile_fullAccessEndsIn(days);
+      return AppLocalizations.of(context)!.profile_trialEnded;
     }
-    if (!info.isPro) return 'Unlimited accounts, analytics & more';
+    if (!info.isPro) return AppLocalizations.of(context)!.profile_unlimitedDesc;
 
     if (info.expiresAt != null) {
       final days = info.expiresAt!.difference(DateTime.now()).inDays;
-      if (days < 0) return 'Expired — tap to renew';
-      if (days == 0) return 'Expires today';
-      if (days == 1) return 'Renews tomorrow';
-      return 'Renews in $days days';
+      if (days < 0) return AppLocalizations.of(context)!.profile_expiredRenew;
+      if (days == 0) return AppLocalizations.of(context)!.profile_expiresToday;
+      if (days == 1) return AppLocalizations.of(context)!.profile_renewsTomorrow;
+      return AppLocalizations.of(context)!.profile_renewsInDays(days);
     }
-    return 'Active subscription';
+    return AppLocalizations.of(context)!.profile_activeSubscription;
   }
 
   // ── HERO BACKGROUND ──
@@ -776,7 +778,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          profile?.name ?? 'Unknown',
+                          profile?.name ?? AppLocalizations.of(context)!.profile_unknown,
                           style: textTheme.headlineSmall?.copyWith(
                             fontWeight: FontWeight.w900,
                           ),
@@ -853,7 +855,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           height: 64,
           child: ClipOval(
             child: BoringAvatar(
-              name: profile?.name ?? 'Awesome User',
+              name: profile?.name ?? AppLocalizations.of(context)!.profile_awesomeUser,
               palette: BoringAvatarPalette([
                 color.primary,
                 color.tertiary,
@@ -966,7 +968,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   loading: () => '...',
                   error: (_, __) => '0',
                 ),
-                'Accounts',
+                AppLocalizations.of(context)!.profile_accountsLabel,
                 color,
                 textTheme,
               ),
@@ -980,7 +982,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   loading: () => '...',
                   error: (_, __) => '0',
                 ),
-                'Categories',
+                AppLocalizations.of(context)!.profile_categoriesLabel,
                 color,
                 textTheme,
               ),
@@ -994,7 +996,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   snapshot.hasData
                       ? (snapshot.data as List).length.toString()
                       : '...',
-                  'Budgets',
+                  AppLocalizations.of(context)!.profile_budgetsLabel,
                   color,
                   textTheme,
                 ),
@@ -1006,7 +1008,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 child: _quickStat(
                   LucideIcons.flame,
                   '${streak.longestCount}',
-                  'Best Streak',
+                  AppLocalizations.of(context)!.profile_bestStreakLabel,
                   color,
                   textTheme,
                   accentColor: color.tertiary,
@@ -1092,7 +1094,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        'Your Achievements',
+                        AppLocalizations.of(context)!.profile_yourAchievementsLabel,
                         style: textTheme.titleMedium
                             ?.copyWith(fontWeight: FontWeight.w600),
                       ),
@@ -1133,7 +1135,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   Icon(Icons.emoji_events, color: color.primary, size: 24),
                   const SizedBox(width: 12),
                   Text(
-                    'Your Achievements',
+                    AppLocalizations.of(context)!.profile_yourAchievementsLabel,
                     style: textTheme.titleMedium
                         ?.copyWith(fontWeight: FontWeight.w600),
                   ),
@@ -1269,23 +1271,24 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     TextTheme textTheme,
     AppSpacing spacing,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     final items = <_SettingItem>[
       _SettingItem(
         Icons.notifications_outlined,
-        'Notifications',
-        'Daily & weekly summaries',
+        AppLocalizations.of(context)!.profile_notifications,
+        AppLocalizations.of(context)!.profile_dailyWeeklySummaries,
         () => context.push(AppRoutes.notificationSettings),
       ),
       _SettingItem(
         LucideIcons.bellRing,
-        'Auto Import',
-        'Auto-import from bank notifications',
+        AppLocalizations.of(context)!.profile_autoImport,
+        AppLocalizations.of(context)!.profile_autoImportDesc,
         () => context.push(AppRoutes.smsImport),
       ),
       _SettingItem(
         Icons.backup,
-        'Backup & Restore',
-        'Manage your data',
+        AppLocalizations.of(context)!.profile_backupRestore,
+        AppLocalizations.of(context)!.profile_manageData,
         () => context.push(AppRoutes.backupRestore),
         trailing: const ProBadge(),
       ),
@@ -1326,13 +1329,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             Icon(Icons.person, size: 64, color: color.primary),
             const SizedBox(height: 16),
             Text(
-              'About Mudra Manager',
+              AppLocalizations.of(context)!.profile_aboutMudra,
               style:
                   textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             Text(
-              'Your personal finance companion. Track expenses, manage budgets, and gain insights into your spending habits.',
+              AppLocalizations.of(context)!.profile_aboutMudraDesc,
               style: textTheme.bodyMedium,
               textAlign: TextAlign.center,
             ),

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
 
 class AiInsight {
@@ -291,7 +292,7 @@ List<AiInsight> _generateInsights(DashboardData data) {
       final top = leaks.first;
       candidates.add(
         AiInsight(
-          title: 'Quiet money leak 💧',
+          title: Tone.appL10n?.insight_moneyLeakTitle ?? 'Quiet money leak 💧',
           message: BuddyMessages.insightMoneyLeak(
             top.key,
             top.value.count,
@@ -355,7 +356,7 @@ List<AiInsight> _generateInsights(DashboardData data) {
         final potentialSaving = (worstAvg - bestAvg);
         candidates.add(
           AiInsight(
-            title: '${days[worstIdx]}s cost you the most',
+            title: Tone.appL10n?.insight_bestDayTitle(days[worstIdx]) ?? '${days[worstIdx]}s cost you the most',
             message: BuddyMessages.insightBestDay(
               days[worstIdx],
               worstAvg.toStringAsFixed(0),

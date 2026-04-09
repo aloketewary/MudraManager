@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -92,7 +93,7 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Preview Import',
+          AppLocalizations.of(context)!.import_previewImport,
           style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         actions: [
@@ -914,14 +915,14 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
                   const CircularProgressIndicator(),
                   const SizedBox(height: 20),
                   Text(
-                    'Importing $_validCount transactions...',
+                    AppLocalizations.of(context)!.import_importing(_validCount),
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Please don\'t close the app',
+                    AppLocalizations.of(context)!.import_dontClose,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
@@ -973,35 +974,35 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
           size: 48,
         ),
         title: Text(
-          result.imported > 0 ? 'Import Complete!' : 'Import Failed',
+          result.imported > 0 ? AppLocalizations.of(context)!.import_complete : AppLocalizations.of(context)!.import_failed,
           style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             _resultRow(
-              'Imported',
+              AppLocalizations.of(context)!.import_imported,
               '${result.imported}',
               color.primary,
               textTheme,
             ),
             if (result.categoriesCreated > 0)
               _resultRow(
-                'Categories created',
+                AppLocalizations.of(context)!.import_categoriesCreated,
                 '${result.categoriesCreated}',
                 color.secondary,
                 textTheme,
               ),
             if (result.duplicates > 0)
               _resultRow(
-                'Duplicates skipped',
+                AppLocalizations.of(context)!.import_duplicatesSkipped,
                 '${result.duplicates}',
                 color.tertiary,
                 textTheme,
               ),
             if (result.skipped > 0)
               _resultRow(
-                'Errors/skipped',
+                AppLocalizations.of(context)!.import_errorsSkipped,
                 '${result.skipped}',
                 color.error,
                 textTheme,
@@ -1012,9 +1013,9 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
           FilledButton(
             onPressed: () {
               ctx.pop();
-              context.pop(); // Back to import/export screen
+              if (mounted) context.pop();
             },
-            child: const Text('Done'),
+            child: Text(AppLocalizations.of(context)!.common_done),
           ),
         ],
       ),

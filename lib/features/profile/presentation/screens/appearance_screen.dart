@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,6 +29,7 @@ class AppearanceScreen extends ConsumerStatefulWidget {
 }
 
 class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
+  AppLocalizations get ctxt => AppLocalizations.of(context)!;
   @override
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme;
@@ -41,7 +43,7 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
     final activeTone = ref.watch(tonePackProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Appearance')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.appearance_title)),
       body: ListView(
         padding: EdgeInsets.symmetric(
           horizontal: spacing.cardHorizontal,
@@ -60,12 +62,12 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
           const SizedBox(height: 24),
 
           // ── THEME MODE ──
-          _buildSectionHeader('Theme Mode', color, textTheme),
+          _buildSectionHeader(AppLocalizations.of(context)!.appearance_themeMode, color, textTheme),
           const SizedBox(height: 10),
           _buildThemeModeCard(color, textTheme, spacing, currentTheme),
           const SizedBox(height: 24),
           // ── COLOR THEME ──
-          _buildSectionHeader('Color Theme', color, textTheme),
+          _buildSectionHeader(ctxt.appearance_colorTheme, color, textTheme),
           const SizedBox(height: 10),
           _buildColorThemeCard(color, textTheme, spacing),
           const SizedBox(height: 24),
@@ -76,7 +78,7 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
             color: color.outlineVariant.withValues(alpha: 0.4),
           ),
           // ── DISPLAY ──
-          _buildSectionHeader('Display', color, textTheme),
+          _buildSectionHeader(AppLocalizations.of(context)!.appearance_display, color, textTheme),
           const SizedBox(height: 10),
           _buildDisplayCard(
             color,
@@ -89,7 +91,7 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
           const SizedBox(height: 24),
 
           // ── TONE & VOICE ──
-          _buildSectionHeader('Tone & Voice', color, textTheme),
+          _buildSectionHeader(AppLocalizations.of(context)!.appearance_toneVoice, color, textTheme),
           const SizedBox(height: 10),
           _buildToneCard(color, textTheme, spacing, activeTone, ref),
           const SizedBox(height: 24),
@@ -111,7 +113,7 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Theme and display changes apply instantly.',
+                    AppLocalizations.of(context)!.appearance_changesApplyInstantly,
                     style: textTheme.bodySmall?.copyWith(
                       color: color.onSurfaceVariant,
                       height: 1.4,
@@ -182,7 +184,7 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
                 const SizedBox(height: 4),
                 Text(
                   '${activeTone.name} tone • '
-                  '${isDark ? 'Dark' : 'Light'} appearance',
+                  '${isDark ? ctxt.appearance_darkAppearance : ctxt.appearance_lightAppearance}',
                   style: textTheme.bodySmall?.copyWith(
                     color: color.onSurfaceVariant,
                   ),
@@ -219,27 +221,27 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Account Style',
+                  AppLocalizations.of(context)!.appearance_accountStyle,
                   style: textTheme.bodyLarge
                       ?.copyWith(fontWeight: FontWeight.w500),
                 ),
                 const SizedBox(height: 8),
                 SegmentedButton<AccountDisplayStyle>(
-                  segments: const [
+                  segments: [
                     ButtonSegment(
                       value: AccountDisplayStyle.carousel,
                       icon: Icon(LucideIcons.galleryHorizontalEnd, size: 16),
-                      label: Text('Cards'),
+                      label: Text(AppLocalizations.of(context)!.appearance_cards),
                     ),
                     ButtonSegment(
                       value: AccountDisplayStyle.stack,
                       icon: Icon(LucideIcons.layers, size: 16),
-                      label: Text('Stack'),
+                      label: Text(AppLocalizations.of(context)!.appearance_stack),
                     ),
                     ButtonSegment(
                       value: AccountDisplayStyle.bento,
                       icon: Icon(LucideIcons.layoutGrid, size: 16),
-                      label: Text('Bento'),
+                      label: Text(AppLocalizations.of(context)!.appearance_bento),
                     ),
                   ],
                   selected: {current},
@@ -342,10 +344,10 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
     AppSpacing spacing,
     AppThemeMode currentTheme,
   ) {
-    const modes = [
-      (AppThemeMode.system, LucideIcons.smartphone, 'System Default'),
-      (AppThemeMode.light, LucideIcons.sun, 'Light'),
-      (AppThemeMode.dark, LucideIcons.moon, 'Dark'),
+    final modes = [
+      (AppThemeMode.system, LucideIcons.smartphone, AppLocalizations.of(context)!.appearance_systemDefault),
+      (AppThemeMode.light, LucideIcons.sun, ctxt.appearance_lightMode),
+      (AppThemeMode.dark, LucideIcons.moon, ctxt.appearance_darkMode),
       (AppThemeMode.amoled, LucideIcons.eclipse, 'AMOLED'),
     ];
 
@@ -453,8 +455,8 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
         children: [
           _buildToggleRow(
             icon: LucideIcons.contrast,
-            title: 'High Contrast',
-            subtitle: 'Improves readability for low vision',
+            title: ctxt.appearance_highContrast,
+            subtitle: ctxt.appearance_highContrastDesc,
             value: highContrast,
             onChanged: (val) {
               HapticFeedback.mediumImpact();
@@ -472,10 +474,10 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
             ),
             _buildToggleRow(
               icon: LucideIcons.eyeOff,
-              title: 'Guest Mode',
+              title: ctxt.appearance_guestMode,
               subtitle: isGuestMode
-                  ? 'Real amounts are hidden'
-                  : 'Hide sensitive financial data',
+                  ? ctxt.appearance_guestModeOnDesc
+                  : ctxt.appearance_guestModeOffDesc,
               value: isGuestMode,
               onChanged: (val) {
                 HapticFeedback.mediumImpact();
@@ -525,7 +527,7 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
                     HapticFeedback.mediumImpact();
                     ref.read(tonePackProvider.notifier).select(tone);
                     SnackbarService.success(
-                      '${tone.name} tone activated',
+                      ctxt.appearance_toneActivated(tone.name),
                     );
                   },
                   child: Padding(
@@ -708,13 +710,13 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
   String _themeModeLabel(AppThemeMode mode) {
     switch (mode) {
       case AppThemeMode.light:
-        return 'Light Mode';
+        return AppLocalizations.of(context)!.appearance_lightMode;
       case AppThemeMode.dark:
-        return 'Dark Mode';
+        return AppLocalizations.of(context)!.appearance_darkMode;
       case AppThemeMode.amoled:
-        return 'AMOLED Mode';
+        return ctxt.appearance_amoledMode;
       case AppThemeMode.system:
-        return 'System Default';
+        return ctxt.appearance_systemDefault;
     }
   }
 }

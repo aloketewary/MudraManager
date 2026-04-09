@@ -1,4 +1,3 @@
-import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
@@ -92,13 +91,361 @@ extension AppLocalizationsHelper on AppLocalizations {
       case 'onboard_SmartAutoTrackingDesc':
         return onboard_SmartAutoTrackingDesc;
 
+      // Navigation
+      case 'nav_activity':
+        return nav_activity;
+      case 'nav_manage':
+        return nav_manage;
+      case 'nav_insights':
+        return nav_insights;
+
+      // Common
+      case 'common_save':
+        return common_save;
+      case 'common_cancel':
+        return common_cancel;
+      case 'common_delete':
+        return common_delete;
+      case 'common_edit':
+        return common_edit;
+      case 'common_add':
+        return common_add;
+      case 'common_done':
+        return common_done;
+      case 'common_close':
+        return common_close;
+      case 'common_confirm':
+        return common_confirm;
+      case 'common_archive':
+        return common_archive;
+      case 'common_create':
+        return common_create;
+      case 'common_update':
+        return common_update;
+      case 'common_remove':
+        return common_remove;
+      case 'common_search':
+        return common_search;
+      case 'common_filter':
+        return common_filter;
+      case 'common_reset':
+        return common_reset;
+      case 'common_apply':
+        return common_apply;
+      case 'common_yes':
+        return common_yes;
+      case 'common_no':
+        return common_no;
+      case 'common_ok':
+        return common_ok;
+      case 'common_retry':
+        return common_retry;
+      case 'common_loading':
+        return common_loading;
+      case 'common_noData':
+        return common_noData;
+      case 'common_error':
+        return common_error;
+      case 'common_required':
+        return common_required;
+
+      // Titles
+      case 'title_budgets':
+        return title_budgets;
+      case 'title_goals':
+        return title_goals;
+      case 'title_bills':
+        return title_bills;
+      case 'title_groups':
+        return title_groups;
+      case 'title_trips':
+        return title_trips;
+      case 'title_shared':
+        return title_shared;
+      case 'title_achievements':
+        return title_achievements;
+      case 'title_notifications':
+        return title_notifications;
+      case 'title_appearance':
+        return title_appearance;
+      case 'title_currency':
+        return title_currency;
+      case 'title_security':
+        return title_security;
+      case 'title_about':
+        return title_about;
+      case 'title_analytics':
+        return title_analytics;
+      case 'title_netWorth':
+        return title_netWorth;
+      case 'title_financialHealth':
+        return title_financialHealth;
+      case 'title_spendingPersonality':
+        return title_spendingPersonality;
+      case 'title_monthlyRecap':
+        return title_monthlyRecap;
+      case 'title_compareMonths':
+        return title_compareMonths;
+      case 'title_smsImport':
+        return title_smsImport;
+      case 'title_backupShare':
+        return title_backupShare;
+      case 'title_exchangeRates':
+        return title_exchangeRates;
+      case 'title_recurringTransactions':
+        return title_recurringTransactions;
+      case 'title_billControlCenter':
+        return title_billControlCenter;
+      case 'title_plugins':
+        return title_plugins;
+      case 'title_editCategory':
+        return title_editCategory;
+      case 'title_allCategories':
+        return title_allCategories;
+      case 'title_exportOptions':
+        return title_exportOptions;
+      case 'title_dashboardLayout':
+        return title_dashboardLayout;
+
+      // Sections
+      case 'section_activeMoney':
+        return section_activeMoney;
+      case 'section_planning':
+        return section_planning;
+      case 'section_insights':
+        return section_insights;
+      case 'section_coreSettings':
+        return section_coreSettings;
+      case 'section_appData':
+        return section_appData;
+      case 'section_appearance':
+        return section_appearance;
+      case 'section_advanced':
+        return section_advanced;
+      case 'section_supportLegal':
+        return section_supportLegal;
+      case 'section_active':
+        return section_active;
+      case 'section_ongoing':
+        return section_ongoing;
+      case 'section_archive':
+        return section_archive;
+
+      // Labels
+      case 'label_income':
+        return label_income;
+      case 'label_expense':
+        return label_expense;
+      case 'label_balance':
+        return label_balance;
+      case 'label_savings':
+        return label_savings;
+      case 'label_total':
+        return label_total;
+      case 'label_amount':
+        return label_amount;
+      case 'label_date':
+        return label_date;
+      case 'label_category':
+        return label_category;
+      case 'label_account':
+        return label_account;
+      case 'label_description':
+        return label_description;
+      case 'label_type':
+        return label_type;
+      case 'label_transfer':
+        return label_transfer;
+      case 'label_from':
+        return label_from;
+      case 'label_to':
+        return label_to;
+      case 'label_all':
+        return label_all;
+      case 'label_today':
+        return label_today;
+      case 'label_yesterday':
+        return label_yesterday;
+      case 'label_thisWeek':
+        return label_thisWeek;
+      case 'label_thisMonth':
+        return label_thisMonth;
+      case 'label_thisYear':
+        return label_thisYear;
+      case 'label_custom':
+        return label_custom;
+      case 'label_daily':
+        return label_daily;
+      case 'label_weekly':
+        return label_weekly;
+      case 'label_monthly':
+        return label_monthly;
+      case 'label_yearly':
+        return label_yearly;
+      case 'label_none':
+        return label_none;
+
+      // Trip
+      case 'trip_expenses':
+        return trip_expenses;
+      case 'trip_settlements':
+        return trip_settlements;
+      case 'trip_balances':
+        return trip_balances;
+      case 'trip_report':
+        return trip_report;
+      case 'trip_createTrip':
+        return trip_createTrip;
+      case 'trip_createGroup':
+        return trip_createGroup;
+      case 'trip_editTrip':
+        return trip_editTrip;
+      case 'trip_editGroup':
+        return trip_editGroup;
+      case 'trip_archiveTrip':
+        return trip_archiveTrip;
+      case 'trip_archiveGroup':
+        return trip_archiveGroup;
+      case 'trip_allSettled':
+        return trip_allSettled;
+      case 'trip_archiveToSettle':
+        return trip_archiveToSettle;
+      case 'trip_trackTravel':
+        return trip_trackTravel;
+      case 'trip_splitBills':
+        return trip_splitBills;
+      case 'trip_live':
+        return trip_live;
+
+      // Budget
+      case 'budget_spendingLimits':
+        return budget_spendingLimits;
+      case 'budget_savingsProgress':
+        return budget_savingsProgress;
+      case 'budget_upcomingRecurring':
+        return budget_upcomingRecurring;
+      case 'budget_tripsAndSplits':
+        return budget_tripsAndSplits;
+
+      // Import
+      case 'import_dontClose':
+        return import_dontClose;
+      case 'import_complete':
+        return import_complete;
+      case 'import_failed':
+        return import_failed;
+      case 'import_imported':
+        return import_imported;
+      case 'import_duplicatesSkipped':
+        return import_duplicatesSkipped;
+      case 'import_errorsSkipped':
+        return import_errorsSkipped;
+      case 'import_categoriesCreated':
+        return import_categoriesCreated;
+      case 'import_previewImport':
+        return import_previewImport;
+
+      // Recap
+      case 'recap_yourMonthAtGlance':
+        return recap_yourMonthAtGlance;
+      case 'recap_trackProgressOverTime':
+        return recap_trackProgressOverTime;
+      case 'recap_downloadPdf':
+        return recap_downloadPdf;
+
+      // Comparison
+      case 'comparison_current':
+        return comparison_current;
+      case 'comparison_topCategories':
+        return comparison_topCategories;
+      case 'comparison_categoryImpact':
+        return comparison_categoryImpact;
+      case 'comparison_dailySpendingPace':
+        return comparison_dailySpendingPace;
+
+      // Utility
+      case 'utility_customizeUtilities':
+        return utility_customizeUtilities;
+      case 'utility_addUtilities':
+        return utility_addUtilities;
+
+      // Profile
+      case 'profile_accounts':
+        return profile_accounts;
+      case 'profile_manageAccounts':
+        return profile_manageAccounts;
+      case 'profile_categories':
+        return profile_categories;
+      case 'profile_manageCategories':
+        return profile_manageCategories;
+      case 'profile_language':
+        return profile_language;
+      case 'profile_notifications':
+        return profile_notifications;
+      case 'profile_dailyWeeklySummaries':
+        return profile_dailyWeeklySummaries;
+      case 'profile_autoImport':
+        return profile_autoImport;
+      case 'profile_autoImportDesc':
+        return profile_autoImportDesc;
+      case 'profile_importExport':
+        return profile_importExport;
+      case 'profile_importExportDesc':
+        return profile_importExportDesc;
+      case 'profile_backupRestore':
+        return profile_backupRestore;
+      case 'profile_manageData':
+        return profile_manageData;
+      case 'profile_themeDisplay':
+        return profile_themeDisplay;
+      case 'profile_customizeWidgets':
+        return profile_customizeWidgets;
+      case 'profile_manageExtensions':
+        return profile_manageExtensions;
+      case 'profile_helpSupport':
+        return profile_helpSupport;
+      case 'profile_faqs':
+        return profile_faqs;
+      case 'profile_aboutApp':
+        return profile_aboutApp;
+      case 'profile_versionInfo':
+        return profile_versionInfo;
+      case 'profile_pinFingerprint':
+        return profile_pinFingerprint;
+      case 'profile_upgradePro':
+        return profile_upgradePro;
+      case 'profile_unlimitedFeatures':
+        return profile_unlimitedFeatures;
+      case 'profile_freeTier':
+        return profile_freeTier;
+      case 'profile_fullAccess':
+        return profile_fullAccess;
+      case 'profile_proActive':
+        return profile_proActive;
+      case 'profile_yourAchievements':
+        return profile_yourAchievements;
+      case 'profile_bestStreak':
+        return profile_bestStreak;
+
+      // Trips list
+      case 'trips_active':
+        return trips_active;
+      case 'trips_live':
+        return trips_live;
+      case 'trips_allSettled':
+        return trips_allSettled;
+
       default:
         return key;
     }
   }
 
+  /// Always use en_IN for number formatting — Indian users expect
+  /// ₹500 not ₹৫০০ regardless of UI language.
+  String get _numberLocale => 'en_IN';
+
   NumberFormat formatLocalizedCurrency(int fixedStringLength) {
-    final locale = localeName == 'hi' ? 'hi_IN' : localeName;
+    final locale = _numberLocale;
     final format = NumberFormat.currency(
       locale: locale,
       symbol: BaseCurrency.symbol,
@@ -109,7 +456,7 @@ extension AppLocalizationsHelper on AppLocalizations {
   }
 
   NumberFormat formatCompactLocalizedCurrency(int fixedStringLength) {
-    final locale = localeName == 'hi' ? 'hi_IN' : localeName;
+    final locale = _numberLocale;
     final format = NumberFormat.compactCurrency(
       locale: locale,
       symbol: '', // Or separate sign and symbol if needed
@@ -118,8 +465,11 @@ extension AppLocalizationsHelper on AppLocalizations {
     return format;
   }
 
-  String formatCurrencyWithSign(int fixedStringLength, double amount,
-      {bool compact = false}) {
+  String formatCurrencyWithSign(
+    int fixedStringLength,
+    double amount, {
+    bool compact = false,
+  }) {
     final format = compact
         ? formatCompactLocalizedCurrency(fixedStringLength)
         : formatLocalizedCurrency(fixedStringLength);
@@ -141,25 +491,26 @@ extension AppLocalizationsHelper on AppLocalizations {
   String _trimTrailingZeros(String value) {
     if (!value.contains('.')) return value;
     var trimmed = value.replaceAll(RegExp(r'0+$'), '');
-    if (trimmed.endsWith('.'))
+    if (trimmed.endsWith('.')) {
       trimmed = trimmed.substring(0, trimmed.length - 1);
+    }
     return trimmed;
   }
 
   NumberFormat formatCompactNumber() {
-    final locale = localeName == 'hi' ? 'hi_IN' : localeName;
+    final locale = _numberLocale;
     final format = NumberFormat.compact(locale: locale, explicitSign: false);
     return format;
   }
 
   String formatPercentNumber(num value) {
-    final locale = localeName == 'hi' ? 'hi_IN' : localeName;
+    final locale = _numberLocale;
     final format = NumberFormat.percentPattern(locale);
     return format.format(value);
   }
 
   NumberFormat formatLocaleNumber() {
-    final locale = localeName == 'hi' ? 'hi_IN' : localeName;
+    final locale = _numberLocale;
     final format = NumberFormat('#,##,##0.00', locale);
     return format;
   }

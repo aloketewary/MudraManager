@@ -409,15 +409,20 @@ class CategorySeeder {
   /// Seeds system categories if they don't exist.
   /// Safe to call on every app start — no-op if already seeded.
   static Future<void> seedSystemCategories(Isar isar) async {
-    final existing = await isar.categorys
-        .filter()
-        .isSystemEqualTo(true)
-        .findAll();
-    final existingNames = existing.map((c) => c.name).toSet();
+    final existing = await isar.categorys.where().findAll();
+    final existingByName = {for (final c in existing) c.name: c};
 
     final toCreate = <Category>[];
+    final toUpdate = <Category>[];
     for (final def in _systemCategories) {
-      if (existingNames.contains(def.name)) continue;
+      final match = existingByName[def.name];
+      if (match != null) {
+        if (!match.isSystem) {
+          match.isSystem = true;
+          toUpdate.add(match);
+        }
+        continue;
+      }
       toCreate.add(
         Category.create(name: def.name, categoryType: def.type)
           ..iconName = def.icon
@@ -426,10 +431,11 @@ class CategorySeeder {
       );
     }
 
-    if (toCreate.isEmpty) return;
+    if (toCreate.isEmpty && toUpdate.isEmpty) return;
 
     await isar.writeTxn(() async {
-      await isar.categorys.putAll(toCreate);
+      if (toCreate.isNotEmpty) await isar.categorys.putAll(toCreate);
+      if (toUpdate.isNotEmpty) await isar.categorys.putAll(toUpdate);
     });
   }
 

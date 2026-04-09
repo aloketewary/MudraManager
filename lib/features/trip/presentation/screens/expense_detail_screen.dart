@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/shared/widgets/currency_badge.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
@@ -108,7 +109,7 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
                 context.pop();
               },
             ),
-            title: const Text('Expense Details'),
+            title: Text(AppLocalizations.of(context)!.expense_details),
             actions: [
               PopupMenuButton(
                 icon: const Icon(LucideIcons.ellipsisVertical),
@@ -574,7 +575,7 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Edit Split',
+                  AppLocalizations.of(context)!.expense_editSplit,
                   style: textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -833,7 +834,7 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
                   style: FilledButton.styleFrom(
                     minimumSize: const Size(double.infinity, 48),
                   ),
-                  child: const Text('Done'),
+                  child: Text(AppLocalizations.of(context)!.common_done),
                 ),
               ],
             ),

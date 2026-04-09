@@ -1,3 +1,5 @@
+import 'dart:async' show Timer;
+
 import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
@@ -34,17 +36,95 @@ class AccountSetupScreen extends ConsumerStatefulWidget {
 class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  final _accountController = TextEditingController(text: 'Cash');
+  final _accountController = TextEditingController();
   final _balanceController = TextEditingController(text: '0');
 
-  int _step = 0; // 0 = name, 1 = currency, 2 = account, 3 = tone, 4 = pack
+  int _step = 0;
   bool _isLoading = false;
   bool _startFresh = false;
   final Set<String> _selectedPackIds = {'com.mudra.pack.default'};
   String _selectedCurrency = 'INR';
 
+  // Typewriter animation for account name hint
+  static const _hintExamples = ['Cash', 'Wallet', 'SBI Bank', 'Paytm', 'GPay'];
+  String _animatedHint = '';
+  int _hintIndex = 0;
+  int _charIndex = 0;
+  bool _isDeleting = false;
+  bool _hintPaused = false;
+  Timer? _typewriterTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _accountController.addListener(_onAccountTextChanged);
+  }
+
+  void _onAccountTextChanged() {
+    if (_accountController.text.isNotEmpty) {
+      _stopTypewriter();
+    } else if (_typewriterTimer == null) {
+      _startTypewriter();
+    }
+  }
+
+  void _startTypewriter() {
+    _typewriterTimer?.cancel();
+    _hintIndex = 0;
+    _charIndex = 0;
+    _isDeleting = false;
+    _hintPaused = false;
+    _typewriterTimer = Timer.periodic(const Duration(milliseconds: 80), _tick);
+  }
+
+  void _stopTypewriter() {
+    _typewriterTimer?.cancel();
+    _typewriterTimer = null;
+    if (mounted) setState(() => _animatedHint = '');
+  }
+
+  int _pauseCounter = 0;
+
+  void _tick(Timer timer) {
+    if (!mounted) { timer.cancel(); return; }
+
+    final word = _hintExamples[_hintIndex];
+
+    // Handle pause after full word
+    if (_hintPaused) {
+      _pauseCounter++;
+      if (_pauseCounter > 18) { // ~1.5s pause (18 * 80ms)
+        _hintPaused = false;
+        _isDeleting = true;
+        _pauseCounter = 0;
+      }
+      return;
+    }
+
+    if (!_isDeleting) {
+      // Typing forward
+      if (_charIndex <= word.length) {
+        setState(() => _animatedHint = word.substring(0, _charIndex));
+        _charIndex++;
+      } else {
+        _hintPaused = true;
+      }
+    } else {
+      // Deleting
+      if (_charIndex > 0) {
+        _charIndex--;
+        setState(() => _animatedHint = word.substring(0, _charIndex));
+      } else {
+        _isDeleting = false;
+        _hintIndex = (_hintIndex + 1) % _hintExamples.length;
+      }
+    }
+  }
+
   @override
   void dispose() {
+    _typewriterTimer?.cancel();
+    _accountController.removeListener(_onAccountTextChanged);
     _nameController.dispose();
     _accountController.dispose();
     _balanceController.dispose();
@@ -63,9 +143,11 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
       // Currency step — just advance
       HapticFeedback.lightImpact();
       setState(() => _step = 2);
+      if (_accountController.text.isEmpty) _startTypewriter();
     } else if (_step == 2) {
       if (!_formKey.currentState!.validate()) return;
       HapticFeedback.lightImpact();
+      _stopTypewriter();
       setState(() => _step = 3);
     } else if (_step == 3) {
       HapticFeedback.lightImpact();
@@ -259,6 +341,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                               spacing,
                               accent,
                               isDark,
+                              ctxt,
                             )
                           : _step == 2
                               ? _buildAccountStep(
@@ -276,6 +359,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                                       spacing,
                                       isDark,
                                       accent,
+                                      ctxt,
                                     )
                                   : _buildPackPickerStep(
                                       color,
@@ -283,6 +367,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                                       spacing,
                                       isDark,
                                       accent,
+                                      ctxt,
                                     ),
                 ),
               ),
@@ -322,7 +407,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                                 children: [
                                   Text(
                                     _step < 4
-                                        ? 'Continue'
+                                        ? ctxt.onboard_continue
                                         : ctxt.translate('onboard_GetStarted'),
                                     style: const TextStyle(
                                       fontWeight: FontWeight.w600,
@@ -350,7 +435,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                           color: color.onSurfaceVariant,
                         ),
                         label: Text(
-                          'Restore from Backup',
+                          ctxt.onboard_restoreFromBackup,
                           style: textTheme.labelLarge?.copyWith(
                             color: color.onSurfaceVariant,
                           ),
@@ -443,32 +528,21 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 36),
-          Card(
-            elevation: 0,
-            margin: EdgeInsets.zero,
-            color: color.surfaceContainerLow,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(spacing.radiusMedium),
-              side: BorderSide(
-                color: color.outlineVariant.withValues(alpha: 0.5),
+          TextFormField(
+            controller: _nameController,
+            decoration: InputDecoration(
+              labelText: ctxt.translate('onboard_enterYourName'),
+              prefixIcon: Icon(LucideIcons.userRound, color: accent, size: 20),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(spacing.radiusMedium),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                borderSide: BorderSide(color: accent, width: 2),
               ),
             ),
-            clipBehavior: Clip.antiAlias,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-              child: TextFormField(
-                controller: _nameController,
-                decoration: InputDecoration(
-                  hintText: ctxt.translate('onboard_enterYourName'),
-                  icon: Icon(LucideIcons.userRound, color: accent, size: 20),
-                  border: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                  focusedBorder: InputBorder.none,
-                ),
-                textInputAction: TextInputAction.next,
-                onFieldSubmitted: (_) => _nextStep(),
-              ),
-            ),
+            textInputAction: TextInputAction.next,
+            onFieldSubmitted: (_) => _nextStep(),
           ),
         ],
       ),
@@ -482,13 +556,12 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
     AppSpacing spacing,
     Color accent,
     bool isDark,
+    AppLocalizations ctxt,
   ) {
     // Popular currencies shown at top
     const popular = ['INR', 'USD', 'EUR', 'GBP', 'AED', 'SGD', 'CAD', 'AUD'];
-    final popularMetas = popular
-        .map((c) => kCurrencies[c])
-        .whereType<CurrencyMeta>()
-        .toList();
+    final popularMetas =
+        popular.map((c) => kCurrencies[c]).whereType<CurrencyMeta>().toList();
 
     return SingleChildScrollView(
       key: const ValueKey('currency_step'),
@@ -603,12 +676,9 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                       Text(
                         c.code,
                         style: textTheme.bodyMedium?.copyWith(
-                          fontWeight: isSelected
-                              ? FontWeight.w700
-                              : FontWeight.w500,
-                          color: isSelected
-                              ? accent
-                              : color.onSurfaceVariant,
+                          fontWeight:
+                              isSelected ? FontWeight.w700 : FontWeight.w500,
+                          color: isSelected ? accent : color.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -624,8 +694,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                 context: context,
                 isScrollControlled: true,
                 shape: const RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.vertical(top: Radius.circular(20)),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                 ),
                 builder: (_) => _AllCurrenciesSheet(
                   selected: _selectedCurrency,
@@ -637,7 +706,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
             },
             icon: Icon(LucideIcons.globe, size: 16, color: accent),
             label: Text(
-              'Browse all currencies',
+              ctxt.onboard_browseAllCurrencies,
               style: textTheme.labelLarge?.copyWith(color: accent),
             ),
           ),
@@ -652,7 +721,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
-                  'Changing base currency later will archive existing transactions.',
+                  ctxt.onboard_currencyWarning,
                   style: textTheme.bodySmall?.copyWith(
                     color: color.onSurfaceVariant.withValues(alpha: 0.6),
                   ),
@@ -746,81 +815,48 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 36),
-          Card(
-            elevation: 0,
-            margin: EdgeInsets.zero,
-            color: color.surfaceContainerLow,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(spacing.radiusMedium),
-              side: BorderSide(
-                color: color.outlineVariant.withValues(alpha: 0.5),
+          TextFormField(
+            controller: _accountController,
+            decoration: InputDecoration(
+              labelText: ctxt.translate('onboard_accountName'),
+              hintText: _typewriterTimer != null ? _animatedHint : ctxt.onboard_accountHint,
+              prefixIcon: Icon(LucideIcons.wallet, color: color.primary, size: 20),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(spacing.radiusMedium)),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                borderSide: BorderSide(color: color.primary, width: 2),
               ),
             ),
-            clipBehavior: Clip.antiAlias,
-            child: Column(
-              children: [
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                  child: TextFormField(
-                    controller: _accountController,
-                    decoration: InputDecoration(
-                      hintText: 'e.g., Cash, Bank',
-                      icon: Icon(
-                        LucideIcons.wallet,
-                        color: color.primary,
-                        size: 20,
-                      ),
-                      border: InputBorder.none,
-                      enabledBorder: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                      label: Text(ctxt.translate('onboard_accountName')),
-                    ),
-                    validator: (v) => v?.trim().isEmpty ?? true
-                        ? 'Account name is required'
-                        : null,
-                    textInputAction: TextInputAction.next,
-                  ),
-                ),
-                Divider(
-                  height: 1,
-                  indent: 52,
-                  color: color.outlineVariant.withValues(alpha: 0.4),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                  child: TextFormField(
-                    controller: _balanceController,
-                    decoration: InputDecoration(
-                      hintText: '0',
-                      icon: Icon(
-                        currencyIcon(_selectedCurrency),
-                        color: color.primary,
-                        size: 20,
-                      ),
-                      border: InputBorder.none,
-                      enabledBorder: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                      label: Text(ctxt.onboard_initialBalance),
-                    ),
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
-                    validator: (v) {
-                      if (v?.trim().isEmpty ?? true) {
-                        return 'Balance is required';
-                      }
-                      if (double.tryParse(v!) == null) {
-                        return 'Enter valid number';
-                      }
-                      return null;
-                    },
-                    textInputAction: TextInputAction.done,
-                    onFieldSubmitted: (_) => _nextStep(),
-                  ),
-                ),
-              ],
+            validator: (v) => v?.trim().isEmpty ?? true
+                ? ctxt.onboard_accountNameRequired
+                : null,
+            textInputAction: TextInputAction.next,
+          ),
+          SizedBox(height: spacing.sectionGap),
+          TextFormField(
+            controller: _balanceController,
+            decoration: InputDecoration(
+              labelText: ctxt.onboard_initialBalance,
+              hintText: '0',
+              prefixIcon: Icon(currencyIcon(_selectedCurrency), color: color.primary, size: 20),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(spacing.radiusMedium)),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                borderSide: BorderSide(color: color.primary, width: 2),
+              ),
             ),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            validator: (v) {
+              if (v?.trim().isEmpty ?? true) {
+                return ctxt.onboard_balanceRequired;
+              }
+              if (double.tryParse(v!) == null) {
+                return ctxt.onboard_enterValidNumber;
+              }
+              return null;
+            },
+            textInputAction: TextInputAction.done,
+            onFieldSubmitted: (_) => _nextStep(),
           ),
           const SizedBox(height: 12),
           Row(
@@ -851,6 +887,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
     AppSpacing spacing,
     bool isDark,
     Color accent,
+    AppLocalizations ctxt,
   ) {
     final activeTone = ref.watch(tonePackProvider);
 
@@ -908,7 +945,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
           ),
           const SizedBox(height: 32),
           Text(
-            'How should Mudra talk to you?',
+            ctxt.onboard_toneTitle,
             style: textTheme.headlineMedium?.copyWith(
               fontWeight: FontWeight.w800,
               color: color.onSurface,
@@ -918,7 +955,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Pick a personality. You can change this anytime.',
+            ctxt.onboard_toneDesc,
             style: textTheme.bodyLarge?.copyWith(
               color: color.onSurfaceVariant,
               height: 1.5,
@@ -1047,6 +1084,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
     AppSpacing spacing,
     bool isDark,
     Color accent,
+    AppLocalizations ctxt,
   ) {
     final packs = CategoryPackRegistry.visible;
 
@@ -1107,7 +1145,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
           child: Column(
             children: [
               Text(
-                'Choose Your Categories',
+                ctxt.onboard_categoriesTitle,
                 style: textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.w800,
                   color: color.onSurface,
@@ -1117,7 +1155,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Pick packs that match your lifestyle. You can change these later.',
+                ctxt.onboard_categoriesDesc,
                 style: textTheme.bodyLarge?.copyWith(
                   color: color.onSurfaceVariant,
                   height: 1.5,
@@ -1175,13 +1213,13 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Start Fresh',
+                            ctxt.onboard_startFresh,
                             style: textTheme.bodyMedium?.copyWith(
                               fontWeight: FontWeight.w600,
                             ),
                           ),
                           Text(
-                            'No categories — add your own later',
+                            ctxt.onboard_startFreshDesc,
                             style: textTheme.bodySmall?.copyWith(
                               color: color.onSurfaceVariant,
                             ),
@@ -1331,9 +1369,11 @@ class _AllCurrenciesSheetState extends State<_AllCurrenciesSheet> {
     if (_query.isEmpty) return all;
     final q = _query.toLowerCase();
     return all
-        .where((c) =>
-            c.code.toLowerCase().contains(q) ||
-            c.name.toLowerCase().contains(q),)
+        .where(
+          (c) =>
+              c.code.toLowerCase().contains(q) ||
+              c.name.toLowerCase().contains(q),
+        )
         .toList();
   }
 
@@ -1363,8 +1403,8 @@ class _AllCurrenciesSheetState extends State<_AllCurrenciesSheet> {
             child: TextField(
               autofocus: true,
               decoration: InputDecoration(
-                hintText: 'Search currency...',
-                prefixIcon: const Icon(Icons.search, size: 20),
+                hintText: AppLocalizations.of(context)!.common_searchCurrency,
+                prefixIcon: Icon(LucideIcons.search, size: 20),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(color: color.outlineVariant),
@@ -1407,7 +1447,7 @@ class _AllCurrenciesSheetState extends State<_AllCurrenciesSheet> {
                   title: Text(c.code),
                   subtitle: Text(c.name, style: textTheme.bodySmall),
                   trailing: isSelected
-                      ? Icon(Icons.check_circle, color: color.primary)
+                      ? Icon(LucideIcons.circleCheck, color: color.primary)
                       : null,
                   onTap: () {
                     HapticFeedback.lightImpact();

@@ -1,32 +1,32 @@
 {
   "@@locale": "bn",
-  "onboard_manageYourMoneyDescription": "আপনার অর্থ স্মার্ট এবং অনায়াসে পরিচালনা করুন।",
-  "onboard_welcomeToApp": "{appName} e স্বাগতম ",
-  "onboard_TrackYourTransactions": "আপনার লেনদেন ট্র্যাক করুন",
-  "onboard_SeeWhereYourMoneyGoes": "আপনার টাকা প্রতিদিন কোথায় যায় দেখুন।",
-  "onboard_SetBudgetsAndGoals": "বাজেট এবং লক্ষ্য নির্ধারণ করুন",
-  "onboard_stayOnTrackAndAchieveYourDream": "সঠিক পথে থাকুন এবং আপনার স্বপ্ন অর্জন করুন।",
-  "onboard_GetStarted": "এবার শুরু করা যাক!",
-  "onboard_letsSetupYourAccount": "চলুন আপনার অ্যাকাউন্ট সেট আপ করি।",
-  "onboard_howShouldWeCallYou": "আমরা আপনাকে কী নামে ডাকব?",
-  "onboard_enterYourNameToPersonalizeYourExperience": "আপনার অভিজ্ঞতা ব্যক্তিগতকৃত করতে আপনার নাম লিখুন।",
+  "onboard_manageYourMoneyDescription": "টাকা-পয়সা smart ভাবে manage করুন, ঝামেলা ছাড়াই।",
+  "onboard_welcomeToApp": "{appName}-এ স্বাগতম",
+  "onboard_TrackYourTransactions": "খরচ track করুন",
+  "onboard_SeeWhereYourMoneyGoes": "টাকা কোথায় যাচ্ছে, রোজ দেখুন।",
+  "onboard_SetBudgetsAndGoals": "Budget আর Goals সেট করুন",
+  "onboard_stayOnTrackAndAchieveYourDream": "Track-এ থাকুন, স্বপ্ন পূরণ করুন।",
+  "onboard_GetStarted": "চলুন শুরু করি!",
+  "onboard_letsSetupYourAccount": "চলুন আপনার account সেট আপ করি।",
+  "onboard_howShouldWeCallYou": "আপনাকে কী নামে ডাকব?",
+  "onboard_enterYourNameToPersonalizeYourExperience": "নাম দিন, app আপনার মতো হয়ে যাবে।",
   "onboard_enterYourName": "আপনার নাম লিখুন",
-  "onboard_setupYourFirstAccount": "আপনার প্রথম অ্যাকাউন্ট সেটআপ করুন",
-  "onboard_letsCreateYourFirstAccount": "আসুন আপনার প্রথম অ্যাকাউন্ট তৈরি করি (যেমন: ক্যাশ)।",
+  "onboard_setupYourFirstAccount": "প্রথম Account বানান",
+  "onboard_letsCreateYourFirstAccount": "চলুন প্রথম account তৈরি করি (যেমন: Cash)।",
   "onboard_accountName": "অ্যাকাউন্টের নাম",
   "onboard_initialBalance": "প্রাথমিক ব্যালেন্স",
-  "onboard_youCanUpdateOtherDetailsLaterAsWell": "আপনি অন্যান্য বিবরণ পরেও আপডেট করতে পারবেন।",
+  "onboard_youCanUpdateOtherDetailsLaterAsWell": "বাকি details পরেও update করতে পারবেন।",
   "onboard_pleaseFillThe": "অনুগ্রহ করে \"{inputName}\" পূরণ করুন",
   "onboard_pleaseEnterAValidNumberFor": "অনুগ্রহ করে \"{hintText}\" এর জন্য একটি বৈধ সংখ্যা লিখুন",
-  "onboard_youAreAllSet": "আপনি পুরোপুরি তৈরি!",
-  "onboard_letsStartManagingYourMoneyWisely": "আসুন আপনার অর্থ বিচক্ষণতার সাথে পরিচালনা করা শুরু করি।",
+  "onboard_youAreAllSet": "ব্যস, সব তৈরি!",
+  "onboard_letsStartManagingYourMoneyWisely": "এবার টাকা-পয়সা বুঝে-শুনে manage করুন।",
   "app_settings_appbar_title": "অ্যাপ সেটিংস",
   "language_settings_appbar_title": "ভাষা নির্বাচন করুন",
   "app_settings_language_title": "ভাষা",
   "app_settings_language_subtitle": "আপনার ভাষা নির্বাচন করুন",
   "app_settings_theme_mode_title": "থিম মোড",
-  "app_settings_theme_mode_light": "আলো",
-  "app_settings_theme_mode_dark": "ডার্ক",
+  "app_settings_theme_mode_light": "Light",
+  "app_settings_theme_mode_dark": "Dark",
   "app_settings_theme_mode_system_default": "সিস্টেম ডিফল্ট",
   "app_settings_theme_mode_amoled": "AMOLED ডার্ক",
   "app_settings_theme_mode_subtitle": "আপনার পছন্দের থিম নির্বাচন করুন",
@@ -54,17 +54,17 @@
   "cash_flow_filter_type_month": "মাস",
   "cash_flow_filter_type_year": "বছর",
   "dashboard_mini_budget_text": "বাজেট",
-  "dashboard_mini_budget_not_found_text": "কোনো বাজেট সংজ্ঞায়িত নেই, একটি যোগ করুন!",
+  "dashboard_mini_budget_not_found_text": "কোনো Budget নেই, একটা বানান!",
   "dashboard_mini_budget_add_text": "বাজেট যোগ করুন",
   "transaction_list_cash_flow_screen_title": "লেনদেন",
   "transaction_list_filter_all": "সব",
   "transaction_list_filter_income": "আয়",
   "transaction_list_filter_expense": "ব্যয়",
-  "transaction_list_pending_transaction_message_text": "⚡ নতুন লেনদেন পাওয়া গেছে! এখনই পর্যালোচনা করুন",
+  "transaction_list_pending_transaction_message_text": "⚡ নতুন transactions পাওয়া গেছে! দেখুন",
   "transaction_listPendingTransactionMessageActionLabel": "পর্যালোচনা",
-  "transaction_noTransactionFoundText": "কোনো লেনদেন পাওয়া যায়নি।",
+  "transaction_noTransactionFoundText": "কোনো transaction নেই।",
   "transaction_deleteAlertTitleText": "লেনদেন মুছবেন?",
-  "transaction_deleteAlertBodyText": "এই কাজটি আর ফেরানো যাবে না।",
+  "transaction_deleteAlertBodyText": "এটা আর ফেরানো যাবে না।",
   "transaction_deleteButtonActionText": "মুছে ফেলুন",
   "transaction_cancelButtonActionText": "বাতিল করুন",
   "transaction_filterCategoryText": "লেনদেন ফিল্টার করুন",
@@ -76,16 +76,16 @@
   "calendar_week_friday_initial_text": "শুক্র",
   "calendar_week_saturday_initial_text": "শনি",
   "calendar_week_sunday_initial_text": "রবি",
-  "dashboard_netWorthTitle": "নিট মূল্য",
+  "dashboard_netWorthTitle": "মোট সম্পদ",
   "budget_dashboardMiniCardBudgetTitleText": "বাজেট",
   "budget_dashboardMiniCardSpentTitleText": "খরচ হয়েছে",
   "budget_dashboardPageTitle": "বাজেটের বিবরণ",
-  "budget_dashboardNotFoundText": "কোনো বাজেট সংজ্ঞায়িত নেই, একটি যোগ করুন!",
+  "budget_dashboardNotFoundText": "কোনো Budget নেই, একটা বানান!",
   "budget_dashboardAddBudgetText": "বাজেট যোগ করুন",
   "budget_categoriesTitle": "ক্যাটাগরি",
   "budget_dashboardPieChartLabelText": "{title} (মোট {totalPercent}, ব্যয়িত {spentPercent})",
   "budget_buttonDeleteTitleText": "বাজেট মুছবেন?",
-  "budget_buttonDeleteBodyText": "এটি বাজেট এবং এর বরাদ্দগুলি সরিয়ে ফেলবে, এই পদক্ষেপটি আর ফেরানো যাবে না।",
+  "budget_buttonDeleteBodyText": "Budget আর তার allocations মুছে যাবে, এটা আর ফেরানো যাবে না।",
   "budget_buttonDeleteActionText": "মুছে ফেলুন",
   "budget_buttonCancelActionText": "বাতিল করুন",
   "budget_buttonAddText": "বাজেট যোগ করুন",
@@ -101,7 +101,7 @@
   "budget_selectedEndDateText": "শেষ: {endDate}",
   "budget_categoryTitle": "ক্যাটাগরি এবং বরাদ্দ নির্বাচন করুন",
   "budget_allocateAmountText": "বরাদ্দ পরিমাণ",
-  "budget_categoryMessageInfoText": "আপনি ম্যানুয়ালি ক্যাটাগরি বরাদ্দগুলি প্রবেশ করতে পারেন, অথবা অবশিষ্ট পরিমাণ সমানভাবে স্বয়ংক্রিয়ভাবে বিতরণ করার জন্য সেগুলিকে ফাঁকা রাখতে পারেন।",
+  "budget_categoryMessageInfoText": "Category-র amount নিজে দিন, অথবা ফাঁকা রাখুন — বাকিটা সমান ভাগ হয়ে যাবে।",
   "budget_totalAllocatedBudgetText": "মোট বরাদ্দ: {totalAlloc}",
   "budget_recurrenceText": "পুনরাবৃত্তি",
   "budget_recurrenceNoneText": "নেই",
@@ -156,7 +156,7 @@
   "profile_emailControllerHintText": "আপনার ইমেল লিখুন",
   "profile_phoneControllerText": "ফোন",
   "profile_phoneControllerHintText": "আপনার ফোন নম্বর লিখুন",
-  "profile_weAreNotStoringInfoText": "আপনার সমস্ত ডেটা এই ডিভাইসেই সংরক্ষিত থাকে। কোনো সার্ভার নেই, কোনো ক্লাউড নেই, কোনো ট্র্যাকিংও নেই।",
+  "profile_weAreNotStoringInfoText": "আপনার সব data এই phone-এই আছে। কোনো server নেই, cloud নেই, tracking নেই।",
   "profile_saveButtonText": "সংরক্ষণ করুন",
   "profile_editUserProfileAppTitle": "ব্যবহারকারী প্রোফাইল সম্পাদনা করুন",
   "pendingTranx_reviewPendingTransactionsScreenTitle": "মুলতুবি লেনদেন",
@@ -169,19 +169,19 @@
   "statistics_recentTransactionsSubtitle": "গত ৫টি লেনদেন",
   "statistics_categoryBreakdownTitle": "ক্যাটাগরি ভাঙ্গন",
   "statistics_recentTransactionsModalTitle": "সাম্প্রতিক লেনদেন",
-  "transfer_screenTitle": "তহবিল স্থানান্তর",
+  "transfer_screenTitle": "টাকা Transfer করুন",
   "transfer_resetTooltip": "রিসেট",
   "transfer_selectAccountsLabel": "অ্যাকাউন্ট নির্বাচন করুন",
   "transfer_fromLabel": "থেকে",
   "transfer_toLabel": "এ",
-  "transfer_detailsLabel": "স্থানান্তরের বিবরণ",
+  "transfer_detailsLabel": "TRANSFER বিবরণ",
   "transfer_amountLabel": "পরিমাণ",
   "transfer_amountValidationError": "বৈধ পরিমাণ লিখুন",
   "transfer_dateLabel": "তারিখ",
   "transfer_noteLabel": "নোট (ঐচ্ছিক)",
   "transfer_buttonLabel": "স্থানান্তর",
   "transfer_updateButtonLabel": "স্থানান্তর আপডেট করুন",
-  "transfer_errorLoadingAccounts": "অ্যাকাউন্ট লোড করতে ত্রুটি",
+  "transfer_errorLoadingAccounts": "Accounts load হচ্ছে না",
   "app_settings_themeModeModalTitle": "থিম মোড",
   "category_expenseLabel": "ব্যয়",
   "category_incomeLabel": "আয়",
@@ -215,7 +215,7 @@
   "dashboard_removeLabel": "সরান",
   "dashboard_viewAllLabel": "সব দেখুন",
   "common_noAccountsYet": "অভী পর্যন্ত কোনো অ্যাকাউন্ট নেই",
-  "common_loading": "লোড হচ্ছে",
+  "common_loading": "লোড হচ্ছে...",
   "common_editLabel": "সম্পাদনা",
   "common_deleteLabel": "মুছে ফেলুন",
   "common_fromLabel": "থেকে",
@@ -268,18 +268,1753 @@
   "sms_noPendingTransactions": "কোনো মুলতুবি লেনদেন নেই",
   "sms_approveLabel": "অনুমোদন",
   "sms_approveTransactionTitle": "লেনদেন অনুমোদন করুন",
-  "onboard_SmartSmsTracking": "স্মার্ট SMS ট্র্যাকিং",
-  "onboard_SmartSmsTrackingDesc": "ব্যাংক SMS থেকে স্বয়ংক্রিয়ভাবে লেনদেন শনাক্ত ও আমদানি করুন।",
-  "onboard_InsightsAndAnalytics": "ইনসাইটস ও অ্যানালিটিক্স",
-  "onboard_InsightsAndAnalyticsDesc": "বিস্তারিত চার্ট, ট্রেন্ড এবং স্মার্ট ইনসাইটস দিয়ে আপনার খরচের অভ্যাস বুঝুন।",
-  "onboard_SecureAndPrivate": "সুরক্ষিত ও ব্যক্তিগত",
-  "onboard_SecureAndPrivateDesc": "আপনার ডেটা আপনার ডিভাইসে থাকে। কোনো ক্লাউড নেই, কোনো ট্র্যাকিং নেই।",
+  "onboard_SmartSmsTracking": "Smart SMS Tracking",
+  "onboard_SmartSmsTrackingDesc": "Bank SMS থেকে transactions নিজে থেকেই ধরা আর import হবে।",
+  "onboard_InsightsAndAnalytics": "Insights ও Analytics",
+  "onboard_InsightsAndAnalyticsDesc": "Charts, trends আর smart insights দিয়ে খরচের অভ্যাস বুঝুন।",
+  "onboard_SecureAndPrivate": "Safe ও Private",
+  "onboard_SecureAndPrivateDesc": "Data আপনার phone-এই থাকে। কোনো cloud নেই, tracking নেই।",
   "onboard_SmartAutoTracking": "Smart Auto Tracking",
   "@onboard_SmartAutoTracking": {
     "description": "Auto-detect transactions from notifications"
   },
-  "onboard_SmartAutoTrackingDesc": "Automatically detect and import transactions from your bank notifications.",
+  "onboard_SmartAutoTrackingDesc": "Bank notifications থেকে transactions নিজে থেকেই ধরা আর import হবে।",
   "@onboard_SmartAutoTrackingDesc": {
     "description": "Description for auto tracking onboarding page"
-  }
+  },
+  "nav_activity": "কার্যকলাপ",
+  "nav_manage": "পরিচালনা",
+  "nav_insights": "বিশ্লেষণ",
+  "common_save": "সেভ করুন",
+  "common_cancel": "বাতিল",
+  "common_next": "পরেরটা",
+  "common_back": "পেছনে",
+  "common_delete": "মুছুন",
+  "common_edit": "সম্পাদনা",
+  "common_add": "যোগ করুন",
+  "common_done": "হয়ে গেছে",
+  "common_close": "বন্ধ",
+  "common_confirm": "নিশ্চিত",
+  "common_archive": "আর্কাইভ",
+  "common_create": "তৈরি করুন",
+  "common_update": "আপডেট",
+  "common_remove": "সরান",
+  "common_search": "খুঁজুন",
+  "common_filter": "ফিল্টার",
+  "common_reset": "রিসেট",
+  "common_apply": "প্রযোগ",
+  "common_yes": "হ্যাঁ",
+  "common_no": "না",
+  "common_ok": "ঠিক আছে",
+  "common_retry": "পুনরায়",
+  "common_noData": "কোনো তথ্য নেই",
+  "common_error": "কিছু একটা গণ্ডগোল হয়েছে",
+  "common_required": "আবশ্যক",
+  "title_budgets": "বাজেট",
+  "title_goals": "Goals",
+  "title_bills": "বিল",
+  "title_groups": "গ্রুপ",
+  "title_trips": "ভ্রমণ",
+  "title_shared": "ভাগাভাগি",
+  "title_achievements": "অর্জন",
+  "title_notifications": "বিজ্ঞপ্তি",
+  "title_appearance": "চেহারা",
+  "title_currency": "মুদ্রা",
+  "title_security": "নিরাপত্তা",
+  "title_about": "সম্পর্কে",
+  "title_analytics": "বিশ্লেষণ",
+  "title_netWorth": "মোট সম্পদ",
+  "title_financialHealth": "আর্থিক স্বাস্থ্য",
+  "title_spendingPersonality": "খরচের ধরন",
+  "title_monthlyRecap": "মাসিক সারসংক্ষেপ",
+  "title_compareMonths": "মাসের তুলনা",
+  "title_smsImport": "SMS আমদানি",
+  "title_backupShare": "ব্যাকআপ ও শেয়ার",
+  "title_exchangeRates": "বিনিময় হার",
+  "title_recurringTransactions": "পুনরাবৃত্তি লেনদেন",
+  "title_billControlCenter": "বিল নিয়ন্ত্রণ কেন্দ্র",
+  "title_plugins": "প্লাগইন",
+  "title_editCategory": "শ্রেণী সম্পাদনা",
+  "title_allCategories": "সব শ্রেণী",
+  "title_exportOptions": "রপ্তানি বিকল্প",
+  "title_dashboardLayout": "ড্যাশবোর্ড লেআউট",
+  "section_activeMoney": "সক্রিয় অর্থ",
+  "section_planning": "পরিকল্পনা",
+  "section_insights": "অন্তর্দৃষ্টি",
+  "section_coreSettings": "মূল সেটিংস",
+  "section_appData": "অ্যাপ ও ডেটা",
+  "section_appearance": "চেহারা",
+  "section_advanced": "উন্নত",
+  "section_supportLegal": "সহায়তা ও আইন",
+  "section_active": "সক্রিয়",
+  "section_ongoing": "চলমান",
+  "section_archive": "আর্কাইভ",
+  "label_income": "আয়",
+  "label_expense": "খরচ",
+  "label_balance": "ব্যালেন্স",
+  "label_savings": "সঞ্চয়",
+  "label_total": "মোট",
+  "label_amount": "পরিমাণ",
+  "label_date": "তারিখ",
+  "label_category": "শ্রেণী",
+  "label_account": "অ্যাকাউন্ট",
+  "label_description": "বিবরণ",
+  "label_type": "ধরন",
+  "label_transfer": "ট্রান্সফার",
+  "label_from": "থেকে",
+  "label_to": "তে",
+  "label_all": "সব",
+  "label_today": "আজ",
+  "label_yesterday": "গতকাল",
+  "label_thisWeek": "এই সপ্তাহ",
+  "label_thisMonth": "এই মাস",
+  "label_thisYear": "এই বছর",
+  "label_custom": "কাস্টম",
+  "label_daily": "দৈনিক",
+  "label_weekly": "সাপ্তাহিক",
+  "label_monthly": "মাসিক",
+  "label_yearly": "বার্ষিক",
+  "label_none": "কিছু নেই",
+  "trip_expenses": "খরচ",
+  "trip_settlements": "নিষ্পত্তি",
+  "trip_balances": "বাকি টাকা",
+  "trip_report": "রিপোর্ট",
+  "trip_createTrip": "ভ্রমণ তৈরি করুন",
+  "trip_createGroup": "ভাগাভাগি গ্রুপ তৈরি করুন",
+  "trip_editTrip": "ভ্রমণ সম্পাদনা",
+  "trip_editGroup": "গ্রুপ সম্পাদনা",
+  "trip_archiveTrip": "ভ্রমণ আর্কাইভ",
+  "trip_archiveGroup": "গ্রুপ আর্কাইভ",
+  "trip_allSettled": "সব মিটে গেছে!",
+  "trip_archiveToSettle": "নিষ্পত্তির জন্য আর্কাইভ করুন",
+  "trip_trackTravel": "Travel খরচ dates ও budget সহ track করুন",
+  "trip_splitBills": "বন্ধুদের সাথে bill split করুন",
+  "trip_live": "লাইভ",
+  "budget_spendingLimits": "খরচের সীমা",
+  "budget_savingsProgress": "সঞ্চয় অগ্রগতি",
+  "budget_upcomingRecurring": "আগামী ও পুনরাবৃত্তি",
+  "budget_tripsAndSplits": "Trips ও splits",
+  "import_importing": "{count}টি লেনদেন আমদানি হচ্ছে...",
+  "@import_importing": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "import_dontClose": "App বন্ধ করবেন না",
+  "import_complete": "Import হয়ে গেছে!",
+  "import_failed": "Import হয়নি",
+  "import_imported": "আমদানি হয়েছে",
+  "import_duplicatesSkipped": "ডুপ্লিকেট বাদ দেওয়া হয়েছে",
+  "import_errorsSkipped": "ত্রুটি/বাদ দেওয়া হয়েছে",
+  "import_categoriesCreated": "শ্রেণী তৈরি হয়েছে",
+  "import_previewImport": "আমদানি প্রিভিউ",
+  "recap_yourMonthAtGlance": "এই মাসের হালচাল",
+  "recap_trackProgressOverTime": "Progress track করুন",
+  "recap_transactions": "{count}টি লেনদেন",
+  "@recap_transactions": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recap_downloadPdf": "PDF ডাউনলোড",
+  "comparison_current": "বর্তমান",
+  "comparison_byDay": "দিন {day} পর্যন্ত",
+  "@comparison_byDay": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "comparison_topCategories": "শীর্ষ শ্রেণী",
+  "comparison_categoryImpact": "শ্রেণী প্রভাব",
+  "comparison_dailySpendingPace": "দৈনিক খরচের গতি",
+  "comparison_projected": "অনুমান: এই মাসে {amount} খরচ হবে",
+  "@comparison_projected": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "utility_customizeUtilities": "উপযোগিতা কাস্টমাইজ",
+  "utility_addUtilities": "উপযোগিতা যোগ করুন",
+  "profile_accounts": "অ্যাকাউন্ট",
+  "profile_manageAccounts": "আপনার অ্যাকাউন্ট পরিচালনা করুন",
+  "profile_categories": "শ্রেণী",
+  "profile_manageCategories": "আপনার শ্রেণী পরিচালনা করুন",
+  "profile_language": "ভাষা",
+  "profile_notifications": "বিজ্ঞপ্তি",
+  "profile_dailyWeeklySummaries": "দৈনিক ও সাপ্তাহিক সারসংক্ষেপ",
+  "profile_autoImport": "অটো আমদানি",
+  "profile_autoImportDesc": "Bank notifications থেকে auto import",
+  "profile_importExport": "আমদানি ও রপ্তানি",
+  "profile_importExportDesc": "Excel import ও export",
+  "profile_backupRestore": "ব্যাকআপ ও পুনরুদ্ধার",
+  "profile_manageData": "আপনার ডেটা পরিচালনা করুন",
+  "profile_themeDisplay": "Theme, tone ও display",
+  "profile_customizeWidgets": "Widgets ও cards customize করুন",
+  "profile_manageExtensions": "এক্সটেনশন পরিচালনা",
+  "profile_helpSupport": "সাহায্য ও সমর্থন",
+  "profile_faqs": "FAQs ও feature guides",
+  "profile_aboutApp": "অ্যাপ সম্পর্কে",
+  "profile_versionInfo": "সংস্করণ ও তথ্য",
+  "profile_pinFingerprint": "PIN বা ফিঙ্গারপ্রিন্ট",
+  "profile_upgradePro": "Pro-তে আপগ্রেড",
+  "profile_unlimitedFeatures": "Unlimited accounts, analytics ও আরও অনেক কিছু",
+  "profile_freeTier": "ফ্রি প্ল্যান",
+  "profile_fullAccess": "পূর্ণ অ্যাক্সেস",
+  "profile_proActive": "Pro সক্রিয়",
+  "profile_yourAchievements": "আপনার অর্জন",
+  "profile_bestStreak": "সেরা স্ট্রিক",
+  "trips_active": "সক্রিয়",
+  "trips_live": "লাইভ",
+  "trips_allSettled": "সব মিটে গেছে",
+  "tone_friendly_txnAdded": "Done! Transaction save হয়ে গেছে ✨|বুঝেছি! সব note হয়ে গেছে 👍|Save হয়ে গেছে! আপনি track-এ আছেন ✨|Note হয়ে গেছে! আরেকটা track 📝",
+  "tone_friendly_txnUpdated": "Update হয়ে গেছে! 👍|Changes save হয়ে গেছে! ✓|সব update! 👌",
+  "tone_friendly_txnDeleted": "গেছে! Transaction remove 🗑️|Delete হয়ে গেছে! একটা কম|Remove! পরিষ্কার 🗑️",
+  "tone_friendly_txnFailed": "Save হলো না, আবার try করবেন?",
+  "tone_friendly_enterAmount": "কত ছিল? Amount দিন",
+  "tone_friendly_pickAccount": "কোন account? একটা বেছে নিন",
+  "tone_friendly_pickCategory": "কিসের জন্য ছিল? Category বেছে নিন",
+  "tone_friendly_fillAllFields": "প্রায় হয়ে গেছে — সব fields ভরুন",
+  "tone_friendly_invalidAmount": "এটা ঠিক লাগছে না — সঠিক amount দিন",
+  "tone_friendly_budgetCreated": "Budget set! Track-এ থাকুন 💪|Budget lock! Planning ভালো হচ্ছে 💪|দারুণ! Budget ready 📊",
+  "tone_friendly_budgetUpdated": "Budget update হয়ে গেছে!",
+  "tone_friendly_budgetDeleted": "Budget সরিয়ে দেওয়া হয়েছে",
+  "tone_friendly_goalCreated": "Goal set! আপনি পারবেন 🎯|নতুন goal! চলুন পূরণ করি 🎯|Goal lock! নজর রাখুন 🎯",
+  "tone_friendly_goalUpdated": "Goal update হয়ে গেছে!",
+  "tone_friendly_goalDeleted": "Goal সরিয়ে দেওয়া হয়েছে",
+  "tone_friendly_accountCreated": "Account তৈরি হয়ে গেছে! 🏦",
+  "tone_friendly_billAdded": "Bill track হচ্ছে! Remind করব 🔔",
+  "tone_friendly_billPaid": "দারুণ, bill paid! ✅|Bill done! একটা tension কম ✅|Paid! স্বস্তি ✅",
+  "tone_friendly_backupSuccess": "Backup হয়ে গেছে! Data safe আছে 🛡️",
+  "tone_friendly_restoreSuccess": "Restore হয়ে গেছে! Welcome back 🎉",
+  "tone_friendly_noTransactions": "এখনো কিছু নেই\nপ্রথম transaction দিয়ে শুরু করুন|এখন খালি\nTracking শুরু করুন — মাত্র এক sec|কোনো transaction নেই\nআপনার financial journey এখান থেকেই শুরু",
+  "tone_friendly_noBudgets": "কোনো budget নেই\nএকটা বানান, spending track হবে",
+  "tone_friendly_noGoals": "কোনো goal নেই\nবড় করে ভাবুন — প্রথম goal set করুন!",
+  "tone_friendly_genericError": "কিছু একটা গণ্ডগোল হয়েছে। আবার try করবেন?",
+  "tone_friendly_smsImportEnabled": "Auto import on! Transactions track হবে 📩",
+  "tone_friendly_dashboardAllCaughtUp": "সব up to date! 🎉|কিছু pending নেই — মজা করুন! ✨|সব ঠিক আছে! দিনটা enjoy করুন 🎉",
+  "tone_friendly_dailySummaryEmpty": "গতকাল কিছু record হয়নি — zero-spend win নাকি catch up-এর time!|গতকাল শান্ত দিন ছিল — wallet খুশি!|গতকাল কোনো transaction নেই — আজ fresh start!",
+  "tone_friendly_streakMessage": "{days} দিনের streak! চালিয়ে যান! 🔥",
+  "@tone_friendly_streakMessage": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_friendly_budgetExceededBy": "Budget {amount} বেশি হয়ে গেছে 😬",
+  "@tone_friendly_budgetExceededBy": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_professional_txnAdded": "Transaction record হয়ে গেছে।|Entry save হয়ে গেছে।|Transaction log হয়ে গেছে।",
+  "tone_professional_txnUpdated": "Transaction update হয়ে গেছে।|Changes apply হয়ে গেছে।|Record update হয়ে গেছে।",
+  "tone_professional_txnDeleted": "Transaction delete হয়ে গেছে।|Record remove হয়ে গেছে।|Entry delete হয়ে গেছে।",
+  "tone_professional_txnFailed": "Transaction save হয়নি। আবার try করুন।",
+  "tone_professional_enterAmount": "সঠিক amount দিন।",
+  "tone_professional_pickAccount": "Account select করুন।",
+  "tone_professional_pickCategory": "Category select করুন।",
+  "tone_professional_fillAllFields": "সব প্রয়োজনীয় fields পূরণ করুন।",
+  "tone_professional_invalidAmount": "ভুল amount দেওয়া হয়েছে।",
+  "tone_professional_budgetCreated": "Budget তৈরি হয়ে গেছে।|Budget configure হয়ে গেছে।|নতুন budget active আছে।",
+  "tone_professional_budgetUpdated": "Budget update হয়ে গেছে।",
+  "tone_professional_budgetDeleted": "Budget delete হয়ে গেছে।",
+  "tone_professional_goalCreated": "Goal তৈরি হয়ে গেছে।|Savings goal configure হয়ে গেছে।|নতুন goal active আছে।",
+  "tone_professional_goalUpdated": "Goal update হয়ে গেছে।",
+  "tone_professional_goalDeleted": "Goal delete হয়ে গেছে।",
+  "tone_professional_accountCreated": "Account তৈরি হয়ে গেছে।",
+  "tone_professional_billAdded": "Bill add হয়ে গেছে। Remind করা হবে।",
+  "tone_professional_billPaid": "Bill paid mark হয়ে গেছে।|Payment record হয়ে গেছে।|Bill settle হয়ে গেছে।",
+  "tone_professional_backupSuccess": "Backup সম্পন্ন হয়েছে।",
+  "tone_professional_restoreSuccess": "Data restore হয়ে গেছে।",
+  "tone_professional_noTransactions": "কোনো transaction record নেই।\nপ্রথম entry দিন।|কোনো record নেই।\nTransaction দিয়ে শুরু করুন।|Transaction history খালি।\nRecording শুরু করুন।",
+  "tone_professional_noBudgets": "কোনো budget configure নেই।",
+  "tone_professional_noGoals": "কোনো goal set নেই।",
+  "tone_professional_genericError": "Error হয়েছে।",
+  "tone_professional_smsImportEnabled": "Auto-import on হয়ে গেছে।",
+  "tone_professional_dashboardAllCaughtUp": "সব up to date আছে।|কোনো pending action নেই।|সব current আছে।",
+  "tone_professional_dailySummaryEmpty": "গতকাল কোনো transaction record হয়নি।|গতকাল কোনো activity হয়নি।|আগের দিন কোনো entry নেই।",
+  "tone_professional_streakMessage": "টানা {days} দিন tracking।",
+  "@tone_professional_streakMessage": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_professional_budgetExceededBy": "Budget {amount} exceed হয়ে গেছে।",
+  "@tone_professional_budgetExceededBy": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_motivational_txnAdded": "দারুণ! Transaction save হয়ে গেছে! 💪|Log হয়ে গেছে! আপনি থামছেন না 💪|আরেকটা track! Momentum রাখুন! ✨|Save! প্রতিটা entry এক ধাপ এগিয়ে! 🚀",
+  "tone_motivational_txnUpdated": "ভালো update! Sharp থাকুন! ✨|Update! Precision matters! ✨|Changes save! আপনি এটার উপর আছেন! 👍",
+  "tone_motivational_txnDeleted": "পরিষ্কার! একটা tension কম|Remove! জিনিস clean রাখুন! 💪|গেছে! যেটা দরকার সেটায় focus",
+  "tone_motivational_txnFailed": "হলো না — আরেকবার try দিন!",
+  "tone_motivational_enterAmount": "প্রতিটা টাকা count হয় — amount দিন!",
+  "tone_motivational_pickAccount": "Account বেছে নিন, organized থাকুন!",
+  "tone_motivational_pickCategory": "Category দিন — পরে নিজেকে thank করবেন!",
+  "tone_motivational_fillAllFields": "প্রায় হয়ে গেছে! সব ভরুন",
+  "tone_motivational_invalidAmount": "এই amount ঠিক লাগছে না — আবার try!",
+  "tone_motivational_budgetCreated": "Smart move! Budget set! 💪|Budget lock! Control আপনার হাতে! 💪|Discipline! Budget ready! 📊",
+  "tone_motivational_budgetUpdated": "Budget adjust — flexible থাকুন!",
+  "tone_motivational_budgetDeleted": "Budget সরিয়ে দেওয়া হয়েছে",
+  "tone_motivational_goalCreated": "Ambition! Goal set! 🎯|বড় স্বপ্ন এখান থেকেই! Goal lock! 🎯|এই spirit! নতুন goal ready! 🚀",
+  "tone_motivational_goalUpdated": "Goal refine — push করতে থাকুন!",
+  "tone_motivational_goalDeleted": "Goal সরানো হলো — নতুন priorities, নতুন plans",
+  "tone_motivational_accountCreated": "Account তৈরি! Organized হচ্ছেন! 🏦",
+  "tone_motivational_billAdded": "Bill track! আপনি এগিয়ে আছেন! 🔔",
+  "tone_motivational_billPaid": "Bill paid! একটা tension কম! ✅|Crush করে দিলেন! Bill done! ✅|Paid! Game-এর আগে! 💪",
+  "tone_motivational_backupSuccess": "Backup হয়ে গেছে! Progress safe! 🛡️",
+  "tone_motivational_restoreSuccess": "Restore! আবার track-এ! 🎉",
+  "tone_motivational_noTransactions": "Fresh start! 🌟\nপ্রথম transaction দিন — প্রতিটা journey এক পা দিয়ে শুরু|খালি slate! 🌟\nপ্রথম entry wait করছে — চলুন!|এখনো কিছু নেই! 💪\nএকটা transaction আর আপনি রাস্তায়!",
+  "tone_motivational_noBudgets": "কোনো budget নেই\nএকটা বানান — future self thank করবে! 💪",
+  "tone_motivational_noGoals": "কোনো goal নেই\nবড় করে ভাবুন — প্রথম goal set করুন! 🎯",
+  "tone_motivational_genericError": "কিছু গণ্ডগোল হয়েছে — আবার try!",
+  "tone_motivational_smsImportEnabled": "Auto-import on! Finances নিজে থেকে track হবে! 📩",
+  "tone_motivational_dashboardAllCaughtUp": "সব caught up — game-এর আগে! 🏆|কিছু pending নেই — top-এ আছেন 💪|All clear! এই energy রাখুন 🏆",
+  "tone_motivational_dailySummaryEmpty": "গতকাল zero spend — wallet খুশি! ✨|গতকাল কিছু খরচ হয়নি — willpower! 💪|No-spend day! এটা win! 🏆",
+  "tone_motivational_streakMessage": "{days} দিনের streak! থামানো যাবে না! 🔥",
+  "@tone_motivational_streakMessage": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_motivational_budgetExceededBy": "{amount} বেশি — course correct করতে পারবেন! 💪",
+  "@tone_motivational_budgetExceededBy": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_calm_txnAdded": "Note হয়ে গেছে।|Record হয়ে গেছে।|চুপচাপ save।",
+  "tone_calm_txnUpdated": "Update।|Adjust।|Changes save।",
+  "tone_calm_txnDeleted": "ছেড়ে দেওয়া হলো।|সরিয়ে দেওয়া হলো।|যেতে দেওয়া হলো।",
+  "tone_calm_txnFailed": "হলো না। আরেকবার।",
+  "tone_calm_enterAmount": "Amount দরকার।",
+  "tone_calm_pickAccount": "এটা কোথায় belongs, বেছে নিন।",
+  "tone_calm_pickCategory": "এটাকে একটা purpose দিন।",
+  "tone_calm_fillAllFields": "কিছু জিনিস এখনো খালি।",
+  "tone_calm_invalidAmount": "Amount ঠিক করতে হবে।",
+  "tone_calm_budgetCreated": "সীমা ঠিক হলো।|Budget তৈরি।|Limits set।",
+  "tone_calm_budgetUpdated": "Adjust হয়ে গেছে।",
+  "tone_calm_budgetDeleted": "ছেড়ে দেওয়া হলো।",
+  "tone_calm_goalCreated": "ইচ্ছা ঠিক হলো।|নতুন দিক।|Goal বোনা হলো।",
+  "tone_calm_goalUpdated": "Refine হয়ে গেছে।",
+  "tone_calm_goalDeleted": "ছেড়ে দেওয়া হলো।",
+  "tone_calm_accountCreated": "Account খোলা হলো।",
+  "tone_calm_billAdded": "Note হয়ে গেছে। Remind করব।",
+  "tone_calm_billPaid": "Settle হয়ে গেছে।|Paid। একটা কম।|হয়ে গেছে। শান্তি।",
+  "tone_calm_backupSuccess": "নিরাপদে রাখা হলো।",
+  "tone_calm_restoreSuccess": "Restore হয়ে গেছে। Welcome back।",
+  "tone_calm_noTransactions": "পরিষ্কার slate।\nতৈরি হলে শুরু করুন।|এখনো কিছু নেই।\nআস্তে আস্তে শুরু করুন।|খালি।\nনতুন শুরু অপেক্ষা করছে।",
+  "tone_calm_noBudgets": "কোনো সীমা নেই।\nযখন ঠিক মনে হবে, বানান।",
+  "tone_calm_noGoals": "কোনো ইচ্ছা নেই।\nতৈরি হলে set করুন।",
+  "tone_calm_genericError": "কিছু বদলে গেছে। আবার try করুন।",
+  "tone_calm_smsImportEnabled": "চুপচাপ transactions দেখছি।",
+  "tone_calm_dashboardAllCaughtUp": "সব ঠিক আছে।|কিছু attention দরকার নেই।|সব শান্ত।",
+  "tone_calm_dailySummaryEmpty": "শান্ত দিন। কিছু record হয়নি।|গতকাল স্থির ছিল। কোনো entry নেই।|কিছু খরচ হয়নি। বিশ্রামের দিন।",
+  "tone_calm_streakMessage": "{days} দিন mindful tracking।",
+  "@tone_calm_streakMessage": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_calm_budgetExceededBy": "{amount} বেশি। ভাবার সময়।",
+  "@tone_calm_budgetExceededBy": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_friendly_insightBillsDueSoon": "মাথায় রাখুন — bills আসছে",
+  "tone_friendly_insightOverBudget": "Budget পার হয়ে গেছে",
+  "tone_friendly_insightNearBudget": "Budget-এর কাছাকাছি...",
+  "tone_friendly_insightOverspending": "খরচ income-এর বেশি",
+  "tone_friendly_insightSpendingSpike": "আজ খরচ বেশি হচ্ছে",
+  "tone_friendly_insightWeekendAlert": "Weekend খরচ alert",
+  "tone_friendly_insightGetStarted": "চলুন শুরু করি! 🚀",
+  "tone_friendly_insightGetStartedMessage": "প্রথম transaction দিন — মাত্র এক sec",
+  "tone_friendly_insightBillsDueMessage": "{count}টা bill(s) শীঘ্রই due, ভুলবেন না!",
+  "@tone_friendly_insightBillsDueMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_friendly_insightOverBudgetMessage": "{count}টা budget(s) এই মাসে পার — একটু দেখুন",
+  "@tone_friendly_insightOverBudgetMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_friendly_insightNearBudgetMessage": "{count}টা budget(s) 80% পার — এখনো সময় আছে",
+  "@tone_friendly_insightNearBudgetMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_friendly_insightOverspendingMessage": "এই মাসে income-এর চেয়ে {amount} বেশি খরচ — একটু slow করুন",
+  "@tone_friendly_insightOverspendingMessage": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_friendly_insightSpendingSpikeMessage": "রোজ {avg}/day খরচ হয়। আজ ইতিমধ্যে {today}।",
+  "@tone_friendly_insightSpendingSpikeMessage": {
+    "placeholders": {
+      "avg": {
+        "type": "String"
+      },
+      "today": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_friendly_insightWeekendAlertMessage": "Weekend-এ সাধারণত {avg} খরচ। এবার ইতিমধ্যে {current}।",
+  "@tone_friendly_insightWeekendAlertMessage": {
+    "placeholders": {
+      "avg": {
+        "type": "String"
+      },
+      "current": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_professional_insightBillsDueSoon": "আগামী bills",
+  "tone_professional_insightOverBudget": "Budget exceed",
+  "tone_professional_insightNearBudget": "Budget limit-এর কাছে",
+  "tone_professional_insightOverspending": "খরচ income-এর বেশি",
+  "tone_professional_insightSpendingSpike": "আজ খরচ বেড়েছে",
+  "tone_professional_insightWeekendAlert": "Weekend খরচ বেড়েছে",
+  "tone_professional_insightGetStarted": "শুরু করুন",
+  "tone_professional_insightGetStartedMessage": "Tracking শুরু করতে প্রথম transaction record করুন।",
+  "tone_professional_insightBillsDueMessage": "{count}টা bill(s) কয়েক দিনের মধ্যে due।",
+  "@tone_professional_insightBillsDueMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_professional_insightOverBudgetMessage": "এই মাসে {count}টা budget(s) exceed হয়েছে।",
+  "@tone_professional_insightOverBudgetMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_professional_insightNearBudgetMessage": "{count}টা budget(s) 80%-এর উপরে।",
+  "@tone_professional_insightNearBudgetMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_professional_insightOverspendingMessage": "এই মাসে খরচ income-এর চেয়ে {amount} বেশি।",
+  "@tone_professional_insightOverspendingMessage": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_professional_insightSpendingSpikeMessage": "Daily average: {avg}। আজ: {today}।",
+  "@tone_professional_insightSpendingSpikeMessage": {
+    "placeholders": {
+      "avg": {
+        "type": "String"
+      },
+      "today": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_professional_insightWeekendAlertMessage": "Weekend average: {avg}। এখন: {current}।",
+  "@tone_professional_insightWeekendAlertMessage": {
+    "placeholders": {
+      "avg": {
+        "type": "String"
+      },
+      "current": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_motivational_insightBillsDueSoon": "Bills আসছে! 📋",
+  "tone_motivational_insightOverBudget": "Budget পার — ফিরে আসুন",
+  "tone_motivational_insightNearBudget": "Limit-এর কাছে",
+  "tone_motivational_insightOverspending": "খরচ income-এর বেশি",
+  "tone_motivational_insightSpendingSpike": "আজ খরচ spike",
+  "tone_motivational_insightWeekendAlert": "Weekend খরচ alert",
+  "tone_motivational_insightGetStarted": "কিছু দারুণ বানাই! 🚀",
+  "tone_motivational_insightGetStartedMessage": "প্রথম transaction দিন — মাত্র এক step!",
+  "tone_motivational_insightBillsDueMessage": "{count}টা bill(s) শীঘ্রই due — এগিয়ে থাকুন!",
+  "@tone_motivational_insightBillsDueMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_motivational_insightOverBudgetMessage": "{count}টা budget(s) exceed — course-correct করতে পারবেন!",
+  "@tone_motivational_insightOverBudgetMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_motivational_insightNearBudgetMessage": "{count}টা budget(s) 80% পার — আপনি পারবেন!",
+  "@tone_motivational_insightNearBudgetMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_motivational_insightOverspendingMessage": "Income-এর চেয়ে {amount} বেশি — ছোট adjustments বড় ফারাক আনে!",
+  "@tone_motivational_insightOverspendingMessage": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_motivational_insightSpendingSpikeMessage": "সাধারণত {avg}/day। আজ {today} — intentional থাকুন!",
+  "@tone_motivational_insightSpendingSpikeMessage": {
+    "placeholders": {
+      "avg": {
+        "type": "String"
+      },
+      "today": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_motivational_insightWeekendAlertMessage": "Weekend avg: {avg}। এবার {current} — aware থাকুন!",
+  "@tone_motivational_insightWeekendAlertMessage": {
+    "placeholders": {
+      "avg": {
+        "type": "String"
+      },
+      "current": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_calm_insightBillsDueSoon": "Bills আসছে",
+  "tone_calm_insightOverBudget": "সীমা পার",
+  "tone_calm_insightNearBudget": "সীমার কাছে",
+  "tone_calm_insightOverspending": "খরচ আয়ের বেশি",
+  "tone_calm_insightSpendingSpike": "ভারী দিন",
+  "tone_calm_insightWeekendAlert": "Weekend খরচ",
+  "tone_calm_insightGetStarted": "নতুন শুরু",
+  "tone_calm_insightGetStartedMessage": "প্রথম transaction দিয়ে শুরু করুন।",
+  "tone_calm_insightBillsDueMessage": "{count}টা bill(s) শীঘ্রই আসবে।",
+  "@tone_calm_insightBillsDueMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_calm_insightOverBudgetMessage": "{count}টা budget(s) পার। ভাবুন ও adjust করুন।",
+  "@tone_calm_insightOverBudgetMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_calm_insightNearBudgetMessage": "{count}টা budget(s) 80% পার। সচেতন খরচ সাহায্য করে।",
+  "@tone_calm_insightNearBudgetMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tone_calm_insightOverspendingMessage": "আয়ের চেয়ে {amount} বেশি খরচ। থামুন।",
+  "@tone_calm_insightOverspendingMessage": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_calm_insightSpendingSpikeMessage": "সাধারণত {avg}/day। আজ {today}।",
+  "@tone_calm_insightSpendingSpikeMessage": {
+    "placeholders": {
+      "avg": {
+        "type": "String"
+      },
+      "today": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_calm_insightWeekendAlertMessage": "সাধারণত {avg}। এই weekend {current}।",
+  "@tone_calm_insightWeekendAlertMessage": {
+    "placeholders": {
+      "avg": {
+        "type": "String"
+      },
+      "current": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_friendly_insightMoneyLeak": "{category}: এই মাসে {count} বার, মোট {total} — ছোট খরচও যোগ হয়",
+  "@tone_friendly_insightMoneyLeak": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_friendly_insightBestDay": "{worst}s-এ avg {wAvg} vs {best}s-এ {bAvg} — {saving} বাঁচাতে পারেন",
+  "@tone_friendly_insightBestDay": {
+    "placeholders": {
+      "worst": {
+        "type": "String"
+      },
+      "wAvg": {
+        "type": "String"
+      },
+      "best": {
+        "type": "String"
+      },
+      "bAvg": {
+        "type": "String"
+      },
+      "saving": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_professional_insightMoneyLeak": "{category}: {count}টা transaction, মোট {total} এই মাসে।",
+  "@tone_professional_insightMoneyLeak": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_professional_insightBestDay": "{worst}s-এ avg {wAvg} vs {best}s-এ {bAvg}। সম্ভাব্য সঞ্চয়: {saving}।",
+  "@tone_professional_insightBestDay": {
+    "placeholders": {
+      "worst": {
+        "type": "String"
+      },
+      "wAvg": {
+        "type": "String"
+      },
+      "best": {
+        "type": "String"
+      },
+      "bAvg": {
+        "type": "String"
+      },
+      "saving": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_motivational_insightMoneyLeak": "{category}: {count} বার, {total} — ছোট জিত বড় ফারাক আনে!",
+  "@tone_motivational_insightMoneyLeak": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_motivational_insightBestDay": "{worst}s-এ {wAvg} vs {best}s-এ {bAvg} — {saving} বাঁচাতে পারেন!",
+  "@tone_motivational_insightBestDay": {
+    "placeholders": {
+      "worst": {
+        "type": "String"
+      },
+      "wAvg": {
+        "type": "String"
+      },
+      "best": {
+        "type": "String"
+      },
+      "bAvg": {
+        "type": "String"
+      },
+      "saving": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_calm_insightMoneyLeak": "{category}: {count} বার, {total}। ছোট ধারা নদী তৈরি করে।",
+  "@tone_calm_insightMoneyLeak": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_calm_insightBestDay": "{worst}s: {wAvg}। {best}s: {bAvg}। {saving} রাখতে পারেন।",
+  "@tone_calm_insightBestDay": {
+    "placeholders": {
+      "worst": {
+        "type": "String"
+      },
+      "wAvg": {
+        "type": "String"
+      },
+      "best": {
+        "type": "String"
+      },
+      "bAvg": {
+        "type": "String"
+      },
+      "saving": {
+        "type": "String"
+      }
+    }
+  },
+  "tone_friendly_txnNotFound": "Can't find that transaction",
+  "tone_friendly_futureDate": "Pick today or earlier",
+  "tone_friendly_selectAccountAndCategory": "Pick an account & category first",
+  "tone_friendly_addParticipant": "Add at least one person to split with",
+  "tone_friendly_budgetExceededAdjust": "You've exceeded this budget. Maybe ease up a bit?",
+  "tone_friendly_budgetGreatDiscipline": "Great discipline! You're well within your budget ✨",
+  "tone_friendly_comparisonSpentSame": "Spending is about the same as last month — steady!",
+  "tone_friendly_accountUpdated": "Account updated!",
+  "tone_friendly_accountDeleted": "Account removed",
+  "tone_friendly_accountLocked": "This account is locked — upgrade to Pro to use it 🔒",
+  "tone_friendly_categoryCreated": "Category added!",
+  "tone_friendly_categoryDeleted": "Category removed",
+  "tone_friendly_categoryNameRequired": "Give it a name!",
+  "tone_friendly_billDeleted": "Bill removed",
+  "tone_friendly_backupFailed": "Backup didn't work — try again?",
+  "tone_friendly_restoreFailed": "Restore failed — is the file okay?",
+  "tone_friendly_invalidBackupFile": "That doesn't look like a valid backup file",
+  "tone_friendly_corruptBackup": "This backup looks corrupted 😕",
+  "tone_friendly_settingsSaved": "Saved! ✓",
+  "tone_friendly_reminderUpdated": "Reminder updated ⏰",
+  "tone_friendly_biometricFailed": "Authentication failed — try again",
+  "tone_friendly_incorrectPin": "Wrong PIN — give it another shot",
+  "tone_friendly_notificationAccessDenied": "Need notification access to auto-import transactions",
+  "tone_friendly_noBills": "No bills tracked\\nAdd recurring bills so you never miss a payment",
+  "tone_friendly_noAccounts": "No accounts yet\\nAdd one to start tracking",
+  "tone_friendly_noCategories": "No categories yet",
+  "tone_friendly_noNotifications": "All quiet here\\nNo notifications yet",
+  "tone_friendly_noData": "Not enough data yet\\nKeep tracking to unlock insights",
+  "tone_friendly_noRecurring": "No recurring transactions\\nAdd bills to auto-track them",
+  "tone_friendly_exportSuccess": "Report exported! 📄",
+  "tone_friendly_purchaseFailed": "Purchase didn't go through — try again?",
+  "tone_friendly_playNotAvailable": "Google Play isn't available on this device",
+  "tone_friendly_deleteTitle": "Are you sure?",
+  "tone_friendly_deleteCancel": "Keep it",
+  "tone_friendly_deleteConfirm": "Delete",
+  "tone_friendly_logoutTitle": "Leaving already?",
+  "tone_friendly_logoutMessage": "All your data will be cleared from this device.",
+  "tone_friendly_logoutConfirm": "Logout",
+  "tone_friendly_currencyChanged": "Base currency updated! 💱",
+  "tone_friendly_currencyChangeTitle": "Change base currency?",
+  "tone_friendly_currencyChangeCancel": "Keep it",
+  "tone_friendly_currencyPickerTitle": "Choose Your Currency",
+  "tone_friendly_dashboardWelcomeBack": "Welcome back! Let's see where you stand",
+  "tone_professional_txnNotFound": "Transaction not found.",
+  "tone_professional_futureDate": "Future dates are not permitted.",
+  "tone_professional_selectAccountAndCategory": "Account and category are required.",
+  "tone_professional_addParticipant": "At least one participant is required.",
+  "tone_professional_budgetExceededAdjust": "Budget exceeded. Review spending or adjust the limit.",
+  "tone_professional_budgetGreatDiscipline": "Well within budget. Good financial discipline.",
+  "tone_professional_comparisonSpentSame": "Spending is consistent with last month.",
+  "tone_professional_accountUpdated": "Account updated.",
+  "tone_professional_accountDeleted": "Account removed.",
+  "tone_professional_accountLocked": "Account locked. Pro subscription required.",
+  "tone_professional_categoryCreated": "Category added.",
+  "tone_professional_categoryDeleted": "Category removed.",
+  "tone_professional_categoryNameRequired": "Category name is required.",
+  "tone_professional_billDeleted": "Bill removed.",
+  "tone_professional_backupFailed": "Backup failed. Please try again.",
+  "tone_professional_restoreFailed": "Restore failed. Verify the backup file.",
+  "tone_professional_invalidBackupFile": "Invalid backup file format.",
+  "tone_professional_corruptBackup": "Backup file is corrupted.",
+  "tone_professional_settingsSaved": "Settings saved.",
+  "tone_professional_reminderUpdated": "Reminder time updated.",
+  "tone_professional_biometricFailed": "Authentication failed.",
+  "tone_professional_incorrectPin": "Incorrect PIN.",
+  "tone_professional_notificationAccessDenied": "Notification access is required for auto-import.",
+  "tone_professional_noBills": "No recurring bills.",
+  "tone_professional_noAccounts": "No accounts configured.",
+  "tone_professional_noCategories": "No categories defined.",
+  "tone_professional_noNotifications": "No notifications.",
+  "tone_professional_noData": "Insufficient data.\\nContinue recording transactions.",
+  "tone_professional_noRecurring": "No recurring transactions configured.",
+  "tone_professional_exportSuccess": "Report exported.",
+  "tone_professional_purchaseFailed": "Purchase failed. Please retry.",
+  "tone_professional_playNotAvailable": "Google Play Services unavailable.",
+  "tone_professional_deleteTitle": "Confirm Deletion",
+  "tone_professional_deleteCancel": "Cancel",
+  "tone_professional_deleteConfirm": "Delete",
+  "tone_professional_logoutTitle": "Confirm Logout",
+  "tone_professional_logoutMessage": "All local data will be erased.",
+  "tone_professional_logoutConfirm": "Logout",
+  "tone_professional_currencyChanged": "Base currency updated.",
+  "tone_professional_currencyChangeTitle": "Change Base Currency",
+  "tone_professional_currencyChangeCancel": "Cancel",
+  "tone_professional_currencyPickerTitle": "Select Currency",
+  "tone_professional_dashboardWelcomeBack": "Welcome back. Here is your summary.",
+  "tone_motivational_txnNotFound": "Can't find that one — it may have been removed",
+  "tone_motivational_futureDate": "Let's stay in the present — pick today or earlier",
+  "tone_motivational_selectAccountAndCategory": "Account & category first — you're almost done!",
+  "tone_motivational_addParticipant": "Add at least one person to split with!",
+  "tone_motivational_budgetExceededAdjust": "Over budget — but every day is a chance to reset! 💪",
+  "tone_motivational_budgetGreatDiscipline": "Amazing discipline! You're way ahead! 🏆",
+  "tone_motivational_comparisonSpentSame": "Holding steady! Consistent spending shows control 💪",
+  "tone_motivational_accountUpdated": "Account updated!",
+  "tone_motivational_accountDeleted": "Account removed",
+  "tone_motivational_accountLocked": "This account is locked — Go Pro to unlock! 🔒",
+  "tone_motivational_categoryCreated": "New category added!",
+  "tone_motivational_categoryDeleted": "Category removed",
+  "tone_motivational_categoryNameRequired": "Give it a name!",
+  "tone_motivational_billDeleted": "Bill removed",
+  "tone_motivational_backupFailed": "Backup didn't work — try again!",
+  "tone_motivational_restoreFailed": "Restore failed — check the file and retry",
+  "tone_motivational_invalidBackupFile": "That doesn't look like a valid backup",
+  "tone_motivational_corruptBackup": "This backup seems damaged",
+  "tone_motivational_settingsSaved": "Saved! ✓",
+  "tone_motivational_reminderUpdated": "Reminder set! ⏰",
+  "tone_motivational_biometricFailed": "Authentication failed — try again!",
+  "tone_motivational_incorrectPin": "Wrong PIN — you've got this, try again!",
+  "tone_motivational_notificationAccessDenied": "Need notification access to auto-track transactions",
+  "tone_motivational_noBills": "No bills tracked\\nStay ahead by adding your recurring bills",
+  "tone_motivational_noAccounts": "No accounts yet\\nAdd one to start your financial journey!",
+  "tone_motivational_noCategories": "No categories yet",
+  "tone_motivational_noNotifications": "All clear!\\nNo notifications — you're on top of things",
+  "tone_motivational_noData": "Keep going! 📈\\nMore data means better insights",
+  "tone_motivational_noRecurring": "No recurring transactions\\nAutomate your bills to stay ahead!",
+  "tone_motivational_exportSuccess": "Report exported! 📄",
+  "tone_motivational_purchaseFailed": "Purchase didn't go through — try again!",
+  "tone_motivational_playNotAvailable": "Google Play isn't available on this device",
+  "tone_motivational_deleteTitle": "Are you sure?",
+  "tone_motivational_deleteCancel": "Keep it",
+  "tone_motivational_deleteConfirm": "Delete",
+  "tone_motivational_logoutTitle": "Heading out?",
+  "tone_motivational_logoutMessage": "All data on this device will be cleared.",
+  "tone_motivational_logoutConfirm": "Logout",
+  "tone_motivational_currencyChanged": "Currency switched! New chapter! 💱",
+  "tone_motivational_currencyChangeTitle": "Ready to switch?",
+  "tone_motivational_currencyChangeCancel": "Not yet",
+  "tone_motivational_currencyPickerTitle": "Pick Your Currency! 🌍",
+  "tone_motivational_dashboardWelcomeBack": "You're back! Let's keep the progress going! 🚀",
+  "tone_calm_txnNotFound": "Not found. It may have moved on.",
+  "tone_calm_futureDate": "Stay in the present.",
+  "tone_calm_selectAccountAndCategory": "Account and category, please.",
+  "tone_calm_addParticipant": "Add someone to share with.",
+  "tone_calm_budgetExceededAdjust": "Past the boundary. Pause and reconsider.",
+  "tone_calm_budgetGreatDiscipline": "Well within bounds. Peaceful.",
+  "tone_calm_comparisonSpentSame": "Spending flows at the same pace.",
+  "tone_calm_accountUpdated": "Adjusted.",
+  "tone_calm_accountDeleted": "Closed.",
+  "tone_calm_accountLocked": "This one is resting. Pro unlocks it.",
+  "tone_calm_categoryCreated": "Added.",
+  "tone_calm_categoryDeleted": "Removed.",
+  "tone_calm_categoryNameRequired": "A name, please.",
+  "tone_calm_billDeleted": "Released.",
+  "tone_calm_backupFailed": "Couldn't save. Try again gently.",
+  "tone_calm_restoreFailed": "Couldn't restore. Check the file.",
+  "tone_calm_invalidBackupFile": "This file doesn't feel right.",
+  "tone_calm_corruptBackup": "The file seems damaged.",
+  "tone_calm_settingsSaved": "Saved.",
+  "tone_calm_reminderUpdated": "Reminder adjusted.",
+  "tone_calm_biometricFailed": "Not recognized. Try again.",
+  "tone_calm_incorrectPin": "Not quite. Try again.",
+  "tone_calm_notificationAccessDenied": "Permission needed for quiet tracking.",
+  "tone_calm_noBills": "Nothing recurring.\\nPeaceful.",
+  "tone_calm_noAccounts": "No accounts yet.\\nStart simply.",
+  "tone_calm_noCategories": "No categories yet.",
+  "tone_calm_noNotifications": "Silence.\\nNothing needs attention.",
+  "tone_calm_noData": "Not enough yet.\\nIt will come with time.",
+  "tone_calm_noRecurring": "Nothing recurring.\\nAdd when ready.",
+  "tone_calm_exportSuccess": "Exported.",
+  "tone_calm_purchaseFailed": "Purchase didn't complete. Try again.",
+  "tone_calm_playNotAvailable": "Play Store not available here.",
+  "tone_calm_deleteTitle": "Let go?",
+  "tone_calm_deleteCancel": "Hold on",
+  "tone_calm_deleteConfirm": "Release",
+  "tone_calm_logoutTitle": "Moving on?",
+  "tone_calm_logoutMessage": "Your data here will be cleared.",
+  "tone_calm_logoutConfirm": "Leave",
+  "tone_calm_currencyChanged": "Currency shifted.",
+  "tone_calm_currencyChangeTitle": "A new currency?",
+  "tone_calm_currencyChangeCancel": "Stay",
+  "tone_calm_currencyPickerTitle": "Choose your currency",
+  "tone_calm_dashboardWelcomeBack": "Welcome back.",
+  "notif_quietDayTitle": "📊 গতকাল শান্ত দিন ছিল",
+  "notif_heresYesterdayTitle": "📊 গতকালের হাল",
+  "notif_weekInReviewTitle": "📅 সপ্তাহের সারসংক্ষেপ",
+  "notif_yourWeekInReviewTitle": "📅 আপনার সপ্তাহের সারসংক্ষেপ",
+  "notif_niceOneTitle": "🏆 দারুণ!",
+  "notif_streakDaysTitle": "🔥 {days} দিন একটানা!",
+  "notif_levelUpTitle": "🎉 Level {level}!",
+  "notif_budgetsOverLimitTitle": "🚨 {count}টি budget limit পার",
+  "notif_budgetsGettingTightTitle": "⚠️ {count}টি budget tight হচ্ছে",
+  "notif_billDueTitle": "📅 {name} {label}-এ দেয়",
+  "notif_fundsGettingLowTitle": "📉 টাকা কমে যাচ্ছে",
+  "notif_categoryCreepingUpTitle": "💡 {category} বাড়ছে",
+  "notif_bigDayTitle": "📈 বড় দিন ছিল",
+  "notif_smsFoundTitle": "📱 {count}টি SMS transaction পাওয়া গেছে",
+  "notif_smallSpendsTitle": "💧 ছোট খরচ জমছে",
+  "notif_missYouTitle": "👋 আপনাকে মিস করছি",
+  "notif_daysUntrackedTitle": "📊 {days} দিন untracked",
+  "notif_streakEndedTitle": "💔 {days} দিনের streak ভেঙেছে",
+  "notif_fewDaysUntrackedTitle": "📊 কয়েকদিন untracked",
+  "insight_moneyLeakTitle": "চুপচাপ টাকা বেরিয়ে যাচ্ছে 💧",
+  "insight_bestDayTitle": "{day}-তে সবচেয়ে বেশি খরচ হয়",
+  "@notif_streakDaysTitle": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "@notif_levelUpTitle": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "@notif_budgetsOverLimitTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@notif_budgetsGettingTightTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@notif_billDueTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "@notif_categoryCreepingUpTitle": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "@notif_smsFoundTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@notif_daysUntrackedTitle": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "@notif_streakEndedTitle": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "@insight_bestDayTitle": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "bills_howBillsWorkTitle": "বিল কীভাবে কাজ করে",
+  "bills_howBillsWorkDesc": "ভাড়া, subscription এবং utility-র মতো নিয়মিত বিল track করুন",
+  "bills_gotIt": "বুঝেছি",
+  "bills_addBill": "বিল যোগ করুন",
+  "bills_markAsPaid": "পরিশোধিত",
+  "bills_deleteBill": "বিল মুছুন",
+  "bills_addNewBill": "নতুন বিল যোগ করুন",
+  "bills_billName": "বিলের নাম",
+  "bills_amount": "পরিমাণ",
+  "bills_frequency": "পুনরাবৃত্তি",
+  "bills_monthly": "মাসিক",
+  "bills_quarterly": "ত্রৈমাসিক",
+  "bills_yearly": "বার্ষিক",
+  "bills_dueDate": "দেয় তারিখ",
+  "goal_deleteGoalTitle": "Goal মুছবেন?",
+  "goal_editGoal": "Goal সম্পাদনা",
+  "goal_deleteGoal": "Goal মুছুন",
+  "goal_saved": "সঞ্চিত",
+  "goal_target": "লক্ষ্য",
+  "goal_quickDeposit": "দ্রুত জমা",
+  "goal_targetDate": "লক্ষ্য তারিখ",
+  "goal_milestones": "মাইলফলক",
+  "goal_recentActivity": "সাম্প্রতিক কার্যকলাপ",
+  "goal_addToGoal": "Goal-এ যোগ করুন",
+  "goal_goalReached": "Goal সম্পন্ন! 🎉",
+  "goal_whatsThisAbout": "এই goal কিসের জন্য?",
+  "goal_icon": "আইকন",
+  "goal_color": "রঙ",
+  "dashboard_enableCards": "Cards সক্রিয় করুন",
+  "recurring_fixedExpenses": "নিয়মিত খরচ",
+  "goal_freePlanLimit": "Free plan-এ ২টি goal। Pro-তে unlimited।",
+  "goal_editGoalTitle": "Goal সম্পাদনা",
+  "goal_newGoalTitle": "নতুন Goal",
+  "goal_yourGoal": "আপনার Goal",
+  "goal_appearance": "চেহারা",
+  "goal_goalName": "Goal-এর নাম",
+  "goal_giveGoalName": "আপনার goal-এর নাম দিন",
+  "goal_targetAmount": "লক্ষ্য পরিমাণ",
+  "goal_enterValidTarget": "সঠিক target পরিমাণ লিখুন",
+  "goal_alreadySaved": "আগেই সঞ্চিত",
+  "goal_targetDateLabel": "লক্ষ্য তারিখ",
+  "goal_setTargetDate": "Target তারিখ সেট করুন (ঐচ্ছিক)",
+  "goal_smartInsight": "Smart তথ্য",
+  "goal_onTrack": "সঠিক পথে",
+  "goal_onTrackDesc": "এই goal সহজেই অর্জনযোগ্য 👍",
+  "goal_needsEffort": "চেষ্টা দরকার",
+  "goal_needsEffortDesc": "আরেকটু সঞ্চয় করতে হবে",
+  "goal_ambitious": "উচ্চাকাঙ্ক্ষী",
+  "goal_ambitiousDesc": "Deadline বাড়ানোর কথা ভাবুন",
+  "goal_addNote": "নোট যোগ করুন (ঐচ্ছিক)",
+  "goal_note": "নোট",
+  "goal_updateGoal": "Goal আপডেট করুন",
+  "goal_createGoal": "Goal তৈরি করুন",
+  "profile_developerMode": "Developer Mode সক্রিয়! 🚀",
+  "profile_couldNotOpenLink": "লিংক খোলা যায়নি",
+  "profile_about": "সম্পর্কে",
+  "profile_unableToCheckUpdates": "Updates check করা যায়নি",
+  "profile_openSourceLicenses": "Open Source Licenses",
+  "account_totalValue": "মোট মূল্য",
+  "account_gainLoss": "লাভ/ক্ষতি",
+  "account_holdings": "Holdings",
+  "account_addHolding": "Holding যোগ করুন",
+  "account_addMissingTransaction": "বাদ পড়া Transaction যোগ করুন",
+  "account_whatWasThisFor": "এই transaction কিসের জন্য ছিল?",
+  "budget_used": "ব্যবহৃত",
+  "budget_selectAtLeastOneTag": "অন্তত একটি tag বেছে নিন",
+  "budget_over": "বেশি",
+  "budget_left": "বাকি",
+  "budget_breakdown": "বিবরণ",
+  "budget_basicInfo": "মৌলিক তথ্য",
+  "budget_duration": "সময়কাল",
+  "budget_budgetType": "Budget-এর ধরন",
+  "budget_selectType": "ধরন বেছে নিন",
+  "budget_categoryAllocation": "Category Allocation",
+  "budget_totalBudget": "মোট Budget",
+  "budget_allocated": "বরাদ্দ",
+  "budget_remaining": "বাকি",
+  "budget_overBudget": "Budget ছাড়িয়ে গেছে",
+  "budget_safeToSpend": "খরচ করা যাবে",
+  "budget_startDate": "শুরুর তারিখ",
+  "budget_endDate": "শেষের তারিখ",
+  "budget_selectTags": "Tags বেছে নিন",
+  "budget_tagInfo": "বেছে নেওয়া tags-এর সব খরচ এই budget-এ গণনা হবে।",
+  "budget_noTags": "এখনো কোনো tag নেই। আগে transactions-এ tags যোগ করুন।",
+  "budget_freePlanLimit": "Free plan-এ 2টা budget বানানো যায়। আরো চাইলে Pro নিন।",
+  "budget_daysRemaining": "{count} দিন",
+  "budget_delete": "মুছুন",
+  "budget_emotionUnderControl": "খরচ control-এ আছে 💪",
+  "budget_emotionHalfway": "মাসের অর্ধেক পার ✨",
+  "budget_emotionAlmostThere": "একটু সাবধান, নজর রাখুন ⚠️",
+  "budget_emotionExceeded": "Budget ছাড়িয়ে গেছে, সামলান 🔴",
+  "budget_highlightLabel": "নজর দিন",
+  "budget_overBudgetSection": "Budget ছাড়িয়ে গেছে",
+  "budget_activeBudgets": "Active budgets",
+  "budget_onTrackSection": "ঠিক চলছে",
+  "budget_spendingPace": "খরচের গতি",
+  "budget_dailyActual": "{amount}/দিন খরচ",
+  "budget_dailyAllowed": "{amount}/দিন সীমা",
+  "budget_stepNote0": "Budget-এর নাম দিন আর কত খরচ করতে চান সেট করুন।",
+  "budget_stepNote1": "Budget কতবার repeat হবে আর dates বেছে নিন।",
+  "budget_stepNote2": "কোন categories বা tags track করতে চান বেছে নিন।",
+  "budget_stepNote3": "Save করার আগে সব দেখে নিন। Edit করতে tap করুন।",
+  "budget_autoDistributed": "auto",
+  "budget_categoriesCount": "{count, plural, =1{1টি category} other{{count}টি categories}}",
+  "@budget_categoriesCount": { "placeholders": { "count": {} } },
+  "budget_tagsCount": "{count, plural, =1{1টি tag} other{{count}টি tags}}",
+  "@budget_tagsCount": { "placeholders": { "count": {} } },
+  "budget_typeCategoryWise": "Category অনুসারে",
+  "budget_typeTagWise": "Tag অনুসারে",
+  "budget_typeDayWise": "প্রতিদিন",
+  "budget_typeFestival": "উৎসব",
+  "budget_typeTravel": "ভ্রমণ",
+  "budget_typeDescCategoryWise": "নির্দিষ্ট categories-এর জন্য budget সেট করুন",
+  "budget_typeDescTagWise": "নির্দিষ্ট tags-এর জন্য budget সেট করুন",
+  "budget_typeDescDayWise": "প্রতিদিনের খরচ সীমা সেট করুন",
+  "budget_typeDescFestival": "উৎসব ও events-এর জন্য budget",
+  "budget_typeDescTravel": "ভ্রমণের খরচের জন্য budget",
+  "budget_reviewTitle": "দেখে নিন ও Save করুন",
+  "budget_selectCategories": "Categories বেছে নিন",
+  "budget_noActiveTrip": "কোনো active trip নেই। Travel budget-এর জন্য আগে trip শুরু করুন।",
+  "budget_categoryDeleteWarning": "এই category {count}টা budget-এ আছে। মুছলে budget tracking প্রভাবিত হবে।",
+  "budget_invalidCategories": "কিছু categories মুছে ফেলা হয়েছে। ঠিক করতে budget edit করুন।",
+  "category_categoryName": "শ্রেণীর নাম",
+  "category_keywords": "Keywords (কমা দিয়ে আলাদা)",
+  "category_noneTopLevel": "কোনোটি নয় (শীর্ষ-স্তর)",
+  "common_searchCurrency": "মুদ্রা খুঁজুন...",
+  "common_selectCategory": "শ্রেণী বেছে নিন",
+  "common_noDescription": "কোনো বিবরণ নেই",
+  "common_errors": "ত্রুটি",
+  "dashboard_enableCardsDesc": "আপনার আর্থিক সারসংক্ষেপ দেখতে Dashboard cards সক্রিয় করুন",
+  "dashboard_customizeDashboard": "Dashboard customize করুন",
+  "dashboard_newToApp": "Mudra Manager-এ নতুন?",
+  "dashboard_tapToExploreHelp": "Help guide দেখতে ট্যাপ করুন",
+  "dashboard_tapToReviewTxn": "Transactions review করতে ট্যাপ করুন",
+  "dashboard_autoImportPaused": "Auto Import থেমে আছে",
+  "dashboard_enable": "সক্রিয় করুন",
+  "dashboard_enableAutoImport": "Auto Import সক্রিয় করুন",
+  "dashboard_autoTrackDesc": "Bank notifications থেকে transactions auto-track করুন",
+  "profile_awesomeUser": "দারুণ User",
+  "profile_logout": "লগআউট",
+  "profile_proActiveLabel": "Pro সক্রিয়",
+  "profile_freeTierLabel": "Free Tier",
+  "profile_fullAccessLabel": "পূর্ণ Access",
+  "profile_upgradeToProLabel": "Pro-তে Upgrade করুন",
+  "profile_fullAccessEnjoy": "পূর্ণ access — সব features উপভোগ করুন!",
+  "profile_fullAccessDaysRemaining": "পূর্ণ access — {days} দিন বাকি",
+  "profile_fullAccessEndsIn": "পূর্ণ access {days} দিনে শেষ",
+  "profile_trialEnded": "Trial শেষ — সব features রাখতে upgrade করুন",
+  "profile_unlimitedDesc": "Unlimited accounts, analytics এবং আরও অনেক কিছু",
+  "profile_expiredRenew": "মেয়াদ শেষ — renew করতে ট্যাপ করুন",
+  "profile_expiresToday": "আজ মেয়াদ শেষ",
+  "profile_renewsTomorrow": "আগামীকাল renew হবে",
+  "profile_renewsInDays": "{days} দিনে renew হবে",
+  "profile_activeSubscription": "সক্রিয় সদস্যতা",
+  "profile_unknown": "অজানা",
+  "profile_accountsLabel": "অ্যাকাউন্ট",
+  "profile_categoriesLabel": "শ্রেণী",
+  "profile_budgetsLabel": "বাজেট",
+  "profile_bestStreakLabel": "সেরা Streak",
+  "profile_yourAchievementsLabel": "আপনার অর্জন",
+  "profile_aboutMudra": "Mudra Manager সম্পর্কে",
+  "profile_aboutMudraDesc": "আপনার ব্যক্তিগত ফাইন্যান্স সঙ্গী। খরচ track করুন, budget সামলান",
+  "txnList_searchHint": "Transactions খুঁজুন...",
+  "txnList_category": "শ্রেণী",
+  "txnList_dateRange": "তারিখ সীমা",
+  "txnList_tag": "Tag",
+  "txnList_allTransactions": "সব লেনদেন",
+  "txnList_tapStartEnd": "শুরু এবং শেষ তারিখ ট্যাপ করুন",
+  "txnList_scrollToLoad": "আরও লোড করতে scroll করুন",
+  "txnList_month": "মাস",
+  "txnList_previousMonth": "আগের মাস",
+  "txnList_resetToCurrentMonth": "এই মাসে ফিরে যান",
+  "txnList_selectMonth": "মাস বেছে নিন",
+  "txnList_nextMonth": "পরের মাস",
+  "txnList_monthView": "মাস দৃশ্য",
+  "txnList_subscriptionTagRemoved": "Subscription tag সরানো হয়েছে",
+  "txnList_filterByTag": "Tag দিয়ে filter করুন",
+  "txnList_noTagsYet": "এখনো কোনো tag নেই। আগে transactions-এ tag যোগ করুন।",
+  "txnList_clear": "মুছুন",
+  "txnList_filterOptions": "Filter বিকল্প",
+  "txnList_transactionType": "Transaction ধরন",
+  "txnList_allCategories": "সব শ্রেণী",
+  "txnList_selectDateRange": "তারিখ সীমা বেছে নিন",
+  "txnList_clearDateRange": "তারিখ সীমা মুছুন",
+  "stats_today": "আজ",
+  "stats_week": "সপ্তাহ",
+  "stats_month": "মাস",
+  "stats_year": "বছর",
+  "stats_custom": "কাস্টম",
+  "stats_unableToLoad": "Statistics লোড করা যায়নি",
+  "stats_overview": "সারসংক্ষেপ",
+  "stats_income": "আয়",
+  "stats_expense": "খরচ",
+  "stats_trends": "প্রবণতা",
+  "stats_spendingByDay": "দিন অনুযায়ী খরচ",
+  "stats_insights": "তথ্য",
+  "stats_nextMonthForecast": "পরের মাসের পূর্বাভাস",
+  "stats_topSpending": "সবচেয়ে বেশি খরচ",
+  "@profile_fullAccessDaysRemaining": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "@profile_fullAccessEndsIn": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "@profile_renewsInDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "notifSettings_dailySummary": "দৈনিক সারসংক্ষেপ",
+  "notifSettings_weeklySummary": "সাপ্তাহিক সারসংক্ষেপ",
+  "notifSettings_comeBackNudges": "ফিরে আসার মনে করানো",
+  "notifSettings_streakReminder": "Streak Reminder",
+  "notifSettings_smartAlerts": "Smart Alerts",
+  "notifSettings_selectDay": "দিন বেছে নিন",
+  "notifSettings_summariesDesc": "সারসংক্ষেপে খরচ, আয়, শীর্ষ শ্রেণী এবং ব্যালেন্স দেখায়",
+  "notifSettings_reminderTime": "Reminder-এর সময়",
+  "notifSettings_sendTestNotif": "Test Notification পাঠান",
+  "notifSettings_testNotifSent": "Test notification পাঠানো হয়েছে",
+  "notifSettings_dailyNudgeStreak": "Streak ধরে রাখার দৈনিক মনে করানো",
+  "notifSettings_summaryDay": "সারসংক্ষেপের দিন",
+  "notifSettings_gentleReminders": "অ্যাপে ফিরে আসার মৃদু মনে করানো",
+  "notifSettings_budgetWarningsDesc": "Budget সতর্কতা, খরচ spike, বিল reminder",
+  "notifSettings_localNotifDisclaimer": "Notifications আপনার device-এ locally deliver হয়। কোনো data বাইরে যায় না।",
+  "smsImport_autoImport": "Auto Import",
+  "smsImport_permissions": "অনুমতি",
+  "smsImport_notifAccess": "Notification Access",
+  "smsImport_notifAccessEnabled": "Notification access সক্রিয়",
+  "smsImport_allowReadingNotif": "Bank notifications পড়ার অনুমতি দিন",
+  "smsImport_autoDetectTxn": "Notifications থেকে transactions auto-detect করুন",
+  "smsImport_privacyNote": "Notifications are read locally on your device to detect transactions. Nothing is uploaded or shared.",
+  "smsImport_tools": "টুলস",
+  "smsImport_txnActivity": "Transaction Activity",
+  "smsImport_viewDetectedTxn": "সব detect করা transactions দেখুন",
+  "smsImport_clearHistory": "Processing History মুছুন",
+  "smsImport_resetDetection": "Detection history reset করুন",
+  "smsImport_howItWorks": "এটি কীভাবে কাজ করে",
+  "smsImport_readsBankNotif": "Reads bank and wallet notifications",
+  "smsImport_dataStaysOnDevice": "সব data আপনার device-এ থাকে",
+  "smsImport_autoCreatesTxn": "Transactions স্বয়ংক্রিয়ভাবে তৈরি করে",
+  "smsImport_personalIgnored": "Personal notifications উপেক্ষা করা হয়",
+  "smsImport_noDataSent": "কোনো data কোনো server-এ পাঠানো হয় না",
+  "smsImport_active": "সক্রিয়",
+  "smsImport_inactive": "নিষ্ক্রিয়",
+  "smsImport_grantAccess": "শুরু করতে notification access দিন",
+  "smsImport_notAvailableIos": "iOS-এ পাওয়া যায় না",
+  "smsImport_enableAccessFirst": "আগে notification access সক্রিয় করুন",
+  "smsImport_notifAccessRequired": "Notification Access প্রয়োজন",
+  "smsImport_notifAccessDesc": "Mudra Manager-এর transactions auto-detect করতে notification access দরকার",
+  "smsImport_onlyBankRead": "শুধু bank/wallet notifications পড়া হয়",
+  "smsImport_personalNeverRead": "Personal messages কখনো পড়া হয় না",
+  "smsImport_openSettings": "Settings খুলুন",
+  "smsImport_clearHistoryConfirm": "Processing History মুছবেন?",
+  "smsImport_clearHistoryWarning": "আগে detect করা notifications আবার process হবে",
+  "smsImport_tapAgainSettings": "System settings খুলতে আবার ট্যাপ করুন",
+  "upgrade_purchaseFailed": "কেনা ব্যর্থ হয়েছে। আবার চেষ্টা করুন।",
+  "upgrade_purchasePending": "Purchase pending। Payment সম্পন্ন হলে Pro activate হবে।",
+  "upgrade_welcomePro": "Pro-তে স্বাগতম!",
+  "upgrade_allFeaturesUnlocked": "সব features unlock হয়েছে। আপনার support-এর জন্য ধন্যবাদ!",
+  "upgrade_startExploring": "Explore শুরু করুন",
+  "upgrade_yourProFeatures": "আপনার Pro features",
+  "upgrade_manageSubscription": "Subscription manage করতে Google Play Store > Subscriptions-এ যান",
+  "upgrade_everythingInPro": "Pro-তে সবকিছু",
+  "upgrade_chooseYourPlan": "আপনার plan বেছে নিন",
+  "upgrade_yearly": "বার্ষিক",
+  "upgrade_save43": "43% বাঁচান",
+  "upgrade_monthly": "মাসিক",
+  "upgrade_continue": "চালিয়ে যান",
+  "upgrade_restorePurchases": "Purchases restore করুন",
+  "upgrade_renewsToday": "আজ renew হবে",
+  "upgrade_mudraManagerPro": "Mudra Manager Pro",
+  "upgrade_unlockFullPower": "আপনার finances-এর পূর্ণ শক্তি unlock করুন",
+  "day_monday": "সোমবার",
+  "day_tuesday": "মঙ্গলবার",
+  "day_wednesday": "বুধবার",
+  "day_thursday": "বৃহস্পতিবার",
+  "day_friday": "শুক্রবার",
+  "day_saturday": "শনিবার",
+  "day_sunday": "রবিবার",
+  "recap_income": "আয়",
+  "recap_expense": "খরচ",
+  "recap_saved": "সঞ্চিত",
+  "recap_dailySpending": "দৈনিক খরচ",
+  "recap_spendingPace": "খরচের গতি",
+  "recap_recurringVsOneTime": "নিয়মিত vs একবারের",
+  "recap_topCategories": "শীর্ষ শ্রেণী",
+  "recap_mostFrequent": "সবচেয়ে ঘন ঘন",
+  "recap_incomeSources": "আয়ের উৎস",
+  "recap_byAccount": "অ্যাকাউন্ট অনুযায়ী",
+  "recap_budgetHealth": "Budget স্বাস্থ্য",
+  "recap_biggestExpenses": "সবচেয়ে বড় খরচ",
+  "recap_biggestIncome": "সবচেয়ে বড় আয়",
+  "recap_generating": "তৈরি হচ্ছে...",
+  "recap_avgPerDay": "গড়/দিন",
+  "recap_weekdayAvg": "কর্মদিবস গড়",
+  "recap_weekendAvg": "উইকেন্ড গড়",
+  "recap_budgets": "বাজেট",
+  "recap_badges": "ব্যাজ",
+  "recap_streak": "Streak",
+  "recap_best": "সেরা",
+  "recap_savings": "সঞ্চয়",
+  "about_developerMode": "Developer Mode সক্রিয়!",
+  "about_couldNotOpenLink": "লিংক খোলা যায়নি",
+  "about_title": "সম্পর্কে",
+  "about_privacyDesc": "সবকিছু আপনার device-এ থাকে। কোনো account নেই, কোনো cloud নেই।",
+  "about_legalTransparency": "আইনি ও স্বচ্ছতা",
+  "about_privacyPolicy": "Privacy Policy",
+  "about_privacyPolicyDesc": "আমরা কীভাবে আপনার data সুরক্ষিত রাখি",
+  "about_termsOfService": "সেবার শর্তাবলী",
+  "about_termsDesc": "App ব্যবহারের শর্তাবলী",
+  "about_openSourceLicenses": "Open Source Licenses",
+  "about_openSourceDesc": "আমাদের ব্যবহৃত third-party libraries",
+  "about_supportConnect": "Support ও Connect",
+  "about_checkForUpdates": "Updates চেক করুন",
+  "about_checkForUpdatesDesc": "App version ম্যানুয়ালি চেক করুন",
+  "about_latestVersion": "আপনি latest version-এ আছেন",
+  "about_unableToCheck": "Updates চেক করা যায়নি",
+  "about_officialWebsite": "অফিসিয়াল ওয়েবসাইট",
+  "about_visitWebsite": "mudramanager.com দেখুন",
+  "about_contactSupport": "Support-এ যোগাযোগ করুন",
+  "about_contactSupportDesc": "সাহায্য নিন বা সমস্যা জানান",
+  "about_rateApp": "App-কে Rate করুন",
+  "about_rateAppDesc": "Store-এ আপনার অভিজ্ঞতা শেয়ার করুন",
+  "about_developerModeSection": "Developer Mode",
+  "about_mudraManager": "Mudra Manager",
+  "about_secureFinancial": "নিরাপদ আর্থিক নিয়ন্ত্রণ",
+  "about_loadingLicenses": "Licenses লোড হচ্ছে...",
+  "appearance_title": "চেহারা",
+  "appearance_themeMode": "Theme Mode",
+  "appearance_display": "Display",
+  "appearance_toneVoice": "Tone ও Voice",
+  "appearance_changesApplyInstantly": "Theme ও display পরিবর্তন তৎক্ষণাৎ প্রযোজ্য।",
+  "appearance_darkAppearance": "Dark চেহারা",
+  "appearance_lightAppearance": "Light চেহারা",
+  "appearance_accountStyle": "Account স্টাইল",
+  "appearance_cards": "Cards",
+  "appearance_stack": "Stack",
+  "appearance_bento": "Bento",
+  "appearance_highContrast": "High Contrast",
+  "appearance_highContrastDesc": "কম দৃষ্টির জন্য পাঠযোগ্যতা উন্নত করে",
+  "appearance_guestMode": "Guest Mode",
+  "appearance_guestModeOnDesc": "আসল পরিমাণ লুকানো আছে",
+  "appearance_guestModeOffDesc": "সংবেদনশীল আর্থিক data লুকান",
+  "appearance_lightMode": "Light Mode",
+  "appearance_darkMode": "Dark Mode",
+  "appearance_systemDefault": "System Default",
+  "analytics_financialHealthScore": "আর্থিক স্বাস্থ্য Score",
+  "analytics_savingsRate": "সঞ্চয় হার",
+  "analytics_expenseRatio": "খরচ অনুপাত",
+  "analytics_insights": "তথ্য",
+  "analytics_spendingPrediction": "খরচের পূর্বাভাস",
+  "analytics_nextMonth": "পরের মাস",
+  "analytics_basedOnAvg": "গত ৩ মাসের গড়ের উপর ভিত্তি করে",
+  "analytics_categoryTrends": "শ্রেণী প্রবণতা",
+  "analytics_spendingByDay": "দিন অনুযায়ী খরচ",
+  "trip_notFound": "Trip পাওয়া যায়নি",
+  "trip_notFoundMsg": "Trip পাওয়া যায়নি",
+  "trip_tripLabel": "Trip",
+  "trip_groupLabel": "Group",
+  "trip_archiveTripTitle": "Trip Archive করুন",
+  "trip_archiveMsg": "এই trip archive হবে। সব data ও settlement সুরক্ষিত থাকবে।",
+  "trip_archiveConfirm": "Archive করুন",
+  "trip_totalSpent": "মোট খরচ",
+  "trip_splitExpense": "খরচ ভাগ করুন",
+  "trip_allPeople": "সবাই",
+  "trip_allCategories": "সব শ্রেণী",
+  "trip_uncategorized": "শ্রেণীবিহীন",
+  "trip_removeExpense": "খরচ সরান",
+  "trip_removeFromTrip": "এই খরচ trip থেকে সরাবেন?",
+  "trip_removeFromGroup": "এই খরচ group থেকে সরাবেন?",
+  "trip_removeConfirm": "সরান",
+  "trip_unknown": "অজানা",
+  "trip_youPaid": "আপনি দিয়েছেন",
+  "trip_noPendingSettlements": "এই trip-এর জন্য কোনো pending settlement নেই",
+  "trip_everyoneSquare": "সবার হিসাব সমান",
+  "trip_archiveGroupTitle": "Group Archive করুন",
+  "trip_archiveGroupMsg": "এই group archive হবে। সব data ও settlement সুরক্ষিত থাকবে।",
+  "editTrip_addParticipant": "অংশগ্রহণকারী যোগ করুন",
+  "editTrip_name": "নাম",
+  "editTrip_enterName": "অংশগ্রহণকারীর নাম লিখুন",
+  "editTrip_finalizeTrip": "Trip চূড়ান্ত করুন",
+  "editTrip_closeGroup": "Group বন্ধ করুন",
+  "editTrip_finalizeMsg": "Trip শেষ হবে। এরপর খরচ যোগ করা যাবে না।",
+  "editTrip_closeGroupMsg": "এই group বন্ধ হবে। এরপর খরচ যোগ করা যাবে না।",
+  "editTrip_finalize": "চূড়ান্ত করুন",
+  "editTrip_close": "বন্ধ করুন",
+  "editTrip_groupNotFound": "Group পাওয়া যায়নি",
+  "editTrip_groupNotFoundMsg": "Group পাওয়া যায়নি",
+  "editTrip_editTrip": "Trip সম্পাদনা",
+  "editTrip_editGroup": "Group সম্পাদনা",
+  "editTrip_editSplitGroup": "Split Group সম্পাদনা",
+  "editTrip_createTrip": "Trip তৈরি করুন",
+  "editTrip_createSplitGroup": "Split Group তৈরি করুন",
+  "editTrip_travelTrip": "Travel Trip",
+  "editTrip_splitGroup": "Split Group",
+  "editTrip_tripDetails": "Trip বিবরণ",
+  "editTrip_groupDetails": "Group বিবরণ",
+  "editTrip_tripName": "Trip-এর নাম",
+  "editTrip_groupName": "Group-এর নাম",
+  "editTrip_descriptionOptional": "বিবরণ (ঐচ্ছিক)",
+  "editTrip_tripHint": "বন্ধুদের সাথে beach vacation",
+  "editTrip_groupHint": "বন্ধুদের সাথে খরচ ভাগ করুন",
+  "editTrip_budgetOptional": "Budget (ঐচ্ছিক)",
+  "editTrip_currency": "মুদ্রা",
+  "editTrip_baseCurrencyDefault": "Base currency (default)",
+  "editTrip_duration": "সময়কাল",
+  "editTrip_warningDateChange": "সতর্কতা: তারিখ পরিবর্তন",
+  "expense_notFound": "পাওয়া যায়নি",
+  "expense_notFoundMsg": "খরচ পাওয়া যায়নি",
+  "expense_details": "খরচের বিবরণ",
+  "expense_paidBy": "কে দিয়েছে",
+  "expense_you": "You",
+  "expense_yourShare": "আপনার ভাগ",
+  "expense_noteLabel": "নোট",
+  "expense_editSplit": "Split সম্পাদনা",
+  "expense_splitType": "Split ধরন",
+  "expense_equal": "সমান",
+  "expense_custom": "কাস্টম",
+  "expense_participants": "অংশগ্রহণকারী",
+  "expense_autoFillRemaining": "বাকি auto-fill করুন",
+  "expense_deleteExpense": "খরচ মুছুন",
+  "expense_deleteExpenseMsg": "এটি সবার balance পরিবর্তন করবে। চালিয়ে যাবেন?",
+  "billCenter_overdue": "বকেয়া",
+  "billCenter_thisWeek": "এই সপ্তাহে",
+  "billCenter_thisMonth": "এই মাসে",
+  "billCenter_later": "পরে",
+  "billCenter_totalUpcoming": "মোট আসন্ন",
+  "billCenter_today": "আজ",
+  "billCenter_tomorrow": "আগামীকাল",
+  "billCenter_afterUpcoming": "আসন্ন বিলের পরে",
+  "billCenter_dueToday": "আজ দেয়",
+  "billCenter_paid": "পরিশোধিত",
+  "billCenter_pay": "Pay",
+  "billCenter_existingTxnFound": "বিদ্যমান Transaction পাওয়া গেছে",
+  "billCenter_linkTransaction": "এই Transaction যুক্ত করুন",
+  "billCenter_createNewEntry": "নতুন Entry তৈরি করুন",
+  "comparison_steady": "স্থির চলছে",
+  "comparison_steadyDesc": "আপনার খরচ সামঞ্জস্যপূর্ণ — এটাই শৃঙ্খলা।",
+  "comparison_doingGreat": "দারুণ করছেন",
+  "comparison_headsUp": "সতর্কতা — খরচ বেড়েছে",
+  "reconcile_title": "মিলিয়ে নিন",
+  "reconcile_info": "আপনার ব্যাংক অ্যাপ বা পাসবইতে দেখানো বর্তমান ব্যালেন্স লিখুন। আমরা স্বয়ংক্রিয়ভাবে পার্থক্য সমন্বয় করব।",
+  "reconcile_balanceInApp": "অ্যাপে ব্যালেন্স",
+  "reconcile_actualBalance": "প্রকৃত ব্যাংক ব্যালেন্স",
+  "reconcile_balanced": "সমন্বিত!",
+  "reconcile_difference": "পার্থক্য",
+  "reconcile_incomeAdjustment": "{amount} এর আয় সমন্বয় যোগ করা হবে।",
+  "reconcile_expenseAdjustment": "{amount} এর ব্যয় সমন্বয় যোগ করা হবে।",
+  "balanceHistory_currentBalance": "বর্তমান ব্যালেন্স",
+  "balanceHistory_highest": "সর্বোচ্চ",
+  "balanceHistory_lowest": "সর্বনিম্ন",
+  "balanceHistory_average": "গড়",
+  "common_errorLoading": "ডেটা লোড করতে ব্যর্থ",
+  "balanceHistory_trend": "৩০ দিনের প্রবণতা",
+  "balanceHistory_growing": "আপনার ব্যালেন্স বাড়ছে 📈",
+  "balanceHistory_declining": "ব্যালেন্স কমেছে — পুনরুদ্ধার করুন 💪",
+  "balanceHistory_steady": "স্থির আছে ⚖️",
+  "account_editTitle": "অ্যাকাউন্ট সম্পাদনা",
+  "account_newTitle": "নতুন অ্যাকাউন্ট",
+  "account_name": "অ্যাকাউন্টের নাম",
+  "account_typeLabel": "অ্যাকাউন্টের ধরন",
+  "account_detailsLabel": "বিবরণ",
+  "account_colorLabel": "রঙ",
+  "account_currencyLabel": "মুদ্রা",
+  "account_balance": "ব্যালেন্স",
+  "account_outstanding": "বকেয়া",
+  "account_last4": "শেষ ৪ অঙ্ক",
+  "account_last4Helper": "SMS অটো-ম্যাচিংয়ের জন্য",
+  "account_initialBalance": "প্রারম্ভিক ব্যালেন্স",
+  "account_cardPaidOff": "কার্ড পরিশোধ হলে ০ লিখুন",
+  "account_min4": "ন্যূনতম ৪ অঙ্ক",
+  "account_max4": "শুধুমাত্র শেষ ৪ অঙ্ক",
+  "iconPicker_title": "আইকন বেছে নিন",
+  "iconPicker_search": "আইকন খুঁজুন...",
+  "iconPicker_noResults": "কোনো আইকন পাওয়া যায়নি",
+  "colorPicker_title": "রঙ বেছে নিন",
+  "color_red": "লাল",
+  "color_pink": "গোলাপি",
+  "color_purple": "বেগুনি",
+  "color_indigo": "নীল",
+  "color_blue": "নীলা",
+  "color_cyan": "সায়ান",
+  "color_teal": "টিল",
+  "color_green": "সবুজ",
+  "color_orange": "কমলা",
+  "color_brown": "বাদামি",
+  "color_grey": "ধূসর",
+  "accounts_totalBalance": "মোট ব্যালেন্স",
+  "accounts_accountsCount": "অ্যাকাউন্ট",
+  "accounts_archived": "সংগ্রহীত",
+  "accounts_howItWorks": "অ্যাকাউন্ট কীভাবে কাজ করে",
+  "accounts_howItWorksDesc": "আপনার সব ব্যাংক অ্যাকাউন্ট, ওয়ালেট এবং নগদ এক জায়গায় পরিচালনা করুন। একাধিক অ্যাকাউন্টে ব্যালেন্স এবং লেনদেন ট্র্যাক করুন।",
+  "accounts_primary": "প্রাথমিক",
+  "categories_label": "শ্রেণী",
+  "categories_transactionsLabel": "লেনদেন",
+  "categories_deleteWithTransactions": "এটি \"{name}\" এবং {count} টি সংযুক্ত লেনদেন স্থায়ীভাবে মুছে দেবে। এই কাজটি ফেরানো যাবে না।",
+  "categories_deleteAll": "সব মুছুন",
+  "categories_edit": "শ্রেণী সম্পাদনা",
+  "categories_delete": "শ্রেণী মুছুন",
+  "categories_deleteSubtitle": "সব সংযুক্ত লেনদেন মুছে দেয়",
+  "category_save": "সেভ করুন",
+  "category_detailsLabel": "বিবরণ",
+  "category_parentLabel": "মূল শ্রেণী",
+  "category_nameHint": "শ্রেণীর নাম",
+  "category_keywordsHint": "কীওয়ার্ড (কমা দিয়ে আলাদা)",
+  "category_keywordsHelper": "SMS অটো-ডিটেকশনের জন্য",
+  "currency_title": "মুদ্রা",
+  "currency_baseCurrency": "মূল মুদ্রা",
+  "currency_baseDescription": "সব মোট, বাজেট এবং বিশ্লেষণ এই মুদ্রা ব্যবহার করে।",
+  "currency_exchangeRates": "বিনিময় হার",
+  "currency_exchangeRatesDesc": "রূপান্তর হার দেখুন এবং সম্পাদনা করুন",
+  "currency_archivedDesc": "পূর্ববর্তী মুদ্রার লেনদেন দেখুন",
+  "exchange_unitInfo": "বিদেশী মুদ্রার ১ ইউনিট = X {base}। সম্পাদনা করতে ট্যাপ করুন।",
+  "exchange_search": "মুদ্রা খুঁজুন...",
+  "exchange_rateUpdated": "{code} হার আপডেট হয়েছে",
+  "exchange_editRate": "{code} হার সম্পাদনা",
+  "exchange_rateLabel": "হার",
+  "exchange_invalidRate": "একটি বৈধ হার লিখুন",
+  "archived_transaction": "লেনদেন",
+  "currency_changingCurrency": "মুদ্রা পরিবর্তন হচ্ছে...",
+  "currency_pleaseWait": "লেনদেন সংগ্রহ এবং সেটিংস আপডেট হচ্ছে",
+  "security_title": "নিরাপত্তা",
+  "security_unprotected": "অসুরক্ষিত",
+  "security_basic": "বেসিক",
+  "security_strong": "শক্তিশালী",
+  "security_unprotectedDesc": "আপনার ডেটা সুরক্ষিত করতে PIN বা বায়োমেট্রিক্স সক্রিয় করুন",
+  "security_protectionsActive": "{total} এর মধ্যে {count} সুরক্ষা সক্রিয়",
+  "security_authentication": "প্রমাণীকরণ",
+  "security_pinLock": "PIN লক",
+  "security_pinActive": "৪ অঙ্কের PIN সক্রিয়",
+  "security_pinSet": "৪ অঙ্কের PIN সেট করুন",
+  "security_biometric": "বায়োমেট্রিক আনলক",
+  "security_biometricDesc": "ফিঙ্গারপ্রিন্ট বা Face ID",
+  "security_manage": "পরিচালনা",
+  "security_changePin": "PIN পরিবর্তন",
+  "security_changePinDesc": "আপনার ৪ অঙ্কের PIN আপডেট করুন",
+  "security_enablePinFirst": "প্রথমে PIN সক্রিয় করুন",
+  "security_biometricEnabled": "বায়োমেট্রিক সক্রিয়",
+  "security_biometricDisabled": "বায়োমেট্রিক অক্ষম",
+  "security_infoText": "আপনার PIN এই ডিভাইসে নিরাপদে সংরক্ষিত — এটি কখনো সার্ভারে যায় না।",
+  "notifSettings_activeCount": "৩ এর মধ্যে {count} সক্রিয়",
+  "notifSettings_summaryDesc": "সারাংশে খরচ, আয়, শীর্ষ শ্রেণী এবং ব্যালেন্স দেখায়",
+  "notifSettings_dailySummaryDesc": "গতকালের খরচের সারাংশ",
+  "notifSettings_weeklySchedule": "প্রতি {day} সকাল ৯:০০ টায়",
+  "smsImport_autoImporting": "লেনদেন অটোম্যাটিক import হচ্ছে",
+  "smsImport_enableToStart": "Auto import সক্রিয় করুন tracking শুরু করতে",
+  "smsImport_iosRestriction": "iOS প্ল্যাটফর্মের সীমাবদ্ধতার কারণে Auto import শুধুমাত্র Android-এ পাওয়া যায়।",
+  "common_change": "পরিবর্তন",
+  "goal_whatSavingFor": "কিসের জন্য সঞ্চয় করছেন?",
+  "netWorth_totalLabel": "মোট Net Worth",
+  "netWorth_notEnoughData": "এখনো পর্যাপ্ত data নেই",
+  "netWorth_assets": "সম্পদ",
+  "netWorth_liabilities": "দায়",
+  "netWorth_composition": "সম্পদ কাঠামো",
+  "goal_milestoneStarted": "শুরু",
+  "goal_milestoneStartedDesc": "আপনার যাত্রা শুরু হয়েছে",
+  "goal_milestone25": "25%",
+  "goal_milestone25Desc": "এক চতুর্থাংশ সম্পন্ন",
+  "goal_milestone50": "50%",
+  "goal_milestone50Desc": "অর্ধেক হয়ে গেছে!",
+  "goal_milestone75": "75%",
+  "goal_milestone75Desc": "প্রায় পৌঁছে গেছেন",
+  "goal_milestone100": "100%",
+  "goal_milestone100Desc": "Goal সম্পন্ন! 🎉",
+  "goal_flexibleTimeline": "নমনীয় সময়সীমা",
+  "goal_amount": "রাশি",
+  "goal_emotionReached": "Goal পূরণ হয়েছে! 🎉",
+  "goal_emotionProgress": "ভালো progress ✨",
+  "goal_emotionMoreToGo": "আর মাত্র {amount} বাকি 💪",
+  "goal_emotionSetTarget": "Target সেট করুন 🎯",
+  "goal_emotionWhatSaving": "কিসের জন্য সঞ্চয় করছেন?",
+  "goal_exceededTarget": "Target ছাড়িয়ে গেছে! 🎉",
+  "goal_alreadyReached": "Goal আগেই পূরণ হয়েছে! 🎉",
+  "goal_progressLeft": "{percent}% হয়েছে • {amount} বাকি",
+  "goal_paceDaily": "এই গতিতে {daily}/দিন লাগবে।\nমানে {monthly}/মাস।",
+  "goal_daysRemaining": "{count} দিন বাকি",
+  "goal_daysLeft": "{count} দিন বাকি আছে",
+  "goal_startSaving": "{amount} সঞ্চয় শুরু করুন",
+  "common_today": "আজ",
+  "common_yesterday": "গতকাল",
+  "common_amount": "পরিমাণ",
+  "accounts_edit": "অ্যাকাউন্ট সম্পাদনা",
+  "accounts_balanceHistory": "ব্যালেন্স ইতিহাস",
+  "accounts_matchBank": "Bank statement-এর সাথে মেলান",
+  "accounts_viewPortfolio": "Portfolio দেখুন",
+  "accounts_setAsPrimary": "প্রাথমিক করুন",
+  "accounts_primaryDesc": "Splits ও trips-এর জন্য default অ্যাকাউন্ট",
+  "accounts_archive": "Archive করুন",
+  "accounts_archiveDesc": "সক্রিয় অ্যাকাউন্ট থেকে লুকান",
+  "accounts_unarchive": "Unarchive করুন",
+  "accounts_unarchiveDesc": "সক্রিয় অ্যাকাউন্টে ফিরিয়ে আনুন",
+  "accounts_deleteDesc": "অ্যাকাউন্ট স্থায়ীভাবে মুছুন",
+  "smsActivity_title": "Transaction Activity",
+  "smsActivity_approved": "অনুমোদিত",
+  "smsActivity_pending": "মুলতুবি",
+  "smsActivity_rejected": "প্রত্যাখ্যাত",
+  "smsActivity_needsReview": "Review দরকার",
+  "smsActivity_duplicates": "ডুপ্লিকেট",
+  "smsActivity_filterByStatus": "Status দিয়ে filter করুন",
+  "smsActivity_transactionCount": "{count}টি Transaction",
+  "smsActivity_needsAttention": "{count}টিতে মনোযোগ দিন",
+  "smsActivity_resultCount": "{count}টি ফলাফল",
+  "smsActivity_noActivities": "কোনো মিলে যাওয়া activity নেই",
+  "smsActivity_status": "Status",
+  "smsActivity_confidence": "বিশ্বাসযোগ্যতা",
+  "smsActivity_account": "অ্যাকাউন্ট",
+  "smsActivity_bank": "Bank",
+  "smsActivity_type": "ধরন",
+  "smsActivity_merchant": "Merchant",
+  "smsActivity_balance": "ব্যালেন্স",
+  "smsActivity_reference": "Reference",
+  "smsActivity_duplicateLabel": "DUPLICATE",
+  "smsActivity_transferLabel": "TRANSFER",
+  "smsActivity_reject": "প্রত্যাখ্যান",
+  "smsActivity_approve": "অনুমোদন",
+  "smsActivity_transfer": "Transfer",
+  "smsActivity_addAccount": "অ্যাকাউন্ট যোগ",
+  "smsActivity_duplicateWarning": "এটি duplicate transaction হতে পারে। Approve করার আগে ভালো করে দেখুন।",
+  "smsActivity_noAccountWarning": "\"{account}\" এর সাথে মিলে যাওয়া অ্যাকাউন্ট পাওয়া যায়নি। Approve করতে আগে যোগ করুন।",
+  "smsActivity_transferWarning": "এটি আপনার অ্যাকাউন্টগুলোর মধ্যে transfer মনে হচ্ছে। Approve করলে transfer screen খুলবে।",
+  "common_all": "সব",
+  "backup_lastBackup": "শেষ backup",
+  "backup_noBackups": "এখনো কোনো backup নেই",
+  "backup_createFirst": "আপনার data সুরক্ষিত করতে প্রথম backup তৈরি করুন",
+  "backup_actions": "কার্যকরী",
+  "backup_history": "ইতিহাস",
+  "backup_noHistory": "কোনো backup ইতিহাস নেই",
+  "backup_infoText": "Backups আপনার password দিয়ে encrypt হয়ে .mudra files-এ save হয়। Password সুরক্ষিত রাখুন — এটি recover করা যায় না।",
+  "backup_justNow": "এইমাত্র",
+  "backup_minutesAgo": "{count} মিনিট আগে",
+  "backup_hoursAgo": "{count} ঘন্টা আগে",
+  "backup_daysAgo": "{count} দিন আগে",
+  "backup_recordCount": "{count} records",
+  "account_changeCurrency": "মুদ্রা পরিবর্তন করবেন?",
+  "account_resetTo": "{code}-এ reset করুন",
+  "account_baseCurrencyInfo": "এই অ্যাকাউন্টের transactions আপনার base currency-তে।",
+  "account_foreignCurrencyInfo": "Transactions {code}-এ record হবে এবং {base}-এ convert হবে।",
+  "account_warningNoConvert": "বিদ্যমান balance স্বয়ংক্রিয়ভাবে convert হবে না।",
+  "account_warningNewCurrency": "নতুন transactions নতুন মুদ্রায় হবে।",
+  "account_warningManualAdjust": "আপনাকে balance ম্যানুয়ালি adjust করতে হতে পারে।",
+  "category_selectParent": "মূল শ্রেণী বেছে নিন",
+  "appearance_colorTheme": "Color Theme",
+  "appearance_amoledMode": "AMOLED Mode",
+  "appearance_toneActivated": "{name} tone সক্রিয়",
+  "dashboard_cardsActive": "{total} এর মধ্যে {visible}টি card সক্রিয়",
+  "dashboard_dragToReorder": "ক্রম পরিবর্তন করতে drag করুন, দেখাতে/লুকাতে toggle করুন",
+  "dashboard_smartOrdering": "Smart ক্রম",
+  "dashboard_catEssential": "অপরিহার্য",
+  "dashboard_catFinance": "অর্থ",
+  "dashboard_catAnalytics": "বিশ্লেষণ",
+  "dashboard_catActions": "কার্যকরী",
+  "dashboard_catAI": "AI তথ্য",
+  "dashboard_catContextual": "প্রসঙ্গ ভিত্তিক",
+  "importExport_title": "Import ও Export",
+  "importExport_export": "Export",
+  "importExport_import": "Import",
+  "importExport_exportTitle": "Transactions Export করুন",
+  "importExport_exportDesc": "আপনার transactions Excel file-এ download করুন।",
+  "importExport_exporting": "Export হচ্ছে...",
+  "importExport_exportAsExcel": "Excel-এ Export করুন",
+  "importExport_importTitle": "Excel থেকে Import করুন",
+  "importExport_importDesc": ".xlsx file থেকে transactions import করুন। Import-এর আগে preview ও column mapping করতে পারবেন।",
+  "importExport_excelFormat": "Excel (.xlsx)",
+  "importExport_bankStatement": "Bank Statement",
+  "importExport_otherApps": "অন্যান্য Apps",
+  "importExport_pickFile": "Excel File বেছে নিন",
+  "importExport_infoText": "Export সব transaction details সহ Excel file তৈরি করে। Import অন্য finance apps বা manual spreadsheets থেকে .xlsx files support করে।",
+  "plugins_subtitle": "Mudra Manager-কে powerful plugins দিয়ে বাড়ান",
+  "plugins_official": "Official",
+  "plugins_enabled": "{name} সক্রিয়",
+  "plugins_disabled": "{name} নিষ্ক্রিয়",
+  "plugins_configure": "Plugin configure করুন",
+  "plugins_activeCount": "{total} এর মধ্যে {active} সক্রিয়",
+  "plugins_toggleDesc": "App features বাড়াতে plugins toggle করুন",
+  "plugins_default": "Default",
+  "plugins_configureSettings": "Plugin settings configure করুন",
+  "plugins_creditCardReminders": "Credit Card Reminders",
+  "plugins_remindBefore": "কত দিন আগে মনে করাবে",
+  "plugins_noCreditCards": "কোনো credit card account পাওয়া যায়নি। আগে একটি যোগ করুন।",
+  "plugins_creditCardAccounts": "Credit Card অ্যাকাউন্ট",
+  "plugins_billDay": "Bill Day (1-31)",
+  "plugins_remindersConfigured": "Credit card reminders সেট হয়েছে",
+  "plugins_infoText": "Plugins app features বাড়ায়। কিছু plugins-এর অতিরিক্ত permissions বা configuration দরকার।",
+  "help_title": "সাহায্য ও সহায়তা",
+  "help_searchHint": "Help topics খুঁজুন...",
+  "help_heroTitle": "আমরা কীভাবে সাহায্য করতে পারি?",
+  "help_heroDesc": "Guides দেখুন বা কোনো topic খুঁজুন",
+  "help_topics": "বিষয়",
+  "help_tryDifferent": "অন্য শব্দ চেষ্টা করুন",
+  "help_howToUse": "কীভাবে ব্যবহার করবেন",
+  "help_tips": "পরামর্শ",
+  "help_articleCount": "{count}টি নিবন্ধ",
+  "help_resultCount": "{count}টি ফলাফল",
+  "help_infoText": "যা দরকার তা পাচ্ছেন না? About → Contact Support-এ যান।",
+  "about_legalCount": "3টি আইটেম",
+  "about_supportCount": "4টি আইটেম",
+  "about_packageCount": "{count}টি open source packages",
+  "onboard_continue": "এগিয়ে যান",
+  "onboard_restoreFromBackup": "Backup থেকে restore করুন",
+  "onboard_accountNameRequired": "অ্যাকাউন্টের নাম দরকার",
+  "onboard_balanceRequired": "ব্যালেন্স দরকার",
+  "onboard_enterValidNumber": "সঠিক নম্বর লিখুন",
+  "onboard_accountHint": "যেমন Cash, Bank",
+  "onboard_browseAllCurrencies": "সব মুদ্রা দেখুন",
+  "onboard_toneTitle": "Mudra আপনার সাথে কীভাবে কথা বলবে?",
+  "onboard_toneDesc": "একটি শৈলী বেছে নিন। পরে পরিবর্তন করতে পারবেন।",
+  "onboard_categoriesTitle": "আপনার শ্রেণী বেছে নিন",
+  "onboard_categoriesDesc": "আপনার জীবনধারার সাথে মিলে যায় এমন packs বেছে নিন। পরে পরিবর্তন করতে পারবেন।",
+  "onboard_startFresh": "নতুন করে শুরু",
+  "onboard_startFreshDesc": "কোনো শ্রেণী নেই — পরে নিজে যোগ করুন",
+  "onboard_currencyWarning": "পরে base currency পরিবর্তন করলে বর্তমান transactions archive হবে।"
 }

@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/utils/safe_date_format.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 // lib/features/profile/presentation/screens/backup_restore_screen.dart
 
@@ -54,7 +55,7 @@ class BackupRestoreScreen extends ConsumerWidget {
                 end: Alignment.bottomRight,
                 colors: [
                   color.primary.withValues(alpha: isDark ? 0.2 : 0.12),
-                  color.primaryContainer.withValues(alpha: 0.4),
+                  color.primary.withValues(alpha: isDark ? 0.08 : 0.04),
                 ],
               ),
               border: Border.all(
@@ -90,7 +91,7 @@ class BackupRestoreScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        lastBackup != null ? 'Last backup' : 'No backups yet',
+                        lastBackup != null ? ctxt.backup_lastBackup : ctxt.backup_noBackups,
                         style: textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w700,
                           color: color.primary,
@@ -99,8 +100,8 @@ class BackupRestoreScreen extends ConsumerWidget {
                       const SizedBox(height: 4),
                       Text(
                         lastBackup != null
-                            ? _formatRelativeDate(lastBackup.backupDate)
-                            : 'Create your first backup to protect your data',
+                            ? _formatRelativeDate(lastBackup.backupDate, ctxt)
+                            : ctxt.backup_createFirst,
                         style: textTheme.bodySmall?.copyWith(
                           color: color.onSurfaceVariant,
                         ),
@@ -114,7 +115,7 @@ class BackupRestoreScreen extends ConsumerWidget {
           const SizedBox(height: 24),
 
           // ── ACTIONS ──
-          _buildSectionHeader('Actions', color, textTheme),
+          _buildSectionHeader(ctxt.backup_actions, color, textTheme),
           const SizedBox(height: 10),
           Card(
             elevation: 0,
@@ -156,7 +157,7 @@ class BackupRestoreScreen extends ConsumerWidget {
           const SizedBox(height: 24),
 
           // ── BACKUP HISTORY ──
-          _buildSectionHeader('History', color, textTheme),
+          _buildSectionHeader(ctxt.backup_history, color, textTheme),
           const SizedBox(height: 10),
           historyAsync.when(
             data: (history) {
@@ -179,7 +180,7 @@ class BackupRestoreScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        'No backup history',
+                        ctxt.backup_noHistory,
                         style: textTheme.bodyMedium?.copyWith(
                           color: color.onSurfaceVariant,
                         ),
@@ -207,7 +208,7 @@ class BackupRestoreScreen extends ConsumerWidget {
                         (history.length > 5 ? 4 : history.length - 1);
                     return Column(
                       children: [
-                        _buildHistoryRow(
+                        _buildHistoryRow(ctxt: ctxt, 
                           backup: backup,
                           color: color,
                           textTheme: textTheme,
@@ -251,7 +252,7 @@ class BackupRestoreScreen extends ConsumerWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Backups are encrypted with your password and saved as .mudra files. Keep your password safe — it cannot be recovered.',
+                    ctxt.backup_infoText,
                     style: textTheme.bodySmall?.copyWith(
                       color: color.onSurfaceVariant,
                       height: 1.4,
@@ -330,7 +331,7 @@ class BackupRestoreScreen extends ConsumerWidget {
               ),
             ),
             Icon(
-              Icons.chevron_right,
+              LucideIcons.chevronRight,
               color: color.onSurfaceVariant,
               size: 20,
             ),
@@ -341,11 +342,11 @@ class BackupRestoreScreen extends ConsumerWidget {
   }
 
   Widget _buildHistoryRow({
-    required BackupMetadata backup,
+    required AppLocalizations ctxt, required BackupMetadata backup,
     required ColorScheme color,
     required TextTheme textTheme,
   }) {
-    final dateStr = DateFormat.yMMMd().add_jm().format(backup.backupDate);
+    final dateStr = safeDateFormat('yMMMd',).add_jm().format(backup.backupDate);
     final sizeStr = _formatFileSize(backup.fileSize);
 
     return Padding(
@@ -374,7 +375,7 @@ class BackupRestoreScreen extends ConsumerWidget {
                 Row(
                   children: [
                     Text(
-                      '${backup.recordCount} records',
+                      ctxt.backup_recordCount(backup.recordCount),
                       style: textTheme.bodySmall
                           ?.copyWith(color: color.onSurfaceVariant),
                     ),
@@ -437,7 +438,7 @@ class BackupRestoreScreen extends ConsumerWidget {
       message: ctxt.backup_includeAttachmentsMessage,
       confirmText: ctxt.backup_yesLabel,
       cancelText: ctxt.backup_noLabel,
-      icon: Icons.attach_file,
+      icon: LucideIcons.paperclip,
     );
 
     final filePath = await BackupService.createEncryptedBackup(
@@ -484,12 +485,12 @@ class BackupRestoreScreen extends ConsumerWidget {
     return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
   }
 
-  String _formatRelativeDate(DateTime date) {
+  String _formatRelativeDate(DateTime date, AppLocalizations ctxt) {
     final diff = DateTime.now().difference(date);
-    if (diff.inMinutes < 1) return 'Just now';
-    if (diff.inHours < 1) return '${diff.inMinutes}m ago';
-    if (diff.inDays < 1) return '${diff.inHours}h ago';
-    if (diff.inDays < 7) return '${diff.inDays}d ago';
-    return DateFormat.yMMMd().format(date);
+    if (diff.inMinutes < 1) return ctxt.backup_justNow;
+    if (diff.inHours < 1) return ctxt.backup_minutesAgo(diff.inMinutes);
+    if (diff.inDays < 1) return ctxt.backup_hoursAgo(diff.inHours);
+    if (diff.inDays < 7) return ctxt.backup_daysAgo(diff.inDays);
+    return safeDateFormat('yMMMd').format(date);
   }
 }

@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/utils/safe_date_format.dart';
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
@@ -44,7 +46,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
     setState(() => _downloading = true);
     try {
       final bytes = await MonthlyRecapPdf.generate(data);
-      final monthStr = DateFormat('MMM_yyyy').format(data.month);
+      final monthStr = safeDateFormat('MMM_yyyy').format(data.month);
       await saveExportedFile(
         bytes,
         'MudraManager_Recap_$monthStr.pdf',
@@ -72,7 +74,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
     final textTheme = Theme.of(context).textTheme;
     final spacing = ref.watch(spacingProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final monthName = DateFormat('MMMM yyyy').format(_selectedMonth);
+    final monthName = safeDateFormat('MMMM yyyy').format(_selectedMonth);
 
     return Scaffold(
       appBar: AppBar(
@@ -143,11 +145,11 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
                     SizedBox(height: spacing.elementGap * 1.5),
                     Row(
                       children: [
-                        _summaryTile('Income', data.totalIncome, color.primary, color, textTheme, spacing),
+                        _summaryTile(AppLocalizations.of(context)!.recap_income, data.totalIncome, color.primary, color, textTheme, spacing),
                         SizedBox(width: spacing.elementGap),
-                        _summaryTile('Expense', data.totalExpense, color.error, color, textTheme, spacing),
+                        _summaryTile(AppLocalizations.of(context)!.recap_expense, data.totalExpense, color.error, color, textTheme, spacing),
                         SizedBox(width: spacing.elementGap),
-                        _summaryTile('Saved', data.netSavings, color.primary, color, textTheme, spacing),
+                        _summaryTile(AppLocalizations.of(context)!.recap_saved, data.netSavings, color.primary, color, textTheme, spacing),
                       ],
                     ),
                   ],
@@ -176,7 +178,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
                     // ── DAILY SPENDING CHART ──
                     if (data.dailySpending.isNotEmpty) ...[
                       _sectionHeader(
-                        'Daily Spending',
+                        AppLocalizations.of(context)!.recap_dailySpending,
                         LucideIcons.chartBar,
                         color,
                         textTheme,
@@ -188,7 +190,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
 
                     // ── SPENDING VELOCITY ──
                     _sectionHeader(
-                      'Spending Pace',
+                      AppLocalizations.of(context)!.recap_spendingPace,
                       LucideIcons.gauge,
                       color,
                       textTheme,
@@ -201,7 +203,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
                     if (data.recurringExpense > 0 ||
                         data.oneTimeExpense > 0) ...[
                       _sectionHeader(
-                        'Recurring vs One-time',
+                        AppLocalizations.of(context)!.recap_recurringVsOneTime,
                         LucideIcons.repeat,
                         color,
                         textTheme,
@@ -214,7 +216,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
                     // ── TOP CATEGORIES ──
                     if (data.topCategories.isNotEmpty) ...[
                       _sectionHeader(
-                        'Top Categories',
+                        AppLocalizations.of(context)!.recap_topCategories,
                         LucideIcons.chartPie,
                         color,
                         textTheme,
@@ -232,7 +234,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
                     // ── CATEGORY BY FREQUENCY ──
                     if (data.categoryByFrequency.isNotEmpty) ...[
                       _sectionHeader(
-                        'Most Frequent',
+                        AppLocalizations.of(context)!.recap_mostFrequent,
                         LucideIcons.hash,
                         color,
                         textTheme,
@@ -245,7 +247,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
                     // ── INCOME SOURCES ──
                     if (data.incomeCategories.isNotEmpty) ...[
                       _sectionHeader(
-                        'Income Sources',
+                        AppLocalizations.of(context)!.recap_incomeSources,
                         LucideIcons.trendingUp,
                         color,
                         textTheme,
@@ -264,7 +266,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
                     // ── ACCOUNT BREAKDOWN ──
                     if (data.accountBreakdown.isNotEmpty) ...[
                       _sectionHeader(
-                        'By Account',
+                        AppLocalizations.of(context)!.recap_byAccount,
                         LucideIcons.wallet,
                         color,
                         textTheme,
@@ -277,7 +279,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
                     // ── BUDGET UTILIZATION ──
                     if (data.budgetDetails.isNotEmpty) ...[
                       _sectionHeader(
-                        'Budget Health',
+                        AppLocalizations.of(context)!.recap_budgetHealth,
                         LucideIcons.target,
                         color,
                         textTheme,
@@ -290,7 +292,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
                     // ── TOP EXPENSES ──
                     if (data.topTransactions.isNotEmpty) ...[
                       _sectionHeader(
-                        'Biggest Expenses',
+                        AppLocalizations.of(context)!.recap_biggestExpenses,
                         LucideIcons.arrowUpDown,
                         color,
                         textTheme,
@@ -309,7 +311,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
                     // ── TOP INCOME ──
                     if (data.topIncomeTransactions.isNotEmpty) ...[
                       _sectionHeader(
-                        'Biggest Income',
+                        AppLocalizations.of(context)!.recap_biggestIncome,
                         LucideIcons.arrowDownUp,
                         color,
                         textTheme,
@@ -438,7 +440,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
             ),
             SizedBox(width: spacing.elementGap),
             _momItem(
-              'Savings',
+              AppLocalizations.of(context)!.recap_savings,
               data.netSavings,
               data.prevMonthSavings,
               data.prevMonthSavings != 0
@@ -532,7 +534,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
               children: [
                 _highlightChip(
                   LucideIcons.calendar,
-                  'Avg/Day',
+                  AppLocalizations.of(context)!.recap_avgPerDay,
                   _fmt(data.avgDailySpend),
                   color,
                   textTheme,
@@ -552,7 +554,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
               children: [
                 _highlightChip(
                   LucideIcons.sun,
-                  'Weekday Avg',
+                  AppLocalizations.of(context)!.recap_weekdayAvg,
                   _fmt(data.weekdayAvg),
                   color,
                   textTheme,
@@ -560,7 +562,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
                 SizedBox(width: spacing.elementGap),
                 _highlightChip(
                   LucideIcons.moon,
-                  'Weekend Avg',
+                  AppLocalizations.of(context)!.recap_weekendAvg,
                   _fmt(data.weekendAvg),
                   color,
                   textTheme,
@@ -572,7 +574,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
               children: [
                 _highlightChip(
                   LucideIcons.piggyBank,
-                  'Budgets',
+                  AppLocalizations.of(context)!.recap_budgets,
                   '${data.budgetsKept}/${data.budgetsTotal} kept',
                   color,
                   textTheme,
@@ -580,7 +582,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
                 SizedBox(width: spacing.elementGap),
                 _highlightChip(
                   LucideIcons.trophy,
-                  'Badges',
+                  AppLocalizations.of(context)!.recap_badges,
                   '${data.achievementsUnlocked} unlocked',
                   color,
                   textTheme,
@@ -592,7 +594,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
               children: [
                 _highlightChip(
                   LucideIcons.flame,
-                  'Streak',
+                  AppLocalizations.of(context)!.recap_streak,
                   '${data.currentStreak} days',
                   color,
                   textTheme,
@@ -601,7 +603,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
                 SizedBox(width: spacing.elementGap),
                 _highlightChip(
                   LucideIcons.award,
-                  'Best',
+                  AppLocalizations.of(context)!.recap_best,
                   '${data.longestStreak} days',
                   color,
                   textTheme,
@@ -1331,7 +1333,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
                             overflow: TextOverflow.ellipsis,
                           ),
                           Text(
-                            '${txn.category} • ${DateFormat('dd MMM').format(txn.date)}',
+                            '${txn.category} • ${safeDateFormat('dd MMM').format(txn.date)}',
                             style: textTheme.labelSmall
                                 ?.copyWith(color: color.onSurfaceVariant),
                           ),

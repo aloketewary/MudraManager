@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -22,6 +23,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
   int _versionTapCount = 0;
   bool _devModeEnabled = false;
   final InAppReview _inAppReview = InAppReview.instance;
+  AppLocalizations get ctxt => AppLocalizations.of(context)!;
 
   void _onVersionTap() {
     setState(() {
@@ -38,7 +40,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
                   color: Theme.of(context).colorScheme.onInverseSurface,
                 ),
                 const SizedBox(width: 12),
-                const Text('Developer Mode Activated! 🚀'),
+                Text(ctxt.about_developerMode),
               ],
             ),
             backgroundColor: Theme.of(context).colorScheme.inverseSurface,
@@ -63,7 +65,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
     try {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (_) {
-      SnackbarService.error('Could not open link');
+      SnackbarService.error(ctxt.about_couldNotOpenLink);
     }
   }
 
@@ -75,7 +77,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('About')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.about_title)),
       body: FutureBuilder<PackageInfo>(
         future: PackageInfo.fromPlatform(),
         builder: (context, snapshot) {
@@ -110,7 +112,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        'Everything stays on your device. No accounts, no cloud, no data collection. Your finances are yours alone.',
+                        ctxt.about_privacyDesc,
                         style: textTheme.bodySmall?.copyWith(
                           color: color.onSurfaceVariant,
                           height: 1.4,
@@ -124,8 +126,8 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
 
               // ── LEGAL & TRANSPARENCY ──
               _buildSectionHeader(
-                'Legal & Transparency',
-                '3 items',
+                AppLocalizations.of(context)!.about_legalTransparency,
+                ctxt.about_legalCount,
                 color,
                 textTheme,
               ),
@@ -137,8 +139,8 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
                 [
                   _ItemData(
                     LucideIcons.fileText,
-                    'Privacy Policy',
-                    'How we protect your data',
+                    AppLocalizations.of(context)!.about_privacyPolicy,
+                    AppLocalizations.of(context)!.about_privacyPolicyDesc,
                     () {
                       HapticFeedback.mediumImpact();
                       _launchURL('https://mudramanager.com/privacy.html');
@@ -146,8 +148,8 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
                   ),
                   _ItemData(
                     LucideIcons.fileCheck,
-                    'Terms of Service',
-                    'App usage terms and conditions',
+                    AppLocalizations.of(context)!.about_termsOfService,
+                    AppLocalizations.of(context)!.about_termsDesc,
                     () {
                       HapticFeedback.mediumImpact();
                       _launchURL('https://mudramanager.com/terms.html');
@@ -155,8 +157,8 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
                   ),
                   _ItemData(
                     LucideIcons.package,
-                    'Open Source Licenses',
-                    'Third-party libraries we use',
+                    AppLocalizations.of(context)!.about_openSourceLicenses,
+                    AppLocalizations.of(context)!.about_openSourceDesc,
                     () {
                       HapticFeedback.mediumImpact();
                       Navigator.push(
@@ -176,8 +178,8 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
 
               // ── SUPPORT & CONNECT ──
               _buildSectionHeader(
-                'Support & Connect',
-                '4 items',
+                AppLocalizations.of(context)!.about_supportConnect,
+                ctxt.about_supportCount,
                 color,
                 textTheme,
               ),
@@ -189,8 +191,8 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
                 [
                   _ItemData(
                     LucideIcons.refreshCw,
-                    'Check for Updates',
-                    'Manually check app version',
+                    AppLocalizations.of(context)!.about_checkForUpdates,
+                    AppLocalizations.of(context)!.about_checkForUpdatesDesc,
                     () async {
                       HapticFeedback.mediumImpact();
                       try {
@@ -209,7 +211,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                'You\'re on the latest version ${info?.version ?? '1.0.0'}',
+                                ctxt.about_latestVersion,
                               ),
                               behavior: SnackBarBehavior.floating,
                             ),
@@ -217,19 +219,14 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
                         }
                       } catch (e) {
                         if (!context.mounted) return;
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Unable to check for updates'),
-                            behavior: SnackBarBehavior.floating,
-                          ),
-                        );
+                        SnackbarService.error(ctxt.about_unableToCheck);
                       }
                     },
                   ),
                   _ItemData(
                     LucideIcons.globe,
-                    'Official Website',
-                    'Visit mudramanager.com',
+                    AppLocalizations.of(context)!.about_officialWebsite,
+                    AppLocalizations.of(context)!.about_visitWebsite,
                     () {
                       HapticFeedback.mediumImpact();
                       _launchURL('https://mudramanager.com');
@@ -237,8 +234,8 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
                   ),
                   _ItemData(
                     LucideIcons.mail,
-                    'Contact Support',
-                    'Get help or report issues',
+                    AppLocalizations.of(context)!.about_contactSupport,
+                    AppLocalizations.of(context)!.about_contactSupportDesc,
                     () {
                       HapticFeedback.mediumImpact();
                       _launchURL('https://mudramanager.com/support.html');
@@ -246,8 +243,8 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
                   ),
                   _ItemData(
                     LucideIcons.star,
-                    'Rate the App',
-                    'Share your experience on the store',
+                    AppLocalizations.of(context)!.about_rateApp,
+                    AppLocalizations.of(context)!.about_rateAppDesc,
                     _requestReview,
                   ),
                 ],
@@ -256,7 +253,8 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
               // ── DEVELOPER MODE ──
               if (_devModeEnabled) ...[
                 const SizedBox(height: 24),
-                _buildSectionHeader('Developer Mode', '', color, textTheme),
+                _buildSectionHeader(
+                    ctxt.about_developerModeSection, '', color, textTheme),
                 const SizedBox(height: 10),
                 Card(
                   elevation: 0,
@@ -363,7 +361,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
           ),
           const SizedBox(height: 20),
           Text(
-            'Mudra Manager',
+            AppLocalizations.of(context)!.about_mudraManager,
             style: textTheme.headlineMedium?.copyWith(
               fontWeight: FontWeight.w800,
               color: color.onSurface,
@@ -372,7 +370,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
           ),
           const SizedBox(height: 4),
           Text(
-            'Secure Financial Command',
+            AppLocalizations.of(context)!.about_secureFinancial,
             style: textTheme.bodyMedium?.copyWith(
               color: color.onSurfaceVariant,
               fontWeight: FontWeight.w500,
@@ -551,9 +549,11 @@ class LicenseScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final ctxt = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Open Source Licenses')),
+      appBar: AppBar(
+          title: Text(ctxt.about_openSourceLicenses),),
       body: FutureBuilder<LicenseData>(
         future: LicenseRegistry.licenses.fold<LicenseData>(
           LicenseData(0, []),
@@ -569,7 +569,7 @@ class LicenseScreen extends StatelessWidget {
                   const CircularProgressIndicator(),
                   const SizedBox(height: 16),
                   Text(
-                    'Loading licenses...',
+                    ctxt.about_loadingLicenses,
                     style: textTheme.bodyLarge?.copyWith(
                       color: color.onSurfaceVariant,
                     ),
@@ -618,7 +618,7 @@ class LicenseScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          appName ?? 'Mudra Manager',
+                          appName ?? ctxt.about_mudraManager,
                           style: textTheme.headlineSmall?.copyWith(
                             fontWeight: FontWeight.w700,
                           ),
@@ -654,7 +654,7 @@ class LicenseScreen extends StatelessWidget {
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              '${data.count} open source packages',
+                              ctxt.about_packageCount(data.count),
                               style: textTheme.titleSmall?.copyWith(
                                 color: color.onSurfaceVariant,
                                 fontWeight: FontWeight.w600,

@@ -12,6 +12,7 @@ import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -126,8 +127,8 @@ class NotificationService {
     if (transactions.isEmpty) {
       await showLocalNotification(
         id: 100,
-        title: '📊 Quiet day yesterday',
-        body: Tone.current.dailySummaryEmpty,
+        title: Tone.appL10n?.notif_quietDayTitle ?? '📊 Quiet day yesterday',
+        body: BuddyMessages.dailySummaryEmpty,
         payload: 'statistics',
       );
       return;
@@ -169,7 +170,7 @@ class NotificationService {
 
     await showLocalNotification(
       id: 100,
-      title: '📊 Here\'s yesterday',
+      title: Tone.appL10n?.notif_heresYesterdayTitle ?? '📊 Here\'s yesterday',
       body: Tone.current.dailySummaryNotif(
         totalSpent.toStringAsFixed(0),
         totalIncome.toStringAsFixed(0),
@@ -261,7 +262,7 @@ class NotificationService {
     if (thisWeekTotal <= 0) {
       await showLocalNotification(
         id: 101,
-        title: '📅 Week in review',
+        title: Tone.appL10n?.notif_weekInReviewTitle ?? '📅 Week in review',
         body: 'Zero expenses this week — that\'s impressive 💪',
         payload: 'statistics',
       );
@@ -303,7 +304,7 @@ class NotificationService {
         '$trend';
     await showLocalNotification(
       id: 101,
-      title: '📅 Your week in review',
+      title: Tone.appL10n?.notif_yourWeekInReviewTitle ?? '📅 Your week in review',
       body: body,
       payload: 'statistics',
     );
@@ -527,7 +528,7 @@ class NotificationService {
   static Future<void> showAchievementUnlocked(String title, int xp) async {
     await showLocalNotification(
       id: 200,
-      title: '🏆 Nice one!',
+      title: Tone.appL10n?.notif_niceOneTitle ?? '🏆 Nice one!',
       body: '$title — that\'s +$xp XP for you',
       payload: 'achievements',
     );
@@ -541,7 +542,7 @@ class NotificationService {
   static Future<void> showLevelUp(int newLevel) async {
     await showLocalNotification(
       id: 201,
-      title: '🎉 Level $newLevel!',
+      title: Tone.appL10n?.notif_levelUpTitle(newLevel) ?? '🎉 Level $newLevel!',
       body: 'You just leveled up — keep going!',
       payload: 'achievements',
     );
@@ -555,7 +556,7 @@ class NotificationService {
   static Future<void> showStreakMilestone(int days) async {
     await showLocalNotification(
       id: 202,
-      title: '🔥 $days days straight!',
+      title: Tone.appL10n?.notif_streakDaysTitle(days) ?? '🔥 $days days straight!',
       body: 'That\'s dedication — your streak is on fire',
       payload: 'achievements',
     );

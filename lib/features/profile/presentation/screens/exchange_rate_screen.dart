@@ -1,3 +1,5 @@
+import 'package:mudra_manager/core/utils/safe_date_format.dart';
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -34,10 +36,11 @@ class _ExchangeRateScreenState extends ConsumerState<ExchangeRateScreen> {
     final spacing = ref.watch(spacingProvider);
     final ratesAsync = ref.watch(_ratesProvider);
     final base = BaseCurrency.code;
+    final ctxt = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Exchange Rates'),
+        title: Text(ctxt.title_exchangeRates),
         elevation: 0,
       ),
       body: ratesAsync.when(
@@ -64,21 +67,25 @@ class _ExchangeRateScreenState extends ConsumerState<ExchangeRateScreen> {
                   children: [
                     Card(
                       elevation: 0,
-                      color: color.primaryContainer,
+                      color: color.surfaceContainerLow,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                        borderRadius:
+                            BorderRadius.circular(spacing.radiusMedium),
+                        side: BorderSide(
+                            color: color.outlineVariant.withValues(alpha: 0.5)),
                       ),
                       child: Padding(
                         padding: EdgeInsets.all(spacing.cardInner),
                         child: Row(
                           children: [
-                            Icon(LucideIcons.info, size: 18, color: color.onPrimaryContainer),
+                            Icon(LucideIcons.info,
+                                size: 18, color: color.primary),
                             SizedBox(width: spacing.elementGap),
                             Expanded(
                               child: Text(
-                                '1 unit of foreign currency = X $base. Tap any rate to edit.',
+                                '1 ${ctxt.exchange_unitInfo(base)}',
                                 style: textTheme.bodySmall?.copyWith(
-                                  color: color.onPrimaryContainer,
+                                  color: color.onSurfaceVariant,
                                 ),
                               ),
                             ),
@@ -90,13 +97,22 @@ class _ExchangeRateScreenState extends ConsumerState<ExchangeRateScreen> {
                     TextField(
                       onChanged: (v) => setState(() => _search = v),
                       decoration: InputDecoration(
-                        hintText: 'Search currency...',
+                        hintText: ctxt.exchange_search,
                         prefixIcon: const Icon(LucideIcons.search, size: 18),
                         filled: true,
                         fillColor: color.surfaceContainerLow,
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                          borderSide: BorderSide.none,
+                          borderRadius:
+                              BorderRadius.circular(spacing.radiusMedium),
+                          borderSide: BorderSide(
+                              color:
+                                  color.outlineVariant.withValues(alpha: 0.3)),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius:
+                              BorderRadius.circular(spacing.radiusMedium),
+                          borderSide:
+                              BorderSide(color: color.primary, width: 2),
                         ),
                         contentPadding: EdgeInsets.symmetric(
                           horizontal: spacing.cardInner,
@@ -115,7 +131,9 @@ class _ExchangeRateScreenState extends ConsumerState<ExchangeRateScreen> {
                         padding: EdgeInsets.only(
                           left: spacing.cardHorizontalMax,
                           right: spacing.cardHorizontalMax,
-                          bottom: MediaQuery.of(context).padding.bottom + kBottomNavigationBarHeight + spacing.sectionGap,
+                          bottom: MediaQuery.of(context).padding.bottom +
+                              kBottomNavigationBarHeight +
+                              spacing.sectionGap,
                         ),
                         itemCount: entries.length,
                         separatorBuilder: (_, __) => Divider(
@@ -133,7 +151,8 @@ class _ExchangeRateScreenState extends ConsumerState<ExchangeRateScreen> {
                             rate: r.rateToBase,
                             updatedAt: r.updatedAt,
                             base: base,
-                            onSave: (newRate) => _updateRate(r.currencyCode, newRate),
+                            onSave: (newRate) =>
+                                _updateRate(r.currencyCode, newRate, ctxt,),
                           );
                         },
                       ),
@@ -142,18 +161,22 @@ class _ExchangeRateScreenState extends ConsumerState<ExchangeRateScreen> {
           );
         },
         loading: () => ListView(
-          children: List.generate(6, (_) => DashboardCardSkeleton()),
+          children: List.generate(6, (_) => const DashboardCardSkeleton()),
         ),
         error: (_, __) => Center(child: Text(BuddyMessages.genericError)),
       ),
     );
   }
 
-  Future<void> _updateRate(String code, double newRate) async {
+  Future<void> _updateRate(
+    String code,
+    double newRate,
+    AppLocalizations ctxt,
+  ) async {
     final service = await ref.read(currencyServiceProvider.future);
     await service.updateRates({code: newRate});
     ref.invalidate(_ratesProvider);
-    if (mounted) SnackbarService.success('$code rate updated');
+    if (mounted) SnackbarService.success(ctxt.exchange_rateUpdated(code));
   }
 }
 
@@ -193,7 +216,7 @@ class _RateTile extends StatelessWidget {
               height: 40,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: color.primaryContainer,
+                color: color.primary.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(spacing.radiusMedium),
               ),
               child: Text(
@@ -236,7 +259,7 @@ class _RateTile extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  DateFormat('dd MMM yy').format(updatedAt),
+                  safeDateFormat('dd MMM yy').format(updatedAt),
                   style: textTheme.labelSmall?.copyWith(
                     color: color.onSurfaceVariant.withValues(alpha: 0.6),
                     fontSize: 10,
@@ -258,6 +281,7 @@ class _RateTile extends StatelessWidget {
     TextTheme textTheme,
     AppSpacing spacing,
   ) {
+    final ctxt = AppLocalizations.of(context)!;
     final controller = TextEditingController(
       text: rate.toStringAsFixed(rate < 1 ? 6 : 2),
     );
@@ -265,13 +289,16 @@ class _RateTile extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      shape: RoundedRectangleBorder(
+        borderRadius:
+            BorderRadius.vertical(top: Radius.circular(spacing.radiusLarge)),
       ),
       builder: (ctx) => Padding(
         padding: EdgeInsets.fromLTRB(
-          24, 24, 24,
-          24 + MediaQuery.of(ctx).viewInsets.bottom,
+          spacing.sectionGap,
+          spacing.sectionGap,
+          spacing.sectionGap,
+          spacing.sectionGap + MediaQuery.of(ctx).viewInsets.bottom,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -286,8 +313,9 @@ class _RateTile extends StatelessWidget {
             ),
             SizedBox(height: spacing.sectionGap),
             Text(
-              'Edit $code Rate',
-              style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ctxt.exchange_editRate(code),
+              style:
+                  textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             SizedBox(height: spacing.elementGap),
             Text(
@@ -300,12 +328,13 @@ class _RateTile extends StatelessWidget {
             TextField(
               controller: controller,
               autofocus: true,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
               inputFormatters: [
                 FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
               ],
               decoration: InputDecoration(
-                labelText: 'Rate',
+                labelText: ctxt.exchange_rateLabel,
                 prefixIcon: const Icon(LucideIcons.arrowLeftRight, size: 18),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(spacing.radiusMedium),
@@ -319,12 +348,14 @@ class _RateTile extends StatelessWidget {
                   child: OutlinedButton(
                     onPressed: () => Navigator.pop(ctx),
                     style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      padding: EdgeInsets.symmetric(
+                          vertical: spacing.elementGap * 1.5),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                        borderRadius:
+                            BorderRadius.circular(spacing.radiusMedium),
                       ),
                     ),
-                    child: const Text('Cancel'),
+                    child: Text(ctxt.common_cancel),
                   ),
                 ),
                 SizedBox(width: spacing.elementGap * 1.5),
@@ -333,19 +364,21 @@ class _RateTile extends StatelessWidget {
                     onPressed: () {
                       final val = double.tryParse(controller.text);
                       if (val == null || val <= 0) {
-                        SnackbarService.error('Enter a valid rate');
+                        SnackbarService.error(ctxt.exchange_invalidRate);
                         return;
                       }
                       onSave(val);
                       Navigator.pop(ctx);
                     },
                     style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      padding: EdgeInsets.symmetric(
+                          vertical: spacing.elementGap * 1.5),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                        borderRadius:
+                            BorderRadius.circular(spacing.radiusMedium),
                       ),
                     ),
-                    child: const Text('Save'),
+                    child: Text(ctxt.common_save),
                   ),
                 ),
               ],
