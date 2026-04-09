@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:flutter/material.dart';
@@ -42,14 +43,14 @@ class BudgetCategoryAllocation extends StatelessWidget {
               style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             IconButton(
-              icon: const Icon(Icons.edit_outlined, size: 20),
+              icon: const Icon(LucideIcons.pencil, size: 20),
               onPressed: () {
                 HapticFeedback.lightImpact();
                 onEdit();
               },
             ),
             IconButton(
-              icon: const Icon(Icons.delete_outline, size: 20),
+              icon: const Icon(LucideIcons.trash2, size: 20),
               onPressed: () {
                 HapticFeedback.mediumImpact();
                 onDelete();

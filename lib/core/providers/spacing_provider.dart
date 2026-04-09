@@ -1,8 +1,9 @@
-// lib/core/providers/spacing_provider.dart
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/theme/theme_provider.dart';
 
 class AppSpacing {
+  // ── Layout Spacing ──
   final double cardHorizontalMin;
   final double cardHorizontal;
   final double cardHorizontalMax;
@@ -14,11 +15,47 @@ class AppSpacing {
   final double elementGap;
   final double elementGapMin;
   final double elementGapUltraMin;
+
+  // ── Border Radius ──
   final double radiusSmall;
   final double radiusMedium;
   final double radiusLarge;
 
+  // ── Icon Sizes ──
+  final double iconXS;
+  final double iconSM;
+  final double iconMD;
+  final double iconLG;
+  final double iconXL;
+
+  // ── Animation Durations ──
+  final Duration animFast;
+  final Duration animNormal;
+  final Duration animSlow;
+  final Duration animHero;
+
+  // ── Opacity ──
+  final double opacityDisabled;
+  final double opacitySubtle;
+  final double opacityMedium;
+  final double opacityHigh;
+
+  // ── Stroke / Border ──
+  final double strokeThin;
+  final double strokeNormal;
+  final double strokeThick;
+
+  // ── Progress Bar ──
+  final double progressThin;
+  final double progressNormal;
+  final double progressThick;
+
+  // ── Touch Targets ──
+  final double touchTarget;
+  final double touchTargetSmall;
+
   const AppSpacing({
+    // Layout
     this.cardHorizontalMin = 4.0,
     this.cardHorizontal = 8.0,
     this.cardHorizontalMax = 16.0,
@@ -30,14 +67,44 @@ class AppSpacing {
     this.elementGap = 8.0,
     this.elementGapMin = 4.0,
     this.elementGapUltraMin = 2.0,
+    // Radius
     this.radiusSmall = 8.0,
     this.radiusMedium = 12.0,
     this.radiusLarge = 16.0,
+    // Icons
+    this.iconXS = 14.0,
+    this.iconSM = 16.0,
+    this.iconMD = 20.0,
+    this.iconLG = 24.0,
+    this.iconXL = 32.0,
+    // Animation
+    this.animFast = const Duration(milliseconds: 150),
+    this.animNormal = const Duration(milliseconds: 300),
+    this.animSlow = const Duration(milliseconds: 500),
+    this.animHero = const Duration(milliseconds: 800),
+    // Opacity
+    this.opacityDisabled = 0.3,
+    this.opacitySubtle = 0.08,
+    this.opacityMedium = 0.15,
+    this.opacityHigh = 0.5,
+    // Stroke
+    this.strokeThin = 1.0,
+    this.strokeNormal = 1.5,
+    this.strokeThick = 2.0,
+    // Progress
+    this.progressThin = 3.0,
+    this.progressNormal = 6.0,
+    this.progressThick = 8.0,
+    // Touch
+    this.touchTarget = 48.0,
+    this.touchTargetSmall = 40.0,
   });
 
-  /// Comfortable spacing for accessibility / elderly users
+  /// Comfortable spacing for accessibility / high contrast / elderly users.
+  /// Larger touch targets, more breathing room, bolder strokes.
   const AppSpacing.comfortable()
-      : cardHorizontalMin = 8.0,
+      : // Layout — ~40% larger
+        cardHorizontalMin = 8.0,
         cardHorizontal = 14.0,
         cardHorizontalMax = 22.0,
         cardVerticalMin = 8.0,
@@ -48,9 +115,43 @@ class AppSpacing {
         elementGap = 14.0,
         elementGapMin = 8.0,
         elementGapUltraMin = 4.0,
+        // Radius — slightly larger
         radiusSmall = 10.0,
         radiusMedium = 16.0,
-        radiusLarge = 20.0;
+        radiusLarge = 20.0,
+        // Icons — 2px larger
+        iconXS = 16.0,
+        iconSM = 18.0,
+        iconMD = 22.0,
+        iconLG = 28.0,
+        iconXL = 36.0,
+        // Animation — slower for readability
+        animFast = const Duration(milliseconds: 200),
+        animNormal = const Duration(milliseconds: 400),
+        animSlow = const Duration(milliseconds: 600),
+        animHero = const Duration(milliseconds: 1000),
+        // Opacity — higher for visibility
+        opacityDisabled = 0.4,
+        opacitySubtle = 0.12,
+        opacityMedium = 0.2,
+        opacityHigh = 0.6,
+        // Stroke — bolder
+        strokeThin = 1.5,
+        strokeNormal = 2.0,
+        strokeThick = 3.0,
+        // Progress — thicker
+        progressThin = 4.0,
+        progressNormal = 8.0,
+        progressThick = 10.0,
+        // Touch — larger targets (WCAG)
+        touchTarget = 56.0,
+        touchTargetSmall = 48.0;
+
+  // ── Convenience helpers ──
+
+  BorderRadius get borderRadiusSmall => BorderRadius.circular(radiusSmall);
+  BorderRadius get borderRadiusMedium => BorderRadius.circular(radiusMedium);
+  BorderRadius get borderRadiusLarge => BorderRadius.circular(radiusLarge);
 }
 
 final spacingProvider = Provider<AppSpacing>((ref) {

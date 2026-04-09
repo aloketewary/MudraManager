@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:flutter/material.dart';
@@ -27,111 +28,129 @@ class AccountSelector extends ConsumerWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return ref.watch(accountsProvider).when(
-      data: (accounts) {
-        final matchedAccount = accountNumber != null
-            ? accounts.where((a) => a.accountNumber?.contains(accountNumber!) == true).firstOrNull
-            : null;
-        final showAddButton = accountNumber != null && matchedAccount == null;
+          data: (accounts) {
+            final matchedAccount = accountNumber != null
+                ? accounts
+                    .where((a) =>
+                        a.accountNumber?.contains(accountNumber!) == true)
+                    .firstOrNull
+                : null;
+            final showAddButton =
+                accountNumber != null && matchedAccount == null;
 
-        return SizedBox(
-          height: 120,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: accounts.length + (showAddButton ? 1 : 0),
-            separatorBuilder: (_, __) => const SizedBox(width: 8),
-            itemBuilder: (context, index) {
-              if (showAddButton && index == accounts.length) {
-                return _AddAccountButton(
-                  accountNumber: accountNumber!,
-                  bankName: bankName,
-                  color: color,
-                  textTheme: textTheme,
-                );
-              }
+            return SizedBox(
+              height: 120,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: accounts.length + (showAddButton ? 1 : 0),
+                separatorBuilder: (_, __) => const SizedBox(width: 8),
+                itemBuilder: (context, index) {
+                  if (showAddButton && index == accounts.length) {
+                    return _AddAccountButton(
+                      accountNumber: accountNumber!,
+                      bankName: bankName,
+                      color: color,
+                      textTheme: textTheme,
+                    );
+                  }
 
-              final account = accounts[index];
-              final isSelected = selectedAccount?.id == account.id;
+                  final account = accounts[index];
+                  final isSelected = selectedAccount?.id == account.id;
 
-              return GestureDetector(
-                onTap: () {
-                  HapticFeedback.mediumImpact();
-                  onAccountSelected(account);
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: isSelected ? color.primaryContainer : color.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(12),
-                    border: isSelected ? Border.all(color: color.primary, width: 2) : null,
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        _getAccountIcon(account.accountType),
-                        size: 20,
-                        color: isSelected ? color.onPrimaryContainer : color.onSurface,
+                  return GestureDetector(
+                    onTap: () {
+                      HapticFeedback.mediumImpact();
+                      onAccountSelected(account);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? color.primaryContainer
+                            : color.surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(12),
+                        border: isSelected
+                            ? Border.all(color: color.primary, width: 2)
+                            : null,
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        account.name,
-                        style: textTheme.labelSmall?.copyWith(
-                          color: isSelected ? color.onPrimaryContainer : color.onSurface,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        account.accountNumber ?? '',
-                        style: textTheme.labelSmall?.copyWith(
-                          color: isSelected ? color.onPrimaryContainer : color.onSurface,
-                        ),
-                      ),
-                      if (account.currencyCode != null) ...[
-                        const SizedBox(height: 2),
-                        Text(
-                          account.currencyCode!,
-                          style: textTheme.labelSmall?.copyWith(
-                            color: isSelected ? color.primary : color.onSurfaceVariant,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 9,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            _getAccountIcon(account.accountType),
+                            size: 20,
+                            color: isSelected
+                                ? color.onPrimaryContainer
+                                : color.onSurface,
                           ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              );
-            },
+                          const SizedBox(height: 4),
+                          Text(
+                            account.name,
+                            style: textTheme.labelSmall?.copyWith(
+                              color: isSelected
+                                  ? color.onPrimaryContainer
+                                  : color.onSurface,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            account.accountNumber ?? '',
+                            style: textTheme.labelSmall?.copyWith(
+                              color: isSelected
+                                  ? color.onPrimaryContainer
+                                  : color.onSurface,
+                            ),
+                          ),
+                          if (account.currencyCode != null) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              account.currencyCode!,
+                              style: textTheme.labelSmall?.copyWith(
+                                color: isSelected
+                                    ? color.primary
+                                    : color.onSurfaceVariant,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 9,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            );
+          },
+          loading: () => SizedBox(
+            height: 120,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: 3,
+              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              itemBuilder: (_, __) => const AccountCardSkeleton(),
+            ),
           ),
+          error: (_, __) =>
+              SizedBox(height: 60, child: Text(BuddyMessages.genericError)),
         );
-      },
-      loading: () => SizedBox(
-        height: 120,
-        child: ListView.separated(
-          scrollDirection: Axis.horizontal,
-          itemCount: 3,
-          separatorBuilder: (_, __) => const SizedBox(width: 8),
-          itemBuilder: (_, __) => const AccountCardSkeleton(),
-        ),
-      ),
-      error: (_, __) => SizedBox(height: 60, child: Text(BuddyMessages.genericError)),
-    );
   }
 
   IconData _getAccountIcon(AccountType type) {
     switch (type) {
       case AccountType.bank:
-        return Icons.account_balance;
+        return LucideIcons.landmark;
       case AccountType.cash:
-        return Icons.money;
+        return LucideIcons.banknote;
       case AccountType.creditCard:
-        return Icons.credit_card;
+        return LucideIcons.creditCard;
       case AccountType.eWallet:
-        return Icons.account_balance_wallet;
+        return LucideIcons.wallet;
       case AccountType.investment:
-        return Icons.trending_up;
+        return LucideIcons.trendingUp;
       case AccountType.other:
-        return Icons.attach_money;
+        return LucideIcons.dollarSign;
     }
   }
 }
@@ -152,10 +171,13 @@ class _AddAccountButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => context.push('/manage-accounts/add', extra: {
-        'accountNumber': accountNumber,
-        'bankName': bankName,
-      }),
+      onTap: () => context.push(
+        '/manage-accounts/add',
+        extra: {
+          'accountNumber': accountNumber,
+          'bankName': bankName,
+        },
+      ),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
@@ -166,7 +188,7 @@ class _AddAccountButton extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.add_circle_outline, size: 20, color: color.error),
+            Icon(LucideIcons.circlePlus, size: 20, color: color.error),
             const SizedBox(height: 4),
             Text(
               bankName != null && bankName!.isNotEmpty

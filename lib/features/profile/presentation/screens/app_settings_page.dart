@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -48,7 +49,7 @@ class _AppSettingsPageState extends ConsumerState<AppSettingsPage> {
             context,
             color,
             textTheme,
-            Icons.extension,
+            LucideIcons.puzzle,
             'Plugins',
             'Manage plugins by category',
             () {
@@ -61,7 +62,7 @@ class _AppSettingsPageState extends ConsumerState<AppSettingsPage> {
             context,
             color,
             textTheme,
-            Icons.dashboard_customize,
+            LucideIcons.layoutDashboard,
             'Customize Dashboard',
             'Show/hide and reorder cards',
             () {
@@ -74,7 +75,7 @@ class _AppSettingsPageState extends ConsumerState<AppSettingsPage> {
             context,
             color,
             textTheme,
-            Icons.language_outlined,
+            LucideIcons.globe,
             ctxt.app_settings_language_title,
             ctxt.app_settings_language_subtitle,
             () {
@@ -95,7 +96,7 @@ class _AppSettingsPageState extends ConsumerState<AppSettingsPage> {
             context,
             color,
             textTheme,
-            Icons.brightness_6_outlined,
+            LucideIcons.sun,
             ctxt.app_settings_theme_mode_title,
             ctxt.app_settings_theme_mode_subtitle,
             () {
@@ -142,7 +143,7 @@ class _AppSettingsPageState extends ConsumerState<AppSettingsPage> {
                             ),
                             trailing: currentTheme == mode
                                 ? Icon(
-                                    Icons.check,
+                                    LucideIcons.check,
                                     color: color.onPrimaryContainer,
                                   )
                                 : null,
@@ -216,7 +217,7 @@ class _AppSettingsPageState extends ConsumerState<AppSettingsPage> {
                 ),
               ),
               Icon(
-                Icons.chevron_right,
+                LucideIcons.chevronRight,
                 color: color.onSurfaceVariant,
                 size: 20,
               ),
@@ -230,13 +231,13 @@ class _AppSettingsPageState extends ConsumerState<AppSettingsPage> {
   IconData _getThemeIcon(AppThemeMode mode) {
     switch (mode) {
       case AppThemeMode.light:
-        return Icons.light_mode;
+        return LucideIcons.sun;
       case AppThemeMode.dark:
-        return Icons.dark_mode;
+        return LucideIcons.moon;
       case AppThemeMode.amoled:
-        return Icons.circle;
+        return LucideIcons.circle;
       case AppThemeMode.system:
-        return Icons.phone_android;
+        return LucideIcons.smartphone;
     }
   }
 

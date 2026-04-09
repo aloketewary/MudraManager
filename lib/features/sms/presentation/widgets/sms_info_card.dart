@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 
 class SmsInfoCard extends StatelessWidget {
@@ -19,10 +20,10 @@ class SmsInfoCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: color.primary.withOpacity(0.1),
+                color: color.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(Icons.info_outline, color: color.primary, size: 24),
+              child: Icon(LucideIcons.info, color: color.primary, size: 24),
             ),
             const SizedBox(width: 16),
             Expanded(

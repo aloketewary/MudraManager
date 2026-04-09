@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -243,7 +244,7 @@ class FinancialHealthScreen extends ConsumerWidget {
   ) {
     final ratio = c.max > 0 ? c.earned / c.max : 0.0;
     final isGood = ratio >= 0.7;
-    final statusColor = isGood ? Colors.green : Colors.orange;
+    final statusColor = isGood ? FinanceColors.statusGood : FinanceColors.statusWarning;
     final statusIcon = isGood ? LucideIcons.circleCheck : LucideIcons.circleAlert;
 
     return Row(
@@ -294,13 +295,13 @@ class FinancialHealthScreen extends ConsumerWidget {
     final Color runwayColor;
     final String statusLabel;
     if (daysOfCover >= 60) {
-      runwayColor = Colors.green;
+      runwayColor = FinanceColors.statusGood;
       statusLabel = 'Safe';
     } else if (daysOfCover >= 30) {
-      runwayColor = Colors.orange;
+      runwayColor = FinanceColors.statusWarning;
       statusLabel = 'Moderate';
     } else {
-      runwayColor = Colors.red;
+      runwayColor = FinanceColors.statusDanger;
       statusLabel = 'Risk';
     }
 
@@ -500,7 +501,7 @@ class FinancialHealthScreen extends ConsumerWidget {
     }
 
     final isUp = changePercent > 0;
-    final trendColor = isUp ? Colors.red : Colors.green;
+    final trendColor = isUp ? FinanceColors.statusDanger : FinanceColors.statusGood;
     final label = isUp ? 'High ↑' : 'Reduced ↓';
 
     return Container(
@@ -594,10 +595,10 @@ class FinancialHealthScreen extends ConsumerWidget {
   }
 
   Color _scoreColor(int score, ColorScheme color) {
-    if (score >= 80) return Colors.green;
+    if (score >= 80) return FinanceColors.statusGood;
     if (score >= 60) return color.primary;
-    if (score >= 40) return Colors.orange;
-    return Colors.red;
+    if (score >= 40) return FinanceColors.statusWarning;
+    return FinanceColors.statusDanger;
   }
 }
 

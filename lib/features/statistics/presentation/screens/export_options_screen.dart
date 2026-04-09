@@ -34,7 +34,7 @@ class ExportOptionsScreen extends ConsumerWidget {
         backgroundColor: color.surfaceContainer,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(LucideIcons.refreshCw),
             onPressed: () {
               ref.invalidate(exportFormatsProvider);
             },
@@ -85,7 +85,7 @@ class ExportOptionsScreen extends ConsumerWidget {
                 ),
                 error: (err, stack) => Card(
                   child: ListTile(
-                    leading: const Icon(Icons.error),
+                    leading: const Icon(LucideIcons.circleAlert),
                     title: Text(BuddyMessages.errorWith('$err')),
                   ),
                 ),

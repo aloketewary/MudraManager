@@ -15,7 +15,6 @@ import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/models/trip.dart';
 import 'package:mudra_manager/core/db/models/sms_activity.dart';
 import 'package:mudra_manager/core/entitlement/entitlement_feature.dart';
-import 'package:mudra_manager/core/extension/localization_extenstion.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/notification_record_service.dart';
@@ -284,7 +283,7 @@ class _AddEditTransactionScreenState
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.close),
+          icon: const Icon(LucideIcons.x),
           onPressed: () {
             HapticFeedback.mediumImpact();
             context.pop();
@@ -454,7 +453,7 @@ class _AddEditTransactionScreenState
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.luggage, size: 18, color: color.primary),
+                      Icon(LucideIcons.luggage, size: 18, color: color.primary),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -478,7 +477,7 @@ class _AddEditTransactionScreenState
                       GestureDetector(
                         onTap: () => _showSplitCustomizer(),
                         child: Icon(
-                          Icons.edit,
+                          LucideIcons.pencil,
                           size: 16,
                           color: color.primary,
                         ),
@@ -712,7 +711,7 @@ class _AddEditTransactionScreenState
                             child: Row(
                               children: [
                                 Icon(
-                                  Icons.calendar_today,
+                                  LucideIcons.calendar,
                                   size: 16,
                                   color: color.onSurfaceVariant,
                                 ),
@@ -801,7 +800,7 @@ class _AddEditTransactionScreenState
                     decoration: InputDecoration(
                       hintText: ctxt.transaction_addNoteHint,
                       prefixIcon: Icon(
-                        Icons.edit_note,
+                        LucideIcons.penLine,
                         size: 20,
                         color: color.onSurfaceVariant,
                       ),
@@ -1062,7 +1061,7 @@ class _AddEditTransactionScreenState
                 decoration: InputDecoration(
                   labelText: ctxt.transaction_tagNameControllerText,
                   hintText: 'e.g., Travel, Food, Shopping',
-                  prefixIcon: const Icon(Icons.label_outline),
+                  prefixIcon: const Icon(LucideIcons.tag),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -1192,17 +1191,17 @@ class _AddEditTransactionScreenState
                     ButtonSegment(
                       value: SplitType.equal,
                       label: Text('Equal'),
-                      icon: Icon(Icons.pie_chart_outline, size: 16),
+                      icon: Icon(LucideIcons.chartPie, size: 16),
                     ),
                     ButtonSegment(
                       value: SplitType.percentage,
                       label: Text('%'),
-                      icon: Icon(Icons.percent, size: 16),
+                      icon: Icon(LucideIcons.percent, size: 16),
                     ),
                     ButtonSegment(
                       value: SplitType.custom,
                       label: Text('Custom'),
-                      icon: Icon(Icons.calculate, size: 16),
+                      icon: Icon(LucideIcons.calculator, size: 16),
                     ),
                   ],
                   selected: {_splitType},
@@ -1334,7 +1333,7 @@ class _AddEditTransactionScreenState
                                                 ),
                                                 suffixIcon: IconButton(
                                                   icon: Icon(
-                                                    Icons.auto_fix_high,
+                                                    LucideIcons.wand,
                                                     size: 18,
                                                     color: color.primary,
                                                   ),
@@ -1394,12 +1393,12 @@ class _AddEditTransactionScreenState
                               ),
                               if (isSelected && _splitType == SplitType.equal)
                                 Icon(
-                                  Icons.check_circle_rounded,
+                                  LucideIcons.circleCheck,
                                   color: color.primary,
                                 )
                               else if (!isSelected)
                                 Icon(
-                                  Icons.circle_outlined,
+                                  LucideIcons.circle,
                                   color: color.outline,
                                 ),
                             ],
@@ -1478,7 +1477,7 @@ class _AddEditTransactionScreenState
                 ),
                 const SizedBox(height: 16),
                 ListTile(
-                  leading: const Icon(Icons.close),
+                  leading: const Icon(LucideIcons.x),
                   title: const Text('None'),
                   onTap: () {
                     setState(() {
@@ -1493,7 +1492,7 @@ class _AddEditTransactionScreenState
                 ...trips.map(
                   (trip) => ListTile(
                     leading: Icon(
-                      trip.isActive ? Icons.luggage : Icons.luggage_outlined,
+                      trip.isActive ? LucideIcons.luggage : LucideIcons.luggage,
                     ),
                     title: Text(trip.name),
                     subtitle: Text(

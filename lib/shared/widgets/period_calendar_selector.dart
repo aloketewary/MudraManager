@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -100,7 +101,7 @@ class _PeriodCalendarSelectorState extends State<PeriodCalendarSelector> {
                   borderRadius: BorderRadius.circular(spacing.radiusMedium),
                 ),
                 child: Icon(
-                  Icons.calendar_today_rounded,
+                  LucideIcons.calendar,
                   color: color.primary,
                   size: 20,
                 ),
@@ -116,7 +117,7 @@ class _PeriodCalendarSelectorState extends State<PeriodCalendarSelector> {
                 ),
               ),
               Icon(
-                Icons.keyboard_arrow_down_rounded,
+                LucideIcons.chevronDown,
                 color: color.onSurfaceVariant,
               ),
             ],
@@ -176,14 +177,14 @@ class _PeriodCalendarSelectorState extends State<PeriodCalendarSelector> {
                   children: [
                     Expanded(
                       child: _buildGridChip(
-                        PeriodType.day, 'Today', Icons.today_rounded,
+                        PeriodType.day, 'Today', LucideIcons.calendarCheck,
                         color, textTheme, ctx, setModalState,
                       ),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: _buildGridChip(
-                        PeriodType.week, 'This Week', Icons.view_week_rounded,
+                        PeriodType.week, 'This Week', LucideIcons.columns3,
                         color, textTheme, ctx, setModalState,
                       ),
                     ),
@@ -194,14 +195,14 @@ class _PeriodCalendarSelectorState extends State<PeriodCalendarSelector> {
                   children: [
                     Expanded(
                       child: _buildGridChip(
-                        PeriodType.month, 'This Month', Icons.calendar_view_month_rounded,
+                        PeriodType.month, 'This Month', LucideIcons.calendarDays,
                         color, textTheme, ctx, setModalState,
                       ),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: _buildGridChip(
-                        PeriodType.year, 'This Year', Icons.calendar_view_day_rounded,
+                        PeriodType.year, 'This Year', LucideIcons.calendarDays,
                         color, textTheme, ctx, setModalState,
                       ),
                     ),
@@ -211,7 +212,7 @@ class _PeriodCalendarSelectorState extends State<PeriodCalendarSelector> {
 
                 // Custom range — full width, same height
                 _buildGridChip(
-                  PeriodType.custom, 'Custom Range', Icons.date_range_rounded,
+                  PeriodType.custom, 'Custom Range', LucideIcons.calendarRange,
                   color, textTheme, ctx, setModalState,
                 ),
 

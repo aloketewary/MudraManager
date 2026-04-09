@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/features/analytics/data/analytics_provider.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
@@ -164,17 +165,17 @@ class FinancialHealthCard extends ConsumerWidget {
   }
 
   String _verdict(int score) {
-    if (score >= 80) return "great shape";
-    if (score >= 60) return "on track";
+    if (score >= 80) return 'great shape';
+    if (score >= 60) return 'on track';
     if (score >= 40) return 'needs work';
     return 'needs attention';
   }
 
   Color _scoreColor(int score, ColorScheme color) {
-    if (score >= 80) return Colors.green;
+    if (score >= 80) return FinanceColors.statusGood;
     if (score >= 60) return color.primary;
-    if (score >= 40) return Colors.orange;
-    return Colors.red;
+    if (score >= 40) return FinanceColors.statusWarning;
+    return FinanceColors.statusDanger;
   }
 }
 

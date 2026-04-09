@@ -1,5 +1,5 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
-import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:flutter/material.dart';
 import 'package:mudra_manager/core/services/settlement_service.dart';
 
@@ -27,7 +27,7 @@ class LiveBalanceCard extends StatelessWidget {
           padding: const EdgeInsets.all(20),
           child: Row(
             children: [
-              Icon(Icons.check_circle, color: color.primary, size: 32),
+              Icon(LucideIcons.circleCheck, color: color.primary, size: 32),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
@@ -66,7 +66,7 @@ class LiveBalanceCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.account_balance_wallet, color: color.primary),
+                Icon(LucideIcons.wallet, color: color.primary),
                 const SizedBox(width: 12),
                 Text(
                   'Live Balances',
@@ -138,7 +138,7 @@ class LiveBalanceCard extends StatelessWidget {
               width: double.infinity,
               child: FilledButton.icon(
                 onPressed: onSettleUp,
-                icon: const Icon(Icons.payments),
+                icon: const Icon(LucideIcons.banknote),
                 label: const Text('Settle Up Now'),
                 style: FilledButton.styleFrom(
                   backgroundColor: color.primary,

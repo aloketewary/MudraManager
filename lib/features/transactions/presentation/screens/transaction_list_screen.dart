@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'dart:async';
 
@@ -22,7 +23,6 @@ import 'package:mudra_manager/features/transactions/data/transaction_provider.da
 import 'package:mudra_manager/features/transactions/presentation/widgets/transaction_card.dart';
 import 'package:mudra_manager/features/transactions/presentation/widgets/transaction_group.dart';
 import 'package:mudra_manager/features/trip/data/trip_provider.dart';
-import 'package:mudra_manager/shared/widgets/adaptive_text.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/shared/widgets/speed_dial_fab.dart';
@@ -75,6 +75,8 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
   String _lastFilterKey = '';
   double _lastScrollOffset = 0;
   Timer? _searchDebounce;
+  Timer? _pendingDeleteTimer;
+  int? _pendingDeleteId;
 
   // Trip names caching
   List<int>? _lastTxIds;
@@ -99,6 +101,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
   @override
   void dispose() {
     _searchDebounce?.cancel();
+    _pendingDeleteTimer?.cancel();
     _scrollController.dispose();
     _fabController?.dispose();
     super.dispose();
@@ -193,7 +196,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                     toggleSearch();
                   },
                   icon: Icon(
-                    _showSearch ? Icons.close_rounded : Icons.search_rounded,
+                    _showSearch ? LucideIcons.x : LucideIcons.search,
                   ),
                 ),
                 IconButton(
@@ -202,7 +205,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                     _showTagFilterSheet(context);
                   },
                   icon: Icon(
-                    Icons.label_rounded,
+                    LucideIcons.tag,
                     color: _selectedTagId != null
                         ? Theme.of(context).colorScheme.tertiary
                         : null,
@@ -213,7 +216,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                     HapticFeedback.mediumImpact();
                     showFilterBottomSheet(context, spacing);
                   },
-                  icon: const Icon(Icons.filter_list_rounded),
+                  icon: const Icon(LucideIcons.listFilter),
                 ),
               ],
             ),
@@ -362,13 +365,13 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
               color: color.onSurfaceVariant.withValues(alpha: 0.6),
             ),
             prefixIcon: Icon(
-              Icons.search_rounded,
+              LucideIcons.search,
               color: color.primary,
               size: 22,
             ),
             suffixIcon: _searchQuery.isNotEmpty
                 ? IconButton(
-                    icon: const Icon(Icons.clear_rounded, size: 20),
+                    icon: const Icon(LucideIcons.x, size: 20),
                     onPressed: () {
                       HapticFeedback.mediumImpact();
                       setState(() {
@@ -412,9 +415,9 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
           if (_selectedCategoryId != null)
             Chip(
               avatar:
-                  Icon(Icons.category_rounded, size: 18, color: color.primary),
+                  Icon(LucideIcons.layoutGrid, size: 18, color: color.primary),
               label: Text(AppLocalizations.of(context)!.txnList_category, style: textTheme.labelMedium),
-              deleteIcon: const Icon(Icons.close_rounded, size: 18),
+              deleteIcon: const Icon(LucideIcons.x, size: 18),
               backgroundColor: color.primaryContainer,
               side: BorderSide.none,
               onDeleted: () {
@@ -428,12 +431,12 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
           if (_filterStartDate != null)
             Chip(
               avatar: Icon(
-                Icons.date_range_rounded,
+                LucideIcons.calendarRange,
                 size: 18,
                 color: color.primary,
               ),
               label: Text(AppLocalizations.of(context)!.txnList_dateRange, style: textTheme.labelMedium),
-              deleteIcon: const Icon(Icons.close_rounded, size: 18),
+              deleteIcon: const Icon(LucideIcons.x, size: 18),
               backgroundColor: color.primaryContainer,
               side: BorderSide.none,
               onDeleted: () {
@@ -447,9 +450,9 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
             ),
           if (_selectedTagId != null)
             Chip(
-              avatar: Icon(Icons.label_rounded, size: 18, color: color.tertiary),
+              avatar: Icon(LucideIcons.tag, size: 18, color: color.tertiary),
               label: Text(_selectedTagName ?? AppLocalizations.of(context)!.txnList_tag, style: textTheme.labelMedium),
-              deleteIcon: const Icon(Icons.close_rounded, size: 18),
+              deleteIcon: const Icon(LucideIcons.x, size: 18),
               backgroundColor: color.tertiaryContainer,
               side: BorderSide.none,
               onDeleted: () {
@@ -518,7 +521,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Icon(
-                            Icons.calendar_today_rounded,
+                            LucideIcons.calendar,
                             color: color.primary,
                             size: 20,
                           ),
@@ -563,8 +566,8 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                         if (!_useInfiniteScroll || _filterStartDate != null)
                           Icon(
                             _showCalendar || _showMonthPicker
-                                ? Icons.keyboard_arrow_up_rounded
-                                : Icons.keyboard_arrow_down_rounded,
+                                ? LucideIcons.chevronUp
+                                : LucideIcons.chevronDown,
                             color: color.onSurfaceVariant,
                           ),
                       ],
@@ -578,14 +581,14 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                               value: RangeSelectionMode.toggledOff,
                               label: Text(AppLocalizations.of(context)!.txnList_month),
                               icon: Icon(
-                                Icons.calendar_view_month_rounded,
+                                LucideIcons.calendarDays,
                                 size: 16,
                               ),
                             ),
                             ButtonSegment(
                               value: RangeSelectionMode.toggledOn,
                               label: Text(AppLocalizations.of(context)!.txnList_dateRange),
-                              icon: Icon(Icons.date_range_rounded, size: 16),
+                              icon: Icon(LucideIcons.calendarRange, size: 16),
                             ),
                           ],
                           selected: {_rangeSelectionMode},
@@ -636,7 +639,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
         children: [
           if (!_useInfiniteScroll || _filterStartDate != null) ...[
             IconButton(
-              icon: const Icon(Icons.chevron_left_rounded, size: 22),
+              icon: const Icon(LucideIcons.chevronLeft, size: 22),
               tooltip: AppLocalizations.of(context)!.txnList_previousMonth,
               onPressed: () {
                 HapticFeedback.lightImpact();
@@ -653,7 +656,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
             if (!isSameMonth(_selectedDate, DateTime.now()))
               IconButton(
                 icon:
-                    Icon(Icons.refresh_rounded, size: 20, color: color.primary),
+                    Icon(LucideIcons.refreshCw, size: 20, color: color.primary),
                 tooltip: AppLocalizations.of(context)!.txnList_resetToCurrentMonth,
                 onPressed: () {
                   HapticFeedback.mediumImpact();
@@ -667,7 +670,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
             else
               IconButton(
                 icon: Icon(
-                  Icons.calendar_month_rounded,
+                  LucideIcons.calendar,
                   size: 20,
                   color: color.primary,
                 ),
@@ -678,7 +681,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                 },
               ),
             IconButton(
-              icon: const Icon(Icons.chevron_right_rounded, size: 22),
+              icon: const Icon(LucideIcons.chevronRight, size: 22),
               tooltip: AppLocalizations.of(context)!.txnList_nextMonth,
               onPressed: isSameMonth(_selectedDate, DateTime.now())
                   ? null
@@ -698,8 +701,8 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
           IconButton(
             icon: Icon(
               _useInfiniteScroll && _filterStartDate == null
-                  ? Icons.view_list_rounded
-                  : Icons.all_inclusive_rounded,
+                  ? LucideIcons.list
+                  : LucideIcons.infinity,
               size: 20,
               color: color.primary,
             ),
@@ -829,7 +832,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                           _focusedDay = _selectedDate;
                         });
                       },
-                      icon: const Icon(Icons.chevron_left_rounded, size: 18),
+                      icon: const Icon(LucideIcons.chevronLeft, size: 18),
                       label: Text('${_selectedDate.year - 1}'),
                       style: TextButton.styleFrom(
                         foregroundColor: color.onSurface,
@@ -856,7 +859,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                                 _focusedDay = _selectedDate;
                               });
                             },
-                      icon: const Icon(Icons.chevron_right_rounded, size: 18),
+                      icon: const Icon(LucideIcons.chevronRight, size: 18),
                       label: Text('${_selectedDate.year + 1}'),
                       style: TextButton.styleFrom(
                         foregroundColor:
@@ -1005,15 +1008,20 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                       _filterStartDate != null
                   ? BuddyMessages.noFilterResults('filter')
                   : BuddyMessages.noTransactions,
-              iconData: Icons.receipt_long_outlined,
+              iconData: LucideIcons.receipt,
             ),
           ),
         ],
       );
     }
 
-    final displayItems = filtered.take(_displayLimit).toList();
-    final hasMore = filtered.length > _displayLimit;
+    // Hide pending delete from UI
+    final visible = _pendingDeleteId != null
+        ? filtered.where((e) => e is! TxItem || e.txn.id != _pendingDeleteId).toList()
+        : filtered;
+
+    final displayItems = visible.take(_displayLimit).toList();
+    final hasMore = visible.length > _displayLimit;
 
     final transactionIds =
         displayItems.whereType<TxItem>().map((e) => e.txn.id).toList();
@@ -1165,24 +1173,49 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
 
     if (confirm != true) return;
 
-    await ref
-        .read(tripServiceProvider)
-        .removeTransactionFromTrip(transaction.id);
+    // Hide from UI immediately
+    setState(() {
+      _pendingDeleteId = transaction.id;
+      _clearCache();
+    });
 
-    if (transaction.isTransfer) {
-      await transaction.related.load();
-      final relatedId = transaction.related.value?.id;
-      if (relatedId != null) {
-        await ref.read(transactionProvider).deleteTransaction(relatedId);
+    // Schedule actual delete after undo window
+    bool undone = false;
+    _pendingDeleteTimer?.cancel();
+    _pendingDeleteTimer = Timer(const Duration(seconds: 6), () async {
+      if (undone) return;
+      _pendingDeleteId = null;
+
+      await ref
+          .read(tripServiceProvider)
+          .removeTransactionFromTrip(transaction.id);
+
+      if (transaction.isTransfer) {
+        await transaction.related.load();
+        final relatedId = transaction.related.value?.id;
+        if (relatedId != null) {
+          await ref.read(transactionProvider).deleteTransaction(relatedId);
+        }
       }
-    }
 
-    await ref.read(transactionProvider).deleteTransaction(transaction.id);
-    _invalidateTransactionProviders();
-    setState(() => _clearCache());
+      await ref.read(transactionProvider).deleteTransaction(transaction.id);
+      _invalidateTransactionProviders();
+      if (mounted) setState(() => _clearCache());
+    });
 
     if (context.mounted) {
-      SnackbarService.success(BuddyMessages.txnDeleted);
+      SnackbarService.success(
+        BuddyMessages.txnDeleted,
+        actionLabel: ctxt.common_undo,
+        onAction: () {
+          undone = true;
+          _pendingDeleteTimer?.cancel();
+          setState(() {
+            _pendingDeleteId = null;
+            _clearCache();
+          });
+        },
+      );
     }
   }
 
@@ -1300,7 +1333,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                         if (_selectedTagId != null)
                           ActionChip(
                             label: Text(AppLocalizations.of(context)!.txnList_clear),
-                            avatar: const Icon(Icons.close, size: 16),
+                            avatar: const Icon(LucideIcons.x, size: 16),
                             onPressed: () {
                               setState(() {
                                 _selectedTagId = null;
@@ -1471,7 +1504,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                                     Expanded(child: Text(parent.name)),
                                     if (hasSubcategories)
                                       Icon(
-                                        Icons.chevron_right,
+                                        LucideIcons.chevronRight,
                                         size: 16,
                                         color: color.onSurfaceVariant,
                                       ),
@@ -1539,13 +1572,13 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                           ),
                         ),
                         ListTile(
-                          leading: Icon(Icons.date_range, color: color.primary),
+                          leading: Icon(LucideIcons.calendarRange, color: color.primary),
                           title: Text(
                             _filterStartDate != null && _filterEndDate != null
                                 ? '${DateFormat.yMMMd().format(_filterStartDate!)} - ${DateFormat.yMMMd().format(_filterEndDate!)}'
                                 : AppLocalizations.of(context)!.txnList_selectDateRange,
                           ),
-                          trailing: const Icon(Icons.chevron_right),
+                          trailing: const Icon(LucideIcons.chevronRight),
                           onTap: () async {
                             HapticFeedback.mediumImpact();
                             final picked = await showDateRangePicker(
@@ -1584,7 +1617,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                                 });
                                 setModalState(() {});
                               },
-                              icon: const Icon(Icons.clear),
+                              icon: const Icon(LucideIcons.x),
                               label: Text(AppLocalizations.of(context)!.txnList_clearDateRange),
                             ),
                           ),

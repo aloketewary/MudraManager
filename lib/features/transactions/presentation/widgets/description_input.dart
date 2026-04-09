@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 
 class DescriptionInput extends StatelessWidget {
@@ -20,7 +21,7 @@ class DescriptionInput extends StatelessWidget {
       decoration: InputDecoration(
         labelText: 'Description',
         hintText: hintText ?? 'Enter description',
-        prefixIcon: const Icon(Icons.description_outlined),
+        prefixIcon: const Icon(LucideIcons.fileText),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
         ),

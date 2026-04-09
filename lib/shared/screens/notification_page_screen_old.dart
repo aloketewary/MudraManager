@@ -51,7 +51,7 @@ class NotificationPage extends ConsumerWidget {
                 SliverFillRemaining(
                   child: NoDataFound(
                     message: BuddyMessages.noNotifications,
-                    iconData: Icons.notifications_none_outlined,
+                    iconData: LucideIcons.bell,
                   ),
                 )
               else

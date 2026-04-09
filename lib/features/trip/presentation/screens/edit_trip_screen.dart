@@ -1038,7 +1038,7 @@ class _TripCurrencyPickerState extends State<_TripCurrencyPicker> {
               autofocus: true,
               decoration: InputDecoration(
                 hintText: 'Search currency...',
-                prefixIcon: const Icon(Icons.search, size: 20),
+                prefixIcon: const Icon(LucideIcons.search, size: 20),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(color: color.outlineVariant),
@@ -1081,7 +1081,7 @@ class _TripCurrencyPickerState extends State<_TripCurrencyPicker> {
                   title: Text(c.code),
                   subtitle: Text(c.name, style: textTheme.bodySmall),
                   trailing: isSelected
-                      ? Icon(Icons.check_circle, color: color.primary)
+                      ? Icon(LucideIcons.circleCheck, color: color.primary)
                       : null,
                   onTap: () {
                     HapticFeedback.lightImpact();

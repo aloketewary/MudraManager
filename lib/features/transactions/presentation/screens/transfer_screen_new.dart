@@ -206,7 +206,7 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
       backgroundColor: color.surface,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.close),
+          icon: const Icon(LucideIcons.x),
           onPressed: () {
             HapticFeedback.mediumImpact();
             context.pop();

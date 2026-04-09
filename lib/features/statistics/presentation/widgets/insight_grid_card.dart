@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/shared/widgets/adaptive_text.dart';
@@ -120,7 +121,7 @@ class InsightGridCard extends StatelessWidget {
             Row(
               children: [
                 Icon(
-                  Icons.calendar_today_outlined,
+                  LucideIcons.calendar,
                   size: 16,
                   color: color.primary,
                 ),

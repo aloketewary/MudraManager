@@ -607,17 +607,17 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
                     ButtonSegment(
                       value: SplitType.equal,
                       label: Text('Equal'),
-                      icon: Icon(Icons.pie_chart_outline, size: 16),
+                      icon: Icon(LucideIcons.chartPie, size: 16),
                     ),
                     ButtonSegment(
                       value: SplitType.percentage,
                       label: Text('%'),
-                      icon: Icon(Icons.percent, size: 16),
+                      icon: Icon(LucideIcons.percent, size: 16),
                     ),
                     ButtonSegment(
                       value: SplitType.custom,
                       label: Text('Custom'),
-                      icon: Icon(Icons.calculate, size: 16),
+                      icon: Icon(LucideIcons.calculator, size: 16),
                     ),
                   ],
                   selected: {_splitType},
@@ -749,7 +749,7 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
                                                 ),
                                                 suffixIcon: IconButton(
                                                   icon: Icon(
-                                                    Icons.auto_fix_high,
+                                                    LucideIcons.wand,
                                                     size: 18,
                                                     color: color.primary,
                                                   ),
@@ -808,12 +808,12 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
                               ),
                               if (isSelected && _splitType == SplitType.equal)
                                 Icon(
-                                  Icons.check_circle_rounded,
+                                  LucideIcons.circleCheck,
                                   color: color.primary,
                                 )
                               else if (!isSelected)
                                 Icon(
-                                  Icons.circle_outlined,
+                                  LucideIcons.circle,
                                   color: color.outline,
                                 ),
                             ],

@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -232,7 +233,7 @@ class SpendingPersonalityCard extends ConsumerWidget {
     if (trend.contains('increasing') && isImpulse) {
       return _SpendingStatus(
         label: 'Risk',
-        color: Colors.red,
+        color: FinanceColors.statusDanger,
         insight: 'Overspending trend detected this period',
         controlLevel: control,
       );
@@ -241,7 +242,7 @@ class SpendingPersonalityCard extends ConsumerWidget {
     if (trend.contains('increasing') || isImpulse) {
       return _SpendingStatus(
         label: 'Drift',
-        color: Colors.orange,
+        color: FinanceColors.statusWarning,
         insight: 'Spending slightly higher than usual',
         controlLevel: control,
       );
@@ -250,7 +251,7 @@ class SpendingPersonalityCard extends ConsumerWidget {
     if (savingsOk && trend.contains('decreasing')) {
       return _SpendingStatus(
         label: 'Great',
-        color: Colors.green,
+        color: FinanceColors.statusGood,
         insight: 'Spending is trending down — nice work',
         controlLevel: control,
       );
@@ -258,7 +259,7 @@ class SpendingPersonalityCard extends ConsumerWidget {
 
     return _SpendingStatus(
       label: 'Stable',
-      color: Colors.green,
+      color: FinanceColors.statusGood,
       insight: 'Balanced and in control',
       controlLevel: control,
     );

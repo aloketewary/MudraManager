@@ -2,8 +2,6 @@ import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:flutter/material.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/extension/account_type_extenstion.dart';
-import 'package:mudra_manager/core/extension/localization_extenstion.dart';
-import 'package:mudra_manager/core/l10n/app_localizations.dart';
 
 class AccountCardMini extends StatelessWidget {
   final Account? account;

@@ -19,7 +19,7 @@ class AiInsightWidgetPlugin extends DashboardWidgetPlugin {
   String get title => 'AI Insights';
 
   @override
-  IconData get icon => Icons.auto_awesome;
+  IconData get icon => LucideIcons.sparkles;
 
   @override
   int get defaultOrder => 1;
@@ -97,7 +97,7 @@ class AiInsightWidgetPlugin extends DashboardWidgetPlugin {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          Icons.auto_awesome,
+                          LucideIcons.sparkles,
                           color: color.onPrimary,
                           size: 12,
                         ),

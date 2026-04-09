@@ -261,15 +261,38 @@ class ExcelImportService {
           var matched = categoryMap[catKey];
 
           if (matched == null && autoCreateCategories) {
-            // Auto-create with relevant icon/color/keywords
+            final isKnown = CategoryResolver.isKnown(row.category!);
             matched = CategoryResolver.createCategory(row.category!);
+
+            // Unknown categories go under Miscellaneous parent
+            if (!isKnown) {
+              var miscParent = await isar.categorys
+                  .filter()
+                  .nameEqualTo('Miscellaneous')
+                  .findFirst();
+              if (miscParent == null) {
+                miscParent = Category.create(
+                  name: 'Miscellaneous',
+                  categoryType: CategoryType.expense,
+                )
+                  ..iconName = 'circle'
+                  ..colorValue = 0xFF94A3B8;
+                await isar.writeTxn(() async {
+                  await isar.categorys.put(miscParent!);
+                });
+              }
+              matched!.parentCategory.value = miscParent;
+            }
+
             await isar.writeTxn(() async {
               await isar.categorys.put(matched!);
+              if (matched!.parentCategory.value != null) {
+                await matched!.parentCategory.save();
+              }
             });
-            // Add to map so subsequent rows reuse it
             categoryMap[catKey] = matched;
             categoriesCreated++;
-            _log.i('Auto-created category: ${row.category}');
+            _log.i('Auto-created category: ${row.category}${!isKnown ? ' (under Miscellaneous)' : ''}');
           }
 
           txn.category.value = matched;

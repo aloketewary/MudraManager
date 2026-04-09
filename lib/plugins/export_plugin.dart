@@ -1,4 +1,3 @@
-import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_plugin_sdk/plugin.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';

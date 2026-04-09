@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
@@ -89,12 +90,12 @@ class GoalHealth {
     switch (status) {
       case GoalStatus.completed:
       case GoalStatus.ahead:
-        return Colors.green;
+        return FinanceColors.statusGood;
       case GoalStatus.onTrack:
       case GoalStatus.noDeadline:
         return color.primary;
       case GoalStatus.behind:
-        return Colors.orange;
+        return FinanceColors.statusWarning;
     }
   }
 

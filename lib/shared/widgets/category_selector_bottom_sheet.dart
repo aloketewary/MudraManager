@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:flutter/material.dart';
@@ -82,7 +83,7 @@ class _CategorySelectorBottomSheetState
                   children: [
                     if (_selectedParent != null)
                       IconButton(
-                        icon: const Icon(Icons.arrow_back),
+                        icon: const Icon(LucideIcons.arrowLeft),
                         onPressed: () => setState(() => _selectedParent = null),
                       ),
                     Expanded(
@@ -192,7 +193,7 @@ class _CategorySelectorBottomSheetState
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(
-                                Icons.chevron_right,
+                                LucideIcons.chevronRight,
                                 size: 12,
                                 color: color.onPrimary,
                               ),

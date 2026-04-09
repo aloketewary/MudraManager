@@ -212,7 +212,7 @@ class _AnimatedSwipeableAccountCardsState
                     ),
                     SizedBox(width: spacing.elementGap / 2),
                     Icon(
-                      Icons.arrow_forward_ios,
+                      LucideIcons.chevronRight,
                       size: 12,
                       color: color.primary,
                     ),
@@ -259,7 +259,7 @@ class _AnimatedSwipeableAccountCardsState
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
-                      Icons.chevron_right,
+                      LucideIcons.chevronRight,
                       size: 18,
                       color: color.onSurfaceVariant,
                     ),
@@ -283,8 +283,8 @@ class _AnimatedSwipeableAccountCardsState
                   children: [
                     Icon(
                       netCashFlow >= 0
-                          ? Icons.trending_up
-                          : Icons.trending_down,
+                          ? LucideIcons.trendingUp
+                          : LucideIcons.trendingDown,
                       size: 16,
                       color: netCashFlow >= 0 ? color.primary : color.error,
                     ),
@@ -335,7 +335,7 @@ class _AnimatedSwipeableAccountCardsState
                       turns: _accountsExpanded ? 0.5 : 0.0,
                       duration: const Duration(milliseconds: 250),
                       child: Icon(
-                        Icons.keyboard_arrow_down,
+                        LucideIcons.chevronDown,
                         size: 16,
                         color: color.onSurfaceVariant,
                       ),

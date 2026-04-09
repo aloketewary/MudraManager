@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -127,7 +128,7 @@ class _YearSelector extends StatelessWidget {
               HapticFeedback.lightImpact();
               onYearChanged(selectedDate.year - 1);
             },
-            icon: const Icon(Icons.chevron_left_rounded, size: 18),
+            icon: const Icon(LucideIcons.chevronLeft, size: 18),
             label: Text('${selectedDate.year - 1}'),
             style: TextButton.styleFrom(foregroundColor: color.onSurface),
           ),
@@ -145,7 +146,7 @@ class _YearSelector extends StatelessWidget {
                     HapticFeedback.lightImpact();
                     onYearChanged(selectedDate.year + 1);
                   },
-            icon: const Icon(Icons.chevron_right_rounded, size: 18),
+            icon: const Icon(LucideIcons.chevronRight, size: 18),
             label: Text('${selectedDate.year + 1}'),
             style: TextButton.styleFrom(
               foregroundColor: selectedDate.year >= DateTime.now().year

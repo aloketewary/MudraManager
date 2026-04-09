@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
@@ -69,14 +70,14 @@ class CommandCenterScreen extends ConsumerWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             IconButton(
-                              icon: Icon(Icons.search, color: color.onSurface),
+                              icon: Icon(LucideIcons.search, color: color.onSurface),
                               onPressed: () {
                                 HapticFeedback.mediumImpact();
                                 // Navigate to search
                               },
                             ),
                             IconButton(
-                              icon: Icon(Icons.notifications_outlined,
+                              icon: Icon(LucideIcons.bell,
                                   color: color.onSurface),
                               onPressed: () {
                                 HapticFeedback.mediumImpact();
@@ -127,7 +128,7 @@ class CommandCenterScreen extends ConsumerWidget {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.lock_outline,
+                                  Icon(LucideIcons.lock,
                                       size: 16, color: color.error),
                                   const SizedBox(width: 8),
                                   Text(
@@ -195,8 +196,8 @@ class CommandCenterScreen extends ConsumerWidget {
                                     Icon(
                                       primaryAccount.accountType ==
                                               AccountType.creditCard
-                                          ? Icons.credit_card
-                                          : Icons.account_balance_wallet,
+                                          ? LucideIcons.creditCard
+                                          : LucideIcons.wallet,
                                       color: color.onPrimary
                                           .withValues(alpha: 0.7),
                                       size: 28,

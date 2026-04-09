@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -78,7 +79,7 @@ class _NetWorthMiniCardState extends ConsumerState<NetWorthMiniCard> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Icon(
-                            Icons.account_balance_wallet,
+                            LucideIcons.wallet,
                             size: 20,
                             color: color.secondary,
                           ),

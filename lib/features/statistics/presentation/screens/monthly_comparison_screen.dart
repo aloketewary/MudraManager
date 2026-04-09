@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
-import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/core/utils/safe_date_format.dart';
 import 'package:mudra_manager/shared/widgets/month_picker_sheet.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
@@ -18,7 +18,6 @@ import 'package:mudra_manager/core/utils/refresh_helper.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/shared/widgets/ambient_brand_section.dart';
 import 'package:mudra_manager/shared/widgets/animated_balance.dart';
-import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 
 // ── Data model ──
@@ -41,7 +40,8 @@ class _ComparisonData {
   });
 
   double get variance => currentExpense - lastExpense;
-  double get variancePct => lastExpense > 0 ? (variance / lastExpense * 100) : 0;
+  double get variancePct =>
+      lastExpense > 0 ? (variance / lastExpense * 100) : 0;
   bool get isDown => variance < 0;
   bool get isFlat => variance.abs() < 1;
 }
@@ -106,12 +106,15 @@ class _MonthlyComparisonScreenState
     final curStart = DateTime(now.year, now.month, 1);
     final curEnd = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
     final lastStart = _compareMonth;
-    final lastEnd = DateTime(lastStart.year, lastStart.month + 1, 0, 23, 59, 59);
+    final lastEnd =
+        DateTime(lastStart.year, lastStart.month + 1, 0, 23, 59, 59);
     final lastSameDayEnd = DateTime(
       lastStart.year,
       lastStart.month,
       math.min(now.day, DateTime(lastStart.year, lastStart.month + 1, 0).day),
-      23, 59, 59,
+      23,
+      59,
+      59,
     );
 
     final db = await isar.getInstance();
@@ -132,8 +135,11 @@ class _MonthlyComparisonScreenState
         final c = t.category.value;
         if (c != null) {
           catMap.putIfAbsent(
-              c.name, () => {'icon': c.iconName, 'cur': 0.0, 'last': 0.0});
-          catMap[c.name]!['cur'] = (catMap[c.name]!['cur'] as double) + t.amount;
+            c.name,
+            () => {'icon': c.iconName, 'cur': 0.0, 'last': 0.0},
+          );
+          catMap[c.name]!['cur'] =
+              (catMap[c.name]!['cur'] as double) + t.amount;
         }
       } else {
         curInc += t.effectiveAmount;
@@ -143,12 +149,16 @@ class _MonthlyComparisonScreenState
       if (t.isTransfer) continue;
       if (t.isExpense) {
         lastExp += t.effectiveAmount;
-        if (!t.date.isAfter(lastSameDayEnd)) lastExpByThisDay += t.effectiveAmount;
+        if (!t.date.isAfter(lastSameDayEnd)) {
+          lastExpByThisDay += t.effectiveAmount;
+        }
         await t.category.load();
         final c = t.category.value;
         if (c != null) {
           catMap.putIfAbsent(
-              c.name, () => {'icon': c.iconName, 'cur': 0.0, 'last': 0.0});
+            c.name,
+            () => {'icon': c.iconName, 'cur': 0.0, 'last': 0.0},
+          );
           catMap[c.name]!['last'] =
               (catMap[c.name]!['last'] as double) + t.amount;
         }
@@ -158,12 +168,14 @@ class _MonthlyComparisonScreenState
     }
 
     final cats = catMap.entries
-        .map((e) => _CategoryDelta(
-              name: e.key,
-              iconName: e.value['icon'] as String,
-              current: e.value['cur'] as double,
-              last: e.value['last'] as double,
-            ))
+        .map(
+          (e) => _CategoryDelta(
+            name: e.key,
+            iconName: e.value['icon'] as String,
+            current: e.value['cur'] as double,
+            last: e.value['last'] as double,
+          ),
+        )
         .toList()
       ..sort((a, b) => b.absDelta.compareTo(a.absDelta));
 
@@ -186,9 +198,11 @@ class _MonthlyComparisonScreenState
     final color = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
     final brightness = Theme.of(context).brightness;
+    final ctxt = AppLocalizations.of(context)!;
     final now = DateTime.now();
-    final curName = DateFormat('MMMM').format(now);
-    final lastName = DateFormat('MMMM yyyy').format(_compareMonth);
+    final curName = safeDateFormat('MMMM', ctxt.localeName).format(now);
+    final lastName =
+        safeDateFormat('MMMM yyyy', ctxt.localeName).format(_compareMonth);
 
     return Scaffold(
       backgroundColor: color.surface,
@@ -208,10 +222,15 @@ class _MonthlyComparisonScreenState
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(LucideIcons.calendarSearch, size: 16, color: color.primary),
+                  Icon(
+                    LucideIcons.calendarSearch,
+                    size: 16,
+                    color: color.primary,
+                  ),
                   const SizedBox(width: 6),
                   Text(
-                    DateFormat('MMM yy').format(_compareMonth),
+                    safeDateFormat('MMM yy', ctxt.localeName)
+                        .format(_compareMonth),
                     style: text.labelLarge?.copyWith(
                       color: color.primary,
                       fontWeight: FontWeight.w700,
@@ -232,18 +251,18 @@ class _MonthlyComparisonScreenState
                 horizontal: spacing.cardHorizontal,
                 vertical: spacing.cardVertical,
               ),
-              children: List.generate(3, (_) => BudgetCardSkeleton()),
+              children: List.generate(3, (_) => const BudgetCardSkeleton()),
             );
           }
 
           final d = snap.data!;
-          final curExp = GuestModeUtil.applyGuestMode(d.currentExpense, isGuest);
+          final curExp =
+              GuestModeUtil.applyGuestMode(d.currentExpense, isGuest);
           final lastExp = GuestModeUtil.applyGuestMode(d.lastExpense, isGuest);
           final curInc = GuestModeUtil.applyGuestMode(d.currentIncome, isGuest);
           final lastInc = GuestModeUtil.applyGuestMode(d.lastIncome, isGuest);
           final variance = curExp - lastExp;
-          final variancePct =
-              lastExp > 0 ? (variance / lastExp * 100) : 0.0;
+          final variancePct = lastExp > 0 ? (variance / lastExp * 100) : 0.0;
           final isDown = variance < 0;
           final isFlat = variance.abs() < 1;
 
@@ -256,20 +275,15 @@ class _MonthlyComparisonScreenState
           // Prediction: project current month-end based on daily avg so far
           final dayOfMonth = now.day;
           final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
-          final dailyAvgCur =
-              dayOfMonth > 0 ? curExp / dayOfMonth : 0.0;
+          final dailyAvgCur = dayOfMonth > 0 ? curExp / dayOfMonth : 0.0;
           final dailyAvgLast = DateTime(now.year, now.month, 0).day > 0
               ? lastExp / DateTime(now.year, now.month, 0).day
               : 0.0;
           final projected = dailyAvgCur * daysInMonth;
 
           // Top category delta
-          final topIncrease = d.categories
-              .where((c) => c.delta > 0)
-              .toList();
-          final topDecrease = d.categories
-              .where((c) => c.delta < 0)
-              .toList();
+          final topIncrease = d.categories.where((c) => c.delta > 0).toList();
+          final topDecrease = d.categories.where((c) => c.delta < 0).toList();
 
           return RefreshIndicator(
             onRefresh: () => RefreshHelper.withMinDuration(() async {
@@ -286,59 +300,114 @@ class _MonthlyComparisonScreenState
               children: [
                 // ── 1. HERO ──
                 _buildHero(
-                  curInc, lastInc, curExp, lastExp, variance, variancePct,
+                  curInc,
+                  lastInc,
+                  curExp,
+                  lastExp,
+                  variance,
+                  variancePct,
                   GuestModeUtil.applyGuestMode(d.lastExpenseByThisDay, isGuest),
-                  curName, lastName, accent, isDown, isFlat,
-                  color, text, spacing, brightness,
+                  curName,
+                  lastName,
+                  accent,
+                  isDown,
+                  isFlat,
+                  color,
+                  text,
+                  spacing,
+                  brightness,
+                  ctxt,
                 ),
                 SizedBox(height: spacing.elementGap),
 
                 // ── 2. VERDICT ──
-                _buildVerdict(variance, isDown, isFlat, accent,
-                    topIncrease, topDecrease, projected,
-                    color, text, spacing),
+                _buildVerdict(
+                  variance,
+                  isDown,
+                  isFlat,
+                  accent,
+                  topIncrease,
+                  topDecrease,
+                  projected,
+                  color,
+                  text,
+                  spacing,
+                  ctxt,
+                ),
                 SizedBox(height: spacing.sectionGap),
 
                 // ── 3. INCOME / EXPENSE / BALANCE ──
                 _buildMiniStats(
-                  curInc, lastInc, curExp, lastExp,
-                  color, text, spacing, brightness,
+                  curInc,
+                  lastInc,
+                  curExp,
+                  lastExp,
+                  color,
+                  text,
+                  spacing,
+                  brightness,
+                  ctxt,
                 ),
                 SizedBox(height: spacing.sectionGap),
 
                 // ── 4. CATEGORY CHART ──
-                if (d.categories.where((c) => c.current > 0 || c.last > 0).isNotEmpty) ...[
+                if (d.categories
+                    .where((c) => c.current > 0 || c.last > 0)
+                    .isNotEmpty) ...[
                   _buildCategoryChart(
                     d.categories.take(5).toList(),
-                    curName, lastName,
-                    color, text, spacing, brightness,
+                    curName,
+                    lastName,
+                    color,
+                    text,
+                    spacing,
+                    brightness,
+                    ctxt,
                   ),
                   SizedBox(height: spacing.sectionGap),
                 ],
 
                 // ── 5. SPENDING PACE ──
                 _buildPaceCard(
-                  dailyAvgCur, dailyAvgLast, projected,
-                  curName, lastName,
-                  color, text, spacing, brightness,
+                  dailyAvgCur,
+                  dailyAvgLast,
+                  projected,
+                  curName,
+                  lastName,
+                  color,
+                  text,
+                  spacing,
+                  brightness,
+                  ctxt,
                 ),
                 SizedBox(height: spacing.sectionGap),
 
                 // ── 6. CATEGORY IMPACT ──
                 if (d.categories.isNotEmpty) ...[
-                  _sectionLabel('CATEGORY IMPACT', color, text),
+                  _sectionLabel(ctxt.stats_categoryImpact, color, text),
                   SizedBox(height: spacing.elementGap),
-                  ...d.categories.take(6).map((cat) => _buildCategoryTile(
-                        cat, isGuest, color, text, spacing, brightness,
-                      )),
+                  ...d.categories.take(6).map(
+                        (cat) => _buildCategoryTile(
+                          cat,
+                          isGuest,
+                          color,
+                          text,
+                          spacing,
+                          brightness,
+                        ),
+                      ),
                   SizedBox(height: spacing.sectionGap),
                 ],
 
                 // ── 7. ACTIVITY ──
                 _buildActivityRow(
-                  d.currentTxnCount, d.lastTxnCount,
-                  curName, lastName,
-                  color, text, spacing,
+                  d.currentTxnCount,
+                  d.lastTxnCount,
+                  curName,
+                  lastName,
+                  color,
+                  text,
+                  spacing,
                 ),
 
                 SizedBox(height: spacing.sectionGap),
@@ -354,12 +423,23 @@ class _MonthlyComparisonScreenState
   // ── 1. HERO ──
 
   Widget _buildHero(
-    double curInc, double lastInc, double curExp, double lastExp,
-    double variance, double variancePct,
+    double curInc,
+    double lastInc,
+    double curExp,
+    double lastExp,
+    double variance,
+    double variancePct,
     double lastExpByThisDay,
-    String curName, String lastName,
-    Color accent, bool isDown, bool isFlat,
-    ColorScheme color, TextTheme text, AppSpacing spacing, Brightness brightness,
+    String curName,
+    String lastName,
+    Color accent,
+    bool isDown,
+    bool isFlat,
+    ColorScheme color,
+    TextTheme text,
+    AppSpacing spacing,
+    Brightness brightness,
+    AppLocalizations ctxt,
   ) {
     final code = BaseCurrency.code;
     final incColor = FinanceColors.incomeColor(brightness);
@@ -379,28 +459,69 @@ class _MonthlyComparisonScreenState
             children: [
               const SizedBox(width: 80),
               Expanded(
-                child: Text(curName.split(' ').first, textAlign: TextAlign.center,
-                    style: text.labelMedium?.copyWith(fontWeight: FontWeight.w700, color: color.primary)),
+                child: Text(
+                  curName.split(' ').first,
+                  textAlign: TextAlign.center,
+                  style: text.labelMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: color.primary,
+                  ),
+                ),
               ),
               Expanded(
-                child: Text(lastName.split(' ').first, textAlign: TextAlign.center,
-                    style: text.labelMedium?.copyWith(fontWeight: FontWeight.w600, color: color.onSurfaceVariant)),
+                child: Text(
+                  lastName.split(' ').first,
+                  textAlign: TextAlign.center,
+                  style: text.labelMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: color.onSurfaceVariant,
+                  ),
+                ),
               ),
               const SizedBox(width: 50),
             ],
           ),
           const SizedBox(height: 12),
           // Income row
-          _heroRow('Income', curInc, lastInc, incColor, code, color, text, brightness),
+          _heroRow(
+            ctxt.stats_income,
+            curInc,
+            lastInc,
+            incColor,
+            code,
+            color,
+            text,
+            brightness,
+          ),
           const SizedBox(height: 8),
           // Expense row
-          _heroRow('Expense', curExp, lastExp, expColor, code, color, text, brightness),
+          _heroRow(
+            ctxt.stats_expense,
+            curExp,
+            lastExp,
+            expColor,
+            code,
+            color,
+            text,
+            brightness,
+          ),
           const SizedBox(height: 8),
-          Divider(height: 1, color: color.outlineVariant.withValues(alpha: 0.2)),
+          Divider(
+            height: 1,
+            color: color.outlineVariant.withValues(alpha: 0.2),
+          ),
           const SizedBox(height: 8),
           // Net row
-          _heroRow('Net', curInc - curExp, lastInc - lastExp,
-              (curInc - curExp) >= 0 ? incColor : expColor, code, color, text, brightness),
+          _heroRow(
+            ctxt.stats_net,
+            curInc - curExp,
+            lastInc - lastExp,
+            (curInc - curExp) >= 0 ? incColor : expColor,
+            code,
+            color,
+            text,
+            brightness,
+          ),
           if (lastExpByThisDay > 0) ...[
             const SizedBox(height: 10),
             Container(
@@ -423,24 +544,37 @@ class _MonthlyComparisonScreenState
   }
 
   Widget _heroRow(
-    String label, double curVal, double lastVal, Color rowColor, String code,
-    ColorScheme color, TextTheme text, Brightness brightness, {
-    String? customCur, String? customDelta, Color? deltaColor,
+    String label,
+    double curVal,
+    double lastVal,
+    Color rowColor,
+    String code,
+    ColorScheme color,
+    TextTheme text,
+    Brightness brightness, {
+    String? customCur,
+    String? customDelta,
+    Color? deltaColor,
   }) {
     final delta = curVal - lastVal;
     final pct = lastVal > 0 ? (delta / lastVal * 100) : 0.0;
     final isUp = delta > 0;
-    final dColor = deltaColor ?? (isUp
-        ? FinanceColors.expenseColor(brightness)
-        : FinanceColors.incomeColor(brightness));
+    final dColor = deltaColor ??
+        (isUp
+            ? FinanceColors.expenseColor(brightness)
+            : FinanceColors.incomeColor(brightness));
 
     return Row(
       children: [
         SizedBox(
           width: 80,
-          child: Text(label, style: text.bodySmall?.copyWith(
-            color: color.onSurfaceVariant, fontWeight: FontWeight.w600,
-          )),
+          child: Text(
+            label,
+            style: text.bodySmall?.copyWith(
+              color: color.onSurfaceVariant,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
         Expanded(
           child: Text(
@@ -454,7 +588,8 @@ class _MonthlyComparisonScreenState
             formatCurrencyCompact(lastVal, code: code),
             textAlign: TextAlign.center,
             style: text.titleSmall?.copyWith(
-              fontWeight: FontWeight.w600, color: color.onSurfaceVariant,
+              fontWeight: FontWeight.w600,
+              color: color.onSurfaceVariant,
             ),
           ),
         ),
@@ -467,9 +602,13 @@ class _MonthlyComparisonScreenState
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
-              customDelta ?? (delta.abs() < 1 ? '\u2014' : '${isUp ? '+' : ''}${pct.toStringAsFixed(0)}%'),
+              customDelta ??
+                  (delta.abs() < 1
+                      ? '\u2014'
+                      : '${isUp ? '+' : ''}${pct.toStringAsFixed(0)}%'),
               textAlign: TextAlign.center,
-              style: text.labelSmall?.copyWith(color: dColor, fontWeight: FontWeight.w700),
+              style: text.labelSmall
+                  ?.copyWith(color: dColor, fontWeight: FontWeight.w700),
             ),
           ),
         ),
@@ -480,10 +619,17 @@ class _MonthlyComparisonScreenState
   // ── 2. VERDICT ──
 
   Widget _buildVerdict(
-    double variance, bool isDown, bool isFlat, Color accent,
-    List<_CategoryDelta> topIncrease, List<_CategoryDelta> topDecrease,
+    double variance,
+    bool isDown,
+    bool isFlat,
+    Color accent,
+    List<_CategoryDelta> topIncrease,
+    List<_CategoryDelta> topDecrease,
     double projected,
-    ColorScheme color, TextTheme text, AppSpacing spacing,
+    ColorScheme color,
+    TextTheme text,
+    AppSpacing spacing,
+    AppLocalizations ctxt,
   ) {
     final code = BaseCurrency.code;
     String headline;
@@ -491,19 +637,21 @@ class _MonthlyComparisonScreenState
     IconData icon;
 
     if (isFlat) {
-      headline = 'Steady as she goes';
-      detail = 'Your spending is consistent — that\'s discipline.';
+      headline = ctxt.stats_steadyHeadline;
+      detail = ctxt.stats_steadyDetail;
       icon = LucideIcons.shieldCheck;
     } else if (isDown) {
-      headline = 'You\'re doing great 🌟';
-      detail = 'Spending is down ${formatCurrencyCompact(variance.abs(), code: code)}. ';
+      headline = ctxt.stats_doingGreatHeadline;
+      detail =
+          'Spending is down ${formatCurrencyCompact(variance.abs(), code: code)}. ';
       if (topDecrease.isNotEmpty) {
         detail += '${topDecrease.first.name} dropped the most.';
       }
       icon = LucideIcons.trendingDown;
     } else {
-      headline = 'Heads up — spending is up';
-      detail = '${formatCurrencyCompact(variance.abs(), code: code)} more than before. ';
+      headline = ctxt.stats_spendingUpHeadline;
+      detail =
+          '${formatCurrencyCompact(variance.abs(), code: code)} more than before. ';
       if (topIncrease.isNotEmpty) {
         detail += '${topIncrease.first.name} grew the most.';
       }
@@ -511,7 +659,8 @@ class _MonthlyComparisonScreenState
     }
 
     if (projected > 0) {
-      detail += '\nOn track to spend ${formatCurrencyCompact(projected, code: code)} this month.';
+      detail +=
+          '\nOn track to spend ${formatCurrencyCompact(projected, code: code)} this month.';
     }
 
     return Container(
@@ -563,8 +712,15 @@ class _MonthlyComparisonScreenState
   // ── 3. MINI STATS ──
 
   Widget _buildMiniStats(
-    double curInc, double lastInc, double curExp, double lastExp,
-    ColorScheme color, TextTheme text, AppSpacing spacing, Brightness brightness,
+    double curInc,
+    double lastInc,
+    double curExp,
+    double lastExp,
+    ColorScheme color,
+    TextTheme text,
+    AppSpacing spacing,
+    Brightness brightness,
+    AppLocalizations ctxt,
   ) {
     final incColor = FinanceColors.incomeColor(brightness);
     final expColor = FinanceColors.expenseColor(brightness);
@@ -576,22 +732,43 @@ class _MonthlyComparisonScreenState
       children: [
         Expanded(
           child: _miniStat(
-            'Income', curInc, lastInc, LucideIcons.trendingUp,
-            incColor, color, text, spacing,
+            ctxt.stats_income,
+            curInc,
+            lastInc,
+            LucideIcons.trendingUp,
+            incColor,
+            color,
+            text,
+            spacing,
+            ctxt,
           ),
         ),
         SizedBox(width: spacing.elementGap),
         Expanded(
           child: _miniStat(
-            'Expense', curExp, lastExp, LucideIcons.trendingDown,
-            expColor, color, text, spacing,
+            ctxt.stats_expense,
+            curExp,
+            lastExp,
+            LucideIcons.trendingDown,
+            expColor,
+            color,
+            text,
+            spacing,
+            ctxt,
           ),
         ),
         SizedBox(width: spacing.elementGap),
         Expanded(
           child: _miniStat(
-            'Balance', curBal, lastBal, LucideIcons.wallet,
-            balColor, color, text, spacing,
+            'Balance',
+            curBal,
+            lastBal,
+            LucideIcons.wallet,
+            balColor,
+            color,
+            text,
+            spacing,
+            ctxt,
           ),
         ),
       ],
@@ -599,15 +776,21 @@ class _MonthlyComparisonScreenState
   }
 
   Widget _miniStat(
-    String label, double current, double previous, IconData icon,
-    Color accent, ColorScheme color, TextTheme text, AppSpacing spacing,
+    String label,
+    double current,
+    double previous,
+    IconData icon,
+    Color accent,
+    ColorScheme color,
+    TextTheme text,
+    AppSpacing spacing,
+    AppLocalizations ctxt,
   ) {
-    final pct = previous != 0
-        ? ((current - previous) / previous.abs() * 100)
-        : 0.0;
+    final pct =
+        previous != 0 ? ((current - previous) / previous.abs() * 100) : 0.0;
     final isUp = pct > 0;
     // For expense: down is good. For income/balance: up is good.
-    final isGood = label == 'Expense' ? !isUp : isUp;
+    final isGood = label == ctxt.stats_expense ? !isUp : isUp;
     final changeColor = previous == 0
         ? color.onSurfaceVariant
         : isGood
@@ -656,8 +839,12 @@ class _MonthlyComparisonScreenState
   // ── 4. CATEGORY TILE ──
 
   Widget _buildCategoryTile(
-    _CategoryDelta cat, bool isGuest,
-    ColorScheme color, TextTheme text, AppSpacing spacing, Brightness brightness,
+    _CategoryDelta cat,
+    bool isGuest,
+    ColorScheme color,
+    TextTheme text,
+    AppSpacing spacing,
+    Brightness brightness,
   ) {
     final cur = GuestModeUtil.applyGuestMode(cat.current, isGuest);
     final last = GuestModeUtil.applyGuestMode(cat.last, isGuest);
@@ -682,7 +869,8 @@ class _MonthlyComparisonScreenState
         decoration: BoxDecoration(
           color: color.surfaceContainerLow,
           borderRadius: BorderRadius.circular(spacing.radiusMedium),
-          border: Border.all(color: color.outlineVariant.withValues(alpha: 0.3)),
+          border:
+              Border.all(color: color.outlineVariant.withValues(alpha: 0.3)),
         ),
         child: Row(
           children: [
@@ -706,13 +894,15 @@ class _MonthlyComparisonScreenState
                 children: [
                   Text(
                     cat.name,
-                    style: text.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                    style:
+                        text.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
                     '${formatCurrencyCompact(cur, code: BaseCurrency.code)} vs ${formatCurrencyCompact(last, code: BaseCurrency.code)}',
-                    style: text.bodySmall?.copyWith(color: color.onSurfaceVariant, fontSize: 11),
+                    style: text.bodySmall
+                        ?.copyWith(color: color.onSurfaceVariant, fontSize: 11),
                   ),
                 ],
               ),
@@ -740,9 +930,16 @@ class _MonthlyComparisonScreenState
   // ── 5. SPENDING PACE ──
 
   Widget _buildPaceCard(
-    double dailyAvgCur, double dailyAvgLast, double projected,
-    String curName, String lastName,
-    ColorScheme color, TextTheme text, AppSpacing spacing, Brightness brightness,
+    double dailyAvgCur,
+    double dailyAvgLast,
+    double projected,
+    String curName,
+    String lastName,
+    ColorScheme color,
+    TextTheme text,
+    AppSpacing spacing,
+    Brightness brightness,
+    AppLocalizations ctxt,
   ) {
     final maxAvg = math.max(dailyAvgCur, dailyAvgLast);
     final curFrac = maxAvg > 0 ? (dailyAvgCur / maxAvg).clamp(0.0, 1.0) : 0.0;
@@ -763,15 +960,34 @@ class _MonthlyComparisonScreenState
             children: [
               Icon(LucideIcons.gauge, size: 16, color: color.primary),
               const SizedBox(width: 8),
-              Text('Daily Spending Pace', style: text.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
+              Text(
+                ctxt.stats_dailySpendingPace,
+                style: text.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+              ),
             ],
           ),
           const SizedBox(height: 16),
           // Current month bar
-          _paceBar(curName.split(' ').first, dailyAvgCur, curFrac, color.primary, code, color, text),
+          _paceBar(
+            curName.split(' ').first,
+            dailyAvgCur,
+            curFrac,
+            color.primary,
+            code,
+            color,
+            text,
+          ),
           const SizedBox(height: 10),
           // Compare month bar
-          _paceBar(lastName.split(' ').first, dailyAvgLast, lastFrac, color.primary.withValues(alpha: 0.4), code, color, text),
+          _paceBar(
+            lastName.split(' ').first,
+            dailyAvgLast,
+            lastFrac,
+            color.primary.withValues(alpha: 0.4),
+            code,
+            color,
+            text,
+          ),
           if (projected > 0) ...[
             const SizedBox(height: 14),
             Container(
@@ -786,7 +1002,10 @@ class _MonthlyComparisonScreenState
                   const SizedBox(width: 6),
                   Text(
                     'Projected: ${formatCurrencyCompact(projected, code: code)} this month',
-                    style: text.bodySmall?.copyWith(color: color.primary, fontWeight: FontWeight.w600),
+                    style: text.bodySmall?.copyWith(
+                      color: color.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ],
               ),
@@ -797,12 +1016,26 @@ class _MonthlyComparisonScreenState
     );
   }
 
-  Widget _paceBar(String label, double value, double fraction, Color barColor, String code, ColorScheme color, TextTheme text) {
+  Widget _paceBar(
+    String label,
+    double value,
+    double fraction,
+    Color barColor,
+    String code,
+    ColorScheme color,
+    TextTheme text,
+  ) {
     return Row(
       children: [
         SizedBox(
           width: 40,
-          child: Text(label, style: text.labelSmall?.copyWith(color: color.onSurfaceVariant, fontWeight: FontWeight.w600)),
+          child: Text(
+            label,
+            style: text.labelSmall?.copyWith(
+              color: color.onSurfaceVariant,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
         const SizedBox(width: 8),
         Expanded(
@@ -833,9 +1066,13 @@ class _MonthlyComparisonScreenState
   // ── 6. ACTIVITY ROW ──
 
   Widget _buildActivityRow(
-    int curCount, int lastCount,
-    String curName, String lastName,
-    ColorScheme color, TextTheme text, AppSpacing spacing,
+    int curCount,
+    int lastCount,
+    String curName,
+    String lastName,
+    ColorScheme color,
+    TextTheme text,
+    AppSpacing spacing,
   ) {
     final delta = curCount - lastCount;
     final isUp = delta > 0;
@@ -861,7 +1098,8 @@ class _MonthlyComparisonScreenState
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
               decoration: BoxDecoration(
-                color: (isUp ? color.primary : color.tertiary).withValues(alpha: 0.1),
+                color: (isUp ? color.primary : color.tertiary)
+                    .withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
@@ -881,11 +1119,17 @@ class _MonthlyComparisonScreenState
 
   Widget _buildCategoryChart(
     List<_CategoryDelta> categories,
-    String curName, String lastName,
-    ColorScheme color, TextTheme text, AppSpacing spacing, Brightness brightness,
+    String curName,
+    String lastName,
+    ColorScheme color,
+    TextTheme text,
+    AppSpacing spacing,
+    Brightness brightness,
+    AppLocalizations ctxt,
   ) {
     final maxVal = categories.fold<double>(
-      0, (m, c) => math.max(m, math.max(c.current, c.last)),
+      0,
+      (m, c) => math.max(m, math.max(c.current, c.last)),
     );
     if (maxVal <= 0) return const SizedBox.shrink();
 
@@ -903,24 +1147,43 @@ class _MonthlyComparisonScreenState
             children: [
               Icon(LucideIcons.chartBarBig, size: 16, color: color.primary),
               const SizedBox(width: 8),
-              Text('Top Categories', style: text.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
+              Text(
+                ctxt.stats_topCategories,
+                style: text.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+              ),
             ],
           ),
           const SizedBox(height: 6),
           // Legend
           Row(
             children: [
-              Container(width: 10, height: 10, decoration: BoxDecoration(
-                color: color.primary, borderRadius: BorderRadius.circular(2),
-              )),
+              Container(
+                width: 10,
+                height: 10,
+                decoration: BoxDecoration(
+                  color: color.primary,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
               const SizedBox(width: 4),
-              Text(curName.split(' ').first, style: text.labelSmall?.copyWith(color: color.onSurfaceVariant)),
+              Text(
+                curName.split(' ').first,
+                style: text.labelSmall?.copyWith(color: color.onSurfaceVariant),
+              ),
               const SizedBox(width: 12),
-              Container(width: 10, height: 10, decoration: BoxDecoration(
-                color: color.primary.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2),
-              )),
+              Container(
+                width: 10,
+                height: 10,
+                decoration: BoxDecoration(
+                  color: color.primary.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
               const SizedBox(width: 4),
-              Text(lastName.split(' ').first, style: text.labelSmall?.copyWith(color: color.onSurfaceVariant)),
+              Text(
+                lastName.split(' ').first,
+                style: text.labelSmall?.copyWith(color: color.onSurfaceVariant),
+              ),
             ],
           ),
           const SizedBox(height: 14),
@@ -933,9 +1196,13 @@ class _MonthlyComparisonScreenState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(cat.name, style: text.labelSmall?.copyWith(
-                    fontWeight: FontWeight.w600, color: color.onSurfaceVariant,
-                  )),
+                  Text(
+                    cat.name,
+                    style: text.labelSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: color.onSurfaceVariant,
+                    ),
+                  ),
                   const SizedBox(height: 4),
                   // Current month bar
                   ClipRRect(
@@ -945,7 +1212,8 @@ class _MonthlyComparisonScreenState
                       duration: const Duration(milliseconds: 600),
                       curve: Curves.easeOutCubic,
                       builder: (_, v, __) => LinearProgressIndicator(
-                        value: v, minHeight: 6,
+                        value: v,
+                        minHeight: 6,
                         backgroundColor: color.primary.withValues(alpha: 0.06),
                         valueColor: AlwaysStoppedAnimation(color.primary),
                       ),
@@ -960,9 +1228,12 @@ class _MonthlyComparisonScreenState
                       duration: const Duration(milliseconds: 600),
                       curve: Curves.easeOutCubic,
                       builder: (_, v, __) => LinearProgressIndicator(
-                        value: v, minHeight: 6,
+                        value: v,
+                        minHeight: 6,
                         backgroundColor: color.primary.withValues(alpha: 0.03),
-                        valueColor: AlwaysStoppedAnimation(color.primary.withValues(alpha: 0.3)),
+                        valueColor: AlwaysStoppedAnimation(
+                          color.primary.withValues(alpha: 0.3),
+                        ),
                       ),
                     ),
                   ),

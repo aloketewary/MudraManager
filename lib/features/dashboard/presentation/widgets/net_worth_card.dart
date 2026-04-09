@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -87,7 +88,7 @@ class NetWorthCard extends ConsumerWidget {
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Icon(
-                                  Icons.account_balance,
+                                  LucideIcons.landmark,
                                   size: 20,
                                   color: color.onPrimaryContainer,
                                 ),
@@ -103,7 +104,7 @@ class NetWorthCard extends ConsumerWidget {
                               ),
                               const Spacer(),
                               Icon(
-                                Icons.chevron_right,
+                                LucideIcons.chevronRight,
                                 color: color.onPrimaryContainer
                                     .withValues(alpha: 0.6),
                                 size: 20,
@@ -157,8 +158,8 @@ class NetWorthCard extends ConsumerWidget {
                                     children: [
                                       Icon(
                                         displayMonthlyChange >= 0
-                                            ? Icons.trending_up
-                                            : Icons.trending_down,
+                                            ? LucideIcons.trendingUp
+                                            : LucideIcons.trendingDown,
                                         size: 16,
                                         color: displayMonthlyChange >= 0
                                             ? color.primary
@@ -216,7 +217,7 @@ class NetWorthCard extends ConsumerWidget {
                                         child: _MetricChip(
                                           label: 'Assets',
                                           amount: displayAssets,
-                                          icon: Icons.arrow_upward,
+                                          icon: LucideIcons.arrowUp,
                                           color: color.primary,
                                           textTheme: textTheme,
                                           colorScheme: color,
@@ -227,7 +228,7 @@ class NetWorthCard extends ConsumerWidget {
                                         child: _MetricChip(
                                           label: 'Liabilities',
                                           amount: displayLiabilities,
-                                          icon: Icons.arrow_downward,
+                                          icon: LucideIcons.arrowDown,
                                           color: color.error,
                                           textTheme: textTheme,
                                           colorScheme: color,
@@ -241,7 +242,7 @@ class NetWorthCard extends ConsumerWidget {
                             loading: () => Row(
                               children: [
                                 Icon(
-                                  Icons.trending_up,
+                                  LucideIcons.trendingUp,
                                   size: 16,
                                   color: color.onPrimaryContainer
                                       .withValues(alpha: 0.5),

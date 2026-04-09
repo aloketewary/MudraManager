@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -38,7 +39,7 @@ class BudgetOverviewCard extends ConsumerWidget {
     } else if (percent >= 90) {
       progressColor = color.error;
     } else if (percent >= 80) {
-      progressColor = Colors.orange;
+      progressColor = FinanceColors.statusWarning;
     }
 
     return Container(

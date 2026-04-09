@@ -1,7 +1,6 @@
 import 'package:mudra_manager/core/utils/safe_date_format.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
-import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/shared/widgets/ambient_brand_section.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
@@ -78,7 +77,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Recap — $monthName'),
+        title: Text('${AppLocalizations.of(context)!.recap_recapTitle} — $monthName'),
       ),
       body: FutureBuilder<MonthlyRecapData>(
         future: _loadData(),
@@ -138,7 +137,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
                               ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
                               : const Icon(LucideIcons.download),
                           onPressed: _downloading ? null : () => _downloadPdf(data),
-                          tooltip: 'Download PDF',
+                          tooltip: AppLocalizations.of(context)!.stats_downloadPdf,
                         ),
                       ],
                     ),
@@ -341,7 +340,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
                             )
                           : const Icon(LucideIcons.download, size: 18),
                       label:
-                          Text(_downloading ? 'Generating...' : 'Download PDF'),
+                          Text(_downloading ? AppLocalizations.of(context)!.stats_generating : AppLocalizations.of(context)!.stats_downloadPdf),
                       style: FilledButton.styleFrom(
                         minimumSize: const Size(double.infinity, 50),
                         shape: RoundedRectangleBorder(
@@ -420,7 +419,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
         child: Row(
           children: [
             _momItem(
-              'Income',
+              AppLocalizations.of(context)!.recap_income,
               data.totalIncome,
               data.prevMonthIncome,
               data.incomeChange,
@@ -430,7 +429,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
             ),
             SizedBox(width: spacing.elementGap),
             _momItem(
-              'Expense',
+              AppLocalizations.of(context)!.recap_expense,
               data.totalExpense,
               data.prevMonthExpense,
               data.expenseChange,
@@ -469,7 +468,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
   ) {
     final isUp = pctChange >= 0;
     // For expense, up is bad; for income/savings, up is good
-    final isExpenseLabel = label == 'Expense';
+    final isExpenseLabel = label == AppLocalizations.of(context)!.recap_expense;
     final changeColor = (isUp && !isExpenseLabel) || (!isUp && isExpenseLabel)
         ? color.primary
         : color.error;
@@ -542,7 +541,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
                 SizedBox(width: spacing.elementGap),
                 _highlightChip(
                   LucideIcons.percent,
-                  'Saved',
+                  AppLocalizations.of(context)!.recap_saved,
                   '${data.savingsRate.toStringAsFixed(1)}%',
                   color,
                   textTheme,
@@ -737,7 +736,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  'Below avg',
+                  AppLocalizations.of(context)!.recap_belowAvg,
                   style: textTheme.labelSmall
                       ?.copyWith(color: color.onSurfaceVariant),
                 ),
@@ -752,7 +751,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  'Above avg',
+                  AppLocalizations.of(context)!.recap_aboveAvg,
                   style: textTheme.labelSmall
                       ?.copyWith(color: color.onSurfaceVariant),
                 ),
@@ -882,7 +881,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
             Expanded(
               child: _miniStatCard(
                 LucideIcons.repeat,
-                'Recurring',
+                AppLocalizations.of(context)!.recap_recurring,
                 _fmt(data.recurringExpense),
                 '${recurPct.toStringAsFixed(0)}%',
                 color.secondary,
@@ -894,7 +893,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
             Expanded(
               child: _miniStatCard(
                 LucideIcons.zap,
-                'One-time',
+                AppLocalizations.of(context)!.recap_oneTime,
                 _fmt(data.oneTimeExpense),
                 '${(100 - recurPct).toStringAsFixed(0)}%',
                 color.tertiary,

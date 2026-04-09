@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -35,22 +36,22 @@ class FrequencySelector extends StatelessWidget {
             ButtonSegment(
               value: FrequencyType.daily,
               label: Text('Daily'),
-              icon: Icon(Icons.today, size: 16),
+              icon: Icon(LucideIcons.calendarCheck, size: 16),
             ),
             ButtonSegment(
               value: FrequencyType.weekly,
               label: Text('Weekly'),
-              icon: Icon(Icons.calendar_view_week, size: 16),
+              icon: Icon(LucideIcons.calendarDays, size: 16),
             ),
             ButtonSegment(
               value: FrequencyType.monthly,
               label: Text('Monthly'),
-              icon: Icon(Icons.calendar_month, size: 16),
+              icon: Icon(LucideIcons.calendar, size: 16),
             ),
             ButtonSegment(
               value: FrequencyType.yearly,
               label: Text('Yearly'),
-              icon: Icon(Icons.calendar_today, size: 16),
+              icon: Icon(LucideIcons.calendar, size: 16),
             ),
           ],
           selected: {selectedFrequency},

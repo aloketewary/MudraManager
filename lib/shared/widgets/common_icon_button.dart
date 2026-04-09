@@ -1,4 +1,4 @@
-import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 
 class CommonIconPickerButton extends StatelessWidget {
@@ -15,7 +15,7 @@ class CommonIconPickerButton extends StatelessWidget {
     this.backgroundColor = Colors.blue,
     required this.label,
     this.textColor,
-    this.selectedIcon = Icons.add,
+    this.selectedIcon = LucideIcons.plus,
     this.iconBackGroundColor,
   });
 

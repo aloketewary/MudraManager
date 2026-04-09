@@ -1,4 +1,3 @@
-import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:math_expressions/math_expressions.dart';
@@ -76,7 +75,7 @@ class _SimpleCalculatorState extends State<SimpleCalculator> {
               padding: EdgeInsets.all(20),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [color.primaryContainer.withOpacity(0.3), color.surface],
+                  colors: [color.primaryContainer.withValues(alpha: 0.3), color.surface],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                 ),

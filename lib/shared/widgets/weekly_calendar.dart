@@ -1,4 +1,4 @@
-import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -114,7 +114,7 @@ class _WeeklyCalendarState extends State<WeeklyCalendar> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               IconButton(
-                icon: const Icon(Icons.arrow_back_ios),
+                icon: const Icon(LucideIcons.chevronLeft),
                 onPressed: _previousWeek,
               ),
               GestureDetector(
@@ -128,7 +128,7 @@ class _WeeklyCalendarState extends State<WeeklyCalendar> {
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.arrow_forward_ios),
+                icon: const Icon(LucideIcons.chevronRight),
                 onPressed: _nextWeek,
               ),
             ],

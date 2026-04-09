@@ -129,7 +129,7 @@ void main() {
     test('free themes are not pro', () {
       expect(AppColorTheme.finance.isPro, false);
       expect(AppColorTheme.classic.isPro, false);
-      expect(AppColorTheme.dark.isPro, false);
+      expect(AppColorTheme.mint.isPro, false);
     });
 
     test('pro themes are pro', () {

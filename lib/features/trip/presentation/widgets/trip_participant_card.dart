@@ -1,5 +1,6 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
-import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:flutter/material.dart';
 
 class TripParticipantCard extends StatelessWidget {
@@ -37,12 +38,12 @@ class TripParticipantCard extends StatelessWidget {
         subtitle: Text(
           balance >= 0 ? 'Gets back ${formatCurrency(balance.abs(), decimals: 2)}' : 'Owes ${formatCurrency(balance.abs(), decimals: 2)}',
           style: TextStyle(
-            color: balance >= 0 ? Colors.green : Colors.red,
+            color: balance >= 0 ? FinanceColors.statusGood : FinanceColors.statusDanger,
           ),
         ),
         trailing: onDelete != null
             ? IconButton(
-                icon: const Icon(Icons.delete_outline),
+                icon: const Icon(LucideIcons.trash2),
                 onPressed: onDelete,
               )
             : null,

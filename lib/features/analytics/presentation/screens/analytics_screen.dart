@@ -1,3 +1,5 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -59,7 +61,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.favorite, color: color.primary, size: 28),
+                          Icon(LucideIcons.heart, color: color.primary, size: 28),
                           const SizedBox(width: 12),
                           Text(
                             AppLocalizations.of(context)!.analytics_financialHealthScore,
@@ -120,7 +122,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                             child: Row(
                               children: [
                                 Icon(
-                                  Icons.lightbulb_outline,
+                                  LucideIcons.lightbulb,
                                   size: 20,
                                   color: color.primary,
                                 ),
@@ -161,7 +163,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                       Row(
                         children: [
                           Icon(
-                            Icons.trending_up,
+                            LucideIcons.trendingUp,
                             color: color.primary,
                             size: 28,
                           ),
@@ -234,7 +236,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                         Row(
                           children: [
                             Icon(
-                              Icons.category,
+                              LucideIcons.layoutGrid,
                               color: color.primary,
                               size: 28,
                             ),
@@ -279,20 +281,20 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                                               const SizedBox(width: 8),
                                               Icon(
                                                 trend.changePercent > 0
-                                                    ? Icons.arrow_upward
-                                                    : Icons.arrow_downward,
+                                                    ? LucideIcons.arrowUp
+                                                    : LucideIcons.arrowDown,
                                                 size: 16,
                                                 color: trend.changePercent > 0
-                                                    ? Colors.red
-                                                    : Colors.green,
+                                                    ? FinanceColors.statusDanger
+                                                    : FinanceColors.statusGood,
                                               ),
                                               Text(
                                                 '${trend.changePercent.abs().toStringAsFixed(0)}%',
                                                 style: textTheme.bodySmall
                                                     ?.copyWith(
                                                   color: trend.changePercent > 0
-                                                      ? Colors.red
-                                                      : Colors.green,
+                                                      ? FinanceColors.statusDanger
+                                                      : FinanceColors.statusGood,
                                                 ),
                                               ),
                                             ],
@@ -343,7 +345,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                         Row(
                           children: [
                             Icon(
-                              Icons.calendar_today,
+                              LucideIcons.calendar,
                               color: color.primary,
                               size: 28,
                             ),
@@ -463,9 +465,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   }
 
   Color _getScoreColor(int score) {
-    if (score >= 80) return Colors.green;
+    if (score >= 80) return FinanceColors.statusGood;
     if (score >= 60) return Colors.blue;
-    if (score >= 40) return Colors.orange;
-    return Colors.red;
+    if (score >= 40) return FinanceColors.statusWarning;
+    return FinanceColors.statusDanger;
   }
 }

@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
@@ -33,7 +34,7 @@ class TripExpenseItem extends StatelessWidget {
         onTap: onTap,
         leading: CircleAvatar(
           backgroundColor: color.primaryContainer,
-          child: Icon(Icons.receipt, color: color.primary, size: 20),
+          child: Icon(LucideIcons.receipt, color: color.primary, size: 20),
         ),
         title: Text(description, style: textTheme.titleSmall),
         subtitle: Text(
@@ -52,7 +53,7 @@ class TripExpenseItem extends StatelessWidget {
             ),
             if (onDelete != null)
               IconButton(
-                icon: const Icon(Icons.delete_outline, size: 20),
+                icon: const Icon(LucideIcons.trash2, size: 20),
                 onPressed: onDelete,
               ),
           ],

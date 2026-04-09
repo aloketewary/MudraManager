@@ -1391,7 +1391,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
     final accent = pct > 0.9
         ? color.error
         : pct > 0.7
-            ? Colors.orange
+            ? FinanceColors.statusWarning
             : FinanceColors.incomeColor(Theme.of(context).brightness);
 
     return Padding(
@@ -1467,7 +1467,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
       // 🟠 Tight
       message = BuddyMessages.budgetGettingTight(formatCurrency(remaining, code: BaseCurrency.code), daysLeft);
       icon = LucideIcons.clock;
-      accent = Colors.orange;
+      accent = FinanceColors.statusWarning;
     } else {
       // 🟢 Healthy
       message = BuddyMessages.budgetInControl(formatCurrency(safePerDay, code: BaseCurrency.code));

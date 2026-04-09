@@ -1,4 +1,3 @@
-import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/db/models/trip.dart';
 import 'package:mudra_manager/core/providers/collection_watchers.dart';
@@ -169,13 +168,23 @@ final allSectionedTransactionsProvider = FutureProvider.autoDispose
   ref.watch(transactionChangeProvider);
   final service = ref.watch(transactionProvider);
 
+  // Load last 6 months for performance — user can switch to month view for older
+  final cutoff = DateTime.now().subtract(const Duration(days: 180));
   List<Transaction> transactions;
   if (type == 'income') {
-    transactions = await service.getByType(isExpense: false);
+    transactions = await service.getByTypeAndDateRange(
+      isExpense: false,
+      start: cutoff,
+      end: DateTime.now(),
+    );
   } else if (type == 'expense') {
-    transactions = await service.getByType(isExpense: true);
+    transactions = await service.getByTypeAndDateRange(
+      isExpense: true,
+      start: cutoff,
+      end: DateTime.now(),
+    );
   } else {
-    transactions = await service.getAll();
+    transactions = await service.getByDateRange(cutoff, DateTime.now());
   }
 
   if (transactions.isEmpty) return [];

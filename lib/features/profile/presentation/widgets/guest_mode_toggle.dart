@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -39,7 +40,7 @@ class GuestModeToggle extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  Icon(Icons.hide_source, size: 64, color: color.primary),
+                  Icon(LucideIcons.eyeOff, size: 64, color: color.primary),
                   const SizedBox(height: 16),
                   Text(
                     'Guest Mode',
@@ -102,7 +103,7 @@ class GuestModeToggle extends ConsumerWidget {
                   color: color.primary.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(Icons.hide_source, color: color.primary, size: 24),
+                child: Icon(LucideIcons.eyeOff, color: color.primary, size: 24),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -127,7 +128,7 @@ class GuestModeToggle extends ConsumerWidget {
                 ),
               ),
               Icon(
-                Icons.chevron_right,
+                LucideIcons.chevronRight,
                 color: color.onSurfaceVariant,
                 size: 20,
               ),

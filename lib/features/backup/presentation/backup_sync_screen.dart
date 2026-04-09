@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -56,8 +57,8 @@ class _BackupSyncScreenState extends ConsumerState<BackupSyncScreen> {
             subtitle: const Text('Save to device storage'),
             leading: Icon(
               _selectedMethod == BackupMethod.local
-                  ? Icons.radio_button_checked
-                  : Icons.radio_button_unchecked,
+                  ? LucideIcons.circleDot
+                  : LucideIcons.circle,
             ),
             onTap: () => setState(() => _selectedMethod = BackupMethod.local),
           ),
@@ -66,8 +67,8 @@ class _BackupSyncScreenState extends ConsumerState<BackupSyncScreen> {
             subtitle: const Text('Save locally + open share dialog'),
             leading: Icon(
               _selectedMethod == BackupMethod.shareToCloud
-                  ? Icons.radio_button_checked
-                  : Icons.radio_button_unchecked,
+                  ? LucideIcons.circleDot
+                  : LucideIcons.circle,
             ),
             onTap: () =>
                 setState(() => _selectedMethod = BackupMethod.shareToCloud),
@@ -139,13 +140,13 @@ class _BackupSyncScreenState extends ConsumerState<BackupSyncScreen> {
                     itemBuilder: (context, index) {
                       final backup = backups[index];
                       return ListTile(
-                        leading: const Icon(Icons.storage),
+                        leading: const Icon(LucideIcons.database),
                         title: Text(backup.name),
                         subtitle: Text(
                           '${_formatFileSize(backup.size)} • ${_formatDate(backup.date)}',
                         ),
                         trailing: IconButton(
-                          icon: const Icon(Icons.share),
+                          icon: const Icon(LucideIcons.share2),
                           onPressed: () => _shareBackup(backup),
                         ),
                       );

@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
@@ -463,15 +464,15 @@ class TripsScreen extends ConsumerWidget {
     final String balanceText;
 
     if (s.youGet) {
-      balanceColor = Colors.green;
+      balanceColor = FinanceColors.statusGood;
       balanceText =
           'You\'ll get ${formatCurrency(s.netBalance, code: currencyCode, decimals: 0)}';
     } else if (s.youOwe) {
-      balanceColor = Colors.red;
+      balanceColor = FinanceColors.statusDanger;
       balanceText =
           'You owe ${formatCurrency(s.netBalance.abs(), code: currencyCode, decimals: 0)}';
     } else if (s.settled) {
-      balanceColor = Colors.green;
+      balanceColor = FinanceColors.statusGood;
       balanceText = AppLocalizations.of(context)!.trip_allSettled;
     } else {
       balanceColor = color.onSurfaceVariant;

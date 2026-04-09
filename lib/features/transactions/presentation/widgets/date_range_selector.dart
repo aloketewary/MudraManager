@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -51,7 +52,7 @@ class DateRangeSelector extends StatelessWidget {
         color: color.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: color.outlineVariant.withOpacity(0.5),
+          color: color.outlineVariant.withValues(alpha: 0.5),
           width: 1,
         ),
       ),
@@ -75,7 +76,7 @@ class DateRangeSelector extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
-                    Icons.calendar_today_rounded,
+                    LucideIcons.calendar,
                     color: color.primary,
                     size: 20,
                   ),
@@ -115,24 +116,24 @@ class DateRangeSelector extends StatelessWidget {
                     children: [
                       if (!useInfiniteScroll || filterStartDate != null) ...[
                         IconButton(
-                          icon: const Icon(Icons.chevron_left_rounded, size: 22),
+                          icon: const Icon(LucideIcons.chevronLeft, size: 22),
                           onPressed: onPreviousMonth,
                         ),
                         if (!_isSameMonth(selectedDate, DateTime.now()))
                           IconButton(
-                            icon: Icon(Icons.refresh_rounded, size: 20, color: color.primary),
+                            icon: Icon(LucideIcons.refreshCw, size: 20, color: color.primary),
                             onPressed: onResetToday,
                           ),
                         IconButton(
-                          icon: const Icon(Icons.chevron_right_rounded, size: 22),
+                          icon: const Icon(LucideIcons.chevronRight, size: 22),
                           onPressed: canGoNext ? onNextMonth : null,
                         ),
                       ],
                       IconButton(
                         icon: Icon(
                           useInfiniteScroll && filterStartDate == null
-                              ? Icons.view_list_rounded
-                              : Icons.all_inclusive_rounded,
+                              ? LucideIcons.list
+                              : LucideIcons.infinity,
                           size: 20,
                           color: color.primary,
                         ),
@@ -144,8 +145,8 @@ class DateRangeSelector extends StatelessWidget {
                 const SizedBox(width: 8),
                 Icon(
                   showCalendar
-                      ? Icons.keyboard_arrow_up_rounded
-                      : Icons.keyboard_arrow_down_rounded,
+                      ? LucideIcons.chevronUp
+                      : LucideIcons.chevronDown,
                   color: color.onSurfaceVariant,
                 ),
               ],

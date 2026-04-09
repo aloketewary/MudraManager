@@ -1,4 +1,3 @@
-import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 
 class TopHeader extends StatelessWidget {
@@ -25,7 +24,7 @@ class TopHeader extends StatelessWidget {
 
               Text(
                 'Payday in a week',
-                style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 12),
+                style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12),
               ),
             ],
           ),

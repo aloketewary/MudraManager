@@ -1,5 +1,5 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
@@ -211,7 +211,7 @@ class _SwipeableWeeklyCalendarState extends State<SwipeableWeeklyCalendar> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 IconButton(
-                  icon: Icon(Icons.arrow_back_ios, color: color.primary),
+                  icon: Icon(LucideIcons.chevronLeft, color: color.primary),
                   onPressed: _goToPreviousWeek,
                 ),
                 GestureDetector(
@@ -225,7 +225,7 @@ class _SwipeableWeeklyCalendarState extends State<SwipeableWeeklyCalendar> {
                   ),
                 ),
                 IconButton(
-                  icon: Icon(Icons.arrow_forward_ios, color: color.primary),
+                  icon: Icon(LucideIcons.chevronRight, color: color.primary),
                   onPressed: _goToNextWeek,
                 ),
               ],

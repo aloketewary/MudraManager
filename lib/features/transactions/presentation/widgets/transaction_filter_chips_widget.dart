@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -42,9 +43,9 @@ class TransactionFilterChips extends StatelessWidget {
         children: [
           if (selectedCategoryId != null)
             Chip(
-              avatar: Icon(Icons.category_rounded, size: 18, color: color.primary),
+              avatar: Icon(LucideIcons.layoutGrid, size: 18, color: color.primary),
               label: Text('Category', style: textTheme.labelMedium),
-              deleteIcon: const Icon(Icons.close_rounded, size: 18),
+              deleteIcon: const Icon(LucideIcons.x, size: 18),
               backgroundColor: color.primaryContainer,
               side: BorderSide.none,
               onDeleted: () {
@@ -54,9 +55,9 @@ class TransactionFilterChips extends StatelessWidget {
             ),
           if (selectedTagId != null)
             Chip(
-              avatar: Icon(Icons.label_rounded, size: 18, color: color.tertiary),
+              avatar: Icon(LucideIcons.tag, size: 18, color: color.tertiary),
               label: Text(selectedTagName ?? 'Tag', style: textTheme.labelMedium),
-              deleteIcon: const Icon(Icons.close_rounded, size: 18),
+              deleteIcon: const Icon(LucideIcons.x, size: 18),
               backgroundColor: color.tertiaryContainer,
               side: BorderSide.none,
               onDeleted: () {
@@ -66,9 +67,9 @@ class TransactionFilterChips extends StatelessWidget {
             ),
           if (filterStartDate != null)
             Chip(
-              avatar: Icon(Icons.date_range_rounded, size: 18, color: color.primary),
+              avatar: Icon(LucideIcons.calendarRange, size: 18, color: color.primary),
               label: Text('Date Range', style: textTheme.labelMedium),
-              deleteIcon: const Icon(Icons.close_rounded, size: 18),
+              deleteIcon: const Icon(LucideIcons.x, size: 18),
               backgroundColor: color.primaryContainer,
               side: BorderSide.none,
               onDeleted: () {

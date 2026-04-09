@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/utils/safe_date_format.dart';
 import 'package:mudra_manager/shared/widgets/currency_badge.dart';
 import 'package:go_router/go_router.dart';
@@ -606,7 +607,7 @@ class _AddEditGoalScreenState extends ConsumerState<AddEditGoalScreen> {
                     ),
                   ),
             style: textTheme.bodySmall?.copyWith(
-              color: reachedGoal ? Colors.green : color.onSurfaceVariant,
+              color: reachedGoal ? FinanceColors.statusGood : color.onSurfaceVariant,
               fontWeight: reachedGoal ? FontWeight.w600 : FontWeight.normal,
             ),
           ),
@@ -781,15 +782,15 @@ class _AddEditGoalScreenState extends ConsumerState<AddEditGoalScreen> {
     final String healthLabel;
     final IconData healthIcon;
     if (_dailyNeeded < _target * 0.005) {
-      healthColor = Colors.green;
+      healthColor = FinanceColors.statusGood;
       healthLabel = AppLocalizations.of(context)!.goal_onTrack;
       healthIcon = LucideIcons.circleCheck;
     } else if (_dailyNeeded < _target * 0.02) {
-      healthColor = Colors.orange;
+      healthColor = FinanceColors.statusWarning;
       healthLabel = AppLocalizations.of(context)!.goal_needsEffort;
       healthIcon = LucideIcons.triangleAlert;
     } else {
-      healthColor = Colors.red.shade400;
+      healthColor = FinanceColors.statusDanger;
       healthLabel = AppLocalizations.of(context)!.goal_ambitious;
       healthIcon = LucideIcons.circleAlert;
     }

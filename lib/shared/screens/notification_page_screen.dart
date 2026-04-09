@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -572,12 +573,12 @@ class _NotificationPageState extends ConsumerState<NotificationPage> {
       'low_balance' => color.tertiary,
       'budget_overspent' => color.error,
       'budget_near_limit' => color.secondary,
-      'pending_settlement' => Colors.red,
+      'pending_settlement' => FinanceColors.statusDanger,
       'new_expense' => Colors.blue,
       'reminder' => color.primary,
       'achievement' => Colors.amber,
       'level_up' => Colors.deepPurple,
-      'streak' => Colors.orange,
+      'streak' => FinanceColors.statusWarning,
       _ => color.primary,
     };
   }

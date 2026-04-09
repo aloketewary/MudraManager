@@ -1,5 +1,6 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
-import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:flutter/material.dart';
 import 'package:mudra_manager/features/budget/data/budget_alert_service.dart';
@@ -61,8 +62,8 @@ class BudgetAlertBanner extends StatelessWidget {
               children: [
                 Icon(
                   alert.threshold == 100
-                      ? Icons.error
-                      : Icons.warning_amber_rounded,
+                      ? LucideIcons.circleAlert
+                      : LucideIcons.triangleAlert,
                   color: color,
                   size: 36,
                 ),
@@ -91,7 +92,7 @@ class BudgetAlertBanner extends StatelessWidget {
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close),
+                  icon: const Icon(LucideIcons.x),
                   onPressed: onDismiss,
                   color: color,
                 ),
@@ -120,9 +121,9 @@ class BudgetAlertBanner extends StatelessWidget {
               value: alert.percentage / 100,
               backgroundColor: Colors.grey[300],
               color: alert.threshold == 100
-                  ? Colors.red
+                  ? FinanceColors.statusDanger
                   : alert.threshold == 90
-                  ? Colors.orange
+                  ? FinanceColors.statusWarning
                   : Colors.amber,
             ),
           ],

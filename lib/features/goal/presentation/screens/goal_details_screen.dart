@@ -1,10 +1,10 @@
+import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/utils/safe_date_format.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
@@ -61,23 +61,37 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
       title: AppLocalizations.of(context)!.goal_deleteGoalTitle,
     );
     if (confirmed == true && mounted) {
-      await ref.read(goalServiceProvider).deleteGoal(widget.goal.id);
-      if (mounted) {
-        SnackbarService.success(BuddyMessages.goalDeleted);
-        context.pop();
-      }
+      bool undone = false;
+      context.pop();
+      final ctxt = AppLocalizations.of(context)!;
+
+      // Schedule actual delete after undo window
+      Future.delayed(const Duration(seconds: 6), () async {
+        if (undone) return;
+        await ref.read(goalServiceProvider).deleteGoal(widget.goal.id);
+        ref.invalidate(goalsProvider);
+      });
+
+      SnackbarService.success(
+        BuddyMessages.goalDeleted,
+        actionLabel: ctxt.common_undo,
+        onAction: () {
+          undone = true;
+          ref.invalidate(goalsProvider);
+        },
+      );
     }
   }
 
   // ── Emotional headline ──
-  String _emotionLine(double progress, GoalHealth health) {
-    if (progress >= 1.0) return 'You did it! 🎉';
-    if (progress >= 0.9) return 'Almost there! 🚀';
-    if (progress >= 0.75) return 'So close, keep going! 💪';
-    if (progress >= 0.5) return 'Halfway done ✨';
-    if (progress >= 0.25) return 'Building momentum 🔥';
-    if (health.status == GoalStatus.behind) return 'Let\'s catch up ⚡';
-    return 'Every bit counts 🌱';
+  String _emotionLine(double progress, GoalHealth health, AppLocalizations ctxt) {
+    if (progress >= 1.0) return ctxt.goal_emotionDidIt;
+    if (progress >= 0.9) return ctxt.goal_emotionAlmost;
+    if (progress >= 0.75) return ctxt.goal_emotionSoClose;
+    if (progress >= 0.5) return ctxt.goal_emotionHalfwayDone;
+    if (progress >= 0.25) return ctxt.goal_emotionMomentum;
+    if (health.status == GoalStatus.behind) return ctxt.goal_emotionCatchUp;
+    return ctxt.goal_emotionEvery;
   }
 
   @override
@@ -185,7 +199,7 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
                           children: [
                             // Emotional headline
                             Text(
-                              _emotionLine(progress, health),
+                              _emotionLine(progress, health, ctxt),
                               style: textTheme.bodyMedium?.copyWith(
                                 color: goalColor,
                                 fontWeight: FontWeight.w600,
@@ -247,7 +261,7 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
                               amount: currentAmount,
                               fixedLength: 0,
                               compact: false,
-                              suffixText: 'saved',
+                              suffixText: ctxt.goal_suffixSaved,
                               style: textTheme.titleSmall?.copyWith(
                                 fontWeight: FontWeight.w700,
                                 color: goalColor,
@@ -259,7 +273,7 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
                               amount: remaining,
                               fixedLength: 0,
                               compact: false,
-                              suffixText: 'left',
+                              suffixText: ctxt.goal_suffixLeft,
                               style: textTheme.bodySmall
                                   ?.copyWith(color: color.onSurfaceVariant),
                             ),
@@ -286,7 +300,7 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
                       ),
                       SizedBox(width: spacing.elementGap),
                       // Right — progress ring
-                      _buildProgressRing(progress, goalColor, color, textTheme),
+                      _buildProgressRing(progress, goalColor, color, textTheme, ctxt,),
                     ],
                   ),
                 ),
@@ -309,7 +323,7 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
                   icon: const Icon(LucideIcons.plus, size: 20),
                   label: Text(
                     progress >= 0.9
-                        ? 'Finish this goal! 🚀'
+                        ? ctxt.goal_finishGoal
                         : ctxt.goal_quickDeposit,
                   ),
                   style: FilledButton.styleFrom(
@@ -429,7 +443,7 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
                       ),
                       _buildMilestone(
                         '50%',
-                        'Halfway done!',
+                        ctxt.goal_emotionHalfwayDone,
                         progress >= 0.50,
                         goalColor,
                         textTheme,
@@ -447,7 +461,7 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
                       ),
                       _buildMilestone(
                         '100%',
-                        'Goal reached! 🎉',
+                        ctxt.goal_emotionReached,
                         progress >= 1.0,
                         goalColor,
                         textTheme,
@@ -538,7 +552,7 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
               colors: [
                 goalColor,
                 Colors.amber,
-                Colors.green,
+                FinanceColors.statusGood,
                 Colors.pink,
                 Colors.blue,
               ],
@@ -578,10 +592,10 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
     AppLocalizations ctxt,
   ) {
     final label = switch (health.status) {
-      GoalStatus.ahead => 'Ahead of schedule 🎯',
-      GoalStatus.onTrack => 'On Track ✅',
-      GoalStatus.behind => 'Behind pace ⚠️',
-      GoalStatus.completed => 'Completed 🎉',
+      GoalStatus.ahead => ctxt.goal_aheadOfSchedule,
+      GoalStatus.onTrack => ctxt.goal_onTrack,
+      GoalStatus.behind => ctxt.goal_behindPace,
+      GoalStatus.completed => ctxt.goal_completedSection,
       GoalStatus.noDeadline => ctxt.goal_flexibleTimeline,
     };
     return Container(
@@ -607,6 +621,7 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
     Color goalColor,
     ColorScheme color,
     TextTheme textTheme,
+    AppLocalizations ctxt,
   ) {
     final clamped = progress.clamp(0.0, 1.0);
     final filled = clamped > 0 ? clamped : 0.001;
@@ -652,7 +667,7 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
                 ),
               ),
               Text(
-                'done',
+                ctxt.goal_suffixDone,
                 style: textTheme.labelSmall?.copyWith(
                   color: goalColor.withValues(alpha: 0.6),
                   fontSize: 9,
@@ -861,7 +876,7 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
         : diff.inDays == 1
             ? ctxt.common_yesterday
             : diff.inDays < 7
-                ? '${diff.inDays} days ago'
+                ? ctxt.goal_daysAgo(diff.inDays)
                 : safeDateFormat('dd MMM').format(c.date);
 
     return Padding(
@@ -998,7 +1013,8 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
   }
 
   String _formatDaysLeft(int days) {
-    if (days > 60) return '${(days / 30).round()} months left';
-    return '$days days left';
+    final ctxt = AppLocalizations.of(context)!;
+    if (days > 60) return ctxt.goal_monthsLeft((days / 30).round());
+    return ctxt.goal_daysLeft(days);
   }
 }

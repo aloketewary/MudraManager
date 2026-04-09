@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
@@ -237,10 +238,10 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
             gravity: 0.2,
             shouldLoop: false,
             colors: const [
-              Colors.green,
+              FinanceColors.statusGood,
               Colors.blue,
               Colors.pink,
-              Colors.orange,
+              FinanceColors.statusWarning,
               Colors.purple,
             ],
           ),

@@ -62,7 +62,7 @@ class BudgetDetailsScreen extends ConsumerWidget {
     final accent = isOver
         ? FinanceColors.expenseColor(brightness)
         : pct > 0.8
-            ? Colors.orange
+            ? FinanceColors.statusWarning
             : FinanceColors.incomeColor(brightness);
 
     final sortedCategories = List<CategorySpending>.from(data.categorySpendings)
@@ -617,7 +617,7 @@ class BudgetDetailsScreen extends ConsumerWidget {
     final accent = isOver
         ? FinanceColors.expenseColor(brightness)
         : pct > 0.8
-            ? Colors.orange
+            ? FinanceColors.statusWarning
             : color.primary;
 
     return Padding(

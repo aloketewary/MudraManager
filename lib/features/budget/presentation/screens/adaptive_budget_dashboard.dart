@@ -79,7 +79,7 @@ class _AdaptiveBudgetDashboardState
           final accent = isOver
               ? FinanceColors.expenseColor(brightness)
               : pct > 0.8
-                  ? Colors.orange
+                  ? FinanceColors.statusWarning
                   : FinanceColors.incomeColor(brightness);
 
           // Sort: over-budget first, then by % used descending
@@ -437,7 +437,7 @@ class _AdaptiveBudgetDashboardState
                   daysLeft,
                 ),
                 LucideIcons.clock,
-                Colors.orange,
+                FinanceColors.statusWarning,
               )
             : (
                 BuddyMessages.budgetSafePerDay(
@@ -489,7 +489,7 @@ class _AdaptiveBudgetDashboardState
     final accent = isOver
         ? FinanceColors.expenseColor(brightness)
         : pct > 0.8
-            ? Colors.orange
+            ? FinanceColors.statusWarning
             : color.primary;
 
     return Container(
@@ -623,7 +623,7 @@ class _AdaptiveBudgetDashboardState
     final accent = isOver
         ? FinanceColors.expenseColor(brightness)
         : pct > 0.8
-            ? Colors.orange
+            ? FinanceColors.statusWarning
             : color.primary;
 
     return Padding(
