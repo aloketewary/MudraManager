@@ -15,10 +15,42 @@ class BackgroundTaskManager {
   static const String _dailyTaskName = 'dailyBackgroundTask';
   static final AppLog _log = AppLog(getLogger(), 'BackgroundTaskManager');
 
+  /// Call at app start — only schedules workmanager, no heavy work.
   static Future<void> initialize() async {
     await Workmanager().initialize(callbackDispatcher);
     await _scheduleDailyTask();
-    await _runAllTasks();
+    _log.i('Background task manager initialized');
+  }
+
+  /// Call after UI is visible — only notifications and cleanup, no heavy processing.
+  static Future<void> runDeferredTasks() async {
+    try {
+      await BalanceHistoryService.instance.recordDailySnapshots();
+      await SummaryScheduler.checkAndShowSummaries();
+      await SmartNotificationService.instance.runSmartChecks();
+      await SmsHashCleanupService.cleanupOldHashes();
+
+      _log.i('Deferred tasks completed');
+    } catch (e) {
+      _log.e('Deferred tasks failed', e);
+    }
+  }
+
+  /// Call when user opens recurring/bill screens — processes due items on demand.
+  static Future<void> processRecurringNow() async {
+    try {
+      final isar = await IsarService().getInstance();
+      final gamificationService = GamificationService(
+        isar,
+        AppLog(getLogger(), 'GamificationService'),
+      );
+      await RecurringTransactionService(IsarService(), gamificationService)
+          .processRecurringTransactions();
+      await BillService.createPendingTransactionsForDueBills();
+      _log.i('On-demand recurring processing completed');
+    } catch (e) {
+      _log.e('On-demand recurring processing failed', e);
+    }
   }
 
   static Future<void> _scheduleDailyTask() async {
@@ -31,12 +63,12 @@ class BackgroundTaskManager {
           networkType: NetworkType.notRequired,
         ),
       );
-      _log.i('Daily background task scheduled');
     } catch (e) {
       _log.e('Failed to schedule background task', e);
     }
   }
 
+  /// Full task run — used by workmanager callback only.
   static Future<void> _runAllTasks() async {
     try {
       final isar = await IsarService().getInstance();
@@ -45,14 +77,11 @@ class BackgroundTaskManager {
         AppLog(getLogger(), 'GamificationService'),
       );
 
-      // Run sequentially to avoid concurrent write transaction stalls
       await RecurringTransactionService(IsarService(), gamificationService)
           .processRecurringTransactions();
-      await SummaryScheduler.checkAndShowSummaries();
-      // Bill reminders handled by SmartNotificationService.checkUpcomingBills()
-      // with proper dedup — don't fire raw notifications here.
       await BillService.createPendingTransactionsForDueBills();
       await BalanceHistoryService.instance.recordDailySnapshots();
+      await SummaryScheduler.checkAndShowSummaries();
       await SmartNotificationService.instance.runSmartChecks();
       await SmsHashCleanupService.cleanupOldHashes();
 
