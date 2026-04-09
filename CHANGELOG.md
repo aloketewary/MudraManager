@@ -7,6 +7,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.5.2] - 2025-06-19
+
+### Added
+- **12-month trend chart** on statistics screen with animated entry and contextual insight lines
+- **Fullscreen landscape chart** — tap any month to drill down into stacked daily bars per category
+- **Inline chart legend** with `ChartPalette` colors
+- **Undo delete for transactions** — timer-based with countdown ring animation in snackbar, actual delete after 6s
+- **Undo delete for goals** — same pattern, pop screen + scheduled delete with cancel
+- **`FinanceColors`** — brightness-aware `statusGood`, `statusWarning`, `statusDanger` + `scoreColor()` helper
+- **`ChartPalette`** — 8 bright, colorblind-friendly chart colors
+- **Mint theme** — pastel teal replacing redundant Dark theme
+- **Error boundaries** on dashboard widgets via `_WidgetErrorBoundary` StatefulWidget
+- **Import category auto-parenting** — unknown categories created under "Miscellaneous" parent
+- **30+ new statistics ARB keys** (EN/HI/BN) — trend labels, insights, drill-down headers
+
+### Fixed
+- **Period selector visible during loading** — moved outside `stats.when()` so it stays interactive
+- **`swapAnimationDuration` deprecation** in FL Chart
+- **55+ raw color references** replaced with `FinanceColors` (no more `Colors.red/green/orange`)
+- **304 Material Icons** migrated to `LucideIcons` across entire codebase
+- **Cascading icon replacements** — fixed `LucideLucideIcons`, `refreshCwCw`, `share22`, `badgeCount`
+- **Bengali numeral rendering** — `_safeNumericLocale()` in `CurrencyText` and date formatters
+- **Transaction list performance** — pagination limited to last 6 months instead of all-time query
+
+### Changed
+- **Color system** — all status colors now adapt to light/dark brightness automatically
+- **Snackbar service** — `_UndoSnackbarContent` with `AnimationController`-driven countdown ring
+- **Statistics screen** — period selector persistent, trend chart animated, fullscreen drill-down
+
+### Performance
+- **Transaction list query** — `allSectionedTransactionsProvider` scoped to 6-month window via `getByDateRange`
+- **Dashboard deferred tasks** pushed to 2–3s post-launch
+
+### Removed
+- **`DesignTokens`** file — fully replaced by `spacingProvider`
+- **`RecurringTransactionScheduler`** — dead code, processing handled by `BackgroundTaskManager`
+
+---
+
 ## [3.5.1] - 2025-04-09
 
 ### Added
