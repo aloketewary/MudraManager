@@ -85,105 +85,74 @@ void invalidateEntitlementsFromRef(Ref ref) {
 Future<void> _initializeBackgroundServices(ProviderContainer container) async {
   final log = AppLog(getLogger(), 'Init');
   Future.microtask(() async {
-    // 1. Initialize Isar first
+    // 1. Initialize Isar first (critical — needed for UI)
     log.i('🔄 Initializing Isar...');
     final isar = await safeExecute(
       () => container.read(isarServiceProvider).getInstance(),
     );
-    if (isar != null) {
-      log.i('✅ Isar initialized');
-
-      // Seed category keywords
-      await safeExecute(() async {
-        await CategorySeeder.seedDefaultKeywords(isar);
-        log.i('✅ Category keywords seeded');
-      });
-
-      // Snapshot grandfathered counts for entitlement system
-      await safeExecute(() async {
-        final entitlement =
-            EntitlementService(container.read(isarServiceProvider));
-        await entitlement.snapshotGrandfatheredCounts();
-        log.i('✅ Entitlement grandfathering complete');
-      });
-
-      // Stamp install date for existing users (no-op if already stamped)
-      await safeExecute(() async {
-        final entitlement =
-            EntitlementService(container.read(isarServiceProvider));
-        await entitlement.stampInstallDate();
-        log.i('✅ Install date stamped');
-      });
-
-      await safeExecute(() async {
-        final entitlement =
-            EntitlementService(container.read(isarServiceProvider));
-        final isPro = await entitlement.isPro();
-        final inTrial = await entitlement.isInTrialPeriod();
-        if (!isPro && !inTrial) {
-          await MarketplaceService().disableProPlugins();
-          log.i('✅ Pro plugins disabled (trial expired)');
-        }
-      });
-
-      // Initialize billing service
-      await safeExecute(() async {
-        final billing = container.read(billingServiceProvider);
-        await billing.initialize();
-        log.i('✅ Billing service initialized');
-      });
-
-      // Sync category icons from pack definitions
-      await safeExecute(() async {
-        await CategorySeeder.seedCategoryIcons(isar);
-        log.i('✅ Category icons synced');
-      });
-
-      // Seed system categories (trip/split/settlement)
-      await safeExecute(() async {
-        await CategorySeeder.seedSystemCategories(isar);
-        log.i('✅ System categories seeded');
-      });
-
-      // Migrate: seed isSettlement + isSharedExpense on old transactions
-      await safeExecute(() async {
-        await _migrateTransactionFields(isar);
-        log.i('✅ Transaction fields migrated');
-      });
-
-      // Migrate: seed isSystem on categories + isOwner on participants
-      await safeExecute(() async {
-        await _migrateCategoryAndParticipantFields(isar);
-        log.i('✅ Category & participant fields migrated');
-      });
-    } else {
+    if (isar == null) {
       log.e('❌ Isar initialization failed');
       return;
     }
+    log.i('✅ Isar initialized');
 
-    // 2. Initialize gamification service (depends on Isar)
-    log.i('🔄 Initializing Gamification service...');
-    final gamification = await safeExecute(
-      () => container.read(gamificationServiceInitProvider.future),
-    );
-    if (gamification != null) {
-      log.i('✅ Gamification service initialized');
-    } else {
-      log.e('❌ Gamification service initialization failed');
-    }
-
-    // 3. Initialize background task manager
-    log.i('🔄 Initializing background tasks...');
+    // 2. Critical seeds (fast, needed before UI renders categories)
     await safeExecute(() async {
-      await BackgroundTaskManager.initialize();
-      log.i('✅ Background tasks initialized');
+      await CategorySeeder.seedDefaultKeywords(isar);
+      await CategorySeeder.seedSystemCategories(isar);
+      log.i('✅ Categories seeded');
     });
 
-    // 4. Initialize home widget
-    log.i('🔄 Initializing home widget...');
+    // 3. Entitlement (needed for pro gates in UI)
     await safeExecute(() async {
-      await _initializeHomeWidget();
-      log.i('✅ HomeWidget initialized');
+      final entitlement =
+          EntitlementService(container.read(isarServiceProvider));
+      await entitlement.stampInstallDate();
+      await entitlement.snapshotGrandfatheredCounts();
+      final isPro = await entitlement.isPro();
+      final inTrial = await entitlement.isInTrialPeriod();
+      if (!isPro && !inTrial) {
+        await MarketplaceService().disableProPlugins();
+      }
+      log.i('✅ Entitlement initialized');
+    });
+
+    // 4. Schedule workmanager (no heavy work, just registers)
+    await safeExecute(() async {
+      await BackgroundTaskManager.initialize();
+      log.i('✅ Background tasks scheduled');
+    });
+
+    // 5. Defer everything else — run 3s after UI is visible
+    Future.delayed(const Duration(seconds: 3), () async {
+      await safeExecute(() async {
+        final billing = container.read(billingServiceProvider);
+        await billing.initialize();
+        log.i('✅ Billing initialized (deferred)');
+      });
+
+      await safeExecute(() async {
+        await CategorySeeder.seedCategoryIcons(isar);
+        log.i('✅ Category icons synced (deferred)');
+      });
+
+      await safeExecute(() async {
+        await container.read(gamificationServiceInitProvider.future);
+        log.i('✅ Gamification initialized (deferred)');
+      });
+
+      await safeExecute(() async {
+        await _initializeHomeWidget();
+        log.i('✅ HomeWidget initialized (deferred)');
+      });
+
+      // Migrations (one-time, guarded by SharedPrefs flags)
+      await safeExecute(() => _migrateTransactionFields(isar));
+      await safeExecute(() => _migrateCategoryAndParticipantFields(isar));
+
+      // Run recurring/bill/notification tasks
+      await BackgroundTaskManager.runDeferredTasks();
+      log.i('✅ All deferred tasks completed');
     });
   });
 }

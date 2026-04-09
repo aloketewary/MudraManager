@@ -1,4 +1,5 @@
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
+import 'package:mudra_manager/core/services/background_task_manager.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
@@ -35,6 +36,13 @@ class BillControlCenterScreen extends ConsumerStatefulWidget {
 
 class _BillControlCenterScreenState
     extends ConsumerState<BillControlCenterScreen> {
+
+  @override
+  void initState() {
+    super.initState();
+    BackgroundTaskManager.processRecurringNow();
+  }
+
   // ── Helpers ──
   static const _dueSoonDays = 7;
 
