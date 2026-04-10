@@ -60,3 +60,5 @@ keystore_base64.txt
 .kiro
 .dart_tool
 .amazonq
+
+pubspec.lock
