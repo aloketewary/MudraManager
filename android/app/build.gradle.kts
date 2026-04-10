@@ -98,6 +98,7 @@ flutter {
 }
 
 dependencies {
+    implementation(project(":integration_test"))
     implementation("androidx.core:core-ktx")
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
 
