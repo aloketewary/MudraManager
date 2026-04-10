@@ -165,7 +165,6 @@ final dashboardDataProvider =
         netWorth: netWorth,
       );
     } catch (e) {
-      print('Error fetching dashboard data: $e');
       rethrow;
     }
   }

@@ -222,7 +222,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
                 ],
               );
             },
-            loading: () => ListView(children: List.generate(4, (_) => DashboardCardSkeleton())),
+            loading: () => ListView(children: List.generate(4, (_) => const DashboardCardSkeleton())),
             error: (_, __) =>
                 Center(child: Text(BuddyMessages.genericError)),
           ),
@@ -269,7 +269,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionHeader(
-            'Trophy Shelf', '${items.length}', color, textTheme),
+            'Trophy Shelf', '${items.length}', color, textTheme,),
         const SizedBox(height: 10),
         Container(
           decoration: BoxDecoration(

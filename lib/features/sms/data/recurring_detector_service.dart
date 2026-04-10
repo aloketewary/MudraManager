@@ -25,7 +25,9 @@ class RecurringDetectorService {
 
   /// Match by exact amount, same account, within the recurring bill's date window.
   static Future<bool> _tryLinkToExistingRecurring(
-      Isar isar, Transaction newTransaction) async {
+    Isar isar,
+    Transaction newTransaction,
+  ) async {
     await newTransaction.account.load();
     await newTransaction.category.load();
     final accountId = newTransaction.account.value?.id;
@@ -51,7 +53,9 @@ class RecurringDetectorService {
       final windowStart = dueDate.subtract(const Duration(days: 5));
       final windowEnd = dueDate.add(const Duration(days: 2));
       if (newTransaction.date.isBefore(windowStart) ||
-          newTransaction.date.isAfter(windowEnd)) continue;
+          newTransaction.date.isAfter(windowEnd)) {
+        continue;
+      }
 
       // Check not already linked for this period
       final alreadyLinked = await isar.transactions
@@ -74,7 +78,9 @@ class RecurringDetectorService {
 
   /// Fallback: detect recurring pattern from similar past transactions.
   static Future<void> _detectPatternFromHistory(
-      Isar isar, Transaction newTransaction) async {
+    Isar isar,
+    Transaction newTransaction,
+  ) async {
     final startDate = newTransaction.date.subtract(const Duration(days: 90));
     final similar = await isar.transactions
         .filter()
@@ -110,9 +116,11 @@ class RecurringDetectorService {
         .findAll();
 
     final matchingRecurring = existing
-        .where((r) =>
-            r.category.value?.id == newTransaction.category.value?.id &&
-            r.frequency == pattern)
+        .where(
+          (r) =>
+              r.category.value?.id == newTransaction.category.value?.id &&
+              r.frequency == pattern,
+        )
         .firstOrNull;
 
     if (matchingRecurring != null) {
@@ -149,7 +157,9 @@ class RecurringDetectorService {
   }
 
   static Frequency? _detectFrequency(
-      List<Transaction> transactions, Transaction latest) {
+    List<Transaction> transactions,
+    Transaction latest,
+  ) {
     final allDates = [...transactions.map((t) => t.date), latest.date]..sort();
     if (allDates.length < 2) return null;
 

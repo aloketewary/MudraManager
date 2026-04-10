@@ -35,7 +35,7 @@ class BusinessPack extends CategoryPack {
         CategoryDef(name: 'Marketing', icon: 'presentation', color: 0xFFFF5722),
         CategoryDef(name: 'Advertising', icon: 'tv', color: 0xFFE91E63),
         CategoryDef(
-            name: 'Website & Domain', icon: 'broadband', color: 0xFF3F51B5),
+            name: 'Website & Domain', icon: 'broadband', color: 0xFF3F51B5,),
         CategoryDef(name: 'Legal Fees', icon: 'work', color: 0xFF607D8B),
         CategoryDef(
           name: 'Accounting',

@@ -43,21 +43,21 @@ class BudgetAlertService {
         alerts.add(BudgetAlert(
           budget: budget, spent: spent,
           percentage: percentage, threshold: 100,
-        ));
+        ),);
         budget.notifiedAt100 = true;
         await isar.writeTxn(() => isar.budgets.put(budget));
       } else if (percentage >= 90 && !budget.notifiedAt90 && !budget.notifiedAt100) {
         alerts.add(BudgetAlert(
           budget: budget, spent: spent,
           percentage: percentage, threshold: 90,
-        ));
+        ),);
         budget.notifiedAt90 = true;
         await isar.writeTxn(() => isar.budgets.put(budget));
       } else if (percentage >= 80 && !budget.notifiedAt80 && !budget.notifiedAt90) {
         alerts.add(BudgetAlert(
           budget: budget, spent: spent,
           percentage: percentage, threshold: 80,
-        ));
+        ),);
         budget.notifiedAt80 = true;
         await isar.writeTxn(() => isar.budgets.put(budget));
       }
@@ -83,7 +83,7 @@ class BudgetAlertService {
     return transactions
         .where((t) =>
             t.category.value != null &&
-            categoryIds.contains(t.category.value!.id))
+            categoryIds.contains(t.category.value!.id),)
         .fold<double>(0.0, (sum, t) => sum + t.baseAmount);
   }
 

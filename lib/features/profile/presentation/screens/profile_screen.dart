@@ -1274,20 +1274,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final items = <_SettingItem>[
       _SettingItem(
         LucideIcons.bell,
-        AppLocalizations.of(context)!.profile_notifications,
-        AppLocalizations.of(context)!.profile_dailyWeeklySummaries,
+        l10n.profile_notifications,
+        l10n.profile_dailyWeeklySummaries,
         () => context.push(AppRoutes.notificationSettings),
       ),
       _SettingItem(
         LucideIcons.bellRing,
-        AppLocalizations.of(context)!.profile_autoImport,
-        AppLocalizations.of(context)!.profile_autoImportDesc,
+        l10n.profile_autoImport,
+        l10n.profile_autoImportDesc,
         () => context.push(AppRoutes.smsImport),
       ),
       _SettingItem(
         LucideIcons.cloudUpload,
-        AppLocalizations.of(context)!.profile_backupRestore,
-        AppLocalizations.of(context)!.profile_manageData,
+        l10n.profile_backupRestore,
+        l10n.profile_manageData,
         () => context.push(AppRoutes.backupRestore),
         trailing: const ProBadge(),
       ),

@@ -39,7 +39,7 @@ class BudgetCategoryAllocation extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              '${formatCurrency(allocatedAmount, code: BaseCurrency.code)}',
+              formatCurrency(allocatedAmount, code: BaseCurrency.code),
               style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             IconButton(

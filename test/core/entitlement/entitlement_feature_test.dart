@@ -58,7 +58,7 @@ void main() {
     test('all gated routes map to valid ProFeature', () {
       for (final entry in gatedRoutes.entries) {
         expect(ProFeature.values, contains(entry.value),
-            reason: '${entry.key} maps to invalid feature');
+            reason: '${entry.key} maps to invalid feature',);
       }
     });
 
@@ -137,7 +137,7 @@ void main() {
       expect(proThemes.length, greaterThan(0));
       for (final theme in proThemes) {
         expect(theme.isPro, true,
-            reason: '${theme.name} should be pro');
+            reason: '${theme.name} should be pro',);
       }
     });
 

@@ -89,8 +89,8 @@ class HomePageState extends ConsumerState<HomePage>
         final action = call.arguments as String?;
         log.i('Widget action received: $action');
         if (action == 'add_transaction' || action == 'ADD_TRANSACTION') {
+          await Future.delayed(const Duration(milliseconds: 300));
           if (mounted) {
-            await Future.delayed(const Duration(milliseconds: 300));
             showModalBottomSheet(
               context: context,
               isScrollControlled: true,

@@ -17,6 +17,11 @@ class NotificationListenerBridge with WidgetsBindingObserver {
   bool _initialized = false;
   bool _isDraining = false;
 
+  // Per-transaction notification rate limit: max 3 per minute
+  static const _maxPerMinute = 3;
+  final List<DateTime> _recentNotifTimestamps = [];
+  int _suppressedCount = 0;
+
   NotificationListenerBridge._();
 
   void initialize() {
@@ -57,6 +62,7 @@ class NotificationListenerBridge with WidgetsBindingObserver {
       int pending = 0;
       int needsReview = 0;
       double totalAmount = 0;
+      _suppressedCount = 0;
 
       for (final item in result) {
         final data = Map<String, dynamic>.from(item as Map);
@@ -81,25 +87,47 @@ class NotificationListenerBridge with WidgetsBindingObserver {
         switch (parseResult) {
           case ParseResult.approved:
             approved++;
-            // Try to extract amount for the notification summary
             final amountMatch = RegExp(r'(?:Rs\.?\s*|INR\s*|₹\s*)([\d,]+(?:\.\d{1,2})?)')
                 .firstMatch(body);
+            double txnAmount = 0;
             if (amountMatch != null) {
-              totalAmount += double.tryParse(
+              txnAmount = double.tryParse(
                     amountMatch.group(1)?.replaceAll(',', '') ?? '',
                   ) ?? 0;
+              totalAmount += txnAmount;
             }
+            _showPerTxnNotification(
+              isApproved: true,
+              amount: txnAmount,
+              sender: sender,
+              index: approved,
+            );
           case ParseResult.pending:
             pending++;
+            _showPerTxnNotification(
+              isApproved: false,
+              amount: 0,
+              sender: sender,
+              index: pending,
+            );
           case ParseResult.needsReview:
             needsReview++;
+            _showPerTxnNotification(
+              isApproved: false,
+              amount: 0,
+              sender: sender,
+              index: needsReview,
+            );
           default:
             break;
         }
       }
 
       _log.i('Queue drained: $approved approved, $pending pending, $needsReview needs review');
-      _showSmartNotification(approved, pending, needsReview, totalAmount);
+      // Show batch summary only for suppressed notifications
+      if (_suppressedCount > 0) {
+        _showSmartNotification(approved, pending, needsReview, totalAmount);
+      }
     } catch (e) {
       _log.e('Failed to drain notification queue', e);
     } finally {
@@ -108,6 +136,47 @@ class NotificationListenerBridge with WidgetsBindingObserver {
   }
 
   static const _notifId = 9900;
+
+  /// Rate-limited per-transaction notification.
+  /// Max [_maxPerMinute] in any rolling 60s window.
+  void _showPerTxnNotification({
+    required bool isApproved,
+    required double amount,
+    required String sender,
+    required int index,
+  }) {
+    final now = DateTime.now();
+    _recentNotifTimestamps.removeWhere(
+      (t) => now.difference(t).inSeconds > 60,
+    );
+    if (_recentNotifTimestamps.length >= _maxPerMinute) {
+      _suppressedCount++;
+      return;
+    }
+    _recentNotifTimestamps.add(now);
+
+    final String title;
+    final String body;
+
+    if (isApproved && amount > 0) {
+      title = '✅ Transaction logged';
+      body = '${formatCurrency(amount, code: BaseCurrency.code, decimals: 0)} from $sender — auto-saved';
+    } else if (isApproved) {
+      title = '✅ Transaction logged';
+      body = 'From $sender — auto-saved';
+    } else {
+      title = '👀 Needs your review';
+      body = 'Transaction from $sender — tap to review';
+    }
+
+    NotificationService.showLocalNotification(
+      id: _notifId + index + now.millisecond,
+      title: title,
+      body: body,
+      payload: 'sms_activity',
+      bypassThrottle: true,
+    );
+  }
 
   void _showSmartNotification(
     int approved,

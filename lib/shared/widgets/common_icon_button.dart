@@ -21,10 +21,10 @@ class CommonIconPickerButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var color = Theme.of(context).colorScheme;
-    var textTheme = Theme.of(context).textTheme;
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
@@ -42,7 +42,7 @@ class CommonIconPickerButton extends StatelessWidget {
               label,
               style: textTheme.titleMedium?.copyWith(color: textColor),
             ),
-            SizedBox(width: 12),
+            const SizedBox(width: 12),
             CircleAvatar(
               radius: 20,
               backgroundColor: iconBackGroundColor ?? color.primary,

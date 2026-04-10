@@ -2321,6 +2321,42 @@ abstract class AppLocalizations {
   /// **'None'**
   String get label_none;
 
+  /// No description provided for @label_frequency.
+  ///
+  /// In en, this message translates to:
+  /// **'Frequency'**
+  String get label_frequency;
+
+  /// No description provided for @label_repeatEvery.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat every'**
+  String get label_repeatEvery;
+
+  /// No description provided for @label_days.
+  ///
+  /// In en, this message translates to:
+  /// **'days'**
+  String get label_days;
+
+  /// No description provided for @label_weeks.
+  ///
+  /// In en, this message translates to:
+  /// **'weeks'**
+  String get label_weeks;
+
+  /// No description provided for @label_months.
+  ///
+  /// In en, this message translates to:
+  /// **'months'**
+  String get label_months;
+
+  /// No description provided for @label_years.
+  ///
+  /// In en, this message translates to:
+  /// **'years'**
+  String get label_years;
+
   /// No description provided for @trip_expenses.
   ///
   /// In en, this message translates to:
@@ -9501,6 +9537,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Changing base currency later will archive existing transactions.'**
   String get onboard_currencyWarning;
+
+  /// No description provided for @statistics_topCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Top Category'**
+  String get statistics_topCategory;
+
+  /// No description provided for @statistics_dailyAverage.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Average'**
+  String get statistics_dailyAverage;
+
+  /// No description provided for @statistics_perDay.
+  ///
+  /// In en, this message translates to:
+  /// **'per day'**
+  String get statistics_perDay;
+
+  /// No description provided for @statistics_percentOfExpenses.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% of expenses'**
+  String statistics_percentOfExpenses(String percent);
+
+  /// No description provided for @sms_infoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How SMS Import Works'**
+  String get sms_infoTitle;
+
+  /// No description provided for @sms_infoOnlyScans.
+  ///
+  /// In en, this message translates to:
+  /// **'Only scans bank and wallet SMS'**
+  String get sms_infoOnlyScans;
+
+  /// No description provided for @sms_infoStaysOnDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'All data stays on your device'**
+  String get sms_infoStaysOnDevice;
+
+  /// No description provided for @sms_infoAutoCreates.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically creates transactions'**
+  String get sms_infoAutoCreates;
+
+  /// No description provided for @sms_infoNoPersonal.
+  ///
+  /// In en, this message translates to:
+  /// **'No personal messages are read'**
+  String get sms_infoNoPersonal;
+
+  /// No description provided for @dashboard_totalBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Balance'**
+  String get dashboard_totalBalance;
+
+  /// No description provided for @dashboard_netWorthLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Net Worth'**
+  String get dashboard_netWorthLink;
+
+  /// No description provided for @dashboard_showAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Show accounts'**
+  String get dashboard_showAccounts;
+
+  /// No description provided for @dashboard_hideAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide accounts'**
+  String get dashboard_hideAccounts;
+
+  /// No description provided for @dashboard_accountsTapExpand.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} accounts · Tap to expand'**
+  String dashboard_accountsTapExpand(int count);
 }
 
 class _AppLocalizationsDelegate

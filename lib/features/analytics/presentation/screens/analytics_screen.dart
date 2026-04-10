@@ -43,7 +43,10 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(title: Text(AppLocalizations.of(context)!.title_analytics), elevation: 0),
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.title_analytics),
+        elevation: 0,
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -61,10 +64,15 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                     children: [
                       Row(
                         children: [
-                          Icon(LucideIcons.heart, color: color.primary, size: 28),
+                          Icon(
+                            LucideIcons.heart,
+                            color: color.primary,
+                            size: 28,
+                          ),
                           const SizedBox(width: 12),
                           Text(
-                            AppLocalizations.of(context)!.analytics_financialHealthScore,
+                            AppLocalizations.of(context)!
+                                .analytics_financialHealthScore,
                             style: textTheme.headlineSmall?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -169,7 +177,8 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                           ),
                           const SizedBox(width: 12),
                           Text(
-                            AppLocalizations.of(context)!.analytics_spendingPrediction,
+                            AppLocalizations.of(context)!
+                                .analytics_spendingPrediction,
                             style: textTheme.headlineSmall?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -189,7 +198,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                             const SizedBox(height: 8),
                             CurrencyText(
                               amount: GuestModeUtil.applyGuestMode(
-                                  predicted, isGuestMode),
+                                predicted,
+                                isGuestMode,
+                              ),
                               style: textTheme.displayMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: color.primary,
@@ -242,7 +253,8 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                             ),
                             const SizedBox(width: 12),
                             Text(
-                              AppLocalizations.of(context)!.analytics_categoryTrends,
+                              AppLocalizations.of(context)!
+                                  .analytics_categoryTrends,
                               style: textTheme.headlineSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -273,8 +285,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                                             CurrencyText(
                                               amount:
                                                   GuestModeUtil.applyGuestMode(
-                                                      trend.thisMonth,
-                                                      isGuestMode),
+                                                trend.thisMonth,
+                                                isGuestMode,
+                                              ),
                                               style: textTheme.titleSmall,
                                             ),
                                             if (trend.changePercent != 0) ...[
@@ -293,8 +306,10 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                                                 style: textTheme.bodySmall
                                                     ?.copyWith(
                                                   color: trend.changePercent > 0
-                                                      ? FinanceColors.statusDanger
-                                                      : FinanceColors.statusGood,
+                                                      ? FinanceColors
+                                                          .statusDanger
+                                                      : FinanceColors
+                                                          .statusGood,
                                                 ),
                                               ),
                                             ],
@@ -351,7 +366,8 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                             ),
                             const SizedBox(width: 12),
                             Text(
-                              AppLocalizations.of(context)!.analytics_spendingByDay,
+                              AppLocalizations.of(context)!
+                                  .analytics_spendingByDay,
                               style: textTheme.headlineSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),

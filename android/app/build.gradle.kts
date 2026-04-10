@@ -16,7 +16,7 @@ android {
     namespace = "com.mudramanager.app"
 //    compileSdk = flutter.compileSdkVersion
 //    ndkVersion = flutter.ndkVersion
-    ndkVersion = "27.0.12077973"
+    ndkVersion = "28.2.13676358"
     compileSdk = 36
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -36,7 +36,7 @@ android {
 //        minSdk = flutter.minSdkVersion
         minSdk = 29
 //        targetSdk = flutter.targetSdkVersion
-        targetSdk = 36
+        targetSdk = 35
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }

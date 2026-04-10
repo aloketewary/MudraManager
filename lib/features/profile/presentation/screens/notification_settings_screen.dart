@@ -62,6 +62,7 @@ class _NotificationSettingsScreenState
 
   Future<void> _toggleDailySummary(bool enabled) async {
     HapticFeedback.mediumImpact();
+    final label = AppLocalizations.of(context)!.notifSettings_dailySummary;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('daily_summary_enabled', enabled);
     if (enabled) {
@@ -69,59 +70,63 @@ class _NotificationSettingsScreenState
       SnackbarService.success(BuddyMessages.toggledOn('Daily summary'));
     } else {
       await NotificationService.cancelReminder();
-      SnackbarService.success(BuddyMessages.toggledOff(AppLocalizations.of(context)!.notifSettings_dailySummary));
+      SnackbarService.success(BuddyMessages.toggledOff(label));
     }
-    setState(() => _dailySummaryEnabled = enabled);
+    if (mounted) setState(() => _dailySummaryEnabled = enabled);
   }
 
   Future<void> _toggleWeeklySummary(bool enabled) async {
     HapticFeedback.mediumImpact();
+    final label = AppLocalizations.of(context)!.notifSettings_weeklySummary;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('weekly_summary_enabled', enabled);
     if (enabled) {
       await NotificationService.scheduleWeeklySummary(_weeklyDay);
-      SnackbarService.success(BuddyMessages.toggledOn(AppLocalizations.of(context)!.notifSettings_weeklySummary));
+      SnackbarService.success(BuddyMessages.toggledOn(label));
     } else {
-      SnackbarService.success(BuddyMessages.toggledOff(AppLocalizations.of(context)!.notifSettings_weeklySummary));
+      SnackbarService.success(BuddyMessages.toggledOff(label));
     }
-    setState(() => _weeklySummaryEnabled = enabled);
+    if (mounted) setState(() => _weeklySummaryEnabled = enabled);
   }
 
   Future<void> _toggleStreakReminder(bool enabled) async {
     HapticFeedback.mediumImpact();
+    final label = AppLocalizations.of(context)!.notifSettings_comeBackNudges;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('streak_reminder_enabled', enabled);
     if (enabled) {
-      SnackbarService.success(BuddyMessages.toggledOn(AppLocalizations.of(context)!.notifSettings_comeBackNudges));
+      SnackbarService.success(BuddyMessages.toggledOn(label));
     } else {
-      SnackbarService.success(BuddyMessages.toggledOff(AppLocalizations.of(context)!.notifSettings_comeBackNudges));
+      SnackbarService.success(BuddyMessages.toggledOff(label));
     }
-    setState(() => _reEngagementEnabled = enabled);
+    if (mounted) setState(() => _reEngagementEnabled = enabled);
   }
 
   Future<void> _toggleReEngagement(bool enabled) async {
     HapticFeedback.mediumImpact();
+    final label = AppLocalizations.of(context)!.notifSettings_streakReminder;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('re_engagement_enabled', enabled);
     if (enabled) {
-      SnackbarService.success(BuddyMessages.toggledOn(AppLocalizations.of(context)!.notifSettings_streakReminder));
+      SnackbarService.success(BuddyMessages.toggledOn(label));
     } else {
       await NotificationService.cancelStreakReminder();
-      SnackbarService.success(BuddyMessages.toggledOff(AppLocalizations.of(context)!.notifSettings_streakReminder));
+      SnackbarService.success(BuddyMessages.toggledOff(label));
     }
-    setState(() => _streakReminderEnabled = enabled);
+    if (mounted) setState(() => _streakReminderEnabled = enabled);
   }
 
   Future<void> _toggleSmartAlerts(bool enabled) async {
     HapticFeedback.mediumImpact();
+    final label = AppLocalizations.of(context)!.notifSettings_smartAlerts;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('smart_alerts_enabled', enabled);
     if (enabled) {
-      SnackbarService.success(BuddyMessages.toggledOn(AppLocalizations.of(context)!.notifSettings_smartAlerts));
+      SnackbarService.success(BuddyMessages.toggledOn(label));
     } else {
-      SnackbarService.success(BuddyMessages.toggledOff(AppLocalizations.of(context)!.notifSettings_smartAlerts));
+      SnackbarService.success(BuddyMessages.toggledOff(label));
     }
-    setState(() => _smartAlertsEnabled = enabled);
+    if (mounted) setState(() => _smartAlertsEnabled = enabled);
   }
 
   Future<void> _selectTime() async {
@@ -250,7 +255,7 @@ class _NotificationSettingsScreenState
     return Scaffold(
       appBar: AppBar(title: Text(AppLocalizations.of(context)!.title_notifications)),
       body: !_loaded
-          ? Padding(padding: EdgeInsets.all(spacing.cardHorizontal), child: Column(children: [DashboardCardSkeleton(), SizedBox(height: spacing.elementGap), DashboardCardSkeleton()]))
+          ? Padding(padding: EdgeInsets.all(spacing.cardHorizontal), child: Column(children: [const DashboardCardSkeleton(), SizedBox(height: spacing.elementGap), const DashboardCardSkeleton()]))
           : ListView(
               padding: EdgeInsets.symmetric(
                 horizontal: spacing.cardHorizontal,
@@ -358,11 +363,10 @@ class _NotificationSettingsScreenState
                         icon: LucideIcons.send,
                         title: AppLocalizations.of(context)!.notifSettings_sendTestNotif,
                         onTap: () async {
+                          final msg = AppLocalizations.of(context)!.notifSettings_testNotifSent;
                           HapticFeedback.mediumImpact();
                           await NotificationService.showDailySummary();
-                          SnackbarService.success(
-                            AppLocalizations.of(context)!.notifSettings_testNotifSent,
-                          );
+                          SnackbarService.success(msg);
                         },
                         color: color,
                         textTheme: textTheme,
@@ -445,11 +449,10 @@ class _NotificationSettingsScreenState
                         icon: LucideIcons.send,
                         title: AppLocalizations.of(context)!.notifSettings_sendTestNotif,
                         onTap: () async {
+                          final msg = AppLocalizations.of(context)!.notifSettings_testNotifSent;
                           HapticFeedback.mediumImpact();
                           await NotificationService.showWeeklySummary();
-                          SnackbarService.success(
-                            AppLocalizations.of(context)!.notifSettings_testNotifSent,
-                          );
+                          SnackbarService.success(msg);
                         },
                         color: color,
                         textTheme: textTheme,

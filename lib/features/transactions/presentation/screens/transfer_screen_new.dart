@@ -171,6 +171,13 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
 
       await WidgetService.updateWidget(ref);
 
+      // Mark SMS activity as approved if this came from SMS
+      if (widget.smsActivity != null) {
+        await SmsActivityService.instance.markTransferApproved(
+          widget.smsActivity!,
+        );
+      }
+
       if (mounted) {
         ref.invalidate(transactionProvider);
         ref.invalidate(accountServiceProvider);
@@ -179,13 +186,6 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
         SnackbarService.success(
           _isEditing ? 'Transfer updated' : 'Transfer completed',
         );
-
-        // Mark SMS activity as approved if this came from SMS
-        if (widget.smsActivity != null) {
-          await SmsActivityService.instance.markTransferApproved(
-            widget.smsActivity!,
-          );
-        }
 
         context.pop(true); // return true so list screen knows to refresh
       }
@@ -672,7 +672,7 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
                       const SizedBox(height: 4),
                       CurrencyText(
                         amount: displayBalance,
-                        currencyCode: account?.currencyCode,
+                        currencyCode: account.currencyCode,
                         compact: true,
                         style: textTheme.labelMedium?.copyWith(
                           color: color.onSurfaceVariant,

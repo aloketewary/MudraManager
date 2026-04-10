@@ -130,6 +130,7 @@ class NotificationService {
         title: Tone.appL10n?.notif_quietDayTitle ?? '📊 Quiet day yesterday',
         body: BuddyMessages.dailySummaryEmpty,
         payload: 'statistics',
+        bypassThrottle: true,
       );
       return;
     }
@@ -177,6 +178,7 @@ class NotificationService {
         topCategory,
       ),
       payload: 'statistics',
+      bypassThrottle: true,
     );
   }
 
@@ -265,6 +267,7 @@ class NotificationService {
         title: Tone.appL10n?.notif_weekInReviewTitle ?? '📅 Week in review',
         body: 'Zero expenses this week — that\'s impressive 💪',
         payload: 'statistics',
+        bypassThrottle: true,
       );
       await _logToDatabase(
         '📅 Weekly Summary',
@@ -307,6 +310,7 @@ class NotificationService {
       title: Tone.appL10n?.notif_yourWeekInReviewTitle ?? '📅 Your week in review',
       body: body,
       payload: 'statistics',
+      bypassThrottle: true,
     );
     await _logToDatabase('📅 Your week in review', body, 'weekly_summary');
   }
@@ -362,18 +366,22 @@ class NotificationService {
     return scheduledDate;
   }
 
-  // ── Throttle: max N OS notifications per day ──
-  static const _maxDailyPush = 5;
+  // ── Throttle: max N smart-alert OS notifications per day ──
+  static const _maxDailySmartPush = 12;
   static const _pushCountKey = 'notif_push_count';
   static const _pushDateKey = 'notif_push_date';
   static final _sentToday = <String>{}; // in-memory dedup for current session
 
+  /// Show an OS notification.
+  /// [dedupKey] — if set, only one notification per key per day.
+  /// [bypassThrottle] — if true, skip the daily cap (for scheduled summaries, streaks, achievements).
   static Future<void> showLocalNotification({
     required int id,
     required String title,
     required String body,
     String? payload,
     String? dedupKey,
+    bool bypassThrottle = false,
   }) async {
     // Dedup: if a dedupKey is provided, skip if already sent today
     if (dedupKey != null) {
@@ -386,20 +394,22 @@ class NotificationService {
       _sentToday.add(dedupKey);
     }
 
-    // Throttle: cap total OS pushes per day
-    final prefs = await SharedPreferences.getInstance();
-    final today = '${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}';
-    if (prefs.getString(_pushDateKey) != today) {
-      await prefs.setInt(_pushCountKey, 0);
-      await prefs.setString(_pushDateKey, today);
-      _sentToday.clear();
+    // Throttle: cap smart-alert pushes per day (scheduled notifications bypass)
+    if (!bypassThrottle) {
+      final prefs = await SharedPreferences.getInstance();
+      final today = '${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}';
+      if (prefs.getString(_pushDateKey) != today) {
+        await prefs.setInt(_pushCountKey, 0);
+        await prefs.setString(_pushDateKey, today);
+        _sentToday.clear();
+      }
+      final count = prefs.getInt(_pushCountKey) ?? 0;
+      if (count >= _maxDailySmartPush) {
+        _log.i('Daily push cap reached, skipping: $title');
+        return;
+      }
+      await prefs.setInt(_pushCountKey, count + 1);
     }
-    final count = prefs.getInt(_pushCountKey) ?? 0;
-    if (count >= _maxDailyPush) {
-      _log.i('Daily push cap reached, skipping: $title');
-      return;
-    }
-    await prefs.setInt(_pushCountKey, count + 1);
 
     _log.i('Showing notification: $title');
     const androidDetails = AndroidNotificationDetails(
@@ -531,6 +541,7 @@ class NotificationService {
       title: Tone.appL10n?.notif_niceOneTitle ?? '🏆 Nice one!',
       body: '$title — that\'s +$xp XP for you',
       payload: 'achievements',
+      bypassThrottle: true,
     );
     await _logToDatabase(
       '🏆 Nice one!',
@@ -545,6 +556,7 @@ class NotificationService {
       title: Tone.appL10n?.notif_levelUpTitle(newLevel) ?? '🎉 Level $newLevel!',
       body: 'You just leveled up — keep going!',
       payload: 'achievements',
+      bypassThrottle: true,
     );
     await _logToDatabase(
       '🎉 Level Up!',
@@ -559,6 +571,7 @@ class NotificationService {
       title: Tone.appL10n?.notif_streakDaysTitle(days) ?? '🔥 $days days straight!',
       body: 'That\'s dedication — your streak is on fire',
       payload: 'achievements',
+      bypassThrottle: true,
     );
     await _logToDatabase(
       '🔥 Streak Milestone!',

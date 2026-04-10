@@ -133,7 +133,6 @@ void main() {
     test('same day cutoff calculation', () {
       // If today is the 15th, compare only 1st-15th of the compare month
       final today = 15;
-      final compareMonth = DateTime(2024, 3, 1);
       final daysInCompareMonth = DateTime(2024, 4, 0).day; // 31 for March
       final cutoffDay = today < daysInCompareMonth ? today : daysInCompareMonth;
       expect(cutoffDay, 15);

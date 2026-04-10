@@ -13,6 +13,7 @@
 ///
 /// EXPECTED OUTCOME on unfixed code: FAIL
 /// Counterexamples documented below.
+library;
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';

@@ -24,7 +24,6 @@ class ActiveTripMiniCard extends ConsumerWidget {
         if (activeTrip == null) return const SizedBox.shrink();
 
         final trip = activeTrip;
-        final duration = trip.endDate.difference(trip.startDate).inDays + 1;
         final now = DateTime.now();
         final today = DateTime(now.year, now.month, now.day);
         final daysLeft = trip.endDate.difference(today).inDays + 1;

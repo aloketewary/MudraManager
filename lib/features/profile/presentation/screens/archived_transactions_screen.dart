@@ -101,7 +101,7 @@ class ArchivedTransactionsScreen extends ConsumerWidget {
             },
           );
         },
-        loading: () => ListView(children: List.generate(5, (_) => TransactionCardSkeleton())),
+        loading: () => ListView(children: List.generate(5, (_) => const TransactionCardSkeleton())),
         error: (e, _) => Center(child: Text(ctxt.common_errorLoading)),
       ),
     );

@@ -1,5 +1,5 @@
 extension StringUtil on String {
-  substringAfterLast(String delimeter) {
+  String substringAfterLast(String delimeter) {
     final pos = lastIndexOf(delimeter);
     return pos != -1 ? substring(pos + 1, length) : this;
   }
@@ -9,17 +9,17 @@ extension StringUtil on String {
     return pos != -1 ? substring(pos + 1, length) : this;
   }
 
-  substringBefore(String delimeter) {
+  String substringBefore(String delimeter) {
     final pos = indexOf(delimeter);
     return pos != -1 ? substring(0, pos) : this;
   }
 
-  substringBeforeLast(String delimeter) {
+  String substringBeforeLast(String delimeter) {
     final pos = lastIndexOf(delimeter);
     return pos != -1 ? substring(0, pos) : this;
   }
 
-  toInt({int defaultValue = 0}) {
+  int toInt({int defaultValue = 0}) {
     return int.tryParse(this) ?? defaultValue;
   }
 

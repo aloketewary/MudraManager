@@ -329,7 +329,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
         },
         loading: () => Scaffold(
           appBar: AppBar(title: Text(_isTrip ? 'Edit Trip' : 'Edit Group')),
-          body: ListView(children: List.generate(3, (_) => DashboardCardSkeleton())),
+          body: ListView(children: List.generate(3, (_) => const DashboardCardSkeleton())),
         ),
         error: (e, _) => Scaffold(
           appBar: AppBar(title: Text(BuddyMessages.genericError)),
@@ -614,6 +614,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
                             !DateUtils.isSameDay(range.start, trip.startDate) ||
                                 !DateUtils.isSameDay(range.end, trip.endDate);
                         if (datesChanged) {
+                          if (!mounted) return;
                           final confirm = await DialogUtils.showConfirmation(
                             context,
                             title: 'Warning: Date Change',

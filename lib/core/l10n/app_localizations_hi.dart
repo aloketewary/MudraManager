@@ -1181,6 +1181,24 @@ class AppLocalizationsHi extends AppLocalizations {
   String get label_none => 'कोई नहीं';
 
   @override
+  String get label_frequency => 'Frequency';
+
+  @override
+  String get label_repeatEvery => 'हर';
+
+  @override
+  String get label_days => 'दिन';
+
+  @override
+  String get label_weeks => 'हफ़्ते';
+
+  @override
+  String get label_months => 'महीने';
+
+  @override
+  String get label_years => 'साल';
+
+  @override
   String get trip_expenses => 'खर्चे';
 
   @override
@@ -5207,4 +5225,50 @@ class AppLocalizationsHi extends AppLocalizations {
   @override
   String get onboard_currencyWarning =>
       'बाद में base currency बदलने पर मौजूदा transactions archive हो जाएंगे।';
+
+  @override
+  String get statistics_topCategory => 'टॉप Category';
+
+  @override
+  String get statistics_dailyAverage => 'रोज़ का औसत';
+
+  @override
+  String get statistics_perDay => 'प्रति दिन';
+
+  @override
+  String statistics_percentOfExpenses(String percent) {
+    return '$percent% खर्चों का';
+  }
+
+  @override
+  String get sms_infoTitle => 'SMS Import कैसे काम करता है';
+
+  @override
+  String get sms_infoOnlyScans => 'सिर्फ bank और wallet SMS scan करता है';
+
+  @override
+  String get sms_infoStaysOnDevice => 'सारा data आपके device पर ही रहता है';
+
+  @override
+  String get sms_infoAutoCreates => 'Transactions अपने-आप बन जाते हैं';
+
+  @override
+  String get sms_infoNoPersonal => 'कोई personal message नहीं पढ़ा जाता';
+
+  @override
+  String get dashboard_totalBalance => 'कुल बैलेंस';
+
+  @override
+  String get dashboard_netWorthLink => 'Net Worth';
+
+  @override
+  String get dashboard_showAccounts => 'Accounts दिखाएं';
+
+  @override
+  String get dashboard_hideAccounts => 'Accounts छुपाएं';
+
+  @override
+  String dashboard_accountsTapExpand(int count) {
+    return '$count accounts · Tap करें';
+  }
 }

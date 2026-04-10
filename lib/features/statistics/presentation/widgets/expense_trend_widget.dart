@@ -92,7 +92,6 @@ class _ExpenseTrendWidgetState extends State<ExpenseTrendWidget> {
 
   Widget _buildLineChart(BuildContext context, List<FlSpot> spots) {
     final ctxt = AppLocalizations.of(context)!;
-    final color = Theme.of(context).colorScheme;
 
     // Build line bars: parent + subcategories
     final lineBars = <LineChartBarData>[
@@ -169,7 +168,6 @@ class _ExpenseTrendWidgetState extends State<ExpenseTrendWidget> {
 
   Widget _buildBarChart(BuildContext context, List<FlSpot> spots) {
     final ctxt = AppLocalizations.of(context)!;
-    final color = Theme.of(context).colorScheme;
 
     final barGroups = spots.map((spot) {
       final x = spot.x.toInt();

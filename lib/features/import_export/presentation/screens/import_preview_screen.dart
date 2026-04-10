@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-import 'package:flutter/foundation.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -39,12 +37,7 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
   @override
   void initState() {
     super.initState();
-    debugPrint('[Preview] fileBytes: ${widget.fileBytes.length} bytes');
     _sheets = ExcelImportService.getSheetInfo(widget.fileBytes);
-    debugPrint(
-      '[Preview] Sheets: ${_sheets.map((s) => '${s.name}(${s.rowCount})').toList()}',
-    );
-    // Auto-select first sheet with data
     _selectedSheet = _sheets.where((s) => s.rowCount > 1).firstOrNull?.name ??
         _sheets.firstOrNull?.name;
     _loadSheet();
@@ -55,23 +48,12 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
       widget.fileBytes,
       sheetName: _selectedSheet,
     );
-    debugPrint('[Preview] Headers (${_headers.length}): $_headers');
     _dataRows = ExcelImportService.readDataRows(
       widget.fileBytes,
       sheetName: _selectedSheet,
     );
-    debugPrint('[Preview] Data rows: ${_dataRows.length}');
-    if (_dataRows.isNotEmpty) {
-      debugPrint('[Preview] First row: ${_dataRows.first}');
-    }
     _mapping = ExcelImportService.autoDetectMapping(_headers);
-    debugPrint(
-      '[Preview] Mapping: date=${_mapping.dateColumn}, amount=${_mapping.amountColumn}, desc=${_mapping.descriptionColumn}, cat=${_mapping.categoryColumn}, type=${_mapping.typeColumn}, currency=${_mapping.currencyColumn}',
-    );
     _parsedRows = ExcelImportService.parseRows(_dataRows, _mapping);
-    debugPrint(
-      '[Preview] Parsed: ${_parsedRows.length} rows, ${_parsedRows.where((r) => r.isValid).length} valid',
-    );
   }
 
   void _reParse() {
@@ -372,8 +354,8 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
                     SizedBox(
                       width: 160,
                       child: DropdownButtonFormField<int?>(
-                        key: ValueKey('${label}_${currentCol}'),
-                        value: currentCol,
+                        key: ValueKey('${label}_$currentCol'),
+                        initialValue: currentCol,
                         isDense: true,
                         isExpanded: true,
                         decoration: InputDecoration(
@@ -470,13 +452,14 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
               data: (accounts) {
                 if (_selectedAccount == null && accounts.isNotEmpty) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (mounted)
+                    if (mounted) {
                       setState(() => _selectedAccount = accounts.first);
+                    }
                   });
                 }
                 return DropdownButtonFormField<int>(
                   key: ValueKey('account_${_selectedAccount?.id}'),
-                  value: _selectedAccount?.id,
+                  initialValue: _selectedAccount?.id,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(spacing.radiusSmall),

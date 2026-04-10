@@ -82,7 +82,7 @@ class _WeeklyCalendarState extends State<WeeklyCalendar> {
             ),
             child: Center(
               child: Padding(
-                padding: EdgeInsets.all(8),
+                padding: const EdgeInsets.all(8),
                 child: Text(
                   DateFormat('d').format(day),
                   style: textTheme.titleLarge?.copyWith(

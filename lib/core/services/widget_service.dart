@@ -11,7 +11,8 @@ import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
 
 class WidgetService {
-  static const String androidWidgetName = 'com.mudramanager.app.QuickAddWidgetProvider';
+  static const String androidWidgetName =
+      'com.mudramanager.app.QuickAddWidgetProvider';
   static final _log = AppLog(getLogger(), 'WidgetService');
 
   static Future<void> updateWidget(WidgetRef ref) async {
@@ -23,10 +24,8 @@ class WidgetService {
       // Force Isar to sync any pending writes
       await isar.txn(() async {});
 
-      final accounts = await isar.accounts
-          .filter()
-          .isActiveEqualTo(true)
-          .findAll();
+      final accounts =
+          await isar.accounts.filter().isActiveEqualTo(true).findAll();
       final accountService = ref.read(accountServiceProvider);
 
       double totalBalance = 0;
@@ -42,10 +41,13 @@ class WidgetService {
       _log.d('Querying transactions between $startOfDay and $endOfDay');
 
       // Check latest transactions
-      final allTxns = await isar.transactions.where().sortByDateDesc().limit(5).findAll();
+      final allTxns =
+          await isar.transactions.where().sortByDateDesc().limit(5).findAll();
       _log.d('Latest 5 transactions:');
       for (var tx in allTxns) {
-        _log.d('  ID: ${tx.id}, Date: ${tx.date}, Amount: ${tx.amount}, isExpense: ${tx.isExpense}');
+        _log.d(
+          '  ID: ${tx.id}, Date: ${tx.date}, Amount: ${tx.amount}, isExpense: ${tx.isExpense}',
+        );
       }
 
       final transactions = await isar.transactions
@@ -58,7 +60,9 @@ class WidgetService {
       double todayExpense = 0;
       double todayIncome = 0;
       for (var txn in transactions) {
-        _log.d('Txn: ${txn.description}, Amount: ${txn.amount}, isExpense: ${txn.isExpense}, isTransfer: ${txn.isTransfer}');
+        _log.d(
+          'Txn: ${txn.description}, Amount: ${txn.amount}, isExpense: ${txn.isExpense}, isTransfer: ${txn.isTransfer}',
+        );
         if (txn.isTransfer) continue;
         if (txn.isExpense) {
           todayExpense += txn.baseAmount;
@@ -69,15 +73,15 @@ class WidgetService {
 
       await HomeWidget.saveWidgetData<String>(
         'balance',
-        '${formatCurrency(totalBalance, code: BaseCurrency.code, decimals: 0)}',
+        formatCurrency(totalBalance, code: BaseCurrency.code, decimals: 0),
       );
       await HomeWidget.saveWidgetData<String>(
         'todayExpense',
-        '${formatCurrency(todayExpense, code: BaseCurrency.code, decimals: 0)}',
+        formatCurrency(todayExpense, code: BaseCurrency.code, decimals: 0),
       );
       await HomeWidget.saveWidgetData<String>(
         'todayIncome',
-        '${formatCurrency(todayIncome, code: BaseCurrency.code, decimals: 0)}',
+        formatCurrency(todayIncome, code: BaseCurrency.code, decimals: 0),
       );
 
       try {
@@ -86,7 +90,7 @@ class WidgetService {
         // Widget not found - ignore (happens in dev builds)
         _log.d('Widget update skipped: $e');
       }
-      
+
       _log.i(
         'Widget updated: Balance=${formatCurrency(totalBalance, code: BaseCurrency.code, decimals: 0)}, Expense=${formatCurrency(todayExpense, code: BaseCurrency.code, decimals: 0)}, Income=${formatCurrency(todayIncome, code: BaseCurrency.code, decimals: 0)}',
       );

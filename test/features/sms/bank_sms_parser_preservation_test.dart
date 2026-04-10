@@ -13,6 +13,7 @@
 ///   (b) the body has no valid transaction pattern (no amount / no keyword)
 ///
 /// EXPECTED OUTCOME on unfixed code: ALL PASS
+library;
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';

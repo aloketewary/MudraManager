@@ -177,6 +177,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
       setState(() => _isLoading = true);
 
       final isar = await ref.read(isarServiceProvider).getInstance();
+      if (!mounted) return;
       final data = await BackupService.restoreEncryptedBackup(
         context,
         isar,
@@ -185,10 +186,8 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
 
       if (data != null) {
         SharedPrefsUtil.instance.setOnboardingComplete();
-        if (mounted) {
-          SnackbarService.success(BuddyMessages.restoreSuccess);
-          context.go(AppRoutes.home);
-        }
+        SnackbarService.success(BuddyMessages.restoreSuccess);
+        if (mounted) context.go(AppRoutes.home);
       }
     } catch (e) {
       if (mounted) {
@@ -1404,7 +1403,7 @@ class _AllCurrenciesSheetState extends State<_AllCurrenciesSheet> {
               autofocus: true,
               decoration: InputDecoration(
                 hintText: AppLocalizations.of(context)!.common_searchCurrency,
-                prefixIcon: Icon(LucideIcons.search, size: 20),
+                prefixIcon: const Icon(LucideIcons.search, size: 20),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(color: color.outlineVariant),

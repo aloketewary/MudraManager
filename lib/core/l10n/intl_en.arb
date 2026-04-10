@@ -1198,6 +1198,12 @@
   "label_monthly": "Monthly",
   "label_yearly": "Yearly",
   "label_none": "None",
+  "label_frequency": "Frequency",
+  "label_repeatEvery": "Repeat every",
+  "label_days": "days",
+  "label_weeks": "weeks",
+  "label_months": "months",
+  "label_years": "years",
   "trip_expenses": "Expenses",
   "trip_settlements": "Settlements",
   "trip_balances": "Balances",
@@ -3096,5 +3102,34 @@
   "onboard_categoriesDesc": "Pick packs that match your lifestyle. You can change these later.",
   "onboard_startFresh": "Start Fresh",
   "onboard_startFreshDesc": "No categories — add your own later",
-  "onboard_currencyWarning": "Changing base currency later will archive existing transactions."
+  "onboard_currencyWarning": "Changing base currency later will archive existing transactions.",
+
+  "statistics_topCategory": "Top Category",
+  "statistics_dailyAverage": "Daily Average",
+  "statistics_perDay": "per day",
+  "statistics_percentOfExpenses": "{percent}% of expenses",
+  "@statistics_percentOfExpenses": {
+    "placeholders": {
+      "percent": { "type": "String" }
+    }
+  },
+
+  "sms_infoTitle": "How SMS Import Works",
+  "sms_infoOnlyScans": "Only scans bank and wallet SMS",
+  "sms_infoStaysOnDevice": "All data stays on your device",
+  "sms_infoAutoCreates": "Automatically creates transactions",
+  "sms_infoNoPersonal": "No personal messages are read",
+
+  "dashboard_totalBalance": "Total Balance",
+  "dashboard_netWorthLink": "Net Worth",
+  "dashboard_showAccounts": "Show accounts",
+  "dashboard_hideAccounts": "Hide accounts",
+  "dashboard_accountsTapExpand": "{count} accounts · Tap to expand",
+  "@dashboard_accountsTapExpand": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

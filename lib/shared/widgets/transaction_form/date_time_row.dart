@@ -91,9 +91,8 @@ class DateTimeRow extends StatelessWidget {
 
   Future<void> _pickDate(BuildContext context) async {
     final now = DateTime.now();
-    final safeInitial = selectedDate.isAfter(now) && !allowFuture
-        ? now
-        : selectedDate;
+    final safeInitial =
+        selectedDate.isAfter(now) && !allowFuture ? now : selectedDate;
     final pick = await showDatePicker(
       context: context,
       initialDate: safeInitial,
@@ -102,13 +101,15 @@ class DateTimeRow extends StatelessWidget {
     );
     if (pick != null) {
       HapticFeedback.lightImpact();
-      onDateChanged(DateTime(
-        pick.year,
-        pick.month,
-        pick.day,
-        selectedDate.hour,
-        selectedDate.minute,
-      ));
+      onDateChanged(
+        DateTime(
+          pick.year,
+          pick.month,
+          pick.day,
+          selectedDate.hour,
+          selectedDate.minute,
+        ),
+      );
     }
   }
 
@@ -119,13 +120,15 @@ class DateTimeRow extends StatelessWidget {
     );
     if (picked != null) {
       HapticFeedback.lightImpact();
-      onDateChanged(DateTime(
-        selectedDate.year,
-        selectedDate.month,
-        selectedDate.day,
-        picked.hour,
-        picked.minute,
-      ));
+      onDateChanged(
+        DateTime(
+          selectedDate.year,
+          selectedDate.month,
+          selectedDate.day,
+          picked.hour,
+          picked.minute,
+        ),
+      );
     }
   }
 }

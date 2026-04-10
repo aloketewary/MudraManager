@@ -31,14 +31,18 @@ void main() {
 
         // Transfer between accounts
         Transaction.create(
-            date: DateTime.now(),
-            amount: 10000,
-            isExpense: true,
-            isTransfer: true),
+          date: DateTime.now(),
+          amount: 10000,
+          isExpense: true,
+          isTransfer: true,
+        ),
 
         // Regular income
         Transaction.create(
-            date: DateTime.now(), amount: 50000, isExpense: false),
+          date: DateTime.now(),
+          amount: 50000,
+          isExpense: false,
+        ),
       ];
     });
 
@@ -90,8 +94,7 @@ void main() {
     });
 
     test('transaction count for stats excludes settlements and transfers', () {
-      final statsTxnCount =
-          transactions.where((t) => t.affectsStats).length;
+      final statsTxnCount = transactions.where((t) => t.affectsStats).length;
 
       // 4 expenses (2 regular + 2 shared) + 1 income = 5
       // Excludes: 2 settlements + 1 transfer
@@ -131,7 +134,9 @@ void main() {
 
       final transactions = [weekdayTxn, weekendTxn];
       final total = transactions.fold(
-          0.0, (sum, t) => sum + t.effectiveAmount);
+        0.0,
+        (sum, t) => sum + t.effectiveAmount,
+      );
       final weekendAmount = weekendTxn.effectiveAmount;
 
       final weekendRatio = weekendAmount / total;
@@ -147,13 +152,22 @@ void main() {
 
       final expenses = [
         Transaction.create(
-            date: DateTime.now(), amount: 2000, isExpense: true),
+          date: DateTime.now(),
+          amount: 2000,
+          isExpense: true,
+        ),
         Transaction.create(
-            date: DateTime.now(), amount: 1200, isExpense: true)
+          date: DateTime.now(),
+          amount: 1200,
+          isExpense: true,
+        )
           ..myShare = 400
           ..isSharedExpense = true,
         Transaction.create(
-            date: DateTime.now(), amount: 800, isExpense: true),
+          date: DateTime.now(),
+          amount: 800,
+          isExpense: true,
+        ),
       ];
 
       final spent = expenses

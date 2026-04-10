@@ -253,7 +253,7 @@ void main() {
             date: DateTime.now(),
             amount: 5000,
             isExpense: true,
-            isTransfer: true),
+            isTransfer: true,),
         Transaction.create(date: DateTime.now(), amount: 200, isExpense: true),
       ];
 
@@ -269,11 +269,11 @@ void main() {
     test('category breakdown uses effectiveAmount', () {
       final transactions = [
         Transaction.create(
-            date: DateTime.now(), amount: 1200, isExpense: true)
+            date: DateTime.now(), amount: 1200, isExpense: true,)
           ..myShare = 300
           ..isSharedExpense = true,
         Transaction.create(
-            date: DateTime.now(), amount: 800, isExpense: true),
+            date: DateTime.now(), amount: 800, isExpense: true,),
       ];
 
       final categoryTotal = transactions
@@ -287,14 +287,14 @@ void main() {
     test('balance calculation uses full amount', () {
       final transactions = [
         Transaction.create(
-            date: DateTime.now(), amount: 1200, isExpense: true)
+            date: DateTime.now(), amount: 1200, isExpense: true,)
           ..myShare = 300
           ..isSharedExpense = true,
         Transaction.create(
-            date: DateTime.now(), amount: 300, isExpense: true)
+            date: DateTime.now(), amount: 300, isExpense: true,)
           ..isSettlement = true,
         Transaction.create(
-            date: DateTime.now(), amount: 50000, isExpense: false),
+            date: DateTime.now(), amount: 50000, isExpense: false,),
       ];
 
       final balance = transactions.fold(0.0, (sum, t) {

@@ -57,7 +57,7 @@ class _EditUserProfileScreenState extends ConsumerState<EditUserProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(ctxt.profile_editUserProfileAppTitle,
-            style: textTheme.titleLarge),
+            style: textTheme.titleLarge,),
         elevation: 0,
       ),
       body: profileAsync.when(
@@ -75,7 +75,7 @@ class _EditUserProfileScreenState extends ConsumerState<EditUserProfileScreen> {
 
               // Personal Info
               _buildSectionHeader(
-                  'Personal Info', LucideIcons.user, color, textTheme),
+                  'Personal Info', LucideIcons.user, color, textTheme,),
               const SizedBox(height: 10),
               Form(
                 key: _formKey,
@@ -99,12 +99,12 @@ class _EditUserProfileScreenState extends ConsumerState<EditUserProfileScreen> {
               SkeletonLoader(
                   width: 80,
                   height: 80,
-                  borderRadius: BorderRadius.all(Radius.circular(40))),
+                  borderRadius: BorderRadius.all(Radius.circular(40)),),
               SizedBox(height: 24),
               SkeletonLoader(width: double.infinity, height: 48),
               SizedBox(height: 16),
-              SkeletonLoader(width: double.infinity, height: 48)
-            ])),
+              SkeletonLoader(width: double.infinity, height: 48),
+            ],),),
         error: (e, _) => Center(child: Text(BuddyMessages.errorWith('$e'))),
       ),
     );
@@ -325,10 +325,8 @@ class _EditUserProfileScreenState extends ConsumerState<EditUserProfileScreen> {
               .read(userProfileServiceProvider)
               .saveProfile(updatedProfile);
           ref.invalidate(userProfileProvider);
-          if (context.mounted) {
-            SnackbarService.success(BuddyMessages.settingsSaved);
-            context.pop();
-          }
+          SnackbarService.success(BuddyMessages.settingsSaved);
+          if (mounted) context.pop();
         }
       },
       icon: const Icon(LucideIcons.check),

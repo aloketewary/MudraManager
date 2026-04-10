@@ -11,8 +11,8 @@ class GamificationDebugButton extends ConsumerWidget {
     return FloatingActionButton.extended(
       onPressed: () async {
         try {
-          final service = await ref.read(gamificationServiceInitProvider.future);
-          // await initTestGamificationData(service);
+          await ref.read(gamificationServiceInitProvider.future);
+          // final service = above; await initTestGamificationData(service);
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('✅ Gamification data created!')),

@@ -204,7 +204,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
             100,
           ),
           itemCount: 5,
-          itemBuilder: (context, index) => TransactionCardSkeleton(),
+          itemBuilder: (context, index) => const TransactionCardSkeleton(),
         ),
         error: (err, stack) =>
             Center(child: Text(BuddyMessages.errorWith('$err'))),

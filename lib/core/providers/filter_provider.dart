@@ -63,7 +63,8 @@ final customDateRangeTransactionsProvider = FutureProvider.autoDispose
         (txn) =>
             !txn.date.isBefore(startDate) &&
             !txn.date.isAfter(
-                DateTime(endDate.year, endDate.month, endDate.day, 23, 59, 59)),
+              DateTime(endDate.year, endDate.month, endDate.day, 23, 59, 59),
+            ),
       )
       .toList();
 
@@ -127,16 +128,19 @@ final previousPeriodTransactionsProvider = FutureProvider.autoDispose
 
   final txns = switch (period) {
     'day' => allTxns
-        .where((txn) =>
-            _isSameDay(txn.date, now.subtract(const Duration(days: 1))))
+        .where(
+          (txn) => _isSameDay(txn.date, now.subtract(const Duration(days: 1))),
+        )
         .toList(),
     'week' => allTxns
-        .where((txn) =>
-            _isSameWeek(txn.date, now.subtract(const Duration(days: 7))))
+        .where(
+          (txn) => _isSameWeek(txn.date, now.subtract(const Duration(days: 7))),
+        )
         .toList(),
     'month' => allTxns
         .where(
-            (txn) => _isSameMonth(txn.date, DateTime(now.year, now.month - 1)))
+          (txn) => _isSameMonth(txn.date, DateTime(now.year, now.month - 1)),
+        )
         .toList(),
     'year' => allTxns
         .where((txn) => _isSameYear(txn.date, DateTime(now.year - 1)))

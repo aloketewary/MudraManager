@@ -148,7 +148,7 @@ class PendingSplitsSection extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              '${formatCurrency(txn.amount, decimals: 0)}',
+                              formatCurrency(txn.amount, decimals: 0),
                               style: textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: color.primary,
@@ -163,7 +163,7 @@ class PendingSplitsSection extends StatelessWidget {
                         ),
                       ),
                     ),
-                  )),
+                  ),),
             ],
           );
         }),
@@ -201,7 +201,7 @@ class PendingSplitsSection extends StatelessWidget {
                         'tripId': tripId,
                         'transactionId': txn.id,
                         'splitType': 'equal',
-                      });
+                      },);
                     },
                   ),
                 ),
@@ -217,7 +217,7 @@ class PendingSplitsSection extends StatelessWidget {
                         'tripId': tripId,
                         'transactionId': txn.id,
                         'splitType': 'percentage',
-                      });
+                      },);
                     },
                   ),
                 ),
@@ -233,7 +233,7 @@ class PendingSplitsSection extends StatelessWidget {
                         'tripId': tripId,
                         'transactionId': txn.id,
                         'splitType': 'custom',
-                      });
+                      },);
                     },
                   ),
                 ),

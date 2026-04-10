@@ -1,9 +1,7 @@
 import 'package:mudra_manager/core/utils/safe_date_format.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -52,14 +50,14 @@ class _ImportExportScreenState extends ConsumerState<ImportExportScreen> {
         children: [
           // ── EXPORT SECTION ──
           _buildSectionHeader(
-              ctxt.importExport_export, LucideIcons.upload, color, textTheme),
+              ctxt.importExport_export, LucideIcons.upload, color, textTheme,),
           SizedBox(height: spacing.elementGap),
           _buildExportCard(color, textTheme, spacing),
           SizedBox(height: spacing.sectionGap),
 
           // ── IMPORT SECTION ──
           _buildSectionHeader(
-              ctxt.importExport_import, LucideIcons.download, color, textTheme),
+              ctxt.importExport_import, LucideIcons.download, color, textTheme,),
           SizedBox(height: spacing.elementGap),
           _buildImportCard(color, textTheme, spacing, ctxt),
           SizedBox(height: spacing.sectionGap),
@@ -189,7 +187,7 @@ class _ImportExportScreenState extends ConsumerState<ImportExportScreen> {
                 child: Row(
                   children: [
                     Icon(LucideIcons.calendarRange,
-                        size: 18, color: color.primary),
+                        size: 18, color: color.primary,),
                     SizedBox(width: spacing.elementGap),
                     Text(
                       '${dateFmt.format(_exportStart)} — ${dateFmt.format(_exportEnd)}',
@@ -226,7 +224,7 @@ class _ImportExportScreenState extends ConsumerState<ImportExportScreen> {
                     : const Icon(LucideIcons.fileSpreadsheet, size: 18),
                 label: Text(_exporting
                     ? ctxt.importExport_exporting
-                    : ctxt.importExport_exportAsExcel),
+                    : ctxt.importExport_exportAsExcel,),
                 style: FilledButton.styleFrom(
                   padding:
                       EdgeInsets.symmetric(vertical: spacing.elementGap * 1.5),
@@ -339,7 +337,7 @@ class _ImportExportScreenState extends ConsumerState<ImportExportScreen> {
   ) {
     return Container(
       padding: EdgeInsets.symmetric(
-          horizontal: spacing.elementGap, vertical: spacing.elementGapMin),
+          horizontal: spacing.elementGap, vertical: spacing.elementGapMin,),
       decoration: BoxDecoration(
         color: color.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(spacing.radiusSmall),
@@ -367,7 +365,7 @@ class _ImportExportScreenState extends ConsumerState<ImportExportScreen> {
         isarService: ref.read(isarServiceProvider),
         startDate: _exportStart,
         endDate: DateTime(
-            _exportEnd.year, _exportEnd.month, _exportEnd.day, 23, 59, 59),
+            _exportEnd.year, _exportEnd.month, _exportEnd.day, 23, 59, 59,),
       );
       final fileName =
           'Mudra_${safeDateFormat('yyyyMMdd').format(_exportStart)}_${DateFormat('yyyyMMdd').format(_exportEnd)}.xlsx';
@@ -383,42 +381,28 @@ class _ImportExportScreenState extends ConsumerState<ImportExportScreen> {
   Future<void> _pickAndImport() async {
     HapticFeedback.mediumImpact();
     try {
-      debugPrint('[Import] Picking file...');
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['xlsx', 'xls'],
         withData: true,
       );
 
-      if (result == null || result.files.isEmpty) {
-        debugPrint('[Import] No file selected');
-        return;
-      }
+      if (result == null || result.files.isEmpty) return;
       final file = result.files.first;
-      debugPrint(
-          '[Import] File: name=${file.name}, size=${file.size}, path=${file.path}, hasBytes=${file.bytes != null}');
 
       Uint8List? bytes = file.bytes;
 
       if (bytes == null && file.path != null) {
-        debugPrint('[Import] bytes is null, reading from path: ${file.path}');
         final f = File(file.path!);
-        if (await f.exists()) {
+        if (f.existsSync()) {
           bytes = await f.readAsBytes();
-          debugPrint('[Import] Read ${bytes.length} bytes from file path');
-        } else {
-          debugPrint('[Import] File does not exist at path: ${file.path}');
         }
       }
 
       if (bytes == null || bytes.isEmpty) {
-        debugPrint('[Import] FAILED: bytes is null or empty');
         SnackbarService.error(BuddyMessages.invalidBackupFile);
         return;
       }
-
-      debugPrint(
-          '[Import] SUCCESS: ${bytes.length} bytes, navigating to preview');
 
       if (mounted) {
         context.push(
@@ -426,9 +410,7 @@ class _ImportExportScreenState extends ConsumerState<ImportExportScreen> {
           extra: bytes,
         );
       }
-    } catch (e, stack) {
-      debugPrint('[Import] ERROR: $e');
-      debugPrint('[Import] Stack: $stack');
+    } catch (e, _) {
       SnackbarService.error(BuddyMessages.errorWith('$e'));
     }
   }

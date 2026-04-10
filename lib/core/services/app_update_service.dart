@@ -19,7 +19,7 @@ class AppUpdateService {
       // Ignore during hot reload/development
     } catch (e) {
       if (!e.toString().contains('ERROR_APP_NOT_OWNED')) {
-        debugPrint('Update check failed: $e');
+        // Silently ignore update check failures in production
       }
     }
   }

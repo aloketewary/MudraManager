@@ -10,7 +10,7 @@ void main() {
         if (theme == AppColorTheme.dynamic) continue; // needs device
         final scheme = theme.lightColorScheme();
         expect(scheme.brightness, Brightness.light,
-            reason: '${theme.name} light scheme has wrong brightness');
+            reason: '${theme.name} light scheme has wrong brightness',);
         expect(scheme.primary, isNotNull);
       }
     });
@@ -20,7 +20,7 @@ void main() {
         if (theme == AppColorTheme.dynamic) continue;
         final scheme = theme.darkColorScheme();
         expect(scheme.brightness, Brightness.dark,
-            reason: '${theme.name} dark scheme has wrong brightness');
+            reason: '${theme.name} dark scheme has wrong brightness',);
       }
     });
 
@@ -29,7 +29,7 @@ void main() {
         if (theme == AppColorTheme.dynamic) continue;
         final scheme = theme.amoledColorScheme();
         expect(scheme.surface, Colors.black,
-            reason: '${theme.name} AMOLED should have black surface');
+            reason: '${theme.name} AMOLED should have black surface',);
       }
     });
 
@@ -53,18 +53,18 @@ void main() {
 
   group('FinanceColors', () {
     test('income colors are green-ish', () {
-      expect(FinanceColors.income.green, greaterThan(FinanceColors.income.red));
-      expect(FinanceColors.incomeDark.green, greaterThan(FinanceColors.incomeDark.red));
+      expect(FinanceColors.income.g, greaterThan(FinanceColors.income.r));
+      expect(FinanceColors.incomeDark.g, greaterThan(FinanceColors.incomeDark.r));
     });
 
     test('expense colors are red-ish', () {
-      expect(FinanceColors.expense.red, greaterThan(FinanceColors.expense.green));
-      expect(FinanceColors.expenseDark.red, greaterThan(FinanceColors.expenseDark.green));
+      expect(FinanceColors.expense.r, greaterThan(FinanceColors.expense.g));
+      expect(FinanceColors.expenseDark.r, greaterThan(FinanceColors.expenseDark.g));
     });
 
     test('transfer colors are blue-ish', () {
-      expect(FinanceColors.transfer.blue, greaterThan(FinanceColors.transfer.red));
-      expect(FinanceColors.transferDark.blue, greaterThan(FinanceColors.transferDark.red));
+      expect(FinanceColors.transfer.b, greaterThan(FinanceColors.transfer.r));
+      expect(FinanceColors.transferDark.b, greaterThan(FinanceColors.transferDark.r));
     });
 
     test('brightness-aware helpers return correct variant', () {

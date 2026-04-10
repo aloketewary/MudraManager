@@ -115,7 +115,7 @@ void main() {
   });
 
   group('DashboardData equality', () {
-    DashboardData _makeData({
+    DashboardData makeData({
       int txnCount = 0,
       int accountCount = 0,
       int budgetCount = 0,
@@ -147,43 +147,43 @@ void main() {
     }
 
     test('equal when same shape', () {
-      final a = _makeData(txnCount: 5, income: 1000, expense: 500);
-      final b = _makeData(txnCount: 5, income: 1000, expense: 500);
+      final a = makeData(txnCount: 5, income: 1000, expense: 500);
+      final b = makeData(txnCount: 5, income: 1000, expense: 500);
       expect(a, equals(b));
     });
 
     test('not equal when different transaction count', () {
-      final a = _makeData(txnCount: 5);
-      final b = _makeData(txnCount: 10);
+      final a = makeData(txnCount: 5);
+      final b = makeData(txnCount: 10);
       expect(a, isNot(equals(b)));
     });
 
     test('not equal when different income', () {
-      final a = _makeData(income: 1000);
-      final b = _makeData(income: 2000);
+      final a = makeData(income: 1000);
+      final b = makeData(income: 2000);
       expect(a, isNot(equals(b)));
     });
 
     test('not equal when different expense', () {
-      final a = _makeData(expense: 500);
-      final b = _makeData(expense: 800);
+      final a = makeData(expense: 500);
+      final b = makeData(expense: 800);
       expect(a, isNot(equals(b)));
     });
 
     test('not equal when different netWorth', () {
-      final a = _makeData(netWorth: 50000);
-      final b = _makeData(netWorth: 60000);
+      final a = makeData(netWorth: 50000);
+      final b = makeData(netWorth: 60000);
       expect(a, isNot(equals(b)));
     });
 
     test('identical returns true', () {
-      final a = _makeData(txnCount: 3, income: 500);
+      final a = makeData(txnCount: 3, income: 500);
       expect(a == a, true);
     });
 
     test('hashCode consistent with equality', () {
-      final a = _makeData(txnCount: 5, income: 1000, expense: 500);
-      final b = _makeData(txnCount: 5, income: 1000, expense: 500);
+      final a = makeData(txnCount: 5, income: 1000, expense: 500);
+      final b = makeData(txnCount: 5, income: 1000, expense: 500);
       expect(a.hashCode, b.hashCode);
     });
   });

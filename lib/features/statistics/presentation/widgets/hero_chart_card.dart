@@ -79,8 +79,11 @@ class HeroChartCard extends StatelessWidget {
                       isCurved: true,
                       barWidth: 2,
                       dotData: const FlDotData(show: true),
-                      gradient: LinearGradient(
-                        colors: [FinanceColors.statusGood, FinanceColors.statusGood],
+                      gradient: const LinearGradient(
+                        colors: [
+                          FinanceColors.statusGood,
+                          FinanceColors.statusGood,
+                        ],
                       ),
                     ),
                     LineChartBarData(
@@ -88,8 +91,11 @@ class HeroChartCard extends StatelessWidget {
                       isCurved: true,
                       barWidth: 2,
                       dotData: const FlDotData(show: true),
-                      gradient: LinearGradient(
-                        colors: [FinanceColors.statusDanger, FinanceColors.statusDanger],
+                      gradient: const LinearGradient(
+                        colors: [
+                          FinanceColors.statusDanger,
+                          FinanceColors.statusDanger,
+                        ],
                       ),
                     ),
                   ],
@@ -113,7 +119,8 @@ class HeroChartCard extends StatelessWidget {
                       sideTitles: SideTitles(
                         showTitles: true,
                         getTitlesWidget: (value, _) => Text(
-                          formatCurrency(value, code: BaseCurrency.code, decimals: 0),
+                          formatCurrency(value,
+                              code: BaseCurrency.code, decimals: 0,),
                           style: textTheme.bodySmall?.copyWith(fontSize: 9),
                         ),
                         reservedSize: 35,

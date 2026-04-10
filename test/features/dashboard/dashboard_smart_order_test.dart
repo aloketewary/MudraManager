@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
-import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/goal.dart';
 import 'package:mudra_manager/core/db/models/budget.dart';
 import 'package:mudra_manager/core/db/models/frequency.dart';
@@ -80,7 +79,7 @@ void main() {
     }
   }
 
-  DashboardData _emptyData() => const DashboardData(
+  DashboardData emptyData() => const DashboardData(
         transactions: [],
         accounts: [],
         accountBalances: {},
@@ -95,15 +94,15 @@ void main() {
 
   group('Urgency scoring', () {
     test('ai_insight always max urgency', () {
-      expect(urgencyScore('ai_insight', _emptyData(), DateTime.now()), 1.0);
+      expect(urgencyScore('ai_insight', emptyData(), DateTime.now()), 1.0);
     });
 
     test('accounts always 0.5', () {
-      expect(urgencyScore('accounts', _emptyData(), DateTime.now()), 0.5);
+      expect(urgencyScore('accounts', emptyData(), DateTime.now()), 0.5);
     });
 
     test('budget_overview 0 when no budgets', () {
-      expect(urgencyScore('budget_overview', _emptyData(), DateTime.now()), 0);
+      expect(urgencyScore('budget_overview', emptyData(), DateTime.now()), 0);
     });
 
     test('budget_overview critical when over 100%', () {
@@ -242,11 +241,11 @@ void main() {
     });
 
     test('goals_progress 0 when no goals', () {
-      expect(urgencyScore('goals_progress', _emptyData(), DateTime.now()), 0);
+      expect(urgencyScore('goals_progress', emptyData(), DateTime.now()), 0);
     });
 
     test('cash_flow urgent when overspending', () {
-      final data = DashboardData(
+      final data = const DashboardData(
         transactions: [],
         accounts: [],
         accountBalances: {},
@@ -262,7 +261,7 @@ void main() {
     });
 
     test('cash_flow normal when income > expense', () {
-      final data = DashboardData(
+      final data = const DashboardData(
         transactions: [],
         accounts: [],
         accountBalances: {},
@@ -300,13 +299,13 @@ void main() {
     });
 
     test('unknown widget gets default 0.2', () {
-      expect(urgencyScore('unknown_widget', _emptyData(), DateTime.now()), 0.2);
+      expect(urgencyScore('unknown_widget', emptyData(), DateTime.now()), 0.2);
     });
   });
 
   group('Freshness scoring', () {
     test('recent_transactions 0 when empty', () {
-      expect(freshnessScore('recent_transactions', _emptyData(), DateTime.now()), 0);
+      expect(freshnessScore('recent_transactions', emptyData(), DateTime.now()), 0);
     });
 
     test('recent_transactions max when < 1 hour old', () {
@@ -398,25 +397,25 @@ void main() {
     });
 
     test('accounts always 0.5', () {
-      expect(freshnessScore('accounts', _emptyData(), DateTime.now()), 0.5);
+      expect(freshnessScore('accounts', emptyData(), DateTime.now()), 0.5);
     });
 
     test('budget_overview scales with day of month', () {
       // Day 1 → 1/30 = 0.033 → clamped to 0.2
       final earlyMonth = DateTime(2024, 6, 1);
-      expect(freshnessScore('budget_overview', _emptyData(), earlyMonth), 0.2);
+      expect(freshnessScore('budget_overview', emptyData(), earlyMonth), 0.2);
 
       // Day 30 → 30/30 = 1.0
       final lateMonth = DateTime(2024, 6, 30);
-      expect(freshnessScore('budget_overview', _emptyData(), lateMonth), 1.0);
+      expect(freshnessScore('budget_overview', emptyData(), lateMonth), 1.0);
 
       // Day 15 → 15/30 = 0.5
       final midMonth = DateTime(2024, 6, 15);
-      expect(freshnessScore('budget_overview', _emptyData(), midMonth), 0.5);
+      expect(freshnessScore('budget_overview', emptyData(), midMonth), 0.5);
     });
 
     test('unknown widget gets default 0.3', () {
-      expect(freshnessScore('unknown_widget', _emptyData(), DateTime.now()), 0.3);
+      expect(freshnessScore('unknown_widget', emptyData(), DateTime.now()), 0.3);
     });
   });
 

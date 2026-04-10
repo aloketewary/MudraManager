@@ -1,8 +1,10 @@
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 
-class DetailActionCard extends StatelessWidget {
+class DetailActionCard extends ConsumerWidget {
   final IconData icon;
   final String title;
   final String subtitle;
@@ -17,22 +19,27 @@ class DetailActionCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
 
     return Card(
-      margin: EdgeInsets.only(bottom: 12),
+      margin: EdgeInsets.only(bottom: spacing.elementGap + 4),
       elevation: 0,
-      color: color.surfaceContainerHighest,
+      color: color.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        side: BorderSide(color: color.outlineVariant.withValues(alpha: 0.5)),
+      ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
         onTap: () {
           HapticFeedback.mediumImpact();
           onTap();
         },
         child: Padding(
-          padding: EdgeInsets.all(16),
+          padding: EdgeInsets.all(spacing.cardInner),
           child: Row(
             children: [
               Container(
@@ -40,11 +47,11 @@ class DetailActionCard extends StatelessWidget {
                 height: 48,
                 decoration: BoxDecoration(
                   color: color.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
                 ),
                 child: Icon(icon, color: color.primary, size: 24),
               ),
-              SizedBox(width: 16),
+              SizedBox(width: spacing.cardInner),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -55,7 +62,7 @@ class DetailActionCard extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    SizedBox(height: 2),
+                    SizedBox(height: spacing.elementGapUltraMin),
                     Text(
                       subtitle,
                       style: textTheme.labelSmall?.copyWith(

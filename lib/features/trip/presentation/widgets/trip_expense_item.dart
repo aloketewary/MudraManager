@@ -45,7 +45,7 @@ class TripExpenseItem extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              '${formatCurrency(amount, code: currencyCode, decimals: 2)}',
+              formatCurrency(amount, code: currencyCode, decimals: 2),
               style: textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: color.primary,

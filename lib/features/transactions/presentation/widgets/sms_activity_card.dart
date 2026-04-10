@@ -372,12 +372,12 @@ class _SmsActivityCardState extends ConsumerState<SmsActivityCard> {
                         color: FinanceColors.statusWarning.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                            color: FinanceColors.statusWarning.withValues(alpha: 0.3)),
+                            color: FinanceColors.statusWarning.withValues(alpha: 0.3),),
                       ),
                       child: Row(
                         children: [
                           const Icon(LucideIcons.info,
-                              color: FinanceColors.statusWarning, size: 20),
+                              color: FinanceColors.statusWarning, size: 20,),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
@@ -413,7 +413,7 @@ class _SmsActivityCardState extends ConsumerState<SmsActivityCard> {
                             size: 18,
                           ),
                           label: Text(
-                              hasUnknownAccount ? 'ADD ACCOUNT' : 'APPROVE'),
+                              hasUnknownAccount ? 'ADD ACCOUNT' : 'APPROVE',),
                         ),
                       ),
                     ],

@@ -175,7 +175,7 @@ class BudgetCard extends ConsumerWidget {
           ),
         );
       },
-      loading: () => BudgetCardSkeleton(),
+      loading: () => const BudgetCardSkeleton(),
       error: (_, __) => const SizedBox.shrink(),
     );
   }

@@ -1,47 +1,57 @@
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 
-class SmsInfoCard extends StatelessWidget {
+class SmsInfoCard extends ConsumerWidget {
   const SmsInfoCard({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
+    final ctxt = AppLocalizations.of(context)!;
 
     return Card(
       elevation: 0,
-      color: color.surfaceContainerHighest,
+      margin: EdgeInsets.zero,
+      color: color.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        side: BorderSide(color: color.outlineVariant.withValues(alpha: 0.5)),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(spacing.cardInner),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: EdgeInsets.all(spacing.elementGap + 4),
               decoration: BoxDecoration(
                 color: color.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(spacing.radiusMedium),
               ),
               child: Icon(LucideIcons.info, color: color.primary, size: 24),
             ),
-            const SizedBox(width: 16),
+            SizedBox(width: spacing.cardInner),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'How SMS Import Works',
+                    ctxt.sms_infoTitle,
                     style: textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: color.onSurface,
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  _InfoPoint(emoji: '🏦', text: 'Only scans bank and wallet SMS'),
-                  _InfoPoint(emoji: '🔒', text: 'All data stays on your device'),
-                  _InfoPoint(emoji: '✨', text: 'Automatically creates transactions'),
-                  _InfoPoint(emoji: '🚫', text: 'No personal messages are read'),
+                  SizedBox(height: spacing.elementGap),
+                  _InfoPoint(emoji: '🏦', text: ctxt.sms_infoOnlyScans, spacing: spacing),
+                  _InfoPoint(emoji: '🔒', text: ctxt.sms_infoStaysOnDevice, spacing: spacing),
+                  _InfoPoint(emoji: '✨', text: ctxt.sms_infoAutoCreates, spacing: spacing),
+                  _InfoPoint(emoji: '🚫', text: ctxt.sms_infoNoPersonal, spacing: spacing),
                 ],
               ),
             ),
@@ -55,8 +65,9 @@ class SmsInfoCard extends StatelessWidget {
 class _InfoPoint extends StatelessWidget {
   final String emoji;
   final String text;
+  final AppSpacing spacing;
 
-  const _InfoPoint({required this.emoji, required this.text});
+  const _InfoPoint({required this.emoji, required this.text, required this.spacing});
 
   @override
   Widget build(BuildContext context) {
@@ -64,12 +75,12 @@ class _InfoPoint extends StatelessWidget {
     final color = Theme.of(context).colorScheme;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
+      padding: EdgeInsets.only(bottom: spacing.elementGapMin + 2),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(emoji, style: const TextStyle(fontSize: 14)),
-          const SizedBox(width: 8),
+          SizedBox(width: spacing.elementGap),
           Expanded(
             child: Text(
               text,

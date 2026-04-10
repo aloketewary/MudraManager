@@ -118,11 +118,10 @@ class _AddEditGoalScreenState extends ConsumerState<AddEditGoalScreen> {
   Future<void> _saveGoal() async {
     if (_saving) return;
     if (widget.goal == null) {
+      final limitMsg = AppLocalizations.of(context)!.goal_freePlanLimit;
       final canCreate = await ref.read(canCreateGoalProvider.future);
       if (!canCreate) {
-        SnackbarService.warning(
-          AppLocalizations.of(context)!.goal_freePlanLimit,
-        );
+        SnackbarService.warning(limitMsg);
         return;
       }
     }
@@ -153,15 +152,13 @@ class _AddEditGoalScreenState extends ConsumerState<AddEditGoalScreen> {
       await service.updateGoal(goal);
     }
 
-    if (mounted) {
-      HapticFeedback.mediumImpact();
-      SnackbarService.success(
-        widget.goal == null
-            ? BuddyMessages.goalCreated
-            : BuddyMessages.goalUpdated,
-      );
-      context.pop();
-    }
+    HapticFeedback.mediumImpact();
+    SnackbarService.success(
+      widget.goal == null
+          ? BuddyMessages.goalCreated
+          : BuddyMessages.goalUpdated,
+    );
+    if (mounted) context.pop();
   }
 
   // ── BUILD (scaffold) ── will call sub-builders ──

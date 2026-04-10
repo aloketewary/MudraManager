@@ -27,7 +27,7 @@ class CommandCenterScreen extends ConsumerWidget {
         data: (accounts) {
           final totalBalance = accounts.fold<double>(
             0,
-            (sum, acc) => sum + (acc.initialBalance ?? 0),
+            (sum, acc) => sum + (acc.initialBalance),
           );
 
           final transactionService = ref.watch(transactionProvider);
@@ -78,7 +78,7 @@ class CommandCenterScreen extends ConsumerWidget {
                             ),
                             IconButton(
                               icon: Icon(LucideIcons.bell,
-                                  color: color.onSurface),
+                                  color: color.onSurface,),
                               onPressed: () {
                                 HapticFeedback.mediumImpact();
                                 context.push(AppRoutes.notifications);
@@ -115,7 +115,7 @@ class CommandCenterScreen extends ConsumerWidget {
                           if (pendingAmount > 0)
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 10),
+                                  horizontal: 20, vertical: 10,),
                               decoration: BoxDecoration(
                                 color:
                                     color.errorContainer.withValues(alpha: 0.3),
@@ -129,7 +129,7 @@ class CommandCenterScreen extends ConsumerWidget {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Icon(LucideIcons.lock,
-                                      size: 16, color: color.error),
+                                      size: 16, color: color.error,),
                                   const SizedBox(width: 8),
                                   Text(
                                     'Money hold: ${formatCurrency(pendingAmount, code: BaseCurrency.code, decimals: 2)}',
@@ -231,7 +231,7 @@ class CommandCenterScreen extends ConsumerWidget {
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
-                                          formatCurrency((primaryAccount.initialBalance ?? 0), decimals: 2),
+                                          formatCurrency((primaryAccount.initialBalance), decimals: 2),
                                           style:
                                               textTheme.titleMedium?.copyWith(
                                             color: color.onPrimary,

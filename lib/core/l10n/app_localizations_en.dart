@@ -1181,6 +1181,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get label_none => 'None';
 
   @override
+  String get label_frequency => 'Frequency';
+
+  @override
+  String get label_repeatEvery => 'Repeat every';
+
+  @override
+  String get label_days => 'days';
+
+  @override
+  String get label_weeks => 'weeks';
+
+  @override
+  String get label_months => 'months';
+
+  @override
+  String get label_years => 'years';
+
+  @override
   String get trip_expenses => 'Expenses';
 
   @override
@@ -5225,4 +5243,50 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get onboard_currencyWarning =>
       'Changing base currency later will archive existing transactions.';
+
+  @override
+  String get statistics_topCategory => 'Top Category';
+
+  @override
+  String get statistics_dailyAverage => 'Daily Average';
+
+  @override
+  String get statistics_perDay => 'per day';
+
+  @override
+  String statistics_percentOfExpenses(String percent) {
+    return '$percent% of expenses';
+  }
+
+  @override
+  String get sms_infoTitle => 'How SMS Import Works';
+
+  @override
+  String get sms_infoOnlyScans => 'Only scans bank and wallet SMS';
+
+  @override
+  String get sms_infoStaysOnDevice => 'All data stays on your device';
+
+  @override
+  String get sms_infoAutoCreates => 'Automatically creates transactions';
+
+  @override
+  String get sms_infoNoPersonal => 'No personal messages are read';
+
+  @override
+  String get dashboard_totalBalance => 'Total Balance';
+
+  @override
+  String get dashboard_netWorthLink => 'Net Worth';
+
+  @override
+  String get dashboard_showAccounts => 'Show accounts';
+
+  @override
+  String get dashboard_hideAccounts => 'Hide accounts';
+
+  @override
+  String dashboard_accountsTapExpand(int count) {
+    return '$count accounts · Tap to expand';
+  }
 }

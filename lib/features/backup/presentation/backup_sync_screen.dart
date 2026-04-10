@@ -131,7 +131,7 @@ class _BackupSyncScreenState extends ConsumerState<BackupSyncScreen> {
                 future: EnhancedBackupService.getAvailableBackups(),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) {
-                    return ListView(children: List.generate(3, (_) => DashboardCardSkeleton()));
+                    return ListView(children: List.generate(3, (_) => const DashboardCardSkeleton()));
                   }
 
                   final backups = snapshot.data!;

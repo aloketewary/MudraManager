@@ -494,7 +494,7 @@ class _AddTripTransactionScreenState
         );
       },
       loading: () => Scaffold(
-        body: ListView(children: List.generate(3, (_) => DashboardCardSkeleton())),
+        body: ListView(children: List.generate(3, (_) => const DashboardCardSkeleton())),
       ),
       error: (e, _) => Scaffold(
         body: Center(child: Text(BuddyMessages.errorWith('$e'))),

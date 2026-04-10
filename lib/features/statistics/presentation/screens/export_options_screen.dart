@@ -130,7 +130,7 @@ class ExportOptionsScreen extends ConsumerWidget {
   }
 
   Future<void> _exportWithTemplate(
-      BuildContext context, String format, String template) async {
+      BuildContext context, String format, String template,) async {
     final plugin = await ExportPluginManager.instance.getPlugin(format, template);
     if (plugin == null) return;
 

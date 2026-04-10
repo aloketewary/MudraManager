@@ -108,7 +108,7 @@ class _DashboardCustomizeScreenState
         ],
       ),
       body: prefsAsync.when(
-        loading: () => ListView(children: List.generate(4, (_) => DashboardCardSkeleton())),
+        loading: () => ListView(children: List.generate(4, (_) => const DashboardCardSkeleton())),
         error: (e, _) => Center(child: Text(BuddyMessages.errorWith('$e'))),
         data: (prefs) {
           if (!_initialized) {

@@ -50,7 +50,7 @@ class ActiveTripService {
 
     // Check if transaction date is within trip dates
     if (txn.date.isAfter(activeTrip.startDate) &&
-        txn.date.isBefore(activeTrip.endDate.add(Duration(days: 1)))) {
+        txn.date.isBefore(activeTrip.endDate.add(const Duration(days: 1)))) {
       return activeTrip;
     }
 
@@ -69,7 +69,7 @@ class ActiveTripService {
     // Get all transactions in date range
     final allTxns = await isar.transactions
         .filter()
-        .dateBetween(trip.startDate, trip.endDate.add(Duration(days: 1)))
+        .dateBetween(trip.startDate, trip.endDate.add(const Duration(days: 1)))
         .findAll();
 
     // Return only those not yet added to trip

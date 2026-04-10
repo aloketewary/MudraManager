@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/models/goal.dart';
-import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/features/trip/data/trip_service.dart';
 
 void main() {

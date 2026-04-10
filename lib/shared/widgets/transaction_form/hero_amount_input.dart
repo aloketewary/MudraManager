@@ -91,7 +91,7 @@ class HeroAmountInput extends StatelessWidget {
                 children: quickAmounts!.map((amt) {
                   return ActionChip(
                     label: Text(
-                      '${formatCurrency(amt.toDouble(), decimals: 0)}',
+                      formatCurrency(amt.toDouble(), decimals: 0),
                       style: textTheme.labelSmall?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),

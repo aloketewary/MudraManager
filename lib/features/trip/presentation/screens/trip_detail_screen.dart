@@ -153,7 +153,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                       ref.invalidate(allTripsProvider);
                       ref.invalidate(activeTripsProvider);
                       ref.invalidate(tripByIdProvider(widget.tripId));
-                      if (mounted) context.pop();
+                      if (context.mounted) context.pop();
                     }
                   }
                 },
@@ -1026,9 +1026,9 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                                   currencyCode: trip.currencyCode,
                                 );
                             ref.invalidate(
-                                tripByIdProvider(widget.tripId));
+                                tripByIdProvider(widget.tripId),);
                             ref.invalidate(
-                                tripSettlementsProvider(widget.tripId));
+                                tripSettlementsProvider(widget.tripId),);
                             ref.invalidate(transactionProvider);
                           }
                         },
@@ -1121,7 +1121,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                 Container(
                   width: 8,
                   height: 8,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: FinanceColors.statusGood,
                     shape: BoxShape.circle,
                   ),

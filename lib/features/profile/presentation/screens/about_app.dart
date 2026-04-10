@@ -254,7 +254,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
               if (_devModeEnabled) ...[
                 const SizedBox(height: 24),
                 _buildSectionHeader(
-                    ctxt.about_developerModeSection, '', color, textTheme),
+                    ctxt.about_developerModeSection, '', color, textTheme,),
                 const SizedBox(height: 10),
                 Card(
                   elevation: 0,

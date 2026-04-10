@@ -527,8 +527,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
         IconData insightIcon;
         Color insightColor;
         if (thisMonth > lastMonth * 1.3 && lastMonth > 0) {
-          insight =
-              ctxt.stats_trendUp(topCat.key, topPercent);
+          insight = ctxt.stats_trendUp(topCat.key, topPercent);
           insightIcon = LucideIcons.trendingUp;
           insightColor =
               FinanceColors.expenseColor(Theme.of(context).brightness);
@@ -538,8 +537,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
           insightColor =
               FinanceColors.incomeColor(Theme.of(context).brightness);
         } else {
-          insight =
-              ctxt.stats_topCategory(topCat.key, topPercent);
+          insight = ctxt.stats_topCategory(topCat.key, topPercent);
           insightIcon = LucideIcons.sparkles;
           insightColor = color.primary;
         }
@@ -580,15 +578,22 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
             // Tap to expand
             GestureDetector(
               onTap: () => _showFullScreenChart(
-                context, sortedCategories, chartColors, color, textTheme, spacing,
+                context,
+                sortedCategories,
+                chartColors,
+                color,
+                textTheme,
+                spacing,
               ),
               child: RepaintBoundary(
                 child: _ChartOnVisible(
                   height: 200,
                   zeroChild: _MonthlyTrendChart(
                     sortedCategories: sortedCategories
-                        .map((e) => MapEntry(e.key, List<double>.filled(e.value.length, 0)))
+                        .map((e) => MapEntry(
+                            e.key, List<double>.filled(e.value.length, 0),),)
                         .toList(),
+                    maxCategories: 4,
                   ),
                   child: _MonthlyTrendChart(sortedCategories: sortedCategories),
                 ),
@@ -599,7 +604,12 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
               alignment: Alignment.centerRight,
               child: GestureDetector(
                 onTap: () => _showFullScreenChart(
-                  context, sortedCategories, chartColors, color, textTheme, spacing,
+                  context,
+                  sortedCategories,
+                  chartColors,
+                  color,
+                  textTheme,
+                  spacing,
                 ),
                 child: Container(
                   padding: EdgeInsets.symmetric(
@@ -609,12 +619,14 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                   decoration: BoxDecoration(
                     color: color.surfaceContainerLow,
                     borderRadius: BorderRadius.circular(spacing.radiusSmall),
-                    border: Border.all(color: color.outlineVariant.withValues(alpha: 0.3)),
+                    border: Border.all(
+                        color: color.outlineVariant.withValues(alpha: 0.3),),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(LucideIcons.expand, size: 12, color: color.onSurfaceVariant),
+                      Icon(LucideIcons.expand,
+                          size: 12, color: color.onSurfaceVariant,),
                       SizedBox(width: spacing.elementGapMin),
                       Text(
                         'Expand',
@@ -699,8 +711,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
           insightIcon = LucideIcons.briefcase;
           insightColor = FinanceColors.statusWarning;
         } else {
-          insight =
-              ctxt.stats_peakAndQuiet(peakDay, quietDay);
+          insight = ctxt.stats_peakAndQuiet(peakDay, quietDay);
           insightIcon = LucideIcons.chartBar;
           insightColor = color.primary;
         }
@@ -926,7 +937,8 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                   ),
                   child: Row(
                     children: [
-                      Icon(LucideIcons.trendingUp, color: color.primary, size: 32),
+                      Icon(LucideIcons.trendingUp,
+                          color: color.primary, size: 32,),
                       SizedBox(width: spacing.elementGap),
                       Expanded(
                         child: Column(
@@ -1068,7 +1080,8 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                                                           : color.primary)
                                                       .withValues(alpha: 0.1),
                                                   borderRadius:
-                                                      BorderRadius.circular(spacing.radiusMedium),
+                                                      BorderRadius.circular(
+                                                          spacing.radiusMedium,),
                                                 ),
                                                 child: Row(
                                                   children: [
@@ -1404,7 +1417,8 @@ class _MonthlyTrendChartState extends State<_MonthlyTrendChart>
                   isCurved: true,
                   curveSmoothness: 0.4,
                   preventCurveOverShooting: true,
-                  color: colors[entry.key % colors.length].withValues(alpha: 0.9),
+                  color:
+                      colors[entry.key % colors.length].withValues(alpha: 0.9),
                   barWidth: 3,
                   dotData: const FlDotData(show: false),
                   belowBarData: BarAreaData(
@@ -1413,8 +1427,10 @@ class _MonthlyTrendChartState extends State<_MonthlyTrendChart>
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        colors[entry.key % colors.length].withValues(alpha: 0.15 * t),
-                        colors[entry.key % colors.length].withValues(alpha: 0.05 * t),
+                        colors[entry.key % colors.length]
+                            .withValues(alpha: 0.15 * t),
+                        colors[entry.key % colors.length]
+                            .withValues(alpha: 0.05 * t),
                       ],
                     ),
                   ),
@@ -1785,7 +1801,6 @@ class _ChartOnVisibleState extends State<_ChartOnVisible> {
   }
 }
 
-
 class _FullScreenTrendChart extends ConsumerStatefulWidget {
   final List<MapEntry<String, List<double>>> sortedCategories;
   final List<Color> chartColors;
@@ -1886,7 +1901,12 @@ class _FullScreenTrendChartState extends ConsumerState<_FullScreenTrendChart> {
                 child: _selectedMonthIndex == null
                     ? _buildMonthlyView(color, textTheme, spacing, maxCats)
                     : _buildDailyDrillDown(
-                        color, textTheme, spacing, now, _selectedMonthIndex!),
+                        color,
+                        textTheme,
+                        spacing,
+                        now,
+                        _selectedMonthIndex!,
+                      ),
               ),
             ],
           ),
@@ -1896,7 +1916,10 @@ class _FullScreenTrendChartState extends ConsumerState<_FullScreenTrendChart> {
   }
 
   Widget _buildMonthlyView(
-    ColorScheme color, TextTheme textTheme, AppSpacing spacing, int maxCats,
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    int maxCats,
   ) {
     return LineChart(
       LineChartData(
@@ -1933,7 +1956,8 @@ class _FullScreenTrendChartState extends ConsumerState<_FullScreenTrendChart> {
               showTitles: true,
               getTitlesWidget: (value, meta) {
                 final now = DateTime.now();
-                final month = DateTime(now.year, now.month - (11 - value.toInt()));
+                final month =
+                    DateTime(now.year, now.month - (11 - value.toInt()));
                 return Text(
                   DateFormat('MMM').format(month),
                   style: textTheme.labelSmall?.copyWith(
@@ -1991,14 +2015,17 @@ class _FullScreenTrendChartState extends ConsumerState<_FullScreenTrendChart> {
   }
 
   Widget _buildDailyDrillDown(
-    ColorScheme color, TextTheme textTheme, AppSpacing spacing,
-    DateTime now, int monthIndex,
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    DateTime now,
+    int monthIndex,
   ) {
     final month = DateTime(now.year, now.month - (11 - monthIndex));
     final daysInMonth = DateTime(month.year, month.month + 1, 0).day;
     final transactionsAsync = ref.watch(transactionProvider);
     final maxCats = widget.sortedCategories.length.clamp(1, 7);
-    final topCatNames = widget.sortedCategories.take(maxCats).map((e) => e.key).toSet();
+    widget.sortedCategories.take(maxCats).map((e) => e.key).toSet();
 
     return FutureBuilder(
       future: transactionsAsync.getAllForDashBoard(),
@@ -2023,7 +2050,9 @@ class _FullScreenTrendChartState extends ConsumerState<_FullScreenTrendChart> {
         for (final t in txns) {
           if (!t.isExpense ||
               t.date.isBefore(monthStart) ||
-              t.date.isAfter(monthEnd)) continue;
+              t.date.isAfter(monthEnd)) {
+            continue;
+          }
           final catName = t.category.value?.name;
           final dayIdx = t.date.day - 1;
           final catIdx = widget.sortedCategories
@@ -2050,7 +2079,8 @@ class _FullScreenTrendChartState extends ConsumerState<_FullScreenTrendChart> {
           return Center(
             child: Text(
               BuddyMessages.noTransactions,
-              style: textTheme.bodyMedium?.copyWith(color: color.onSurfaceVariant),
+              style:
+                  textTheme.bodyMedium?.copyWith(color: color.onSurfaceVariant),
             ),
           );
         }
@@ -2067,10 +2097,10 @@ class _FullScreenTrendChartState extends ConsumerState<_FullScreenTrendChart> {
                     final item = rod.rodStackItems[i];
                     final amount = item.toY - item.fromY;
                     if (amount <= 0) continue;
-                    final name = i < maxCats
-                        ? widget.sortedCategories[i].key
-                        : 'Other';
-                    segments.add('$name: ${formatCurrency(amount, code: BaseCurrency.code)}');
+                    final name =
+                        i < maxCats ? widget.sortedCategories[i].key : 'Other';
+                    segments.add(
+                        '$name: ${formatCurrency(amount, code: BaseCurrency.code)}',);
                   }
                   return BarTooltipItem(
                     'Day ${group.x + 1}\n${segments.join('\n')}',
@@ -2083,9 +2113,12 @@ class _FullScreenTrendChartState extends ConsumerState<_FullScreenTrendChart> {
               ),
             ),
             titlesData: FlTitlesData(
-              leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-              topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-              rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+              leftTitles:
+                  const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+              topTitles:
+                  const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+              rightTitles:
+                  const AxisTitles(sideTitles: SideTitles(showTitles: false)),
               bottomTitles: AxisTitles(
                 sideTitles: SideTitles(
                   showTitles: true,
@@ -2114,21 +2147,25 @@ class _FullScreenTrendChartState extends ConsumerState<_FullScreenTrendChart> {
               for (var c = 0; c < maxCats; c++) {
                 final val = catDailyTotals[c]![d];
                 if (val > 0) {
-                  stackItems.add(BarChartRodStackItem(
-                    cumulative,
-                    cumulative + val,
-                    widget.chartColors[c % widget.chartColors.length],
-                  ));
+                  stackItems.add(
+                    BarChartRodStackItem(
+                      cumulative,
+                      cumulative + val,
+                      widget.chartColors[c % widget.chartColors.length],
+                    ),
+                  );
                   cumulative += val;
                 }
               }
               // Other
               if (otherDaily[d] > 0) {
-                stackItems.add(BarChartRodStackItem(
-                  cumulative,
-                  cumulative + otherDaily[d],
-                  const Color(0xFF9CA3AF),
-                ));
+                stackItems.add(
+                  BarChartRodStackItem(
+                    cumulative,
+                    cumulative + otherDaily[d],
+                    const Color(0xFF9CA3AF),
+                  ),
+                );
                 cumulative += otherDaily[d];
               }
 

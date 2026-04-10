@@ -52,3 +52,11 @@ keystore_base64.txt
 *.jks
 *.keystore
 *.g.dart
+
+# Environment secrets
+.env
+.env.*
+
+.kiro
+.dart_tool
+.amazonq

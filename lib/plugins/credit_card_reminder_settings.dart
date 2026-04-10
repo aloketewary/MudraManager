@@ -226,7 +226,7 @@ class _CardDialogState extends State<_CardDialog> {
                       .map((day) => DropdownMenuItem(
                             value: day,
                             child: Text('$day'),
-                          ))
+                          ),)
                       .toList(),
                   onChanged: (value) => setState(() => _billDay = value!),
                 ),

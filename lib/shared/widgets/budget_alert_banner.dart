@@ -4,7 +4,6 @@ import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:flutter/material.dart';
 import 'package:mudra_manager/features/budget/data/budget_alert_service.dart';
-import 'package:mudra_manager/shared/widgets/currency_text.dart';
 
 class BudgetAlertBanner extends StatelessWidget {
   final List<BudgetAlert> alerts;

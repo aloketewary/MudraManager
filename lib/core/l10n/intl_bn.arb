@@ -375,6 +375,12 @@
   "label_weekly": "সাপ্তাহিক",
   "label_monthly": "মাসিক",
   "label_yearly": "বার্ষিক",
+  "label_frequency": "Frequency",
+  "label_repeatEvery": "প্রতি",
+  "label_days": "দিন",
+  "label_weeks": "সপ্তাহ",
+  "label_months": "মাস",
+  "label_years": "বছর",
   "label_none": "কিছু নেই",
   "trip_expenses": "খরচ",
   "trip_settlements": "নিষ্পত্তি",
@@ -1340,7 +1346,7 @@
   "goal_targetDateLabel": "লক্ষ্য তারিখ",
   "goal_setTargetDate": "Target তারিখ সেট করুন (ঐচ্ছিক)",
   "goal_smartInsight": "Smart তথ্য",
-  "goal_onTrack": "সঠিক পথে",
+  "goal_onTrack": "ঠিক চলছে ✅",
   "goal_onTrackDesc": "এই goal সহজেই অর্জনযোগ্য 👍",
   "goal_needsEffort": "চেষ্টা দরকার",
   "goal_needsEffortDesc": "আরেকটু সঞ্চয় করতে হবে",
@@ -1401,9 +1407,17 @@
   "budget_stepNote3": "Save করার আগে সব দেখে নিন। Edit করতে tap করুন।",
   "budget_autoDistributed": "auto",
   "budget_categoriesCount": "{count, plural, =1{1টি category} other{{count}টি categories}}",
-  "@budget_categoriesCount": { "placeholders": { "count": {} } },
+  "@budget_categoriesCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "budget_tagsCount": "{count, plural, =1{1টি tag} other{{count}টি tags}}",
-  "@budget_tagsCount": { "placeholders": { "count": {} } },
+  "@budget_tagsCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "budget_typeCategoryWise": "Category অনুসারে",
   "budget_typeTagWise": "Tag অনুসারে",
   "budget_typeDayWise": "প্রতিদিন",
@@ -1507,8 +1521,6 @@
   "stats_netWorth": "Net Worth",
   "stats_savings": "সঞ্চয়",
   "stats_categoryImpact": "CATEGORY প্রভাব",
-  "stats_income": "আয়",
-  "stats_expense": "খরচ",
   "stats_net": "নেট",
   "stats_dailySpendingPace": "দৈনিক খরচের গতি",
   "stats_topCategories": "শীর্ষ Categories",
@@ -1619,9 +1631,6 @@
   "day_friday": "শুক্রবার",
   "day_saturday": "শনিবার",
   "day_sunday": "রবিবার",
-  "recap_income": "আয়",
-  "recap_expense": "খরচ",
-  "recap_saved": "সঞ্চিত",
   "recap_dailySpending": "দৈনিক খরচ",
   "recap_spendingPace": "খরচের গতি",
   "recap_recurringVsOneTime": "নিয়মিত vs একবারের",
@@ -1941,7 +1950,6 @@
   "goal_emotionMomentum": "গতি তৈরি হচ্ছে 🔥",
   "goal_emotionCatchUp": "চলুন ধরি 💪",
   "goal_finishGoal": "এই goal শেষ করুন! 🚀",
-  "goal_onTrack": "ঠিক চলছে ✅",
   "goal_behindPace": "পিছিয়ে পড়ছে ⚠️",
   "goal_daysAgo": "{count} দিন আগে",
   "common_today": "আজ",
@@ -2076,5 +2084,26 @@
   "onboard_categoriesDesc": "আপনার জীবনধারার সাথে মিলে যায় এমন packs বেছে নিন। পরে পরিবর্তন করতে পারবেন।",
   "onboard_startFresh": "নতুন করে শুরু",
   "onboard_startFreshDesc": "কোনো শ্রেণী নেই — পরে নিজে যোগ করুন",
-  "onboard_currencyWarning": "পরে base currency পরিবর্তন করলে বর্তমান transactions archive হবে।"
+  "onboard_currencyWarning": "পরে base currency পরিবর্তন করলে বর্তমান transactions archive হবে।",
+  "statistics_topCategory": "টপ Category",
+  "statistics_dailyAverage": "দৈনিক গড়",
+  "statistics_perDay": "প্রতিদিন",
+  "statistics_percentOfExpenses": "{percent}% খরচের",
+  "sms_infoTitle": "SMS Import কিভাবে কাজ করে",
+  "sms_infoOnlyScans": "শুধু bank ও wallet SMS scan করে",
+  "sms_infoStaysOnDevice": "সব data আপনার device-এই থাকে",
+  "sms_infoAutoCreates": "Transactions আপনা-আপনি তৈরি হয়",
+  "sms_infoNoPersonal": "কোনো personal message পড়া হয় না",
+  "dashboard_totalBalance": "মোট ব্যালেন্স",
+  "dashboard_netWorthLink": "Net Worth",
+  "dashboard_showAccounts": "Accounts দেখান",
+  "dashboard_hideAccounts": "Accounts লুকান",
+  "dashboard_accountsTapExpand": "{count} accounts · Tap করুন",
+  "@dashboard_accountsTapExpand": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

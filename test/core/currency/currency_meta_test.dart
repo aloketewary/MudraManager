@@ -169,7 +169,7 @@ void main() {
       final major = ['INR', 'USD', 'EUR', 'GBP', 'JPY', 'AED', 'SGD', 'AUD', 'CAD'];
       for (final code in major) {
         expect(kCurrencies.containsKey(code), true,
-            reason: '$code should be defined');
+            reason: '$code should be defined',);
       }
     });
 
@@ -177,7 +177,7 @@ void main() {
       final sa = ['INR', 'BDT', 'NPR', 'LKR', 'PKR'];
       for (final code in sa) {
         expect(kCurrencies.containsKey(code), true,
-            reason: '$code should be defined');
+            reason: '$code should be defined',);
       }
     });
   });

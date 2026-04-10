@@ -132,7 +132,7 @@ class LiveBalanceCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                )),
+                ),),
             const SizedBox(height: 8),
             SizedBox(
               width: double.infinity,

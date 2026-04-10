@@ -137,7 +137,7 @@ class _PeriodCalendarSelectorState extends State<PeriodCalendarSelector> {
       backgroundColor: Colors.transparent,
       builder: (ctx) => StatefulBuilder(
         builder: (context, setModalState) {
-          bool showCalendar = false;
+          final bool showCalendar = false;
           DateTime focusedDay = DateTime.now();
 
           return Container(

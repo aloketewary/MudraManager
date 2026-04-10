@@ -175,39 +175,11 @@ class BankSmsParser {
     );
   }
 
-  static double? _extractAmount(RegExp regex, String body) {
-    final match = regex.firstMatch(body);
-    if (match == null) return null;
-
-    final amountStr = match.group(1)?.replaceAll(',', '');
-    return double.tryParse(amountStr ?? '');
-  }
-
   static double? _extractAmountFromGroup(RegExpMatch? match, int group) {
     if (match == null) return null;
     final amountStr = match.group(group)?.replaceAll(',', '');
     return double.tryParse(amountStr ?? '');
   }
 
-  static String? _extractMerchantName(RegExp regex, String body) {
-    final match = regex.firstMatch(body);
-    return _cleanMerchantName(match?.group(1));
-  }
 
-  static String? _cleanMerchantName(String? merchant) {
-    if (merchant == null) return null;
-
-    // Remove common noise words and clean up
-    final cleaned = merchant
-        .trim()
-        .replaceAll(RegExp(r'\s+'), ' ') // Multiple spaces to single
-        .replaceAll(
-          RegExp(r'[^a-zA-Z0-9\s@\-]'),
-          '',
-        ) // Remove special chars except @-
-        .trim();
-
-    // Return null if too short or empty
-    return cleaned.length >= 2 ? cleaned : null;
-  }
 }

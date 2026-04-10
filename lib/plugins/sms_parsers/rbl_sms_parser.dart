@@ -48,7 +48,7 @@ class RblSmsParserPlugin extends SmsParserPlugin {
     final amountRegex = RegExp(r'Rs\.?\s*(\d+(?:,\d+)*(?:\.\d{2})?)');
     final accountRegex = RegExp(
         r'(?:A/c|Card|a/c)\s*(?:ending\s*)?[xX]*([\dxX]{4})',
-        caseSensitive: false);
+        caseSensitive: false,);
     final typeRegex =
         RegExp(r'(debited|credited|spent|received|paid)', caseSensitive: false);
     final merchantRegex =
@@ -56,7 +56,7 @@ class RblSmsParserPlugin extends SmsParserPlugin {
     final vpaRegex = RegExp(r'(?:to|from)\s+([\w.-]+@[\w.-]+)');
     final balanceRegex = RegExp(
         r'(?:Avl\s*(?:Bal|Lmt)|Balance)[:\s]*Rs\.?\s*(\d+(?:,\d+)*(?:\.\d{2})?)',
-        caseSensitive: false);
+        caseSensitive: false,);
 
     final amount = _extractAmount(amountRegex, body);
     if (amount == null) return null;
@@ -97,7 +97,7 @@ class RblSmsParserPlugin extends SmsParserPlugin {
       'spent',
       'received',
       'paid',
-      'withdrawn'
+      'withdrawn',
     ];
     return keywords.any((k) => bodyLower.contains(k));
   }

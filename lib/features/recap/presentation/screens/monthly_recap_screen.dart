@@ -85,7 +85,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
           if (!snapshot.hasData) {
             return ListView(
               padding: EdgeInsets.all(spacing.cardHorizontal),
-              children: List.generate(4, (_) => DashboardCardSkeleton()),
+              children: List.generate(4, (_) => const DashboardCardSkeleton()),
             );
           }
 

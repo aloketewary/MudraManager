@@ -270,7 +270,7 @@ class NetWorthCard extends ConsumerWidget {
           ),
         );
       },
-      loading: () => DashboardCardSkeleton(),
+      loading: () => const DashboardCardSkeleton(),
       error: (_, __) => const SizedBox.shrink(),
     );
   }

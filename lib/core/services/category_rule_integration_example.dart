@@ -93,7 +93,9 @@ class TransactionAddScreenExample {
   }
 
   Future<void> saveTransaction(
-      TransactionInfo txnInfo, String categoryId) async {
+    TransactionInfo txnInfo,
+    String categoryId,
+  ) async {
     // Save to database
   }
 }

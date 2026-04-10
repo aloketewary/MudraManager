@@ -34,7 +34,7 @@ class SnackbarService {
         content: hasAction
             ? _UndoSnackbarContent(
                 message: message,
-                actionLabel: actionLabel!,
+                actionLabel: actionLabel,
                 onAction: onAction ?? () {},
                 duration: snackDuration,
                 fg: fg,
@@ -86,32 +86,48 @@ class SnackbarService {
     String? actionLabel,
     VoidCallback? onAction,
   }) =>
-      show(message, SnackbarType.error,
-          actionLabel: actionLabel, onAction: onAction);
+      show(
+        message,
+        SnackbarType.error,
+        actionLabel: actionLabel,
+        onAction: onAction,
+      );
 
   static void success(
     String message, {
     String? actionLabel,
     VoidCallback? onAction,
   }) =>
-      show(message, SnackbarType.success,
-          actionLabel: actionLabel, onAction: onAction);
+      show(
+        message,
+        SnackbarType.success,
+        actionLabel: actionLabel,
+        onAction: onAction,
+      );
 
   static void info(
     String message, {
     String? actionLabel,
     VoidCallback? onAction,
   }) =>
-      show(message, SnackbarType.info,
-          actionLabel: actionLabel, onAction: onAction);
+      show(
+        message,
+        SnackbarType.info,
+        actionLabel: actionLabel,
+        onAction: onAction,
+      );
 
   static void warning(
     String message, {
     String? actionLabel,
     VoidCallback? onAction,
   }) =>
-      show(message, SnackbarType.warning,
-          actionLabel: actionLabel, onAction: onAction);
+      show(
+        message,
+        SnackbarType.warning,
+        actionLabel: actionLabel,
+        onAction: onAction,
+      );
 
   static IconData _icon(SnackbarType type) => switch (type) {
         SnackbarType.error => LucideIcons.circleX,

@@ -304,7 +304,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
               loading: () => ListView.builder(
                 physics: const AlwaysScrollableScrollPhysics(),
                 itemCount: 5,
-                itemBuilder: (_, __) => TransactionCardSkeleton(),
+                itemBuilder: (_, __) => const TransactionCardSkeleton(),
               ),
               error: (e, _) => ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
@@ -580,7 +580,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                             ButtonSegment(
                               value: RangeSelectionMode.toggledOff,
                               label: Text(AppLocalizations.of(context)!.txnList_month),
-                              icon: Icon(
+                              icon: const Icon(
                                 LucideIcons.calendarDays,
                                 size: 16,
                               ),
@@ -588,7 +588,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                             ButtonSegment(
                               value: RangeSelectionMode.toggledOn,
                               label: Text(AppLocalizations.of(context)!.txnList_dateRange),
-                              icon: Icon(LucideIcons.calendarRange, size: 16),
+                              icon: const Icon(LucideIcons.calendarRange, size: 16),
                             ),
                           ],
                           selected: {_rangeSelectionMode},
@@ -1056,7 +1056,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
             if (index == displayItems.length) {
               return Padding(
                 padding: EdgeInsets.all(spacing.cardInner),
-                child: TransactionCardSkeleton(),
+                child: const TransactionCardSkeleton(),
               );
             }
             final entry = displayItems[index];
@@ -1082,7 +1082,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
             final isRecurring =
                 transaction.recurringTransactionSource.value != null;
             final tripName = tripNames[transaction.id];
-            final isFirstTransaction = !peekShown && entry is TxItem;
+            final isFirstTransaction = !peekShown;
             if (isFirstTransaction) peekShown = true;
             final int firstTxIndex =
                 displayItems.indexWhere((e) => e is TxItem);
@@ -1125,6 +1125,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
       if (relatedTx != null) {
         await relatedTx.account.load();
       }
+      if (!mounted) return;
       result = await context.push(
         AppRoutes.transfer,
         extra: {
@@ -1203,7 +1204,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
       if (mounted) setState(() => _clearCache());
     });
 
-    if (context.mounted) {
+    if (mounted) {
       SnackbarService.success(
         BuddyMessages.txnDeleted,
         actionLabel: ctxt.common_undo,
@@ -1367,7 +1368,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
             ),
           _ => Padding(
               padding: const EdgeInsets.all(48),
-              child: Column(children: List.generate(5, (_) => TransactionCardSkeleton())),
+              child: Column(children: List.generate(5, (_) => const TransactionCardSkeleton())),
             ),
         };
       },
@@ -1386,7 +1387,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
     final parentCategories =
         allCategories.where((c) => c.parentCategory.value == null).toList();
 
-    if (!mounted) return;
+    if (!context.mounted) return;
 
     showModalBottomSheet(
       context: context,
@@ -1433,25 +1434,30 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                           ),
                         ),
                         // Transaction type filters
-                        for (final entry in {
-                          'all': ctxt.transaction_list_filter_all,
-                          'income': ctxt.transaction_list_filter_income,
-                          'expense': ctxt.transaction_list_filter_expense,
-                        }.entries)
-                          RadioListTile<String>(
-                            value: entry.key,
-                            groupValue: _filter,
-                            title: Text(entry.value.toUpperCase()),
-                            onChanged: (value) {
-                              HapticFeedback.mediumImpact();
-                              setState(() {
-                                _filter = value!;
-                                _clearCache();
-                              });
-
-                              setModalState(() {});
-                            },
+                        RadioGroup<String>(
+                          groupValue: _filter,
+                          onChanged: (value) {
+                            HapticFeedback.mediumImpact();
+                            setState(() {
+                              _filter = value!;
+                              _clearCache();
+                            });
+                            setModalState(() {});
+                          },
+                          child: Column(
+                            children: [
+                              for (final entry in {
+                                'all': ctxt.transaction_list_filter_all,
+                                'income': ctxt.transaction_list_filter_income,
+                                'expense': ctxt.transaction_list_filter_expense,
+                              }.entries)
+                                RadioListTile<String>(
+                                  value: entry.key,
+                                  title: Text(entry.value.toUpperCase()),
+                                ),
+                            ],
                           ),
+                        ),
                         const Divider(),
                         Padding(
                           padding: EdgeInsets.symmetric(
@@ -1465,99 +1471,87 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                             ),
                           ),
                         ),
-                        RadioListTile<int?>(
-                          value: null,
+                        RadioGroup<int?>(
                           groupValue: _selectedCategoryId,
-                          title: Text(AppLocalizations.of(context)!.txnList_allCategories),
                           onChanged: (value) {
                             HapticFeedback.mediumImpact();
                             setState(() {
-                              _selectedCategoryId = null;
+                              _selectedCategoryId = value;
                               _clearCache();
                             });
                             setModalState(() {});
                           },
-                        ),
-                        ...parentCategories.map((parent) {
-                          final subcategories = allCategories
-                              .where(
-                                (c) => c.parentCategory.value?.id == parent.id,
-                              )
-                              .toList();
-                          final hasSubcategories = subcategories.isNotEmpty;
-
-                          return Column(
+                          child: Column(
                             children: [
                               RadioListTile<int?>(
-                                value: parent.id,
-                                groupValue: _selectedCategoryId,
-                                title: Row(
-                                  children: [
-                                    Icon(
-                                      IconHelper.getIconData(parent.iconName),
-                                      size: 20,
-                                      color: Color(
-                                        parent.colorValue ?? 0xFF9E9E9E,
-                                      ),
-                                    ),
-                                    SizedBox(width: spacing.elementGap),
-                                    Expanded(child: Text(parent.name)),
-                                    if (hasSubcategories)
-                                      Icon(
-                                        LucideIcons.chevronRight,
-                                        size: 16,
-                                        color: color.onSurfaceVariant,
-                                      ),
-                                  ],
-                                ),
-                                onChanged: (value) {
-                                  HapticFeedback.mediumImpact();
-                                  setState(() {
-                                    _selectedCategoryId = value;
-                                    _clearCache();
-                                  });
-                                  setModalState(() {});
-                                },
+                                value: null,
+                                title: Text(AppLocalizations.of(context)!.txnList_allCategories),
                               ),
-                              if (hasSubcategories)
-                                ...subcategories.map(
-                                  (sub) => Padding(
-                                    padding: const EdgeInsets.only(left: 32),
-                                    child: RadioListTile<int?>(
-                                      value: sub.id,
-                                      groupValue: _selectedCategoryId,
+                              ...parentCategories.map((parent) {
+                                final subcategories = allCategories
+                                    .where(
+                                      (c) => c.parentCategory.value?.id == parent.id,
+                                    )
+                                    .toList();
+                                final hasSubcategories = subcategories.isNotEmpty;
+
+                                return Column(
+                                  children: [
+                                    RadioListTile<int?>(
+                                      value: parent.id,
                                       title: Row(
                                         children: [
                                           Icon(
-                                            IconHelper.getIconData(
-                                              sub.iconName,
-                                            ),
-                                            size: 18,
+                                            IconHelper.getIconData(parent.iconName),
+                                            size: 20,
                                             color: Color(
-                                              sub.colorValue ?? 0xFF9E9E9E,
+                                              parent.colorValue ?? 0xFF9E9E9E,
                                             ),
                                           ),
                                           SizedBox(width: spacing.elementGap),
-                                          Text(
-                                            sub.name,
-                                            style: textTheme.bodyMedium,
-                                          ),
+                                          Expanded(child: Text(parent.name)),
+                                          if (hasSubcategories)
+                                            Icon(
+                                              LucideIcons.chevronRight,
+                                              size: 16,
+                                              color: color.onSurfaceVariant,
+                                            ),
                                         ],
                                       ),
-                                      onChanged: (value) {
-                                        HapticFeedback.mediumImpact();
-                                        setState(() {
-                                          _selectedCategoryId = value;
-                                          _clearCache();
-                                        });
-                                        setModalState(() {});
-                                      },
                                     ),
-                                  ),
-                                ),
+                                    if (hasSubcategories)
+                                      ...subcategories.map(
+                                        (sub) => Padding(
+                                          padding: const EdgeInsets.only(left: 32),
+                                          child: RadioListTile<int?>(
+                                            value: sub.id,
+                                            title: Row(
+                                              children: [
+                                                Icon(
+                                                  IconHelper.getIconData(
+                                                    sub.iconName,
+                                                  ),
+                                                  size: 18,
+                                                  color: Color(
+                                                    sub.colorValue ?? 0xFF9E9E9E,
+                                                  ),
+                                                ),
+                                                SizedBox(width: spacing.elementGap),
+                                                Text(
+                                                  sub.name,
+                                                  style: textTheme.bodyMedium,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                );
+                              }),
                             ],
-                          );
-                        }),
+                          ),
+                        ),
                         const Divider(),
                         Padding(
                           padding: EdgeInsets.symmetric(
@@ -1606,7 +1600,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                         if (_filterStartDate != null)
                           Padding(
                             padding: EdgeInsets.symmetric(
-                                horizontal: spacing.cardHorizontal),
+                                horizontal: spacing.cardHorizontal,),
                             child: TextButton.icon(
                               onPressed: () {
                                 HapticFeedback.mediumImpact();

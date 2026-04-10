@@ -20,12 +20,12 @@ class CommonDropdownField<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var color = Theme.of(context).colorScheme;
+    final color = Theme.of(context).colorScheme;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: DropdownButtonFormField<T>(
-        value: value,
+        initialValue: value,
         items:
             items
                 .map(

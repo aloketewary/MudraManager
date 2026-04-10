@@ -85,9 +85,6 @@ class AnimatedAccountCard extends StatefulWidget {
 }
 
 class _AnimatedAccountCard extends State<AnimatedAccountCard> {
-  final Set<AnimationStyles> _animationStyleSelection = <AnimationStyles>{
-    AnimationStyles.defaultStyle,
-  };
   AnimationStyle? _animationStyle;
 
   @override

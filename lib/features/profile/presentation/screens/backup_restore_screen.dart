@@ -429,7 +429,7 @@ class BackupRestoreScreen extends ConsumerWidget {
       context,
       isRestore: false,
     );
-    if (password == null) return;
+    if (password == null || !context.mounted) return;
 
     final includeAttachments = await DialogUtils.showConfirmation(
       context,
@@ -465,6 +465,7 @@ class BackupRestoreScreen extends ConsumerWidget {
     if (password == null) return;
 
     final isar = await ref.read(isarServiceProvider).getInstance();
+    if (!context.mounted) return;
     final data = await BackupService.restoreEncryptedBackup(
       context,
       isar,

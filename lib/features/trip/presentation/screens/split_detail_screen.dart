@@ -16,7 +16,6 @@ import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/dialog_utils.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 import 'package:mudra_manager/features/trip/data/trip_provider.dart';
-import 'package:mudra_manager/shared/widgets/settlement_card.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
@@ -167,7 +166,7 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                       ref.invalidate(allTripsProvider);
                       ref.invalidate(activeTripsProvider);
                       ref.invalidate(tripByIdProvider(widget.tripId));
-                      if (mounted) context.pop();
+                      if (context.mounted) context.pop();
                     }
                   }
                 },

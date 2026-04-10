@@ -74,7 +74,7 @@ class CategorySelector extends ConsumerWidget {
               scrollDirection: Axis.horizontal,
               itemCount: 3,
               separatorBuilder: (_, __) => const SizedBox(width: 12),
-              itemBuilder: (_, __) => SkeletonLoader(width: 120, height: 120, borderRadius: BorderRadius.all(Radius.circular(16))),
+              itemBuilder: (_, __) => const SkeletonLoader(width: 120, height: 120, borderRadius: BorderRadius.all(Radius.circular(16))),
             ),
           ),
           error: (_, __) => SizedBox(

@@ -24,11 +24,12 @@ class CommonButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var textTheme = Theme.of(context).textTheme;
-    var color = Theme.of(context).colorScheme;
-    
+    final textTheme = Theme.of(context).textTheme;
+    final color = Theme.of(context).colorScheme;
+
     final buttonColor = backGroundColor ?? color.primary;
-    final contentColor = textColor ?? (isOutlined ? buttonColor : color.onPrimary);
+    final contentColor =
+        textColor ?? (isOutlined ? buttonColor : color.onPrimary);
 
     if (isOutlined) {
       return SizedBox(
@@ -41,7 +42,7 @@ class CommonButton extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
-            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -49,14 +50,15 @@ class CommonButton extends StatelessWidget {
             children: [
               if (iconData != null) ...[
                 Icon(iconData, size: 20),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
               ],
               Text(
                 text,
-                style: textStyle ?? textTheme.labelLarge?.copyWith(
-                  color: contentColor,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: textStyle ??
+                    textTheme.labelLarge?.copyWith(
+                      color: contentColor,
+                      fontWeight: FontWeight.w600,
+                    ),
               ),
             ],
           ),
@@ -74,7 +76,7 @@ class CommonButton extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           elevation: 2,
         ),
         child: Row(
@@ -83,14 +85,15 @@ class CommonButton extends StatelessWidget {
           children: [
             if (iconData != null) ...[
               Icon(iconData, size: 20),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
             ],
             Text(
               text,
-              style: textStyle ?? textTheme.labelLarge?.copyWith(
-                color: contentColor,
-                fontWeight: FontWeight.w600,
-              ),
+              style: textStyle ??
+                  textTheme.labelLarge?.copyWith(
+                    color: contentColor,
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
           ],
         ),

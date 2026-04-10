@@ -5,7 +5,6 @@ class IconHelper {
   static IconData iconFromName(String name) {
     final icon = iconMap[name];
     if (icon == null) {
-      debugPrint('⚠️ IconHelper: missing icon "$name"');
       return LucideIcons.circleQuestionMark;
     }
     return icon;
@@ -383,7 +382,6 @@ class IconHelper {
     }
     final icon = iconMap[iconName];
     if (icon == null) {
-      debugPrint('⚠️ IconHelper: missing icon "$iconName"');
       return LucideIcons.circleQuestionMark;
     }
     return icon;

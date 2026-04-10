@@ -15,7 +15,6 @@ import 'package:mudra_manager/features/dashboard/presentation/providers/dashboar
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 import 'package:mudra_manager/shared/widgets/animated_balance.dart';
-import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 
@@ -81,7 +80,6 @@ class _AnimatedSwipeableAccountCardsState
     final spacing = ref.watch(spacingProvider);
     final textTheme = Theme.of(context).textTheme;
     final color = Theme.of(context).colorScheme;
-    final ctxt = AppLocalizations.of(context)!;
     final dashboardAsync = ref.watch(dashboardDataProvider);
     final isGuestMode = ref.watch(guestModeProvider);
     final displayStyle = ref.watch(accountDisplayStyleProvider);
@@ -162,9 +160,10 @@ class _AnimatedSwipeableAccountCardsState
     Map<int, double> balanceMap,
     bool isGuestMode,
   ) {
+    final ctxt = AppLocalizations.of(context)!;
     final isTotal = balanceViewIndex == -1;
     final displayLabel =
-        isTotal ? 'Total Balance' : accounts[balanceViewIndex].name;
+        isTotal ? ctxt.dashboard_totalBalance : accounts[balanceViewIndex].name;
     final displayBalance = isTotal
         ? totalBalance
         : GuestModeUtil.applyGuestMode(
@@ -204,7 +203,7 @@ class _AnimatedSwipeableAccountCardsState
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'Net Worth',
+                      ctxt.dashboard_netWorthLink,
                       style: textTheme.labelMedium?.copyWith(
                         color: color.primary,
                         fontWeight: FontWeight.w600,
@@ -253,7 +252,7 @@ class _AnimatedSwipeableAccountCardsState
                     });
                   },
                   child: Container(
-                    padding: const EdgeInsets.all(6),
+                    padding: EdgeInsets.all(spacing.elementGap),
                     decoration: BoxDecoration(
                       color: color.surfaceContainerHighest,
                       shape: BoxShape.circle,
@@ -265,7 +264,7 @@ class _AnimatedSwipeableAccountCardsState
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: spacing.elementGap),
               ],
               Container(
                 padding: EdgeInsets.symmetric(
@@ -276,7 +275,7 @@ class _AnimatedSwipeableAccountCardsState
                   color: netCashFlow >= 0
                       ? color.primaryContainer
                       : color.errorContainer,
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(spacing.radiusLarge),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -288,7 +287,7 @@ class _AnimatedSwipeableAccountCardsState
                       size: 16,
                       color: netCashFlow >= 0 ? color.primary : color.error,
                     ),
-                    const SizedBox(width: 4),
+                    SizedBox(width: spacing.elementGap / 2),
                     AnimatedBalance(
                       value: netCashFlow,
                       style: textTheme.labelMedium?.copyWith(
@@ -314,23 +313,25 @@ class _AnimatedSwipeableAccountCardsState
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                padding: EdgeInsets.symmetric(
+                  horizontal: spacing.cardHorizontal,
+                  vertical: spacing.elementGap / 2,
+                ),
                 decoration: BoxDecoration(
                   color: color.surfaceContainerHighest.withValues(alpha: 0.6),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      _accountsExpanded ? 'Hide accounts' : 'Show accounts',
+                      _accountsExpanded ? ctxt.dashboard_hideAccounts : ctxt.dashboard_showAccounts,
                       style: textTheme.labelSmall?.copyWith(
                         color: color.onSurfaceVariant,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    const SizedBox(width: 4),
+                    SizedBox(width: spacing.elementGap / 2),
                     AnimatedRotation(
                       turns: _accountsExpanded ? 0.5 : 0.0,
                       duration: const Duration(milliseconds: 250),
@@ -524,7 +525,7 @@ class _AnimatedSwipeableAccountCardsState
                                                       overflow:
                                                           TextOverflow.ellipsis,
                                                     ),
-                                                    const SizedBox(height: 2),
+                                                    SizedBox(height: spacing.elementGap / 4),
                                                     Text(
                                                       account.accountType.label,
                                                       style: textTheme
@@ -568,7 +569,7 @@ class _AnimatedSwipeableAccountCardsState
                             padding: EdgeInsets.only(top: spacing.cardVertical),
                             child: Center(
                               child: Text(
-                                '${accounts.length} accounts · Tap to expand',
+                                AppLocalizations.of(context)!.dashboard_accountsTapExpand(accounts.length),
                                 style: textTheme.labelSmall?.copyWith(
                                   color: color.onSurfaceVariant,
                                 ),
@@ -836,7 +837,7 @@ class _AnimatedSwipeableAccountCardsState
                         color: Colors.white.withValues(alpha: 0.8),
                         size: 22,
                       ),
-                      const SizedBox(width: 8),
+                      SizedBox(width: spacing.elementGap),
                       Expanded(
                         child: Text(
                           account.name,
@@ -880,7 +881,7 @@ class _AnimatedSwipeableAccountCardsState
                         color: Colors.white.withValues(alpha: 0.7),
                         size: 18,
                       ),
-                      const SizedBox(width: 6),
+                      SizedBox(width: spacing.elementGap),
                       Expanded(
                         child: Text(
                           account.name,

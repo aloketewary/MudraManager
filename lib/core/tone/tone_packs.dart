@@ -1,5 +1,4 @@
 import 'package:mudra_manager/core/currency/currency_service.dart';
-import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/tone/tone_pack.dart';
 import 'package:mudra_manager/core/tone/tone_variation.dart';
 

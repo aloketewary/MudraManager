@@ -32,7 +32,7 @@ class AccountSelector extends ConsumerWidget {
             final matchedAccount = accountNumber != null
                 ? accounts
                     .where((a) =>
-                        a.accountNumber?.contains(accountNumber!) == true)
+                        a.accountNumber?.contains(accountNumber!) == true,)
                     .firstOrNull
                 : null;
             final showAddButton =
@@ -64,7 +64,7 @@ class AccountSelector extends ConsumerWidget {
                     },
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
+                          horizontal: 16, vertical: 8,),
                       decoration: BoxDecoration(
                         color: isSelected
                             ? color.primaryContainer

@@ -137,12 +137,12 @@ void main() {
             date: DateTime.now(),
             amount: 100,
             isExpense: true,
-            isTransfer: true),
+            isTransfer: true,),
       ];
 
       for (final txn in scenarios) {
         expect(txn.effectiveAmount, greaterThanOrEqualTo(0),
-            reason: 'effectiveAmount should never be negative');
+            reason: 'effectiveAmount should never be negative',);
       }
     });
 

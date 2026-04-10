@@ -25,11 +25,11 @@ class _MadeWithLoveFooterState extends State<MadeWithLoveFooter>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 800),
       vsync: this,
     );
     _heartController = AnimationController(
-      duration: Duration(milliseconds: 1200),
+      duration: const Duration(milliseconds: 1200),
       vsync: this,
     );
     
@@ -44,10 +44,10 @@ class _MadeWithLoveFooterState extends State<MadeWithLoveFooter>
     ).animate(CurvedAnimation(
       parent: _heartController,
       curve: Curves.elasticOut,
-    ));
+    ),);
 
     // Start animations
-    Future.delayed(Duration(milliseconds: 300), () {
+    Future.delayed(const Duration(milliseconds: 300), () {
       if (mounted) {
         _controller.forward();
         _startHeartAnimation();
@@ -75,7 +75,7 @@ class _MadeWithLoveFooterState extends State<MadeWithLoveFooter>
     return FadeTransition(
       opacity: _fadeAnimation,
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
         child: Column(
           children: [
             // Subtle divider
@@ -93,7 +93,7 @@ class _MadeWithLoveFooterState extends State<MadeWithLoveFooter>
               ),
             ),
 
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
 
             // Heart icon
             AnimatedBuilder(
@@ -102,18 +102,18 @@ class _MadeWithLoveFooterState extends State<MadeWithLoveFooter>
                 return Transform.scale(
                   scale: _heartAnimation.value,
                   child: Container(
-                    padding: EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       color: color.error.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
-                    child: Text('❤️', style: TextStyle(fontSize: 24)),
+                    child: const Text('❤️', style: TextStyle(fontSize: 24)),
                   ),
                 );
               },
             ),
 
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
 
             // In India text
             Row(
@@ -137,11 +137,11 @@ class _MadeWithLoveFooterState extends State<MadeWithLoveFooter>
                     letterSpacing: 0.5,
                   ),
                 ),
-                Text('🇮🇳', style: TextStyle(fontSize: 16)),
+                const Text('🇮🇳', style: TextStyle(fontSize: 16)),
               ],
             ),
 
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
 
             // Crafted with Love
             Text(
@@ -153,7 +153,7 @@ class _MadeWithLoveFooterState extends State<MadeWithLoveFooter>
               textAlign: TextAlign.center,
             ),
 
-            SizedBox(height: 4),
+            const SizedBox(height: 4),
 
             // Built for You
             Text(
@@ -166,7 +166,7 @@ class _MadeWithLoveFooterState extends State<MadeWithLoveFooter>
             ),
 
             if (widget.showCopyright) ...[
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
 
               // Bottom divider
               Container(
@@ -183,7 +183,7 @@ class _MadeWithLoveFooterState extends State<MadeWithLoveFooter>
                 ),
               ),
 
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
 
               // Copyright
               Text(
@@ -195,7 +195,7 @@ class _MadeWithLoveFooterState extends State<MadeWithLoveFooter>
                 textAlign: TextAlign.center,
               ),
 
-              SizedBox(height: 4),
+              const SizedBox(height: 4),
 
               Text(
                 'All rights reserved',
@@ -207,7 +207,7 @@ class _MadeWithLoveFooterState extends State<MadeWithLoveFooter>
               ),
             ],
 
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
           ],
         ),
       ),

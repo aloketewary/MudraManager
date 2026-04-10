@@ -99,7 +99,6 @@ class WidgetPreferencesService {
       _initialized = true;
     } catch (e) {
       // Silently handle unique constraint violations
-      print('Widget preferences initialization: $e');
     }
   }
 
