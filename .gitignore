@@ -61,4 +61,4 @@ keystore_base64.txt
 .dart_tool
 .amazonq
 
-pubspec.lock
+*pubspec.lock
