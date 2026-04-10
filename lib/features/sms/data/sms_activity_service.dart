@@ -52,7 +52,7 @@ class SmsActivityService {
     final endTime = activity.date.add(timeWindow);
 
     // Check SMS activities (exclude self by hash, skip already-approved ones)
-    final smsDuplicates = await isar.smsActivitys
+    final rawSmsDuplicates = await isar.smsActivitys
         .filter()
         .dateBetween(startTime, endTime)
         .and()
@@ -62,8 +62,17 @@ class SmsActivityService {
         .smsHashEqualTo(activity.smsHash)
         .findAll();
 
+    // Content-aware: only keep SMS dupes from same sender or same account
+    final smsDuplicates = rawSmsDuplicates.where((d) {
+      if (activity.sender == d.sender) return true;
+      if (activity.account != null &&
+          activity.account!.isNotEmpty &&
+          activity.account == d.account) return true;
+      return false;
+    }).toList();
+
     // Check manual/SMS-created transactions
-    final manualDuplicates = await isar.transactions
+    final rawManualDuplicates = await isar.transactions
         .filter()
         .dateBetween(startTime, endTime)
         .and()
@@ -71,6 +80,15 @@ class SmsActivityService {
         .and()
         .isExpenseEqualTo(!(activity.isIncome == true))
         .findAll();
+
+    // Content-aware: only keep manual dupes linked to same account
+    final manualDuplicates = rawManualDuplicates.where((txn) {
+      if (activity.account == null || activity.account!.isEmpty) return true;
+      final txnAccount = txn.account.value;
+      if (txnAccount == null) return true;
+      final acNum = txnAccount.accountNumber ?? '';
+      return acNum.isEmpty || acNum.endsWith(activity.account!);
+    }).toList();
 
     // Also check if any existing transaction was already created from this SMS
     // (handles the case where user edited the transaction's amount/date)
@@ -197,7 +215,7 @@ class SmsActivityService {
       activity.isPotentialDuplicate = true;
       activity.similarActivityIds =
           duplicates.whereType<SmsActivity>().map((d) => d.id).toList();
-      activity.status = ActivityStatus.duplicate;
+      activity.status = ActivityStatus.pending;
       final manualCount = duplicates.whereType<Transaction>().length;
       final smsCount = duplicates.whereType<SmsActivity>().length;
       _log.w(

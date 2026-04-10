@@ -397,20 +397,22 @@ class NotificationService {
     final today = '${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}';
 
     // ── Content-hash dedup: same title+body never fires twice in a day ──
-    if (prefs.getString(_contentHashDateKey) != today) {
-      await prefs.setStringList(_contentHashKey, []);
-      await prefs.setString(_contentHashDateKey, today);
+    // Skip for bypassThrottle — SMS per-txn notifications are unique events
+    if (!bypassThrottle) {
+      if (prefs.getString(_contentHashDateKey) != today) {
+        await prefs.setStringList(_contentHashKey, []);
+        await prefs.setString(_contentHashDateKey, today);
+      }
+      final hash = _contentHash(title, body);
+      final seenHashes = prefs.getStringList(_contentHashKey) ?? [];
+      if (seenHashes.contains(hash)) {
+        _log.i('Content-hash dedup, skipping: $title');
+        return;
+      }
+      seenHashes.add(hash);
+      if (seenHashes.length > 500) seenHashes.removeRange(0, seenHashes.length - 500);
+      await prefs.setStringList(_contentHashKey, seenHashes);
     }
-    final hash = _contentHash(title, body);
-    final seenHashes = prefs.getStringList(_contentHashKey) ?? [];
-    if (seenHashes.contains(hash)) {
-      _log.i('Content-hash dedup, skipping: $title');
-      return;
-    }
-    seenHashes.add(hash);
-    // Cap at 500 to avoid unbounded growth
-    if (seenHashes.length > 500) seenHashes.removeRange(0, seenHashes.length - 500);
-    await prefs.setStringList(_contentHashKey, seenHashes);
 
     // Dedup: if a dedupKey is provided, skip if already sent today
     if (dedupKey != null) {

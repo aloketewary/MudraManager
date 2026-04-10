@@ -21,6 +21,7 @@ class NotificationListenerBridge with WidgetsBindingObserver {
   static const _maxPerMinute = 3;
   final List<DateTime> _recentNotifTimestamps = [];
   int _suppressedCount = 0;
+  final Set<String> _recentHashes = {};
 
   NotificationListenerBridge._();
 
@@ -47,20 +48,42 @@ class NotificationListenerBridge with WidgetsBindingObserver {
     }
   }
 
+  bool _isDuplicate(String hash) {
+    if (hash.isEmpty) return false;
+    if (_recentHashes.contains(hash)) return true;
+
+    _recentHashes.add(hash);
+
+    if (_recentHashes.length > 200) {
+      _recentHashes.remove(_recentHashes.first);
+    }
+    return false;
+  }
+
+  String _normalize(String text) {
+    return text
+        .toLowerCase()
+        .replaceAll('\n', ' ')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+  }
+
+  String _detectSender(String title, String body) {
+    if (title.isNotEmpty) return title;
+    return 'UNKNOWN';
+  }
+
   Future<void> _drainQueue() async {
     if (_isDraining) return;
     if (!SharedPrefsUtil.instance.getSmsImportEnabled()) return;
     _isDraining = true;
     try {
-
       final result = await _channel.invokeMethod<List>('drainQueue');
       if (result == null || result.isEmpty) return;
 
       _log.i('Processing ${result.length} queued notifications');
 
-      int approved = 0;
-      int pending = 0;
-      int needsReview = 0;
+      int approved = 0, pending = 0, needsReview = 0;
       double totalAmount = 0;
       _suppressedCount = 0;
 
@@ -69,16 +92,23 @@ class NotificationListenerBridge with WidgetsBindingObserver {
         final text = data['text'] as String? ?? '';
         final title = data['title'] as String? ?? '';
         final timestamp = data['timestamp'] as int? ?? 0;
+        final hash = data['hash'] as String? ?? '';
 
         if (timestamp == 0) continue;
 
-        final body = text.isNotEmpty ? text : title;
-        if (body.isEmpty) continue;
+        final rawBody = text.isNotEmpty ? text : title;
+        if (rawBody.trim().isEmpty) continue;
 
-        final sender = title.isNotEmpty ? title : 'UNKNOWN';
+        if (_isDuplicate(hash)) {
+          _log.w('Duplicate skipped (Flutter): $hash');
+          continue;
+        }
 
-        final parseResult = await SmsProcessorService.instance.parseAndSaveTransaction(
-          body: body,
+        final sender = _detectSender(title, rawBody);
+
+        final parseResult =
+            await SmsProcessorService.instance.parseAndSaveTransaction(
+          body: rawBody,
           address: sender,
           sender: sender,
           timestamp: timestamp,
@@ -87,13 +117,15 @@ class NotificationListenerBridge with WidgetsBindingObserver {
         switch (parseResult) {
           case ParseResult.approved:
             approved++;
-            final amountMatch = RegExp(r'(?:Rs\.?\s*|INR\s*|₹\s*)([\d,]+(?:\.\d{1,2})?)')
-                .firstMatch(body);
+            final amountMatch = RegExp(
+              r'(?:rs\.?|inr|₹)\s*(\d+(?:,\d{3})*(?:\.\d{1,2})?)',
+              caseSensitive: false,
+            ).firstMatch(rawBody);
             double txnAmount = 0;
             if (amountMatch != null) {
               txnAmount = double.tryParse(
-                    amountMatch.group(1)?.replaceAll(',', '') ?? '',
-                  ) ?? 0;
+                      amountMatch.group(1)?.replaceAll(',', '') ?? '') ??
+                  0;
               totalAmount += txnAmount;
             }
             _showPerTxnNotification(
@@ -103,6 +135,7 @@ class NotificationListenerBridge with WidgetsBindingObserver {
               index: approved,
             );
           case ParseResult.pending:
+          case ParseResult.needsReview:
             pending++;
             _showPerTxnNotification(
               isApproved: false,
@@ -110,21 +143,15 @@ class NotificationListenerBridge with WidgetsBindingObserver {
               sender: sender,
               index: pending,
             );
-          case ParseResult.needsReview:
-            needsReview++;
-            _showPerTxnNotification(
-              isApproved: false,
-              amount: 0,
-              sender: sender,
-              index: needsReview,
-            );
+          case ParseResult.duplicate:
+            _log.i('Duplicate transaction skipped');
           default:
             break;
         }
       }
 
-      _log.i('Queue drained: $approved approved, $pending pending, $needsReview needs review');
-      // Show batch summary only for suppressed notifications
+      _log.i(
+          'Queue drained: $approved approved, $pending pending, $needsReview needs review');
       if (_suppressedCount > 0) {
         _showSmartNotification(approved, pending, needsReview, totalAmount);
       }
@@ -160,7 +187,8 @@ class NotificationListenerBridge with WidgetsBindingObserver {
 
     if (isApproved && amount > 0) {
       title = '✅ Transaction logged';
-      body = '${formatCurrency(amount, code: BaseCurrency.code, decimals: 0)} from $sender — auto-saved';
+      body =
+          '${formatCurrency(amount, code: BaseCurrency.code, decimals: 0)} from $sender — auto-saved';
     } else if (isApproved) {
       title = '✅ Transaction logged';
       body = 'From $sender — auto-saved';
@@ -192,11 +220,15 @@ class NotificationListenerBridge with WidgetsBindingObserver {
     String body;
 
     if (total == 1 && approved == 1) {
-      final amountStr = totalAmount > 0 ? ' of ${formatCurrency(totalAmount, code: BaseCurrency.code, decimals: 0)}' : '';
+      final amountStr = totalAmount > 0
+          ? ' of ${formatCurrency(totalAmount, code: BaseCurrency.code, decimals: 0)}'
+          : '';
       title = '✅ Got it!';
       body = tone.singleApproved(amountStr);
     } else if (approved > 0 && pending == 0 && needsReview == 0) {
-      final amountStr = totalAmount > 0 ? ' totalling ${formatCurrency(totalAmount, code: BaseCurrency.code, decimals: 0)}' : '';
+      final amountStr = totalAmount > 0
+          ? ' totalling ${formatCurrency(totalAmount, code: BaseCurrency.code, decimals: 0)}'
+          : '';
       title = '✅ All caught up!';
       body = tone.allApproved(approved, amountStr);
     } else if (needsReview > 0 || pending > 0) {

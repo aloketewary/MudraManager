@@ -62,14 +62,14 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
     );
     if (confirmed == true && mounted) {
       bool undone = false;
-      context.pop();
       final ctxt = AppLocalizations.of(context)!;
 
       // Schedule actual delete after undo window
       Future.delayed(const Duration(seconds: 6), () async {
-        if (undone) return;
+        if (undone || !mounted) return;
         await ref.read(goalServiceProvider).deleteGoal(widget.goal.id);
         ref.invalidate(goalsProvider);
+        context.pop();
       });
 
       SnackbarService.success(
@@ -84,7 +84,11 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
   }
 
   // ── Emotional headline ──
-  String _emotionLine(double progress, GoalHealth health, AppLocalizations ctxt) {
+  String _emotionLine(
+    double progress,
+    GoalHealth health,
+    AppLocalizations ctxt,
+  ) {
     if (progress >= 1.0) return ctxt.goal_emotionDidIt;
     if (progress >= 0.9) return ctxt.goal_emotionAlmost;
     if (progress >= 0.75) return ctxt.goal_emotionSoClose;
@@ -300,14 +304,26 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
                       ),
                       SizedBox(width: spacing.elementGap),
                       // Right — progress ring
-                      _buildProgressRing(progress, goalColor, color, textTheme, ctxt,),
+                      _buildProgressRing(
+                        progress,
+                        goalColor,
+                        color,
+                        textTheme,
+                        ctxt,
+                      ),
                     ],
                   ),
                 ),
               ),
 
               // ── Smart Insight (promoted — right after hero) ──
-              _buildSmartInsight(goalColor, color, textTheme, spacing, ctxt,),
+              _buildSmartInsight(
+                goalColor,
+                color,
+                textTheme,
+                spacing,
+                ctxt,
+              ),
 
               // ── Quick Deposit ──
               Padding(
@@ -979,8 +995,10 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
                   HapticFeedback.mediumImpact();
                   final wasComplete = widget.goal.progressPercent >= 1.0;
                   widget.goal.currentAmount += amount;
-                  widget.goal.contributions
-                      .add(GoalContribution.create(amount));
+                  widget.goal.contributions = [
+                    ...widget.goal.contributions,
+                    GoalContribution.create(amount),
+                  ];
                   final isNowComplete = widget.goal.progressPercent >= 1.0;
                   await ref.read(goalServiceProvider).updateGoal(widget.goal);
                   ref.invalidate(goalsProvider);

@@ -80,11 +80,11 @@ class SmsProcessorService {
     required int timestamp,
   }) async {
     if (!checkForTransactionalMessage(body)) {
-      _log.i('Message filtered out (not transactional) sender: $address');
+      _log.i('Message filtered out (not transactional) sender: $address, body: $body');
       return ParseResult.skipped;
     }
 
-    final smsHash = generateSmsHash(address, body);
+    final smsHash = generateSmsHash(address, timestamp, body);
 
     if (SharedPrefsUtil.instance.isAlreadyProcessed(smsHash)) {
       _log.i(
@@ -167,8 +167,8 @@ class SmsProcessorService {
     }
   }
 
-  String generateSmsHash(String address, String body) {
-    final input = '$address|$body';
+  String generateSmsHash(String address, int timestamp, String body) {
+    final input = '$address|$timestamp|$body';
     return sha256.convert(utf8.encode(input)).toString();
   }
 }

@@ -11,6 +11,7 @@ import android.service.notification.StatusBarNotification
 import io.flutter.plugin.common.MethodChannel
 import org.json.JSONArray
 import org.json.JSONObject
+import java.security.MessageDigest
 
 class TransactionNotificationListener : NotificationListenerService() {
 
@@ -34,6 +35,7 @@ class TransactionNotificationListener : NotificationListenerService() {
             "com.motorola.mms",
             "com.coloros.mms",
             "org.thoughtcrime.securesms",
+            "com.example.myapplication",
         )
 
         fun drainQueue(context: Context): List<Map<String, Any>> {
@@ -50,7 +52,8 @@ class TransactionNotificationListener : NotificationListenerService() {
                     "title" to obj.optString("title", ""),
                     "text" to obj.optString("text", ""),
                     "package" to obj.optString("package", ""),
-                    "timestamp" to obj.optLong("timestamp", 0)
+                    "timestamp" to obj.optLong("timestamp", 0),
+                    "hash" to obj.optString("hash", "")
                 ))
             }
 
@@ -60,40 +63,47 @@ class TransactionNotificationListener : NotificationListenerService() {
     }
 
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
-        sbn ?: return
-        val packageName = sbn.packageName
+    sbn ?: return
 
-        // Only process SMS app notifications
-        if (!smsPackages.contains(packageName)) return
-        if (packageName == applicationContext.packageName) return
+    val packageName = sbn.packageName
+    if (!smsPackages.contains(packageName)) return
+    if (packageName == applicationContext.packageName) return
 
-        val extras = sbn.notification.extras
-        val title = extras.getCharSequence("android.title")?.toString() ?: ""
-        val text = extractMessageText(extras)
+    val extras = sbn.notification.extras
+    val title = extras.getCharSequence("android.title")?.toString() ?: ""
+    val text = extractMessageText(extras)
 
-        // Skip empty or very short messages (unlikely to be transactional)
-        val body = text.ifEmpty { title }
-        if (body.length < 10) return
+    val body = if (text.isNotEmpty()) text else title
+    if (body.length < 5) return
 
-        val timestamp = sbn.postTime
+    val isBankMsg = body.contains("debited", true) ||
+            body.contains("credited", true) ||
+            body.contains("spent", true) ||
+            body.contains("upi", true)
 
-        val data = mapOf<String, Any>(
-            "title" to title,
-            "text" to text,
-            "package" to packageName,
-            "timestamp" to timestamp
-        )
+    if (!isBankMsg) return
 
-        // Always queue first to guarantee persistence
-        queueNotification(data)
+    val normalized = normalize(body)
+    val raw = "$title|$normalized|$packageName"
+    val hash = sha256(raw)
 
-        // Then try to notify Flutter to drain (must be on main thread)
-        try {
-            Handler(Looper.getMainLooper()).post {
-                methodChannel?.invokeMethod("onDrainQueue", null)
-            }
-        } catch (_: Exception) {}
-    }
+    val data = mapOf(
+        "title" to title,
+        "text" to text,
+        "package" to packageName,
+        "timestamp" to sbn.postTime,
+        "hash" to hash
+    )
+
+    queueNotification(data)
+
+    // Notify Flutter to drain immediately
+    try {
+        Handler(Looper.getMainLooper()).post {
+            methodChannel?.invokeMethod("onDrainQueue", null)
+        }
+    } catch (_: Exception) {}
+}
 
     /**
      * Extract message text from notification extras.
@@ -105,10 +115,28 @@ class TransactionNotificationListener : NotificationListenerService() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             val messages = extras.getParcelableArray(Notification.EXTRA_MESSAGES)
             if (messages != null && messages.isNotEmpty()) {
+                // Try to get the last message's text
                 val last = messages.last()
                 if (last is Bundle) {
                     val msgText = last.getCharSequence("text")?.toString()
+                        ?: last.getString("text")
+                        ?: last.getCharSequence("message")?.toString()
+                        ?: last.getString("message")
                     if (!msgText.isNullOrBlank()) return msgText
+                }
+
+                // If no text in last message, try to concatenate all messages
+                val allTexts = messages.mapNotNull { msg ->
+                    if (msg is Bundle) {
+                        msg.getCharSequence("text")?.toString()
+                            ?: msg.getString("text")
+                            ?: msg.getCharSequence("message")?.toString()
+                            ?: msg.getString("message")
+                    } else null
+                }.filter { it.isNotBlank() }
+
+                if (allTexts.isNotEmpty()) {
+                    return allTexts.joinToString("\n")
                 }
             }
         }
@@ -117,29 +145,55 @@ class TransactionNotificationListener : NotificationListenerService() {
         val bigText = extras.getCharSequence(Notification.EXTRA_BIG_TEXT)?.toString()
         if (!bigText.isNullOrBlank()) return bigText
 
-        // 3. Standard text
+        // 3. Try summary text (sometimes used for RCS)
+        val summary = extras.getCharSequence(Notification.EXTRA_SUMMARY_TEXT)?.toString()
+        if (!summary.isNullOrBlank()) return summary
+
+        // 4. Standard text
         return extras.getCharSequence(Notification.EXTRA_TEXT)?.toString() ?: ""
+    }
+
+    private fun normalize(text: String): String {
+    return text
+        .lowercase()
+        .replace("\n", " ")
+        .replace("rs.", "")
+        .replace("rs", "")
+        .replace(",", "")
+        .replace("\\s+".toRegex(), " ")
+        .trim()
+}
+
+    private fun sha256(input: String): String {
+        return MessageDigest.getInstance("SHA-256")
+            .digest(input.toByteArray())
+            .joinToString("") { "%02x".format(it) }
     }
 
     private fun queueNotification(data: Map<String, Any>) {
         synchronized(queueLock) {
             val prefs = applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            val existing = prefs.getString(QUEUE_KEY, "[]")
+            val existing = prefs.getString(QUEUE_KEY, "[]") ?: "[]"
             val array = JSONArray(existing)
 
-            val obj = JSONObject()
-            obj.put("title", data["title"])
-            obj.put("text", data["text"])
-            obj.put("package", data["package"])
-            obj.put("timestamp", data["timestamp"])
-            array.put(obj)
+            // Cap queue before adding — drop oldest if at limit
+            val maxSize = 1000
+            val startIndex = if (array.length() >= maxSize) array.length() - maxSize + 1 else 0
+            val trimmed = if (startIndex > 0) {
+                val newArray = JSONArray()
+                for (i in startIndex until array.length()) newArray.put(array.get(i))
+                newArray
+            } else array
 
-            // Cap queue at 1000 entries, drop oldest if exceeded
-            while (array.length() > 1000) {
-                array.remove(0)
-            }
+            trimmed.put(JSONObject().apply {
+                put("title", data["title"])
+                put("text", data["text"])
+                put("package", data["package"])
+                put("timestamp", data["timestamp"])
+                put("hash", data["hash"])
+            })
 
-            prefs.edit().putString(QUEUE_KEY, array.toString()).apply()
+            prefs.edit().putString(QUEUE_KEY, trimmed.toString()).apply()
         }
     }
 }
