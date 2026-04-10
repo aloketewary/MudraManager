@@ -177,7 +177,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
       setState(() => _isLoading = true);
 
       final isar = await ref.read(isarServiceProvider).getInstance();
-      if (!mounted) return;
+      if (!context.mounted) return;
       final data = await BackupService.restoreEncryptedBackup(
         context,
         isar,
@@ -187,10 +187,10 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
       if (data != null) {
         SharedPrefsUtil.instance.setOnboardingComplete();
         SnackbarService.success(BuddyMessages.restoreSuccess);
-        if (mounted) context.go(AppRoutes.home);
+        if (context.mounted) context.go(AppRoutes.home);
       }
     } catch (e) {
-      if (mounted) {
+      if (context.mounted) {
         SnackbarService.error(BuddyMessages.restoreFailed);
       }
     } finally {
@@ -237,11 +237,11 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
       // Stamp install date for trial period
       await ref.read(entitlementServiceProvider).stampInstallDate();
 
-      if (mounted) {
+      if (context.mounted) {
         context.go(AppRoutes.home);
       }
     } catch (e) {
-      if (mounted) {
+      if (context.mounted) {
         SnackbarService.error(BuddyMessages.genericError);
       }
     } finally {

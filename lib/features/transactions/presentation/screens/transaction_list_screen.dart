@@ -1125,7 +1125,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
       if (relatedTx != null) {
         await relatedTx.account.load();
       }
-      if (!mounted) return;
+      if (!context.mounted) return;
       result = await context.push(
         AppRoutes.transfer,
         extra: {
@@ -1160,7 +1160,8 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
     });
     _invalidateTransactionProviders();
     setState(() => _clearCache());
-    if (mounted) SnackbarService.success(AppLocalizations.of(context)!.txnList_subscriptionTagRemoved);
+    if (!context.mounted) return;
+    SnackbarService.success(AppLocalizations.of(context)!.txnList_subscriptionTagRemoved);
   }
 
   Future<void> _onRemoveTransaction(transaction, AppLocalizations ctxt) async {
@@ -1204,7 +1205,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
       if (mounted) setState(() => _clearCache());
     });
 
-    if (mounted) {
+    if (context.mounted) {
       SnackbarService.success(
         BuddyMessages.txnDeleted,
         actionLabel: ctxt.common_undo,

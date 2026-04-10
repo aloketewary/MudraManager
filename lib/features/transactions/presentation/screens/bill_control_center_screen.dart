@@ -923,7 +923,7 @@ class _BillControlCenterScreenState
     await _advanceDueDate(isar, bill);
     ref.invalidate(transactionProvider);
     ref.invalidate(recurringTransactionsProvider);
-    if (mounted) {
+    if (context.mounted) {
       HapticFeedback.mediumImpact();
       SnackbarService.success('${bill.category.value?.name} marked as paid');
     }

@@ -423,7 +423,7 @@ class _InvestmentPortfolioScreenState
                                   .addHolding(holding, widget.account.id);
                               _loadData();
                               SnackbarService.info(BuddyMessages.txnAdded);
-                              if (mounted) {
+                              if (context.mounted) {
                                 formContext.pop();
                               }
                             } catch (e) {

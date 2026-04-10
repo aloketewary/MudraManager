@@ -32,6 +32,7 @@ import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
 import 'package:mudra_manager/features/marketplace/services/marketplace_service.dart';
 import 'package:mudra_manager/features/sms/data/notification_listener_service.dart';
+import 'package:mudra_manager/core/utils/overflow_detector.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:responsive_framework/responsive_framework.dart';
@@ -39,6 +40,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 void main() async {
   final log = AppLog(getLogger(), 'Main');
   WidgetsFlutterBinding.ensureInitialized();
+  OverflowDetector.init();
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,

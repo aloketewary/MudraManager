@@ -785,7 +785,7 @@ class _AddRecurringTransactionScreenState
             ?.track(GamificationEvent.recurringTransactionCreated);
       }
 
-      if (mounted) {
+      if (context.mounted) {
         SnackbarService.success(
           _isEditing ? BuddyMessages.txnUpdated : BuddyMessages.txnAdded,
         );
@@ -801,7 +801,7 @@ class _AddRecurringTransactionScreenState
     await ref
         .read(recurringTransactionServiceProvider)
         .delete(widget.recurring!.id);
-    if (mounted) {
+    if (context.mounted) {
       SnackbarService.success(BuddyMessages.txnDeleted);
       context.pop();
     }

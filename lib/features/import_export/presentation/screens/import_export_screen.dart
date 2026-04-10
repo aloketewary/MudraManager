@@ -404,7 +404,7 @@ class _ImportExportScreenState extends ConsumerState<ImportExportScreen> {
         return;
       }
 
-      if (mounted) {
+      if (context.mounted) {
         context.push(
           AppRoutes.importPreview,
           extra: bytes,

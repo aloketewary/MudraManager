@@ -654,7 +654,7 @@ class _AddTripTransactionScreenState
           );
 
       ref.invalidate(tripByIdProvider(widget.tripId));
-      if (mounted) {
+      if (context.mounted) {
         SnackbarService.success(
           BuddyMessages.expenseAddedToTrip(trip.isTrip),
         );

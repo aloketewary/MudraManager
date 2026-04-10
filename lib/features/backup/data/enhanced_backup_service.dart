@@ -42,6 +42,7 @@ class EnhancedBackupService extends BackupService {
       _log.i('Backup file prepared for sharing: $fileName');
     } catch (e) {
       _log.e('Failed to share backup file', e);
+      rethrow;
     }
   }
 

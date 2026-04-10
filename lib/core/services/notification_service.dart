@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:flutter/material.dart';
@@ -371,6 +373,14 @@ class NotificationService {
   static const _pushCountKey = 'notif_push_count';
   static const _pushDateKey = 'notif_push_date';
   static final _sentToday = <String>{}; // in-memory dedup for current session
+  static const _contentHashKey = 'notif_content_hashes';
+  static const _contentHashDateKey = 'notif_content_hash_date';
+
+  /// Generate a short content hash from title+body for dedup.
+  static String _contentHash(String title, String body) {
+    final bytes = utf8.encode('$title|$body');
+    return sha256.convert(bytes).toString().substring(0, 16);
+  }
 
   /// Show an OS notification.
   /// [dedupKey] — if set, only one notification per key per day.
@@ -383,11 +393,28 @@ class NotificationService {
     String? dedupKey,
     bool bypassThrottle = false,
   }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final today = '${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}';
+
+    // ── Content-hash dedup: same title+body never fires twice in a day ──
+    if (prefs.getString(_contentHashDateKey) != today) {
+      await prefs.setStringList(_contentHashKey, []);
+      await prefs.setString(_contentHashDateKey, today);
+    }
+    final hash = _contentHash(title, body);
+    final seenHashes = prefs.getStringList(_contentHashKey) ?? [];
+    if (seenHashes.contains(hash)) {
+      _log.i('Content-hash dedup, skipping: $title');
+      return;
+    }
+    seenHashes.add(hash);
+    // Cap at 500 to avoid unbounded growth
+    if (seenHashes.length > 500) seenHashes.removeRange(0, seenHashes.length - 500);
+    await prefs.setStringList(_contentHashKey, seenHashes);
+
     // Dedup: if a dedupKey is provided, skip if already sent today
     if (dedupKey != null) {
       if (_sentToday.contains(dedupKey)) return;
-      final prefs = await SharedPreferences.getInstance();
-      final today = '${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}';
       final stored = prefs.getString('dedup_$dedupKey');
       if (stored == today) return;
       await prefs.setString('dedup_$dedupKey', today);
@@ -396,8 +423,6 @@ class NotificationService {
 
     // Throttle: cap smart-alert pushes per day (scheduled notifications bypass)
     if (!bypassThrottle) {
-      final prefs = await SharedPreferences.getInstance();
-      final today = '${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}';
       if (prefs.getString(_pushDateKey) != today) {
         await prefs.setInt(_pushCountKey, 0);
         await prefs.setString(_pushDateKey, today);

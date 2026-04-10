@@ -178,7 +178,7 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
         );
       }
 
-      if (mounted) {
+      if (context.mounted) {
         ref.invalidate(transactionProvider);
         ref.invalidate(accountServiceProvider);
         ref.invalidate(allSectionedTransactionsProvider);

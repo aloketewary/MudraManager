@@ -121,7 +121,7 @@ class ReconciliationService {
       return patched;
     } catch (e, stack) {
       _log.e('Failed to patch uncategorized transactions', e, stack);
-      return 0;
+      rethrow;
     }
   }
 

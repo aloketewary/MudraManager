@@ -124,7 +124,16 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
       );
     } catch (e, stack) {
       log.e('Dashboard widget "${widget.id}" crashed', e, stack);
-      return const SizedBox.shrink();
+      return Card(
+        color: Theme.of(context).colorScheme.errorContainer,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Text(
+            'Widget failed to load',
+            style: TextStyle(color: Theme.of(context).colorScheme.onErrorContainer),
+          ),
+        ),
+      );
     }
   }
 

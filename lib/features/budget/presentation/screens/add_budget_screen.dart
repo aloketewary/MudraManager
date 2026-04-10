@@ -276,7 +276,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
 
     await service.save(bud, newAllocations: newAllocations);
 
-    if (mounted) {
+    if (context.mounted) {
       HapticFeedback.mediumImpact();
       ref.invalidate(budgetServiceProvider);
       SnackbarService.success(

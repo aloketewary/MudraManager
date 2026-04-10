@@ -616,7 +616,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
 
               // Warn if editing existing account and currency is changing
               if (_isEditing && oldCode != (newIsBase ? null : picked)) {
-                if (!mounted) return;
+                if (!context.mounted) return;
                 final confirmed = await _showCurrencyChangeWarning(
                   context,
                   oldCode ?? baseCurrency,
@@ -979,7 +979,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
       }
 
       invalidateAll(ref);
-      if (mounted) context.pop(true);
+      if (context.mounted) context.pop(true);
     } finally {
       if (mounted) setState(() => _saving = false);
     }

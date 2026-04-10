@@ -823,7 +823,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
     ref.invalidate(allAccountsProvider);
     ref.invalidate(accountsProvider);
 
-    if (mounted) {
+    if (context.mounted) {
       SnackbarService.success('${account.name} restored');
     }
   }
@@ -870,7 +870,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
       ref.invalidate(allAccountsProvider);
       ref.invalidate(accountsProvider);
 
-      if (mounted) {
+      if (context.mounted) {
         SnackbarService.success(
           ctxt.accounts_accountArchivedMessage(account.name),
         );

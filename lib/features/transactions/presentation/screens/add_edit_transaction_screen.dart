@@ -1002,7 +1002,7 @@ class _AddEditTransactionScreenState
       await _checkBudgetAlerts(txn);
       await WidgetService.updateWidget(ref);
 
-      if (mounted) {
+      if (context.mounted) {
         ref.invalidate(transactionProvider);
         ref.invalidate(accountServiceProvider);
         ref.invalidate(budgetServiceProvider);
@@ -1078,7 +1078,7 @@ class _AddEditTransactionScreenState
                     await isar.writeTxn(() async {
                       await isar.tags.put(tag);
                     });
-                    if (mounted) {
+                    if (context.mounted) {
                       setState(() => selectedTags.add(tag));
                       ref.invalidate(tagListProvider);
                       navigator.pop();
@@ -1455,7 +1455,7 @@ class _AddEditTransactionScreenState
     final tripsAsync = ref.read(allTripsProvider);
 
     if (tripsAsync case AsyncData(:final value)) {
-      if (!mounted) return;
+      if (!context.mounted) return;
       final trips = value.where((t) => t.isTrip).toList();
 
       showModalBottomSheet(

@@ -30,7 +30,7 @@ class _PinEntryDialogState extends State<PinEntryDialog> {
     setState(() => _input.add(digit.toString()));
     if (_input.length == widget.length) {
       Future.delayed(const Duration(milliseconds: 200), () {
-        if (mounted) Navigator.of(context).pop(_input.join());
+        if (context.mounted) Navigator.of(context).pop(_input.join());
       });
     }
   }

@@ -182,7 +182,8 @@ class _ExchangeRateScreenState extends ConsumerState<ExchangeRateScreen> {
     final service = await ref.read(currencyServiceProvider.future);
     await service.updateRates({code: newRate});
     ref.invalidate(_ratesProvider);
-    if (mounted) SnackbarService.success(ctxt.exchange_rateUpdated(code));
+    if (!context.mounted) return;
+    SnackbarService.success(ctxt.exchange_rateUpdated(code));
   }
 }
 

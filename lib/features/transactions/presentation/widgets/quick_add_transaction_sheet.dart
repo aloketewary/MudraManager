@@ -575,7 +575,7 @@ class _QuickAddTransactionSheetState
       ref.invalidate(accountServiceProvider);
       ref.invalidate(allSectionedTransactionsProvider);
 
-      if (mounted) {
+      if (context.mounted) {
         Navigator.pop(context);
         SnackbarService.success(BuddyMessages.txnAdded);
       }

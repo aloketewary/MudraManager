@@ -67,7 +67,7 @@ class ExpandableFabState extends State<ExpandableFab>
     HapticFeedback.lightImpact();
     _toggle();
     Future.delayed(const Duration(milliseconds: 250), () {
-      if (mounted) context.push(route, extra: extra);
+      if (context.mounted) context.push(route, extra: extra);
       _navigating = false;
     });
   }

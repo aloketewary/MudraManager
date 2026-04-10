@@ -70,7 +70,7 @@ class HomePageState extends ConsumerState<HomePage>
 
     // Deferred — not needed for first frame
     Future.delayed(const Duration(seconds: 2), () {
-      if (!mounted) return;
+      if (!context.mounted) return;
       initNotification();
       ref.read(achievementUnlockListenerProvider).initialize(context);
     });
@@ -90,7 +90,7 @@ class HomePageState extends ConsumerState<HomePage>
         log.i('Widget action received: $action');
         if (action == 'add_transaction' || action == 'ADD_TRANSACTION') {
           await Future.delayed(const Duration(milliseconds: 300));
-          if (mounted) {
+          if (context.mounted) {
             showModalBottomSheet(
               context: context,
               isScrollControlled: true,

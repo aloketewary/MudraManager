@@ -872,7 +872,7 @@ class _SmsImportSettingsScreenState
     SharedPrefsUtil.instance.setSmsImportEnabled(on);
     ref.invalidate(smsPermissionGrantedProvider);
     if (on) {
-      if (!mounted) return;
+      if (!context.mounted) return;
       SnackbarService.success(BuddyMessages.smsImportEnabled);
     } else {
       SnackbarService.info(BuddyMessages.toggledOff(AppLocalizations.of(context)!.smsImport_autoImport));

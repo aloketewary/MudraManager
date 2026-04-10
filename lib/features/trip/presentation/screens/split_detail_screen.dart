@@ -160,13 +160,14 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                       icon: LucideIcons.archive,
                     );
                     if (confirm == true) {
+                      final router = GoRouter.of(context);
                       await ref
                           .read(tripServiceProvider)
                           .archiveTrip(widget.tripId);
                       ref.invalidate(allTripsProvider);
                       ref.invalidate(activeTripsProvider);
                       ref.invalidate(tripByIdProvider(widget.tripId));
-                      if (context.mounted) context.pop();
+                      router.pop();
                     }
                   }
                 },

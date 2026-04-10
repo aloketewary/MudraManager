@@ -710,10 +710,11 @@ class BudgetDetailsScreen extends ConsumerWidget {
   }
 
   Future<void> _deleteBudget(BuildContext context, WidgetRef ref) async {
+    final router = GoRouter.of(context);
     try {
       await ref.read(budgetServiceProvider).deleteBudget(data.budget.id);
       SnackbarService.success(BuddyMessages.budgetDeleted);
-      if (context.mounted) context.pop();
+      router.pop();
     } catch (e) {
       if (context.mounted) SnackbarService.error(BuddyMessages.genericError);
     }

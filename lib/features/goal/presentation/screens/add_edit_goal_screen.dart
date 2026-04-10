@@ -129,6 +129,7 @@ class _AddEditGoalScreenState extends ConsumerState<AddEditGoalScreen> {
 
     setState(() => _saving = true);
 
+    final router = GoRouter.of(context);
     final goal = widget.goal ?? Goal();
     goal.name = _nameController.text.trim();
     goal.targetAmount = double.parse(_amountController.text.trim());
@@ -158,7 +159,7 @@ class _AddEditGoalScreenState extends ConsumerState<AddEditGoalScreen> {
           ? BuddyMessages.goalCreated
           : BuddyMessages.goalUpdated,
     );
-    if (mounted) context.pop();
+    router.pop();
   }
 
   // ── BUILD (scaffold) ── will call sub-builders ──
