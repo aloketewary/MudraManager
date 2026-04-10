@@ -88,4 +88,14 @@ class SmsParserManager {
     }
     return null;
   }
+
+  SmsParserPlugin? findPluginByBody(String body) {
+    final bodyUpper = body.toUpperCase();
+    for (final parser in _getEnabledParsers()) {
+      if (parser.senderNames.any((n) => bodyUpper.contains(n.toUpperCase()))) {
+        return parser;
+      }
+    }
+    return null;
+  }
 }

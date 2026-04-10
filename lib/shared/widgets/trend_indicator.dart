@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 
 class TrendIndicator extends StatelessWidget {
@@ -33,7 +34,7 @@ class TrendIndicator extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            isPositive ? Icons.trending_up : Icons.trending_down,
+            isPositive ? LucideIcons.trendingUp : LucideIcons.trendingDown,
             color: isGood ? color.primary : color.tertiary,
             size: 14,
           ),

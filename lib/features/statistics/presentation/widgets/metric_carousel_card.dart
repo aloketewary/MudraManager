@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:mudra_manager/shared/widgets/adaptive_text.dart';
 import 'package:mudra_manager/shared/widgets/animated_balance.dart';
@@ -31,7 +32,7 @@ class MetricCarouselCard extends StatelessWidget {
             context,
             'Income',
             income,
-            Icons.arrow_upward,
+            LucideIcons.arrowUp,
             color.primary,
             isDark,
             savingsRate > 0 ? savingsRate : null,
@@ -40,7 +41,7 @@ class MetricCarouselCard extends StatelessWidget {
             context,
             'Expense',
             expense,
-            Icons.arrow_downward,
+            LucideIcons.arrowDown,
             color.error,
             isDark,
             null,
@@ -49,7 +50,7 @@ class MetricCarouselCard extends StatelessWidget {
             context,
             'Net',
             net,
-            net >= 0 ? Icons.trending_up : Icons.trending_down,
+            net >= 0 ? LucideIcons.trendingUp : LucideIcons.trendingDown,
             net >= 0 ? color.tertiary : const Color(0xFFFF9800),
             isDark,
             null,
@@ -58,7 +59,7 @@ class MetricCarouselCard extends StatelessWidget {
             context,
             'Savings',
             savingsRate,
-            Icons.savings_outlined,
+            LucideIcons.piggyBank,
             color.secondary,
             isDark,
             null,

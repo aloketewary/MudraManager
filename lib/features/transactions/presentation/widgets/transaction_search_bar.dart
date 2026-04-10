@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -27,11 +28,11 @@ class TransactionSearchBar extends StatelessWidget {
           onChanged: onChanged,
           decoration: InputDecoration(
             hintText: 'Search transactions...',
-            hintStyle: TextStyle(color: color.onSurfaceVariant.withOpacity(0.6)),
-            prefixIcon: Icon(Icons.search_rounded, color: color.primary, size: 22),
+            hintStyle: TextStyle(color: color.onSurfaceVariant.withValues(alpha: 0.6)),
+            prefixIcon: Icon(LucideIcons.search, color: color.primary, size: 22),
             suffixIcon: searchQuery.isNotEmpty
                 ? IconButton(
-                    icon: const Icon(Icons.clear_rounded, size: 20),
+                    icon: const Icon(LucideIcons.x, size: 20),
                     onPressed: () {
                       HapticFeedback.mediumImpact();
                       onClear();

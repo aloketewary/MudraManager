@@ -82,7 +82,7 @@ class _ThemePickerScreenState extends ConsumerState<ThemePickerScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _applyTheme,
-        icon: const Icon(Icons.check_circle_outline),
+        icon: const Icon(LucideIcons.circleCheck),
         label: Text(ctxt.theme_applyThemeLabel),
       ),
     );

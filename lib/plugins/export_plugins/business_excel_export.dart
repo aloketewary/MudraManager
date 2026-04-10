@@ -41,10 +41,11 @@ class BusinessExcelExportPlugin extends ExportPlugin {
     sheet.cell(CellIndex.indexByString('A1')).value =
         'BUSINESS FINANCIAL REPORT';
     sheet.cell(CellIndex.indexByString('A1')).cellStyle = CellStyle(
-        bold: true,
-        fontSize: 16,
-        backgroundColorHex: '#1976D2',
-        fontColorHex: '#FFFFFF');
+      bold: true,
+      fontSize: 16,
+      backgroundColorHex: '#1976D2',
+      fontColorHex: '#FFFFFF',
+    );
 
     sheet.cell(CellIndex.indexByString('A3')).value = 'Period';
     sheet.cell(CellIndex.indexByString('B3')).value =
@@ -117,11 +118,14 @@ class BusinessExcelExportPlugin extends ExportPlugin {
       sheet.cell(CellIndex.indexByString('A$row')).value =
           DateFormat('dd/MM/yyyy').format(txn.date);
       sheet.cell(CellIndex.indexByString('B$row')).value = txn.description;
-      sheet.cell(CellIndex.indexByString('C$row')).value = txn.category.value?.name ?? 'Unknown';
+      sheet.cell(CellIndex.indexByString('C$row')).value =
+          txn.category.value?.name ?? 'Unknown';
       sheet.cell(CellIndex.indexByString('D$row')).value = txn.amount;
-      sheet.cell(CellIndex.indexByString('E$row')).value = txn.currencyCode ?? data.currency;
+      sheet.cell(CellIndex.indexByString('E$row')).value =
+          txn.currencyCode ?? data.currency;
       sheet.cell(CellIndex.indexByString('F$row')).value = txn.baseAmount;
-      sheet.cell(CellIndex.indexByString('G$row')).value = txn.isExpense ? 'Expense' : 'Income';
+      sheet.cell(CellIndex.indexByString('G$row')).value =
+          txn.isExpense ? 'Expense' : 'Income';
       row++;
     }
   }

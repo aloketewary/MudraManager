@@ -29,7 +29,21 @@ class BankSmsParser {
     final bank = _detectBank(sender);
     _log.i('Legacy parsing SMS from $sender (Bank: ${bank ?? "Unknown"})');
 
+    // Body-based bank detection fallback: when sender is a display name that
+    // didn't match any plugin via canParse, try to find a plugin by scanning
+    // the body for bank keywords.
+    final bodyPlugin = _detectBankFromBody(body);
+    if (bodyPlugin != null) {
+      _log.i('Body-based bank detection matched plugin: ${bodyPlugin.bankName}');
+      final result = bodyPlugin.parseSms(sender, body);
+      if (result != null) return result;
+    }
+
     return _parseGeneric(body);
+  }
+
+  static SmsParserPlugin? _detectBankFromBody(String body) {
+    return SmsParserManager.instance.findPluginByBody(body);
   }
 
   // Promotional/marketing keywords that indicate non-transaction SMS
@@ -91,6 +105,7 @@ class BankSmsParser {
     final transactionKeywords = [
       'debited',
       'credited',
+      'charged',
       'spent',
       'received',
       'recieved',
@@ -107,8 +122,9 @@ class BankSmsParser {
     // Generic fallback parser
     if (!_hasTransactionKeywords(body)) return null;
 
-    final amountRegex =
-        RegExp(r'(?:Rs\.?\s*(?:INR\s*)?|INR\s*|₹\s*)([\d,]+(?:\.\d{2})?)');
+    final amountRegex = RegExp(
+      r'(?:(USD|GBP|EUR|AED|SGD|JPY|HKD|CAD|AUD|CHF|\$|£|€|¥|Rs\.?(?:\s*INR)?|INR|₹)\s*)([\d,]+(?:\.\d{1,2})?)',
+    );
     final accountRegex = RegExp(
       r'(?:A/c|account|card)\s*(?:ending\s*)?[xX]*([\dxX]{4})',
       caseSensitive: false,
@@ -126,11 +142,13 @@ class BankSmsParser {
 
     // Standard debit/credit patterns
     final typeRegex = RegExp(
-      r'(debited|credited|spent|received|paid|withdrawn|added)',
+      r'(debited|credited|charged|spent|received|paid|withdrawn|added)',
       caseSensitive: false,
     );
 
-    final amount = _extractAmount(amountRegex, body);
+    final amountMatch = amountRegex.firstMatch(body);
+    final currency = amountMatch?.group(1);
+    final amount = _extractAmountFromGroup(amountMatch, 2);
     final account = accountRegex.firstMatch(body)?.group(1);
 
     // Determine transaction direction
@@ -153,36 +171,15 @@ class BankSmsParser {
       amount: amount,
       isIncome: isIncome,
       account: account,
+      currency: currency,
     );
   }
 
-  static double? _extractAmount(RegExp regex, String body) {
-    final match = regex.firstMatch(body);
+  static double? _extractAmountFromGroup(RegExpMatch? match, int group) {
     if (match == null) return null;
-
-    final amountStr = match.group(1)?.replaceAll(',', '');
+    final amountStr = match.group(group)?.replaceAll(',', '');
     return double.tryParse(amountStr ?? '');
   }
 
-  static String? _extractMerchantName(RegExp regex, String body) {
-    final match = regex.firstMatch(body);
-    return _cleanMerchantName(match?.group(1));
-  }
 
-  static String? _cleanMerchantName(String? merchant) {
-    if (merchant == null) return null;
-
-    // Remove common noise words and clean up
-    final cleaned = merchant
-        .trim()
-        .replaceAll(RegExp(r'\s+'), ' ') // Multiple spaces to single
-        .replaceAll(
-          RegExp(r'[^a-zA-Z0-9\s@\-]'),
-          '',
-        ) // Remove special chars except @-
-        .trim();
-
-    // Return null if too short or empty
-    return cleaned.length >= 2 ? cleaned : null;
-  }
 }

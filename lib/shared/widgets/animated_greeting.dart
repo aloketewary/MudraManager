@@ -46,7 +46,7 @@ class _AnimatedGreetingState extends State<AnimatedGreeting>
     ).animate(CurvedAnimation(
       parent: _controller,
       curve: Curves.easeOutCubic,
-    ));
+    ),);
 
     _greetingOpacity = Tween<double>(
       begin: 1.0,
@@ -54,7 +54,7 @@ class _AnimatedGreetingState extends State<AnimatedGreeting>
     ).animate(CurvedAnimation(
       parent: _controller,
       curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
-    ));
+    ),);
 
     _nameSlide = Tween<Offset>(
       begin: const Offset(1.0, 0),
@@ -62,7 +62,7 @@ class _AnimatedGreetingState extends State<AnimatedGreeting>
     ).animate(CurvedAnimation(
       parent: _controller,
       curve: Curves.easeOutCubic,
-    ));
+    ),);
 
     _nameOpacity = Tween<double>(
       begin: 0.0,
@@ -70,7 +70,7 @@ class _AnimatedGreetingState extends State<AnimatedGreeting>
     ).animate(CurvedAnimation(
       parent: _controller,
       curve: const Interval(0.3, 1.0, curve: Curves.easeOut),
-    ));
+    ),);
 
     // If animation already played, show name immediately
     if (_hasPlayedAnimation) {

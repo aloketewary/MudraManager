@@ -1,3 +1,5 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -34,9 +36,9 @@ class _SmsActivityCardState extends ConsumerState<SmsActivityCard> {
       case ActivityStatus.pending:
         return color.primary;
       case ActivityStatus.needsReview:
-        return Colors.orange;
+        return FinanceColors.statusWarning;
       case ActivityStatus.duplicate:
-        return Colors.red;
+        return FinanceColors.statusDanger;
       default:
         return color.onSurfaceVariant;
     }
@@ -70,7 +72,7 @@ class _SmsActivityCardState extends ConsumerState<SmsActivityCard> {
         context,
         title: 'Auto-approve pending?',
         message: 'Do you want to automatically approve pending transactions for "${widget.activity.account}"?',
-        icon: Icons.check_circle_outline,
+        icon: LucideIcons.circleCheck,
         confirmText: 'Yes',
         cancelText: 'No',
       );
@@ -219,8 +221,8 @@ class _SmsActivityCardState extends ConsumerState<SmsActivityCard> {
                         ),
                         child: Icon(
                           widget.activity.isIncome == true
-                              ? Icons.arrow_downward_rounded
-                              : Icons.arrow_upward_rounded,
+                              ? LucideIcons.arrowDown
+                              : LucideIcons.arrowUp,
                           color: statusColor,
                           size: 24.0,
                         ),
@@ -232,13 +234,13 @@ class _SmsActivityCardState extends ConsumerState<SmsActivityCard> {
                           child: Container(
                             padding: const EdgeInsets.all(4),
                             decoration: BoxDecoration(
-                              color: Colors.orange,
+                              color: FinanceColors.statusWarning,
                               shape: BoxShape.circle,
                               border:
                                   Border.all(color: color.surface, width: 2),
                             ),
                             child: const Icon(
-                              Icons.account_balance_wallet,
+                              LucideIcons.wallet,
                               size: 12,
                               color: Colors.white,
                             ),
@@ -340,8 +342,8 @@ class _SmsActivityCardState extends ConsumerState<SmsActivityCard> {
                   ),
                   Icon(
                     _isExpanded
-                        ? Icons.keyboard_arrow_up_rounded
-                        : Icons.keyboard_arrow_down_rounded,
+                        ? LucideIcons.chevronUp
+                        : LucideIcons.chevronDown,
                     color: color.onSurfaceVariant,
                   ),
                 ],
@@ -367,21 +369,21 @@ class _SmsActivityCardState extends ConsumerState<SmsActivityCard> {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.orange.withValues(alpha: 0.1),
+                        color: FinanceColors.statusWarning.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                            color: Colors.orange.withValues(alpha: 0.3)),
+                            color: FinanceColors.statusWarning.withValues(alpha: 0.3),),
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.info_outline,
-                              color: Colors.orange, size: 20),
+                          const Icon(LucideIcons.info,
+                              color: FinanceColors.statusWarning, size: 20,),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               'Account "${widget.activity.account}" not found. Add it first.',
                               style: textTheme.bodySmall
-                                  ?.copyWith(color: Colors.orange[800]),
+                                  ?.copyWith(color: FinanceColors.statusWarning),
                             ),
                           ),
                         ],
@@ -394,7 +396,7 @@ class _SmsActivityCardState extends ConsumerState<SmsActivityCard> {
                       Expanded(
                         child: OutlinedButton.icon(
                           onPressed: _reject,
-                          icon: const Icon(Icons.close_rounded, size: 18),
+                          icon: const Icon(LucideIcons.x, size: 18),
                           label: const Text('REJECT'),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: color.error,
@@ -407,11 +409,11 @@ class _SmsActivityCardState extends ConsumerState<SmsActivityCard> {
                         child: FilledButton.icon(
                           onPressed: hasUnknownAccount ? _addAccount : _approve,
                           icon: Icon(
-                            hasUnknownAccount ? Icons.add : Icons.check_rounded,
+                            hasUnknownAccount ? LucideIcons.plus : LucideIcons.check,
                             size: 18,
                           ),
                           label: Text(
-                              hasUnknownAccount ? 'ADD ACCOUNT' : 'APPROVE'),
+                              hasUnknownAccount ? 'ADD ACCOUNT' : 'APPROVE',),
                         ),
                       ),
                     ],

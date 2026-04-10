@@ -1,5 +1,3 @@
-
-
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 
 class AdvancedAnalyticsService {
@@ -18,12 +16,14 @@ class AdvancedAnalyticsService {
     for (int i = 1; i <= 3; i++) {
       final month = DateTime(now.year, now.month - i);
       final monthTotal = transactions
-          .where((tx) =>
-              tx.isExpense &&
-              tx.date.year == month.year &&
-              tx.date.month == month.month)
+          .where(
+            (tx) =>
+                tx.isExpense &&
+                tx.date.year == month.year &&
+                tx.date.month == month.month,
+          )
           .fold(0.0, (sum, tx) => sum + tx.effectiveAmount);
-      
+
       if (monthTotal > 0) {
         total += monthTotal;
         count++;
@@ -39,7 +39,10 @@ class AdvancedAnalyticsService {
     final transactions = await _transactionService.getAllForDashBoard();
 
     final thisMonth = transactions.where(
-      (tx) => tx.date.year == now.year && tx.date.month == now.month && tx.affectsStats,
+      (tx) =>
+          tx.date.year == now.year &&
+          tx.date.month == now.month &&
+          tx.affectsStats,
     );
 
     final income = thisMonth
@@ -116,14 +119,13 @@ class AdvancedAnalyticsService {
       insights.add('Start building emergency fund');
     }
 
-    final rating =
-        score >= 80
-            ? 'Excellent'
-            : score >= 60
+    final rating = score >= 80
+        ? 'Excellent'
+        : score >= 60
             ? 'Good'
             : score >= 40
-            ? 'Fair'
-            : 'Poor';
+                ? 'Fair'
+                : 'Poor';
 
     return FinancialHealthScore(
       score: score.round(),
@@ -206,7 +208,8 @@ class AdvancedAnalyticsService {
     final days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
     for (var tx in transactions.where(
-      (t) => t.isExpense && t.date.isAfter(now.subtract(const Duration(days: 90))),
+      (t) =>
+          t.isExpense && t.date.isAfter(now.subtract(const Duration(days: 90))),
     )) {
       final dayName = days[tx.date.weekday - 1];
       byDay[dayName] = (byDay[dayName] ?? 0) + tx.effectiveAmount;

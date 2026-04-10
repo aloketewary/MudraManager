@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mudra_manager/core/db/models/trip.dart';
 import 'package:mudra_manager/features/trip/data/trip_service.dart';
 
 void main() {
@@ -203,35 +202,23 @@ void main() {
 
   group('Trip vs Split behavior rules', () {
     test('trip settlement only after ended', () {
-      final isTrip = true;
-      final isActive = true;
-
-      final canSettle = !(isTrip && isActive);
-      expect(canSettle, false);
+      expect(_canSettle(isTrip: true, isActive: true), false);
     });
 
     test('trip settlement allowed after ended', () {
-      final isTrip = true;
-      final isActive = false;
-
-      final canSettle = !(isTrip && isActive);
-      expect(canSettle, true);
+      expect(_canSettle(isTrip: true, isActive: false), true);
     });
 
     test('split settlement always allowed', () {
-      final isTrip = false;
-      final isActive = true;
-
-      final canSettle = !(isTrip && isActive);
-      expect(canSettle, true);
+      expect(_canSettle(isTrip: false, isActive: true), true);
     });
 
     test('split settlement allowed when ended too', () {
-      final isTrip = false;
-      final isActive = false;
-
-      final canSettle = !(isTrip && isActive);
-      expect(canSettle, true);
+      expect(_canSettle(isTrip: false, isActive: false), true);
     });
   });
+}
+
+bool _canSettle({required bool isTrip, required bool isActive}) {
+  return !(isTrip && isActive);
 }

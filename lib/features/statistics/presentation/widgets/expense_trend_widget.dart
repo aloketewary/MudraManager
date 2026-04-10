@@ -1,4 +1,4 @@
-import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -73,7 +73,7 @@ class _ExpenseTrendWidgetState extends State<ExpenseTrendWidget> {
             ),
             const SizedBox(width: 12),
             IconButton.filled(
-              icon: Icon(showLineChart ? Icons.bar_chart : Icons.show_chart),
+              icon: Icon(showLineChart ? Icons.bar_chart : LucideIcons.chartLine),
               onPressed: () => setState(() => showLineChart = !showLineChart),
               iconSize: 40,
             ),
@@ -92,7 +92,6 @@ class _ExpenseTrendWidgetState extends State<ExpenseTrendWidget> {
 
   Widget _buildLineChart(BuildContext context, List<FlSpot> spots) {
     final ctxt = AppLocalizations.of(context)!;
-    final color = Theme.of(context).colorScheme;
 
     // Build line bars: parent + subcategories
     final lineBars = <LineChartBarData>[
@@ -169,7 +168,6 @@ class _ExpenseTrendWidgetState extends State<ExpenseTrendWidget> {
 
   Widget _buildBarChart(BuildContext context, List<FlSpot> spots) {
     final ctxt = AppLocalizations.of(context)!;
-    final color = Theme.of(context).colorScheme;
 
     final barGroups = spots.map((spot) {
       final x = spot.x.toInt();

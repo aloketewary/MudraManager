@@ -46,13 +46,11 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(milliseconds: 500), _performDailyCheckIn);
-    Future.delayed(const Duration(milliseconds: 1000), () {
-      if (mounted) {
-        ref
-            .read(reconciliationServiceProvider)
-            .patchUncategorizedTransactions();
-      }
+    // Deferred — gamification check-in and reconciliation don't affect first frame
+    Future.delayed(const Duration(seconds: 3), () {
+      if (!mounted) return;
+      _performDailyCheckIn();
+      ref.read(reconciliationServiceProvider).patchUncategorizedTransactions();
     });
   }
 
@@ -108,21 +106,26 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
     WidgetRef ref,
     DashboardWidgetPlugin widget,
   ) {
-    // Hero moment is auto-dismiss, not tappable for navigation
-    if (widget.id == 'hero_moment') return widget.build(context, ref);
+    try {
+      final child = widget.build(context, ref);
 
-    return GestureDetector(
-      behavior: HitTestBehavior.translucent,
-      onTap: () {
-        CardInteractionTracker.recordTap(widget.id);
-        widget.onTap(context, ref);
-      },
-      child: AbsorbPointer(
-        // Let the card's own InkWell handle visual feedback
-        absorbing: false,
-        child: widget.build(context, ref),
-      ),
-    );
+      if (widget.id == 'hero_moment') return child;
+
+      return GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () {
+          CardInteractionTracker.recordTap(widget.id);
+          widget.onTap(context, ref);
+        },
+        child: AbsorbPointer(
+          absorbing: false,
+          child: child,
+        ),
+      );
+    } catch (e, stack) {
+      log.e('Dashboard widget "${widget.id}" crashed', e, stack);
+      return const SizedBox.shrink();
+    }
   }
 
   @override
@@ -197,7 +200,10 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                     }
                     return _StaggeredEntry(
                       key: ValueKey(widget.id),
-                      child: _buildTrackedWidget(context, ref, widget),
+                      child: _WidgetErrorBoundary(
+                        id: widget.id,
+                        child: _buildTrackedWidget(context, ref, widget),
+                      ),
                     );
                   }
                   return const SizedBox.shrink();
@@ -708,5 +714,34 @@ class _AutoImportBanner extends ConsumerWidget {
         ),
       ),
     );
+  }
+}
+
+
+
+
+class _WidgetErrorBoundary extends StatefulWidget {
+  final String id;
+  final Widget child;
+
+  const _WidgetErrorBoundary({required this.id, required this.child});
+
+  @override
+  State<_WidgetErrorBoundary> createState() => _WidgetErrorBoundaryState();
+}
+
+class _WidgetErrorBoundaryState extends State<_WidgetErrorBoundary> {
+  bool _hasError = false;
+
+  @override
+  Widget build(BuildContext context) {
+    if (_hasError) return const SizedBox.shrink();
+    return widget.child;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _hasError = false;
   }
 }

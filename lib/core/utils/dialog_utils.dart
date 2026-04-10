@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 
@@ -33,7 +34,7 @@ class DialogUtils {
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              Icon(Icons.delete_forever_rounded, size: 48, color: color.error),
+              Icon(LucideIcons.trash2, size: 48, color: color.error),
               const SizedBox(height: 16),
               Text(
                 title ?? BuddyMessages.deleteTitle,
@@ -248,7 +249,7 @@ class _PasswordDialogContentState extends State<_PasswordDialogContent> {
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-          Icon(Icons.lock_outline, size: 48, color: widget.color.primary),
+          Icon(LucideIcons.lock, size: 48, color: widget.color.primary),
           const SizedBox(height: 16),
           Text(
             widget.isRestore ? 'Enter Password' : 'Set Backup Password',
@@ -261,7 +262,7 @@ class _PasswordDialogContentState extends State<_PasswordDialogContent> {
             decoration: InputDecoration(
               labelText: 'Password',
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-              prefixIcon: const Icon(Icons.password),
+              prefixIcon: const Icon(LucideIcons.keyRound),
             ),
           ),
           if (!widget.isRestore) ...[
@@ -272,7 +273,7 @@ class _PasswordDialogContentState extends State<_PasswordDialogContent> {
               decoration: InputDecoration(
                 labelText: 'Confirm Password',
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                prefixIcon: const Icon(Icons.password),
+                prefixIcon: const Icon(LucideIcons.keyRound),
               ),
             ),
           ],

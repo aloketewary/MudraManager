@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
@@ -206,12 +207,12 @@ class _ReconciliationScreenState extends ConsumerState<ReconciliationScreen> {
                     padding: EdgeInsets.all(spacing.cardInner),
                     decoration: BoxDecoration(
                       color: diff.abs() < 0.01
-                          ? Colors.green.withValues(alpha: 0.08)
+                          ? FinanceColors.statusGood.withValues(alpha: 0.08)
                           : color.error.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(spacing.radiusMedium),
                       border: Border.all(
                         color: diff.abs() < 0.01
-                            ? Colors.green.withValues(alpha: 0.3)
+                            ? FinanceColors.statusGood.withValues(alpha: 0.3)
                             : color.error.withValues(alpha: 0.3),
                       ),
                     ),
@@ -223,14 +224,14 @@ class _ReconciliationScreenState extends ConsumerState<ReconciliationScreen> {
                             Icon(
                               diff.abs() < 0.01 ? LucideIcons.circleCheck : LucideIcons.arrowLeftRight,
                               size: 18,
-                              color: diff.abs() < 0.01 ? Colors.green : color.error,
+                              color: diff.abs() < 0.01 ? FinanceColors.statusGood : color.error,
                             ),
                             SizedBox(width: spacing.elementGap),
                             Text(
                               diff.abs() < 0.01 ? ctxt.reconcile_balanced : ctxt.reconcile_difference,
                               style: textTheme.titleSmall?.copyWith(
                                 fontWeight: FontWeight.w600,
-                                color: diff.abs() < 0.01 ? Colors.green : color.error,
+                                color: diff.abs() < 0.01 ? FinanceColors.statusGood : color.error,
                               ),
                             ),
                           ],
@@ -243,7 +244,7 @@ class _ReconciliationScreenState extends ConsumerState<ReconciliationScreen> {
                             isExpense: diff < 0,
                             style: textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: diff > 0 ? Colors.green : color.error,
+                              color: diff > 0 ? FinanceColors.statusGood : color.error,
                             ),
                             compact: false,
                           ),

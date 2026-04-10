@@ -16,7 +16,7 @@ android {
     namespace = "com.mudramanager.app"
 //    compileSdk = flutter.compileSdkVersion
 //    ndkVersion = flutter.ndkVersion
-    ndkVersion = "27.0.12077973"
+    ndkVersion = "28.2.13676358"
     compileSdk = 36
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -36,7 +36,7 @@ android {
 //        minSdk = flutter.minSdkVersion
         minSdk = 29
 //        targetSdk = flutter.targetSdkVersion
-        targetSdk = 36
+        targetSdk = 35
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
@@ -84,6 +84,12 @@ android {
         }
     }
 
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
+
 
 }
 
@@ -94,4 +100,11 @@ flutter {
 dependencies {
     implementation("androidx.core:core-ktx")
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
+
+    // Unit test dependencies
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.robolectric:robolectric:4.12.2")
+    testImplementation("androidx.test:core:1.5.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
+    testImplementation("org.json:json:20231013")
 }

@@ -380,7 +380,7 @@ class _BillControlCenterScreenState
               ),
             Divider(
                 height: spacing.sectionGap,
-                color: color.onPrimaryContainer.withValues(alpha: 0.15)),
+                color: color.onPrimaryContainer.withValues(alpha: 0.15),),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -726,7 +726,7 @@ class _BillControlCenterScreenState
                         Row(
                           children: [
                             Icon(effectiveIcon,
-                                size: 12, color: effectiveColor),
+                                size: 12, color: effectiveColor,),
                             SizedBox(width: spacing.elementGapMin),
                             Text(
                               effectiveText,
@@ -788,7 +788,7 @@ class _BillControlCenterScreenState
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Icon(LucideIcons.check,
-                                      size: 12, color: color.primary),
+                                      size: 12, color: color.primary,),
                                   SizedBox(width: spacing.elementGapMin),
                                   Text(
                                     'Pay',
@@ -994,7 +994,7 @@ class _BillControlCenterScreenState
                       Text(
                         formatCurrency(existing.amount,
                             code: existing.account.value?.currencyCode ??
-                                BaseCurrency.code),
+                                BaseCurrency.code,),
                         style: tt.titleMedium
                             ?.copyWith(fontWeight: FontWeight.bold),
                       ),

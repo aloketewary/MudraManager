@@ -230,17 +230,17 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
                   segments: [
                     ButtonSegment(
                       value: AccountDisplayStyle.carousel,
-                      icon: Icon(LucideIcons.galleryHorizontalEnd, size: 16),
+                      icon: const Icon(LucideIcons.galleryHorizontalEnd, size: 16),
                       label: Text(AppLocalizations.of(context)!.appearance_cards),
                     ),
                     ButtonSegment(
                       value: AccountDisplayStyle.stack,
-                      icon: Icon(LucideIcons.layers, size: 16),
+                      icon: const Icon(LucideIcons.layers, size: 16),
                       label: Text(AppLocalizations.of(context)!.appearance_stack),
                     ),
                     ButtonSegment(
                       value: AccountDisplayStyle.bento,
-                      icon: Icon(LucideIcons.layoutGrid, size: 16),
+                      icon: const Icon(LucideIcons.layoutGrid, size: 16),
                       label: Text(AppLocalizations.of(context)!.appearance_bento),
                     ),
                   ],

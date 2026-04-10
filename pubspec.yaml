@@ -1,5 +1,5 @@
 name: mudra_manager
-description: "A new Flutter project."
+description: "Mudra Manager — local-first personal finance app for India. Track expenses, budgets, goals, and more. 100% offline."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: "none" # Remove this line if you wish to publish to pub.dev
@@ -16,9 +16,9 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 3.5.1+41
+version: 3.5.10+50
 minSdk: 29
-targetSdk: 33
+targetSdk: 35
 ndkVersion: 27.0.12077973
 
 environment:
@@ -98,6 +98,8 @@ dependencies:
   async: ^2.13.0
 
 dev_dependencies:
+  integration_test:
+    sdk: flutter
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
@@ -106,6 +108,8 @@ dev_dependencies:
   flutter_launcher_icons: ^0.13.1
   json_serializable: ^6.7.1
   envied_generator: ^1.1.1
+  plugin_platform_interface: ^2.1.8
+  path_provider_platform_interface: ^2.1.2
 
 flutter_launcher_icons:
   android: true
@@ -142,3 +146,4 @@ flutter:
     - assets/fonts/NotoSans-Regular.ttf
     - assets/help_content.json
     - assets/plugins/manifest.json
+

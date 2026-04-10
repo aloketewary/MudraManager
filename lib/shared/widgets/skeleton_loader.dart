@@ -1,7 +1,6 @@
-import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:mudra_manager/core/theme/design_tokens.dart';
+
 
 /// Skeleton loading component for displaying placeholder content
 /// while data is being loaded
@@ -29,7 +28,7 @@ class SkeletonLoader extends StatelessWidget {
       margin: margin,
       decoration: BoxDecoration(
         color: color.surfaceContainerHighest,
-        borderRadius: borderRadius ?? DesignTokens.borderRadiusSmall,
+        borderRadius: borderRadius ?? BorderRadius.circular(12),
       ),
     )
         .animate(onComplete: (controller) => controller.repeat())
@@ -50,16 +49,16 @@ class TransactionCardSkeleton extends StatelessWidget {
 
     return Card(
       margin: const EdgeInsets.symmetric(
-        horizontal: DesignTokens.spacing16,
-        vertical: DesignTokens.spacing8,
+        horizontal: 16.0,
+        vertical: 8.0,
       ),
       elevation: 0,
       color: color.surfaceContainerLow,
       shape: RoundedRectangleBorder(
-        borderRadius: DesignTokens.borderRadiusMedium,
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(DesignTokens.spacing16),
+        padding: const EdgeInsets.all(16.0),
         child: Row(
           children: [
             SkeletonLoader(
@@ -67,7 +66,7 @@ class TransactionCardSkeleton extends StatelessWidget {
               height: 48,
               borderRadius: BorderRadius.circular(12),
             ),
-            const SizedBox(width: DesignTokens.spacing16),
+            const SizedBox(width: 16.0),
             const Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -75,20 +74,20 @@ class TransactionCardSkeleton extends StatelessWidget {
                   SkeletonLoader(
                     width: double.infinity,
                     height: 16,
-                    margin: EdgeInsets.only(bottom: DesignTokens.spacing8),
+                    margin: EdgeInsets.only(bottom: 8.0),
                   ),
                   SkeletonLoader(width: 120, height: 14),
                 ],
               ),
             ),
-            const SizedBox(width: DesignTokens.spacing16),
+            const SizedBox(width: 16.0),
             const Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 SkeletonLoader(
                   width: 80,
                   height: 20,
-                  margin: EdgeInsets.only(bottom: DesignTokens.spacing4),
+                  margin: EdgeInsets.only(bottom: 4.0),
                 ),
                 SkeletonLoader(width: 60, height: 12),
               ],
@@ -116,13 +115,13 @@ class AccountCardSkeleton extends StatelessWidget {
     return Container(
           height: 250,
           margin: const EdgeInsets.symmetric(
-            horizontal: DesignTokens.spacing16,
-            vertical: DesignTokens.spacing8,
+            horizontal: 16.0,
+            vertical: 8.0,
           ),
-          padding: const EdgeInsets.all(DesignTokens.spacing24),
+          padding: const EdgeInsets.all(24.0),
           decoration: BoxDecoration(
             color: color.surfaceContainerHighest,
-            borderRadius: DesignTokens.borderRadiusLarge,
+            borderRadius: BorderRadius.circular(20),
           ),
           child: const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -152,14 +151,14 @@ class BudgetCardSkeleton extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.symmetric(
-        horizontal: DesignTokens.spacing16,
-        vertical: DesignTokens.spacing8,
+        horizontal: 16.0,
+        vertical: 8.0,
       ),
       child: Container(
-        padding: const EdgeInsets.all(DesignTokens.spacing16),
+        padding: const EdgeInsets.all(16.0),
         decoration: BoxDecoration(
           color: color.surfaceContainerLow,
-          borderRadius: DesignTokens.borderRadiusLarge,
+          borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
           children: [
@@ -168,7 +167,7 @@ class BudgetCardSkeleton extends StatelessWidget {
               height: 60,
               borderRadius: BorderRadius.circular(30),
             ),
-            const SizedBox(width: DesignTokens.spacing16),
+            const SizedBox(width: 16.0),
             const Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -176,12 +175,12 @@ class BudgetCardSkeleton extends StatelessWidget {
                   SkeletonLoader(
                     width: 120,
                     height: 16,
-                    margin: EdgeInsets.only(bottom: DesignTokens.spacing12),
+                    margin: EdgeInsets.only(bottom: 12.0),
                   ),
                   SkeletonLoader(
                     width: double.infinity,
                     height: 10,
-                    margin: EdgeInsets.only(bottom: DesignTokens.spacing8),
+                    margin: EdgeInsets.only(bottom: 8.0),
                   ),
                   Row(
                     children: [

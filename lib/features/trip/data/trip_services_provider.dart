@@ -4,7 +4,6 @@ import 'package:mudra_manager/core/services/active_trip_service.dart';
 import 'package:mudra_manager/core/services/settlement_service.dart';
 import 'package:mudra_manager/core/db/models/trip.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
-import 'package:mudra_manager/core/services/settlement_service.dart' show ParticipantBalance;
 
 final activeTripServiceProvider = FutureProvider<ActiveTripService>((ref) async {
   final isar = await ref.watch(isarServiceProvider).getInstance();

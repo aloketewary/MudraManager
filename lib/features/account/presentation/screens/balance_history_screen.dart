@@ -64,8 +64,16 @@ class BalanceHistoryScreen extends ConsumerWidget {
             children: [
               // Hero
               _buildHeroCard(
-                currentBalance, change, changePercent, emotionLine,
-                accountColor, isGuestMode, color, textTheme, spacing, ctxt,
+                currentBalance,
+                change,
+                changePercent,
+                emotionLine,
+                accountColor,
+                isGuestMode,
+                color,
+                textTheme,
+                spacing,
+                ctxt,
               ),
               SizedBox(height: spacing.sectionGap),
 
@@ -78,7 +86,14 @@ class BalanceHistoryScreen extends ConsumerWidget {
               SizedBox(height: spacing.sectionGap),
 
               // Stats
-              _buildStatsRow(snapshots, isGuestMode, color, textTheme, spacing, ctxt),
+              _buildStatsRow(
+                snapshots,
+                isGuestMode,
+                color,
+                textTheme,
+                spacing,
+                ctxt,
+              ),
               SizedBox(height: spacing.sectionGap * 2),
             ],
           );
@@ -93,7 +108,10 @@ class BalanceHistoryScreen extends ConsumerWidget {
             children: [
               Icon(LucideIcons.circleAlert, size: 64, color: color.error),
               SizedBox(height: spacing.sectionGap),
-              Text(ctxt.common_errorLoading, style: textTheme.titleMedium?.copyWith(color: color.error)),
+              Text(
+                ctxt.common_errorLoading,
+                style: textTheme.titleMedium?.copyWith(color: color.error),
+              ),
             ],
           ),
         ),
@@ -151,12 +169,17 @@ class BalanceHistoryScreen extends ConsumerWidget {
                   color: accountColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(spacing.radiusMedium),
                 ),
-                child: Icon(account.accountType.icon, color: accountColor, size: 20),
+                child: Icon(
+                  account.accountType.icon,
+                  color: accountColor,
+                  size: 20,
+                ),
               ),
               SizedBox(width: spacing.elementGap),
               Text(
                 ctxt.balanceHistory_currentBalance,
-                style: textTheme.labelLarge?.copyWith(color: color.onSurfaceVariant),
+                style: textTheme.labelLarge
+                    ?.copyWith(color: color.onSurfaceVariant),
               ),
             ],
           ),
@@ -165,7 +188,8 @@ class BalanceHistoryScreen extends ConsumerWidget {
             amount: GuestModeUtil.applyGuestMode(currentBalance, isGuestMode),
             currencyCode: account.currencyCode,
             compact: false,
-            style: textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w900),
+            style:
+                textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w900),
           ),
           SizedBox(height: spacing.elementGap),
           Container(
@@ -181,21 +205,27 @@ class BalanceHistoryScreen extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  isPositive ? LucideIcons.trendingUp : LucideIcons.trendingDown,
-                  size: 14, color: changeColor,
+                  isPositive
+                      ? LucideIcons.trendingUp
+                      : LucideIcons.trendingDown,
+                  size: 14,
+                  color: changeColor,
                 ),
                 SizedBox(width: spacing.elementGapMin),
                 CurrencyText(
-                  amount: GuestModeUtil.applyGuestMode(change.abs(), isGuestMode),
+                  amount:
+                      GuestModeUtil.applyGuestMode(change.abs(), isGuestMode),
                   currencyCode: account.currencyCode,
                   style: textTheme.labelMedium?.copyWith(
-                    color: changeColor, fontWeight: FontWeight.w600,
+                    color: changeColor,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 Text(
                   ' (${changePercent.abs().toStringAsFixed(1)}%)',
                   style: textTheme.labelMedium?.copyWith(
-                    color: changeColor, fontWeight: FontWeight.w600,
+                    color: changeColor,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
@@ -221,23 +251,41 @@ class BalanceHistoryScreen extends ConsumerWidget {
 
     return Row(
       children: [
-        Expanded(child: _statPill(
-          ctxt.balanceHistory_highest,
-          GuestModeUtil.applyGuestMode(highest, isGuestMode),
-          LucideIcons.arrowUp, color.primary, color, textTheme, spacing,
-        )),
+        Expanded(
+          child: _statPill(
+            ctxt.balanceHistory_highest,
+            GuestModeUtil.applyGuestMode(highest, isGuestMode),
+            LucideIcons.arrowUp,
+            color.primary,
+            color,
+            textTheme,
+            spacing,
+          ),
+        ),
         SizedBox(width: spacing.elementGap),
-        Expanded(child: _statPill(
-          ctxt.balanceHistory_lowest,
-          GuestModeUtil.applyGuestMode(lowest, isGuestMode),
-          LucideIcons.arrowDown, color.error, color, textTheme, spacing,
-        )),
+        Expanded(
+          child: _statPill(
+            ctxt.balanceHistory_lowest,
+            GuestModeUtil.applyGuestMode(lowest, isGuestMode),
+            LucideIcons.arrowDown,
+            color.error,
+            color,
+            textTheme,
+            spacing,
+          ),
+        ),
         SizedBox(width: spacing.elementGap),
-        Expanded(child: _statPill(
-          ctxt.balanceHistory_average,
-          GuestModeUtil.applyGuestMode(avg, isGuestMode),
-          LucideIcons.minus, color.secondary, color, textTheme, spacing,
-        )),
+        Expanded(
+          child: _statPill(
+            ctxt.balanceHistory_average,
+            GuestModeUtil.applyGuestMode(avg, isGuestMode),
+            LucideIcons.minus,
+            color.secondary,
+            color,
+            textTheme,
+            spacing,
+          ),
+        ),
       ],
     );
   }
@@ -268,7 +316,11 @@ class BalanceHistoryScreen extends ConsumerWidget {
             style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
           ),
           SizedBox(height: spacing.elementGapUltraMin),
-          Text(label, style: textTheme.labelSmall?.copyWith(color: color.onSurfaceVariant)),
+          Text(
+            label,
+            style:
+                textTheme.labelSmall?.copyWith(color: color.onSurfaceVariant),
+          ),
         ],
       ),
     );

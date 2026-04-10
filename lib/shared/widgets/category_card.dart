@@ -1,4 +1,3 @@
-import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 
 class CategoryCard extends StatelessWidget {
@@ -25,9 +24,9 @@ class CategoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var colorTheme = Theme.of(context).colorScheme;
-    var textTheme = Theme.of(context).textTheme;
-    var size = MediaQuery.of(context).size;
+    final colorTheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final size = MediaQuery.of(context).size;
     
     // Calculate proper text color for category color background
     final categoryLuminance = color.computeLuminance();

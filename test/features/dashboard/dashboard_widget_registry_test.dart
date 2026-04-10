@@ -15,7 +15,8 @@ void main() {
 
     test('all widgets have non-empty title', () {
       for (final widget in DashboardWidgetRegistry.widgets) {
-        expect(widget.title, isNotEmpty, reason: '${widget.id} has empty title');
+        expect(widget.title, isNotEmpty,
+            reason: '${widget.id} has empty title',);
       }
     });
 
@@ -57,8 +58,11 @@ void main() {
       for (final category in WidgetCategory.values) {
         final widgets = DashboardWidgetRegistry.getWidgetsByCategory(category);
         for (final w in widgets) {
-          expect(w.category, category,
-              reason: '${w.id} has wrong category');
+          expect(
+            w.category,
+            category,
+            reason: '${w.id} has wrong category',
+          );
         }
       }
     });
@@ -82,16 +86,14 @@ void main() {
     });
 
     test('most widgets can be disabled', () {
-      final disableable = DashboardWidgetRegistry.widgets
-          .where((w) => w.canBeDisabled)
-          .length;
+      final disableable =
+          DashboardWidgetRegistry.widgets.where((w) => w.canBeDisabled).length;
       expect(disableable, greaterThan(0));
     });
 
     test('most widgets are visible by default', () {
-      final visible = DashboardWidgetRegistry.widgets
-          .where((w) => w.defaultVisible)
-          .length;
+      final visible =
+          DashboardWidgetRegistry.widgets.where((w) => w.defaultVisible).length;
       expect(visible, greaterThan(0));
     });
   });

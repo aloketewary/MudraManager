@@ -74,9 +74,9 @@ DateTime calculateNextDueDate(DateTime currentDueDate, Frequency frequency, Date
   }
   switch (frequency) {
     case Frequency.daily:
-      return currentDueDate.add(Duration(days: 1));
+      return currentDueDate.add(const Duration(days: 1));
     case Frequency.weekly:
-      return currentDueDate.add(Duration(days: 7));
+      return currentDueDate.add(const Duration(days: 7));
     case Frequency.monthly:
     // Basic calculation - careful with month lengths! Libraries like `intl` or `jiffy` can help.
       return DateTime(currentDueDate.year, currentDueDate.month + 1, currentDueDate.day);

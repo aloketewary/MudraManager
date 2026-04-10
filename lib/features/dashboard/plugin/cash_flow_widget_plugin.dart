@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -14,7 +15,7 @@ class CashFlowWidgetPlugin extends DashboardWidgetPlugin {
   String get title => 'Cash Flow';
 
   @override
-  IconData get icon => Icons.account_balance_wallet;
+  IconData get icon => LucideIcons.wallet;
 
   @override
   int get defaultOrder => 3;

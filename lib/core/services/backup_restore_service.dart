@@ -317,24 +317,28 @@ class BackupService {
     // Backup AppConfig (includes base_currency)
     final appConfigs = await isar.appConfigs.where().findAll();
     backupData['AppConfig'] = appConfigs
-        .map((c) => {
-              'key': c.key,
-              'stringValue': c.stringValue,
-              'intValue': c.intValue,
-              'doubleValue': c.doubleValue,
-              'boolValue': c.boolValue,
-              'dateValue': c.dateValue?.toIso8601String(),
-            })
+        .map(
+          (c) => {
+            'key': c.key,
+            'stringValue': c.stringValue,
+            'intValue': c.intValue,
+            'doubleValue': c.doubleValue,
+            'boolValue': c.boolValue,
+            'dateValue': c.dateValue?.toIso8601String(),
+          },
+        )
         .toList();
 
     // Backup ExchangeRates
     final rates = await isar.exchangeRates.where().findAll();
     backupData['ExchangeRate'] = rates
-        .map((r) => {
-              'currencyCode': r.currencyCode,
-              'rateToBase': r.rateToBase,
-              'updatedAt': r.updatedAt.toIso8601String(),
-            })
+        .map(
+          (r) => {
+            'currencyCode': r.currencyCode,
+            'rateToBase': r.rateToBase,
+            'updatedAt': r.updatedAt.toIso8601String(),
+          },
+        )
         .toList();
 
     return backupData;
@@ -602,10 +606,8 @@ class BackupService {
     }
 
     // Sync BaseCurrency from restored AppConfig
-    final baseCurrencyConfig = await isar.appConfigs
-        .filter()
-        .keyEqualTo('base_currency')
-        .findFirst();
+    final baseCurrencyConfig =
+        await isar.appConfigs.filter().keyEqualTo('base_currency').findFirst();
     BaseCurrency.sync(baseCurrencyConfig?.stringValue ?? 'INR');
 
     _log.i('Restore completed successfully');

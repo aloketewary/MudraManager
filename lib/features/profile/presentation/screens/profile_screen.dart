@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
@@ -59,7 +58,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             leading: const SizedBox.shrink(),
             actions: [
               IconButton(
-                icon: const Icon(Icons.info_outline),
+                icon: const Icon(LucideIcons.info),
                 onPressed: () => _showAboutSheet(color, textTheme),
               ),
             ],
@@ -126,13 +125,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   spacing,
                   items: [
                     _SettingItem(
-                      Icons.account_balance_wallet_outlined,
+                      LucideIcons.wallet,
                       AppLocalizations.of(context)!.profile_accounts,
                       AppLocalizations.of(context)!.profile_manageAccounts,
                       () => context.push(AppRoutes.manageAccounts),
                     ),
                     _SettingItem(
-                      Icons.category_outlined,
+                      LucideIcons.layoutGrid,
                       AppLocalizations.of(context)!.profile_categories,
                       AppLocalizations.of(context)!.profile_manageCategories,
                       () => context.push(AppRoutes.manageCategories),
@@ -144,7 +143,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       () => context.push(AppRoutes.currencySettings),
                     ),
                     _SettingItem(
-                      Icons.lock,
+                      LucideIcons.lock,
                       l10n.title_security,
                       AppLocalizations.of(context)!.profile_pinFingerprint,
                       () => context.push(AppRoutes.security),
@@ -230,13 +229,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   spacing,
                   items: [
                     _SettingItem(
-                      Icons.help_outline,
+                      LucideIcons.circleQuestionMark,
                       AppLocalizations.of(context)!.profile_helpSupport,
                       AppLocalizations.of(context)!.profile_faqs,
                       () => context.push(AppRoutes.help),
                     ),
                     _SettingItem(
-                      Icons.info_outline,
+                      LucideIcons.info,
                       AppLocalizations.of(context)!.profile_aboutApp,
                       AppLocalizations.of(context)!.profile_versionInfo,
                       () => context.push(AppRoutes.about),
@@ -256,7 +255,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   child: TextButton.icon(
                     onPressed: () =>
                         _showLogoutBottomSheet(context, ref, color, textTheme),
-                    icon: Icon(Icons.logout, size: 18, color: color.error),
+                    icon: Icon(LucideIcons.logOut, size: 18, color: color.error),
                     label: Text(
                       AppLocalizations.of(context)!.profile_logout,
                       style: textTheme.bodyMedium?.copyWith(color: color.error),
@@ -962,7 +961,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           children: [
             Expanded(
               child: _quickStat(
-                Icons.account_balance_wallet,
+                LucideIcons.wallet,
                 accountsAsync.when(
                   data: (a) => (a as List).length.toString(),
                   loading: () => '...',
@@ -976,7 +975,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             _divider(color),
             Expanded(
               child: _quickStat(
-                Icons.category,
+                LucideIcons.layoutGrid,
                 categoriesAsync.when(
                   data: (c) => (c as List).length.toString(),
                   loading: () => '...',
@@ -992,7 +991,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               child: FutureBuilder(
                 future: budgetsAsync,
                 builder: (context, snapshot) => _quickStat(
-                  Icons.pie_chart,
+                  LucideIcons.chartPie,
                   snapshot.hasData
                       ? (snapshot.data as List).length.toString()
                       : '...',
@@ -1088,7 +1087,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   child: Row(
                     children: [
                       Icon(
-                        Icons.emoji_events,
+                        LucideIcons.trophy,
                         color: color.primary,
                         size: 24,
                       ),
@@ -1108,7 +1107,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ),
                       const SizedBox(width: 8),
                       Icon(
-                        Icons.chevron_right,
+                        LucideIcons.chevronRight,
                         color: color.onSurfaceVariant,
                         size: 20,
                       ),
@@ -1132,7 +1131,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  Icon(Icons.emoji_events, color: color.primary, size: 24),
+                  Icon(LucideIcons.trophy, color: color.primary, size: 24),
                   const SizedBox(width: 12),
                   Text(
                     AppLocalizations.of(context)!.profile_yourAchievementsLabel,
@@ -1244,7 +1243,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         ),
                       ),
                       Icon(
-                        Icons.chevron_right,
+                        LucideIcons.chevronRight,
                         color: color.onSurfaceVariant,
                         size: 20,
                       ),
@@ -1274,21 +1273,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final l10n = AppLocalizations.of(context)!;
     final items = <_SettingItem>[
       _SettingItem(
-        Icons.notifications_outlined,
-        AppLocalizations.of(context)!.profile_notifications,
-        AppLocalizations.of(context)!.profile_dailyWeeklySummaries,
+        LucideIcons.bell,
+        l10n.profile_notifications,
+        l10n.profile_dailyWeeklySummaries,
         () => context.push(AppRoutes.notificationSettings),
       ),
       _SettingItem(
         LucideIcons.bellRing,
-        AppLocalizations.of(context)!.profile_autoImport,
-        AppLocalizations.of(context)!.profile_autoImportDesc,
+        l10n.profile_autoImport,
+        l10n.profile_autoImportDesc,
         () => context.push(AppRoutes.smsImport),
       ),
       _SettingItem(
-        Icons.backup,
-        AppLocalizations.of(context)!.profile_backupRestore,
-        AppLocalizations.of(context)!.profile_manageData,
+        LucideIcons.cloudUpload,
+        l10n.profile_backupRestore,
+        l10n.profile_manageData,
         () => context.push(AppRoutes.backupRestore),
         trailing: const ProBadge(),
       ),
@@ -1326,7 +1325,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ),
             ),
             const SizedBox(height: 24),
-            Icon(Icons.person, size: 64, color: color.primary),
+            Icon(LucideIcons.user, size: 64, color: color.primary),
             const SizedBox(height: 16),
             Text(
               AppLocalizations.of(context)!.profile_aboutMudra,
@@ -1372,7 +1371,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              Icon(Icons.logout, size: 48, color: color.error),
+              Icon(LucideIcons.logOut, size: 48, color: color.error),
               const SizedBox(height: 16),
               Text(
                 BuddyMessages.logoutTitle,

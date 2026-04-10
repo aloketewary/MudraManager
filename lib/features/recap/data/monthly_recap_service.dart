@@ -1,4 +1,3 @@
-import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
@@ -146,7 +145,6 @@ class MonthlyRecapService {
     final expenseTxns = <Transaction>[];
     final incomeTxns = <Transaction>[];
     double weekdayTotal = 0, weekendTotal = 0;
-    int weekdayDays = 0, weekendDays = 0;
     double firstHalf = 0, secondHalf = 0;
     double recurringExp = 0, oneTimeExp = 0;
 

@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -66,7 +67,7 @@ class TransactionCalendarHeader extends StatelessWidget {
                   color: color.primaryContainer,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(Icons.calendar_today_rounded, color: color.primary, size: 20),
+                child: Icon(LucideIcons.calendar, color: color.primary, size: 20),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -100,7 +101,7 @@ class TransactionCalendarHeader extends StatelessWidget {
                   children: [
                     if (!useInfiniteScroll || filterStartDate != null) ...[
                       IconButton(
-                        icon: const Icon(Icons.chevron_left_rounded, size: 22),
+                        icon: const Icon(LucideIcons.chevronLeft, size: 22),
                         tooltip: 'Previous Month',
                         onPressed: () {
                           HapticFeedback.lightImpact();
@@ -109,7 +110,7 @@ class TransactionCalendarHeader extends StatelessWidget {
                       ),
                       if (!_isSameMonth(selectedDate, DateTime.now()))
                         IconButton(
-                          icon: Icon(Icons.refresh_rounded, size: 20, color: color.primary),
+                          icon: Icon(LucideIcons.refreshCw, size: 20, color: color.primary),
                           tooltip: 'Reset to Current Month',
                           onPressed: () {
                             HapticFeedback.mediumImpact();
@@ -118,7 +119,7 @@ class TransactionCalendarHeader extends StatelessWidget {
                         )
                       else
                         IconButton(
-                          icon: Icon(Icons.calendar_month_rounded, size: 20, color: color.primary),
+                          icon: Icon(LucideIcons.calendar, size: 20, color: color.primary),
                           tooltip: 'Select Month',
                           onPressed: () {
                             HapticFeedback.mediumImpact();
@@ -126,7 +127,7 @@ class TransactionCalendarHeader extends StatelessWidget {
                           },
                         ),
                       IconButton(
-                        icon: const Icon(Icons.chevron_right_rounded, size: 22),
+                        icon: const Icon(LucideIcons.chevronRight, size: 22),
                         tooltip: 'Next Month',
                         onPressed: _isSameMonth(selectedDate, DateTime.now())
                             ? null
@@ -139,8 +140,8 @@ class TransactionCalendarHeader extends StatelessWidget {
                     IconButton(
                       icon: Icon(
                         useInfiniteScroll && filterStartDate == null
-                            ? Icons.view_list_rounded
-                            : Icons.all_inclusive_rounded,
+                            ? LucideIcons.list
+                            : LucideIcons.infinity,
                         size: 20,
                         color: color.primary,
                       ),
@@ -156,8 +157,8 @@ class TransactionCalendarHeader extends StatelessWidget {
               const SizedBox(width: 8),
               Icon(
                 showCalendar || showMonthPicker
-                    ? Icons.keyboard_arrow_up_rounded
-                    : Icons.keyboard_arrow_down_rounded,
+                    ? LucideIcons.chevronUp
+                    : LucideIcons.chevronDown,
                 color: color.onSurfaceVariant,
               ),
             ],

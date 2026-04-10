@@ -920,6 +920,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get common_back => 'पीछे';
 
   @override
+  String get common_undo => 'वापस करें';
+
+  @override
   String get common_delete => 'हटाएं';
 
   @override
@@ -1176,6 +1179,24 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get label_none => 'कोई नहीं';
+
+  @override
+  String get label_frequency => 'Frequency';
+
+  @override
+  String get label_repeatEvery => 'हर';
+
+  @override
+  String get label_days => 'दिन';
+
+  @override
+  String get label_weeks => 'हफ़्ते';
+
+  @override
+  String get label_months => 'महीने';
+
+  @override
+  String get label_years => 'साल';
 
   @override
   String get trip_expenses => 'खर्चे';
@@ -2877,7 +2898,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get goal_smartInsight => 'Smart जानकारी';
 
   @override
-  String get goal_onTrack => 'सही राह पर';
+  String get goal_onTrack => 'सही चल रहा है ✅';
 
   @override
   String get goal_onTrackDesc => 'यह goal आसानी से पूरा हो सकता है 👍';
@@ -3383,6 +3404,115 @@ class AppLocalizationsHi extends AppLocalizations {
   String get stats_topSpending => 'सबसे ज़्यादा खर्च';
 
   @override
+  String get stats_12MonthTrend => '12 महीने का Trend';
+
+  @override
+  String stats_trendUp(Object category, Object percent) {
+    return '$category बढ़ रहा है — कुल खर्च का $percent%';
+  }
+
+  @override
+  String stats_trendDown(Object category) {
+    return '$category इस महीने कम हो रहा है 📉';
+  }
+
+  @override
+  String stats_topCategory(Object category, Object percent) {
+    return '$category सबसे ज़्यादा है — $percent% खर्च';
+  }
+
+  @override
+  String stats_weekendPeak(Object day) {
+    return 'Weekend पर ज़्यादा खर्च — $day सबसे भारी';
+  }
+
+  @override
+  String stats_weekdayPeak(Object day) {
+    return 'Weekday में ज़्यादा खर्च — $day सबसे भारी';
+  }
+
+  @override
+  String stats_peakAndQuiet(Object peak, Object quiet) {
+    return '$peak सबसे भारी दिन, $quiet सबसे हल्का';
+  }
+
+  @override
+  String get stats_categoryTrends => 'Category Trends';
+
+  @override
+  String get stats_spendingByTag => 'Tag अनुसार खर्च';
+
+  @override
+  String get stats_netWorth => 'Net Worth';
+
+  @override
+  String get stats_savings => 'बचत';
+
+  @override
+  String get stats_categoryImpact => 'CATEGORY प्रभाव';
+
+  @override
+  String get stats_net => 'नेट';
+
+  @override
+  String get stats_dailySpendingPace => 'रोज़ाना खर्च की रफ़्तार';
+
+  @override
+  String get stats_topCategories => 'शीर्ष Categories';
+
+  @override
+  String stats_projectedThisMonth(Object amount) {
+    return 'अनुमान: इस महीने $amount';
+  }
+
+  @override
+  String stats_byDay(Object day, Object amount, Object month) {
+    return 'दिन $day तक: $month में $amount';
+  }
+
+  @override
+  String get stats_steadyHeadline => 'स्थिर चल रहा है';
+
+  @override
+  String get stats_steadyDetail => 'आपका खर्च एकसमान है — यह अनुशासन है।';
+
+  @override
+  String get stats_doingGreatHeadline => 'बहुत अच्छा चल रहा है 🌟';
+
+  @override
+  String get stats_spendingUpHeadline => 'ध्यान दें — खर्च बढ़ रहा है';
+
+  @override
+  String get stats_downloadPdf => 'PDF Download करें';
+
+  @override
+  String get stats_generating => 'बन रहा है...';
+
+  @override
+  String get recap_income => 'आय';
+
+  @override
+  String get recap_expense => 'खर्च';
+
+  @override
+  String get recap_saved => 'बचाया';
+
+  @override
+  String get recap_belowAvg => 'औसत से कम';
+
+  @override
+  String get recap_aboveAvg => 'औसत से ज़्यादा';
+
+  @override
+  String get recap_recurring => 'Recurring';
+
+  @override
+  String get recap_oneTime => 'One-time';
+
+  @override
+  String get recap_recapTitle => 'Recap';
+
+  @override
   String get notifSettings_dailySummary => 'दैनिक सारांश';
 
   @override
@@ -3610,15 +3740,6 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get day_sunday => 'रविवार';
-
-  @override
-  String get recap_income => 'आय';
-
-  @override
-  String get recap_expense => 'खर्च';
-
-  @override
-  String get recap_saved => 'बचाया';
 
   @override
   String get recap_dailySpending => 'दैनिक खर्च';
@@ -4558,6 +4679,101 @@ class AppLocalizationsHi extends AppLocalizations {
   }
 
   @override
+  String goal_goalsInProgress(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count goals चल रहे हैं',
+      one: '1 goal चल रहा है',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get goal_completedSection => 'पूरा हो गया 🎉';
+
+  @override
+  String get goal_emotionAlmost => 'बस थोड़ा और 🚀';
+
+  @override
+  String get goal_emotionHalfway => 'आधा रास्ता 💪';
+
+  @override
+  String get goal_emotionEvery => 'हर बूंद मायने रखती है 🌱';
+
+  @override
+  String get goal_emotionHalfwayDone => 'आधा हो गया ✨';
+
+  @override
+  String get goal_emotionKeepPushing => 'जारी रखो 🔥';
+
+  @override
+  String get goal_emotionJustStarted => 'अभी शुरू हुआ है 🌱';
+
+  @override
+  String get goal_closestToCompletion => 'पूरा होने के सबसे करीब';
+
+  @override
+  String goal_acrossGoals(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count goals में',
+      one: '1 goal में',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get goal_suffixSaved => 'बचाया';
+
+  @override
+  String get goal_suffixLeft => 'बाकी';
+
+  @override
+  String get goal_suffixDone => 'हो गया';
+
+  @override
+  String get goal_suffixAchieved => 'पूरा किया';
+
+  @override
+  String get goal_suffixToGo => 'और चाहिए';
+
+  @override
+  String get goal_needsAttention => 'ध्यान दें ⚠️';
+
+  @override
+  String get goal_aheadOfSchedule => 'समय से आगे 🎯';
+
+  @override
+  String goal_monthsLeft(Object count) {
+    return '$count महीने बाकी';
+  }
+
+  @override
+  String get goal_emotionDidIt => 'आपने कर दिखाया! 🎉';
+
+  @override
+  String get goal_emotionSoClose => 'बहुत करीब, जारी रखो! 💪';
+
+  @override
+  String get goal_emotionMomentum => 'रफ़्तार बन रही है 🔥';
+
+  @override
+  String get goal_emotionCatchUp => 'चलो पकड़ते हैं ⚡';
+
+  @override
+  String get goal_finishGoal => 'यह goal पूरा करो! 🚀';
+
+  @override
+  String get goal_behindPace => 'पीछे चल रहा है ⚠️';
+
+  @override
+  String goal_daysAgo(Object count) {
+    return '$count दिन पहले';
+  }
+
+  @override
   String get common_today => 'आज';
 
   @override
@@ -5009,4 +5225,50 @@ class AppLocalizationsHi extends AppLocalizations {
   @override
   String get onboard_currencyWarning =>
       'बाद में base currency बदलने पर मौजूदा transactions archive हो जाएंगे।';
+
+  @override
+  String get statistics_topCategory => 'टॉप Category';
+
+  @override
+  String get statistics_dailyAverage => 'रोज़ का औसत';
+
+  @override
+  String get statistics_perDay => 'प्रति दिन';
+
+  @override
+  String statistics_percentOfExpenses(String percent) {
+    return '$percent% खर्चों का';
+  }
+
+  @override
+  String get sms_infoTitle => 'SMS Import कैसे काम करता है';
+
+  @override
+  String get sms_infoOnlyScans => 'सिर्फ bank और wallet SMS scan करता है';
+
+  @override
+  String get sms_infoStaysOnDevice => 'सारा data आपके device पर ही रहता है';
+
+  @override
+  String get sms_infoAutoCreates => 'Transactions अपने-आप बन जाते हैं';
+
+  @override
+  String get sms_infoNoPersonal => 'कोई personal message नहीं पढ़ा जाता';
+
+  @override
+  String get dashboard_totalBalance => 'कुल बैलेंस';
+
+  @override
+  String get dashboard_netWorthLink => 'Net Worth';
+
+  @override
+  String get dashboard_showAccounts => 'Accounts दिखाएं';
+
+  @override
+  String get dashboard_hideAccounts => 'Accounts छुपाएं';
+
+  @override
+  String dashboard_accountsTapExpand(int count) {
+    return '$count accounts · Tap करें';
+  }
 }

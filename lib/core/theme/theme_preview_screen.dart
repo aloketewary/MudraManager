@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 
@@ -56,7 +57,7 @@ class ThemePreviewCard extends StatelessWidget {
                     child: Row(
                       children: [
                         Icon(
-                          Icons.menu,
+                          LucideIcons.menu,
                           size: 14,
                           color: colorScheme.onSurface,
                         ),
@@ -94,7 +95,7 @@ class ThemePreviewCard extends StatelessWidget {
                                   radius: 12,
                                   backgroundColor: colorScheme.primary,
                                   child: Icon(
-                                    Icons.check,
+                                    LucideIcons.check,
                                     size: 12,
                                     color: colorScheme.onPrimary,
                                   ),
@@ -125,7 +126,7 @@ class ThemePreviewCard extends StatelessWidget {
                               radius: 18,
                               backgroundColor: colorScheme.tertiary,
                               child: Icon(
-                                Icons.edit,
+                                LucideIcons.pencil,
                                 size: 16,
                                 color: colorScheme.onTertiary,
                               ),
@@ -147,7 +148,7 @@ class ThemePreviewCard extends StatelessWidget {
                     radius: 10,
                     backgroundColor: colorScheme.primary,
                     child: const Icon(
-                      Icons.check,
+                      LucideIcons.check,
                       color: Colors.white,
                       size: 12,
                     ),

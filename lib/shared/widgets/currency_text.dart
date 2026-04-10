@@ -131,20 +131,28 @@ class CurrencyText extends StatelessWidget {
     return '$code ';
   }
 
-  /// Compact formatting: Indian notation for base currency.
-  /// <10K → full grouped number
-  /// 10K–99.9K → 12.5K
-  /// 1L–99.9L → 2.3L
-  /// 1Cr+ → 1.2Cr
+  /// Compact formatting.
+  /// INR base: Indian notation (K, L, Cr)
+  /// Other currencies: International notation (K, M, B)
   String _formatCompact(AppLocalizations ctxt, double value, int decimals) {
-    if (value.abs() >= 10000000) {
-      return '${_trimTrailing((value / 10000000).toStringAsFixed(decimals))}${ctxt.currency_crore_short}';
-    } else if (value.abs() >= 100000) {
-      return '${_trimTrailing((value / 100000).toStringAsFixed(decimals))}${ctxt.currency_lakh_short}';
-    } else if (value.abs() >= 10000) {
-      return '${_trimTrailing((value / 1000).toStringAsFixed(decimals))}${ctxt.currency_thousand_short}';
+    final isIndian = (currencyCode ?? BaseCurrency.code) == 'INR';
+    if (isIndian) {
+      if (value >= 10000000) {
+        return '${_trimTrailing((value / 10000000).toStringAsFixed(decimals))}${ctxt.currency_crore_short}';
+      } else if (value >= 100000) {
+        return '${_trimTrailing((value / 100000).toStringAsFixed(decimals))}${ctxt.currency_lakh_short}';
+      } else if (value >= 10000) {
+        return '${_trimTrailing((value / 1000).toStringAsFixed(decimals))}${ctxt.currency_thousand_short}';
+      }
+    } else {
+      if (value >= 1000000000) {
+        return '${_trimTrailing((value / 1000000000).toStringAsFixed(decimals))}B';
+      } else if (value >= 1000000) {
+        return '${_trimTrailing((value / 1000000).toStringAsFixed(decimals))}M';
+      } else if (value >= 10000) {
+        return '${_trimTrailing((value / 1000).toStringAsFixed(decimals))}${ctxt.currency_thousand_short}';
+      }
     }
-    // Below 10K: full grouped number
     final locale = _safeNumericLocale(ctxt.localeName);
     final fmt = NumberFormat.currency(
       locale: locale,
@@ -184,13 +192,15 @@ class CurrencyText extends StatelessWidget {
   }
 
   /// Returns a locale safe for NumberFormat (Western digits).
-  /// Locales like bn, mr, ar use non-Latin numerals — fall back to
-  /// hi_IN (for Indian grouping) or en.
+  /// Bengali, Arabic etc. use non-Latin numerals — fall back to
+  /// hi_IN (Indian grouping) for INR, or en for other currencies.
   static String _safeNumericLocale(String localeName) {
     const nonLatinNumeralLocales = {'bn', 'mr', 'ar', 'fa', 'ne', 'pa', 'as', 'ks'};
     final lang = localeName.split('_').first;
     if (lang == 'hi') return 'hi_IN';
-    if (nonLatinNumeralLocales.contains(lang)) return 'hi_IN';
+    if (nonLatinNumeralLocales.contains(lang)) {
+      return BaseCurrency.code == 'INR' ? 'hi_IN' : 'en';
+    }
     return localeName;
   }
 

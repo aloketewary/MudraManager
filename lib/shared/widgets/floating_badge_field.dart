@@ -47,14 +47,16 @@ class _FloatingBadgeFieldState extends State<FloatingBadgeField>
       final rx = cx * radiusFraction;
       final ry = cy * radiusFraction * 0.85; // slightly elliptical
 
-      placements.add(_BadgePlacement(
-        x: cx + rx * cos(angle),
-        y: cy + ry * sin(angle),
-        phaseOffset: rng.nextDouble() * 2 * pi,
-        floatAmplitude: 3.0 + rng.nextDouble() * 4.0,
-        size: 32.0 + rng.nextDouble() * 8.0,
-        icon: widget.badgeIcons[i],
-      ));
+      placements.add(
+        _BadgePlacement(
+          x: cx + rx * cos(angle),
+          y: cy + ry * sin(angle),
+          phaseOffset: rng.nextDouble() * 2 * pi,
+          floatAmplitude: 3.0 + rng.nextDouble() * 4.0,
+          size: 32.0 + rng.nextDouble() * 8.0,
+          icon: widget.badgeIcons[i],
+        ),
+      );
     }
     return placements;
   }
@@ -67,8 +69,9 @@ class _FloatingBadgeFieldState extends State<FloatingBadgeField>
 
   @override
   Widget build(BuildContext context) {
-    if (_placements.isEmpty)
+    if (_placements.isEmpty) {
       return SizedBox(width: widget.width, height: widget.height);
+    }
 
     return AnimatedBuilder(
       animation: _controller,

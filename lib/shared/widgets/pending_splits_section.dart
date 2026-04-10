@@ -1,5 +1,5 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
-import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -42,7 +42,7 @@ class PendingSplitsSection extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
           child: Row(
             children: [
-              Icon(Icons.pending_actions, color: color.secondary, size: 20),
+              Icon(LucideIcons.clockAlert, color: color.secondary, size: 20),
               const SizedBox(width: 8),
               Text(
                 'Pending Splits',
@@ -121,7 +121,7 @@ class PendingSplitsSection extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Icon(
-                                Icons.receipt,
+                                LucideIcons.receipt,
                                 size: 20,
                                 color: color.secondary,
                               ),
@@ -148,7 +148,7 @@ class PendingSplitsSection extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              '${formatCurrency(txn.amount, decimals: 0)}',
+                              formatCurrency(txn.amount, decimals: 0),
                               style: textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: color.primary,
@@ -156,14 +156,14 @@ class PendingSplitsSection extends StatelessWidget {
                             ),
                             const SizedBox(width: 8),
                             Icon(
-                              Icons.chevron_right,
+                              LucideIcons.chevronRight,
                               color: color.onSurfaceVariant,
                             ),
                           ],
                         ),
                       ),
                     ),
-                  )),
+                  ),),
             ],
           );
         }),
@@ -192,7 +192,7 @@ class PendingSplitsSection extends StatelessWidget {
               children: [
                 Expanded(
                   child: _SplitOptionButton(
-                    icon: Icons.people,
+                    icon: LucideIcons.users,
                     label: 'Equal',
                     color: color.primary,
                     onTap: () {
@@ -201,14 +201,14 @@ class PendingSplitsSection extends StatelessWidget {
                         'tripId': tripId,
                         'transactionId': txn.id,
                         'splitType': 'equal',
-                      });
+                      },);
                     },
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: _SplitOptionButton(
-                    icon: Icons.percent,
+                    icon: LucideIcons.percent,
                     label: 'Percentage',
                     color: color.secondary,
                     onTap: () {
@@ -217,14 +217,14 @@ class PendingSplitsSection extends StatelessWidget {
                         'tripId': tripId,
                         'transactionId': txn.id,
                         'splitType': 'percentage',
-                      });
+                      },);
                     },
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: _SplitOptionButton(
-                    icon: Icons.edit,
+                    icon: LucideIcons.pencil,
                     label: 'Custom',
                     color: color.tertiary,
                     onTap: () {
@@ -233,7 +233,7 @@ class PendingSplitsSection extends StatelessWidget {
                         'tripId': tripId,
                         'transactionId': txn.id,
                         'splitType': 'custom',
-                      });
+                      },);
                     },
                   ),
                 ),

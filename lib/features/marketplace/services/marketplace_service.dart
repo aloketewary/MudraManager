@@ -388,7 +388,7 @@ class MarketplaceService {
           label: 'Alert Threshold',
           type: 'number',
           defaultValue: 1000.0,
-          prefix: '${BaseCurrency.symbol}',
+          prefix: BaseCurrency.symbol,
         ),
       ],
     ),

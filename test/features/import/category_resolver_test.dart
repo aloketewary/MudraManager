@@ -116,8 +116,8 @@ void main() {
     test('created category has keywords', () {
       final cat = CategoryResolver.createCategory('Food');
       expect(cat.keywords, isNotNull);
-      expect(cat.keywords!, contains('restaurant'));
-      expect(cat.keywords!, contains('dining'));
+      expect(cat.keywords, contains('restaurant'));
+      expect(cat.keywords, contains('dining'));
     });
 
     test('unknown category has null keywords', () {
@@ -137,7 +137,7 @@ void main() {
     });
 
     test('invalid when date is null', () {
-      final row = ImportRow(rowIndex: 2, amount: 500);
+      final row = const ImportRow(rowIndex: 2, amount: 500);
       expect(row.isValid, false);
     });
 
@@ -162,7 +162,7 @@ void main() {
     });
 
     test('defaults to expense', () {
-      final row = ImportRow(rowIndex: 2);
+      final row = const ImportRow(rowIndex: 2);
       expect(row.isExpense, true);
     });
   });

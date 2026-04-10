@@ -5,7 +5,6 @@ class IconHelper {
   static IconData iconFromName(String name) {
     final icon = iconMap[name];
     if (icon == null) {
-      debugPrint('⚠️ IconHelper: missing icon "$name"');
       return LucideIcons.circleQuestionMark;
     }
     return icon;
@@ -78,7 +77,7 @@ class IconHelper {
       'gas_bill': LucideIcons.flame,
       'water_bill': LucideIcons.glassWater,
       'broadband': LucideIcons.router,
-      'recharge': LucideIcons.refreshCcw,
+      'recharge': LucideIcons.rotateCcw,
       'postpaid': LucideIcons.phoneOutgoing,
       'prepaid': LucideIcons.phoneIncoming,
       'autopay': LucideIcons.timerReset,
@@ -131,7 +130,7 @@ class IconHelper {
       'glass_water': LucideIcons.glassWater,
       'martini': LucideIcons.martini,
       'vegan': LucideIcons.vegan,
-      'milk': LucideIcons.milkOff,
+      'milk': LucideIcons.milk,
       'microwave': LucideIcons.microwave,
       'refrigerator': LucideIcons.refrigerator,
       'delivery': LucideIcons.truck,
@@ -212,7 +211,7 @@ class IconHelper {
       'lab_test': LucideIcons.microscope,
       'vaccination': LucideIcons.syringe,
       'health_insurance': LucideIcons.shieldPlus,
-      'yoga': LucideIcons.personStanding,
+      'yoga': LucideIcons.userCheck,
       'haircut': LucideIcons.scissors,
       'skincare': LucideIcons.droplet,
       'perfume': LucideIcons.sprayCan,
@@ -383,7 +382,6 @@ class IconHelper {
     }
     final icon = iconMap[iconName];
     if (icon == null) {
-      debugPrint('⚠️ IconHelper: missing icon "$iconName"');
       return LucideIcons.circleQuestionMark;
     }
     return icon;

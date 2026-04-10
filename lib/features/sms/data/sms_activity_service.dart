@@ -1,4 +1,3 @@
-import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
@@ -40,7 +39,6 @@ class SmsActivityService {
     return score;
   }
 
-  // Detect potential duplicates within time window
   // Detect potential duplicates within time window (check both SMS and manual transactions)
   Future<List<dynamic>> _findPotentialDuplicates(
     SmsActivity activity,
@@ -53,7 +51,7 @@ class SmsActivityService {
     final startTime = activity.date.subtract(timeWindow);
     final endTime = activity.date.add(timeWindow);
 
-    // Check SMS activities
+    // Check SMS activities (exclude self by hash, skip already-approved ones)
     final smsDuplicates = await isar.smsActivitys
         .filter()
         .dateBetween(startTime, endTime)
@@ -64,7 +62,7 @@ class SmsActivityService {
         .smsHashEqualTo(activity.smsHash)
         .findAll();
 
-    // Check manual transactions
+    // Check manual/SMS-created transactions
     final manualDuplicates = await isar.transactions
         .filter()
         .dateBetween(startTime, endTime)
@@ -73,6 +71,16 @@ class SmsActivityService {
         .and()
         .isExpenseEqualTo(!(activity.isIncome == true))
         .findAll();
+
+    // Also check if any existing transaction was already created from this SMS
+    // (handles the case where user edited the transaction's amount/date)
+    final linkedTxn = await isar.transactions
+        .filter()
+        .smsActivityIdEqualTo(activity.id)
+        .findFirst();
+    if (linkedTxn != null && !manualDuplicates.contains(linkedTxn)) {
+      return [...smsDuplicates, ...manualDuplicates, linkedTxn];
+    }
 
     return [...smsDuplicates, ...manualDuplicates];
   }
@@ -335,38 +343,28 @@ class SmsActivityService {
     Category category,
     Isar isar,
   ) async {
-    final bodyLower = smsBody.toLowerCase();
-    final words = bodyLower.split(RegExp(r'\s+'));
+    final categories = await isar.categorys.where().findAll();
+    final merchant = CategoryMatcherService.detectMerchant(smsBody, categories);
+    if (merchant == null) return;
 
-    // Extract potential merchant names (3-15 chars, alphabetic)
-    final potentialKeywords = words
-        .where(
-          (w) =>
-              w.length >= 3 &&
-              w.length <= 15 &&
-              RegExp(r'^[a-z]+$').hasMatch(w),
-        )
-        .toList();
+    final keyword = merchant.toLowerCase().trim();
+    if (keyword.length < 3 || _smsNoiseWords.contains(keyword)) return;
 
-    if (potentialKeywords.isEmpty) return;
-
-    // Add new keywords to category
     final existingKeywords = category.keywords ?? [];
-    final newKeywords = potentialKeywords
-        .where((k) => !existingKeywords.contains(k))
-        .take(3)
-        .toList(); // Limit to 3 new keywords per SMS
+    if (existingKeywords.contains(keyword)) return;
 
-    if (newKeywords.isNotEmpty) {
-      category.keywords = [...existingKeywords, ...newKeywords];
-      await isar.writeTxn(() async {
-        await isar.categorys.put(category);
-      });
-      _log.i(
-        'Learned new keywords for ${category.name}: ${newKeywords.join(", ")}',
-      );
-    }
+    category.keywords = [...existingKeywords, keyword];
+    await isar.writeTxn(() async {
+      await isar.categorys.put(category);
+    });
+    _log.i('Learned merchant keyword for ${category.name}: $keyword');
   }
+
+  static const _smsNoiseWords = {
+    'debited', 'credited', 'account', 'balance', 'available',
+    'transaction', 'transfer', 'payment', 'received', 'sent',
+    'bank', 'upi', 'neft', 'imps', 'rtgs', 'ref', 'inr',
+  };
 
   Future<void> rejectActivity(SmsActivity activity, String? reason) async {
     final isar = await _getIsar();

@@ -26,50 +26,57 @@ class SnackbarService {
     messenger.clearSnackBars();
 
     final (bg, fg, accent) = _colorRoles(type, color);
+    final hasAction = actionLabel != null;
+    final snackDuration = hasAction ? const Duration(seconds: 6) : duration;
 
     messenger.showSnackBar(
       SnackBar(
-        content: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: accent.withValues(alpha: 0.15),
-                shape: BoxShape.circle,
+        content: hasAction
+            ? _UndoSnackbarContent(
+                message: message,
+                actionLabel: actionLabel,
+                onAction: onAction ?? () {},
+                duration: snackDuration,
+                fg: fg,
+                accent: accent,
+                textTheme: textTheme,
+                type: type,
+              )
+            : Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: accent.withValues(alpha: 0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(_icon(type), size: 18, color: accent),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      message,
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: fg,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
               ),
-              child: Icon(_icon(type), size: 18, color: accent),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                message,
-                style: textTheme.bodyMedium?.copyWith(
-                  color: fg,
-                  fontWeight: FontWeight.w500,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
         backgroundColor: bg,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: hasAction ? 10 : 14,
+        ),
         elevation: 0,
-        duration: actionLabel != null ? const Duration(seconds: 8) : duration,
+        duration: snackDuration,
         dismissDirection: DismissDirection.horizontal,
-        showCloseIcon: actionLabel != null,
-        closeIconColor: fg.withValues(alpha: 0.7),
-        action: actionLabel != null
-            ? SnackBarAction(
-                label: actionLabel,
-                textColor: accent,
-                onPressed: onAction ?? () {},
-              )
-            : null,
       ),
     );
   }
@@ -129,7 +136,6 @@ class SnackbarService {
         SnackbarType.warning => LucideIcons.triangleAlert,
       };
 
-  /// Returns (background, foreground, accent) using M3 tonal color roles.
   static (Color, Color, Color) _colorRoles(
     SnackbarType type,
     ColorScheme color,
@@ -156,5 +162,117 @@ class SnackbarService {
           color.tertiary,
         ),
     };
+  }
+}
+
+/// Snackbar content with countdown ring + undo button.
+class _UndoSnackbarContent extends StatefulWidget {
+  final String message;
+  final String actionLabel;
+  final VoidCallback onAction;
+  final Duration duration;
+  final Color fg;
+  final Color accent;
+  final TextTheme textTheme;
+  final SnackbarType type;
+
+  const _UndoSnackbarContent({
+    required this.message,
+    required this.actionLabel,
+    required this.onAction,
+    required this.duration,
+    required this.fg,
+    required this.accent,
+    required this.textTheme,
+    required this.type,
+  });
+
+  @override
+  State<_UndoSnackbarContent> createState() => _UndoSnackbarContentState();
+}
+
+class _UndoSnackbarContentState extends State<_UndoSnackbarContent>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: widget.duration,
+    )..forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        // Countdown ring with icon
+        AnimatedBuilder(
+          animation: _controller,
+          builder: (_, __) => SizedBox(
+            width: 32,
+            height: 32,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                CircularProgressIndicator(
+                  value: 1.0 - _controller.value,
+                  strokeWidth: 2.5,
+                  strokeCap: StrokeCap.round,
+                  color: widget.accent,
+                  backgroundColor: widget.accent.withValues(alpha: 0.15),
+                ),
+                Icon(
+                  SnackbarService._icon(widget.type),
+                  size: 14,
+                  color: widget.accent,
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        // Message
+        Expanded(
+          child: Text(
+            widget.message,
+            style: widget.textTheme.bodyMedium?.copyWith(
+              color: widget.fg,
+              fontWeight: FontWeight.w500,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        const SizedBox(width: 8),
+        // Undo button
+        TextButton(
+          onPressed: () {
+            widget.onAction();
+            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          },
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            minimumSize: Size.zero,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+          child: Text(
+            widget.actionLabel,
+            style: widget.textTheme.labelLarge?.copyWith(
+              color: widget.accent,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }

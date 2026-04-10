@@ -4,8 +4,6 @@ import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
-import 'package:mudra_manager/core/extension/localization_extenstion.dart';
-import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/shared/widgets/account_display_card.dart';
 
@@ -41,7 +39,6 @@ class AccountSelectorBottomSheet extends ConsumerWidget {
     final accountsAsync = ref.watch(accountsProvider);
     final accountService = ref.watch(accountServiceProvider);
     final textTheme = Theme.of(context).textTheme;
-    final l10n = AppLocalizations.of(context)!;
 
     return DraggableScrollableSheet(
       initialChildSize: 0.6,

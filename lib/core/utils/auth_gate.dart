@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -166,7 +167,7 @@ class _AuthGateState extends ConsumerState<AuthGate>
             context,
             title: 'Exit Mudra Manager?',
             message: 'Are you sure you want to exit?',
-            icon: Icons.exit_to_app,
+            icon: LucideIcons.logOut,
             confirmText: 'Exit',
           );
           if (shouldExit == true) SystemNavigator.pop();
@@ -231,7 +232,7 @@ class BiometricLockScreen extends StatelessWidget {
                     ],
                   ),
                   child: Icon(
-                    Icons.fingerprint,
+                    LucideIcons.scanFace,
                     size: 80,
                     color: color.primary,
                   ),
@@ -274,7 +275,7 @@ class BiometricLockScreen extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.fingerprint, size: 24),
+                      const Icon(LucideIcons.scanFace, size: 24),
                       const SizedBox(width: 12),
                       Text(
                         'Unlock',

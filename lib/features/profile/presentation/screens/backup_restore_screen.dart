@@ -5,7 +5,6 @@ import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/db/models/backup_metadata.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
@@ -430,7 +429,7 @@ class BackupRestoreScreen extends ConsumerWidget {
       context,
       isRestore: false,
     );
-    if (password == null) return;
+    if (password == null || !context.mounted) return;
 
     final includeAttachments = await DialogUtils.showConfirmation(
       context,
@@ -466,6 +465,7 @@ class BackupRestoreScreen extends ConsumerWidget {
     if (password == null) return;
 
     final isar = await ref.read(isarServiceProvider).getInstance();
+    if (!context.mounted) return;
     final data = await BackupService.restoreEncryptedBackup(
       context,
       isar,

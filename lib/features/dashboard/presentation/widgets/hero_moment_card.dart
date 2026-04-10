@@ -292,7 +292,7 @@ class _HeroMomentCardState extends ConsumerState<HeroMomentCard>
                       ),
                     ),
                     Icon(
-                      Icons.close,
+                      LucideIcons.x,
                       color: color.onSurfaceVariant,
                       size: 18,
                     ),

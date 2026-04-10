@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
@@ -221,7 +222,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
                 ],
               );
             },
-            loading: () => ListView(children: List.generate(4, (_) => DashboardCardSkeleton())),
+            loading: () => ListView(children: List.generate(4, (_) => const DashboardCardSkeleton())),
             error: (_, __) =>
                 Center(child: Text(BuddyMessages.genericError)),
           ),
@@ -237,10 +238,10 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
             gravity: 0.2,
             shouldLoop: false,
             colors: const [
-              Colors.green,
+              FinanceColors.statusGood,
               Colors.blue,
               Colors.pink,
-              Colors.orange,
+              FinanceColors.statusWarning,
               Colors.purple,
             ],
           ),
@@ -268,7 +269,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionHeader(
-            'Trophy Shelf', '${items.length}', color, textTheme),
+            'Trophy Shelf', '${items.length}', color, textTheme,),
         const SizedBox(height: 10),
         Container(
           decoration: BoxDecoration(

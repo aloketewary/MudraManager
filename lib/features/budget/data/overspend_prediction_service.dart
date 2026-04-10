@@ -1,5 +1,4 @@
 import 'package:mudra_manager/core/currency/currency_meta.dart';
-import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/db/models/budget.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';

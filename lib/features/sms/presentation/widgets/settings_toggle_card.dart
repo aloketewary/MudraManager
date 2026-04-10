@@ -33,7 +33,7 @@ class SettingsToggleCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: color.primary.withOpacity(0.1),
+                color: color.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(icon, color: color.primary, size: 24),

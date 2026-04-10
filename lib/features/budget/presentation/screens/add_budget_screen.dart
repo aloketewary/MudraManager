@@ -97,13 +97,9 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
         .budget((q) => q.idEqualTo(budget.id))
         .findAll();
 
-    debugPrint('[BUDGET_EDIT] budget.id=${budget.id} name=${budget.name} type=${budget.budgetType}');
-    debugPrint('[BUDGET_EDIT] allocs found: ${allocs.length}');
-
     for (final alloc in allocs) {
       await alloc.category.load();
       final cat = alloc.category.value;
-      debugPrint('[BUDGET_EDIT] alloc.id=${alloc.id} amount=${alloc.amount} cat=${cat?.id}:${cat?.name}');
       if (cat == null) continue;
       _selectedCats.add(cat);
       selectedCategories.add(cat.id);
@@ -116,7 +112,6 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
         _expandedParents[parentId] = true;
       }
     }
-    debugPrint('[BUDGET_EDIT] selectedCategories=$selectedCategories _selectedCats=${_selectedCats.map((c) => '${c.id}:${c.name}').toList()}');
     _allocationsLoaded = true;
     if (mounted) setState(() {});
   }
@@ -329,7 +324,6 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
             if (!_allocationsLoaded) {
               return const Center(child: CircularProgressIndicator());
             }
-            debugPrint('[BUDGET_BUILD] cats=${cats.length} selectedCategories=$selectedCategories _selectedCats=${_selectedCats.length} step=$_step');
             final parentCategories = _getParentCategories(cats);
             return Column(
               children: [
@@ -1391,7 +1385,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
     final accent = pct > 0.9
         ? color.error
         : pct > 0.7
-            ? Colors.orange
+            ? FinanceColors.statusWarning
             : FinanceColors.incomeColor(Theme.of(context).brightness);
 
     return Padding(
@@ -1467,7 +1461,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
       // 🟠 Tight
       message = BuddyMessages.budgetGettingTight(formatCurrency(remaining, code: BaseCurrency.code), daysLeft);
       icon = LucideIcons.clock;
-      accent = Colors.orange;
+      accent = FinanceColors.statusWarning;
     } else {
       // 🟢 Healthy
       message = BuddyMessages.budgetInControl(formatCurrency(safePerDay, code: BaseCurrency.code));

@@ -441,7 +441,9 @@ class CategorySeeder {
 
   /// Looks up a system category by name. Returns null if not found.
   static Future<Category?> getSystemCategory(
-      Isar isar, String name) async {
+    Isar isar,
+    String name,
+  ) async {
     return isar.categorys
         .filter()
         .isSystemEqualTo(true)

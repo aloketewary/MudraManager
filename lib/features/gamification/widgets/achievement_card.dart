@@ -289,7 +289,6 @@ class _AchievementShowcase extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final isUnlocked = achievement.isUnlocked;
     final accent = _categoryAccent();

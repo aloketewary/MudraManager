@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
@@ -10,8 +11,8 @@ class GamificationDebugButton extends ConsumerWidget {
     return FloatingActionButton.extended(
       onPressed: () async {
         try {
-          final service = await ref.read(gamificationServiceInitProvider.future);
-          // await initTestGamificationData(service);
+          await ref.read(gamificationServiceInitProvider.future);
+          // final service = above; await initTestGamificationData(service);
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('✅ Gamification data created!')),
@@ -25,7 +26,7 @@ class GamificationDebugButton extends ConsumerWidget {
           }
         }
       },
-      icon: const Icon(Icons.sports_esports),
+      icon: const Icon(LucideIcons.gamepad2),
       label: const Text('Init Gamification'),
     );
   }

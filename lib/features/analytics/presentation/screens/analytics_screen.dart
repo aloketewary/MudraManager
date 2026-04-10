@@ -1,3 +1,5 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -41,7 +43,10 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(title: Text(AppLocalizations.of(context)!.title_analytics), elevation: 0),
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.title_analytics),
+        elevation: 0,
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -59,10 +64,15 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.favorite, color: color.primary, size: 28),
+                          Icon(
+                            LucideIcons.heart,
+                            color: color.primary,
+                            size: 28,
+                          ),
                           const SizedBox(width: 12),
                           Text(
-                            AppLocalizations.of(context)!.analytics_financialHealthScore,
+                            AppLocalizations.of(context)!
+                                .analytics_financialHealthScore,
                             style: textTheme.headlineSmall?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -120,7 +130,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                             child: Row(
                               children: [
                                 Icon(
-                                  Icons.lightbulb_outline,
+                                  LucideIcons.lightbulb,
                                   size: 20,
                                   color: color.primary,
                                 ),
@@ -161,13 +171,14 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                       Row(
                         children: [
                           Icon(
-                            Icons.trending_up,
+                            LucideIcons.trendingUp,
                             color: color.primary,
                             size: 28,
                           ),
                           const SizedBox(width: 12),
                           Text(
-                            AppLocalizations.of(context)!.analytics_spendingPrediction,
+                            AppLocalizations.of(context)!
+                                .analytics_spendingPrediction,
                             style: textTheme.headlineSmall?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -187,7 +198,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                             const SizedBox(height: 8),
                             CurrencyText(
                               amount: GuestModeUtil.applyGuestMode(
-                                  predicted, isGuestMode),
+                                predicted,
+                                isGuestMode,
+                              ),
                               style: textTheme.displayMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: color.primary,
@@ -234,13 +247,14 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                         Row(
                           children: [
                             Icon(
-                              Icons.category,
+                              LucideIcons.layoutGrid,
                               color: color.primary,
                               size: 28,
                             ),
                             const SizedBox(width: 12),
                             Text(
-                              AppLocalizations.of(context)!.analytics_categoryTrends,
+                              AppLocalizations.of(context)!
+                                  .analytics_categoryTrends,
                               style: textTheme.headlineSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -271,28 +285,31 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                                             CurrencyText(
                                               amount:
                                                   GuestModeUtil.applyGuestMode(
-                                                      trend.thisMonth,
-                                                      isGuestMode),
+                                                trend.thisMonth,
+                                                isGuestMode,
+                                              ),
                                               style: textTheme.titleSmall,
                                             ),
                                             if (trend.changePercent != 0) ...[
                                               const SizedBox(width: 8),
                                               Icon(
                                                 trend.changePercent > 0
-                                                    ? Icons.arrow_upward
-                                                    : Icons.arrow_downward,
+                                                    ? LucideIcons.arrowUp
+                                                    : LucideIcons.arrowDown,
                                                 size: 16,
                                                 color: trend.changePercent > 0
-                                                    ? Colors.red
-                                                    : Colors.green,
+                                                    ? FinanceColors.statusDanger
+                                                    : FinanceColors.statusGood,
                                               ),
                                               Text(
                                                 '${trend.changePercent.abs().toStringAsFixed(0)}%',
                                                 style: textTheme.bodySmall
                                                     ?.copyWith(
                                                   color: trend.changePercent > 0
-                                                      ? Colors.red
-                                                      : Colors.green,
+                                                      ? FinanceColors
+                                                          .statusDanger
+                                                      : FinanceColors
+                                                          .statusGood,
                                                 ),
                                               ),
                                             ],
@@ -343,13 +360,14 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                         Row(
                           children: [
                             Icon(
-                              Icons.calendar_today,
+                              LucideIcons.calendar,
                               color: color.primary,
                               size: 28,
                             ),
                             const SizedBox(width: 12),
                             Text(
-                              AppLocalizations.of(context)!.analytics_spendingByDay,
+                              AppLocalizations.of(context)!
+                                  .analytics_spendingByDay,
                               style: textTheme.headlineSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -463,9 +481,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   }
 
   Color _getScoreColor(int score) {
-    if (score >= 80) return Colors.green;
+    if (score >= 80) return FinanceColors.statusGood;
     if (score >= 60) return Colors.blue;
-    if (score >= 40) return Colors.orange;
-    return Colors.red;
+    if (score >= 40) return FinanceColors.statusWarning;
+    return FinanceColors.statusDanger;
   }
 }

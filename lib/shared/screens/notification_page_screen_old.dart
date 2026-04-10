@@ -23,7 +23,7 @@ class NotificationPage extends ConsumerWidget {
         title: Text('Notifications', style: textTheme.titleLarge),
         actions: [
           IconButton(
-            icon: Icon(LucideIcons.checkCheck),
+            icon: const Icon(LucideIcons.checkCheck),
             onPressed: () async {
               HapticFeedback.mediumImpact();
               await notificationService.markAllAsRead();
@@ -31,7 +31,7 @@ class NotificationPage extends ConsumerWidget {
             tooltip: 'Mark all as read',
           ),
           IconButton(
-            icon: Icon(LucideIcons.trash2),
+            icon: const Icon(LucideIcons.trash2),
             onPressed: () {
               HapticFeedback.mediumImpact();
               notificationService.clearAllNotifications();
@@ -51,7 +51,7 @@ class NotificationPage extends ConsumerWidget {
                 SliverFillRemaining(
                   child: NoDataFound(
                     message: BuddyMessages.noNotifications,
-                    iconData: Icons.notifications_none_outlined,
+                    iconData: LucideIcons.bell,
                   ),
                 )
               else
@@ -148,7 +148,7 @@ class NotificationPage extends ConsumerWidget {
                           ),
                         ),
                       );
-                    }, childCount: data.length),
+                    }, childCount: data.length,),
                   ),
                 ),
             ],

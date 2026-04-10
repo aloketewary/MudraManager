@@ -294,17 +294,17 @@ class _AddTripTransactionScreenState
                           ButtonSegment(
                             value: SplitType.equal,
                             label: Text('Equally'),
-                            icon: Icon(Icons.balance_rounded),
+                            icon: Icon(LucideIcons.scale),
                           ),
                           ButtonSegment(
                             value: SplitType.custom,
                             label: Text('Custom'),
-                            icon: Icon(Icons.tune_rounded),
+                            icon: Icon(LucideIcons.slidersHorizontal),
                           ),
                           ButtonSegment(
                             value: SplitType.percentage,
                             label: Text('%'),
-                            icon: Icon(Icons.percent_rounded),
+                            icon: Icon(LucideIcons.percent),
                           ),
                         ],
                         selected: {_splitType},
@@ -439,10 +439,10 @@ class _AddTripTransactionScreenState
                                 ),
                                 if (isChecked &&
                                     _splitType == SplitType.equal)
-                                  Icon(Icons.check_circle_rounded,
+                                  Icon(LucideIcons.circleCheck,
                                       color: color.primary,)
                                 else if (!isChecked)
-                                  Icon(Icons.circle_outlined,
+                                  Icon(LucideIcons.circle,
                                       color: color.outline,),
                               ],
                             ),
@@ -494,7 +494,7 @@ class _AddTripTransactionScreenState
         );
       },
       loading: () => Scaffold(
-        body: ListView(children: List.generate(3, (_) => DashboardCardSkeleton())),
+        body: ListView(children: List.generate(3, (_) => const DashboardCardSkeleton())),
       ),
       error: (e, _) => Scaffold(
         body: Center(child: Text(BuddyMessages.errorWith('$e'))),
@@ -545,7 +545,7 @@ class _AddTripTransactionScreenState
               border:
                   OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
               suffixIcon: IconButton(
-                icon: Icon(Icons.auto_fix_high,
+                icon: Icon(LucideIcons.wand,
                     size: 18, color: color.primary,),
                 tooltip: 'Auto-fill remaining',
                 padding: EdgeInsets.zero,

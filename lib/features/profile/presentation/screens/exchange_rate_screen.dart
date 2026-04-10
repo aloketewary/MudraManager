@@ -3,7 +3,6 @@ import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/currency/currency_provider.dart';
@@ -72,14 +71,18 @@ class _ExchangeRateScreenState extends ConsumerState<ExchangeRateScreen> {
                         borderRadius:
                             BorderRadius.circular(spacing.radiusMedium),
                         side: BorderSide(
-                            color: color.outlineVariant.withValues(alpha: 0.5)),
+                          color: color.outlineVariant.withValues(alpha: 0.5),
+                        ),
                       ),
                       child: Padding(
                         padding: EdgeInsets.all(spacing.cardInner),
                         child: Row(
                           children: [
-                            Icon(LucideIcons.info,
-                                size: 18, color: color.primary),
+                            Icon(
+                              LucideIcons.info,
+                              size: 18,
+                              color: color.primary,
+                            ),
                             SizedBox(width: spacing.elementGap),
                             Expanded(
                               child: Text(
@@ -105,8 +108,8 @@ class _ExchangeRateScreenState extends ConsumerState<ExchangeRateScreen> {
                           borderRadius:
                               BorderRadius.circular(spacing.radiusMedium),
                           borderSide: BorderSide(
-                              color:
-                                  color.outlineVariant.withValues(alpha: 0.3)),
+                            color: color.outlineVariant.withValues(alpha: 0.3),
+                          ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius:
@@ -151,8 +154,11 @@ class _ExchangeRateScreenState extends ConsumerState<ExchangeRateScreen> {
                             rate: r.rateToBase,
                             updatedAt: r.updatedAt,
                             base: base,
-                            onSave: (newRate) =>
-                                _updateRate(r.currencyCode, newRate, ctxt,),
+                            onSave: (newRate) => _updateRate(
+                              r.currencyCode,
+                              newRate,
+                              ctxt,
+                            ),
                           );
                         },
                       ),
@@ -349,7 +355,8 @@ class _RateTile extends StatelessWidget {
                     onPressed: () => Navigator.pop(ctx),
                     style: OutlinedButton.styleFrom(
                       padding: EdgeInsets.symmetric(
-                          vertical: spacing.elementGap * 1.5),
+                        vertical: spacing.elementGap * 1.5,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius:
                             BorderRadius.circular(spacing.radiusMedium),
@@ -372,7 +379,8 @@ class _RateTile extends StatelessWidget {
                     },
                     style: FilledButton.styleFrom(
                       padding: EdgeInsets.symmetric(
-                          vertical: spacing.elementGap * 1.5),
+                        vertical: spacing.elementGap * 1.5,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius:
                             BorderRadius.circular(spacing.radiusMedium),

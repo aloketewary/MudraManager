@@ -1,5 +1,4 @@
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
-import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
@@ -105,7 +104,7 @@ class _HelpScreenState extends ConsumerState<HelpScreen> {
       ),
       body: _isLoading
           ? ListView(
-              children: List.generate(4, (_) => const DashboardCardSkeleton()))
+              children: List.generate(4, (_) => const DashboardCardSkeleton()),)
           : ListView(
               padding: EdgeInsets.symmetric(
                 horizontal: spacing.cardHorizontal,

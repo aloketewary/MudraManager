@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -46,7 +47,12 @@ class FinancialHealthScreen extends ConsumerWidget {
               // 2. Key Insight (top 1)
               if (health.insights.isNotEmpty)
                 _buildKeyInsight(
-                    health.insights.first, scoreColor, color, textTheme, spacing),
+                  health.insights.first,
+                  scoreColor,
+                  color,
+                  textTheme,
+                  spacing,
+                ),
               if (health.insights.isNotEmpty)
                 SizedBox(height: spacing.sectionGap),
 
@@ -57,7 +63,12 @@ class FinancialHealthScreen extends ConsumerWidget {
               // 4. Liquidity Runway
               predictionAsync.maybeWhen(
                 data: (predicted) => _buildLiquidityRunway(
-                    health, predicted, color, textTheme, spacing),
+                  health,
+                  predicted,
+                  color,
+                  textTheme,
+                  spacing,
+                ),
                 orElse: () => const SizedBox.shrink(),
               ),
               SizedBox(height: spacing.sectionGap),
@@ -72,15 +83,19 @@ class FinancialHealthScreen extends ConsumerWidget {
 
               // 6. What You Can Do
               if (health.insights.length > 1)
-                _buildActions(health.insights.skip(1).toList(), color,
-                    textTheme, spacing),
+                _buildActions(
+                  health.insights.skip(1).toList(),
+                  color,
+                  textTheme,
+                  spacing,
+                ),
               SizedBox(height: spacing.sectionGap * 3),
             ],
           );
         },
         loading: () => ListView(
-            children:
-                List.generate(3, (_) => const DashboardCardSkeleton())),
+          children: List.generate(3, (_) => const DashboardCardSkeleton()),
+        ),
         error: (_, __) =>
             const Center(child: Text('Unable to load health data')),
       ),
@@ -213,15 +228,21 @@ class FinancialHealthScreen extends ConsumerWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
         side: BorderSide(
-            color: color.outlineVariant.withValues(alpha: 0.5)),
+          color: color.outlineVariant.withValues(alpha: 0.5),
+        ),
       ),
       child: Padding(
         padding: EdgeInsets.all(spacing.cardInner),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _sectionHeader('Score Breakdown', LucideIcons.chartBar, color,
-                textTheme, spacing),
+            _sectionHeader(
+              'Score Breakdown',
+              LucideIcons.chartBar,
+              color,
+              textTheme,
+              spacing,
+            ),
             SizedBox(height: spacing.sectionGap),
             ...components.map(
               (c) => Padding(
@@ -243,8 +264,10 @@ class FinancialHealthScreen extends ConsumerWidget {
   ) {
     final ratio = c.max > 0 ? c.earned / c.max : 0.0;
     final isGood = ratio >= 0.7;
-    final statusColor = isGood ? Colors.green : Colors.orange;
-    final statusIcon = isGood ? LucideIcons.circleCheck : LucideIcons.circleAlert;
+    final statusColor =
+        isGood ? FinanceColors.statusGood : FinanceColors.statusWarning;
+    final statusIcon =
+        isGood ? LucideIcons.circleCheck : LucideIcons.circleAlert;
 
     return Row(
       children: [
@@ -294,13 +317,13 @@ class FinancialHealthScreen extends ConsumerWidget {
     final Color runwayColor;
     final String statusLabel;
     if (daysOfCover >= 60) {
-      runwayColor = Colors.green;
+      runwayColor = FinanceColors.statusGood;
       statusLabel = 'Safe';
     } else if (daysOfCover >= 30) {
-      runwayColor = Colors.orange;
+      runwayColor = FinanceColors.statusWarning;
       statusLabel = 'Moderate';
     } else {
-      runwayColor = Colors.red;
+      runwayColor = FinanceColors.statusDanger;
       statusLabel = 'Risk';
     }
 
@@ -311,7 +334,8 @@ class FinancialHealthScreen extends ConsumerWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
         side: BorderSide(
-            color: color.outlineVariant.withValues(alpha: 0.5)),
+          color: color.outlineVariant.withValues(alpha: 0.5),
+        ),
       ),
       child: Padding(
         padding: EdgeInsets.all(spacing.cardInner),
@@ -326,8 +350,11 @@ class FinancialHealthScreen extends ConsumerWidget {
                     color: runwayColor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(spacing.radiusMedium),
                   ),
-                  child: Icon(LucideIcons.droplet,
-                      color: runwayColor, size: 20),
+                  child: Icon(
+                    LucideIcons.droplet,
+                    color: runwayColor,
+                    size: 20,
+                  ),
                 ),
                 SizedBox(width: spacing.elementGap * 1.5),
                 Expanded(
@@ -399,12 +426,16 @@ class FinancialHealthScreen extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('0',
-                    style: textTheme.labelSmall
-                        ?.copyWith(color: color.onSurfaceVariant)),
-                Text('90 days',
-                    style: textTheme.labelSmall
-                        ?.copyWith(color: color.onSurfaceVariant)),
+                Text(
+                  '0',
+                  style: textTheme.labelSmall
+                      ?.copyWith(color: color.onSurfaceVariant),
+                ),
+                Text(
+                  '90 days',
+                  style: textTheme.labelSmall
+                      ?.copyWith(color: color.onSurfaceVariant),
+                ),
               ],
             ),
           ],
@@ -433,15 +464,21 @@ class FinancialHealthScreen extends ConsumerWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
         side: BorderSide(
-            color: color.outlineVariant.withValues(alpha: 0.5)),
+          color: color.outlineVariant.withValues(alpha: 0.5),
+        ),
       ),
       child: Padding(
         padding: EdgeInsets.all(spacing.cardInner),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _sectionHeader('Category Health', LucideIcons.layers, color,
-                textTheme, spacing),
+            _sectionHeader(
+              'Category Health',
+              LucideIcons.layers,
+              color,
+              textTheme,
+              spacing,
+            ),
             SizedBox(height: spacing.sectionGap),
             ...top.map(
               (trend) => Padding(
@@ -481,7 +518,10 @@ class FinancialHealthScreen extends ConsumerWidget {
   }
 
   Widget _trendLabel(
-      double changePercent, TextTheme textTheme, ColorScheme color) {
+    double changePercent,
+    TextTheme textTheme,
+    ColorScheme color,
+  ) {
     if (changePercent.abs() < 5) {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -500,7 +540,8 @@ class FinancialHealthScreen extends ConsumerWidget {
     }
 
     final isUp = changePercent > 0;
-    final trendColor = isUp ? Colors.red : Colors.green;
+    final trendColor =
+        isUp ? FinanceColors.statusDanger : FinanceColors.statusGood;
     final label = isUp ? 'High ↑' : 'Reduced ↓';
 
     return Container(
@@ -533,15 +574,21 @@ class FinancialHealthScreen extends ConsumerWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
         side: BorderSide(
-            color: color.outlineVariant.withValues(alpha: 0.5)),
+          color: color.outlineVariant.withValues(alpha: 0.5),
+        ),
       ),
       child: Padding(
         padding: EdgeInsets.all(spacing.cardInner),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _sectionHeader('What You Can Do', LucideIcons.rocket, color,
-                textTheme, spacing),
+            _sectionHeader(
+              'What You Can Do',
+              LucideIcons.rocket,
+              color,
+              textTheme,
+              spacing,
+            ),
             SizedBox(height: spacing.sectionGap),
             ...insights.map(
               (insight) => Padding(
@@ -579,8 +626,13 @@ class FinancialHealthScreen extends ConsumerWidget {
 
   // ── Helpers ──
 
-  Widget _sectionHeader(String title, IconData icon, ColorScheme color,
-      TextTheme textTheme, AppSpacing spacing) {
+  Widget _sectionHeader(
+    String title,
+    IconData icon,
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
     return Row(
       children: [
         Icon(icon, size: 18, color: color.primary),
@@ -594,10 +646,10 @@ class FinancialHealthScreen extends ConsumerWidget {
   }
 
   Color _scoreColor(int score, ColorScheme color) {
-    if (score >= 80) return Colors.green;
+    if (score >= 80) return FinanceColors.statusGood;
     if (score >= 60) return color.primary;
-    if (score >= 40) return Colors.orange;
-    return Colors.red;
+    if (score >= 40) return FinanceColors.statusWarning;
+    return FinanceColors.statusDanger;
   }
 }
 
@@ -640,7 +692,9 @@ class _AnimatedScoreRingState extends State<_AnimatedScoreRing>
   void initState() {
     super.initState();
     _ctrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 1800));
+      vsync: this,
+      duration: const Duration(milliseconds: 1800),
+    );
     _anim = CurvedAnimation(parent: _ctrl, curve: Curves.easeOutCubic);
   }
 
@@ -736,7 +790,9 @@ class _AnimatedBarState extends State<_AnimatedBar>
   void initState() {
     super.initState();
     _ctrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 1200));
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    );
     _anim = CurvedAnimation(parent: _ctrl, curve: Curves.easeOutCubic);
   }
 
@@ -750,7 +806,8 @@ class _AnimatedBarState extends State<_AnimatedBar>
   Widget build(BuildContext context) {
     return VisibilityDetector(
       key: ValueKey(
-          'bar_${widget.progress}_${widget.barColor.toARGB32()}'),
+        'bar_${widget.progress}_${widget.barColor.toARGB32()}',
+      ),
       onVisibilityChanged: (info) {
         if (info.visibleFraction > 0.3 && !_started) {
           _started = true;
@@ -828,11 +885,21 @@ class _GradientRingPainter extends CustomPainter {
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
 
       canvas.drawArc(
-          rect, -math.pi / 2, 2 * math.pi * progress, false, glowPaint);
+        rect,
+        -math.pi / 2,
+        2 * math.pi * progress,
+        false,
+        glowPaint,
+      );
     }
 
     canvas.drawArc(
-        rect, -math.pi / 2, 2 * math.pi * progress, false, progressPaint);
+      rect,
+      -math.pi / 2,
+      2 * math.pi * progress,
+      false,
+      progressPaint,
+    );
   }
 
   @override

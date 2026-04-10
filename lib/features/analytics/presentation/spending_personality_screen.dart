@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/shared/widgets/ambient_brand_section.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
@@ -260,7 +261,7 @@ class SpendingPersonalityScreen extends ConsumerWidget {
       _InsightItem(
         LucideIcons.piggyBank,
         '${data.savingsRate.toStringAsFixed(0)}% savings rate',
-        data.savingsRate > 20 ? Colors.green : Colors.orange,
+        data.savingsRate > 20 ? FinanceColors.statusGood : FinanceColors.statusWarning,
       ),
       _InsightItem(
         LucideIcons.tag,
@@ -276,7 +277,7 @@ class SpendingPersonalityScreen extends ConsumerWidget {
         _InsightItem(
           LucideIcons.target,
           '${data.activeGoals} active ${data.activeGoals == 1 ? 'goal' : 'goals'}',
-          Colors.green,
+          FinanceColors.statusGood,
         ),
       _InsightItem(
         LucideIcons.calendarDays,

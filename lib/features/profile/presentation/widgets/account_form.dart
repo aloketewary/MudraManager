@@ -616,7 +616,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
 
               // Warn if editing existing account and currency is changing
               if (_isEditing && oldCode != (newIsBase ? null : picked)) {
-                if (!context.mounted) return;
+                if (!mounted) return;
                 final confirmed = await _showCurrencyChangeWarning(
                   context,
                   oldCode ?? baseCurrency,
@@ -978,10 +978,8 @@ class _AccountFormState extends ConsumerState<AccountForm> {
         await gamificationService.track(GamificationEvent.accountCreated);
       }
 
-      if (mounted) {
-        invalidateAll(ref);
-        context.pop(true);
-      }
+      invalidateAll(ref);
+      if (mounted) context.pop(true);
     } finally {
       if (mounted) setState(() => _saving = false);
     }

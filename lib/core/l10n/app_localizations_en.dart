@@ -920,6 +920,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get common_back => 'Back';
 
   @override
+  String get common_undo => 'Undo';
+
+  @override
   String get common_delete => 'Delete';
 
   @override
@@ -1176,6 +1179,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get label_none => 'None';
+
+  @override
+  String get label_frequency => 'Frequency';
+
+  @override
+  String get label_repeatEvery => 'Repeat every';
+
+  @override
+  String get label_days => 'days';
+
+  @override
+  String get label_weeks => 'weeks';
+
+  @override
+  String get label_months => 'months';
+
+  @override
+  String get label_years => 'years';
 
   @override
   String get trip_expenses => 'Expenses';
@@ -2897,7 +2918,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get goal_smartInsight => 'Smart Insight';
 
   @override
-  String get goal_onTrack => 'On Track';
+  String get goal_onTrack => 'On Track ✅';
 
   @override
   String get goal_onTrackDesc => 'This goal is very achievable 👍';
@@ -3401,6 +3422,116 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stats_topSpending => 'Top Spending';
 
   @override
+  String get stats_12MonthTrend => '12-Month Trend';
+
+  @override
+  String stats_trendUp(Object category, Object percent) {
+    return '$category is trending up — $percent% of total spending';
+  }
+
+  @override
+  String stats_trendDown(Object category) {
+    return '$category is trending down this month 📉';
+  }
+
+  @override
+  String stats_topCategory(Object category, Object percent) {
+    return '$category is your top category — $percent% of spending';
+  }
+
+  @override
+  String stats_weekendPeak(Object day) {
+    return 'You spend more on weekends — $day is your peak day';
+  }
+
+  @override
+  String stats_weekdayPeak(Object day) {
+    return 'Weekdays cost more — $day is your biggest day';
+  }
+
+  @override
+  String stats_peakAndQuiet(Object peak, Object quiet) {
+    return '$peak is your peak spending day, $quiet is the quietest';
+  }
+
+  @override
+  String get stats_categoryTrends => 'Category Trends';
+
+  @override
+  String get stats_spendingByTag => 'Spending by Tag';
+
+  @override
+  String get stats_netWorth => 'Net Worth';
+
+  @override
+  String get stats_savings => 'Savings';
+
+  @override
+  String get stats_categoryImpact => 'CATEGORY IMPACT';
+
+  @override
+  String get stats_net => 'Net';
+
+  @override
+  String get stats_dailySpendingPace => 'Daily Spending Pace';
+
+  @override
+  String get stats_topCategories => 'Top Categories';
+
+  @override
+  String stats_projectedThisMonth(Object amount) {
+    return 'Projected: $amount this month';
+  }
+
+  @override
+  String stats_byDay(Object day, Object amount, Object month) {
+    return 'By day $day: $amount in $month';
+  }
+
+  @override
+  String get stats_steadyHeadline => 'Steady as she goes';
+
+  @override
+  String get stats_steadyDetail =>
+      'Your spending is consistent — that\'s discipline.';
+
+  @override
+  String get stats_doingGreatHeadline => 'You\'re doing great 🌟';
+
+  @override
+  String get stats_spendingUpHeadline => 'Heads up — spending is up';
+
+  @override
+  String get stats_downloadPdf => 'Download PDF';
+
+  @override
+  String get stats_generating => 'Generating...';
+
+  @override
+  String get recap_income => 'Income';
+
+  @override
+  String get recap_expense => 'Expense';
+
+  @override
+  String get recap_saved => 'Saved';
+
+  @override
+  String get recap_belowAvg => 'Below avg';
+
+  @override
+  String get recap_aboveAvg => 'Above avg';
+
+  @override
+  String get recap_recurring => 'Recurring';
+
+  @override
+  String get recap_oneTime => 'One-time';
+
+  @override
+  String get recap_recapTitle => 'Recap';
+
+  @override
   String get notifSettings_dailySummary => 'Daily Summary';
 
   @override
@@ -3624,15 +3755,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get day_sunday => 'Sunday';
-
-  @override
-  String get recap_income => 'Income';
-
-  @override
-  String get recap_expense => 'Expense';
-
-  @override
-  String get recap_saved => 'Saved';
 
   @override
   String get recap_dailySpending => 'Daily Spending';
@@ -4575,6 +4697,101 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String goal_goalsInProgress(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count goals in progress',
+      one: '1 goal in progress',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get goal_completedSection => 'Completed 🎉';
+
+  @override
+  String get goal_emotionAlmost => 'Almost there 🚀';
+
+  @override
+  String get goal_emotionHalfway => 'Halfway there 💪';
+
+  @override
+  String get goal_emotionEvery => 'Every bit counts 🌱';
+
+  @override
+  String get goal_emotionHalfwayDone => 'Halfway done ✨';
+
+  @override
+  String get goal_emotionKeepPushing => 'Keep pushing 🔥';
+
+  @override
+  String get goal_emotionJustStarted => 'Just getting started 🌱';
+
+  @override
+  String get goal_closestToCompletion => 'Closest to completion';
+
+  @override
+  String goal_acrossGoals(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'across $count goals',
+      one: 'across 1 goal',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get goal_suffixSaved => 'saved';
+
+  @override
+  String get goal_suffixLeft => 'left';
+
+  @override
+  String get goal_suffixDone => 'done';
+
+  @override
+  String get goal_suffixAchieved => 'achieved';
+
+  @override
+  String get goal_suffixToGo => 'to go';
+
+  @override
+  String get goal_needsAttention => 'Needs attention ⚠️';
+
+  @override
+  String get goal_aheadOfSchedule => 'Ahead of schedule 🎯';
+
+  @override
+  String goal_monthsLeft(Object count) {
+    return '$count months left';
+  }
+
+  @override
+  String get goal_emotionDidIt => 'You did it! 🎉';
+
+  @override
+  String get goal_emotionSoClose => 'So close, keep going! 💪';
+
+  @override
+  String get goal_emotionMomentum => 'Building momentum 🔥';
+
+  @override
+  String get goal_emotionCatchUp => 'Let\'s catch up ⚡';
+
+  @override
+  String get goal_finishGoal => 'Finish this goal! 🚀';
+
+  @override
+  String get goal_behindPace => 'Behind pace ⚠️';
+
+  @override
+  String goal_daysAgo(Object count) {
+    return '$count days ago';
+  }
+
+  @override
   String get common_today => 'Today';
 
   @override
@@ -5026,4 +5243,50 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get onboard_currencyWarning =>
       'Changing base currency later will archive existing transactions.';
+
+  @override
+  String get statistics_topCategory => 'Top Category';
+
+  @override
+  String get statistics_dailyAverage => 'Daily Average';
+
+  @override
+  String get statistics_perDay => 'per day';
+
+  @override
+  String statistics_percentOfExpenses(String percent) {
+    return '$percent% of expenses';
+  }
+
+  @override
+  String get sms_infoTitle => 'How SMS Import Works';
+
+  @override
+  String get sms_infoOnlyScans => 'Only scans bank and wallet SMS';
+
+  @override
+  String get sms_infoStaysOnDevice => 'All data stays on your device';
+
+  @override
+  String get sms_infoAutoCreates => 'Automatically creates transactions';
+
+  @override
+  String get sms_infoNoPersonal => 'No personal messages are read';
+
+  @override
+  String get dashboard_totalBalance => 'Total Balance';
+
+  @override
+  String get dashboard_netWorthLink => 'Net Worth';
+
+  @override
+  String get dashboard_showAccounts => 'Show accounts';
+
+  @override
+  String get dashboard_hideAccounts => 'Hide accounts';
+
+  @override
+  String dashboard_accountsTapExpand(int count) {
+    return '$count accounts · Tap to expand';
+  }
 }

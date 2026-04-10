@@ -1,4 +1,3 @@
-import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:math_expressions/math_expressions.dart';
@@ -49,10 +48,11 @@ class _SimpleCalculatorState extends State<SimpleCalculator> {
 
   String _evaluate(String expression) {
     try {
-      ExpressionParser p = ShuntingYardParser();
-      Expression exp = p.parse(expression);
-      var evaluate = exp.evaluate(EvaluationType.REAL, ContextModel());
-      return evaluate.toStringAsFixed(evaluate.truncateToDouble() == evaluate ? 0 : 2);
+      final ExpressionParser p = ShuntingYardParser();
+      final Expression exp = p.parse(expression);
+      final evaluate = exp.evaluate(EvaluationType.REAL, ContextModel());
+      return evaluate
+          .toStringAsFixed(evaluate.truncateToDouble() == evaluate ? 0 : 2);
     } catch (err) {
       return '0';
     }
@@ -60,23 +60,26 @@ class _SimpleCalculatorState extends State<SimpleCalculator> {
 
   @override
   Widget build(BuildContext context) {
-    var textTheme = Theme.of(context).textTheme;
-    var color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final color = Theme.of(context).colorScheme;
 
     return SingleChildScrollView(
       child: Container(
         decoration: BoxDecoration(
           color: color.surface,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              padding: EdgeInsets.all(20),
+              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [color.primaryContainer.withOpacity(0.3), color.surface],
+                  colors: [
+                    color.primaryContainer.withValues(alpha: 0.3),
+                    color.surface,
+                  ],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                 ),
@@ -93,7 +96,7 @@ class _SimpleCalculatorState extends State<SimpleCalculator> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
                     result.isEmpty ? '' : '= $result',
                     style: textTheme.headlineMedium?.copyWith(
@@ -107,17 +110,17 @@ class _SimpleCalculatorState extends State<SimpleCalculator> {
               ),
             ),
             Padding(
-              padding: EdgeInsets.all(12),
+              padding: const EdgeInsets.all(12),
               child: Column(
                 children: [
                   _buildButtonRow(['AC', '⌫', '÷'], color, textTheme),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   _buildButtonRow(['7', '8', '9', '×'], color, textTheme),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   _buildButtonRow(['4', '5', '6', '-'], color, textTheme),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   _buildButtonRow(['1', '2', '3', '+'], color, textTheme),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   _buildButtonRow(['0', '.', '=', '✓'], color, textTheme),
                 ],
               ),
@@ -128,14 +131,19 @@ class _SimpleCalculatorState extends State<SimpleCalculator> {
     );
   }
 
-  Widget _buildButtonRow(List<String> buttons, ColorScheme color, TextTheme textTheme) {
+  Widget _buildButtonRow(
+      List<String> buttons, ColorScheme color, TextTheme textTheme,) {
     return Row(
-      children: buttons.map((btn) => Expanded(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 3),
-          child: _buildButton(btn, color, textTheme),
-        ),
-      )).toList(),
+      children: buttons
+          .map(
+            (btn) => Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 3),
+                child: _buildButton(btn, color, textTheme),
+              ),
+            ),
+          )
+          .toList(),
     );
   }
 
@@ -143,10 +151,10 @@ class _SimpleCalculatorState extends State<SimpleCalculator> {
     final isOperator = ['÷', '×', '-', '+', '='].contains(text);
     final isSpecial = ['AC', '⌫', '✓'].contains(text);
     final isConfirm = text == '✓';
-    
+
     Color bgColor;
     Color textColor;
-    
+
     if (isConfirm) {
       bgColor = color.primary;
       textColor = color.onPrimary;
@@ -174,7 +182,8 @@ class _SimpleCalculatorState extends State<SimpleCalculator> {
             text,
             style: textTheme.titleLarge?.copyWith(
               color: textColor,
-              fontWeight: isOperator || isSpecial ? FontWeight.bold : FontWeight.w500,
+              fontWeight:
+                  isOperator || isSpecial ? FontWeight.bold : FontWeight.w500,
             ),
           ),
         ),

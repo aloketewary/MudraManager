@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -14,7 +15,7 @@ class RecurringExpensesWidgetPlugin extends DashboardWidgetPlugin {
   String get title => 'Bill Control Center';
 
   @override
-  IconData get icon => Icons.repeat;
+  IconData get icon => LucideIcons.repeat;
 
   @override
   int get defaultOrder => 5;

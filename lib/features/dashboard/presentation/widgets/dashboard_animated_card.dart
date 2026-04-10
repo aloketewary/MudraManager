@@ -1,8 +1,7 @@
-import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/extension/account_type_extenstion.dart';
-import 'package:mudra_manager/core/theme/design_tokens.dart';
 import 'package:mudra_manager/core/utils/string_util.dart';
 import 'package:mudra_manager/shared/widgets/animated_balance.dart';
 
@@ -86,9 +85,6 @@ class AnimatedAccountCard extends StatefulWidget {
 }
 
 class _AnimatedAccountCard extends State<AnimatedAccountCard> {
-  final Set<AnimationStyles> _animationStyleSelection = <AnimationStyles>{
-    AnimationStyles.defaultStyle,
-  };
   AnimationStyle? _animationStyle;
 
   @override
@@ -103,8 +99,8 @@ class _AnimatedAccountCard extends State<AnimatedAccountCard> {
     return Container(
       height: 220,
       margin: const EdgeInsets.symmetric(
-        horizontal: DesignTokens.spacing12,
-        vertical: DesignTokens.spacing8,
+        horizontal: 12,
+        vertical: 8,
       ),
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -178,7 +174,7 @@ class _AnimatedAccountCard extends State<AnimatedAccountCard> {
                         child: PopupMenuButton<Menu>(
                           popUpAnimationStyle: _animationStyle,
                           icon: Icon(
-                            Icons.more_vert,
+                            LucideIcons.ellipsisVertical,
                             color: textColor,
                             size: 20,
                           ),
@@ -189,7 +185,7 @@ class _AnimatedAccountCard extends State<AnimatedAccountCard> {
                                   value: Menu.edit,
                                   onTap: widget.onEdit,
                                   child: const ListTile(
-                                    leading: Icon(Icons.edit_outlined),
+                                    leading: Icon(LucideIcons.pencil),
                                     title: Text('Edit'),
                                     contentPadding: EdgeInsets.symmetric(
                                       horizontal: 12,
@@ -200,7 +196,7 @@ class _AnimatedAccountCard extends State<AnimatedAccountCard> {
                                   value: Menu.archive,
                                   onTap: widget.onArchive,
                                   child: const ListTile(
-                                    leading: Icon(Icons.archive_outlined),
+                                    leading: Icon(LucideIcons.archive),
                                     title: Text('Archive'),
                                     contentPadding: EdgeInsets.symmetric(
                                       horizontal: 12,
@@ -213,7 +209,7 @@ class _AnimatedAccountCard extends State<AnimatedAccountCard> {
                                   onTap: widget.onRemove,
                                   child: ListTile(
                                     leading: Icon(
-                                      Icons.delete_outline,
+                                      LucideIcons.trash2,
                                       color: color.error,
                                     ),
                                     title: Text(

@@ -1,5 +1,4 @@
 import 'package:mudra_manager/core/currency/currency_meta.dart';
-import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -169,7 +168,7 @@ class AccountSelector extends ConsumerWidget {
                 child: Row(
                   children: [
                     Icon(
-                      Icons.check_circle,
+                      LucideIcons.circleCheck,
                       size: 20,
                       color: Color(
                         selectedAccount!.colorValue ??
@@ -377,7 +376,7 @@ class _AddButton extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.add, size: 16, color: color.onSurfaceVariant),
+            Icon(LucideIcons.plus, size: 16, color: color.onSurfaceVariant),
             const SizedBox(width: 6),
             Text(
               label,
@@ -477,7 +476,7 @@ class CategorySelector extends ConsumerWidget {
                 child: Row(
                   children: [
                     Icon(
-                      Icons.check_circle,
+                      LucideIcons.circleCheck,
                       size: 20,
                       color: Color(
                         selectedCategory!.colorValue ??
@@ -592,7 +591,7 @@ class CategorySelector extends ConsumerWidget {
                               turns: isExpanded ? 0.5 : 0.0,
                               duration: const Duration(milliseconds: 200),
                               child: Icon(
-                                Icons.expand_more,
+                                LucideIcons.chevronDown,
                                 size: 14,
                                 color: isSelected
                                     ? catColor
@@ -668,7 +667,7 @@ class CategorySelector extends ConsumerWidget {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Icon(
-                                        Icons.add,
+                                        LucideIcons.plus,
                                         size: 14,
                                         color: color.onSurfaceVariant,
                                       ),
@@ -802,7 +801,7 @@ class TagSelector extends ConsumerWidget {
           }),
           ActionChip(
             label: Text(addNewTagText),
-            avatar: const Icon(Icons.add, size: 16),
+            avatar: const Icon(LucideIcons.plus, size: 16),
             onPressed: onAddNew,
             visualDensity: VisualDensity.compact,
           ),

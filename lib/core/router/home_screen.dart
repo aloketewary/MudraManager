@@ -63,14 +63,16 @@ class HomePageState extends ConsumerState<HomePage>
       duration: const Duration(milliseconds: 300),
       value: 1.0,
     );
-    initNotification();
-    _setupWidgetClickListener();
-    _setupMethodChannel();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        ref.read(achievementUnlockListenerProvider).initialize(context);
-      }
+    // Critical — needed for widget click handling
+    _setupMethodChannel();
+    _setupWidgetClickListener();
+
+    // Deferred — not needed for first frame
+    Future.delayed(const Duration(seconds: 2), () {
+      if (!mounted) return;
+      initNotification();
+      ref.read(achievementUnlockListenerProvider).initialize(context);
     });
   }
 
@@ -87,8 +89,8 @@ class HomePageState extends ConsumerState<HomePage>
         final action = call.arguments as String?;
         log.i('Widget action received: $action');
         if (action == 'add_transaction' || action == 'ADD_TRANSACTION') {
+          await Future.delayed(const Duration(milliseconds: 300));
           if (mounted) {
-            await Future.delayed(const Duration(milliseconds: 300));
             showModalBottomSheet(
               context: context,
               isScrollControlled: true,

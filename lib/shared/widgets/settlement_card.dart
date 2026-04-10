@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_boring_avatars/flutter_boring_avatars.dart';
 import 'package:intl/intl.dart';
@@ -116,7 +117,7 @@ class SettlementCard extends StatelessWidget {
                       child: Column(
                         children: [
                           Icon(
-                            Icons.arrow_forward_rounded,
+                            LucideIcons.arrowRight,
                             color:
                                 isPaid ? color.onSurfaceVariant : color.error,
                             size: 32,
@@ -217,7 +218,7 @@ class SettlementCard extends StatelessWidget {
                   SizedBox(height: spacing.cardHorizontalMax),
                   FilledButton.icon(
                     onPressed: onMarkPaid,
-                    icon: const Icon(Icons.check_circle_outline, size: 20),
+                    icon: const Icon(LucideIcons.circleCheck, size: 20),
                     label: const Text('Mark as Paid'),
                     style: FilledButton.styleFrom(
                       minimumSize: const Size(double.infinity, 44),
@@ -243,7 +244,7 @@ class SettlementCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
-                          Icons.check_circle,
+                          LucideIcons.circleCheck,
                           color: color.primary,
                           size: 18,
                         ),

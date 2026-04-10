@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -141,7 +142,30 @@ class _NotificationPageState extends ConsumerState<NotificationPage> {
                     return Padding(
                       padding: EdgeInsets.only(right: spacing.elementGap),
                       child: FilterChip(
-                        label: Text(label),
+                        label: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(label),
+                            if (f == _FilterType.all && unreadAll > 0) ...[
+                              const SizedBox(width: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                                decoration: BoxDecoration(
+                                  color: isActive ? color.onPrimary : color.primary,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Text(
+                                  '$unreadAll',
+                                  style: textTheme.labelSmall?.copyWith(
+                                    color: isActive ? color.primary : color.onPrimary,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
                         avatar: Icon(icon, size: 16),
                         selected: isActive,
                         onSelected: (_) {
@@ -405,7 +429,8 @@ class _NotificationPageState extends ConsumerState<NotificationPage> {
                                   notifColor.withValues(alpha: 0.12),
                               foregroundColor: notifColor,
                               padding: EdgeInsets.symmetric(
-                                  vertical: spacing.cardVertical),
+                                vertical: spacing.cardVertical,
+                              ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(
                                   spacing.radiusSmall,
@@ -433,7 +458,8 @@ class _NotificationPageState extends ConsumerState<NotificationPage> {
                             ),
                             style: OutlinedButton.styleFrom(
                               padding: EdgeInsets.symmetric(
-                                  vertical: spacing.cardVertical),
+                                vertical: spacing.cardVertical,
+                              ),
                               side: BorderSide(
                                 color:
                                     color.outlineVariant.withValues(alpha: 0.3),
@@ -474,7 +500,7 @@ class _NotificationPageState extends ConsumerState<NotificationPage> {
     HapticFeedback.mediumImpact();
     showDialog(
       context: context,
-      builder: (ctx) =>  AlertDialog(
+      builder: (ctx) => AlertDialog(
         title: const Text('Clear all notifications?'),
         content: Text(BuddyMessages.deleteMessage(null)),
         actions: [
@@ -520,12 +546,15 @@ class _NotificationPageState extends ConsumerState<NotificationPage> {
         final data = jsonDecode(n.actionData!) as Map<String, dynamic>;
         switch (data['type'] as String?) {
           case 'settle_up':
-            if (n.tripId != null)
+            if (n.tripId != null) {
               context.push(AppRoutes.tripDetail, extra: n.tripId);
+            }
           case 'view_expense':
             if (n.expenseId != null && n.tripId != null) {
-              context.push(AppRoutes.expenseDetail,
-                  extra: {'expenseId': n.expenseId, 'tripId': n.tripId});
+              context.push(
+                AppRoutes.expenseDetail,
+                extra: {'expenseId': n.expenseId, 'tripId': n.tripId},
+              );
             }
           case 'view_budget':
             context.push(AppRoutes.budgetDashboard);
@@ -545,8 +574,9 @@ class _NotificationPageState extends ConsumerState<NotificationPage> {
         case NotificationCategory.budget:
           context.push(AppRoutes.budgetDashboard);
         case NotificationCategory.trip:
-          if (n.tripId != null)
+          if (n.tripId != null) {
             context.push(AppRoutes.tripDetail, extra: n.tripId);
+          }
         case NotificationCategory.financial:
           context.push(AppRoutes.statistics);
         default:
@@ -572,12 +602,12 @@ class _NotificationPageState extends ConsumerState<NotificationPage> {
       'low_balance' => color.tertiary,
       'budget_overspent' => color.error,
       'budget_near_limit' => color.secondary,
-      'pending_settlement' => Colors.red,
+      'pending_settlement' => FinanceColors.statusDanger,
       'new_expense' => Colors.blue,
       'reminder' => color.primary,
       'achievement' => Colors.amber,
       'level_up' => Colors.deepPurple,
-      'streak' => Colors.orange,
+      'streak' => FinanceColors.statusWarning,
       _ => color.primary,
     };
   }

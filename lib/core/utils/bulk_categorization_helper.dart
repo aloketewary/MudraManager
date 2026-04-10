@@ -8,7 +8,7 @@ class BulkCategorizationHelper {
   BulkCategorizationHelper(this.ruleService);
 
   /// Groups similar transactions together for bulk categorization
-  /// Returns: Map<String, List<TransactionInfo>>
+  /// Returns: `Map<String, List<TransactionInfo>>`
   /// Key = grouping identifier (recipient/merchant)
   /// Value = list of similar transactions
   Map<String, List<TransactionInfo>> groupSimilarTransactions(

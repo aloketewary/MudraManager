@@ -329,7 +329,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
         },
         loading: () => Scaffold(
           appBar: AppBar(title: Text(_isTrip ? 'Edit Trip' : 'Edit Group')),
-          body: ListView(children: List.generate(3, (_) => DashboardCardSkeleton())),
+          body: ListView(children: List.generate(3, (_) => const DashboardCardSkeleton())),
         ),
         error: (e, _) => Scaffold(
           appBar: AppBar(title: Text(BuddyMessages.genericError)),
@@ -614,6 +614,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
                             !DateUtils.isSameDay(range.start, trip.startDate) ||
                                 !DateUtils.isSameDay(range.end, trip.endDate);
                         if (datesChanged) {
+                          if (!mounted) return;
                           final confirm = await DialogUtils.showConfirmation(
                             context,
                             title: 'Warning: Date Change',
@@ -1038,7 +1039,7 @@ class _TripCurrencyPickerState extends State<_TripCurrencyPicker> {
               autofocus: true,
               decoration: InputDecoration(
                 hintText: 'Search currency...',
-                prefixIcon: const Icon(Icons.search, size: 20),
+                prefixIcon: const Icon(LucideIcons.search, size: 20),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(color: color.outlineVariant),
@@ -1081,7 +1082,7 @@ class _TripCurrencyPickerState extends State<_TripCurrencyPicker> {
                   title: Text(c.code),
                   subtitle: Text(c.name, style: textTheme.bodySmall),
                   trailing: isSelected
-                      ? Icon(Icons.check_circle, color: color.primary)
+                      ? Icon(LucideIcons.circleCheck, color: color.primary)
                       : null,
                   onTap: () {
                     HapticFeedback.lightImpact();

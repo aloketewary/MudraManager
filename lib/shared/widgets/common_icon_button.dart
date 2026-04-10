@@ -1,4 +1,4 @@
-import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 
 class CommonIconPickerButton extends StatelessWidget {
@@ -15,16 +15,16 @@ class CommonIconPickerButton extends StatelessWidget {
     this.backgroundColor = Colors.blue,
     required this.label,
     this.textColor,
-    this.selectedIcon = Icons.add,
+    this.selectedIcon = LucideIcons.plus,
     this.iconBackGroundColor,
   });
 
   @override
   Widget build(BuildContext context) {
-    var color = Theme.of(context).colorScheme;
-    var textTheme = Theme.of(context).textTheme;
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
@@ -42,7 +42,7 @@ class CommonIconPickerButton extends StatelessWidget {
               label,
               style: textTheme.titleMedium?.copyWith(color: textColor),
             ),
-            SizedBox(width: 12),
+            const SizedBox(width: 12),
             CircleAvatar(
               radius: 20,
               backgroundColor: iconBackGroundColor ?? color.primary,

@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
@@ -11,7 +12,6 @@ import 'package:mudra_manager/shared/widgets/ambient_brand_section.dart';
 import 'package:mudra_manager/features/trip/data/trip_provider.dart';
 import 'package:mudra_manager/core/db/models/trip.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
-import 'package:mudra_manager/core/utils/refresh_helper.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/features/trip/data/trip_service.dart';
 
@@ -382,9 +382,9 @@ class TripsScreen extends ConsumerWidget {
                     padding: EdgeInsets.only(top: spacing.elementGap),
                     child: isSplit
                         ? _buildSplitSummary(
-                            context, s, trip.currencyCode, color, textTheme, spacing)
+                            context, s, trip.currencyCode, color, textTheme, spacing,)
                         : _buildTripSummary(
-                            s, trip.currencyCode, color, textTheme, spacing),
+                            s, trip.currencyCode, color, textTheme, spacing,),
                   );
                 },
                 orElse: () => const SizedBox.shrink(),
@@ -463,15 +463,15 @@ class TripsScreen extends ConsumerWidget {
     final String balanceText;
 
     if (s.youGet) {
-      balanceColor = Colors.green;
+      balanceColor = FinanceColors.statusGood;
       balanceText =
           'You\'ll get ${formatCurrency(s.netBalance, code: currencyCode, decimals: 0)}';
     } else if (s.youOwe) {
-      balanceColor = Colors.red;
+      balanceColor = FinanceColors.statusDanger;
       balanceText =
           'You owe ${formatCurrency(s.netBalance.abs(), code: currencyCode, decimals: 0)}';
     } else if (s.settled) {
-      balanceColor = Colors.green;
+      balanceColor = FinanceColors.statusGood;
       balanceText = AppLocalizations.of(context)!.trip_allSettled;
     } else {
       balanceColor = color.onSurfaceVariant;
@@ -551,12 +551,12 @@ class TripsScreen extends ConsumerWidget {
                 ),
                 title: Text(AppLocalizations.of(context)!.trip_createTrip,
                     style: textTheme.titleSmall
-                        ?.copyWith(fontWeight: FontWeight.bold)),
+                        ?.copyWith(fontWeight: FontWeight.bold),),
                 subtitle: Text(AppLocalizations.of(context)!.trip_trackTravel,
                     style: textTheme.bodySmall
-                        ?.copyWith(color: color.onSurfaceVariant)),
+                        ?.copyWith(color: color.onSurfaceVariant),),
                 trailing: Icon(LucideIcons.chevronRight,
-                    size: 18, color: color.onSurfaceVariant),
+                    size: 18, color: color.onSurfaceVariant,),
                 onTap: () {
                   HapticFeedback.mediumImpact();
                   ctx.pop();
@@ -576,12 +576,12 @@ class TripsScreen extends ConsumerWidget {
                 ),
                 title: Text(AppLocalizations.of(context)!.trip_createGroup,
                     style: textTheme.titleSmall
-                        ?.copyWith(fontWeight: FontWeight.bold)),
+                        ?.copyWith(fontWeight: FontWeight.bold),),
                 subtitle: Text(AppLocalizations.of(context)!.trip_splitBills,
                     style: textTheme.bodySmall
-                        ?.copyWith(color: color.onSurfaceVariant)),
+                        ?.copyWith(color: color.onSurfaceVariant),),
                 trailing: Icon(LucideIcons.chevronRight,
-                    size: 18, color: color.onSurfaceVariant),
+                    size: 18, color: color.onSurfaceVariant,),
                 onTap: () {
                   HapticFeedback.mediumImpact();
                   ctx.pop();

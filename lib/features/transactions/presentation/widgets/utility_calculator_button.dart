@@ -37,7 +37,7 @@ class UtilityCalculatorButton extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: (iconColor ?? color.primary).withOpacity(0.1),
+                  color: (iconColor ?? color.primary).withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(

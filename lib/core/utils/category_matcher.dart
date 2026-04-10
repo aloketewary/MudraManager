@@ -3,6 +3,33 @@ import 'package:mudra_manager/core/db/models/category_rule.dart';
 import 'package:mudra_manager/core/utils/transaction_msg_util.dart';
 
 class CategoryMatcher {
+  static const _noiseWords = {
+    'debited',
+    'credited',
+    'account',
+    'balance',
+    'available',
+    'transaction',
+    'transfer',
+    'payment',
+    'received',
+    'sent',
+    'bank',
+    'upi',
+    'neft',
+    'imps',
+    'rtgs',
+    'ref',
+    'inr',
+    'your',
+    'from',
+    'has',
+    'been',
+    'the',
+    'for',
+    'with',
+  };
+
   static Category? matchByKeywords(String text, List<Category> categories) {
     final lowerText = text.toLowerCase();
     Category? bestMatch;
@@ -16,9 +43,16 @@ class CategoryMatcher {
       ];
 
       for (final keyword in keywords) {
-        if (lowerText.contains(keyword)) {
-          // Longer keywords get higher priority
-          score += keyword.length;
+        if (_noiseWords.contains(keyword)) continue;
+        if (!lowerText.contains(keyword)) continue;
+
+        // Longer keywords = more specific = higher score
+        score += keyword.length * 2;
+
+        // Bonus for exact word boundary match (not just substring)
+        if (RegExp(r'\b' + RegExp.escape(keyword) + r'\b')
+            .hasMatch(lowerText)) {
+          score += 10;
         }
       }
 
@@ -32,7 +66,9 @@ class CategoryMatcher {
   }
 
   static Category? getFallbackCategory(
-      List<Category> categories, double? amount) {
+    List<Category> categories,
+    double? amount,
+  ) {
     if (categories.isEmpty) return null;
 
     // Try to find "Others" or "Miscellaneous" category
@@ -41,7 +77,7 @@ class CategoryMatcher {
       'other',
       'miscellaneous',
       'misc',
-      'general'
+      'general',
     ];
     for (final name in fallbackNames) {
       final match =
@@ -126,17 +162,21 @@ class CategoryMatcher {
 
     if (txn.account?.sendTo != null) {
       existing = existingRules
-          .where((r) =>
-              r.recipientName?.toLowerCase() ==
-              txn.account?.sendTo?.toLowerCase())
+          .where(
+            (r) =>
+                r.recipientName?.toLowerCase() ==
+                txn.account?.sendTo?.toLowerCase(),
+          )
           .firstOrNull;
     }
 
     if (existing == null && txn.account?.bankName != null) {
       existing = existingRules
-          .where((r) =>
-              r.merchantName?.toLowerCase() ==
-              txn.account?.bankName?.toLowerCase())
+          .where(
+            (r) =>
+                r.merchantName?.toLowerCase() ==
+                txn.account?.bankName?.toLowerCase(),
+          )
           .firstOrNull;
     }
 

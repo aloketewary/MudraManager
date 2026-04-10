@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -101,7 +102,7 @@ class _AchievementCard extends StatelessWidget {
 
                 Expanded(child: _TextSection(achievement: achievement)),
 
-                const Icon(Icons.chevron_right_rounded),
+                const Icon(LucideIcons.chevronRight),
               ],
             ),
           ),

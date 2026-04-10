@@ -1799,6 +1799,12 @@ abstract class AppLocalizations {
   /// **'Back'**
   String get common_back;
 
+  /// No description provided for @common_undo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get common_undo;
+
   /// No description provided for @common_delete.
   ///
   /// In en, this message translates to:
@@ -2314,6 +2320,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'None'**
   String get label_none;
+
+  /// No description provided for @label_frequency.
+  ///
+  /// In en, this message translates to:
+  /// **'Frequency'**
+  String get label_frequency;
+
+  /// No description provided for @label_repeatEvery.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat every'**
+  String get label_repeatEvery;
+
+  /// No description provided for @label_days.
+  ///
+  /// In en, this message translates to:
+  /// **'days'**
+  String get label_days;
+
+  /// No description provided for @label_weeks.
+  ///
+  /// In en, this message translates to:
+  /// **'weeks'**
+  String get label_weeks;
+
+  /// No description provided for @label_months.
+  ///
+  /// In en, this message translates to:
+  /// **'months'**
+  String get label_months;
+
+  /// No description provided for @label_years.
+  ///
+  /// In en, this message translates to:
+  /// **'years'**
+  String get label_years;
 
   /// No description provided for @trip_expenses.
   ///
@@ -5251,7 +5293,7 @@ abstract class AppLocalizations {
   /// No description provided for @goal_onTrack.
   ///
   /// In en, this message translates to:
-  /// **'On Track'**
+  /// **'On Track ✅'**
   String get goal_onTrack;
 
   /// No description provided for @goal_onTrackDesc.
@@ -6166,6 +6208,192 @@ abstract class AppLocalizations {
   /// **'Top Spending'**
   String get stats_topSpending;
 
+  /// No description provided for @stats_12MonthTrend.
+  ///
+  /// In en, this message translates to:
+  /// **'12-Month Trend'**
+  String get stats_12MonthTrend;
+
+  /// No description provided for @stats_trendUp.
+  ///
+  /// In en, this message translates to:
+  /// **'{category} is trending up — {percent}% of total spending'**
+  String stats_trendUp(Object category, Object percent);
+
+  /// No description provided for @stats_trendDown.
+  ///
+  /// In en, this message translates to:
+  /// **'{category} is trending down this month 📉'**
+  String stats_trendDown(Object category);
+
+  /// No description provided for @stats_topCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'{category} is your top category — {percent}% of spending'**
+  String stats_topCategory(Object category, Object percent);
+
+  /// No description provided for @stats_weekendPeak.
+  ///
+  /// In en, this message translates to:
+  /// **'You spend more on weekends — {day} is your peak day'**
+  String stats_weekendPeak(Object day);
+
+  /// No description provided for @stats_weekdayPeak.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekdays cost more — {day} is your biggest day'**
+  String stats_weekdayPeak(Object day);
+
+  /// No description provided for @stats_peakAndQuiet.
+  ///
+  /// In en, this message translates to:
+  /// **'{peak} is your peak spending day, {quiet} is the quietest'**
+  String stats_peakAndQuiet(Object peak, Object quiet);
+
+  /// No description provided for @stats_categoryTrends.
+  ///
+  /// In en, this message translates to:
+  /// **'Category Trends'**
+  String get stats_categoryTrends;
+
+  /// No description provided for @stats_spendingByTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Spending by Tag'**
+  String get stats_spendingByTag;
+
+  /// No description provided for @stats_netWorth.
+  ///
+  /// In en, this message translates to:
+  /// **'Net Worth'**
+  String get stats_netWorth;
+
+  /// No description provided for @stats_savings.
+  ///
+  /// In en, this message translates to:
+  /// **'Savings'**
+  String get stats_savings;
+
+  /// No description provided for @stats_categoryImpact.
+  ///
+  /// In en, this message translates to:
+  /// **'CATEGORY IMPACT'**
+  String get stats_categoryImpact;
+
+  /// No description provided for @stats_net.
+  ///
+  /// In en, this message translates to:
+  /// **'Net'**
+  String get stats_net;
+
+  /// No description provided for @stats_dailySpendingPace.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Spending Pace'**
+  String get stats_dailySpendingPace;
+
+  /// No description provided for @stats_topCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Top Categories'**
+  String get stats_topCategories;
+
+  /// No description provided for @stats_projectedThisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Projected: {amount} this month'**
+  String stats_projectedThisMonth(Object amount);
+
+  /// No description provided for @stats_byDay.
+  ///
+  /// In en, this message translates to:
+  /// **'By day {day}: {amount} in {month}'**
+  String stats_byDay(Object day, Object amount, Object month);
+
+  /// No description provided for @stats_steadyHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Steady as she goes'**
+  String get stats_steadyHeadline;
+
+  /// No description provided for @stats_steadyDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Your spending is consistent — that\'s discipline.'**
+  String get stats_steadyDetail;
+
+  /// No description provided for @stats_doingGreatHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re doing great 🌟'**
+  String get stats_doingGreatHeadline;
+
+  /// No description provided for @stats_spendingUpHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Heads up — spending is up'**
+  String get stats_spendingUpHeadline;
+
+  /// No description provided for @stats_downloadPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Download PDF'**
+  String get stats_downloadPdf;
+
+  /// No description provided for @stats_generating.
+  ///
+  /// In en, this message translates to:
+  /// **'Generating...'**
+  String get stats_generating;
+
+  /// No description provided for @recap_income.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get recap_income;
+
+  /// No description provided for @recap_expense.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense'**
+  String get recap_expense;
+
+  /// No description provided for @recap_saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get recap_saved;
+
+  /// No description provided for @recap_belowAvg.
+  ///
+  /// In en, this message translates to:
+  /// **'Below avg'**
+  String get recap_belowAvg;
+
+  /// No description provided for @recap_aboveAvg.
+  ///
+  /// In en, this message translates to:
+  /// **'Above avg'**
+  String get recap_aboveAvg;
+
+  /// No description provided for @recap_recurring.
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring'**
+  String get recap_recurring;
+
+  /// No description provided for @recap_oneTime.
+  ///
+  /// In en, this message translates to:
+  /// **'One-time'**
+  String get recap_oneTime;
+
+  /// No description provided for @recap_recapTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recap'**
+  String get recap_recapTitle;
+
   /// No description provided for @notifSettings_dailySummary.
   ///
   /// In en, this message translates to:
@@ -6585,24 +6813,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sunday'**
   String get day_sunday;
-
-  /// No description provided for @recap_income.
-  ///
-  /// In en, this message translates to:
-  /// **'Income'**
-  String get recap_income;
-
-  /// No description provided for @recap_expense.
-  ///
-  /// In en, this message translates to:
-  /// **'Expense'**
-  String get recap_expense;
-
-  /// No description provided for @recap_saved.
-  ///
-  /// In en, this message translates to:
-  /// **'Saved'**
-  String get recap_saved;
 
   /// No description provided for @recap_dailySpending.
   ///
@@ -8380,6 +8590,156 @@ abstract class AppLocalizations {
   /// **'Start saving {amount}'**
   String goal_startSaving(Object amount);
 
+  /// No description provided for @goal_goalsInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 goal in progress} other{{count} goals in progress}}'**
+  String goal_goalsInProgress(num count);
+
+  /// No description provided for @goal_completedSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed 🎉'**
+  String get goal_completedSection;
+
+  /// No description provided for @goal_emotionAlmost.
+  ///
+  /// In en, this message translates to:
+  /// **'Almost there 🚀'**
+  String get goal_emotionAlmost;
+
+  /// No description provided for @goal_emotionHalfway.
+  ///
+  /// In en, this message translates to:
+  /// **'Halfway there 💪'**
+  String get goal_emotionHalfway;
+
+  /// No description provided for @goal_emotionEvery.
+  ///
+  /// In en, this message translates to:
+  /// **'Every bit counts 🌱'**
+  String get goal_emotionEvery;
+
+  /// No description provided for @goal_emotionHalfwayDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Halfway done ✨'**
+  String get goal_emotionHalfwayDone;
+
+  /// No description provided for @goal_emotionKeepPushing.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep pushing 🔥'**
+  String get goal_emotionKeepPushing;
+
+  /// No description provided for @goal_emotionJustStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Just getting started 🌱'**
+  String get goal_emotionJustStarted;
+
+  /// No description provided for @goal_closestToCompletion.
+  ///
+  /// In en, this message translates to:
+  /// **'Closest to completion'**
+  String get goal_closestToCompletion;
+
+  /// No description provided for @goal_acrossGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{across 1 goal} other{across {count} goals}}'**
+  String goal_acrossGoals(num count);
+
+  /// No description provided for @goal_suffixSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'saved'**
+  String get goal_suffixSaved;
+
+  /// No description provided for @goal_suffixLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'left'**
+  String get goal_suffixLeft;
+
+  /// No description provided for @goal_suffixDone.
+  ///
+  /// In en, this message translates to:
+  /// **'done'**
+  String get goal_suffixDone;
+
+  /// No description provided for @goal_suffixAchieved.
+  ///
+  /// In en, this message translates to:
+  /// **'achieved'**
+  String get goal_suffixAchieved;
+
+  /// No description provided for @goal_suffixToGo.
+  ///
+  /// In en, this message translates to:
+  /// **'to go'**
+  String get goal_suffixToGo;
+
+  /// No description provided for @goal_needsAttention.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs attention ⚠️'**
+  String get goal_needsAttention;
+
+  /// No description provided for @goal_aheadOfSchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Ahead of schedule 🎯'**
+  String get goal_aheadOfSchedule;
+
+  /// No description provided for @goal_monthsLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} months left'**
+  String goal_monthsLeft(Object count);
+
+  /// No description provided for @goal_emotionDidIt.
+  ///
+  /// In en, this message translates to:
+  /// **'You did it! 🎉'**
+  String get goal_emotionDidIt;
+
+  /// No description provided for @goal_emotionSoClose.
+  ///
+  /// In en, this message translates to:
+  /// **'So close, keep going! 💪'**
+  String get goal_emotionSoClose;
+
+  /// No description provided for @goal_emotionMomentum.
+  ///
+  /// In en, this message translates to:
+  /// **'Building momentum 🔥'**
+  String get goal_emotionMomentum;
+
+  /// No description provided for @goal_emotionCatchUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Let\'s catch up ⚡'**
+  String get goal_emotionCatchUp;
+
+  /// No description provided for @goal_finishGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish this goal! 🚀'**
+  String get goal_finishGoal;
+
+  /// No description provided for @goal_behindPace.
+  ///
+  /// In en, this message translates to:
+  /// **'Behind pace ⚠️'**
+  String get goal_behindPace;
+
+  /// No description provided for @goal_daysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} days ago'**
+  String goal_daysAgo(Object count);
+
   /// No description provided for @common_today.
   ///
   /// In en, this message translates to:
@@ -9177,6 +9537,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Changing base currency later will archive existing transactions.'**
   String get onboard_currencyWarning;
+
+  /// No description provided for @statistics_topCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Top Category'**
+  String get statistics_topCategory;
+
+  /// No description provided for @statistics_dailyAverage.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Average'**
+  String get statistics_dailyAverage;
+
+  /// No description provided for @statistics_perDay.
+  ///
+  /// In en, this message translates to:
+  /// **'per day'**
+  String get statistics_perDay;
+
+  /// No description provided for @statistics_percentOfExpenses.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% of expenses'**
+  String statistics_percentOfExpenses(String percent);
+
+  /// No description provided for @sms_infoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How SMS Import Works'**
+  String get sms_infoTitle;
+
+  /// No description provided for @sms_infoOnlyScans.
+  ///
+  /// In en, this message translates to:
+  /// **'Only scans bank and wallet SMS'**
+  String get sms_infoOnlyScans;
+
+  /// No description provided for @sms_infoStaysOnDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'All data stays on your device'**
+  String get sms_infoStaysOnDevice;
+
+  /// No description provided for @sms_infoAutoCreates.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically creates transactions'**
+  String get sms_infoAutoCreates;
+
+  /// No description provided for @sms_infoNoPersonal.
+  ///
+  /// In en, this message translates to:
+  /// **'No personal messages are read'**
+  String get sms_infoNoPersonal;
+
+  /// No description provided for @dashboard_totalBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Balance'**
+  String get dashboard_totalBalance;
+
+  /// No description provided for @dashboard_netWorthLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Net Worth'**
+  String get dashboard_netWorthLink;
+
+  /// No description provided for @dashboard_showAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Show accounts'**
+  String get dashboard_showAccounts;
+
+  /// No description provided for @dashboard_hideAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide accounts'**
+  String get dashboard_hideAccounts;
+
+  /// No description provided for @dashboard_accountsTapExpand.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} accounts · Tap to expand'**
+  String dashboard_accountsTapExpand(int count);
 }
 
 class _AppLocalizationsDelegate

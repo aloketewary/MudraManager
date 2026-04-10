@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -130,7 +131,7 @@ class _SwipeActionWrapperState extends State<SwipeActionWrapper>
         child: const Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.edit, color: Colors.white, size: 20),
+            Icon(LucideIcons.pencil, color: Colors.white, size: 20),
             SizedBox(width: 6),
             Text(
               'Edit',
@@ -161,7 +162,7 @@ class _SwipeActionWrapperState extends State<SwipeActionWrapper>
               ),
             ),
             SizedBox(width: 6),
-            Icon(Icons.delete, color: Colors.white, size: 20),
+            Icon(LucideIcons.trash2, color: Colors.white, size: 20),
           ],
         ),
       ),
@@ -224,7 +225,7 @@ class _PeekOverlay extends AnimatedWidget {
                       ),
                     ),
                     SizedBox(width: 6),
-                    Icon(Icons.delete, color: Colors.white, size: 20),
+                    Icon(LucideIcons.trash2, color: Colors.white, size: 20),
                   ],
                 ),
               ),
@@ -245,7 +246,7 @@ class _PeekOverlay extends AnimatedWidget {
                 child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.edit, color: Colors.white, size: 20),
+                    Icon(LucideIcons.pencil, color: Colors.white, size: 20),
                     SizedBox(width: 6),
                     Text(
                       'Edit',

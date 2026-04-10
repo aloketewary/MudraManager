@@ -1,3 +1,5 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -35,7 +37,7 @@ class HeroChartCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.show_chart, color: color.primary, size: 20),
+                Icon(LucideIcons.chartLine, color: color.primary, size: 20),
                 const SizedBox(width: 6),
                 Flexible(
                   child: Text(
@@ -77,8 +79,11 @@ class HeroChartCard extends StatelessWidget {
                       isCurved: true,
                       barWidth: 2,
                       dotData: const FlDotData(show: true),
-                      gradient: LinearGradient(
-                        colors: [Colors.green.shade400, Colors.green.shade600],
+                      gradient: const LinearGradient(
+                        colors: [
+                          FinanceColors.statusGood,
+                          FinanceColors.statusGood,
+                        ],
                       ),
                     ),
                     LineChartBarData(
@@ -86,8 +91,11 @@ class HeroChartCard extends StatelessWidget {
                       isCurved: true,
                       barWidth: 2,
                       dotData: const FlDotData(show: true),
-                      gradient: LinearGradient(
-                        colors: [Colors.red.shade400, Colors.red.shade600],
+                      gradient: const LinearGradient(
+                        colors: [
+                          FinanceColors.statusDanger,
+                          FinanceColors.statusDanger,
+                        ],
                       ),
                     ),
                   ],
@@ -111,7 +119,8 @@ class HeroChartCard extends StatelessWidget {
                       sideTitles: SideTitles(
                         showTitles: true,
                         getTitlesWidget: (value, _) => Text(
-                          formatCurrency(value, code: BaseCurrency.code, decimals: 0),
+                          formatCurrency(value,
+                              code: BaseCurrency.code, decimals: 0,),
                           style: textTheme.bodySmall?.copyWith(fontSize: 9),
                         ),
                         reservedSize: 35,
@@ -140,12 +149,12 @@ class HeroChartCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 _buildLegend(
-                  Colors.green.shade500,
+                  FinanceColors.statusGood,
                   ctxt.statistics_chartLineIncomeText,
                 ),
                 const SizedBox(width: 16),
                 _buildLegend(
-                  Colors.red.shade500,
+                  FinanceColors.statusDanger,
                   ctxt.statistics_chartLineExpenseText,
                 ),
               ],

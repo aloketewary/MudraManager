@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -51,7 +52,7 @@ class _TransactionFilterSheetState extends State<TransactionFilterSheet> {
             color: color.surface,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
             border: Border.all(
-              color: color.primary.withOpacity(0.3),
+              color: color.primary.withValues(alpha: 0.3),
               width: 1.5,
             ),
           ),
@@ -71,14 +72,14 @@ class _TransactionFilterSheetState extends State<TransactionFilterSheet> {
               TextField(
                 decoration: InputDecoration(
                   labelText: 'Search by sender',
-                  prefixIcon: Icon(Icons.search, color: color.primary),
+                  prefixIcon: Icon(LucideIcons.search, color: color.primary),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: color.primary.withOpacity(0.3)),
+                    borderSide: BorderSide(color: color.primary.withValues(alpha: 0.3)),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: color.primary.withOpacity(0.3)),
+                    borderSide: BorderSide(color: color.primary.withValues(alpha: 0.3)),
                   ),
                 ),
                 onChanged: (value) => setState(() => _searchQuery = value),
@@ -95,17 +96,17 @@ class _TransactionFilterSheetState extends State<TransactionFilterSheet> {
                   ButtonSegment(
                     value: null,
                     label: Text('All'),
-                    icon: Icon(Icons.all_inclusive),
+                    icon: Icon(LucideIcons.infinity),
                   ),
                   ButtonSegment(
                     value: true,
                     label: Text('Income'),
-                    icon: Icon(Icons.arrow_downward),
+                    icon: Icon(LucideIcons.arrowDown),
                   ),
                   ButtonSegment(
                     value: false,
                     label: Text('Expense'),
-                    icon: Icon(Icons.arrow_upward),
+                    icon: Icon(LucideIcons.arrowUp),
                   ),
                 ],
                 selected: {_filterIncome},
@@ -127,7 +128,7 @@ class _TransactionFilterSheetState extends State<TransactionFilterSheet> {
                         );
                         if (date != null) setState(() => _startDate = date);
                       },
-                      icon: const Icon(Icons.calendar_today),
+                      icon: const Icon(LucideIcons.calendar),
                       label: Text(
                         _startDate == null
                             ? 'Start Date'
@@ -147,7 +148,7 @@ class _TransactionFilterSheetState extends State<TransactionFilterSheet> {
                         );
                         if (date != null) setState(() => _endDate = date);
                       },
-                      icon: const Icon(Icons.calendar_today),
+                      icon: const Icon(LucideIcons.calendar),
                       label: Text(
                         _endDate == null
                             ? 'End Date'

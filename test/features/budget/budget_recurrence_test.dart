@@ -4,7 +4,7 @@ import 'package:mudra_manager/features/budget/domain/overspend_prediction.dart';
 
 void main() {
   group('Budget getCurrentPeriodRange', () {
-    Budget _makeBudget({
+    Budget makeBudget({
       required BudgetRecurrence recurrence,
       required DateTime start,
       required DateTime end,
@@ -18,7 +18,7 @@ void main() {
     }
 
     test('none recurrence returns original range', () {
-      final budget = _makeBudget(
+      final budget = makeBudget(
         recurrence: BudgetRecurrence.none,
         start: DateTime(2024, 1, 1),
         end: DateTime(2024, 1, 31),
@@ -29,7 +29,7 @@ void main() {
     });
 
     test('monthly recurrence advances to current month', () {
-      final budget = _makeBudget(
+      final budget = makeBudget(
         recurrence: BudgetRecurrence.monthly,
         start: DateTime(2024, 1, 1),
         end: DateTime(2024, 1, 31),
@@ -40,7 +40,7 @@ void main() {
     });
 
     test('weekly recurrence advances by 7 days', () {
-      final budget = _makeBudget(
+      final budget = makeBudget(
         recurrence: BudgetRecurrence.weekly,
         start: DateTime(2024, 1, 1),
         end: DateTime(2024, 1, 7),
@@ -51,7 +51,7 @@ void main() {
     });
 
     test('daily recurrence advances by 1 day', () {
-      final budget = _makeBudget(
+      final budget = makeBudget(
         recurrence: BudgetRecurrence.daily,
         start: DateTime(2024, 1, 1),
         end: DateTime(2024, 1, 1),
@@ -62,7 +62,7 @@ void main() {
     });
 
     test('yearly recurrence advances by year', () {
-      final budget = _makeBudget(
+      final budget = makeBudget(
         recurrence: BudgetRecurrence.yearly,
         start: DateTime(2023, 1, 1),
         end: DateTime(2023, 12, 31),
@@ -73,7 +73,7 @@ void main() {
     });
 
     test('returns initial range when now is before start', () {
-      final budget = _makeBudget(
+      final budget = makeBudget(
         recurrence: BudgetRecurrence.monthly,
         start: DateTime(2024, 6, 1),
         end: DateTime(2024, 6, 30),
@@ -84,7 +84,7 @@ void main() {
     });
 
     test('returns current range when now is exactly on start', () {
-      final budget = _makeBudget(
+      final budget = makeBudget(
         recurrence: BudgetRecurrence.monthly,
         start: DateTime(2024, 3, 1),
         end: DateTime(2024, 3, 31),

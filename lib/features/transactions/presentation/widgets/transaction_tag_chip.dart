@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 
 class TransactionTagChip extends StatelessWidget {
@@ -25,8 +26,8 @@ class TransactionTagChip extends StatelessWidget {
           fontWeight: FontWeight.w500,
         ),
       ),
-      backgroundColor: chipColor.withOpacity(0.1),
-      deleteIcon: onDeleted != null ? Icon(Icons.close, size: 16, color: chipColor) : null,
+      backgroundColor: chipColor.withValues(alpha: 0.1),
+      deleteIcon: onDeleted != null ? Icon(LucideIcons.x, size: 16, color: chipColor) : null,
       onDeleted: onDeleted,
       padding: const EdgeInsets.symmetric(horizontal: 4),
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,

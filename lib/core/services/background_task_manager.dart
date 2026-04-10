@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
@@ -98,8 +97,7 @@ void callbackDispatcher() {
     try {
       await BackgroundTaskManager._runAllTasks();
       return true;
-    } catch (e) {
-      debugPrint('Background task execution failed: $e');
+    } catch (_) {
       return false;
     }
   });

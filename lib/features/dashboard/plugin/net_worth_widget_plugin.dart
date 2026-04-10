@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/widgets/dashboard_widget_plugin.dart';
@@ -11,7 +12,7 @@ class NetWorthWidgetPlugin extends DashboardWidgetPlugin {
   String get title => 'Net Worth';
 
   @override
-  IconData get icon => Icons.account_balance;
+  IconData get icon => LucideIcons.landmark;
 
   @override
   int get defaultOrder => 4;

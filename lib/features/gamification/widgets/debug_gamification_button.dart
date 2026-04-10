@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
@@ -24,7 +25,7 @@ class DebugGamificationButton extends ConsumerWidget {
 
         SnackbarService.success('✅ Dummy data created!');
       },
-      icon: const Icon(Icons.bug_report),
+      icon: const Icon(LucideIcons.bug),
       label: const Text('Test Gamification'),
     );
   }

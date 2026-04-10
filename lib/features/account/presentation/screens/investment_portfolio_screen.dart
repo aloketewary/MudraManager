@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
@@ -249,7 +250,7 @@ class _InvestmentPortfolioScreenState
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddHoldingBottomSheet,
-        child: const Icon(Icons.add),
+        child: const Icon(LucideIcons.plus),
       ),
     );
   }

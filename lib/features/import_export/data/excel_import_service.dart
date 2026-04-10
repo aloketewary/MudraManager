@@ -49,7 +49,9 @@ class ExcelImportService {
     for (final name in sheetNames) {
       final sheet = excel.tables[name]!;
       final allRows = sheet.rows;
-      _log.i('Sheet "$name": ${allRows.length} rows (maxRows=${sheet.maxRows}, maxCols=${sheet.maxCols})');
+      _log.i(
+        'Sheet "$name": ${allRows.length} rows (maxRows=${sheet.maxRows}, maxCols=${sheet.maxCols})',
+      );
       if (allRows.isEmpty) continue;
 
       final headerRow = allRows.first;
@@ -63,7 +65,11 @@ class ExcelImportService {
   }
 
   /// Read all data rows (skip header).
-  static List<List<String>> readDataRows(Uint8List bytes, {String? sheetName, int maxRows = 500}) {
+  static List<List<String>> readDataRows(
+    Uint8List bytes, {
+    String? sheetName,
+    int maxRows = 500,
+  }) {
     final excel = Excel.decodeBytes(bytes);
     if (excel.tables.isEmpty) return [];
 
@@ -92,8 +98,12 @@ class ExcelImportService {
 
     for (int i = 1; i < allRows.length && i <= maxRows; i++) {
       final sheetRow = allRows[i];
-      final hasData = sheetRow.any((cell) =>
-          cell != null && cell.value != null && cell.value.toString().trim().isNotEmpty);
+      final hasData = sheetRow.any(
+        (cell) =>
+            cell != null &&
+            cell.value != null &&
+            cell.value.toString().trim().isNotEmpty,
+      );
       if (!hasData) continue;
 
       rows.add(
@@ -117,19 +127,49 @@ class ExcelImportService {
       if (h.isEmpty) continue;
 
       // Exact matches first (highest priority)
-      if (dateCol == null && (h == 'date' || h == 'txn date' || h == 'transaction date')) {
+      if (dateCol == null &&
+          (h == 'date' || h == 'txn date' || h == 'transaction date')) {
         dateCol = i;
-      } else if (amountCol == null && (h == 'amount' || h == 'sum' || h == 'total' || h == 'value' || h == 'debit amount' || h == 'credit amount')) {
+      } else if (amountCol == null &&
+          (h == 'amount' ||
+              h == 'sum' ||
+              h == 'total' ||
+              h == 'value' ||
+              h == 'debit amount' ||
+              h == 'credit amount')) {
         amountCol = i;
-      } else if (descCol == null && (h == 'description' || h == 'narration' || h == 'particulars' || h == 'remarks' || h == 'note' || h == 'memo' || h == 'detail' || h == 'details')) {
+      } else if (descCol == null &&
+          (h == 'description' ||
+              h == 'narration' ||
+              h == 'particulars' ||
+              h == 'remarks' ||
+              h == 'note' ||
+              h == 'memo' ||
+              h == 'detail' ||
+              h == 'details')) {
         descCol = i;
-      } else if (typeCol == null && (h == 'type' || h == 'transaction type' || h == 'cr/dr' || h == 'dr/cr' || h == 'income/expense')) {
+      } else if (typeCol == null &&
+          (h == 'type' ||
+              h == 'transaction type' ||
+              h == 'cr/dr' ||
+              h == 'dr/cr' ||
+              h == 'income/expense')) {
         typeCol = i;
-      } else if (catCol == null && (h == 'category' || h == 'tag' || h == 'head' || h == 'expense category')) {
+      } else if (catCol == null &&
+          (h == 'category' ||
+              h == 'tag' ||
+              h == 'head' ||
+              h == 'expense category')) {
         catCol = i;
-      } else if (accountCol == null && (h == 'account' || h == 'bank' || h == 'source' || h == 'a/c' || h == 'account name')) {
+      } else if (accountCol == null &&
+          (h == 'account' ||
+              h == 'bank' ||
+              h == 'source' ||
+              h == 'a/c' ||
+              h == 'account name')) {
         accountCol = i;
-      } else if (currencyCol == null && (h == 'currency' || h == 'ccy' || h == 'currency code')) {
+      } else if (currencyCol == null &&
+          (h == 'currency' || h == 'ccy' || h == 'currency code')) {
         currencyCol = i;
       }
     }
@@ -138,15 +178,36 @@ class ExcelImportService {
     for (int i = 0; i < headers.length; i++) {
       final h = headers[i].toLowerCase().trim();
       if (h.isEmpty) continue;
-      if (i == dateCol || i == amountCol || i == descCol || i == typeCol || i == catCol || i == accountCol || i == currencyCol) continue;
+      if (i == dateCol ||
+          i == amountCol ||
+          i == descCol ||
+          i == typeCol ||
+          i == catCol ||
+          i == accountCol ||
+          i == currencyCol) {
+        continue;
+      }
 
-      if (dateCol == null && h.contains('date')) dateCol = i;
-      else if (amountCol == null && (h.contains('amount') || h.contains('debit') || h.contains('credit'))) amountCol = i;
-      else if (descCol == null && (h.contains('desc') || h.contains('narr') || h.contains('particular') || h.contains('remark'))) descCol = i;
-      else if (currencyCol == null && (h.contains('curr') || h.contains('ccy'))) currencyCol = i;
+      if (dateCol == null && h.contains('date')) {
+        dateCol = i;
+      } else if (amountCol == null &&
+          (h.contains('amount') ||
+              h.contains('debit') ||
+              h.contains('credit'))) {
+        amountCol = i;
+      } else if (descCol == null &&
+          (h.contains('desc') ||
+              h.contains('narr') ||
+              h.contains('particular') ||
+              h.contains('remark'))) {
+        descCol = i;
+      } else if (currencyCol == null &&
+          (h.contains('curr') || h.contains('ccy'))) {
+        currencyCol = i;
+      }
     }
 
-    String dateFormat = 'dd/MM/yyyy';
+    final String dateFormat = 'dd/MM/yyyy';
     // Will be refined during preview
 
     return ColumnMapping(
@@ -180,12 +241,16 @@ class ExcelImportService {
         final description = _cellAt(row, mapping.descriptionColumn);
         final category = _cellAt(row, mapping.categoryColumn);
         final account = _cellAt(row, mapping.accountColumn);
-        final currency = _cellAt(row, mapping.currencyColumn) ?? _detectCurrency(rawAmount);
+        final currency =
+            _cellAt(row, mapping.currencyColumn) ?? _detectCurrency(rawAmount);
         final typeStr = _cellAt(row, mapping.typeColumn)?.toLowerCase() ?? '';
 
         bool isExpense = true;
         if (typeStr.isNotEmpty) {
-          isExpense = !_matchesAny(typeStr, ['credit', 'cr', 'income', 'received', 'deposit']);
+          isExpense = !_matchesAny(
+            typeStr,
+            ['credit', 'cr', 'income', 'received', 'deposit'],
+          );
         } else if (amount != null && rawAmount != null) {
           if (rawAmount.startsWith('-') || rawAmount.startsWith('(')) {
             isExpense = true;
@@ -196,22 +261,26 @@ class ExcelImportService {
         if (date == null) error = 'Invalid date';
         if (amount == null || amount <= 0) error = error ?? 'Invalid amount';
 
-        parsed.add(ImportRow(
-          rowIndex: i + 2,
-          date: date,
-          amount: amount?.abs(),
-          description: description,
-          category: category,
-          account: account,
-          currency: currency,
-          isExpense: isExpense,
-          error: error,
-        ));
+        parsed.add(
+          ImportRow(
+            rowIndex: i + 2,
+            date: date,
+            amount: amount?.abs(),
+            description: description,
+            category: category,
+            account: account,
+            currency: currency,
+            isExpense: isExpense,
+            error: error,
+          ),
+        );
       } catch (e) {
-        parsed.add(ImportRow(
-          rowIndex: i + 2,
-          error: 'Parse error: $e',
-        ));
+        parsed.add(
+          ImportRow(
+            rowIndex: i + 2,
+            error: 'Parse error: $e',
+          ),
+        );
       }
     }
     return parsed;
@@ -238,7 +307,10 @@ class ExcelImportService {
     for (final row in validRows) {
       // Duplicate check: same date + amount + description
       final isDuplicate = await _checkDuplicate(
-        isar, row.date!, row.amount!, row.description,
+        isar,
+        row.date!,
+        row.amount!,
+        row.description,
       );
       if (isDuplicate) {
         duplicates++;
@@ -261,15 +333,40 @@ class ExcelImportService {
           var matched = categoryMap[catKey];
 
           if (matched == null && autoCreateCategories) {
-            // Auto-create with relevant icon/color/keywords
+            final isKnown = CategoryResolver.isKnown(row.category!);
             matched = CategoryResolver.createCategory(row.category!);
+
+            // Unknown categories go under Miscellaneous parent
+            if (!isKnown) {
+              var miscParent = await isar.categorys
+                  .filter()
+                  .nameEqualTo('Miscellaneous')
+                  .findFirst();
+              if (miscParent == null) {
+                miscParent = Category.create(
+                  name: 'Miscellaneous',
+                  categoryType: CategoryType.expense,
+                )
+                  ..iconName = 'circle'
+                  ..colorValue = 0xFF94A3B8;
+                await isar.writeTxn(() async {
+                  await isar.categorys.put(miscParent!);
+                });
+              }
+              matched.parentCategory.value = miscParent;
+            }
+
             await isar.writeTxn(() async {
               await isar.categorys.put(matched!);
+              if (matched.parentCategory.value != null) {
+                await matched.parentCategory.save();
+              }
             });
-            // Add to map so subsequent rows reuse it
             categoryMap[catKey] = matched;
             categoriesCreated++;
-            _log.i('Auto-created category: ${row.category}');
+            _log.i(
+              'Auto-created category: ${row.category}${!isKnown ? ' (under Miscellaneous)' : ''}',
+            );
           }
 
           txn.category.value = matched;
@@ -292,7 +389,9 @@ class ExcelImportService {
 
     skipped += rows.where((r) => !r.isValid).length;
 
-    _log.i('Import done: $imported imported, $skipped skipped, $duplicates duplicates, $categoriesCreated categories created');
+    _log.i(
+      'Import done: $imported imported, $skipped skipped, $duplicates duplicates, $categoriesCreated categories created',
+    );
 
     return ImportResult(
       imported: imported,
@@ -304,7 +403,9 @@ class ExcelImportService {
   }
 
   /// Build a lowercase category name → Category map for matching.
-  static Future<Map<String, Category>> buildCategoryMap(IsarService isarService) async {
+  static Future<Map<String, Category>> buildCategoryMap(
+    IsarService isarService,
+  ) async {
     final isar = await isarService.getInstance();
     final categories = await isar.categorys.where().findAll();
     final map = <String, Category>{};
@@ -328,9 +429,18 @@ class ExcelImportService {
     if (value == null || value.isEmpty) return null;
     final v = value.trim();
     const symbolMap = {
-      '\u20b9': 'INR', '\u0024': 'USD', '\u20ac': 'EUR', '\u00a3': 'GBP',
-      '\u00a5': 'JPY', '\u20a9': 'KRW', '\u20bd': 'RUB', '\u20ba': 'TRY',
-      '\u0e3f': 'THB', '\u20b4': 'UAH', '\u20a6': 'NGN', '\u20b5': 'GHS',
+      '\u20b9': 'INR',
+      '\u0024': 'USD',
+      '\u20ac': 'EUR',
+      '\u00a3': 'GBP',
+      '\u00a5': 'JPY',
+      '\u20a9': 'KRW',
+      '\u20bd': 'RUB',
+      '\u20ba': 'TRY',
+      '\u0e3f': 'THB',
+      '\u20b4': 'UAH',
+      '\u20a6': 'NGN',
+      '\u20b5': 'GHS',
     };
     for (final entry in symbolMap.entries) {
       if (v.contains(entry.key)) return entry.value;
@@ -357,9 +467,16 @@ class ExcelImportService {
     } catch (_) {}
     // Try common formats
     for (final fmt in [
-      'dd/MM/yyyy', 'MM/dd/yyyy', 'yyyy-MM-dd', 'dd-MM-yyyy',
-      'dd/MM/yyyy HH:mm', 'yyyy-MM-dd HH:mm:ss',
-      'd/M/yyyy', 'd-M-yyyy', 'dd MMM yyyy', 'd MMM yyyy',
+      'dd/MM/yyyy',
+      'MM/dd/yyyy',
+      'yyyy-MM-dd',
+      'dd-MM-yyyy',
+      'dd/MM/yyyy HH:mm',
+      'yyyy-MM-dd HH:mm:ss',
+      'd/M/yyyy',
+      'd-M-yyyy',
+      'dd MMM yyyy',
+      'd MMM yyyy',
     ]) {
       try {
         return DateFormat(fmt).parseStrict(value);
@@ -374,7 +491,13 @@ class ExcelImportService {
     // Strip all known currency symbols, codes, spaces, commas, parentheses
     final cleaned = value
         .replaceAll(RegExp(r'[₹$€£¥₩₽₺฿₴₦₵₸₼₾₿\s,]'), '')
-        .replaceAll(RegExp(r'^(INR|USD|EUR|GBP|JPY|AUD|CAD|SGD|AED|SAR|BDT|NPR|LKR|PKR|MYR|THB|IDR|PHP|VND|KRW|CNY|HKD|TWD|NZD|ZAR|BRL|MXN|RUB|TRY|CHF|SEK|NOK|DKK|PLN|CZK|HUF|RON|BGN|HRK|ISK|ILS|EGP|KES|GHS|TZS|UGX|NGN|XOF|XAF)\s*', caseSensitive: false), '')
+        .replaceAll(
+          RegExp(
+            r'^(INR|USD|EUR|GBP|JPY|AUD|CAD|SGD|AED|SAR|BDT|NPR|LKR|PKR|MYR|THB|IDR|PHP|VND|KRW|CNY|HKD|TWD|NZD|ZAR|BRL|MXN|RUB|TRY|CHF|SEK|NOK|DKK|PLN|CZK|HUF|RON|BGN|HRK|ISK|ILS|EGP|KES|GHS|TZS|UGX|NGN|XOF|XAF)\s*',
+            caseSensitive: false,
+          ),
+          '',
+        )
         .replaceAll('(', '-')
         .replaceAll(')', '')
         .trim();
@@ -383,7 +506,10 @@ class ExcelImportService {
   }
 
   static Future<bool> _checkDuplicate(
-    Isar isar, DateTime date, double amount, String? description,
+    Isar isar,
+    DateTime date,
+    double amount,
+    String? description,
   ) async {
     final startOfDay = DateTime(date.year, date.month, date.day);
     final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);

@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -177,7 +178,7 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Icon(
-                                          Icons.notes_rounded,
+                                          LucideIcons.notepadText,
                                           size: 14,
                                           color: color.onSurfaceVariant
                                               .withValues(alpha: 0.6),
@@ -226,7 +227,7 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
                                               mainAxisSize: MainAxisSize.min,
                                               children: [
                                                 Icon(
-                                                  Icons.tag,
+                                                  LucideIcons.tag,
                                                   size: 12,
                                                   color: color
                                                       .onSecondaryContainer,
@@ -320,7 +321,7 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
                         turns: _expanded ? 0.5 : 0.0,
                         duration: const Duration(milliseconds: 200),
                         child: Icon(
-                          Icons.expand_more,
+                          LucideIcons.chevronDown,
                           size: 14,
                           color: color.onSurfaceVariant.withValues(alpha: 0.4),
                         ),
@@ -408,7 +409,7 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
                   shape: BoxShape.circle,
                   border: Border.all(color: color.surfaceContainerLow, width: 1.5),
                 ),
-                child: const Icon(Icons.repeat, size: 10, color: Colors.white),
+                child: const Icon(LucideIcons.repeat, size: 10, color: Colors.white),
               ),
             ),
           ],
@@ -434,7 +435,7 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
                               context,
                               title: 'Remove Subscription Tag?',
                               message: 'This will unlink this transaction from the recurring bill.',
-                              icon: Icons.repeat,
+                              icon: LucideIcons.repeat,
                               confirmText: 'Remove',
                             );
                             if (confirmed == true) widget.onUnlinkRecurring?.call();
@@ -459,7 +460,7 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
                           ),
                           if (widget.onUnlinkRecurring != null) ...[
                             const SizedBox(width: 2),
-                            Icon(Icons.close, size: 10, color: color.error),
+                            Icon(LucideIcons.x, size: 10, color: color.error),
                           ],
                         ],
                       ),
@@ -481,7 +482,7 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
                   child: AnimatedRotation(
                     turns: _expanded ? 0.5 : 0.0,
                     duration: const Duration(milliseconds: 200),
-                    child: Icon(Icons.expand_more, size: 14, color: color.onSurfaceVariant.withValues(alpha: 0.4)),
+                    child: Icon(LucideIcons.chevronDown, size: 14, color: color.onSurfaceVariant.withValues(alpha: 0.4)),
                   ),
                 ),
             ],
@@ -552,7 +553,7 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
                   shape: BoxShape.circle,
                   border: Border.all(color: color.surfaceContainerLow, width: 1.5),
                 ),
-                child: const Icon(Icons.flight_takeoff, size: 10, color: Colors.white),
+                child: const Icon(LucideIcons.planeTakeoff, size: 10, color: Colors.white),
               ),
             ),
           ],
@@ -580,7 +581,7 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.flight_takeoff, size: 10, color: color.primary),
+                        Icon(LucideIcons.planeTakeoff, size: 10, color: color.primary),
                         const SizedBox(width: 3),
                         Text(
                           widget.tripName!,
@@ -609,7 +610,7 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
                   child: AnimatedRotation(
                     turns: _expanded ? 0.5 : 0.0,
                     duration: const Duration(milliseconds: 200),
-                    child: Icon(Icons.expand_more, size: 14, color: color.onSurfaceVariant.withValues(alpha: 0.4)),
+                    child: Icon(LucideIcons.chevronDown, size: 14, color: color.onSurfaceVariant.withValues(alpha: 0.4)),
                   ),
                 ),
             ],
@@ -702,7 +703,7 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
               child: Icon(
-                Icons.arrow_forward_rounded,
+                LucideIcons.arrowRight,
                 color: color.tertiary,
                 size: 20,
               ),

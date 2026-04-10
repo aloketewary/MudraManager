@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mudra_manager/core/theme/design_tokens.dart';
 
 class CommonTextInputField extends StatefulWidget {
   final TextEditingController? controller;
@@ -53,12 +52,20 @@ class _CommonTextInputFieldState extends State<CommonTextInputField> {
     final color = Theme.of(context).colorScheme;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: DesignTokens.spacing8),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: AnimatedContainer(
-        duration: DesignTokens.durationNormal,
+        duration: const Duration(milliseconds: 300),
         decoration: BoxDecoration(
-          borderRadius: DesignTokens.borderRadiusMedium,
-          boxShadow: _isFocused ? AppElevation.elevation1(color.primary) : [],
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: _isFocused
+              ? [
+                  BoxShadow(
+                    color: color.primary.withValues(alpha: 0.05),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : [],
         ),
         child: TextFormField(
           controller: widget.controller,
@@ -71,14 +78,14 @@ class _CommonTextInputFieldState extends State<CommonTextInputField> {
               color: _isFocused ? color.primary : color.onSurfaceVariant,
             ),
             border: OutlineInputBorder(
-              borderRadius: DesignTokens.borderRadiusMedium,
+              borderRadius: BorderRadius.circular(16),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: DesignTokens.borderRadiusMedium,
+              borderRadius: BorderRadius.circular(16),
               borderSide: BorderSide(color: color.primary, width: 2.0),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: DesignTokens.borderRadiusMedium,
+              borderRadius: BorderRadius.circular(16),
               borderSide: BorderSide(color: color.outline, width: 1.0),
             ),
           ),

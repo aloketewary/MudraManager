@@ -1,6 +1,9 @@
 package com.mudramanager.app
 
+import android.app.Notification
 import android.content.Context
+import android.os.Build
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.service.notification.NotificationListenerService
@@ -66,7 +69,7 @@ class TransactionNotificationListener : NotificationListenerService() {
 
         val extras = sbn.notification.extras
         val title = extras.getCharSequence("android.title")?.toString() ?: ""
-        val text = extras.getCharSequence("android.text")?.toString() ?: ""
+        val text = extractMessageText(extras)
 
         // Skip empty or very short messages (unlikely to be transactional)
         val body = text.ifEmpty { title }
@@ -90,6 +93,32 @@ class TransactionNotificationListener : NotificationListenerService() {
                 methodChannel?.invokeMethod("onDrainQueue", null)
             }
         } catch (_: Exception) {}
+    }
+
+    /**
+     * Extract message text from notification extras.
+     * RCS/chat messages use MessagingStyle which stores text in android.messages
+     * rather than android.text.
+     */
+    private fun extractMessageText(extras: Bundle): String {
+        // 1. Try MessagingStyle messages (RCS, chat messages)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            val messages = extras.getParcelableArray(Notification.EXTRA_MESSAGES)
+            if (messages != null && messages.isNotEmpty()) {
+                val last = messages.last()
+                if (last is Bundle) {
+                    val msgText = last.getCharSequence("text")?.toString()
+                    if (!msgText.isNullOrBlank()) return msgText
+                }
+            }
+        }
+
+        // 2. Try bigText (expanded notification text, often has full SMS/RCS body)
+        val bigText = extras.getCharSequence(Notification.EXTRA_BIG_TEXT)?.toString()
+        if (!bigText.isNullOrBlank()) return bigText
+
+        // 3. Standard text
+        return extras.getCharSequence(Notification.EXTRA_TEXT)?.toString() ?: ""
     }
 
     private fun queueNotification(data: Map<String, Any>) {

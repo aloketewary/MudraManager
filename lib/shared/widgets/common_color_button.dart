@@ -1,4 +1,3 @@
-import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 
 class CommonColorPickerButton extends StatelessWidget {
@@ -17,15 +16,14 @@ class CommonColorPickerButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var color = Theme.of(context).colorScheme;
-    var textTheme = Theme.of(context).textTheme;
+    final textTheme = Theme.of(context).textTheme;
     
     // Calculate proper text color based on background color brightness
     final bgLuminance = (backgroundColor ?? Colors.blue).computeLuminance();
     final calculatedTextColor = textColor ?? (bgLuminance > 0.5 ? Colors.black : Colors.white);
     
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(

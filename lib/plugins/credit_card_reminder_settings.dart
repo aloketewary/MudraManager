@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -110,7 +111,7 @@ class _CreditCardReminderSettingsState extends State<CreditCardReminderSettings>
             children: [
               Text('Credit Cards', style: Theme.of(context).textTheme.titleLarge),
               IconButton(
-                icon: const Icon(Icons.add_circle),
+                icon: const Icon(LucideIcons.circlePlus),
                 onPressed: _addCard,
               ),
             ],
@@ -129,18 +130,18 @@ class _CreditCardReminderSettingsState extends State<CreditCardReminderSettings>
               final card = entry.value;
               return Card(
                 child: ListTile(
-                  leading: const Icon(Icons.credit_card),
+                  leading: const Icon(LucideIcons.creditCard),
                   title: Text(card.name),
                   subtitle: Text('Bill due on ${card.billDay}${_getDaySuffix(card.billDay)} of every month'),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.edit),
+                        icon: const Icon(LucideIcons.pencil),
                         onPressed: () => _editCard(index),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.delete),
+                        icon: const Icon(LucideIcons.trash2),
                         onPressed: () => _deleteCard(index),
                       ),
                     ],
@@ -225,7 +226,7 @@ class _CardDialogState extends State<_CardDialog> {
                       .map((day) => DropdownMenuItem(
                             value: day,
                             child: Text('$day'),
-                          ))
+                          ),)
                       .toList(),
                   onChanged: (value) => setState(() => _billDay = value!),
                 ),

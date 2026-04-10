@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/widgets/dashboard_widget_plugin.dart';
@@ -11,7 +12,7 @@ class GoalsWidgetPlugin extends DashboardWidgetPlugin {
   String get title => 'Savings Goals';
 
   @override
-  IconData get icon => Icons.flag;
+  IconData get icon => LucideIcons.flag;
 
   @override
   int get defaultOrder => 4;

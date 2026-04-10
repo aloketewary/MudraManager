@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:flutter/material.dart';
@@ -73,7 +74,7 @@ class CategorySelector extends ConsumerWidget {
               scrollDirection: Axis.horizontal,
               itemCount: 3,
               separatorBuilder: (_, __) => const SizedBox(width: 12),
-              itemBuilder: (_, __) => SkeletonLoader(width: 120, height: 120, borderRadius: BorderRadius.all(Radius.circular(16))),
+              itemBuilder: (_, __) => const SkeletonLoader(width: 120, height: 120, borderRadius: BorderRadius.all(Radius.circular(16))),
             ),
           ),
           error: (_, __) => SizedBox(
@@ -218,7 +219,7 @@ class _CategoryCard extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  Icons.chevron_right,
+                  LucideIcons.chevronRight,
                   size: 12,
                   color: color.onPrimary,
                 ),
@@ -285,7 +286,7 @@ class _AddCategoryButton extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.add, color: color.onSurfaceVariant),
+              Icon(LucideIcons.plus, color: color.onSurfaceVariant),
               const SizedBox(height: 4),
               Text(
                 ctxt.common_addLabel,

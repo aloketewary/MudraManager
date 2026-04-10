@@ -140,7 +140,7 @@ void main() {
 
       final uniqueRoutes = routes.toSet();
       expect(uniqueRoutes.length, routes.length,
-          reason: 'All routes must be unique');
+          reason: 'All routes must be unique',);
     });
 
     test('all routes start with /', () {
@@ -159,7 +159,7 @@ void main() {
 
       for (final route in routes) {
         expect(route.startsWith('/'), true,
-            reason: 'Route "$route" must start with /');
+            reason: 'Route "$route" must start with /',);
       }
     });
   });

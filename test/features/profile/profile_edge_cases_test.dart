@@ -5,46 +5,46 @@ import 'package:mudra_manager/features/profile/data/help_item.dart';
 
 void main() {
   group('AccountDisplayExtension', () {
-    Account _makeAccount(AccountType type) {
+    Account makeAccount(AccountType type) {
       return Account()..accountType = type;
     }
 
     test('credit card shows Outstanding', () {
-      expect(_makeAccount(AccountType.creditCard).getBalanceLabel(), 'Outstanding');
+      expect(makeAccount(AccountType.creditCard).getBalanceLabel(), 'Outstanding');
     });
 
     test('bank shows Balance', () {
-      expect(_makeAccount(AccountType.bank).getBalanceLabel(), 'Balance');
+      expect(makeAccount(AccountType.bank).getBalanceLabel(), 'Balance');
     });
 
     test('cash shows Cash', () {
-      expect(_makeAccount(AccountType.cash).getBalanceLabel(), 'Cash');
+      expect(makeAccount(AccountType.cash).getBalanceLabel(), 'Cash');
     });
 
     test('investment shows Value', () {
-      expect(_makeAccount(AccountType.investment).getBalanceLabel(), 'Value');
+      expect(makeAccount(AccountType.investment).getBalanceLabel(), 'Value');
     });
 
     test('eWallet shows Balance', () {
-      expect(_makeAccount(AccountType.eWallet).getBalanceLabel(), 'Balance');
+      expect(makeAccount(AccountType.eWallet).getBalanceLabel(), 'Balance');
     });
 
     test('credit card healthy when balance <= 0', () {
-      final cc = _makeAccount(AccountType.creditCard);
+      final cc = makeAccount(AccountType.creditCard);
       expect(cc.isBalanceHealthy(0), true);
       expect(cc.isBalanceHealthy(-100), true);
       expect(cc.isBalanceHealthy(500), false);
     });
 
     test('bank healthy when balance >= 0', () {
-      final bank = _makeAccount(AccountType.bank);
+      final bank = makeAccount(AccountType.bank);
       expect(bank.isBalanceHealthy(1000), true);
       expect(bank.isBalanceHealthy(0), true);
       expect(bank.isBalanceHealthy(-100), false);
     });
 
     test('cash healthy when balance >= 0', () {
-      final cash = _makeAccount(AccountType.cash);
+      final cash = makeAccount(AccountType.cash);
       expect(cash.isBalanceHealthy(500), true);
       expect(cash.isBalanceHealthy(-1), false);
     });

@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/widgets/dashboard_widget_plugin.dart';
@@ -12,7 +13,7 @@ class BudgetAlertWidgetPlugin extends DashboardWidgetPlugin {
   String get title => 'Budget Alert';
 
   @override
-  IconData get icon => Icons.warning_amber;
+  IconData get icon => LucideIcons.triangleAlert;
 
   @override
   int get defaultOrder => 0; // Always at top

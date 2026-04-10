@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 
 class SettingsActionCard extends StatelessWidget {
@@ -34,7 +35,7 @@ class SettingsActionCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: color.primary.withOpacity(0.1),
+                  color: color.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(icon, color: color.primary, size: 24),
@@ -61,7 +62,7 @@ class SettingsActionCard extends StatelessWidget {
                   ],
                 ),
               ),
-              Icon(Icons.chevron_right, color: color.onSurfaceVariant),
+              Icon(LucideIcons.chevronRight, color: color.onSurfaceVariant),
             ],
           ),
         ),

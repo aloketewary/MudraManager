@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 
@@ -15,7 +16,6 @@ import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/dialog_utils.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 import 'package:mudra_manager/features/trip/data/trip_provider.dart';
-import 'package:mudra_manager/shared/widgets/settlement_card.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
@@ -166,7 +166,7 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                       ref.invalidate(allTripsProvider);
                       ref.invalidate(activeTripsProvider);
                       ref.invalidate(tripByIdProvider(widget.tripId));
-                      if (mounted) context.pop();
+                      if (context.mounted) context.pop();
                     }
                   }
                 },
@@ -1062,7 +1062,7 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                           ? LucideIcons.clock
                           : LucideIcons.circleCheck,
                       size: 20,
-                      color: pendingCount > 0 ? color.tertiary : Colors.green,
+                      color: pendingCount > 0 ? color.tertiary : FinanceColors.statusGood,
                     ),
                     SizedBox(width: spacing.elementGap * 1.5),
                     Expanded(
@@ -1073,7 +1073,7 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                         style: textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                           color:
-                              pendingCount > 0 ? color.onSurface : Colors.green,
+                              pendingCount > 0 ? color.onSurface : FinanceColors.statusGood,
                         ),
                       ),
                     ),
@@ -1213,7 +1213,7 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                   width: 8,
                   height: 8,
                   decoration: const BoxDecoration(
-                    color: Colors.green,
+                    color: FinanceColors.statusGood,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -1230,7 +1230,7 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                   formatCurrency(amount, code: trip.currencyCode, decimals: 0),
                   style: textTheme.bodySmall?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: Colors.green,
+                    color: FinanceColors.statusGood,
                   ),
                 ),
                 SizedBox(width: spacing.elementGap),

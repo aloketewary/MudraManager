@@ -1,6 +1,5 @@
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -304,7 +303,7 @@ class BusinessPdfExportPlugin extends ExportPlugin {
         children: [
           pw.Text(
             title,
-            style: pw.TextStyle(fontSize: 12, color: PdfColors.grey600),
+            style: const pw.TextStyle(fontSize: 12, color: PdfColors.grey600),
           ),
           pw.SizedBox(height: 8),
           pw.Text(
@@ -340,7 +339,7 @@ class BusinessPdfExportPlugin extends ExportPlugin {
                 (item) => _buildTableRow(
                   [
                     item[0].toString(),
-                    '${formatCurrency((item[1] as double), decimals: 2)}',
+                    (formatCurrency((item[1] as double), decimals: 2)),
                   ],
                   isTotal: isTotal,
                 ),

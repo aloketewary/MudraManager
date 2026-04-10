@@ -130,7 +130,8 @@ class PersonalityArchetype {
   );
 
   static PersonalityArchetype fromSpendingPersonality(
-      SpendingPersonality data) {
+    SpendingPersonality data,
+  ) {
     // Score each personality type
     final scores = <String, double>{};
 

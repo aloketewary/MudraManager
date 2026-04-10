@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/shared/widgets/currency_badge.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
@@ -96,7 +97,7 @@ class _ApproveTransactionSheetState extends State<ApproveTransactionSheet> {
                 ),
                 const Spacer(),
                 IconButton(
-                  icon: const Icon(Icons.close),
+                  icon: const Icon(LucideIcons.x),
                   onPressed: () => Navigator.pop(context),
                 ),
               ],
@@ -110,7 +111,7 @@ class _ApproveTransactionSheetState extends State<ApproveTransactionSheet> {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.sms_outlined, size: 20, color: color.primary),
+                  Icon(LucideIcons.messageSquare, size: 20, color: color.primary),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -197,7 +198,7 @@ class _ApproveTransactionSheetState extends State<ApproveTransactionSheet> {
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.calendar_today, size: 20, color: color.primary),
+                    Icon(LucideIcons.calendar, size: 20, color: color.primary),
                     const SizedBox(width: 12),
                     Text(
                       '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',

@@ -1,5 +1,4 @@
 import 'package:isar_community/isar.dart';
-import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/exchange_rate.dart';
 import 'package:mudra_manager/core/db/models/frequency.dart';
@@ -77,13 +76,13 @@ class RecurringTransactionService {
     }
 
     log.i(
-        'Recurring: $processed created, $matched SMS-matched, $skipped already done');
+        'Recurring: $processed created, $matched SMS-matched, $skipped already done',);
   }
 
   /// Find an unlinked transaction that matches this recurring bill
   /// (exact amount, within the billing period, same account)
   Future<Transaction?> _findSmsMatch(
-      Isar isar, RecurringTransaction recurring) async {
+      Isar isar, RecurringTransaction recurring,) async {
     final dueDate = recurring.nextDueDate;
     // Search from 5 days before due to 2 days after (payments can be early/late)
     final searchStart = DateTime(
@@ -114,7 +113,7 @@ class RecurringTransactionService {
   }
 
   Future<void> _linkTransactionToRecurring(
-      Isar isar, Transaction txn, RecurringTransaction recurring) async {
+      Isar isar, Transaction txn, RecurringTransaction recurring,) async {
     txn.recurringTransactionSource.value = recurring;
     await isar.writeTxn(() async {
       await isar.transactions.put(txn);
@@ -123,7 +122,7 @@ class RecurringTransactionService {
   }
 
   Future<bool> _transactionExists(
-      Isar isar, RecurringTransaction recurring, DateTime dueDate) async {
+      Isar isar, RecurringTransaction recurring, DateTime dueDate,) async {
     final startOfDay = DateTime(dueDate.year, dueDate.month, dueDate.day);
     final endOfDay =
         DateTime(dueDate.year, dueDate.month, dueDate.day, 23, 59, 59);
@@ -138,7 +137,7 @@ class RecurringTransactionService {
   }
 
   Future<void> _createTransaction(
-      Isar isar, RecurringTransaction recurring) async {
+      Isar isar, RecurringTransaction recurring,) async {
     final frequencyText = _getFrequencyText(recurring.frequency);
     final description = recurring.description?.isNotEmpty == true
         ? '${recurring.description} (🔄 $frequencyText)'
@@ -195,7 +194,7 @@ class RecurringTransactionService {
   }
 
   Future<void> _updateNextDueDate(
-      Isar isar, RecurringTransaction recurring) async {
+      Isar isar, RecurringTransaction recurring,) async {
     final nextDate = calculateNextDueDate(
       recurring.nextDueDate,
       recurring.frequency,

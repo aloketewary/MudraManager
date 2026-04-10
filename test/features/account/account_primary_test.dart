@@ -131,7 +131,6 @@ void main() {
 
     test('owner not in participants returns null share', () {
       final participantIds = [2, 3];
-      final splitAmounts = [450.0, 450.0];
       final ownerId = 1;
 
       final ownerIdx = participantIds.indexOf(ownerId);

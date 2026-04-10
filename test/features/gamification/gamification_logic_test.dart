@@ -39,7 +39,7 @@ void main() {
 
       for (final entry in xpMap.entries) {
         expect(entry.value, greaterThan(0),
-            reason: '${entry.key} should give positive XP');
+            reason: '${entry.key} should give positive XP',);
       }
     });
 

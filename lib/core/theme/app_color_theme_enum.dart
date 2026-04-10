@@ -6,7 +6,7 @@ enum AppColorTheme {
   // Free (Core)
   finance, // growth green — default
   classic, // trust blue-gray
-  dark, // neutral dark
+  mint, // pastel green — soft, calming
 
   // Pro (Professional)
   ocean, // calm blue
@@ -75,7 +75,7 @@ extension AppColorThemeInfo on AppColorTheme {
   bool get isPro => switch (this) {
         AppColorTheme.finance ||
         AppColorTheme.classic ||
-        AppColorTheme.dark =>
+        AppColorTheme.mint =>
           false,
         _ => true,
       };
@@ -83,7 +83,7 @@ extension AppColorThemeInfo on AppColorTheme {
   String get label => switch (this) {
         AppColorTheme.finance => 'Finance',
         AppColorTheme.classic => 'Classic',
-        AppColorTheme.dark => 'Dark',
+        AppColorTheme.mint => 'Mint',
         AppColorTheme.ocean => 'Ocean',
         AppColorTheme.forest => 'Forest',
         AppColorTheme.midnight => 'Midnight',
@@ -98,7 +98,7 @@ extension AppColorThemeInfo on AppColorTheme {
   String get subtitle => switch (this) {
         AppColorTheme.finance => 'Growth & savings',
         AppColorTheme.classic => 'Trust & security',
-        AppColorTheme.dark => 'Easy on the eyes',
+        AppColorTheme.mint => 'Soft & calming',
         AppColorTheme.ocean => 'Calm & focused',
         AppColorTheme.forest => 'Deep & grounded',
         AppColorTheme.midnight => 'Premium dark',
@@ -115,7 +115,7 @@ extension AppColorThemeExtension on AppColorTheme {
   Color get seedColor => switch (this) {
         AppColorTheme.finance => const Color(0xFF10B981),
         AppColorTheme.classic => const Color(0xFF5B7FA5),
-        AppColorTheme.dark => const Color(0xFF78909C),
+        AppColorTheme.mint => const Color(0xFF81C9D4),
         AppColorTheme.ocean => const Color(0xFF0077B6),
         AppColorTheme.forest => const Color(0xFF2D6A4F),
         AppColorTheme.midnight => const Color(0xFF1A237E),
@@ -131,135 +131,154 @@ extension AppColorThemeExtension on AppColorTheme {
   /// Returns null for free themes (pure fromSeed).
   _ThemeTuning? get _tuning => switch (this) {
         // Free themes — no overrides, pure Material 3
-        AppColorTheme.finance || AppColorTheme.classic || AppColorTheme.dark || AppColorTheme.dynamic => null,
+        AppColorTheme.finance ||
+        AppColorTheme.classic ||
+        AppColorTheme.dynamic =>
+          null,
+
+        // Mint — pastel teal + soft cyan accent
+        AppColorTheme.mint => const _ThemeTuning(
+            lightPrimary: Color(0xFF3DA5B5),
+            lightSecondary: Color(0xFF5AAFB8),
+            lightTertiary: Color(0xFF8BBFC7),
+            lightPrimaryContainer: Color(0xFFD0F0F5),
+            lightSecondaryContainer: Color(0xFFDDF4F7),
+            lightTertiaryContainer: Color(0xFFE8F6F8),
+            darkPrimary: Color(0xFF80D4DE),
+            darkSecondary: Color(0xFF99DDE5),
+            darkTertiary: Color(0xFFB3E6EC),
+            darkPrimaryContainer: Color(0xFF143A40),
+            darkSecondaryContainer: Color(0xFF1A4248),
+            darkTertiaryContainer: Color(0xFF204A50),
+          ),
 
         // Ocean — deep navy + teal accent
         AppColorTheme.ocean => const _ThemeTuning(
-          lightPrimary: Color(0xFF006494),
-          lightSecondary: Color(0xFF0096C7),
-          lightTertiary: Color(0xFF48CAE4),
-          lightPrimaryContainer: Color(0xFFCAE9FF),
-          lightSecondaryContainer: Color(0xFFD4F1F9),
-          lightTertiaryContainer: Color(0xFFE0F7FA),
-          darkPrimary: Color(0xFF48CAE4),
-          darkSecondary: Color(0xFF90E0EF),
-          darkTertiary: Color(0xFFADE8F4),
-          darkPrimaryContainer: Color(0xFF003554),
-          darkSecondaryContainer: Color(0xFF004E71),
-          darkTertiaryContainer: Color(0xFF005F85),
-        ),
+            lightPrimary: Color(0xFF006494),
+            lightSecondary: Color(0xFF0096C7),
+            lightTertiary: Color(0xFF48CAE4),
+            lightPrimaryContainer: Color(0xFFCAE9FF),
+            lightSecondaryContainer: Color(0xFFD4F1F9),
+            lightTertiaryContainer: Color(0xFFE0F7FA),
+            darkPrimary: Color(0xFF48CAE4),
+            darkSecondary: Color(0xFF90E0EF),
+            darkTertiary: Color(0xFFADE8F4),
+            darkPrimaryContainer: Color(0xFF003554),
+            darkSecondaryContainer: Color(0xFF004E71),
+            darkTertiaryContainer: Color(0xFF005F85),
+          ),
 
         // Forest — rich emerald + warm earth
         AppColorTheme.forest => const _ThemeTuning(
-          lightPrimary: Color(0xFF1B5E20),
-          lightSecondary: Color(0xFF558B2F),
-          lightTertiary: Color(0xFF8D6E63),
-          lightPrimaryContainer: Color(0xFFC8E6C9),
-          lightSecondaryContainer: Color(0xFFDCEDC8),
-          lightTertiaryContainer: Color(0xFFD7CCC8),
-          darkPrimary: Color(0xFF66BB6A),
-          darkSecondary: Color(0xFF9CCC65),
-          darkTertiary: Color(0xFFBCAAA4),
-          darkPrimaryContainer: Color(0xFF1B3A1B),
-          darkSecondaryContainer: Color(0xFF2E4A1E),
-          darkTertiaryContainer: Color(0xFF3E2723),
-        ),
+            lightPrimary: Color(0xFF1B5E20),
+            lightSecondary: Color(0xFF558B2F),
+            lightTertiary: Color(0xFF8D6E63),
+            lightPrimaryContainer: Color(0xFFC8E6C9),
+            lightSecondaryContainer: Color(0xFFDCEDC8),
+            lightTertiaryContainer: Color(0xFFD7CCC8),
+            darkPrimary: Color(0xFF66BB6A),
+            darkSecondary: Color(0xFF9CCC65),
+            darkTertiary: Color(0xFFBCAAA4),
+            darkPrimaryContainer: Color(0xFF1B3A1B),
+            darkSecondaryContainer: Color(0xFF2E4A1E),
+            darkTertiaryContainer: Color(0xFF3E2723),
+          ),
 
         // Midnight — deep indigo + electric blue
         AppColorTheme.midnight => const _ThemeTuning(
-          lightPrimary: Color(0xFF1A237E),
-          lightSecondary: Color(0xFF283593),
-          lightTertiary: Color(0xFF5C6BC0),
-          lightPrimaryContainer: Color(0xFFC5CAE9),
-          lightSecondaryContainer: Color(0xFFD1D9FF),
-          lightTertiaryContainer: Color(0xFFE8EAF6),
-          darkPrimary: Color(0xFF7986CB),
-          darkSecondary: Color(0xFF9FA8DA),
-          darkTertiary: Color(0xFF536DFE),
-          darkPrimaryContainer: Color(0xFF0D1259),
-          darkSecondaryContainer: Color(0xFF1A237E),
-          darkTertiaryContainer: Color(0xFF1A1F6E),
-        ),
+            lightPrimary: Color(0xFF1A237E),
+            lightSecondary: Color(0xFF283593),
+            lightTertiary: Color(0xFF5C6BC0),
+            lightPrimaryContainer: Color(0xFFC5CAE9),
+            lightSecondaryContainer: Color(0xFFD1D9FF),
+            lightTertiaryContainer: Color(0xFFE8EAF6),
+            darkPrimary: Color(0xFF7986CB),
+            darkSecondary: Color(0xFF9FA8DA),
+            darkTertiary: Color(0xFF536DFE),
+            darkPrimaryContainer: Color(0xFF0D1259),
+            darkSecondaryContainer: Color(0xFF1A237E),
+            darkTertiaryContainer: Color(0xFF1A1F6E),
+          ),
 
         // Graphite — warm gray + subtle gold accent
         AppColorTheme.graphite => const _ThemeTuning(
-          lightPrimary: Color(0xFF424242),
-          lightSecondary: Color(0xFF757575),
-          lightTertiary: Color(0xFFBFA76A),
-          lightPrimaryContainer: Color(0xFFE0E0E0),
-          lightSecondaryContainer: Color(0xFFEEEEEE),
-          lightTertiaryContainer: Color(0xFFF5F0E1),
-          darkPrimary: Color(0xFFBDBDBD),
-          darkSecondary: Color(0xFF9E9E9E),
-          darkTertiary: Color(0xFFD4AF37),
-          darkPrimaryContainer: Color(0xFF2C2C2C),
-          darkSecondaryContainer: Color(0xFF383838),
-          darkTertiaryContainer: Color(0xFF3D3520),
-        ),
+            lightPrimary: Color(0xFF424242),
+            lightSecondary: Color(0xFF757575),
+            lightTertiary: Color(0xFFBFA76A),
+            lightPrimaryContainer: Color(0xFFE0E0E0),
+            lightSecondaryContainer: Color(0xFFEEEEEE),
+            lightTertiaryContainer: Color(0xFFF5F0E1),
+            darkPrimary: Color(0xFFBDBDBD),
+            darkSecondary: Color(0xFF9E9E9E),
+            darkTertiary: Color(0xFFD4AF37),
+            darkPrimaryContainer: Color(0xFF2C2C2C),
+            darkSecondaryContainer: Color(0xFF383838),
+            darkTertiaryContainer: Color(0xFF3D3520),
+          ),
 
         // Sunset — warm orange → coral gradient feel
         AppColorTheme.sunset => const _ThemeTuning(
-          lightPrimary: Color(0xFFD84315),
-          lightSecondary: Color(0xFFE65100),
-          lightTertiary: Color(0xFFFF6D00),
-          lightPrimaryContainer: Color(0xFFFFCCBC),
-          lightSecondaryContainer: Color(0xFFFFE0B2),
-          lightTertiaryContainer: Color(0xFFFFF3E0),
-          darkPrimary: Color(0xFFFF8A65),
-          darkSecondary: Color(0xFFFFAB40),
-          darkTertiary: Color(0xFFFFD180),
-          darkPrimaryContainer: Color(0xFF4E1A00),
-          darkSecondaryContainer: Color(0xFF5D2E00),
-          darkTertiaryContainer: Color(0xFF6D3F00),
-        ),
+            lightPrimary: Color(0xFFD84315),
+            lightSecondary: Color(0xFFE65100),
+            lightTertiary: Color(0xFFFF6D00),
+            lightPrimaryContainer: Color(0xFFFFCCBC),
+            lightSecondaryContainer: Color(0xFFFFE0B2),
+            lightTertiaryContainer: Color(0xFFFFF3E0),
+            darkPrimary: Color(0xFFFF8A65),
+            darkSecondary: Color(0xFFFFAB40),
+            darkTertiary: Color(0xFFFFD180),
+            darkPrimaryContainer: Color(0xFF4E1A00),
+            darkSecondaryContainer: Color(0xFF5D2E00),
+            darkTertiaryContainer: Color(0xFF6D3F00),
+          ),
 
         // Lavender — soft purple + pink accent
         AppColorTheme.lavender => const _ThemeTuning(
-          lightPrimary: Color(0xFF6D28D9),
-          lightSecondary: Color(0xFF7E57C2),
-          lightTertiary: Color(0xFFEC407A),
-          lightPrimaryContainer: Color(0xFFE1D5F5),
-          lightSecondaryContainer: Color(0xFFEDE7F6),
-          lightTertiaryContainer: Color(0xFFFCE4EC),
-          darkPrimary: Color(0xFFB39DDB),
-          darkSecondary: Color(0xFFCE93D8),
-          darkTertiary: Color(0xFFF48FB1),
-          darkPrimaryContainer: Color(0xFF311B92),
-          darkSecondaryContainer: Color(0xFF4A148C),
-          darkTertiaryContainer: Color(0xFF4A0E2E),
-        ),
+            lightPrimary: Color(0xFF6D28D9),
+            lightSecondary: Color(0xFF7E57C2),
+            lightTertiary: Color(0xFFEC407A),
+            lightPrimaryContainer: Color(0xFFE1D5F5),
+            lightSecondaryContainer: Color(0xFFEDE7F6),
+            lightTertiaryContainer: Color(0xFFFCE4EC),
+            darkPrimary: Color(0xFFB39DDB),
+            darkSecondary: Color(0xFFCE93D8),
+            darkTertiary: Color(0xFFF48FB1),
+            darkPrimaryContainer: Color(0xFF311B92),
+            darkSecondaryContainer: Color(0xFF4A148C),
+            darkTertiaryContainer: Color(0xFF4A0E2E),
+          ),
 
         // Rose — bold pink + warm red
         AppColorTheme.rose => const _ThemeTuning(
-          lightPrimary: Color(0xFFC2185B),
-          lightSecondary: Color(0xFFD81B60),
-          lightTertiary: Color(0xFFFF5252),
-          lightPrimaryContainer: Color(0xFFF8BBD0),
-          lightSecondaryContainer: Color(0xFFFCE4EC),
-          lightTertiaryContainer: Color(0xFFFFEBEE),
-          darkPrimary: Color(0xFFF06292),
-          darkSecondary: Color(0xFFFF80AB),
-          darkTertiary: Color(0xFFFF8A80),
-          darkPrimaryContainer: Color(0xFF5C0028),
-          darkSecondaryContainer: Color(0xFF6E0033),
-          darkTertiaryContainer: Color(0xFF5D1A1A),
-        ),
+            lightPrimary: Color(0xFFC2185B),
+            lightSecondary: Color(0xFFD81B60),
+            lightTertiary: Color(0xFFFF5252),
+            lightPrimaryContainer: Color(0xFFF8BBD0),
+            lightSecondaryContainer: Color(0xFFFCE4EC),
+            lightTertiaryContainer: Color(0xFFFFEBEE),
+            darkPrimary: Color(0xFFF06292),
+            darkSecondary: Color(0xFFFF80AB),
+            darkTertiary: Color(0xFFFF8A80),
+            darkPrimaryContainer: Color(0xFF5C0028),
+            darkSecondaryContainer: Color(0xFF6E0033),
+            darkTertiaryContainer: Color(0xFF5D1A1A),
+          ),
 
         // Amber — rich gold + warm brown
         AppColorTheme.amber => const _ThemeTuning(
-          lightPrimary: Color(0xFFF57F17),
-          lightSecondary: Color(0xFFFF8F00),
-          lightTertiary: Color(0xFF6D4C41),
-          lightPrimaryContainer: Color(0xFFFFF8E1),
-          lightSecondaryContainer: Color(0xFFFFF3E0),
-          lightTertiaryContainer: Color(0xFFD7CCC8),
-          darkPrimary: Color(0xFFFFCA28),
-          darkSecondary: Color(0xFFFFD54F),
-          darkTertiary: Color(0xFFBCAAA4),
-          darkPrimaryContainer: Color(0xFF5D4200),
-          darkSecondaryContainer: Color(0xFF6D5000),
-          darkTertiaryContainer: Color(0xFF3E2723),
-        ),
+            lightPrimary: Color(0xFFF57F17),
+            lightSecondary: Color(0xFFFF8F00),
+            lightTertiary: Color(0xFF6D4C41),
+            lightPrimaryContainer: Color(0xFFFFF8E1),
+            lightSecondaryContainer: Color(0xFFFFF3E0),
+            lightTertiaryContainer: Color(0xFFD7CCC8),
+            darkPrimary: Color(0xFFFFCA28),
+            darkSecondary: Color(0xFFFFD54F),
+            darkTertiary: Color(0xFFBCAAA4),
+            darkPrimaryContainer: Color(0xFF5D4200),
+            darkSecondaryContainer: Color(0xFF6D5000),
+            darkTertiaryContainer: Color(0xFF3E2723),
+          ),
       };
 
   ColorScheme colorScheme(AppThemeMode mode) {
@@ -274,11 +293,18 @@ extension AppColorThemeExtension on AppColorTheme {
       brightness,
       isAmoled: isAmoled,
       primary: t == null ? null : (isLight ? t.lightPrimary : t.darkPrimary),
-      secondary: t == null ? null : (isLight ? t.lightSecondary : t.darkSecondary),
+      secondary:
+          t == null ? null : (isLight ? t.lightSecondary : t.darkSecondary),
       tertiary: t == null ? null : (isLight ? t.lightTertiary : t.darkTertiary),
-      primaryContainer: t == null ? null : (isLight ? t.lightPrimaryContainer : t.darkPrimaryContainer),
-      secondaryContainer: t == null ? null : (isLight ? t.lightSecondaryContainer : t.darkSecondaryContainer),
-      tertiaryContainer: t == null ? null : (isLight ? t.lightTertiaryContainer : t.darkTertiaryContainer),
+      primaryContainer: t == null
+          ? null
+          : (isLight ? t.lightPrimaryContainer : t.darkPrimaryContainer),
+      secondaryContainer: t == null
+          ? null
+          : (isLight ? t.lightSecondaryContainer : t.darkSecondaryContainer),
+      tertiaryContainer: t == null
+          ? null
+          : (isLight ? t.lightTertiaryContainer : t.darkTertiaryContainer),
     );
   }
 
@@ -320,20 +346,37 @@ class _ThemeTuning {
 // ── Semantic Finance Colors (NEVER change with theme) ──────
 /// Fixed colors for financial meaning. Use these instead of
 /// colorScheme.primary / colorScheme.error for money amounts.
+/// Fixed bright colors for charts. Never change with theme.
+/// Designed for maximum visual separation, colorblind-friendly.
+class ChartPalette {
+  ChartPalette._();
+
+  static const List<Color> colors = [
+    Color(0xFF3B82F6), // blue
+    Color(0xFFEF4444), // red
+    Color(0xFF10B981), // emerald
+    Color(0xFFF59E0B), // amber
+    Color(0xFF8B5CF6), // violet
+    Color(0xFFEC4899), // pink
+    Color(0xFF06B6D4), // cyan
+    Color(0xFFFF6B35), // orange
+  ];
+}
+
 class FinanceColors {
   FinanceColors._();
 
   // Income = always green (growth)
-  static Color income = Color(0xFF10B981);
-  static Color incomeDark = Color(0xFF34D399);
+  static Color income = const Color(0xFF10B981);
+  static Color incomeDark = const Color(0xFF34D399);
 
   // Expense = always red (spending)
-  static Color expense = Color(0xFFEF4444);
-  static Color expenseDark = Color(0xFFF87171);
+  static Color expense = const Color(0xFFEF4444);
+  static Color expenseDark = const Color(0xFFF87171);
 
   // Transfer = always blue (neutral movement)
-  static Color transfer = Color(0xFF3B82F6);
-  static Color transferDark = Color(0xFF60A5FA);
+  static Color transfer = const Color(0xFF3B82F6);
+  static Color transferDark = const Color(0xFF60A5FA);
 
   /// Returns the correct income color for the current brightness.
   static Color incomeColor(Brightness brightness) =>
@@ -346,4 +389,27 @@ class FinanceColors {
   /// Returns the correct transfer color for the current brightness.
   static Color transferColor(Brightness brightness) =>
       brightness == Brightness.dark ? transferDark : transfer;
+
+  // Status colors — softer than raw Colors.red/green/orange
+  // Used for health scores, warnings, success states
+  static const Color statusGood = Color(0xFF22C55E); // soft green
+  static const Color statusGoodDark = Color(0xFF4ADE80);
+  static const Color statusWarning = Color(0xFFF59E0B); // warm amber
+  static const Color statusWarningDark = Color(0xFFFBBF24);
+  static const Color statusDanger = Color(0xFFEF4444); // soft red (not pure)
+  static const Color statusDangerDark = Color(0xFFF87171);
+
+  static Color goodColor(Brightness b) =>
+      b == Brightness.dark ? statusGoodDark : statusGood;
+  static Color warningColor(Brightness b) =>
+      b == Brightness.dark ? statusWarningDark : statusWarning;
+  static Color dangerColor(Brightness b) =>
+      b == Brightness.dark ? statusDangerDark : statusDanger;
+
+  /// Score-based color: 80+ good, 40+ warning, below danger.
+  static Color scoreColor(int score, Brightness brightness) {
+    if (score >= 80) return goodColor(brightness);
+    if (score >= 40) return warningColor(brightness);
+    return dangerColor(brightness);
+  }
 }

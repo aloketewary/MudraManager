@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:go_router/go_router.dart';
@@ -89,9 +90,11 @@ class GoalScreen extends ConsumerWidget {
                 SliverAppBar(
                   pinned: true,
                   elevation: 0,
-                  title: Text(ctxt.title_goals,
-                      style: textTheme.titleLarge
-                          ?.copyWith(fontWeight: FontWeight.bold)),
+                  title: Text(
+                    ctxt.title_goals,
+                    style: textTheme.titleLarge
+                        ?.copyWith(fontWeight: FontWeight.bold),
+                  ),
                   actions: [
                     IconButton(
                       icon: const Icon(LucideIcons.plus),
@@ -121,6 +124,7 @@ class GoalScreen extends ConsumerWidget {
                       color,
                       textTheme,
                       spacing,
+                      ctxt,
                     ),
                   ),
                 ),
@@ -154,7 +158,7 @@ class GoalScreen extends ConsumerWidget {
                         spacing.elementGap,
                       ),
                       child: _sectionHeader(
-                        '${remainingGoals.length} ${remainingGoals.length == 1 ? 'goal' : 'goals'} in progress',
+                        ctxt.goal_goalsInProgress(remainingGoals.length),
                         LucideIcons.flame,
                         color,
                         textTheme,
@@ -195,7 +199,7 @@ class GoalScreen extends ConsumerWidget {
                         spacing.elementGap,
                       ),
                       child: _sectionHeader(
-                        'Completed 🎉',
+                        ctxt.goal_completedSection,
                         LucideIcons.trophy,
                         color,
                         textTheme,
@@ -268,14 +272,20 @@ class GoalScreen extends ConsumerWidget {
 
   // ── Section Header ──
   Widget _sectionHeader(
-      String title, IconData icon, ColorScheme color, TextTheme textTheme) {
+    String title,
+    IconData icon,
+    ColorScheme color,
+    TextTheme textTheme,
+  ) {
     return Row(
       children: [
         Icon(icon, size: 18, color: color.primary),
         const SizedBox(width: 8),
-        Text(title,
-            style: textTheme.titleMedium
-                ?.copyWith(fontWeight: FontWeight.w700, color: color.primary)),
+        Text(
+          title,
+          style: textTheme.titleMedium
+              ?.copyWith(fontWeight: FontWeight.w700, color: color.primary),
+        ),
       ],
     );
   }
@@ -289,6 +299,7 @@ class GoalScreen extends ConsumerWidget {
     ColorScheme color,
     TextTheme textTheme,
     AppSpacing spacing,
+    AppLocalizations ctxt,
   ) {
     final goalCount = activeGoals.length;
 
@@ -317,12 +328,12 @@ class GoalScreen extends ConsumerWidget {
 
     // Emotional headline based on progress
     final emotionLine = overallProgress >= 0.75
-        ? 'Almost there 🚀'
+        ? ctxt.goal_emotionAlmost
         : overallProgress >= 0.5
-            ? 'Halfway there 💪'
+            ? ctxt.goal_emotionHalfway
             : overallProgress >= 0.25
-                ? 'Building momentum ✨'
-                : 'Every bit counts 🌱';
+                ? ctxt.goal_emotionProgress
+                : ctxt.goal_emotionEvery;
 
     return Container(
       padding: EdgeInsets.all(spacing.cardInner + spacing.elementGap),
@@ -358,7 +369,7 @@ class GoalScreen extends ConsumerWidget {
                       ),
                     ),
                     Text(
-                      'saved',
+                      ctxt.goal_suffixSaved,
                       style: textTheme.labelSmall?.copyWith(
                         color: color.onPrimaryContainer.withValues(alpha: 0.6),
                       ),
@@ -409,7 +420,7 @@ class GoalScreen extends ConsumerWidget {
                       ),
                     ),
                     Text(
-                      ' across $goalCount ${goalCount == 1 ? 'goal' : 'goals'}',
+                      ' ${ctxt.goal_acrossGoals(goalCount)}',
                       style: textTheme.bodySmall?.copyWith(
                         color: color.onPrimaryContainer.withValues(alpha: 0.6),
                       ),
@@ -430,7 +441,7 @@ class GoalScreen extends ConsumerWidget {
                     amount: totalTarget - totalSaved,
                     fixedLength: 0,
                     compact: false,
-                    suffixText: 'to go',
+                    suffixText: ctxt.goal_suffixToGo,
                     style: textTheme.labelMedium?.copyWith(
                       color: color.onPrimaryContainer,
                       fontWeight: FontWeight.w600,
@@ -459,17 +470,18 @@ class GoalScreen extends ConsumerWidget {
     final statusColor = health.statusColor(color);
     final progress = goal.progressPercent;
     final remaining = goal.targetAmount - goal.currentAmount;
+    final ctxt = AppLocalizations.of(context)!;
 
     // Emotional label based on progress
     final emotionLabel = progress >= 0.9
-        ? 'Almost there 🚀'
+        ? ctxt.goal_emotionAlmost
         : progress >= 0.75
-            ? 'So close! 💪'
+            ? ctxt.goal_emotionAlmost
             : progress >= 0.5
-                ? 'Halfway done ✨'
+                ? ctxt.goal_emotionHalfwayDone
                 : progress >= 0.25
-                    ? 'Keep pushing 🔥'
-                    : 'Just getting started 🌱';
+                    ? ctxt.goal_emotionKeepPushing
+                    : ctxt.goal_emotionJustStarted;
 
     return Container(
       decoration: BoxDecoration(
@@ -495,7 +507,7 @@ class GoalScreen extends ConsumerWidget {
                   children: [
                     // Emotional context line
                     Text(
-                      'Closest to completion',
+                      ctxt.goal_closestToCompletion,
                       style: textTheme.labelSmall?.copyWith(
                         color: color.onSurfaceVariant,
                       ),
@@ -535,7 +547,7 @@ class GoalScreen extends ConsumerWidget {
                       amount: goal.currentAmount,
                       fixedLength: 0,
                       compact: false,
-                      suffixText: 'saved',
+                      suffixText: ctxt.goal_suffixSaved,
                       style: textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w700,
                         color: goalColor,
@@ -546,14 +558,14 @@ class GoalScreen extends ConsumerWidget {
                       amount: remaining,
                       fixedLength: 0,
                       compact: false,
-                      suffixText: 'left',
+                      suffixText: ctxt.goal_suffixLeft,
                       style: textTheme.bodySmall
                           ?.copyWith(color: color.onSurfaceVariant),
                     ),
                     if (health.daysLeft > 0) ...[
                       SizedBox(height: spacing.elementGapUltraMin),
                       Text(
-                        _formatDaysLeft(health.daysLeft),
+                        _formatDaysLeft(health.daysLeft, ctxt),
                         style: textTheme.bodySmall
                             ?.copyWith(color: color.onSurfaceVariant),
                       ),
@@ -584,8 +596,16 @@ class GoalScreen extends ConsumerWidget {
               SizedBox(width: spacing.elementGap),
               // Right — progress ring
               _buildProgressRing(
-                  progress, goalColor, color, textTheme, 80, 45, 8,
-                  showLabel: true),
+                progress,
+                goalColor,
+                color,
+                textTheme,
+                80,
+                45,
+                8,
+                showLabel: true,
+                doneLabel: ctxt.goal_suffixDone,
+              ),
             ],
           ),
         ),
@@ -607,6 +627,7 @@ class GoalScreen extends ConsumerWidget {
     final health = GoalHealth.compute(goal);
     final statusColor = health.statusColor(color);
     final remaining = goal.targetAmount - goal.currentAmount;
+    final ctxt = AppLocalizations.of(context)!;
 
     return Container(
       decoration: BoxDecoration(
@@ -658,20 +679,22 @@ class GoalScreen extends ConsumerWidget {
                           amount: goal.currentAmount,
                           fixedLength: 0,
                           compact: true,
-                          suffixText: 'saved',
+                          suffixText: ctxt.goal_suffixSaved,
                           style: textTheme.labelSmall?.copyWith(
                             fontWeight: FontWeight.w600,
                             color: goalColor,
                           ),
                         ),
-                        Text('  •  ',
-                            style: textTheme.labelSmall
-                                ?.copyWith(color: color.outlineVariant)),
+                        Text(
+                          '  •  ',
+                          style: textTheme.labelSmall
+                              ?.copyWith(color: color.outlineVariant),
+                        ),
                         CurrencyText(
                           amount: remaining,
                           fixedLength: 0,
                           compact: true,
-                          suffixText: 'left',
+                          suffixText: ctxt.goal_suffixLeft,
                           style: textTheme.labelSmall
                               ?.copyWith(color: color.onSurfaceVariant),
                         ),
@@ -680,7 +703,11 @@ class GoalScreen extends ConsumerWidget {
                     SizedBox(height: spacing.elementGapUltraMin),
                     // Insight line
                     Text(
-                      _shortInsight(health, goal),
+                      _shortInsight(
+                        health,
+                        goal,
+                        ctxt,
+                      ),
                       style: textTheme.labelSmall?.copyWith(
                         color: statusColor,
                         fontWeight: FontWeight.w500,
@@ -694,7 +721,14 @@ class GoalScreen extends ConsumerWidget {
               SizedBox(width: spacing.elementGap),
               // Right — mini ring
               _buildProgressRing(
-                  progress, goalColor, color, textTheme, 50, 24, 5),
+                progress,
+                goalColor,
+                color,
+                textTheme,
+                50,
+                24,
+                5,
+              ),
             ],
           ),
         ),
@@ -710,9 +744,7 @@ class GoalScreen extends ConsumerWidget {
     AppSpacing spacing,
     BuildContext context,
   ) {
-    final goalColor = goal.colorValue != null
-        ? Color(goal.colorValue!).withValues(alpha: 0.6)
-        : color.primary.withValues(alpha: 0.6);
+    final ctxt = AppLocalizations.of(context)!;
 
     return Container(
       decoration: BoxDecoration(
@@ -733,10 +765,14 @@ class GoalScreen extends ConsumerWidget {
               Container(
                 padding: EdgeInsets.all(spacing.elementGap * 0.75),
                 decoration: BoxDecoration(
-                  color: Colors.green.withValues(alpha: 0.1),
+                  color: FinanceColors.statusGood.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(spacing.radiusSmall),
                 ),
-                child: Icon(LucideIcons.check, color: Colors.green, size: 20),
+                child: const Icon(
+                  LucideIcons.check,
+                  color: FinanceColors.statusGood,
+                  size: 20,
+                ),
               ),
               SizedBox(width: spacing.elementGap),
               Expanded(
@@ -755,15 +791,20 @@ class GoalScreen extends ConsumerWidget {
                       amount: goal.targetAmount,
                       fixedLength: 0,
                       compact: true,
-                      suffixText: 'achieved',
+                      suffixText: ctxt.goal_suffixAchieved,
                       style: textTheme.labelSmall?.copyWith(
-                          color: Colors.green, fontWeight: FontWeight.w600),
+                        color: FinanceColors.statusGood,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ],
                 ),
               ),
-              Icon(LucideIcons.trophy,
-                  size: 20, color: Colors.amber.withValues(alpha: 0.6)),
+              Icon(
+                LucideIcons.trophy,
+                size: 20,
+                color: Colors.amber.withValues(alpha: 0.6),
+              ),
             ],
           ),
         ),
@@ -781,6 +822,7 @@ class GoalScreen extends ConsumerWidget {
     double radius,
     double ringWidth, {
     bool showLabel = false,
+    String doneLabel = 'done',
   }) {
     final clamped = progress.clamp(0.0, 1.0);
     final filled = clamped > 0 ? clamped : 0.001;
@@ -828,7 +870,7 @@ class GoalScreen extends ConsumerWidget {
                       ),
                     ),
                     Text(
-                      'done',
+                      doneLabel,
                       style: textTheme.labelSmall?.copyWith(
                         color: goalColor.withValues(alpha: 0.6),
                         fontSize: 9,
@@ -849,21 +891,27 @@ class GoalScreen extends ConsumerWidget {
   }
 
   // ── Short insight for list cards ──
-  String _shortInsight(GoalHealth health, Goal goal) {
+  String _shortInsight(
+    GoalHealth health,
+    Goal goal,
+    AppLocalizations ctxt,
+  ) {
     if (health.daysLeft > 0) {
       final pct = goal.progressPercent;
-      if (pct >= 0.75) return 'Almost there 🚀';
-      if (pct >= 0.5) return 'Great progress ✨';
-      if (health.status == GoalStatus.behind) return 'Needs attention ⚠️';
-      if (health.status == GoalStatus.ahead) return 'Ahead of schedule 🎯';
-      return '${_formatDaysLeft(health.daysLeft)}';
+      if (pct >= 0.75) return ctxt.goal_emotionAlmost;
+      if (pct >= 0.5) return ctxt.goal_emotionProgress;
+      if (health.status == GoalStatus.behind) return ctxt.goal_needsAttention;
+      if (health.status == GoalStatus.ahead) return ctxt.goal_aheadOfSchedule;
+      return _formatDaysLeft(health.daysLeft, ctxt);
     }
-    if (health.status == GoalStatus.noDeadline) return 'Flexible timeline';
+    if (health.status == GoalStatus.noDeadline) {
+      return ctxt.goal_flexibleTimeline;
+    }
     return health.insightMessage(goal);
   }
 
-  String _formatDaysLeft(int days) {
-    if (days > 60) return '${(days / 30).round()} months left';
-    return '$days days left';
+  String _formatDaysLeft(int days, AppLocalizations ctxt) {
+    if (days > 60) return ctxt.goal_monthsLeft((days / 30).round());
+    return ctxt.goal_daysLeft(days);
   }
 }

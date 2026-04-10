@@ -299,7 +299,7 @@ class _SecuritySettingsScreenState
                           color: color.outlineVariant.withValues(alpha: 0.4),
                         ),
                         _buildToggleRow(
-                          icon: LucideIcons.fingerprintPattern,
+                          icon: LucideIcons.scanFace,
                           title: ctxt.security_biometric,
                           subtitle: ctxt.security_biometricDesc,
                           value: _bioEnabled,

@@ -38,12 +38,13 @@ class PluginAnalytics {
   Future<void> _flush() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(
-        _storageKey,
-        json.encode({
-          'events': _eventCounts,
-          'errors': _errorCounts,
-          'disabled': _disabledReasons,
-        }));
+      _storageKey,
+      json.encode({
+        'events': _eventCounts,
+        'errors': _errorCounts,
+        'disabled': _disabledReasons,
+      }),
+    );
   }
 
   void trackEvent(String pluginId, String eventType) {
