@@ -76,12 +76,8 @@ class TransactionNotificationListener : NotificationListenerService() {
     val body = if (text.isNotEmpty()) text else title
     if (body.length < 5) return
 
-    val isBankMsg = body.contains("debited", true) ||
-            body.contains("credited", true) ||
-            body.contains("spent", true) ||
-            body.contains("upi", true)
-
-    if (!isBankMsg) return
+    // Log for debugging
+    android.util.Log.d("MudraSMS", "Processing: sender='$title' body='$body'")
 
     val normalized = normalize(body)
     val raw = "$title|$normalized|$packageName"
@@ -98,11 +94,19 @@ class TransactionNotificationListener : NotificationListenerService() {
     queueNotification(data)
 
     // Notify Flutter to drain immediately
-    try {
-        Handler(Looper.getMainLooper()).post {
-            methodChannel?.invokeMethod("onDrainQueue", null)
+   Handler(Looper.getMainLooper()).post {
+        val channel = methodChannel
+        if (channel == null) {
+            android.util.Log.w("NotifListener", "Channel not ready, queue will be drained later")
+            return@post
         }
-    } catch (_: Exception) {}
+
+        try {
+            channel.invokeMethod("onDrainQueue", null)
+        } catch (e: Exception) {
+            android.util.Log.e("NotifListener", "invokeMethod failed", e)
+        }
+    }
 }
 
     /**
@@ -178,10 +182,13 @@ class TransactionNotificationListener : NotificationListenerService() {
 
             // Cap queue before adding — drop oldest if at limit
             val maxSize = 1000
-            val startIndex = if (array.length() >= maxSize) array.length() - maxSize + 1 else 0
-            val trimmed = if (startIndex > 0) {
+
+            val trimmed = if (array.length() >= maxSize) {
                 val newArray = JSONArray()
-                for (i in startIndex until array.length()) newArray.put(array.get(i))
+                val start = array.length() - maxSize + 1
+                for (i in start until array.length()) {
+                    newArray.put(array.get(i))
+                }
                 newArray
             } else array
 

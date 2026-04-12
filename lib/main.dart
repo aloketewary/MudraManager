@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:isar_community/isar.dart';
+import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
@@ -47,7 +48,6 @@ void main() async {
   ]);
   final sharedPrefs = await SharedPreferences.getInstance();
   SharedPrefsUtil.init(sharedPrefs);
-  NotificationListenerBridge.instance.initialize();
   if (kDebugMode) {
     sharedPrefs.remove('has_seen_swipe_peek');
     debugPrint('🔍 PEEK: cleared has_seen_swipe_peek');
@@ -97,6 +97,7 @@ Future<void> _initializeBackgroundServices(ProviderContainer container) async {
       return;
     }
     log.i('✅ Isar initialized');
+    NotificationListenerBridge.instance.initialize(isar: isar);
 
     // 2. Critical seeds (fast, needed before UI renders categories)
     await safeExecute(() async {

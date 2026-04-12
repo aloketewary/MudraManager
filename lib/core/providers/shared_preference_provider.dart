@@ -1,3 +1,6 @@
+import 'dart:collection';
+
+import 'package:mudra_manager/features/sms/domain/detection_level.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SharedPrefsUtil {
@@ -9,11 +12,30 @@ class SharedPrefsUtil {
   static const _setSmsImportEnabledKey = 'sms_import_enabled';
   static const _hasSeenHelpGuideKey = 'has_seen_help_guide';
   static const _lastDailyCheckInKey = 'last_daily_check_in';
+  final Queue<String> _hashQueue = Queue();
+  final Set<String> _hashSet = {};
+  bool _isUpdatingHashes = false;
+
+  static const _processedHashesKey = 'processed_sms_hashes';
+  static const _maxHashes = 500;
 
   final SharedPreferences _prefs;
 
   static void init(SharedPreferences prefs) {
     instance = SharedPrefsUtil._(prefs);
+    instance.initHashes();
+  }
+
+  Future<void> initHashes() async {
+    final stored = _prefs.getStringList(_processedHashesKey) ?? [];
+
+    _hashQueue.clear();
+    _hashSet.clear();
+
+    for (final h in stored) {
+      _hashQueue.addLast(h);
+      _hashSet.add(h);
+    }
   }
 
   static const _accountDisplayStyleKey = 'account_display_style';
@@ -44,25 +66,45 @@ class SharedPrefsUtil {
     return _prefs.getString('user_language') ?? 'en';
   }
 
-  void storeProcessedHash(String hash) {
-    final hashes = _prefs.getStringList('processed_sms_hashes') ?? [];
-    if (!hashes.contains(hash)) {
-      hashes.add(hash);
-      // FIFO eviction: keep only the last 500 hashes
-      if (hashes.length > 500) {
-        hashes.removeRange(0, hashes.length - 500);
+  Future<void> storeProcessedHash(String hash) async {
+    if (hash.isEmpty) return;
+
+    // Prevent async interleaving
+    while (_isUpdatingHashes) {
+      await Future.delayed(const Duration(milliseconds: 1));
+    }
+    _isUpdatingHashes = true;
+
+    try {
+      if (_hashSet.contains(hash)) return;
+
+      _hashSet.add(hash);
+      _hashQueue.addLast(hash);
+
+      if (_hashQueue.length > _maxHashes) {
+        final oldest = _hashQueue.removeFirst();
+        _hashSet.remove(oldest);
       }
-      _prefs.setStringList('processed_sms_hashes', hashes);
+
+      // Persist snapshot
+      await _prefs.setStringList(
+        _processedHashesKey,
+        _hashQueue.toList(),
+      );
+    } finally {
+      _isUpdatingHashes = false;
     }
   }
 
   bool isAlreadyProcessed(String hash) {
-    final hashes = _prefs.getStringList('processed_sms_hashes') ?? [];
-    return hashes.contains(hash);
+    if (hash.isEmpty) return false;
+    return _hashSet.contains(hash);
   }
 
   void clearProcessedHashes() {
-    _prefs.remove('processed_sms_hashes');
+    _hashQueue.clear();
+    _hashSet.clear();
+    _prefs.remove(_processedHashesKey);
   }
 
   void clear() {
@@ -169,11 +211,23 @@ class SharedPrefsUtil {
     await _prefs.setBool('high_contrast_mode', enabled);
   }
 
-  Future<void> setSmsBannerDismiss() async{
+  Future<void> setSmsBannerDismiss() async {
     await _prefs.setBool('sms_banner_dismissed', true);
   }
 
   bool getSmsbannerDismiss() {
     return _prefs.getBool('sms_banner_dismissed') ?? false;
+  }
+
+  DetectionSensitivity getDetectionMode() {
+    final value = _prefs.getString('detection_mode') ?? 'balanced';
+    return DetectionSensitivity.values.firstWhere(
+      (e) => e.name == value,
+      orElse: () => DetectionSensitivity.balanced,
+    );
+  }
+
+  Future<void> setDetectionMode(DetectionSensitivity mode) async {
+    await _prefs.setString('detection_mode', mode.name);
   }
 }

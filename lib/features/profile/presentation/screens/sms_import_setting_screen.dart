@@ -1,5 +1,8 @@
+import 'package:mudra_manager/core/extension/case_extention.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
+import 'package:mudra_manager/core/utils/dialog_utils.dart';
+import 'package:mudra_manager/features/sms/domain/detection_level.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'dart:io';
 
@@ -73,9 +76,11 @@ class _SmsImportSettingsScreenState
     if (Platform.isIOS) return _buildIosPlaceholder(color, textTheme, spacing);
 
     return Scaffold(
-      appBar: AppBar(title: Text(AppLocalizations.of(context)!.smsImport_autoImport)),
+      appBar: AppBar(
+          title: Text(AppLocalizations.of(context)!.smsImport_autoImport)),
       body: !_loaded
-          ? ListView(children: List.generate(3, (_) => const DashboardCardSkeleton()))
+          ? ListView(
+              children: List.generate(3, (_) => const DashboardCardSkeleton()))
           : ListView(
               padding: EdgeInsets.symmetric(
                 horizontal: spacing.cardHorizontal,
@@ -87,7 +92,10 @@ class _SmsImportSettingsScreenState
                 SizedBox(height: spacing.sectionGap),
 
                 // ── PERMISSIONS ──
-                _buildSectionHeader(AppLocalizations.of(context)!.smsImport_permissions, color, textTheme),
+                _buildSectionHeader(
+                    AppLocalizations.of(context)!.smsImport_permissions,
+                    color,
+                    textTheme),
                 SizedBox(height: spacing.sectionGap),
                 _buildGroupedCard(
                   spacing: spacing,
@@ -95,10 +103,13 @@ class _SmsImportSettingsScreenState
                   children: [
                     _buildToggleRow(
                       icon: LucideIcons.shieldCheck,
-                      title: AppLocalizations.of(context)!.smsImport_notifAccess,
+                      title:
+                          AppLocalizations.of(context)!.smsImport_notifAccess,
                       subtitle: _permissionGranted
-                          ? AppLocalizations.of(context)!.smsImport_notifAccessEnabled
-                          : AppLocalizations.of(context)!.smsImport_allowReadingNotif,
+                          ? AppLocalizations.of(context)!
+                              .smsImport_notifAccessEnabled
+                          : AppLocalizations.of(context)!
+                              .smsImport_allowReadingNotif,
                       value: _permissionGranted,
                       onChanged: _handlePermissionToggle,
                       color: color,
@@ -108,13 +119,45 @@ class _SmsImportSettingsScreenState
                     _buildToggleRow(
                       icon: LucideIcons.messageSquare,
                       title: AppLocalizations.of(context)!.smsImport_autoImport,
-                      subtitle: AppLocalizations.of(context)!.smsImport_autoDetectTxn,
+                      subtitle:
+                          AppLocalizations.of(context)!.smsImport_autoDetectTxn,
                       value: _smsImportEnabled && _permissionGranted,
                       onChanged:
                           _permissionGranted ? _handleAutoImportToggle : null,
                       color: color,
                       textTheme: textTheme,
                       disabled: !_permissionGranted,
+                    ),
+                    _divider(color),
+                    _buildTapRow(
+                      icon: LucideIcons.settings,
+                      title: 'Smart Detection Settings',
+                      subtitle:
+                          'How automatic should transaction detection be?',
+                      onTap: () {
+                        HapticFeedback.mediumImpact();
+                        DialogUtils.showListItems(
+                          context: context,
+                          title: 'Select Detection Sensitivity',
+                          items: DetectionSensitivity.values.map((d) => d.name.toTitleCase()).toList(),
+                          selectedValue: SharedPrefsUtil.instance.getDetectionMode().name.toTitleCase(),
+                          onItemSelected: (val) {
+                            final level = switch (val) {
+                              'Strict' => DetectionSensitivity.strict,
+                              'Balanced' => DetectionSensitivity.balanced,
+                              'Aggressive' => DetectionSensitivity.aggressive,
+                              _ => DetectionSensitivity.balanced,
+                            };
+                            SharedPrefsUtil.instance
+                                .setString('detection_mode', level.name);
+                            SnackbarService.info(
+                              'Detection sensitivity set to ${level.name.toTitleCase()}',
+                            );
+                          },
+                        );
+                      },
+                      color: color,
+                      textTheme: textTheme,
                     ),
                   ],
                 ),
@@ -150,7 +193,10 @@ class _SmsImportSettingsScreenState
                   ),
                 ),
                 // ── TOOLS ──
-                _buildSectionHeader(AppLocalizations.of(context)!.smsImport_tools, color, textTheme),
+                _buildSectionHeader(
+                    AppLocalizations.of(context)!.smsImport_tools,
+                    color,
+                    textTheme),
                 SizedBox(height: spacing.sectionGap),
                 _buildGroupedCard(
                   spacing: spacing,
@@ -158,14 +204,14 @@ class _SmsImportSettingsScreenState
                   children: [
                     _buildTapRow(
                       icon: LucideIcons.activity,
-                      title: AppLocalizations.of(context)!.smsImport_txnActivity,
-                      subtitle: AppLocalizations.of(context)!.smsImport_viewDetectedTxn,
+                      title:
+                          AppLocalizations.of(context)!.smsImport_txnActivity,
+                      subtitle: AppLocalizations.of(context)!
+                          .smsImport_viewDetectedTxn,
                       onTap: () => context.push(AppRoutes.smsActivity),
                       color: color,
                       textTheme: textTheme,
-                      badge: ref
-                          .watch(pendingCountProvider)
-                          .maybeWhen(
+                      badge: ref.watch(pendingCountProvider).maybeWhen(
                             data: (c) => c,
                             orElse: () => null,
                           ),
@@ -173,8 +219,10 @@ class _SmsImportSettingsScreenState
                     _divider(color),
                     _buildTapRow(
                       icon: LucideIcons.trash2,
-                      title: AppLocalizations.of(context)!.smsImport_clearHistory,
-                      subtitle: AppLocalizations.of(context)!.smsImport_resetDetection,
+                      title:
+                          AppLocalizations.of(context)!.smsImport_clearHistory,
+                      subtitle: AppLocalizations.of(context)!
+                          .smsImport_resetDetection,
                       onTap: _permissionGranted
                           ? () => _showClearHistoryConfirmation(context)
                           : null,
@@ -188,7 +236,10 @@ class _SmsImportSettingsScreenState
                 SizedBox(height: spacing.sectionGap),
 
                 // ── HOW IT WORKS ──
-                _buildSectionHeader(AppLocalizations.of(context)!.smsImport_howItWorks, color, textTheme),
+                _buildSectionHeader(
+                    AppLocalizations.of(context)!.smsImport_howItWorks,
+                    color,
+                    textTheme),
                 const SizedBox(height: 10),
                 Container(
                   padding: const EdgeInsets.all(16),
@@ -210,7 +261,8 @@ class _SmsImportSettingsScreenState
                       SizedBox(height: spacing.elementGap),
                       _buildInfoPoint(
                         LucideIcons.lock,
-                        AppLocalizations.of(context)!.smsImport_dataStaysOnDevice,
+                        AppLocalizations.of(context)!
+                            .smsImport_dataStaysOnDevice,
                         color,
                         textTheme,
                       ),
@@ -299,7 +351,9 @@ class _SmsImportSettingsScreenState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  active ? AppLocalizations.of(context)!.smsImport_active : AppLocalizations.of(context)!.smsImport_inactive,
+                  active
+                      ? AppLocalizations.of(context)!.smsImport_active
+                      : AppLocalizations.of(context)!.smsImport_inactive,
                   style: textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                     color: heroColor,
@@ -310,7 +364,8 @@ class _SmsImportSettingsScreenState
                   active
                       ? AppLocalizations.of(context)!.smsImport_autoImporting
                       : _permissionGranted
-                          ? AppLocalizations.of(context)!.smsImport_enableToStart
+                          ? AppLocalizations.of(context)!
+                              .smsImport_enableToStart
                           : AppLocalizations.of(context)!.smsImport_grantAccess,
                   style: textTheme.bodySmall?.copyWith(
                     color: color.onSurfaceVariant,
@@ -332,7 +387,8 @@ class _SmsImportSettingsScreenState
     AppSpacing spacing,
   ) {
     return Scaffold(
-      appBar: AppBar(title: Text(AppLocalizations.of(context)!.smsImport_autoImport)),
+      appBar: AppBar(
+          title: Text(AppLocalizations.of(context)!.smsImport_autoImport)),
       body: Center(
         child: Padding(
           padding: EdgeInsets.all(spacing.cardHorizontalMax),
@@ -462,7 +518,10 @@ class _SmsImportSettingsScreenState
                   ),
                 ),
                 Text(
-                  disabled ? AppLocalizations.of(context)!.smsImport_enableAccessFirst : subtitle,
+                  disabled
+                      ? AppLocalizations.of(context)!
+                          .smsImport_enableAccessFirst
+                      : subtitle,
                   style: textTheme.bodySmall?.copyWith(
                     color: color.onSurfaceVariant.withValues(alpha: alpha),
                   ),
@@ -698,7 +757,8 @@ class _SmsImportSettingsScreenState
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: Text(AppLocalizations.of(context)!.smsImport_openSettings),
+                    child: Text(
+                        AppLocalizations.of(context)!.smsImport_openSettings),
                   ),
                 ),
               ],
@@ -783,7 +843,8 @@ class _SmsImportSettingsScreenState
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      AppLocalizations.of(context)!.smsImport_clearHistoryWarning,
+                      AppLocalizations.of(context)!
+                          .smsImport_clearHistoryWarning,
                       style: textTheme.bodySmall?.copyWith(
                         color: color.onSurfaceVariant,
                         height: 1.4,
@@ -861,7 +922,8 @@ class _SmsImportSettingsScreenState
         await NotificationListenerBridge.openSettings();
         _permissionDisableTapCount = 0;
       } else {
-        SnackbarService.info(AppLocalizations.of(context)!.smsImport_tapAgainSettings);
+        SnackbarService.info(
+            AppLocalizations.of(context)!.smsImport_tapAgainSettings);
       }
     }
   }
@@ -875,7 +937,8 @@ class _SmsImportSettingsScreenState
       if (!context.mounted) return;
       SnackbarService.success(BuddyMessages.smsImportEnabled);
     } else {
-      SnackbarService.info(BuddyMessages.toggledOff(AppLocalizations.of(context)!.smsImport_autoImport));
+      SnackbarService.info(BuddyMessages.toggledOff(
+          AppLocalizations.of(context)!.smsImport_autoImport));
     }
   }
 }

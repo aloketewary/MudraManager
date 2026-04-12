@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logger/logger.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
+import 'package:uuid/uuid.dart';
 
 class AppLog {
   final Logger _logger;
@@ -23,5 +24,15 @@ class AppLog {
 extension LoggerX on Ref {
   AppLog getLogger(String tag) {
     return AppLog(read(loggerProvider), tag);
+  }
+}
+
+class LogContext {
+  final String correlationId;
+
+  LogContext(this.correlationId);
+
+  static LogContext create() {
+    return LogContext(const Uuid().v8());
   }
 }

@@ -93,8 +93,6 @@ class SmsProcessorService {
       return ParseResult.skipped;
     }
 
-    SharedPrefsUtil.instance.storeProcessedHash(smsHash);
-
     try {
       SmsActivity activity;
 
@@ -121,6 +119,9 @@ class SmsProcessorService {
         _log.i('Auto Import Parsed by legacy parser, sender: $address');
         activity = await processSmsForSaving(transactionInfo, timestamp);
       }
+
+      // Only store hash after successful processing
+      SharedPrefsUtil.instance.storeProcessedHash(smsHash);
 
       return switch (activity.status) {
         ActivityStatus.approved => ParseResult.approved,

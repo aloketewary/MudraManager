@@ -133,6 +133,9 @@ class CategoryMatcherService {
       if (category.keywords == null || category.keywords!.isEmpty) continue;
 
       int score = 0;
+      int exactMatches = 0;
+      int wordMatches = 0;
+
       for (final keyword in category.keywords!) {
         final keywordLower = keyword.toLowerCase();
         if (bodyLower.contains(keywordLower)) {
@@ -142,12 +145,25 @@ class CategoryMatcherService {
           // Bonus for exact word match (not just substring)
           if (RegExp(r'\b' + RegExp.escape(keywordLower) + r'\b')
               .hasMatch(bodyLower)) {
-            score += 10;
+            score += 15; // Increased from 10
+            exactMatches++;
+            wordMatches++;
+          } else {
+            wordMatches++;
           }
         }
       }
 
-      if (score > maxScore) {
+      // Require at least 2 word matches OR 1 exact match for consideration
+      if (wordMatches < 2 && exactMatches < 1) continue;
+
+      // Additional penalty for common false positive categories like "subscription"
+      if (category.name.toLowerCase().contains('subscription') ||
+          category.name.toLowerCase().contains('service')) {
+        score = (score * 0.7).round(); // 30% penalty
+      }
+
+      if (score > maxScore && score >= 20) { // Minimum threshold
         maxScore = score;
         bestMatch = category;
       }
