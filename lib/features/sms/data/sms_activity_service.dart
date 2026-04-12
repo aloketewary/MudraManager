@@ -28,23 +28,31 @@ class SmsActivityService {
     return Isar.getInstance()!;
   }
 
+  double? _normalizeAmount(double? amount) {
+    if (amount == null || amount <= 0) return null;
+    return amount;
+  }
+
   // Calculate parsing confidence based on available data
   int _calculateConfidence(SmsActivity activity) {
     int score = 0;
 
-    if (activity.amount != null && activity.amount! > 0)
+    if (activity.amount != null && activity.amount! > 0) {
       score += 35; // Increased
+    }
     if (activity.isIncome != null) score += 25; // Increased
     if (activity.account != null && activity.account!.isNotEmpty) score += 20;
     if (activity.fromBank != null && activity.fromBank!.isNotEmpty) score += 10;
     if (activity.transactionRef != null) score += 10;
+    if (activity.category != null && activity.category!.isNotEmpty) score += 15;
 
     // Bonus for merchant detection
     if (activity.merchant != null && activity.merchant!.isNotEmpty) score += 15;
 
     // Bonus for payment type detection
-    if (activity.paymentType != null && activity.paymentType!.isNotEmpty)
+    if (activity.paymentType != null && activity.paymentType!.isNotEmpty) {
       score += 10;
+    }
 
     return score.clamp(0, 100);
   }
@@ -56,7 +64,7 @@ class SmsActivityService {
   ) async {
     final isar = await _getIsar();
 
-    if (activity.amount == null) return [];
+    if (activity.amount == null || activity.amount == 0) return [];
 
     final startTime = activity.date.subtract(timeWindow);
     final endTime = activity.date.add(timeWindow);
@@ -151,7 +159,7 @@ class SmsActivityService {
       ..date = safeDate
       ..createdAt = DateTime.now()
       ..smsHash = smsHash
-      ..amount = parsed?.amount ?? amount
+      ..amount = _normalizeAmount(parsed?.amount ?? amount)
       ..isIncome = parsed?.isIncome ?? isIncome
       ..account = parsed?.account ?? account
       ..fromBank = fromBank
@@ -164,6 +172,13 @@ class SmsActivityService {
           CategoryMatcherService.detectMerchant(body, categories)
       ..isLikelyTransfer = parsed?.isLikelyTransfer ?? false
       ..paymentType = CategoryMatcherService.detectPaymentType(body);
+
+    // If parser did not provide a category, try SMS-specific category matching
+    activity.category ??= CategoryMatcherService.matchCategory(
+      body,
+      categories,
+      activity.isIncome,
+    )?.name;
 
     // Calculate confidence
     activity.confidence = _calculateConfidence(activity);

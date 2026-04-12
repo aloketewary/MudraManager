@@ -48,12 +48,15 @@ class SmsProcessorService {
     }
 
     try {
+      final amount = sms.money != null && sms.money!.trim().isNotEmpty
+          ? sms.money!.toDouble()
+          : null;
       final activity = await SmsActivityService.instance.addActivity(
         sender: sms.sender,
         body: sms.body,
         date: transactionDate,
         smsHash: sms.smsHash,
-        amount: sms.money?.toDouble(),
+        amount: amount == 0 ? null : amount,
         isIncome: sms.typeOfTransaction == TransactionType.credited,
         account: sms.account?.no,
         fromBank: sms.account?.bankName,

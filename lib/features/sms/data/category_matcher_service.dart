@@ -116,14 +116,15 @@ class CategoryMatcherService {
   static Category? matchCategory(
     String smsBody,
     List<Category> categories,
-    bool isIncome,
+    bool? isIncome,
   ) {
     final bodyLower = smsBody.toLowerCase();
-    final type = isIncome ? CategoryType.income : CategoryType.expense;
 
-    // Filter by type
-    final validCategories =
-        categories.where((c) => c.categoryType == type).toList();
+    // Filter by type when known; otherwise consider both income and expense categories.
+    final validCategories = isIncome == null
+        ? categories.toList()
+        : categories.where((c) => c.categoryType ==
+            (isIncome ? CategoryType.income : CategoryType.expense)).toList();
 
     // Keyword matching with scoring (prioritize longer, more specific keywords)
     Category? bestMatch;
