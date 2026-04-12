@@ -9,6 +9,7 @@ import 'package:mudra_manager/core/db/models/exchange_rate.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
+import 'package:mudra_manager/core/utils/robust_category_matcher.dart';
 import 'package:mudra_manager/features/sms/data/bank_sms_parser.dart';
 import 'package:mudra_manager/features/sms/data/category_matcher_service.dart';
 import 'package:mudra_manager/features/sms/domain/detection_level.dart';
@@ -173,12 +174,31 @@ class SmsActivityService {
       ..isLikelyTransfer = parsed?.isLikelyTransfer ?? false
       ..paymentType = CategoryMatcherService.detectPaymentType(body);
 
-    // If parser did not provide a category, try SMS-specific category matching
-    activity.category ??= CategoryMatcherService.matchCategory(
-      body,
-      categories,
-      activity.isIncome,
-    )?.name;
+    // If parser did not provide a category, try robust category matching
+    if (activity.category == null) {
+      final relevantCategories = categories.where((c) =>
+          activity.isIncome == null ||
+          (activity.isIncome == true && c.categoryType == CategoryType.income) ||
+          (activity.isIncome == false && c.categoryType == CategoryType.expense)
+      ).toList();
+
+      final matchResult = RobustCategoryMatcher.match(
+        text: body,
+        allCategories: categories,
+        relevantCategories: relevantCategories,
+        amount: activity.amount,
+        isIncome: activity.isIncome,
+      );
+
+      activity.category = matchResult.category?.name;
+
+      // Boost confidence if we got a high-confidence category match
+      if (matchResult.isHighConfidence) {
+        activity.confidence = (activity.confidence ?? 0) + 10;
+      }
+
+      _log.d('Category matched: ${activity.category} (${matchResult.confidenceScore}% confidence via ${matchResult.matchStrategy})');
+    }
 
     // Calculate confidence
     activity.confidence = _calculateConfidence(activity);

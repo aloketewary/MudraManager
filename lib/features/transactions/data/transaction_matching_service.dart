@@ -3,6 +3,7 @@ import 'package:mudra_manager/core/db/models/category.dart' as db_category;
 import 'package:mudra_manager/core/utils/category_matcher.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
+import 'package:mudra_manager/core/utils/robust_category_matcher.dart';
 
 class TransactionMatchingService {
   static final _log = AppLog(getLogger(), 'TxnMatching');
@@ -72,11 +73,21 @@ class TransactionMatchingService {
       return null;
     }
 
-    // 3. Try keyword-based matching
-    db_category.Category? matchedCategory = CategoryMatcher.matchByKeywords(
-      body,
-      relevantCategories,
+    // 3. Try robust category matching with confidence scoring
+    final matchResult = RobustCategoryMatcher.match(
+      text: body,
+      allCategories: categories,
+      relevantCategories: relevantCategories,
+      amount: amount,
+      isIncome: isIncome,
     );
+
+    db_category.Category? matchedCategory = matchResult.category;
+
+    // Log the matching strategy and confidence
+    if (matchedCategory != null) {
+      _log.i('Category matched: ${matchedCategory.name} (${matchResult.confidenceScore}% confidence via ${matchResult.matchStrategy})');
+    }
 
     // 4. Fallback with smart logic based on amount
     matchedCategory ??= CategoryMatcher.getFallbackCategory(
