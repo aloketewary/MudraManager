@@ -11,7 +11,7 @@ class RblSmsParserPlugin extends SmsParserPlugin {
   String get bankName => 'RBL';
 
   @override
-  List<String> get senderNames => ['RBLBNK', 'RBLBK', 'RBL'];
+  List<String> get senderNames => ['RBL'];
 
   @override
   String get iconPath => 'assets/logo/banks/rbl.svg';

@@ -31,6 +31,7 @@ import 'package:mudra_manager/features/budget/data/budget_alert_service.dart';
 import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
 import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
 import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
+import 'package:mudra_manager/features/sms/data/sms_activity_service.dart';
 import 'package:mudra_manager/features/sms/data/recurring_detector_service.dart';
 import 'package:mudra_manager/features/sms/data/tag_matcher_service.dart';
 import 'package:mudra_manager/features/sms/presentation/screens/sms_activity_screen.dart';
@@ -209,11 +210,14 @@ class _AddEditTransactionScreenState
     final smsAccountNumber = widget.smsActivity?.account;
     if (smsAccountNumber == null || smsAccountNumber.isEmpty) return;
     final isar = await ref.read(isarServiceProvider).getInstance();
-    final match = await isar.accounts
+    final accounts = await isar.accounts
         .filter()
-        .accountNumberEqualTo(smsAccountNumber)
         .isActiveEqualTo(true)
-        .findFirst();
+        .findAll();
+    final match = accounts.where((a) {
+      final dbAccNo = a.accountNumber?.trim();
+      return dbAccNo != null && dbAccNo.endsWith(smsAccountNumber.trim());
+    }).firstOrNull;
     if (match != null && mounted) {
       setState(() => _selectedAccount = match);
     }
@@ -985,16 +989,26 @@ class _AddEditTransactionScreenState
             ?.track(GamificationEvent.expenseSplit);
       }
 
-      // If from SMS activity, approve it
+      // If from SMS activity, mark as approved and learn keywords
       if (widget.smsActivity != null) {
         final isar = await ref.read(isarServiceProvider).getInstance();
         await isar.writeTxn(() async {
           widget.smsActivity!.status = ActivityStatus.approved;
           widget.smsActivity!.transactionId = txn.id;
           await isar.smsActivitys.put(widget.smsActivity!);
+
+          txn.smsActivityId = widget.smsActivity!.id;
+          txn.isFromSms = true;
+          await isar.transactions.put(txn);
         });
 
-        // Detect and link to recurring bills (SMS imports only)
+        // Learn keywords + detect recurring (same as approveActivity but without creating a second txn)
+        await SmsActivityService.instance.learnKeywordsFromApproval(
+          widget.smsActivity!.body,
+          _selectedCategory!,
+          merchant: widget.smsActivity!.merchant,
+          recipient: widget.smsActivity!.toAccount,
+        );
         await RecurringDetectorService.detectAndTagRecurring(txn);
       }
 

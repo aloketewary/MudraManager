@@ -129,7 +129,7 @@ class SmartNotificationService {
       final n = exceeded.length;
       await _emit(
         isar,
-        type: 'budget_exceeded_grouped',
+        type: 'budget_exceeded',
         title: Tone.appL10n?.notif_budgetsOverLimitTitle(n) ?? '🚨 $n budget${n > 1 ? 's' : ''} over limit',
         body: n == 1
             ? '${exceeded.first} is over budget — time to review'
@@ -144,7 +144,7 @@ class SmartNotificationService {
       final n = warnings.length;
       await _emit(
         isar,
-        type: 'budget_warning_grouped',
+        type: 'budget_warning',
         title: Tone.appL10n?.notif_budgetsGettingTightTitle(n) ?? '⚠️ $n budget${n > 1 ? 's' : ''} getting tight',
         body: n == 1
             ? '${warnings.first} is nearing the limit'

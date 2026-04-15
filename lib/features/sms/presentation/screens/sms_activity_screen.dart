@@ -600,7 +600,7 @@ class _ActivityCard extends ConsumerWidget {
                       runSpacing: 4,
                       children: [
                         _StatusChip(
-                          label: _getStatusLabel(),
+                          label: _getStatusLabel(context),
                           color: statusColor,
                         ),
                         if (activity.isPotentialDuplicate == true)
@@ -670,18 +670,19 @@ class _ActivityCard extends ConsumerWidget {
     }
   }
 
-  String _getStatusLabel() {
+  String _getStatusLabel(BuildContext context) {
+    final ctxt = AppLocalizations.of(context)!;
     switch (activity.status) {
       case ActivityStatus.pending:
-        return 'PENDING';
+        return ctxt.smsActivity_pending;
       case ActivityStatus.approved:
-        return 'APPROVED';
+        return ctxt.smsActivity_approved;
       case ActivityStatus.duplicate:
-        return 'DUPLICATE';
+        return ctxt.smsActivity_duplicates;
       case ActivityStatus.rejected:
-        return 'REJECTED';
+        return ctxt.smsActivity_rejected;
       case ActivityStatus.needsReview:
-        return 'REVIEW';
+        return ctxt.smsActivity_needsReview;
     }
   }
 
@@ -792,11 +793,14 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
     final acc = widget.activity.account;
     if (acc == null || acc.isEmpty) return;
     final isar = await ref.read(isarServiceProvider).getInstance();
-    final match = await isar.accounts
+    final accounts = await isar.accounts
         .filter()
-        .accountNumberEqualTo(acc)
         .isActiveEqualTo(true)
-        .findFirst();
+        .findAll();
+    final match = accounts.where((a) {
+      final dbAccNo = a.accountNumber?.trim();
+      return dbAccNo != null && dbAccNo.endsWith(acc.trim());
+    }).firstOrNull;
     if (mounted) setState(() => _hasMatchingAccount = match != null);
   }
 

@@ -7,7 +7,6 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_native_timezone_latest/flutter_native_timezone_latest.dart';
 import 'package:go_router/go_router.dart';
 import 'package:isar_community/isar.dart';
-import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/models/notification_record.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
@@ -24,11 +23,18 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
   static const _reminderTimeKey = 'daily_reminder_time_key';
   static const _streakReminderTimeKey = 'streak_reminder_time_key';
-  static BuildContext? _context;
+  static GlobalKey<NavigatorState>? _navigatorKey;
   static final _log = AppLog(getLogger(), 'NotificationService');
 
+  /// Set the navigator key for notification tap routing.
+  /// Call this once from your root MaterialApp/GoRouter.
+  static void setNavigatorKey(GlobalKey<NavigatorState> key) {
+    _navigatorKey = key;
+  }
+
+  /// @deprecated Use setNavigatorKey instead.
   static void setContext(BuildContext context) {
-    _context = context;
+    // Kept for backward compatibility — callers should migrate to setNavigatorKey
   }
 
   static Future<void> initialize() async {
@@ -132,6 +138,7 @@ class NotificationService {
         title: Tone.appL10n?.notif_quietDayTitle ?? '📊 Quiet day yesterday',
         body: BuddyMessages.dailySummaryEmpty,
         payload: 'statistics',
+        dedupKey: 'daily_summary',
         bypassThrottle: true,
       );
       return;
@@ -163,14 +170,6 @@ class NotificationService {
           .key;
     }
 
-    final accounts = await isar.collection<Account>().where().findAll();
-    for (final acc in accounts) {
-      await isar.transactions
-          .filter()
-          .account((q) => q.idEqualTo(acc.id))
-          .findAll();
-    }
-
     await showLocalNotification(
       id: 100,
       title: Tone.appL10n?.notif_heresYesterdayTitle ?? '📊 Here\'s yesterday',
@@ -180,6 +179,7 @@ class NotificationService {
         topCategory,
       ),
       payload: 'statistics',
+      dedupKey: 'daily_summary',
       bypassThrottle: true,
     );
   }
@@ -269,6 +269,7 @@ class NotificationService {
         title: Tone.appL10n?.notif_weekInReviewTitle ?? '📅 Week in review',
         body: 'Zero expenses this week — that\'s impressive 💪',
         payload: 'statistics',
+        dedupKey: 'weekly_summary',
         bypassThrottle: true,
       );
       await _logToDatabase(
@@ -312,6 +313,7 @@ class NotificationService {
       title: Tone.appL10n?.notif_yourWeekInReviewTitle ?? '📅 Your week in review',
       body: body,
       payload: 'statistics',
+      dedupKey: 'weekly_summary',
       bypassThrottle: true,
     );
     await _logToDatabase('📅 Your week in review', body, 'weekly_summary');
@@ -372,7 +374,6 @@ class NotificationService {
   static const _maxDailySmartPush = 12;
   static const _pushCountKey = 'notif_push_count';
   static const _pushDateKey = 'notif_push_date';
-  static final _sentToday = <String>{}; // in-memory dedup for current session
   static const _contentHashKey = 'notif_content_hashes';
   static const _contentHashDateKey = 'notif_content_hash_date';
 
@@ -394,7 +395,22 @@ class NotificationService {
     bool bypassThrottle = false,
   }) async {
     final prefs = await SharedPreferences.getInstance();
-    final today = '${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}';
+    final now = DateTime.now();
+    final today = '${now.year}-${now.month}-${now.day}';
+
+    // ── Clean up stale dedup keys from previous days ──
+    final allKeys = prefs.getKeys();
+    // Only run cleanup once per day
+    if (prefs.getString(_pushDateKey) != today) {
+      for (final key in allKeys) {
+        if (key.startsWith('dedup_')) {
+          final val = prefs.getString(key);
+          if (val != null && val != today) {
+            await prefs.remove(key);
+          }
+        }
+      }
+    }
 
     // ── Content-hash dedup: same title+body never fires twice in a day ──
     // Skip for bypassThrottle — SMS per-txn notifications are unique events
@@ -416,11 +432,12 @@ class NotificationService {
 
     // Dedup: if a dedupKey is provided, skip if already sent today
     if (dedupKey != null) {
-      if (_sentToday.contains(dedupKey)) return;
       final stored = prefs.getString('dedup_$dedupKey');
-      if (stored == today) return;
+      if (stored == today) {
+        _log.i('Dedup key already sent today, skipping: $dedupKey');
+        return;
+      }
       await prefs.setString('dedup_$dedupKey', today);
-      _sentToday.add(dedupKey);
     }
 
     // Throttle: cap smart-alert pushes per day (scheduled notifications bypass)
@@ -428,7 +445,6 @@ class NotificationService {
       if (prefs.getString(_pushDateKey) != today) {
         await prefs.setInt(_pushCountKey, 0);
         await prefs.setString(_pushDateKey, today);
-        _sentToday.clear();
       }
       final count = prefs.getInt(_pushCountKey) ?? 0;
       if (count >= _maxDailySmartPush) {
@@ -439,17 +455,20 @@ class NotificationService {
     }
 
     _log.i('Showing notification: $title');
-    const androidDetails = AndroidNotificationDetails(
-      'mudra_channel_id',
-      'Mudra Manager Notifications',
-      channelDescription: 'Notifications for budget & account alerts',
+
+    // Route to appropriate Android channel based on dedupKey prefix
+    final channelId = _resolveChannel(dedupKey, payload);
+    final androidDetails = AndroidNotificationDetails(
+      channelId.$1,
+      channelId.$2,
+      channelDescription: channelId.$3,
       importance: Importance.max,
       priority: Priority.high,
     );
 
-    const notificationDetails = NotificationDetails(
+    final notificationDetails = NotificationDetails(
       android: androidDetails,
-      iOS: DarwinNotificationDetails(
+      iOS: const DarwinNotificationDetails(
         presentAlert: true,
         presentBadge: true,
         presentSound: true,
@@ -459,13 +478,43 @@ class NotificationService {
     await _plugin.show(id, title, body, notificationDetails, payload: payload);
   }
 
+  /// Resolve Android notification channel based on notification type.
+  static (String id, String name, String desc) _resolveChannel(
+    String? dedupKey,
+    String? payload,
+  ) {
+    if (dedupKey != null) {
+      if (dedupKey.startsWith('sms_')) {
+        return ('sms_transactions', 'SMS Transactions', 'Auto-imported SMS transaction alerts');
+      }
+      if (dedupKey.startsWith('budget_')) {
+        return ('budget_alerts', 'Budget Alerts', 'Budget limit warnings and exceeded alerts');
+      }
+      if (dedupKey.startsWith('bill_')) {
+        return ('bill_reminders', 'Bill Reminders', 'Upcoming bill payment reminders');
+      }
+      if (dedupKey == 'daily_summary' || dedupKey == 'weekly_summary') {
+        return ('summaries', 'Summaries', 'Daily and weekly spending summaries');
+      }
+    }
+    if (payload == 'achievements') {
+      return ('gamification', 'Achievements & Streaks', 'Achievement unlocks, level-ups, and streak milestones');
+    }
+    return ('mudra_channel_id', 'Mudra Manager', 'General notifications');
+  }
+
   static void _handleNotificationTap(String? payload) {
-    if (payload == 'statistics' && _context != null) {
-      _context!.go(AppRoutes.statistics);
-    } else if (payload == 'home' && _context != null) {
-      _context!.go(AppRoutes.home);
-    } else if (payload == 'achievements' && _context != null) {
-      _context!.go(AppRoutes.achievements);
+    final context = _navigatorKey?.currentContext;
+    if (context == null) return;
+    switch (payload) {
+      case 'statistics':
+        GoRouter.of(context).go(AppRoutes.statistics);
+      case 'home':
+        GoRouter.of(context).go(AppRoutes.home);
+      case 'achievements':
+        GoRouter.of(context).go(AppRoutes.achievements);
+      case 'sms_activity':
+        GoRouter.of(context).go(AppRoutes.smsActivity);
     }
   }
 
@@ -564,7 +613,7 @@ class NotificationService {
 
   static Future<void> showAchievementUnlocked(String title, int xp) async {
     await showLocalNotification(
-      id: 200,
+      id: DateTime.now().microsecondsSinceEpoch % 100000000,
       title: Tone.appL10n?.notif_niceOneTitle ?? '🏆 Nice one!',
       body: '$title — that\'s +$xp XP for you',
       payload: 'achievements',
@@ -579,7 +628,7 @@ class NotificationService {
 
   static Future<void> showLevelUp(int newLevel) async {
     await showLocalNotification(
-      id: 201,
+      id: DateTime.now().microsecondsSinceEpoch % 100000000,
       title: Tone.appL10n?.notif_levelUpTitle(newLevel) ?? '🎉 Level $newLevel!',
       body: 'You just leveled up — keep going!',
       payload: 'achievements',
@@ -594,7 +643,7 @@ class NotificationService {
 
   static Future<void> showStreakMilestone(int days) async {
     await showLocalNotification(
-      id: 202,
+      id: DateTime.now().microsecondsSinceEpoch % 100000000,
       title: Tone.appL10n?.notif_streakDaysTitle(days) ?? '🔥 $days days straight!',
       body: 'That\'s dedication — your streak is on fire',
       payload: 'achievements',

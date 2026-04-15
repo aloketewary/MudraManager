@@ -22,9 +22,13 @@ class TransactionNotificationListener : NotificationListenerService() {
         private val queueLock = Any()
 
         private val smsPackages = setOf(
+            // Google Messages (SMS + RCS)
             "com.google.android.apps.messaging",
+            // Samsung Messages (SMS + RCS on Samsung)
             "com.samsung.android.messaging",
+            // AOSP/Stock SMS
             "com.android.mms",
+            // OEM SMS apps
             "com.oneplus.mms",
             "com.xiaomi.mms",
             "com.miui.mms",
@@ -34,9 +38,15 @@ class TransactionNotificationListener : NotificationListenerService() {
             "com.asus.mms",
             "com.motorola.mms",
             "com.coloros.mms",
+            // Nothing Phone
+            "com.nothing.mms",
+            // Signal (SMS fallback)
             "org.thoughtcrime.securesms",
-            "com.example.myapplication",
+            // Truecaller (SMS mode)
+            "com.truecaller",
         )
+
+        fun getSupportedPackages(): Set<String> = smsPackages
 
         fun drainQueue(context: Context): List<Map<String, Any>> {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -53,7 +63,8 @@ class TransactionNotificationListener : NotificationListenerService() {
                     "text" to obj.optString("text", ""),
                     "package" to obj.optString("package", ""),
                     "timestamp" to obj.optLong("timestamp", 0),
-                    "hash" to obj.optString("hash", "")
+                    "hash" to obj.optString("hash", ""),
+                    "corrId" to obj.optString("corrId", "")
                 ))
             }
 
@@ -63,63 +74,89 @@ class TransactionNotificationListener : NotificationListenerService() {
     }
 
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
-    sbn ?: return
+        sbn ?: return
 
-    val packageName = sbn.packageName
-    if (!smsPackages.contains(packageName)) return
-    if (packageName == applicationContext.packageName) return
+        val packageName = sbn.packageName
+        if (!smsPackages.contains(packageName)) return
+        if (packageName == applicationContext.packageName) return
 
-    val extras = sbn.notification.extras
-    val title = extras.getCharSequence("android.title")?.toString() ?: ""
-    val text = extractMessageText(extras)
-
-    val body = if (text.isNotEmpty()) text else title
-    if (body.length < 5) return
-
-    // Log for debugging
-    android.util.Log.d("MudraSMS", "Processing: sender='$title' body='$body'")
-
-    val normalized = normalize(body)
-    val raw = "$title|$normalized|$packageName"
-    val hash = sha256(raw)
-
-    val data = mapOf(
-        "title" to title,
-        "text" to text,
-        "package" to packageName,
-        "timestamp" to sbn.postTime,
-        "hash" to hash
-    )
-
-    queueNotification(data)
-
-    // Notify Flutter to drain immediately
-   Handler(Looper.getMainLooper()).post {
-        val channel = methodChannel
-        if (channel == null) {
-            android.util.Log.w("NotifListener", "Channel not ready, queue will be drained later")
-            return@post
+        // Skip group summary notifications — they duplicate individual messages
+        val flags = sbn.notification.flags
+        if (flags and Notification.FLAG_GROUP_SUMMARY != 0) {
+            android.util.Log.d("MudraSMS", "Skipping group summary notification")
+            return
         }
 
-        try {
-            channel.invokeMethod("onDrainQueue", null)
-        } catch (e: Exception) {
-            android.util.Log.e("NotifListener", "invokeMethod failed", e)
+        // Skip ongoing/foreground notifications (not actual messages)
+        if (flags and Notification.FLAG_ONGOING_EVENT != 0) return
+
+        val extras = sbn.notification.extras
+        val title = extras.getCharSequence("android.title")?.toString() ?: ""
+        val text = extractMessageText(extras)
+
+        val body = if (text.isNotEmpty()) text else title
+        if (body.length < 5) return
+
+        // For RCS: try to extract the sender short code from subText or conversation title
+        val subText = extras.getCharSequence(Notification.EXTRA_SUB_TEXT)?.toString()
+        val senderHint = subText ?: title
+
+        android.util.Log.d("MudraSMS", "Processing: sender='$senderHint' body='${body.take(80)}'")
+
+        val normalized = normalize(body)
+        val raw = "$senderHint|$normalized|$packageName"
+        val hash = sha256(raw)
+
+        val corrId = hash.take(8)
+
+        val data = mapOf(
+            "title" to senderHint,
+            "text" to text,
+            "package" to packageName,
+            "timestamp" to sbn.postTime,
+            "hash" to hash,
+            "corrId" to corrId
+        )
+
+        android.util.Log.d("MudraSMS", "[$corrId] Queued: sender='$senderHint'")
+
+        queueNotification(data)
+
+        Handler(Looper.getMainLooper()).post {
+            val channel = methodChannel
+            if (channel == null) {
+                android.util.Log.w("NotifListener", "Channel not ready, queue will be drained later")
+                return@post
+            }
+
+            try {
+                channel.invokeMethod("onDrainQueue", null)
+            } catch (e: Exception) {
+                android.util.Log.e("NotifListener", "invokeMethod failed", e)
+            }
         }
     }
-}
 
     /**
      * Extract message text from notification extras.
-     * RCS/chat messages use MessagingStyle which stores text in android.messages
-     * rather than android.text.
+     * Handles:
+     *  - RCS/MessagingStyle (android.messages) — primary for Google Messages RCS
+     *  - BigText (expanded notification) — common for SMS
+     *  - SummaryText — fallback for some RCS implementations
+     *  - Standard EXTRA_TEXT — final fallback
      */
     private fun extractMessageText(extras: Bundle): String {
         // 1. Try MessagingStyle messages (RCS, chat messages)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            val messages = extras.getParcelableArray(Notification.EXTRA_MESSAGES)
+            val messages = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                extras.getParcelableArray(Notification.EXTRA_MESSAGES, Bundle::class.java)
+            } else {
+                @Suppress("DEPRECATION")
+                extras.getParcelableArray(Notification.EXTRA_MESSAGES)
+            }
+
             if (messages != null && messages.isNotEmpty()) {
-                // Try to get the last message's text
+                // Get the LAST message only (most recent in conversation)
                 val last = messages.last()
                 if (last is Bundle) {
                     val msgText = last.getCharSequence("text")?.toString()
@@ -129,7 +166,7 @@ class TransactionNotificationListener : NotificationListenerService() {
                     if (!msgText.isNullOrBlank()) return msgText
                 }
 
-                // If no text in last message, try to concatenate all messages
+                // Fallback: concatenate all messages if last is empty
                 val allTexts = messages.mapNotNull { msg ->
                     if (msg is Bundle) {
                         msg.getCharSequence("text")?.toString()
@@ -140,7 +177,7 @@ class TransactionNotificationListener : NotificationListenerService() {
                 }.filter { it.isNotBlank() }
 
                 if (allTexts.isNotEmpty()) {
-                    return allTexts.joinToString("\n")
+                    return allTexts.last() // Still prefer last
                 }
             }
         }
@@ -198,6 +235,7 @@ class TransactionNotificationListener : NotificationListenerService() {
                 put("package", data["package"])
                 put("timestamp", data["timestamp"])
                 put("hash", data["hash"])
+                put("corrId", data["corrId"])
             })
 
             prefs.edit().putString(QUEUE_KEY, trimmed.toString()).apply()

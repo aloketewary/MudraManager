@@ -1,6 +1,5 @@
 import 'package:mudra_manager/core/db/models/sms_activity.dart';
 import 'package:mudra_manager/core/services/plugin_service.dart';
-import 'package:mudra_manager/core/utils/utils.dart';
 import 'package:mudra_manager/plugins/sms_parser_manager.dart';
 import 'package:mudra_manager/plugins/sms_parser_plugin.dart';
 import 'dart:convert';
@@ -22,8 +21,9 @@ class SmsProcessorService {
 
   Future<SmsActivity> processSmsForSaving(
     TransactionInfo sms,
-    int timestamp,
-  ) async {
+    int timestamp, [
+    String corrId = '',
+  ]) async {
     final notifTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
     DateTime transactionDate;
 
@@ -48,8 +48,9 @@ class SmsProcessorService {
     }
 
     try {
-      final amount = sms.money != null && sms.money!.trim().isNotEmpty
-          ? sms.money!.toDouble()
+      final rawMoney = sms.money?.trim();
+      final amount = (rawMoney != null && rawMoney.isNotEmpty)
+          ? double.tryParse(rawMoney.replaceAll(',', ''))
           : null;
       final activity = await SmsActivityService.instance.addActivity(
         sender: sms.sender,
@@ -63,15 +64,14 @@ class SmsProcessorService {
         toAccount: sms.account?.sendTo,
         transactionRef: sms.account?.refNo,
         category: sms.typeOfTransaction?.name,
+        corrId: corrId,
       );
 
       PluginService().emitSms(sms.sender, sms.body);
-      _log.i(
-        'Auto Import processed and added to activity, sender: ${sms.sender}',
-      );
+      _log.i('[$corrId] Processed sender: ${sms.sender}, amount: $amount');
       return activity;
     } catch (e) {
-      _log.e('Failed to process SMS transaction', e);
+      _log.e('[$corrId] Failed to process SMS transaction', e);
       rethrow;
     }
   }
@@ -81,18 +81,17 @@ class SmsProcessorService {
     required String address,
     String? sender,
     required int timestamp,
+    String corrId = '',
   }) async {
     if (!checkForTransactionalMessage(body)) {
-      _log.i('Message filtered out (not transactional) sender: $address, body: $body');
+      _log.i('[$corrId] Filtered (not transactional) sender: $address');
       return ParseResult.skipped;
     }
 
     final smsHash = generateSmsHash(address, timestamp, body);
 
     if (SharedPrefsUtil.instance.isAlreadyProcessed(smsHash)) {
-      _log.i(
-        'Message already processed, skipping... sender: $address hash: $smsHash',
-      );
+      _log.i('[$corrId] Already processed, skipping sender: $address');
       return ParseResult.skipped;
     }
 
@@ -102,25 +101,18 @@ class SmsProcessorService {
       // Try plugin-based parsing first
       final parsedSms = await SmsParserManager.instance.parseSms(address, body);
       if (parsedSms != null) {
-        _log.i('Auto Import parsed by plugin, sender: $address');
+        _log.i('[$corrId] Parsed by plugin, sender: $address');
         activity = await _processPluginParsedSms(
-          parsedSms,
-          address,
-          timestamp,
-          smsHash,
-          body,
+          parsedSms, address, timestamp, smsHash, body, corrId,
         );
       } else {
         // Fallback to legacy parsing
         final transactionUtil = TransactionUtil();
         final transactionInfo = transactionUtil.getTransactionInfo(
-          body,
-          address,
-          sender,
-          smsHash,
+          body, address, sender, smsHash,
         );
-        _log.i('Auto Import Parsed by legacy parser, sender: $address');
-        activity = await processSmsForSaving(transactionInfo, timestamp);
+        _log.i('[$corrId] Parsed by legacy parser, sender: $address');
+        activity = await processSmsForSaving(transactionInfo, timestamp, corrId);
       }
 
       // Only store hash after successful processing
@@ -144,6 +136,7 @@ class SmsProcessorService {
     int timestamp,
     String smsHash,
     String body,
+    String corrId,
   ) async {
     final transactionDate = DateTime.fromMillisecondsSinceEpoch(timestamp);
 
@@ -160,13 +153,14 @@ class SmsProcessorService {
         toAccount: parsedSms.merchant,
         transactionRef: null,
         category: parsedSms.transactionType,
+        corrId: corrId,
       );
 
       PluginService().emitSms(sender, '');
-      _log.i('Plugin-parsed Auto Import processed, sender: $sender');
+      _log.i('[$corrId] Plugin-parsed, sender: $sender, amount: ${parsedSms.amount}');
       return activity;
     } catch (e) {
-      _log.e('Failed to process plugin-parsed SMS', e);
+      _log.e('[$corrId] Failed to process plugin-parsed SMS', e);
       rethrow;
     }
   }

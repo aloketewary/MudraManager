@@ -124,7 +124,7 @@ class CategoryMatcherService {
     final validCategories = isIncome == null
         ? categories.toList()
         : categories.where((c) => c.categoryType ==
-            (isIncome ? CategoryType.income : CategoryType.expense)).toList();
+            (isIncome ? CategoryType.income : CategoryType.expense),).toList();
 
     // Keyword matching with scoring (prioritize longer, more specific keywords)
     Category? bestMatch;

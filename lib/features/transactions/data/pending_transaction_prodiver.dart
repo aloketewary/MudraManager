@@ -165,8 +165,15 @@ class PendingTransactionService {
         isExpense: pending.isIncome == false,
         description: 'Auto-imported: ${pending.sender}',
       );
+      txn.isFromSms = true;
       txn.account.value = match.account;
       txn.category.value = match.category;
+
+      // Inherit currency from matched account
+      final accountCurrency = match.account.currencyCode;
+      if (accountCurrency != null) {
+        txn.currencyCode = accountCurrency;
+      }
 
       await isar.transactions.put(txn);
       await txn.account.save();

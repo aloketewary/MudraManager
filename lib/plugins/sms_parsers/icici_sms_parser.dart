@@ -14,7 +14,7 @@ class IciciSmsParserPlugin extends SmsParserPlugin {
   String get bankName => 'ICICI';
 
   @override
-  List<String> get senderNames => ['ICICI', 'ICICIB'];
+  List<String> get senderNames => ['ICICI'];
 
   @override
   String get iconPath => 'assets/logo/banks/icici.svg';

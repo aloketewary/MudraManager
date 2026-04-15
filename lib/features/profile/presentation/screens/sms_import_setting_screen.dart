@@ -77,10 +77,10 @@ class _SmsImportSettingsScreenState
 
     return Scaffold(
       appBar: AppBar(
-          title: Text(AppLocalizations.of(context)!.smsImport_autoImport)),
+          title: Text(AppLocalizations.of(context)!.smsImport_autoImport),),
       body: !_loaded
           ? ListView(
-              children: List.generate(3, (_) => const DashboardCardSkeleton()))
+              children: List.generate(3, (_) => const DashboardCardSkeleton()),)
           : ListView(
               padding: EdgeInsets.symmetric(
                 horizontal: spacing.cardHorizontal,
@@ -95,7 +95,7 @@ class _SmsImportSettingsScreenState
                 _buildSectionHeader(
                     AppLocalizations.of(context)!.smsImport_permissions,
                     color,
-                    textTheme),
+                    textTheme,),
                 SizedBox(height: spacing.sectionGap),
                 _buildGroupedCard(
                   spacing: spacing,
@@ -196,7 +196,7 @@ class _SmsImportSettingsScreenState
                 _buildSectionHeader(
                     AppLocalizations.of(context)!.smsImport_tools,
                     color,
-                    textTheme),
+                    textTheme,),
                 SizedBox(height: spacing.sectionGap),
                 _buildGroupedCard(
                   spacing: spacing,
@@ -239,7 +239,7 @@ class _SmsImportSettingsScreenState
                 _buildSectionHeader(
                     AppLocalizations.of(context)!.smsImport_howItWorks,
                     color,
-                    textTheme),
+                    textTheme,),
                 const SizedBox(height: 10),
                 Container(
                   padding: const EdgeInsets.all(16),
@@ -388,7 +388,7 @@ class _SmsImportSettingsScreenState
   ) {
     return Scaffold(
       appBar: AppBar(
-          title: Text(AppLocalizations.of(context)!.smsImport_autoImport)),
+          title: Text(AppLocalizations.of(context)!.smsImport_autoImport),),
       body: Center(
         child: Padding(
           padding: EdgeInsets.all(spacing.cardHorizontalMax),
@@ -758,7 +758,7 @@ class _SmsImportSettingsScreenState
                       ),
                     ),
                     child: Text(
-                        AppLocalizations.of(context)!.smsImport_openSettings),
+                        AppLocalizations.of(context)!.smsImport_openSettings,),
                   ),
                 ),
               ],
@@ -923,7 +923,7 @@ class _SmsImportSettingsScreenState
         _permissionDisableTapCount = 0;
       } else {
         SnackbarService.info(
-            AppLocalizations.of(context)!.smsImport_tapAgainSettings);
+            AppLocalizations.of(context)!.smsImport_tapAgainSettings,);
       }
     }
   }
@@ -938,7 +938,7 @@ class _SmsImportSettingsScreenState
       SnackbarService.success(BuddyMessages.smsImportEnabled);
     } else {
       SnackbarService.info(BuddyMessages.toggledOff(
-          AppLocalizations.of(context)!.smsImport_autoImport));
+          AppLocalizations.of(context)!.smsImport_autoImport,),);
     }
   }
 }

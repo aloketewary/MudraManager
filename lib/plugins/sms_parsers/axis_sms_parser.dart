@@ -14,7 +14,7 @@ class AxisSmsParserPlugin extends SmsParserPlugin {
   String get bankName => 'AXIS';
 
   @override
-  List<String> get senderNames => ['AXIS', 'AXISBK'];
+  List<String> get senderNames => ['AXIS'];
 
   @override
   String get iconPath => 'assets/logo/banks/axis.svg';

@@ -65,11 +65,11 @@ import 'package:mudra_manager/features/gamification/screens/achievements_screen.
 import 'package:mudra_manager/features/marketplace/screens/plugin_groups_screen.dart';
 import 'package:mudra_manager/shared/widgets/pro_gate.dart';
 
-final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
+final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 
 class AppRouter {
   static GoRouter router(bool showOnboarding) => GoRouter(
-        navigatorKey: _rootNavigatorKey,
+        navigatorKey: rootNavigatorKey,
         initialLocation: showOnboarding ? AppRoutes.onboarding : AppRoutes.home,
         debugLogDiagnostics: true,
         errorBuilder: (context, state) {

@@ -101,7 +101,7 @@ class BudgetAlertService {
         body: n == 1
             ? '${exceeded.first.budget.name}: ${formatCurrency(exceeded.first.spent, code: BaseCurrency.code)} / ${formatCurrency(exceeded.first.budget.amount, code: BaseCurrency.code)}'
             : '$names are over budget',
-        dedupKey: 'budget_exceeded_txn',
+        dedupKey: 'budget_exceeded',
       );
     }
 
@@ -114,7 +114,7 @@ class BudgetAlertService {
         body: n == 1
             ? '${warnings.first.budget.name}: ${warnings.first.percentage.toStringAsFixed(0)}% used'
             : '$names are nearing their limits',
-        dedupKey: 'budget_warning_txn',
+        dedupKey: 'budget_warning',
       );
     }
   }

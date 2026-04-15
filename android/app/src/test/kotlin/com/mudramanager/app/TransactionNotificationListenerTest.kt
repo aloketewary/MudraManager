@@ -196,4 +196,38 @@ class TransactionNotificationListenerTest {
         assertEquals("ICICIBK", result[0]["title"])
         assertEquals("Rs 2500.00 debited from a/c XX9876", result[0]["text"])
     }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // Package filtering
+    // ─────────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `smsPackages includes Google Messages for RCS`() {
+        val packages = TransactionNotificationListener.getSupportedPackages()
+        assertTrue(packages.contains("com.google.android.apps.messaging"))
+    }
+
+    @Test
+    fun `smsPackages includes Samsung Messages for RCS`() {
+        val packages = TransactionNotificationListener.getSupportedPackages()
+        assertTrue(packages.contains("com.samsung.android.messaging"))
+    }
+
+    @Test
+    fun `smsPackages includes Truecaller`() {
+        val packages = TransactionNotificationListener.getSupportedPackages()
+        assertTrue(packages.contains("com.truecaller"))
+    }
+
+    @Test
+    fun `smsPackages includes Nothing Phone`() {
+        val packages = TransactionNotificationListener.getSupportedPackages()
+        assertTrue(packages.contains("com.nothing.mms"))
+    }
+
+    @Test
+    fun `smsPackages does not include test app`() {
+        val packages = TransactionNotificationListener.getSupportedPackages()
+        assertFalse(packages.contains("com.example.myapplication"))
+    }
 }

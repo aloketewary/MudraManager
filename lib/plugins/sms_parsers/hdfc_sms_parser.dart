@@ -14,7 +14,7 @@ class HdfcSmsParserPlugin extends SmsParserPlugin {
   String get bankName => 'HDFC';
 
   @override
-  List<String> get senderNames => ['HDFC', 'HDFCBK'];
+  List<String> get senderNames => ['HDFC'];
 
   @override
   String get iconPath => 'assets/logo/banks/hdfc.svg';

@@ -39,8 +39,7 @@ class RobustCategoryMatcher {
     }
 
     // Strategy 2: Keyword exact word boundary matching
-    final keywordExactResult =
-        _tryKeywordExactMatch(text, relevantCategories);
+    final keywordExactResult = _tryKeywordExactMatch(text, relevantCategories);
     if (keywordExactResult.category != null) {
       return keywordExactResult;
     }
@@ -103,9 +102,10 @@ class RobustCategoryMatcher {
 
       for (final keyword in category.keywords!) {
         final keywordLower = keyword.toLowerCase();
-        if (RegExp(r'\b' + RegExp.escape(keywordLower) + r'\b',
-                caseSensitive: false)
-            .hasMatch(textLower)) {
+        if (RegExp(
+          r'\b' + RegExp.escape(keywordLower) + r'\b',
+          caseSensitive: false,
+        ).hasMatch(textLower)) {
           // Longer keywords are more specific = higher score
           score += keywordLower.length * 3;
           matches++;
@@ -199,7 +199,8 @@ class RobustCategoryMatcher {
             textLower.contains('coffee') ||
             textLower.contains('restaurant'))) {
       final match = categories.firstWhereOrNull(
-        (c) => c.name.toLowerCase().contains('food') ||
+        (c) =>
+            c.name.toLowerCase().contains('food') ||
             c.name.toLowerCase().contains('dining'),
       );
       if (match != null) {
@@ -222,12 +223,14 @@ class RobustCategoryMatcher {
       1000,
       2000,
       5000,
-      10000
+      10000,
     ];
     if (roundAmounts.contains(amount.toInt())) {
-      final match = categories.firstWhereOrNull((c) =>
-          c.name.toLowerCase().contains('transfer') ||
-          c.name.toLowerCase().contains('utility'));
+      final match = categories.firstWhereOrNull(
+        (c) =>
+            c.name.toLowerCase().contains('transfer') ||
+            c.name.toLowerCase().contains('utility'),
+      );
       if (match != null) {
         return CategoryMatchResult(
           category: match,

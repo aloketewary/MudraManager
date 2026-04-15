@@ -219,7 +219,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
             ..colorValue = Colors.green.toARGB32()
             ..accountNumber = '0000'
             ..currencyCode = _selectedCurrency
-            ..initialBalance = double.parse(_balanceController.text.trim()),
+            ..initialBalance = double.tryParse(_balanceController.text.trim()) ?? 0.0,
         );
       });
 

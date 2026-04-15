@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:isar_community/isar.dart';
-import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
@@ -328,7 +327,7 @@ class _MudraManagerAppState extends ConsumerState<MudraManagerApp> {
           builder: (context, child) {
             final l10n = AppLocalizations.of(context);
             if (l10n != null) Tone.syncL10n(l10n);
-            NotificationService.setContext(context);
+            NotificationService.setNavigatorKey(rootNavigatorKey);
             WidgetsBinding.instance.addPostFrameCallback((_) {
               AppUpdateService.checkForUpdate(context);
             });

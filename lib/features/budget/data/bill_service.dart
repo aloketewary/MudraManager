@@ -27,6 +27,7 @@ class BillService {
             title: '💳 Bill Reminder',
             body:
                 '${bill.name} is due in $daysUntilDue days - ${formatCurrency(bill.amount, code: BaseCurrency.code)}',
+            dedupKey: 'bill_reminder_${bill.id}',
           );
         }
       }

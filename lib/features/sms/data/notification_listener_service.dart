@@ -14,7 +14,6 @@ import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/core/services/notification_service.dart';
 import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/features/sms/data/sms_processor_service.dart';
-import 'package:uuid/uuid.dart';
 
 class NotificationListenerBridge with WidgetsBindingObserver {
   static final NotificationListenerBridge instance =
@@ -105,9 +104,13 @@ class NotificationListenerBridge with WidgetsBindingObserver {
   }
 
   String _detectSender(String title, String body) {
-    if (title.isNotEmpty && title.length < 30) return title;
+    // For RCS: title is the display name (e.g., "HDFC Bank", "State Bank of India")
+    // For SMS: title is the sender ID (e.g., "HDFCBK", "AD-ICICIB")
+    // Both are valid — the plugin parsers use .contains() matching
+    if (title.isNotEmpty && title.length < 50) return title;
 
-    final bankPattern = RegExp(r'([A-Z]{2,}(?:\sBANK)?)');
+    // Fallback: extract bank-like pattern from body
+    final bankPattern = RegExp(r'([A-Z]{2,}(?:\s(?:BANK|Bank))?)');
     final match = bankPattern.firstMatch(body);
     if (match != null) return match.group(1)!;
 
@@ -119,7 +122,6 @@ class NotificationListenerBridge with WidgetsBindingObserver {
       _log.w('Drain already in progress, skipping');
       return;
     }
-    final correlationId = const Uuid().v7();
     _processRetryQueue();
     if (!SharedPrefsUtil.instance.getSmsImportEnabled()) return;
     _isDraining = true;
@@ -139,11 +141,19 @@ class NotificationListenerBridge with WidgetsBindingObserver {
         final title = data['title'] as String? ?? '';
         final timestamp = data['timestamp'] as int? ?? 0;
         final hash = data['hash'] as String? ?? '';
+        final corrId = (data['corrId'] as String?)?.isNotEmpty == true
+            ? data['corrId'] as String
+            : (hash.length >= 8 ? hash.substring(0, 8) : hash);
 
         if (timestamp == 0) continue;
 
         final rawBody = text.isNotEmpty ? text : title;
         if (rawBody.trim().isEmpty) continue;
+
+        if (_isDuplicate(hash)) {
+          _log.i('[$corrId] In-memory duplicate skipped');
+          continue;
+        }
 
         final sender = _detectSender(title, rawBody);
 
@@ -154,6 +164,7 @@ class NotificationListenerBridge with WidgetsBindingObserver {
             timestamp: timestamp,
             hash: hash,
           ),
+          corrId: corrId,
         );
 
         switch (parseResult) {
@@ -183,6 +194,7 @@ class NotificationListenerBridge with WidgetsBindingObserver {
               amount: txnAmount,
               sender: sender,
               index: approved,
+              smsHash: hash,
             );
             break;
           case ParseResult.pending:
@@ -193,6 +205,7 @@ class NotificationListenerBridge with WidgetsBindingObserver {
               amount: 0,
               sender: sender,
               index: pending,
+              smsHash: hash,
             );
             break;
           case ParseResult.duplicate:
@@ -225,6 +238,7 @@ class NotificationListenerBridge with WidgetsBindingObserver {
     required double amount,
     required String sender,
     required int index,
+    required String smsHash,
   }) {
     final now = DateTime.now();
     _recentNotifTimestamps.removeWhere(
@@ -256,6 +270,7 @@ class NotificationListenerBridge with WidgetsBindingObserver {
       title: title,
       body: body,
       payload: 'sms_activity',
+      dedupKey: 'sms_$smsHash',
       bypassThrottle: true,
     );
   }
@@ -303,6 +318,7 @@ class NotificationListenerBridge with WidgetsBindingObserver {
       title: title,
       body: body,
       payload: 'sms_activity',
+      dedupKey: 'sms_summary_${DateTime.now().millisecondsSinceEpoch ~/ 60000}',
     );
   }
 
@@ -380,13 +396,16 @@ class NotificationListenerBridge with WidgetsBindingObserver {
   Future<ParseResult> _safeProcess(
     PendingNotifications item, {
     bool isRetry = false,
+    String corrId = '',
   }) async {
+    final cid = corrId.isNotEmpty ? corrId : (item.hash.length >= 8 ? item.hash.substring(0, 8) : item.hash);
     try {
       final result = await SmsProcessorService.instance.parseAndSaveTransaction(
         body: item.body,
         address: item.sender,
         sender: item.sender,
         timestamp: item.timestamp,
+        corrId: cid,
       );
 
       // ✅ SUCCESS → remove from DB
@@ -400,7 +419,7 @@ class NotificationListenerBridge with WidgetsBindingObserver {
 
       return result;
     } catch (e) {
-      _log.e('Processing failed for ${item.hash}', e);
+      _log.e('[$cid] Processing failed for ${item.hash}', e);
 
       item.retryCount++;
 
