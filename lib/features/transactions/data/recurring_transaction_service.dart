@@ -8,6 +8,7 @@ import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
 import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
 import 'package:mudra_manager/features/gamification/services/gamification_service.dart';
+import 'package:mudra_manager/features/notifications/data/smart_notification_service.dart';
 
 class RecurringTransactionService {
   final IsarService isarService;
@@ -59,6 +60,15 @@ class RecurringTransactionService {
         // Link the existing transaction to this recurring bill
         await _linkTransactionToRecurring(isar, smsMatch, recurring);
         await _updateNextDueDate(isar, recurring);
+        final billName = recurring.description?.isNotEmpty == true
+            ? recurring.description!
+            : recurring.category.value?.name ?? 'Bill';
+        await SmartNotificationService.instance.notifyBillPaid(
+          description: billName,
+          amount: recurring.amount,
+          billId: recurring.id,
+          wasSmsMatched: true,
+        );
         log.i('Matched SMS transaction to recurring: ${recurring.description}');
         matched++;
         continue;
@@ -70,6 +80,15 @@ class RecurringTransactionService {
       if (daysOverdue >= 2) {
         await _createTransaction(isar, recurring);
         await _updateNextDueDate(isar, recurring);
+        final billName = recurring.description?.isNotEmpty == true
+            ? recurring.description!
+            : recurring.category.value?.name ?? 'Bill';
+        await SmartNotificationService.instance.notifyBillPaid(
+          description: billName,
+          amount: recurring.amount,
+          billId: recurring.id,
+          wasSmsMatched: false,
+        );
         log.i('Auto-created overdue recurring: ${recurring.description}');
         processed++;
       }

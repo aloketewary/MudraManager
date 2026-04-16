@@ -319,6 +319,7 @@ class NotificationListenerBridge with WidgetsBindingObserver {
       body: body,
       payload: 'sms_activity',
       dedupKey: 'sms_summary_${DateTime.now().millisecondsSinceEpoch ~/ 60000}',
+      bypassThrottle: true,
     );
   }
 

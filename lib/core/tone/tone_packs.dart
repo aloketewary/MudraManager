@@ -424,6 +424,9 @@ class FriendlyTonePack extends TonePack {
   String billDueNotif(String name, String amount, String when) =>
       '$name (${BaseCurrency.symbol}$amount) is due $when — just a heads up!';
   @override
+  String billPaidNotif(String name, String amount) =>
+      '${BaseCurrency.symbol}$amount for $name — sorted! ✅';
+  @override
   String balanceDropNotif(String days) =>
       'At this pace, things could get tight in about $days days';
   @override
@@ -883,6 +886,9 @@ class ProfessionalTonePack extends TonePack {
   @override
   String billDueNotif(String name, String amount, String when) =>
       '$name (${BaseCurrency.symbol}$amount) due $when.';
+  @override
+  String billPaidNotif(String name, String amount) =>
+      '${BaseCurrency.symbol}$amount for $name recorded.';
   @override
   String balanceDropNotif(String days) =>
       'At current rate, funds may be insufficient in $days days.';
@@ -1372,6 +1378,9 @@ class MotivationalTonePack extends TonePack {
   String billDueNotif(String name, String amount, String when) =>
       '$name (${BaseCurrency.symbol}$amount) due $when — stay ahead of it! 🔔';
   @override
+  String billPaidNotif(String name, String amount) =>
+      '${BaseCurrency.symbol}$amount for $name — done and dusted! 💪';
+  @override
   String balanceDropNotif(String days) =>
       'Funds could run tight in $days days — small adjustments now pay off big!';
   @override
@@ -1825,6 +1834,9 @@ class CalmTonePack extends TonePack {
   @override
   String billDueNotif(String name, String amount, String when) =>
       '$name — ${BaseCurrency.symbol}$amount, due $when.';
+  @override
+  String billPaidNotif(String name, String amount) =>
+      '$name — ${BaseCurrency.symbol}$amount, recorded.';
   @override
   String balanceDropNotif(String days) =>
       'At this pace, about $days days of runway remain.';

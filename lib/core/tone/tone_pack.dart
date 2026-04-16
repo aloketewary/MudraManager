@@ -201,6 +201,7 @@ abstract class TonePack {
   String budgetExceededNotif(String name, String spent, String limit);
   String budgetWarningNotif(String name, String remaining, String pct);
   String billDueNotif(String name, String amount, String when);
+  String billPaidNotif(String name, String amount);
   String balanceDropNotif(String days);
   String savingsOpportunityNotif(String category, String amount);
   String unusualSpendingNotif(String today, String multiplier);

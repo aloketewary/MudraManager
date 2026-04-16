@@ -167,21 +167,21 @@ void main() {
 
   group('Production: hash generation consistency', () {
     test('same inputs produce same hash', () {
-      final service = SmsProcessorService_TestHelper();
+      final service = smsProcessorServiceTestHelper();
       final hash1 = service.generateSmsHash('HDFCBK', 1000, 'Rs.500 debited');
       final hash2 = service.generateSmsHash('HDFCBK', 1000, 'Rs.500 debited');
       expect(hash1, hash2);
     });
 
     test('different timestamp produces different hash', () {
-      final service = SmsProcessorService_TestHelper();
+      final service = smsProcessorServiceTestHelper();
       final hash1 = service.generateSmsHash('HDFCBK', 1000, 'Rs.500 debited');
       final hash2 = service.generateSmsHash('HDFCBK', 1001, 'Rs.500 debited');
       expect(hash1, isNot(hash2));
     });
 
     test('RCS display name vs SMS sender ID produce different hashes', () {
-      final service = SmsProcessorService_TestHelper();
+      final service = smsProcessorServiceTestHelper();
       final hash1 =
           service.generateSmsHash('HDFCBK', 1000, 'Rs.500 debited');
       final hash2 =
@@ -215,7 +215,7 @@ void main() {
 }
 
 /// Helper to test hash generation without accessing the singleton
-class SmsProcessorService_TestHelper {
+class smsProcessorServiceTestHelper {
   String generateSmsHash(String address, int timestamp, String body) {
     final input = '$address|$timestamp|$body';
     // Replicate the hash logic

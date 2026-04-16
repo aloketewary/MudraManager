@@ -20,6 +20,16 @@ class TransactionNotificationListener : NotificationListenerService() {
         private const val QUEUE_KEY = "pending_notifications"
         var methodChannel: MethodChannel? = null
         private val queueLock = Any()
+        @Volatile
+        private var isListenerConnected = false
+
+        fun ensureRunning(context: Context) {
+            if (!isListenerConnected && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                try {
+                    requestRebind(android.content.ComponentName(context, TransactionNotificationListener::class.java))
+                } catch (_: Exception) {}
+            }
+        }
 
         private val smsPackages = setOf(
             // Google Messages (SMS + RCS)
@@ -73,6 +83,19 @@ class TransactionNotificationListener : NotificationListenerService() {
         }
     }
 
+    override fun onListenerConnected() {
+        super.onListenerConnected()
+        isListenerConnected = true
+    }
+
+    override fun onListenerDisconnected() {
+        super.onListenerDisconnected()
+        isListenerConnected = false
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            requestRebind(android.content.ComponentName(applicationContext, TransactionNotificationListener::class.java))
+        }
+    }
+
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
         sbn ?: return
 
@@ -97,9 +120,15 @@ class TransactionNotificationListener : NotificationListenerService() {
         val body = if (text.isNotEmpty()) text else title
         if (body.length < 5) return
 
-        // For RCS: try to extract the sender short code from subText or conversation title
-        val subText = extras.getCharSequence(Notification.EXTRA_SUB_TEXT)?.toString()
-        val senderHint = subText ?: title
+        // Sender detection:
+        // SMS: title = sender ID ("HDFCBK", "AD-ICICIB") — always use this
+        // RCS: title = display name ("HDFC Bank") — also fine, parsers use .contains()
+        // EXTRA_SUB_TEXT is often the SIM name ("SIM 1", "Jio") on dual-SIM — never use as sender
+        val senderHint = if (title.isNotEmpty() && title.length < 50) {
+            title
+        } else {
+            "UNKNOWN"
+        }
 
         android.util.Log.d("MudraSMS", "Processing: sender='$senderHint' body='${body.take(80)}'")
 

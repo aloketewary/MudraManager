@@ -40,6 +40,16 @@ class SmartNotificationService {
     String? actionData,
     int? budgetId,
   }) async {
+    // Check if already emitted today (prevents duplicate in-app records)
+    final today = DateTime.now();
+    final startOfDay = DateTime(today.year, today.month, today.day);
+    final existing = await isar.notificationRecords
+        .filter()
+        .typeEqualTo(type)
+        .timestampGreaterThan(startOfDay)
+        .findFirst();
+    if (existing != null) return;
+
     // 1. Save in-app record
     final record = NotificationRecord()
       ..title = title
@@ -172,6 +182,7 @@ class SmartNotificationService {
         .findAll();
 
     for (final bill in bills) {
+      await bill.category.load();
       final days = bill.nextDueDate.difference(now).inDays;
       final label = days == 0
           ? 'today'
@@ -179,12 +190,16 @@ class SmartNotificationService {
               ? 'tomorrow'
               : 'in $days days';
 
+      final name = bill.description?.isNotEmpty == true
+          ? bill.description!
+          : bill.category.value?.name ?? 'Bill';
+
       await _emit(
         isar,
         type: 'bill_due_${bill.id}',
-        title: Tone.appL10n?.notif_billDueTitle(bill.description ?? 'Bill', label) ?? '📅 ${bill.description ?? "Bill"} is due $label',
+        title: Tone.appL10n?.notif_billDueTitle(name, label) ?? '📅 $name is due $label',
         body: Tone.current.billDueNotif(
-          bill.description ?? 'Bill',
+          name,
           bill.amount.toStringAsFixed(0),
           label,
         ),
@@ -288,7 +303,7 @@ class SmartNotificationService {
     for (final t in monthTxns) {
       t.category.loadSync();
       final name = t.category.value?.name ?? 'Other';
-      catSpend[name] = (catSpend[name] ?? 0) + t.amount;
+      catSpend[name] = (catSpend[name] ?? 0) + t.baseAmount;
     }
 
     // Last month's expenses by category for comparison
@@ -307,7 +322,7 @@ class SmartNotificationService {
     for (final t in lastMonthTxns) {
       t.category.loadSync();
       final name = t.category.value?.name ?? 'Other';
-      lastCatSpend[name] = (lastCatSpend[name] ?? 0) + t.amount;
+      lastCatSpend[name] = (lastCatSpend[name] ?? 0) + t.baseAmount;
     }
 
     // Find category with biggest increase
@@ -437,7 +452,7 @@ class SmartNotificationService {
       t.category.loadSync();
       final name = t.category.value?.name ?? 'Other';
       final prev = catStats[name] ?? (count: 0, total: 0.0);
-      catStats[name] = (count: prev.count + 1, total: prev.total + t.amount);
+      catStats[name] = (count: prev.count + 1, total: prev.total + t.baseAmount);
     }
 
     final totalExpense = txns.fold<double>(0, (s, t) => s + t.baseAmount);
@@ -599,5 +614,32 @@ class SmartNotificationService {
     // Weekly summary handled by SummaryScheduler in _runAllTasks
     await checkReEngagement();
     _log.i('All smart checks completed');
+  }
+
+  /// Notify when a recurring bill is actually paid (auto-created or SMS-matched).
+  /// Called from RecurringTransactionService.
+  Future<void> notifyBillPaid({
+    required String description,
+    required double amount,
+    required int billId,
+    required bool wasSmsMatched,
+  }) async {
+    final isar = await IsarService().getInstance();
+    await _emit(
+      isar,
+      type: 'bill_paid_$billId',
+      title: wasSmsMatched
+          ? '✅ $description — auto-matched'
+          : '✅ $description — recorded',
+      body: Tone.current.billPaidNotif(
+        description,
+        amount.toStringAsFixed(0),
+      ),
+      channel: 'bill_reminders',
+      channelName: 'Bill Reminders',
+      priority: NotificationPriority.normal,
+      primaryAction: 'View Bills',
+      actionData: jsonEncode({'type': 'view_bills'}),
+    );
   }
 }
