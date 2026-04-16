@@ -47,6 +47,7 @@ void main() async {
   ]);
   final sharedPrefs = await SharedPreferences.getInstance();
   SharedPrefsUtil.init(sharedPrefs);
+  NotificationListenerBridge.instance.initialize();
   if (kDebugMode) {
     sharedPrefs.remove('has_seen_swipe_peek');
     debugPrint('🔍 PEEK: cleared has_seen_swipe_peek');
@@ -96,7 +97,6 @@ Future<void> _initializeBackgroundServices(ProviderContainer container) async {
       return;
     }
     log.i('✅ Isar initialized');
-    NotificationListenerBridge.instance.initialize(isar: isar);
 
     // 2. Critical seeds (fast, needed before UI renders categories)
     await safeExecute(() async {

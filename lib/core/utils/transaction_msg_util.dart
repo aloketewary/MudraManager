@@ -508,6 +508,8 @@ bool checkForTransactionalMessage(String? body) {
       (lower.contains('contribution') &&
           RegExp(r'rs\.?\s*\d|inr\s*\d').hasMatch(lower)) ||
       (lower.contains('successful') &&
+          RegExp(r'rs\.?\s*\d|inr\s*\d').hasMatch(lower)) ||
+      (lower.contains('txn') &&
           RegExp(r'rs\.?\s*\d|inr\s*\d').hasMatch(lower));
 
   if (!hasTrn) return false;

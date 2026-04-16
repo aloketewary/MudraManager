@@ -7,6 +7,7 @@ import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/pending_notifications.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
@@ -32,19 +33,21 @@ class NotificationListenerBridge with WidgetsBindingObserver {
   NotificationListenerBridge._();
   final Queue<PendingNotifications> _retryQueue = Queue();
   final List<PendingNotifications> _deadLetterQueue = [];
-  late final Isar _isar;
   Timer? _retryTimer;
 
-  void initialize({
-    required Isar isar,
-  }) {
+  Future<Isar> _getIsar() async {
+    if (Isar.instanceNames.isEmpty) {
+      return await IsarService.initIsar();
+    }
+    return Isar.getInstance()!;
+  }
+
+  void initialize() {
     if (_initialized) return;
-    _isar = isar;
     _initialized = true;
     _channel.setMethodCallHandler(_handleMethodCall);
     WidgetsBinding.instance.addObserver(this);
     _log.i('Notification listener bridge initialized');
-    _loadRetryQueueFromDb();
     _drainQueue();
     _retryTimer?.cancel();
     _retryTimer = Timer.periodic(const Duration(seconds: 10), (_) {
@@ -56,6 +59,14 @@ class NotificationListenerBridge with WidgetsBindingObserver {
     _retryTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     _channel.setMethodCallHandler(null);
+    _initialized = false;
+    _isDraining = false;
+    _recentHashQueue.clear();
+    _recentHashSet.clear();
+    _retryQueue.clear();
+    _deadLetterQueue.clear();
+    _recentNotifTimestamps.clear();
+    _suppressedCount = 0;
     _log.i('Notification listener bridge disposed');
   }
 
@@ -413,8 +424,9 @@ class NotificationListenerBridge with WidgetsBindingObserver {
       if (result == ParseResult.approved ||
           result == ParseResult.pending ||
           result == ParseResult.needsReview) {
-        await _isar.writeTxn(() async {
-          await _isar.pendingNotifications.delete(item.id); // ensure id exists
+        final isar = await _getIsar();
+        await isar.writeTxn(() async {
+          await isar.pendingNotifications.delete(item.id);
         });
       }
 
@@ -432,7 +444,7 @@ class NotificationListenerBridge with WidgetsBindingObserver {
           Duration(seconds: base + jitter),
         );
 
-        await _saveRetryToDb(item);
+        await _saveRetryToDb(item, await _getIsar());
         if (!_retryQueue.any((e) => e.hash == item.hash)) {
           _retryQueue.add(item);
         }
@@ -445,15 +457,20 @@ class NotificationListenerBridge with WidgetsBindingObserver {
     }
   }
 
-  Future<void> _saveRetryToDb(PendingNotifications item) async {
-    await _isar.writeTxn(() async {
-      await _isar.pendingNotifications.putByHash(item);
+  Future<void> _saveRetryToDb(PendingNotifications item, Isar isar) async {
+    await isar.writeTxn(() async {
+      await isar.pendingNotifications.putByHash(item);
     });
   }
 
   Future<void> _loadRetryQueueFromDb() async {
-    final pendingItems = await _isar.pendingNotifications.where().findAll();
-    _retryQueue.addAll(pendingItems);
-    _log.i('Loaded ${pendingItems.length} pending notifications from DB');
+    try {
+      final isar = await _getIsar();
+      final pendingItems = await isar.pendingNotifications.where().findAll();
+      _retryQueue.addAll(pendingItems);
+      _log.i('Loaded ${pendingItems.length} pending notifications from DB');
+    } catch (e) {
+      _log.e('Failed to load retry queue', e);
+    }
   }
 }

@@ -344,7 +344,8 @@ class SmsActivityService {
         transaction.category.value = matchResult.category;
 
         await isar.writeTxn(() async {
-          // Save activity FIRST
+          // Save activity FIRST (with pending status to satisfy late field)
+          activity.status = ActivityStatus.pending;
           final activityId = await isar.smsActivitys.put(activity);
 
           await isar.transactions.put(transaction);
