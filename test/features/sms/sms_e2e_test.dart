@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
@@ -962,7 +961,7 @@ void main() {
         timestamp: 1713261400000,
         pkg: 'com.android.mms',
       );
-      final r2 = await processNotification(
+      await processNotification(
         title: 'HDFC Bank',
         body: 'Rs.999.00 debited from a/c XX6988 on 16-04-25. Avl Bal:Rs.37,302.00',
         timestamp: 1713261400000,

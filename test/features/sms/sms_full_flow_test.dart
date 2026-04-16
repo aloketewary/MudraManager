@@ -451,7 +451,6 @@ void main() {
           'UPI Ref: 510712345678. If not done by you, call 1800112211. Avl Bal: Rs.18,750.00';
       const ts1 = 1713168000000;
 
-      const sender2 = 'State Bank of India';
       const body2 =
           'Rs.1,200.00 debited from your A/c XX5678 on 15-Apr-25. '
           'UPI Ref: 510712345679. If not done by you, call 1800112211. Avl Bal: Rs.17,550.00';

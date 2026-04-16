@@ -48,6 +48,7 @@ class NotificationListenerBridge with WidgetsBindingObserver {
     _channel.setMethodCallHandler(_handleMethodCall);
     WidgetsBinding.instance.addObserver(this);
     _log.i('Notification listener bridge initialized');
+    _loadRetryQueueFromDb();
     _drainQueue();
     _retryTimer?.cancel();
     _retryTimer = Timer.periodic(const Duration(seconds: 10), (_) {
