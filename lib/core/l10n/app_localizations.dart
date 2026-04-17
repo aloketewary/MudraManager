@@ -5752,6 +5752,12 @@ abstract class AppLocalizations {
   /// **'Some categories were deleted. Edit this budget to fix.'**
   String get budget_invalidCategories;
 
+  /// No description provided for @budget_pastBudgets.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} past {count, plural, =1{budget} other{budgets}}'**
+  String budget_pastBudgets(int count);
+
   /// No description provided for @category_categoryName.
   ///
   /// In en, this message translates to:

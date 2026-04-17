@@ -23,6 +23,7 @@ class SmsProcessorService {
     TransactionInfo sms,
     int timestamp, [
     String corrId = '',
+    bool isRcs = false,
   ]) async {
     final notifTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
     DateTime transactionDate;
@@ -65,6 +66,7 @@ class SmsProcessorService {
         transactionRef: sms.account?.refNo,
         category: sms.typeOfTransaction?.name,
         corrId: corrId,
+        isRcs: isRcs,
       );
 
       PluginService().emitSms(sms.sender, sms.body);
@@ -82,12 +84,8 @@ class SmsProcessorService {
     String? sender,
     required int timestamp,
     String corrId = '',
+    bool isRcs = false,
   }) async {
-    if (!checkForTransactionalMessage(body)) {
-      _log.i('[$corrId] Filtered (not transactional) sender: $address');
-      return ParseResult.skipped;
-    }
-
     final smsHash = generateSmsHash(address, timestamp, body);
 
     if (SharedPrefsUtil.instance.isAlreadyProcessed(smsHash)) {
@@ -98,21 +96,30 @@ class SmsProcessorService {
     try {
       SmsActivity activity;
 
-      // Try plugin-based parsing first
+      // 1. Try plugin parsers FIRST — they know their bank's formats
+      //    and can handle messages that don't have standard keywords.
       final parsedSms = await SmsParserManager.instance.parseSms(address, body);
       if (parsedSms != null) {
         _log.i('[$corrId] Parsed by plugin, sender: $address');
         activity = await _processPluginParsedSms(
-          parsedSms, address, timestamp, smsHash, body, corrId,
+          parsedSms, address, timestamp, smsHash, body, corrId, isRcs,
         );
       } else {
-        // Fallback to legacy parsing
+        // 2. No plugin matched — apply keyword filter before legacy parser.
+        //    This prevents personal messages / promos from reaching the
+        //    generic parser which would create low-quality activities.
+        if (!checkForTransactionalMessage(body)) {
+          _log.i('[$corrId] Filtered (not transactional) sender: $address');
+          return ParseResult.skipped;
+        }
+
+        // 3. Legacy parser fallback
         final transactionUtil = TransactionUtil();
         final transactionInfo = transactionUtil.getTransactionInfo(
           body, address, sender, smsHash,
         );
         _log.i('[$corrId] Parsed by legacy parser, sender: $address');
-        activity = await processSmsForSaving(transactionInfo, timestamp, corrId);
+        activity = await processSmsForSaving(transactionInfo, timestamp, corrId, isRcs);
       }
 
       // Only store hash after successful processing
@@ -136,8 +143,9 @@ class SmsProcessorService {
     int timestamp,
     String smsHash,
     String body,
-    String corrId,
-  ) async {
+    String corrId, [
+    bool isRcs = false,
+  ]) async {
     final transactionDate = DateTime.fromMillisecondsSinceEpoch(timestamp);
 
     try {
@@ -154,6 +162,7 @@ class SmsProcessorService {
         transactionRef: null,
         category: parsedSms.transactionType,
         corrId: corrId,
+        isRcs: isRcs,
       );
 
       PluginService().emitSms(sender, '');

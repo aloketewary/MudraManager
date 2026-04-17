@@ -2251,6 +2251,12 @@
   "budget_categoryDeleteWarning": "This category is used in {count} budget(s). Deleting it will affect budget tracking.",
   "@budget_categoryDeleteWarning": { "placeholders": { "count": {} } },
   "budget_invalidCategories": "Some categories were deleted. Edit this budget to fix.",
+  "budget_pastBudgets": "{count} past {count, plural, =1{budget} other{budgets}}",
+  "@budget_pastBudgets": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
   "category_categoryName": "Category Name",
   "category_keywords": "Keywords (comma-separated)",
   "category_noneTopLevel": "None (Top-level)",

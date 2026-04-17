@@ -2,6 +2,7 @@ import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
 import 'package:mudra_manager/core/services/category_rule_service.dart';
+import 'package:mudra_manager/core/utils/error_tracker.dart';
 import 'package:mudra_manager/features/account/data/balance_history_service.dart';
 import 'package:mudra_manager/features/budget/data/bill_service.dart';
 import 'package:mudra_manager/features/dashboard/data/summary_scheduler.dart';
@@ -89,6 +90,7 @@ class BackgroundTaskManager {
       _log.i('All background tasks completed');
     } catch (e) {
       _log.e('Background tasks failed', e);
+      ErrorTracker.record('background_task', 'runAllTasks failed', e);
     }
   }
 }

@@ -491,6 +491,6 @@ class BackupRestoreScreen extends ConsumerWidget {
     if (diff.inHours < 1) return ctxt.backup_minutesAgo(diff.inMinutes);
     if (diff.inDays < 1) return ctxt.backup_hoursAgo(diff.inHours);
     if (diff.inDays < 7) return ctxt.backup_daysAgo(diff.inDays);
-    return safeDateFormat('yMMMd').format(date);
+    return safeDateFormat('yMMMd', ctxt.localeName).format(date);
   }
 }

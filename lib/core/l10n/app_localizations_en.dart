@@ -3184,6 +3184,17 @@ class AppLocalizationsEn extends AppLocalizations {
       'Some categories were deleted. Edit this budget to fix.';
 
   @override
+  String budget_pastBudgets(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'budgets',
+      one: 'budget',
+    );
+    return '$count past $_temp0';
+  }
+
+  @override
   String get category_categoryName => 'Category Name';
 
   @override

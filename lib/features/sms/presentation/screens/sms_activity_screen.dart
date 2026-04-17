@@ -578,7 +578,7 @@ class _ActivityCard extends ConsumerWidget {
                     Row(
                       children: [
                         Text(
-                          safeDateFormat('dd MMM, hh:mm a').format(activity.date),
+                          safeDateFormat('dd MMM, hh:mm a', ctxt.localeName).format(activity.date),
                           style: textTheme.bodySmall?.copyWith(
                             color: color.onSurfaceVariant,
                           ),
@@ -856,7 +856,7 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          safeDateFormat('dd MMM yyyy, hh:mm a')
+                          safeDateFormat('dd MMM yyyy, hh:mm a', ctxt.localeName)
                               .format(widget.activity.date),
                           style: textTheme.bodySmall?.copyWith(
                             color: color.onSurfaceVariant,

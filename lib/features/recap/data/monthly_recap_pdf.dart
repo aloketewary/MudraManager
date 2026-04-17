@@ -1,5 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:mudra_manager/core/utils/safe_date_format.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'monthly_recap_service.dart';
@@ -16,7 +17,7 @@ class MonthlyRecapPdf {
     final theme =
         pw.ThemeData.withFont(base: font, fontFallback: [fallbackFont]);
 
-    final monthName = DateFormat('MMMM yyyy').format(data.month);
+    final monthName = safeDateFormat('MMMM yyyy').format(data.month);
     final now = DateTime.now();
     final c = data.currency;
 
@@ -121,7 +122,7 @@ class MonthlyRecapPdf {
           alignment: pw.Alignment.centerRight,
           margin: const pw.EdgeInsets.only(top: 8),
           child: pw.Text(
-            'Mudra Manager • Generated ${DateFormat('dd MMM yyyy').format(now)} • Page ${ctx.pageNumber}/${ctx.pagesCount}',
+            'Mudra Manager • Generated ${safeDateFormat('dd MMM yyyy').format(now)} • Page ${ctx.pageNumber}/${ctx.pagesCount}',
             style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey500),
           ),
         ),
@@ -773,7 +774,7 @@ class MonthlyRecapPdf {
       data: transactions
           .map(
             (t) => [
-              DateFormat('dd MMM').format(t.date),
+              safeDateFormat('dd MMM').format(t.date),
               t.category,
               t.description.isEmpty ? '-' : t.description,
               _fmt(t.amount, c),

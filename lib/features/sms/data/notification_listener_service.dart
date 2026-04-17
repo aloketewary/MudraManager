@@ -14,6 +14,7 @@ import 'package:mudra_manager/core/logging/logger_provider.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/core/services/notification_service.dart';
 import 'package:mudra_manager/core/tone/tone_provider.dart';
+import 'package:mudra_manager/core/utils/error_tracker.dart';
 import 'package:mudra_manager/features/sms/data/sms_processor_service.dart';
 
 class NotificationListenerBridge with WidgetsBindingObserver {
@@ -32,7 +33,6 @@ class NotificationListenerBridge with WidgetsBindingObserver {
   final Set<String> _recentHashSet = {};
   NotificationListenerBridge._();
   final Queue<PendingNotifications> _retryQueue = Queue();
-  final List<PendingNotifications> _deadLetterQueue = [];
   Timer? _retryTimer;
 
   Future<Isar> _getIsar() async {
@@ -65,7 +65,6 @@ class NotificationListenerBridge with WidgetsBindingObserver {
     _recentHashQueue.clear();
     _recentHashSet.clear();
     _retryQueue.clear();
-    _deadLetterQueue.clear();
     _recentNotifTimestamps.clear();
     _suppressedCount = 0;
     _log.i('Notification listener bridge disposed');
@@ -116,17 +115,28 @@ class NotificationListenerBridge with WidgetsBindingObserver {
   }
 
   String _detectSender(String title, String body) {
-    // For RCS: title is the display name (e.g., "HDFC Bank", "State Bank of India")
-    // For SMS: title is the sender ID (e.g., "HDFCBK", "AD-ICICIB")
-    // Both are valid — the plugin parsers use .contains() matching
     if (title.isNotEmpty && title.length < 50) return title;
-
-    // Fallback: extract bank-like pattern from body
     final bankPattern = RegExp(r'([A-Z]{2,}(?:\s(?:BANK|Bank))?)');
     final match = bankPattern.firstMatch(body);
     if (match != null) return match.group(1)!;
-
     return 'UNKNOWN';
+  }
+
+  /// Builds the best possible message body from all notification text fields.
+  /// RCS notifications often have truncated `text` but full content in `bigText`.
+  /// This merges all sources and deduplicates.
+  String _buildRawBody(
+    String text,
+    String bigText,
+    String subText,
+    String title,
+  ) {
+    // Prefer bigText (usually the full expanded message)
+    if (bigText.isNotEmpty && bigText.length > text.length) return bigText;
+    // Then primary text from MessagingStyle
+    if (text.isNotEmpty) return text;
+    // Then title as last resort
+    return title;
   }
 
   Future<void> _drainQueue() async {
@@ -150,16 +160,21 @@ class NotificationListenerBridge with WidgetsBindingObserver {
       for (final item in result) {
         final data = Map<String, dynamic>.from(item as Map);
         final text = data['text'] as String? ?? '';
+        final bigText = data['bigText'] as String? ?? '';
+        final subText = data['subText'] as String? ?? '';
         final title = data['title'] as String? ?? '';
         final timestamp = data['timestamp'] as int? ?? 0;
         final hash = data['hash'] as String? ?? '';
+        final isRcs = data['isRcs'] as bool? ?? false;
         final corrId = (data['corrId'] as String?)?.isNotEmpty == true
             ? data['corrId'] as String
             : (hash.length >= 8 ? hash.substring(0, 8) : hash);
 
         if (timestamp == 0) continue;
 
-        final rawBody = text.isNotEmpty ? text : title;
+        // Build unified rawBody from all available text fields.
+        // For RCS, bigText often has the FULL message while text is truncated.
+        final rawBody = _buildRawBody(text, bigText, subText, title);
         if (rawBody.trim().isEmpty) continue;
 
         if (_isDuplicate(hash)) {
@@ -168,6 +183,9 @@ class NotificationListenerBridge with WidgetsBindingObserver {
         }
 
         final sender = _detectSender(title, rawBody);
+        if (isRcs) {
+          _log.i('[$corrId] RCS from $sender (${data['package']})');
+        }
 
         final parseResult = await _safeProcess(
           PendingNotifications.create(
@@ -177,6 +195,7 @@ class NotificationListenerBridge with WidgetsBindingObserver {
             hash: hash,
           ),
           corrId: corrId,
+          isRcs: isRcs,
         );
 
         switch (parseResult) {
@@ -236,6 +255,7 @@ class NotificationListenerBridge with WidgetsBindingObserver {
       }
     } catch (e) {
       _log.e('Failed to drain notification queue', e);
+      ErrorTracker.record('sms_pipeline', 'Drain queue failed', e);
     } finally {
       _isDraining = false;
     }
@@ -410,6 +430,7 @@ class NotificationListenerBridge with WidgetsBindingObserver {
     PendingNotifications item, {
     bool isRetry = false,
     String corrId = '',
+    bool isRcs = false,
   }) async {
     final cid = corrId.isNotEmpty ? corrId : (item.hash.length >= 8 ? item.hash.substring(0, 8) : item.hash);
     try {
@@ -419,6 +440,7 @@ class NotificationListenerBridge with WidgetsBindingObserver {
         sender: item.sender,
         timestamp: item.timestamp,
         corrId: cid,
+        isRcs: isRcs,
       );
 
       // ✅ SUCCESS → remove from DB
@@ -434,6 +456,7 @@ class NotificationListenerBridge with WidgetsBindingObserver {
       return result;
     } catch (e) {
       _log.e('[$cid] Processing failed for ${item.hash}', e);
+      ErrorTracker.record('sms_pipeline', 'Processing failed: ${item.sender}', e);
 
       item.retryCount++;
 
@@ -450,8 +473,7 @@ class NotificationListenerBridge with WidgetsBindingObserver {
           _retryQueue.add(item);
         }
       } else {
-        _deadLetterQueue.add(item);
-        _log.w('Moved to dead letter queue: ${item.hash}');
+        _log.w('Max retries exceeded, dropping: ${item.hash}');
       }
 
       return ParseResult.error;

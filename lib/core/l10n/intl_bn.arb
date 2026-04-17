@@ -1433,6 +1433,7 @@
   "budget_noActiveTrip": "কোনো active trip নেই। Travel budget-এর জন্য আগে trip শুরু করুন।",
   "budget_categoryDeleteWarning": "এই category {count}টা budget-এ আছে। মুছলে budget tracking প্রভাবিত হবে।",
   "budget_invalidCategories": "কিছু categories মুছে ফেলা হয়েছে। ঠিক করতে budget edit করুন।",
+  "budget_pastBudgets": "{count}টি আগের budget",
   "category_categoryName": "শ্রেণীর নাম",
   "category_keywords": "Keywords (কমা দিয়ে আলাদা)",
   "category_noneTopLevel": "কোনোটি নয় (শীর্ষ-স্তর)",

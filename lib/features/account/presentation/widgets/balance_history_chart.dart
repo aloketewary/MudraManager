@@ -114,7 +114,7 @@ class BalanceHistoryChart extends ConsumerWidget {
                           return Padding(
                             padding: EdgeInsets.only(top: spacing.elementGapMin),
                             child: Text(
-                              safeDateFormat('d MMM').format(date),
+                              safeDateFormat('d MMM', ctxt.localeName).format(date),
                               style: textTheme.labelSmall?.copyWith(
                                 color: color.onSurfaceVariant,
                                 fontSize: 10,
@@ -137,7 +137,7 @@ class BalanceHistoryChart extends ConsumerWidget {
                               ? snapshots[index].date
                               : DateTime.now();
                           return LineTooltipItem(
-                            '${safeDateFormat('dd MMM').format(date)}\n${formatCurrencyCompact(spot.y)}',
+                            '${safeDateFormat('dd MMM', ctxt.localeName).format(date)}\n${formatCurrencyCompact(spot.y)}',
                             textTheme.labelSmall?.copyWith(
                               color: color.onSurface,
                               fontWeight: FontWeight.w600,

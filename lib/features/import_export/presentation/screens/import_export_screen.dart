@@ -120,7 +120,7 @@ class _ImportExportScreenState extends ConsumerState<ImportExportScreen> {
     TextTheme textTheme,
     AppSpacing spacing,
   ) {
-    final dateFmt = safeDateFormat('MMM dd, yyyy');
+    final dateFmt = safeDateFormat('MMM dd, yyyy', ctxt.localeName);
 
     return Card(
       elevation: 0,
@@ -368,7 +368,7 @@ class _ImportExportScreenState extends ConsumerState<ImportExportScreen> {
             _exportEnd.year, _exportEnd.month, _exportEnd.day, 23, 59, 59,),
       );
       final fileName =
-          'Mudra_${safeDateFormat('yyyyMMdd').format(_exportStart)}_${DateFormat('yyyyMMdd').format(_exportEnd)}.xlsx';
+          'Mudra_${safeDateFormat('yyyyMMdd').format(_exportStart)}_${safeDateFormat('yyyyMMdd').format(_exportEnd)}.xlsx';
       await saveExportedFile(bytes, fileName, askUser: true);
       SnackbarService.success(BuddyMessages.exportSuccess);
     } catch (e) {

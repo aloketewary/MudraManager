@@ -46,7 +46,7 @@ class ArchivedTransactionsScreen extends ConsumerWidget {
           final grouped = <String, List<ArchivedTransaction>>{};
           for (final txn in txns) {
             final key =
-                '${txn.archivedFromBase} → ${txn.archivedToBase}  •  ${safeDateFormat('MMM dd, yyyy').format(txn.archivedAt)}';
+                '${txn.archivedFromBase} → ${txn.archivedToBase}  •  ${safeDateFormat('MMM dd, yyyy', ctxt.localeName).format(txn.archivedAt)}';
             grouped.putIfAbsent(key, () => []).add(txn);
           }
 
@@ -161,7 +161,7 @@ class _ArchivedTxnCard extends StatelessWidget {
                   Text(
                     [
                       if (txn.accountName != null) txn.accountName!,
-                      safeDateFormat('MMM dd, yyyy').format(txn.date),
+                      safeDateFormat('MMM dd, yyyy', ctxt.localeName).format(txn.date),
                     ].join(' • '),
                     style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
                   ),

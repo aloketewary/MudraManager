@@ -3173,6 +3173,11 @@ class AppLocalizationsBn extends AppLocalizations {
       'কিছু categories মুছে ফেলা হয়েছে। ঠিক করতে budget edit করুন।';
 
   @override
+  String budget_pastBudgets(int count) {
+    return '$countটি আগের budget';
+  }
+
+  @override
   String get category_categoryName => 'শ্রেণীর নাম';
 
   @override

@@ -154,6 +154,7 @@ class SmsActivityService {
     String? transactionRef,
     String? category,
     String corrId = '',
+    bool isRcs = false,
   }) async {
     final isar = await _getIsar();
     final categories = await isar.categorys.where().findAll();
@@ -241,6 +242,13 @@ class SmsActivityService {
     activity.confidence = calculateConfidence(activity);
     if (categoryHighConfidence) {
       activity.confidence = (activity.confidence! + 10).clamp(0, 100);
+    }
+
+    // RCS penalty: notification text may be truncated, lower confidence
+    // so it's more likely to go to needsReview instead of auto-approve
+    if (isRcs) {
+      activity.confidence = (activity.confidence! - 15).clamp(0, 100);
+      _log.d('[$corrId] RCS confidence penalty applied: ${activity.confidence}%');
     }
 
     // ── 1. Check for transfer pair (opposite direction, same amount, different account, within 15 min)

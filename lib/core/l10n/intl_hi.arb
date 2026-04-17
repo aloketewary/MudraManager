@@ -2229,6 +2229,7 @@
   "budget_noActiveTrip": "कोई active trip नहीं है। Travel budget के लिए पहले trip शुरू करें।",
   "budget_categoryDeleteWarning": "यह category {count} budget(s) में है। हटाने से budget tracking प्रभावित होगी।",
   "budget_invalidCategories": "कुछ categories हटा दी गई हैं। ठीक करने के लिए budget edit करें।",
+  "budget_pastBudgets": "{count} पुराने budget",
   "category_categoryName": "श्रेणी का नाम",
   "category_keywords": "Keywords (अल्पविराम से अलग)",
   "category_noneTopLevel": "कोई नहीं (शीर्ष-स्तर)",

@@ -1,4 +1,5 @@
 import 'package:intl/intl.dart';
+import 'package:mudra_manager/core/utils/safe_date_format.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/features/dashboard/presentation/widgets/financial_health_card.dart';
@@ -1959,7 +1960,7 @@ class _FullScreenTrendChartState extends ConsumerState<_FullScreenTrendChart> {
                 final month =
                     DateTime(now.year, now.month - (11 - value.toInt()));
                 return Text(
-                  DateFormat('MMM').format(month),
+                  safeDateFormat('MMM', AppLocalizations.of(context)!.localeName).format(month),
                   style: textTheme.labelSmall?.copyWith(
                     color: color.onSurfaceVariant.withValues(alpha: 0.6),
                     fontSize: 10,
@@ -2191,6 +2192,6 @@ class _FullScreenTrendChartState extends ConsumerState<_FullScreenTrendChart> {
 
   String _monthLabel(DateTime now, int index) {
     final month = DateTime(now.year, now.month - (11 - index));
-    return DateFormat('MMMM yyyy').format(month);
+    return safeDateFormat('MMMM yyyy', AppLocalizations.of(context)!.localeName).format(month);
   }
 }

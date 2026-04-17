@@ -105,6 +105,10 @@ class SmartNotificationService {
           .dateBetween(start, end)
           .findAll();
 
+      for (final t in transactions) {
+        await t.category.load();
+      }
+
       final spent = transactions
           .where(
             (t) =>
@@ -640,6 +644,51 @@ class SmartNotificationService {
       priority: NotificationPriority.normal,
       primaryAction: 'View Bills',
       actionData: jsonEncode({'type': 'view_bills'}),
+    );
+  }
+
+  /// Notify when budget is exceeded (called from BudgetAlertService).
+  Future<void> notifyBudgetExceeded({
+    required List<String> names,
+    required double spent,
+    required double limit,
+  }) async {
+    final isar = await IsarService().getInstance();
+    final n = names.length;
+    await _emit(
+      isar,
+      type: 'budget_exceeded_realtime',
+      title: Tone.appL10n?.notif_budgetsOverLimitTitle(n) ?? '🚨 $n budget${n > 1 ? 's' : ''} exceeded!',
+      body: n == 1
+          ? '${names.first} is over budget — time to review'
+          : '${names.join(', ')} are over budget',
+      channel: 'budget_alerts',
+      channelName: 'Budget Alerts',
+      priority: NotificationPriority.urgent,
+      primaryAction: 'Review Budgets',
+      actionData: jsonEncode({'type': 'view_budget'}),
+    );
+  }
+
+  /// Notify when budget is near limit (called from BudgetAlertService).
+  Future<void> notifyBudgetWarning({
+    required List<String> names,
+    required double percentage,
+  }) async {
+    final isar = await IsarService().getInstance();
+    final n = names.length;
+    await _emit(
+      isar,
+      type: 'budget_warning_realtime',
+      title: Tone.appL10n?.notif_budgetsGettingTightTitle(n) ?? '⚠️ $n budget${n > 1 ? 's' : ''} near limit',
+      body: n == 1
+          ? '${names.first}: ${percentage.toStringAsFixed(0)}% used'
+          : '${names.join(', ')} are nearing their limits',
+      channel: 'budget_alerts',
+      channelName: 'Budget Alerts',
+      priority: NotificationPriority.high,
+      primaryAction: 'View Details',
+      actionData: jsonEncode({'type': 'view_budget'}),
     );
   }
 }

@@ -25,6 +25,7 @@ class NotificationService {
   static const _streakReminderTimeKey = 'streak_reminder_time_key';
   static GlobalKey<NavigatorState>? _navigatorKey;
   static final _log = AppLog(getLogger(), 'NotificationService');
+  static SharedPreferences? _prefsCache;
 
   /// Set the navigator key for notification tap routing.
   /// Call this once from your root MaterialApp/GoRouter.
@@ -320,7 +321,7 @@ class NotificationService {
   }
 
   static Future<void> _saveReminderTime(TimeOfDay time) async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = _prefsCache ??= await SharedPreferences.getInstance();
     prefs.setString(_reminderTimeKey, '${time.hour}:${time.minute}');
   }
 
@@ -329,7 +330,7 @@ class NotificationService {
   }
 
   static Future<TimeOfDay?> getSavedReminderTime() async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = _prefsCache ??= await SharedPreferences.getInstance();
     final saved = prefs.getString(_reminderTimeKey);
     if (saved == null) return null;
     final parts = saved.split(':');
@@ -337,7 +338,7 @@ class NotificationService {
   }
 
   static Future<TimeOfDay?> getSavedStreakReminderTime() async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = _prefsCache ??= await SharedPreferences.getInstance();
     final saved = prefs.getString(_streakReminderTimeKey);
     if (saved == null) return null;
     final parts = saved.split(':');
@@ -345,7 +346,7 @@ class NotificationService {
   }
 
   static Future<void> saveStreakReminderTime(TimeOfDay time) async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = _prefsCache ??= await SharedPreferences.getInstance();
     await prefs.setString(
       _streakReminderTimeKey,
       '${time.hour}:${time.minute}',
@@ -394,7 +395,7 @@ class NotificationService {
     String? dedupKey,
     bool bypassThrottle = false,
   }) async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = _prefsCache ??= await SharedPreferences.getInstance();
     final now = DateTime.now();
     final today = '${now.year}-${now.month}-${now.day}';
 
@@ -558,7 +559,7 @@ class NotificationService {
   }
 
   static Future<void> scheduleStreakReminder(int currentStreak) async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = _prefsCache ??= await SharedPreferences.getInstance();
     final enabled = prefs.getBool('streak_reminder_enabled') ?? true;
 
     if (!enabled) return;

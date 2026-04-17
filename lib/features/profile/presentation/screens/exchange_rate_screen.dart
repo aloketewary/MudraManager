@@ -211,6 +211,7 @@ class _RateTile extends StatelessWidget {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final spacing = SpacingProvider.of(context);
+    final ctxt = AppLocalizations.of(context)!;
 
     return InkWell(
       onTap: () => _showEditSheet(context, color, textTheme, spacing),
@@ -266,7 +267,7 @@ class _RateTile extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  safeDateFormat('dd MMM yy').format(updatedAt),
+                  safeDateFormat('dd MMM yy', ctxt.localeName).format(updatedAt),
                   style: textTheme.labelSmall?.copyWith(
                     color: color.onSurfaceVariant.withValues(alpha: 0.6),
                     fontSize: 10,

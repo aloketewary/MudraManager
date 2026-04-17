@@ -63,6 +63,12 @@ final budgetsWithProgressProvider =
   return ref.watch(budgetServiceProvider).watchBudgetsWithProgress();
 });
 
+final archivedBudgetsProvider =
+    FutureProvider.autoDispose<List<ArchivedBudgetSummary>>((ref) async {
+  final service = ref.watch(budgetServiceProvider);
+  return service.getArchivedBudgets();
+});
+
 class BudgetService {
   final IsarService isarService;
   final AppLog log;
@@ -347,6 +353,27 @@ class BudgetService {
       await isar.budgetCategoryAllocations.deleteAll(allocIds);
     });
   }
+
+  Future<List<ArchivedBudgetSummary>> getArchivedBudgets() async {
+    final isar = await isarService.getInstance();
+    final budgets = await isar.budgets
+        .filter()
+        .isArchivedEqualTo(true)
+        .sortByStartDateDesc()
+        .findAll();
+
+    final results = <ArchivedBudgetSummary>[];
+    for (final budget in budgets) {
+      await budget.categories.load();
+      final spent = await calculateSpentAmount(budget);
+      results.add(ArchivedBudgetSummary(
+        budget: budget,
+        spent: spent,
+        wasUnderBudget: spent <= budget.amount,
+      ));
+    }
+    return results;
+  }
 }
 
 class CategorySpending {
@@ -376,5 +403,17 @@ class BudgetWithProgress {
     required this.startDate,
     required this.endDate,
     this.hasInvalidCategories = false,
+  });
+}
+
+class ArchivedBudgetSummary {
+  final Budget budget;
+  final double spent;
+  final bool wasUnderBudget;
+
+  ArchivedBudgetSummary({
+    required this.budget,
+    required this.spent,
+    required this.wasUnderBudget,
   });
 }

@@ -1,5 +1,6 @@
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
+import 'package:mudra_manager/core/utils/date_arithmetic.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/models/pending_transaction.dart';
 import 'package:mudra_manager/core/db/models/recurring_bill.dart';
@@ -53,6 +54,8 @@ class BillService {
             .findFirst();
 
         if (existing == null) {
+          await bill.category.load();
+          await bill.account.load();
           final pending = PendingTransaction()
             ..amount = bill.amount
             ..body = 'Bill: ${bill.name}'
@@ -75,17 +78,19 @@ class BillService {
   }
 
   static Future<void> _updateNextDueDate(Isar isar, RecurringBill bill) async {
-    DateTime nextDate = bill.nextDueDate!;
+    final current = bill.nextDueDate!;
+    final day = current.day;
 
+    DateTime nextDate;
     switch (bill.frequency) {
       case BillFrequency.monthly:
-        nextDate = DateTime(nextDate.year, nextDate.month + 1, nextDate.day);
+        nextDate = DateArithmetic.addMonths(current, 1, preferDay: day);
         break;
       case BillFrequency.quarterly:
-        nextDate = DateTime(nextDate.year, nextDate.month + 3, nextDate.day);
+        nextDate = DateArithmetic.addMonths(current, 3, preferDay: day);
         break;
       case BillFrequency.yearly:
-        nextDate = DateTime(nextDate.year + 1, nextDate.month, nextDate.day);
+        nextDate = DateArithmetic.addYears(current, 1, preferDay: day);
         break;
     }
 

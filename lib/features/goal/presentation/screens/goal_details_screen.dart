@@ -893,7 +893,7 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
             ? ctxt.common_yesterday
             : diff.inDays < 7
                 ? ctxt.goal_daysAgo(diff.inDays)
-                : safeDateFormat('dd MMM').format(c.date);
+                : safeDateFormat('dd MMM', ctxt.localeName).format(c.date);
 
     return Padding(
       padding: EdgeInsets.symmetric(

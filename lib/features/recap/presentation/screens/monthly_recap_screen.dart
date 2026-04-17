@@ -73,7 +73,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
     final textTheme = Theme.of(context).textTheme;
     final spacing = ref.watch(spacingProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final monthName = safeDateFormat('MMMM yyyy').format(_selectedMonth);
+    final monthName = safeDateFormat('MMMM yyyy', AppLocalizations.of(context)!.localeName).format(_selectedMonth);
 
     return Scaffold(
       appBar: AppBar(
@@ -1332,7 +1332,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
                             overflow: TextOverflow.ellipsis,
                           ),
                           Text(
-                            '${txn.category} • ${safeDateFormat('dd MMM').format(txn.date)}',
+                            '${txn.category} • ${safeDateFormat('dd MMM', AppLocalizations.of(context)!.localeName).format(txn.date)}',
                             style: textTheme.labelSmall
                                 ?.copyWith(color: color.onSurfaceVariant),
                           ),
