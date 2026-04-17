@@ -1,6 +1,4 @@
 import 'package:isar_community/isar.dart';
-import 'package:mudra_manager/core/currency/currency_meta.dart';
-import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/budget.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
@@ -97,7 +95,6 @@ class BudgetAlertService {
     final warnings = alerts.where((a) => a.threshold != 100).toList();
 
     if (exceeded.isNotEmpty) {
-      final n = exceeded.length;
       await SmartNotificationService.instance.notifyBudgetExceeded(
         names: exceeded.map((a) => a.budget.name).toList(),
         spent: exceeded.first.spent,

@@ -1,4 +1,3 @@
-import 'package:intl/intl.dart';
 import 'package:mudra_manager/core/utils/safe_date_format.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
