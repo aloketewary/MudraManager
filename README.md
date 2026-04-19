@@ -218,6 +218,8 @@ Startup is optimized into 3 tiers:
 
 Recurring transaction processing is **lazy** — only runs when the user opens the bill screen or via background workmanager. Never blocks app startup.
 
+**Background isolate note**: Workmanager's `callbackDispatcher` runs in a separate Dart isolate. Isar `watchLazy` streams only fire for writes in the same isolate. Background writes are picked up when the user opens the app (`autoDispose` providers restart with `fireImmediately: true`).
+
 ---
 
 ## License
