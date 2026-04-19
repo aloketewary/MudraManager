@@ -4,19 +4,21 @@ import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 enum AccountDisplayStyle { carousel, stack, bento }
 
 final accountDisplayStyleProvider =
-    StateNotifierProvider<AccountDisplayStyleNotifier, AccountDisplayStyle>(
-  (ref) => AccountDisplayStyleNotifier(),
+    NotifierProvider<AccountDisplayStyleNotifier, AccountDisplayStyle>(
+  AccountDisplayStyleNotifier.new,
 );
 
-class AccountDisplayStyleNotifier extends StateNotifier<AccountDisplayStyle> {
-  AccountDisplayStyleNotifier()
-      : super(_fromString(SharedPrefsUtil.instance.getAccountDisplayStyle()));
-
+class AccountDisplayStyleNotifier extends Notifier<AccountDisplayStyle> {
   static AccountDisplayStyle _fromString(String s) => switch (s) {
         'stack' => AccountDisplayStyle.stack,
         'bento' => AccountDisplayStyle.bento,
         _ => AccountDisplayStyle.carousel,
       };
+
+  @override
+  AccountDisplayStyle build() {
+    return _fromString(SharedPrefsUtil.instance.getAccountDisplayStyle());
+  }
 
   void set(AccountDisplayStyle style) {
     SharedPrefsUtil.instance.setAccountDisplayStyle(style.name);

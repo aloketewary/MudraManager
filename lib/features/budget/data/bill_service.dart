@@ -1,40 +1,9 @@
-import 'package:mudra_manager/core/currency/currency_meta.dart';
-import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/utils/date_arithmetic.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/models/pending_transaction.dart';
 import 'package:mudra_manager/core/db/models/recurring_bill.dart';
-import 'package:mudra_manager/core/services/notification_service.dart';
 
 class BillService {
-  static Future<void> scheduleBillReminders() async {
-    final isar = Isar.getInstance();
-    if (isar == null) return;
-
-    final bills = await isar.recurringBills
-        .filter()
-        .isActiveEqualTo(true)
-        .findAll();
-
-    for (final bill in bills) {
-      if (bill.nextDueDate != null) {
-        final daysUntilDue = bill.nextDueDate!
-            .difference(DateTime.now())
-            .inDays;
-
-        if (daysUntilDue <= 3 && daysUntilDue >= 0) {
-          await NotificationService.showLocalNotification(
-            id: 1000 + bill.id,
-            title: '💳 Bill Reminder',
-            body:
-                '${bill.name} is due in $daysUntilDue days - ${formatCurrency(bill.amount, code: BaseCurrency.code)}',
-            dedupKey: 'bill_reminder_${bill.id}',
-          );
-        }
-      }
-    }
-  }
-
   static Future<void> createPendingTransactionsForDueBills() async {
     final isar = Isar.getInstance();
     if (isar == null) return;

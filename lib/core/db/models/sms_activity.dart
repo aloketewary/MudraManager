@@ -16,7 +16,11 @@ class SmsActivity {
 
   late String sender;
   late String body;
+
+  @Index()
   late DateTime date;
+
+  @Index()
   late DateTime createdAt;
 
   double? amount;
@@ -28,14 +32,15 @@ class SmsActivity {
   String? category;
   String? merchant;
   String? paymentType;
-  String? transactionType; // UPI, Card, ATM, NEFT, etc.
-  double? balance; // Available balance after transaction
+  String? transactionType;
+  double? balance;
   bool? isLikelyTransfer;
   int? pairedActivityId;
 
   @Index(unique: true, replace: true)
   late String smsHash;
 
+  @Index()
   @Enumerated(EnumType.name)
   late ActivityStatus status;
 

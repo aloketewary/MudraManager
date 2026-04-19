@@ -50,7 +50,7 @@ class AuthService {
     try {
       return await _localAuth.authenticate(
         localizedReason: 'Please authenticate to unlock the app',
-        options: const AuthenticationOptions(biometricOnly: true),
+        biometricOnly: true,
       );
     } catch (e) {
       return false;

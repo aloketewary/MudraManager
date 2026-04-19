@@ -2050,6 +2050,49 @@
   "notif_daysUntrackedTitle": "📊 {days} days untracked",
   "notif_streakEndedTitle": "💔 {days}-day streak ended",
   "notif_fewDaysUntrackedTitle": "📊 A few days untracked",
+  "notif_budgetExceededBody": "{name} is over budget — time to review",
+  "@notif_budgetExceededBody": { "placeholders": { "name": { "type": "String" } } },
+  "notif_budgetExceededBodyMulti": "{names} are over budget",
+  "@notif_budgetExceededBodyMulti": { "placeholders": { "names": { "type": "String" } } },
+  "notif_budgetWarningBody": "{name} is nearing the limit",
+  "@notif_budgetWarningBody": { "placeholders": { "name": { "type": "String" } } },
+  "notif_budgetWarningBodyMulti": "{names} are nearing their limits",
+  "@notif_budgetWarningBodyMulti": { "placeholders": { "names": { "type": "String" } } },
+  "notif_budgetWarningPctBody": "{name}: {pct}% used",
+  "@notif_budgetWarningPctBody": { "placeholders": { "name": { "type": "String" }, "pct": { "type": "String" } } },
+  "notif_billPaidAutoTitle": "✅ {name} — auto-matched",
+  "@notif_billPaidAutoTitle": { "placeholders": { "name": { "type": "String" } } },
+  "notif_billPaidRecordedTitle": "✅ {name} — recorded",
+  "@notif_billPaidRecordedTitle": { "placeholders": { "name": { "type": "String" } } },
+  "notif_smsLoggedTitle": "✅ Transaction logged",
+  "notif_smsNeedsReviewTitle": "👀 Needs your review",
+  "notif_smsLoggedBody": "{amount} from {sender} — auto-saved",
+  "@notif_smsLoggedBody": { "placeholders": { "amount": { "type": "String" }, "sender": { "type": "String" } } },
+  "notif_smsLoggedBodyNoAmount": "From {sender} — auto-saved",
+  "@notif_smsLoggedBodyNoAmount": { "placeholders": { "sender": { "type": "String" } } },
+  "notif_smsNeedsReviewBody": "Transaction from {sender} — tap to review",
+  "@notif_smsNeedsReviewBody": { "placeholders": { "sender": { "type": "String" } } },
+  "notif_smsGotItTitle": "✅ Got it!",
+  "notif_smsAllCaughtUpTitle": "✅ All caught up!",
+  "notif_smsAlmostThereTitle": "📋 Almost there!",
+  "notif_smsNeedHelpTitle": "👋 Hey, need your help!",
+  "notif_streakOnLineTitle": "🔥 {days}-day streak on the line!",
+  "@notif_streakOnLineTitle": { "placeholders": { "days": { "type": "int" } } },
+  "notif_quickActionTitle": "⚡ 5 seconds is all it takes",
+  "notif_dailyReminderTitle": "📊 Your day in numbers",
+  "notif_dailyReminderBody": "Here's how yesterday went — take a quick look",
+  "notif_weeklyReminderTitle": "📅 Your week wrapped up",
+  "notif_weeklyReminderBody": "Let's see how the week went — tap to check",
+  "notif_goalStatusTitle": "🎯 Monthly Goal Status",
+  "notif_goalStatusBody": "You have {count} active goals. {name} is {pct}% complete!",
+  "@notif_goalStatusBody": { "placeholders": { "count": { "type": "int" }, "name": { "type": "String" }, "pct": { "type": "String" } } },
+  "notif_streakCountingTitle": "🔥 {days} days and counting!",
+  "@notif_streakCountingTitle": { "placeholders": { "days": { "type": "int" } } },
+  "notif_achievementBody": "{title} — that's +{xp} XP for you",
+  "@notif_achievementBody": { "placeholders": { "title": { "type": "String" }, "xp": { "type": "int" } } },
+  "notif_levelUpBody": "You just leveled up — keep going!",
+  "notif_streakMilestoneBody": "That's dedication — your streak is on fire",
+  "notif_weeklyZeroBody": "Zero expenses this week — that's impressive 💪",
   "insight_moneyLeakTitle": "Quiet money leak 💧",
   "insight_bestDayTitle": "{day}s cost you the most",
   "@notif_streakDaysTitle": {
@@ -2781,7 +2824,7 @@
   "security_biometricEnabled": "Biometric enabled",
   "security_biometricDisabled": "Biometric disabled",
   "security_infoText": "Your PIN is stored securely on this device — it never touches a server. Digits are randomized on entry for extra protection.",
-  "notifSettings_activeCount": "{count} of 3 active",
+  "notifSettings_activeCount": "{count} of 5 active",
   "@notifSettings_activeCount": {
     "placeholders": {
       "count": {
@@ -3135,6 +3178,18 @@
     "placeholders": {
       "count": {
         "type": "int"
+      }
+    }
+  },
+  "notif_lowBalanceTitle": "⚠️ Low Balance Alert",
+  "notif_lowBalanceBody": "Your balance in {account} is {amount}",
+  "@notif_lowBalanceBody": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
       }
     }
   }

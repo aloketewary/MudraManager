@@ -311,7 +311,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return Consumer(
       builder: (context, ref, _) {
         final isProAsync = ref.watch(isProProvider);
-        final isPro = isProAsync.valueOrNull ?? false;
+        final isPro = isProAsync.value ?? false;
 
         return Card(
           elevation: 0,
@@ -1445,7 +1445,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   String _baseCurrencySubtitle(WidgetRef ref) {
     final async = ref.watch(baseCurrencyProvider);
-    final code = async.valueOrNull ?? 'INR';
+    final code = async.value ?? 'INR';
     return '$code — ${currencyName(code)}';
   }
 }

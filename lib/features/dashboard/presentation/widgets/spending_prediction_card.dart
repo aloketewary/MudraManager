@@ -16,7 +16,7 @@ class SpendingPredictionCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final data = ref.watch(dashboardDataProvider).valueOrNull;
+    final data = ref.watch(dashboardDataProvider).value;
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 

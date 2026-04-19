@@ -299,7 +299,7 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
                                   builder: (context, ref, _) {
                                     final amounts =
                                         ref.watch(quickAmountsProvider);
-                                    final chips = amounts.valueOrNull ??
+                                    final chips = amounts.value ??
                                         [100, 500, 1000, 2000, 5000];
                                     return Wrap(
                                       alignment: WrapAlignment.center,

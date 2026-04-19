@@ -21,7 +21,7 @@ class HeroMoment {
 }
 
 final heroMomentProvider = Provider<HeroMoment?>((ref) {
-  final data = ref.watch(dashboardDataProvider).valueOrNull;
+  final data = ref.watch(dashboardDataProvider).value;
   if (data == null) return null;
 
   final now = DateTime.now();

@@ -84,7 +84,7 @@ class _AnimatedSwipeableAccountCardsState
     final isGuestMode = ref.watch(guestModeProvider);
     final displayStyle = ref.watch(accountDisplayStyleProvider);
 
-    final data = dashboardAsync.valueOrNull;
+    final data = dashboardAsync.value;
     if (data == null) {
       return const Column(children: [AccountCardSkeleton()]);
     }

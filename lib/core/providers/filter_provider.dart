@@ -1,10 +1,12 @@
+import 'package:mudra_manager/core/providers/state_value.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/db/filter_type.dart';
 import 'package:mudra_manager/core/providers/collection_watchers.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 
-final filterProvider =
-    StateProvider.autoDispose<FilterType>((ref) => FilterType.day);
+final filterProvider = NotifierProvider.autoDispose<StateValue<FilterType>, FilterType>(
+  () => StateValue(FilterType.day),
+);
 
 // filtered_transactions_provider.dart
 final filteredDashboardTransactionsProvider =

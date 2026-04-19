@@ -217,7 +217,7 @@ final dashboardDataProvider =
 final dashboardTransactionsProvider = Provider<List<Transaction>>((ref) {
   return ref.watch(
     dashboardDataProvider.select(
-      (asyncValue) => asyncValue.valueOrNull?.transactions ?? <Transaction>[],
+      (asyncValue) => asyncValue.value?.transactions ?? <Transaction>[],
     ),
   );
 });
@@ -225,7 +225,7 @@ final dashboardTransactionsProvider = Provider<List<Transaction>>((ref) {
 final dashboardAccountsProvider = Provider<List<Account>>((ref) {
   return ref.watch(
     dashboardDataProvider.select(
-      (asyncValue) => asyncValue.valueOrNull?.accounts ?? <Account>[],
+      (asyncValue) => asyncValue.value?.accounts ?? <Account>[],
     ),
   );
 });
@@ -234,7 +234,7 @@ final dashboardAccountBalancesProvider = Provider<Map<int, double>>((ref) {
   return ref.watch(
     dashboardDataProvider.select(
       (asyncValue) =>
-          asyncValue.valueOrNull?.accountBalances ?? <int, double>{},
+          asyncValue.value?.accountBalances ?? <int, double>{},
     ),
   );
 });
@@ -242,7 +242,7 @@ final dashboardAccountBalancesProvider = Provider<Map<int, double>>((ref) {
 final dashboardBudgetsProvider = Provider<List<BudgetWithProgress>>((ref) {
   return ref.watch(
     dashboardDataProvider.select(
-      (asyncValue) => asyncValue.valueOrNull?.budgets ?? <BudgetWithProgress>[],
+      (asyncValue) => asyncValue.value?.budgets ?? <BudgetWithProgress>[],
     ),
   );
 });
@@ -252,7 +252,7 @@ final dashboardRecurringExpensesProvider =
   return ref.watch(
     dashboardDataProvider.select(
       (asyncValue) =>
-          asyncValue.valueOrNull?.recurringExpenses ?? <RecurringTransaction>[],
+          asyncValue.value?.recurringExpenses ?? <RecurringTransaction>[],
     ),
   );
 });
@@ -260,7 +260,7 @@ final dashboardRecurringExpensesProvider =
 final dashboardTotalBalanceProvider = Provider<double>((ref) {
   return ref.watch(
     dashboardDataProvider.select(
-      (asyncValue) => asyncValue.valueOrNull?.totalBalance ?? 0.0,
+      (asyncValue) => asyncValue.value?.totalBalance ?? 0.0,
     ),
   );
 });
@@ -268,7 +268,7 @@ final dashboardTotalBalanceProvider = Provider<double>((ref) {
 final dashboardNetWorthProvider = Provider<double>((ref) {
   return ref.watch(
     dashboardDataProvider.select(
-      (asyncValue) => asyncValue.valueOrNull?.netWorth ?? 0.0,
+      (asyncValue) => asyncValue.value?.netWorth ?? 0.0,
     ),
   );
 });
@@ -276,7 +276,7 @@ final dashboardNetWorthProvider = Provider<double>((ref) {
 final dashboardIncomeProvider = Provider<double>((ref) {
   return ref.watch(
     dashboardDataProvider.select(
-      (asyncValue) => asyncValue.valueOrNull?.totalIncome ?? 0.0,
+      (asyncValue) => asyncValue.value?.totalIncome ?? 0.0,
     ),
   );
 });
@@ -284,7 +284,7 @@ final dashboardIncomeProvider = Provider<double>((ref) {
 final dashboardExpenseProvider = Provider<double>((ref) {
   return ref.watch(
     dashboardDataProvider.select(
-      (asyncValue) => asyncValue.valueOrNull?.totalExpense ?? 0.0,
+      (asyncValue) => asyncValue.value?.totalExpense ?? 0.0,
     ),
   );
 });
@@ -292,7 +292,7 @@ final dashboardExpenseProvider = Provider<double>((ref) {
 final dashboardGoalsProvider = Provider<List<Goal>>((ref) {
   return ref.watch(
     dashboardDataProvider.select(
-      (asyncValue) => asyncValue.valueOrNull?.goals ?? <Goal>[],
+      (asyncValue) => asyncValue.value?.goals ?? <Goal>[],
     ),
   );
 });

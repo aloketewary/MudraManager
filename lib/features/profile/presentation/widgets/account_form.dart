@@ -581,7 +581,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
     AppSpacing spacing,
   ) {
     final baseCurrencyAsync = ref.watch(baseCurrencyProvider);
-    final baseCurrency = baseCurrencyAsync.valueOrNull ?? 'INR';
+    final baseCurrency = baseCurrencyAsync.value ?? 'INR';
     final displayCode = _selectedCurrency ?? baseCurrency;
     final meta = kCurrencies[displayCode];
     final isBase = _selectedCurrency == null;

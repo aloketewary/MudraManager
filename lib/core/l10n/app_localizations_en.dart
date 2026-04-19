@@ -2779,6 +2779,125 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notif_fewDaysUntrackedTitle => '📊 A few days untracked';
 
   @override
+  String notif_budgetExceededBody(String name) {
+    return '$name is over budget — time to review';
+  }
+
+  @override
+  String notif_budgetExceededBodyMulti(String names) {
+    return '$names are over budget';
+  }
+
+  @override
+  String notif_budgetWarningBody(String name) {
+    return '$name is nearing the limit';
+  }
+
+  @override
+  String notif_budgetWarningBodyMulti(String names) {
+    return '$names are nearing their limits';
+  }
+
+  @override
+  String notif_budgetWarningPctBody(String name, String pct) {
+    return '$name: $pct% used';
+  }
+
+  @override
+  String notif_billPaidAutoTitle(String name) {
+    return '✅ $name — auto-matched';
+  }
+
+  @override
+  String notif_billPaidRecordedTitle(String name) {
+    return '✅ $name — recorded';
+  }
+
+  @override
+  String get notif_smsLoggedTitle => '✅ Transaction logged';
+
+  @override
+  String get notif_smsNeedsReviewTitle => '👀 Needs your review';
+
+  @override
+  String notif_smsLoggedBody(String amount, String sender) {
+    return '$amount from $sender — auto-saved';
+  }
+
+  @override
+  String notif_smsLoggedBodyNoAmount(String sender) {
+    return 'From $sender — auto-saved';
+  }
+
+  @override
+  String notif_smsNeedsReviewBody(String sender) {
+    return 'Transaction from $sender — tap to review';
+  }
+
+  @override
+  String get notif_smsGotItTitle => '✅ Got it!';
+
+  @override
+  String get notif_smsAllCaughtUpTitle => '✅ All caught up!';
+
+  @override
+  String get notif_smsAlmostThereTitle => '📋 Almost there!';
+
+  @override
+  String get notif_smsNeedHelpTitle => '👋 Hey, need your help!';
+
+  @override
+  String notif_streakOnLineTitle(int days) {
+    return '🔥 $days-day streak on the line!';
+  }
+
+  @override
+  String get notif_quickActionTitle => '⚡ 5 seconds is all it takes';
+
+  @override
+  String get notif_dailyReminderTitle => '📊 Your day in numbers';
+
+  @override
+  String get notif_dailyReminderBody =>
+      'Here\'s how yesterday went — take a quick look';
+
+  @override
+  String get notif_weeklyReminderTitle => '📅 Your week wrapped up';
+
+  @override
+  String get notif_weeklyReminderBody =>
+      'Let\'s see how the week went — tap to check';
+
+  @override
+  String get notif_goalStatusTitle => '🎯 Monthly Goal Status';
+
+  @override
+  String notif_goalStatusBody(int count, String name, String pct) {
+    return 'You have $count active goals. $name is $pct% complete!';
+  }
+
+  @override
+  String notif_streakCountingTitle(int days) {
+    return '🔥 $days days and counting!';
+  }
+
+  @override
+  String notif_achievementBody(String title, int xp) {
+    return '$title — that\'s +$xp XP for you';
+  }
+
+  @override
+  String get notif_levelUpBody => 'You just leveled up — keep going!';
+
+  @override
+  String get notif_streakMilestoneBody =>
+      'That\'s dedication — your streak is on fire';
+
+  @override
+  String get notif_weeklyZeroBody =>
+      'Zero expenses this week — that\'s impressive 💪';
+
+  @override
   String get insight_moneyLeakTitle => 'Quiet money leak 💧';
 
   @override
@@ -4576,7 +4695,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String notifSettings_activeCount(int count) {
-    return '$count of 3 active';
+    return '$count of 5 active';
   }
 
   @override
@@ -5299,5 +5418,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String dashboard_accountsTapExpand(int count) {
     return '$count accounts · Tap to expand';
+  }
+
+  @override
+  String get notif_lowBalanceTitle => '⚠️ Low Balance Alert';
+
+  @override
+  String notif_lowBalanceBody(String account, String amount) {
+    return 'Your balance in $account is $amount';
   }
 }

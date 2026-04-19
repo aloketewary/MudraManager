@@ -5020,6 +5020,180 @@ abstract class AppLocalizations {
   /// **'📊 A few days untracked'**
   String get notif_fewDaysUntrackedTitle;
 
+  /// No description provided for @notif_budgetExceededBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is over budget — time to review'**
+  String notif_budgetExceededBody(String name);
+
+  /// No description provided for @notif_budgetExceededBodyMulti.
+  ///
+  /// In en, this message translates to:
+  /// **'{names} are over budget'**
+  String notif_budgetExceededBodyMulti(String names);
+
+  /// No description provided for @notif_budgetWarningBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is nearing the limit'**
+  String notif_budgetWarningBody(String name);
+
+  /// No description provided for @notif_budgetWarningBodyMulti.
+  ///
+  /// In en, this message translates to:
+  /// **'{names} are nearing their limits'**
+  String notif_budgetWarningBodyMulti(String names);
+
+  /// No description provided for @notif_budgetWarningPctBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}: {pct}% used'**
+  String notif_budgetWarningPctBody(String name, String pct);
+
+  /// No description provided for @notif_billPaidAutoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'✅ {name} — auto-matched'**
+  String notif_billPaidAutoTitle(String name);
+
+  /// No description provided for @notif_billPaidRecordedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'✅ {name} — recorded'**
+  String notif_billPaidRecordedTitle(String name);
+
+  /// No description provided for @notif_smsLoggedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'✅ Transaction logged'**
+  String get notif_smsLoggedTitle;
+
+  /// No description provided for @notif_smsNeedsReviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'👀 Needs your review'**
+  String get notif_smsNeedsReviewTitle;
+
+  /// No description provided for @notif_smsLoggedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} from {sender} — auto-saved'**
+  String notif_smsLoggedBody(String amount, String sender);
+
+  /// No description provided for @notif_smsLoggedBodyNoAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'From {sender} — auto-saved'**
+  String notif_smsLoggedBodyNoAmount(String sender);
+
+  /// No description provided for @notif_smsNeedsReviewBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction from {sender} — tap to review'**
+  String notif_smsNeedsReviewBody(String sender);
+
+  /// No description provided for @notif_smsGotItTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'✅ Got it!'**
+  String get notif_smsGotItTitle;
+
+  /// No description provided for @notif_smsAllCaughtUpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'✅ All caught up!'**
+  String get notif_smsAllCaughtUpTitle;
+
+  /// No description provided for @notif_smsAlmostThereTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'📋 Almost there!'**
+  String get notif_smsAlmostThereTitle;
+
+  /// No description provided for @notif_smsNeedHelpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'👋 Hey, need your help!'**
+  String get notif_smsNeedHelpTitle;
+
+  /// No description provided for @notif_streakOnLineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'🔥 {days}-day streak on the line!'**
+  String notif_streakOnLineTitle(int days);
+
+  /// No description provided for @notif_quickActionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'⚡ 5 seconds is all it takes'**
+  String get notif_quickActionTitle;
+
+  /// No description provided for @notif_dailyReminderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'📊 Your day in numbers'**
+  String get notif_dailyReminderTitle;
+
+  /// No description provided for @notif_dailyReminderBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Here\'s how yesterday went — take a quick look'**
+  String get notif_dailyReminderBody;
+
+  /// No description provided for @notif_weeklyReminderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'📅 Your week wrapped up'**
+  String get notif_weeklyReminderTitle;
+
+  /// No description provided for @notif_weeklyReminderBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Let\'s see how the week went — tap to check'**
+  String get notif_weeklyReminderBody;
+
+  /// No description provided for @notif_goalStatusTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'🎯 Monthly Goal Status'**
+  String get notif_goalStatusTitle;
+
+  /// No description provided for @notif_goalStatusBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You have {count} active goals. {name} is {pct}% complete!'**
+  String notif_goalStatusBody(int count, String name, String pct);
+
+  /// No description provided for @notif_streakCountingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'🔥 {days} days and counting!'**
+  String notif_streakCountingTitle(int days);
+
+  /// No description provided for @notif_achievementBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{title} — that\'s +{xp} XP for you'**
+  String notif_achievementBody(String title, int xp);
+
+  /// No description provided for @notif_levelUpBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You just leveled up — keep going!'**
+  String get notif_levelUpBody;
+
+  /// No description provided for @notif_streakMilestoneBody.
+  ///
+  /// In en, this message translates to:
+  /// **'That\'s dedication — your streak is on fire'**
+  String get notif_streakMilestoneBody;
+
+  /// No description provided for @notif_weeklyZeroBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Zero expenses this week — that\'s impressive 💪'**
+  String get notif_weeklyZeroBody;
+
   /// No description provided for @insight_moneyLeakTitle.
   ///
   /// In en, this message translates to:
@@ -8371,7 +8545,7 @@ abstract class AppLocalizations {
   /// No description provided for @notifSettings_activeCount.
   ///
   /// In en, this message translates to:
-  /// **'{count} of 3 active'**
+  /// **'{count} of 5 active'**
   String notifSettings_activeCount(int count);
 
   /// No description provided for @notifSettings_summaryDesc.
@@ -9627,6 +9801,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} accounts · Tap to expand'**
   String dashboard_accountsTapExpand(int count);
+
+  /// No description provided for @notif_lowBalanceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'⚠️ Low Balance Alert'**
+  String get notif_lowBalanceTitle;
+
+  /// No description provided for @notif_lowBalanceBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your balance in {account} is {amount}'**
+  String notif_lowBalanceBody(String account, String amount);
 }
 
 class _AppLocalizationsDelegate

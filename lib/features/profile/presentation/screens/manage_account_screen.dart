@@ -492,7 +492,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
                             builder: (context, ref, _) {
                               final unlockedIds =
                                   ref.watch(unlockedAccountIdsProvider);
-                              final isUnlocked = unlockedIds.valueOrNull
+                              final isUnlocked = unlockedIds.value
                                       ?.contains(account.id) ??
                                   true;
                               if (isUnlocked || isArchived) {

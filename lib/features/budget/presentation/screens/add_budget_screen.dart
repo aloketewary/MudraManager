@@ -650,7 +650,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
             final isActive = _budgetType == type;
             final isTravel = type == BudgetType.travel;
             final activeTripAsync = isTravel ? ref.watch(activeTripProvider) : null;
-            final hasActiveTrip = activeTripAsync?.valueOrNull != null;
+            final hasActiveTrip = activeTripAsync?.value != null;
             final isDisabled = isTravel && !hasActiveTrip;
             return GestureDetector(
               onTap: isDisabled
@@ -1529,7 +1529,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
 
   double _getSpent() {
     if (widget.existing == null) return 0;
-    return ref.read(budgetsWithProgressProvider).valueOrNull
+    return ref.read(budgetsWithProgressProvider).value
         ?.where((b) => b.budget.id == widget.existing!.id)
         .firstOrNull?.spent ?? 0.0;
   }

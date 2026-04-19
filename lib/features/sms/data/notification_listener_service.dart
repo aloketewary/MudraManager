@@ -286,15 +286,20 @@ class NotificationListenerBridge with WidgetsBindingObserver {
     final String body;
 
     if (isApproved && amount > 0) {
-      title = '✅ Transaction logged';
-      body =
+      title = Tone.appL10n?.notif_smsLoggedTitle ?? '✅ Transaction logged';
+      body = Tone.appL10n?.notif_smsLoggedBody(
+            formatCurrency(amount, code: BaseCurrency.code, decimals: 0),
+            sender,
+          ) ??
           '${formatCurrency(amount, code: BaseCurrency.code, decimals: 0)} from $sender — auto-saved';
     } else if (isApproved) {
-      title = '✅ Transaction logged';
-      body = 'From $sender — auto-saved';
+      title = Tone.appL10n?.notif_smsLoggedTitle ?? '✅ Transaction logged';
+      body = Tone.appL10n?.notif_smsLoggedBodyNoAmount(sender) ??
+          'From $sender — auto-saved';
     } else {
-      title = '👀 Needs your review';
-      body = 'Transaction from $sender — tap to review';
+      title = Tone.appL10n?.notif_smsNeedsReviewTitle ?? '👀 Needs your review';
+      body = Tone.appL10n?.notif_smsNeedsReviewBody(sender) ??
+          'Transaction from $sender — tap to review';
     }
 
     NotificationService.showLocalNotification(
@@ -324,21 +329,22 @@ class NotificationListenerBridge with WidgetsBindingObserver {
       final amountStr = totalAmount > 0
           ? ' of ${formatCurrency(totalAmount, code: BaseCurrency.code, decimals: 0)}'
           : '';
-      title = '✅ Got it!';
+      title = Tone.appL10n?.notif_smsGotItTitle ?? '✅ Got it!';
       body = tone.singleApproved(amountStr);
     } else if (approved > 0 && pending == 0 && needsReview == 0) {
       final amountStr = totalAmount > 0
           ? ' totalling ${formatCurrency(totalAmount, code: BaseCurrency.code, decimals: 0)}'
           : '';
-      title = '✅ All caught up!';
+      title = Tone.appL10n?.notif_smsAllCaughtUpTitle ?? '✅ All caught up!';
       body = tone.allApproved(approved, amountStr);
     } else if (needsReview > 0 || pending > 0) {
       final reviewCount = pending + needsReview;
       if (approved > 0) {
-        title = '📋 Almost there!';
+        title = Tone.appL10n?.notif_smsAlmostThereTitle ?? '📋 Almost there!';
         body = tone.mixedResults(approved, reviewCount);
       } else {
-        title = '👋 Hey, need your help!';
+        title =
+            Tone.appL10n?.notif_smsNeedHelpTitle ?? '👋 Hey, need your help!';
         body = tone.allNeedReview(reviewCount);
       }
     } else {
@@ -432,7 +438,9 @@ class NotificationListenerBridge with WidgetsBindingObserver {
     String corrId = '',
     bool isRcs = false,
   }) async {
-    final cid = corrId.isNotEmpty ? corrId : (item.hash.length >= 8 ? item.hash.substring(0, 8) : item.hash);
+    final cid = corrId.isNotEmpty
+        ? corrId
+        : (item.hash.length >= 8 ? item.hash.substring(0, 8) : item.hash);
     try {
       final result = await SmsProcessorService.instance.parseAndSaveTransaction(
         body: item.body,
@@ -456,7 +464,11 @@ class NotificationListenerBridge with WidgetsBindingObserver {
       return result;
     } catch (e) {
       _log.e('[$cid] Processing failed for ${item.hash}', e);
-      ErrorTracker.record('sms_pipeline', 'Processing failed: ${item.sender}', e);
+      ErrorTracker.record(
+        'sms_pipeline',
+        'Processing failed: ${item.sender}',
+        e,
+      );
 
       item.retryCount++;
 

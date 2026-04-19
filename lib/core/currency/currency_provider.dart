@@ -22,6 +22,6 @@ final baseCurrencyProvider = FutureProvider<String>((ref) async {
 
 /// Returns the icon for the current base currency.
 final baseCurrencyIconProvider = Provider<IconData>((ref) {
-  final code = ref.watch(baseCurrencyProvider).valueOrNull;
+  final code = ref.watch(baseCurrencyProvider).value;
   return currencyIcon(code);
 });

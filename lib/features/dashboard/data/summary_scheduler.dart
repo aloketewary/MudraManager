@@ -17,6 +17,8 @@ class SummaryScheduler {
     SharedPreferences prefs,
     DateTime now,
   ) async {
+    if (!(prefs.getBool('daily_summary_enabled') ?? false)) return;
+
     final lastSummary = prefs.getString(_lastDailySummaryKey);
     final today = DateTime(now.year, now.month, now.day);
 
@@ -30,6 +32,8 @@ class SummaryScheduler {
     SharedPreferences prefs,
     DateTime now,
   ) async {
+    if (!(prefs.getBool('weekly_summary_enabled') ?? true)) return;
+
     final selectedDay = prefs.getInt('weekly_summary_day') ?? DateTime.sunday;
     if (now.weekday != selectedDay) return;
 

@@ -1228,6 +1228,49 @@
   "notif_daysUntrackedTitle": "📊 {days} দিন untracked",
   "notif_streakEndedTitle": "💔 {days} দিনের streak ভেঙেছে",
   "notif_fewDaysUntrackedTitle": "📊 কয়েকদিন untracked",
+  "notif_budgetExceededBody": "{name} budget পার হয়ে গেছে — check করুন",
+  "@notif_budgetExceededBody": { "placeholders": { "name": { "type": "String" } } },
+  "notif_budgetExceededBodyMulti": "{names} budget পার হয়ে গেছে",
+  "@notif_budgetExceededBodyMulti": { "placeholders": { "names": { "type": "String" } } },
+  "notif_budgetWarningBody": "{name} limit-এর কাছাকাছি",
+  "@notif_budgetWarningBody": { "placeholders": { "name": { "type": "String" } } },
+  "notif_budgetWarningBodyMulti": "{names} limit-এর কাছাকাছি",
+  "@notif_budgetWarningBodyMulti": { "placeholders": { "names": { "type": "String" } } },
+  "notif_budgetWarningPctBody": "{name}: {pct}% খরচ",
+  "@notif_budgetWarningPctBody": { "placeholders": { "name": { "type": "String" }, "pct": { "type": "String" } } },
+  "notif_billPaidAutoTitle": "✅ {name} — auto-match হয়েছে",
+  "@notif_billPaidAutoTitle": { "placeholders": { "name": { "type": "String" } } },
+  "notif_billPaidRecordedTitle": "✅ {name} — record হয়েছে",
+  "@notif_billPaidRecordedTitle": { "placeholders": { "name": { "type": "String" } } },
+  "notif_smsLoggedTitle": "✅ Transaction save হয়েছে",
+  "notif_smsNeedsReviewTitle": "👀 Review করুন",
+  "notif_smsLoggedBody": "{sender} থেকে {amount} — auto-save হয়েছে",
+  "@notif_smsLoggedBody": { "placeholders": { "amount": { "type": "String" }, "sender": { "type": "String" } } },
+  "notif_smsLoggedBodyNoAmount": "{sender} থেকে — auto-save হয়েছে",
+  "@notif_smsLoggedBodyNoAmount": { "placeholders": { "sender": { "type": "String" } } },
+  "notif_smsNeedsReviewBody": "{sender} থেকে transaction — tap করে দেখুন",
+  "@notif_smsNeedsReviewBody": { "placeholders": { "sender": { "type": "String" } } },
+  "notif_smsGotItTitle": "✅ হয়ে গেছে!",
+  "notif_smsAllCaughtUpTitle": "✅ সব হয়ে গেছে!",
+  "notif_smsAlmostThereTitle": "📋 প্রায় হয়ে গেছে!",
+  "notif_smsNeedHelpTitle": "👋 একটু help চাই!",
+  "notif_streakOnLineTitle": "🔥 {days} দিনের streak দাঁড়ে!",
+  "@notif_streakOnLineTitle": { "placeholders": { "days": { "type": "int" } } },
+  "notif_quickActionTitle": "⚡ মাত্র 5 second-এর কাজ",
+  "notif_dailyReminderTitle": "📊 আপনার দিন numbers-এ",
+  "notif_dailyReminderBody": "গতকাল কেমন ছিল — একটু দেখুন",
+  "notif_weeklyReminderTitle": "📅 সপ্তাহ শেষ",
+  "notif_weeklyReminderBody": "সপ্তাহের হাল দেখুন — tap করুন",
+  "notif_goalStatusTitle": "🎯 Goal Status",
+  "notif_goalStatusBody": "আপনার {count}টি goal active। {name} {pct}% complete!",
+  "@notif_goalStatusBody": { "placeholders": { "count": { "type": "int" }, "name": { "type": "String" }, "pct": { "type": "String" } } },
+  "notif_streakCountingTitle": "🔥 {days} দিন এবং counting!",
+  "@notif_streakCountingTitle": { "placeholders": { "days": { "type": "int" } } },
+  "notif_achievementBody": "{title} — +{xp} XP পেলেন!",
+  "@notif_achievementBody": { "placeholders": { "title": { "type": "String" }, "xp": { "type": "int" } } },
+  "notif_levelUpBody": "Level up হয়েছে — চালিয়ে যান!",
+  "notif_streakMilestoneBody": "দারুণ dedication — streak fire-এ আছে 🔥",
+  "notif_weeklyZeroBody": "এই সপ্তাহে zero খরচ — impressive 💪",
   "insight_moneyLeakTitle": "চুপচাপ টাকা বেরিয়ে যাচ্ছে 💧",
   "insight_bestDayTitle": "{day}-তে সবচেয়ে বেশি খরচ হয়",
   "@notif_streakDaysTitle": {
@@ -1890,7 +1933,7 @@
   "security_biometricEnabled": "বায়োমেট্রিক সক্রিয়",
   "security_biometricDisabled": "বায়োমেট্রিক অক্ষম",
   "security_infoText": "আপনার PIN এই ডিভাইসে নিরাপদে সংরক্ষিত — এটি কখনো সার্ভারে যায় না।",
-  "notifSettings_activeCount": "৩ এর মধ্যে {count} সক্রিয়",
+  "notifSettings_activeCount": "৫ এর মধ্যে {count} সক্রিয়",
   "notifSettings_summaryDesc": "সারাংশে খরচ, আয়, শীর্ষ শ্রেণী এবং ব্যালেন্স দেখায়",
   "notifSettings_dailySummaryDesc": "গতকালের খরচের সারাংশ",
   "notifSettings_weeklySchedule": "প্রতি {day} সকাল ৯:০০ টায়",
@@ -2104,6 +2147,18 @@
     "placeholders": {
       "count": {
         "type": "int"
+      }
+    }
+  },
+  "notif_lowBalanceTitle": "⚠️ Balance কম",
+  "notif_lowBalanceBody": "{account}-এ মাত্র {amount} বাকি আছে",
+  "@notif_lowBalanceBody": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
       }
     }
   }

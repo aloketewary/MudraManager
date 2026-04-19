@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/providers/state_value.dart';
 import 'package:mudra_manager/core/utils/safe_date_format.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
@@ -31,7 +32,9 @@ final pendingCountProvider = FutureProvider.autoDispose<int>((ref) async {
   return await SmsActivityService.instance.getPendingCount();
 });
 
-final smsRefreshProvider = StateProvider<int>((ref) => 0);
+final smsRefreshProvider = NotifierProvider<StateValue<int>, int>(
+  () => StateValue(0),
+);
 
 class SmsActivityScreen extends ConsumerStatefulWidget {
   const SmsActivityScreen({super.key});
@@ -60,7 +63,7 @@ class _SmsActivityScreenState extends ConsumerState<SmsActivityScreen>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      ref.read(smsRefreshProvider.notifier).state++;
+      ref.read(smsRefreshProvider.notifier).update((v) => v + 1);
     }
   }
 
@@ -113,7 +116,7 @@ class _SmsActivityScreenState extends ConsumerState<SmsActivityScreen>
                     ),
                     child: _buildHeroCard(
                       activities,
-                      pendingCount.valueOrNull ?? 0,
+                      pendingCount.value ?? 0,
                       color,
                       textTheme,
                       spacing,
@@ -1109,7 +1112,7 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                               .rejectActivity(widget.activity, null);
                           ref.invalidate(smsActivityProvider);
                           ref.invalidate(pendingCountProvider);
-                          ref.read(smsRefreshProvider.notifier).state++;
+                          ref.read(smsRefreshProvider.notifier).update((v) => v + 1);
                         },
                         icon: const Icon(LucideIcons.x, size: 16),
                         label: Text(ctxt.smsActivity_reject),

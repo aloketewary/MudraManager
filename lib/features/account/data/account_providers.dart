@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/providers/state_value.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
@@ -28,7 +29,9 @@ final allAccountsProvider = FutureProvider.autoDispose((ref) async {
 });
 
 final balanceVisibilityProvider =
-    StateProvider.autoDispose<bool>((ref) => true);
+    NotifierProvider.autoDispose<StateValue<bool>, bool>(
+  () => StateValue(true),
+);
 
 /// The user's primary/default account.
 final primaryAccountProvider = FutureProvider.autoDispose<Account?>((ref) async {

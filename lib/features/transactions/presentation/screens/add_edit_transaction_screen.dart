@@ -33,6 +33,7 @@ import 'package:mudra_manager/features/gamification/models/gamification_enum.dar
 import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
 import 'package:mudra_manager/features/sms/data/sms_activity_service.dart';
 import 'package:mudra_manager/features/sms/data/recurring_detector_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mudra_manager/features/sms/data/tag_matcher_service.dart';
 import 'package:mudra_manager/features/sms/presentation/screens/sms_activity_screen.dart';
 import 'package:mudra_manager/features/transactions/data/tag_provider.dart';
@@ -601,7 +602,7 @@ class _AddEditTransactionScreenState
                           SmartDefaultsBanner(
                             isExpense: _isExpense,
                             onApply: () {
-                              final d = ref.read(smartDefaultsProvider(_isExpense)).valueOrNull;
+                              final d = ref.read(smartDefaultsProvider(_isExpense)).value;
                               if (d == null) return;
                               setState(() {
                                 _selectedCategory = d.suggestedCategory;
@@ -1023,7 +1024,7 @@ class _AddEditTransactionScreenState
         if (widget.smsActivity != null) {
           ref.invalidate(smsActivityProvider);
           ref.invalidate(pendingCountProvider);
-          ref.read(smsRefreshProvider.notifier).state++;
+          ref.read(smsRefreshProvider.notifier).update((v) => v + 1);
           ref
               .read(gamificationServiceProvider)
               ?.track(GamificationEvent.smsTransactionApproved);
@@ -1533,24 +1534,26 @@ class _AddEditTransactionScreenState
 
   Future<void> _checkLowBalance(Account? account) async {
     if (account == null) return;
+    final prefs = await SharedPreferences.getInstance();
+    if (!(prefs.getBool('smart_alerts_enabled') ?? true)) return;
+
     final accountsService = ref.read(accountServiceProvider);
     final currentBalance = await accountsService.getAccountBalance(account.id);
     final lowBalanceThreshold =
         SharedPrefsUtil.instance.getLowBalanceThreshold();
 
     if (currentBalance < lowBalanceThreshold) {
+      final ctxt = AppLocalizations.of(context)!;
       final notificationService = ref.read(notificationRecordServiceProvider);
       await notificationService.logNotification(
-        title: 'Low Balance Alert',
-        body:
-            'Your account "${account.name}" has ${formatCurrency(currentBalance, decimals: 2)} remaining.',
+        title: ctxt.notif_lowBalanceTitle,
+        body: ctxt.notif_lowBalanceBody(account.name, formatCurrency(currentBalance, decimals: 2)),
         type: 'low_balance',
       );
       await NotificationService.showLocalNotification(
         id: 1000 + account.id,
-        title: 'Low Balance Alert',
-        body:
-            'Your balance in ${account.name} is ${formatCurrency(currentBalance, decimals: 2)}.',
+        title: ctxt.notif_lowBalanceTitle,
+        body: ctxt.notif_lowBalanceBody(account.name, formatCurrency(currentBalance, decimals: 2)),
         dedupKey: 'low_balance_${account.id}',
       );
     }

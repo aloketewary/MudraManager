@@ -142,7 +142,7 @@ class AccountSelector extends ConsumerWidget {
     return accountsAsync.when(
       data: (accounts) {
         final unlockedIds =
-            ref.watch(unlockedAccountIdsProvider).valueOrNull ?? {};
+            ref.watch(unlockedAccountIdsProvider).value ?? {};
 
         if (selectedAccount != null && !alreadyScrolled) {
           final idx = accounts.indexWhere((a) => a.id == selectedAccount!.id);
@@ -831,7 +831,7 @@ class QuickAmounts extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final amounts = ref.watch(quickAmountsProvider);
     final textTheme = Theme.of(context).textTheme;
-    final chips = amounts.valueOrNull ?? [100, 500, 1000, 2000, 5000];
+    final chips = amounts.value ?? [100, 500, 1000, 2000, 5000];
 
     return Wrap(
       alignment: WrapAlignment.center,

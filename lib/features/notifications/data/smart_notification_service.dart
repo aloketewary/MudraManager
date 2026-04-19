@@ -146,8 +146,8 @@ class SmartNotificationService {
         type: 'budget_exceeded',
         title: Tone.appL10n?.notif_budgetsOverLimitTitle(n) ?? '🚨 $n budget${n > 1 ? 's' : ''} over limit',
         body: n == 1
-            ? '${exceeded.first} is over budget — time to review'
-            : '${exceeded.join(', ')} are over budget',
+            ? Tone.appL10n?.notif_budgetExceededBody(exceeded.first) ?? '${exceeded.first} is over budget — time to review'
+            : Tone.appL10n?.notif_budgetExceededBodyMulti(exceeded.join(', ')) ?? '${exceeded.join(', ')} are over budget',
         channel: 'budget_alerts',
         channelName: 'Budget Alerts',
         priority: NotificationPriority.urgent,
@@ -161,8 +161,8 @@ class SmartNotificationService {
         type: 'budget_warning',
         title: Tone.appL10n?.notif_budgetsGettingTightTitle(n) ?? '⚠️ $n budget${n > 1 ? 's' : ''} getting tight',
         body: n == 1
-            ? '${warnings.first} is nearing the limit'
-            : '${warnings.join(', ')} are nearing their limits',
+            ? Tone.appL10n?.notif_budgetWarningBody(warnings.first) ?? '${warnings.first} is nearing the limit'
+            : Tone.appL10n?.notif_budgetWarningBodyMulti(warnings.join(', ')) ?? '${warnings.join(', ')} are nearing their limits',
         channel: 'budget_alerts',
         channelName: 'Budget Alerts',
         priority: NotificationPriority.high,
@@ -490,6 +490,8 @@ class SmartNotificationService {
   // ─── 9. RE-ENGAGEMENT NUDGES (🔔) ───
   Future<void> checkReEngagement() async {
     final prefs = await SharedPreferences.getInstance();
+    if (!(prefs.getBool('re_engagement_enabled') ?? true)) return;
+
     final lastCheckInStr = prefs.getString('last_daily_check_in');
     if (lastCheckInStr == null) {
       return; // never opened — onboarding handles this
@@ -580,8 +582,8 @@ class SmartNotificationService {
         isar,
         type: 're_engage_day2',
         title: currentStreak >= 3
-            ? '🔥 $currentStreak-day streak on the line!'
-            : '⚡ 5 seconds is all it takes',
+            ? Tone.appL10n?.notif_streakOnLineTitle(currentStreak) ?? '🔥 $currentStreak-day streak on the line!'
+            : Tone.appL10n?.notif_quickActionTitle ?? '⚡ 5 seconds is all it takes',
         body: currentStreak >= 3
             ? Tone.current.streakAtRisk(currentStreak)
             : Tone.current.reEngageQuickNudge,
@@ -633,8 +635,8 @@ class SmartNotificationService {
       isar,
       type: 'bill_paid_$billId',
       title: wasSmsMatched
-          ? '✅ $description — auto-matched'
-          : '✅ $description — recorded',
+          ? Tone.appL10n?.notif_billPaidAutoTitle(description) ?? '✅ $description — auto-matched'
+          : Tone.appL10n?.notif_billPaidRecordedTitle(description) ?? '✅ $description — recorded',
       body: Tone.current.billPaidNotif(
         description,
         amount.toStringAsFixed(0),
@@ -660,8 +662,8 @@ class SmartNotificationService {
       type: 'budget_exceeded_realtime',
       title: Tone.appL10n?.notif_budgetsOverLimitTitle(n) ?? '🚨 $n budget${n > 1 ? 's' : ''} exceeded!',
       body: n == 1
-          ? '${names.first} is over budget — time to review'
-          : '${names.join(', ')} are over budget',
+          ? Tone.appL10n?.notif_budgetExceededBody(names.first) ?? '${names.first} is over budget — time to review'
+          : Tone.appL10n?.notif_budgetExceededBodyMulti(names.join(', ')) ?? '${names.join(', ')} are over budget',
       channel: 'budget_alerts',
       channelName: 'Budget Alerts',
       priority: NotificationPriority.urgent,
@@ -682,8 +684,8 @@ class SmartNotificationService {
       type: 'budget_warning_realtime',
       title: Tone.appL10n?.notif_budgetsGettingTightTitle(n) ?? '⚠️ $n budget${n > 1 ? 's' : ''} near limit',
       body: n == 1
-          ? '${names.first}: ${percentage.toStringAsFixed(0)}% used'
-          : '${names.join(', ')} are nearing their limits',
+          ? Tone.appL10n?.notif_budgetWarningPctBody(names.first, percentage.toStringAsFixed(0)) ?? '${names.first}: ${percentage.toStringAsFixed(0)}% used'
+          : Tone.appL10n?.notif_budgetWarningBodyMulti(names.join(', ')) ?? '${names.join(', ')} are nearing their limits',
       channel: 'budget_alerts',
       channelName: 'Budget Alerts',
       priority: NotificationPriority.high,

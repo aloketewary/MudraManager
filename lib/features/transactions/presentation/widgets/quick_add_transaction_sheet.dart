@@ -188,7 +188,7 @@ class _QuickAddTransactionSheetState
                           final acColor =
                               Color(acc.colorValue ?? color.primary.toARGB32());
                           final unlockedIds = ref.watch(unlockedAccountIdsProvider);
-                          final isUnlocked = unlockedIds.valueOrNull?.contains(acc.id) ?? true;
+                          final isUnlocked = unlockedIds.value?.contains(acc.id) ?? true;
 
                           return GestureDetector(
                             onTap: () {

@@ -85,10 +85,12 @@ class TransactionService {
     }
   }
 
-  Future<List<Transaction>> getAll() async {
+  Future<List<Transaction>> getAll({int? limit}) async {
     final isar = await isarService.getInstance();
-    final allTransactions =
-        await isar.transactions.where().sortByDateDesc().findAll();
+    var query = isar.transactions.where().sortByDateDesc();
+    final allTransactions = limit != null
+        ? await query.limit(limit).findAll()
+        : await query.findAll();
 
     final filteredTransactions = allTransactions.where((tx) {
       if (tx.isTransfer) {
@@ -102,8 +104,12 @@ class TransactionService {
 
   Future<List<Transaction>> getAllForDashBoard() async {
     final isar = await isarService.getInstance();
+    // Limit to last 12 months — analytics only needs this range
+    final cutoff = DateTime.now().subtract(const Duration(days: 365));
     final allTransactions = await isar.transactions
         .where()
+        .dateBetween(cutoff, DateTime.now())
+        .filter()
         .isTransferEqualTo(false)
         .sortByDateDesc()
         .findAll();

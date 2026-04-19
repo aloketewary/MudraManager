@@ -330,7 +330,6 @@ class NetWorthScreen extends ConsumerWidget {
           lineTouchData: LineTouchData(
             touchTooltipData: LineTouchTooltipData(
               getTooltipColor: (_) => color.surfaceContainerHighest,
-              tooltipRoundedRadius: 8,
               getTooltipItems: (spots) => spots.map((spot) {
                 final i = spot.x.toInt();
                 final date = i >= 0 && i < history.length

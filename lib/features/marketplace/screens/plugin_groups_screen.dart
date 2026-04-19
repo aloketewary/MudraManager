@@ -28,14 +28,15 @@ final pluginGroupsProvider = FutureProvider((ref) async {
 final marketplaceServiceProvider = Provider((ref) => MarketplaceService());
 
 final pluginStatesProvider =
-    StateNotifierProvider<PluginStatesNotifier, Map<String, bool>>((ref) {
-  return PluginStatesNotifier(ref.watch(marketplaceServiceProvider));
-});
+    NotifierProvider<PluginStatesNotifier, Map<String, bool>>(
+  PluginStatesNotifier.new,
+);
 
-class PluginStatesNotifier extends StateNotifier<Map<String, bool>> {
-  final MarketplaceService _service;
+class PluginStatesNotifier extends Notifier<Map<String, bool>> {
+  @override
+  Map<String, bool> build() => {};
 
-  PluginStatesNotifier(this._service) : super({});
+  MarketplaceService get _service => ref.watch(marketplaceServiceProvider);
 
   Future<void> loadStates(List<PluginMetadata> plugins) async {
     final states = <String, bool>{};
@@ -488,7 +489,7 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
                                 builder: (context, ref, _) {
                                   final hasAccess = ref
                                           .watch(hasFullAccessProvider)
-                                          .valueOrNull ??
+                                          .value ??
                                       false;
                                   if (hasAccess) {
                                     return Switch(

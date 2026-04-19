@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/providers/state_value.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,8 +10,12 @@ import 'package:mudra_manager/features/profile/presentation/widgets/pin_entry_di
 import 'package:mudra_manager/shared/widgets/adaptive_text.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 
-final _authStateProvider = StateProvider<bool>((ref) => false);
-final _authInitProvider = StateProvider<bool>((ref) => false);
+final _authStateProvider = NotifierProvider<StateValue<bool>, bool>(
+  () => StateValue(false),
+);
+final _authInitProvider = NotifierProvider<StateValue<bool>, bool>(
+  () => StateValue(false),
+);
 
 class AuthGate extends ConsumerStatefulWidget {
   final Widget child;
@@ -34,7 +39,7 @@ class _AuthGateState extends ConsumerState<AuthGate>
     _subscription = ref.listenManual(_authStateProvider, (_, __) {});
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!ref.read(_authInitProvider)) {
-        ref.read(_authInitProvider.notifier).state = true;
+        ref.read(_authInitProvider.notifier).set(true);
         _runAuthFlow(autoTriggerBiometric: true);
       }
     });
@@ -53,7 +58,7 @@ class _AuthGateState extends ConsumerState<AuthGate>
       if (_authInProgress) return;
 
       final container = ProviderScope.containerOf(context, listen: false);
-      container.read(_authStateProvider.notifier).state = false;
+      container.read(_authStateProvider.notifier).set(false);
       _dismissPinDialog();
       if (mounted) setState(() => _showLockScreen = false);
     } else if (state == AppLifecycleState.resumed) {
@@ -84,7 +89,7 @@ class _AuthGateState extends ConsumerState<AuthGate>
         await auth.isBiometricEnabled() && await auth.canCheckBiometrics();
 
     if (!pinSet && !bioEnabled) {
-      container.read(_authStateProvider.notifier).state = true;
+      container.read(_authStateProvider.notifier).set(true);
       return;
     }
 
@@ -95,7 +100,7 @@ class _AuthGateState extends ConsumerState<AuthGate>
       try {
         final ok = await auth.authenticateBiometric();
         if (ok) {
-          container.read(_authStateProvider.notifier).state = true;
+          container.read(_authStateProvider.notifier).set(true);
           return;
         }
       } finally {
@@ -119,7 +124,7 @@ class _AuthGateState extends ConsumerState<AuthGate>
     try {
       final ok = await auth.authenticateBiometric();
       if (ok) {
-        container.read(_authStateProvider.notifier).state = true;
+        container.read(_authStateProvider.notifier).set(true);
       }
     } finally {
       _authInProgress = false;
@@ -149,7 +154,7 @@ class _AuthGateState extends ConsumerState<AuthGate>
     _pinDialogOpen = false;
 
     if (pin != null && await auth.validatePin(pin)) {
-      container.read(_authStateProvider.notifier).state = true;
+      container.read(_authStateProvider.notifier).set(true);
     }
   }
 

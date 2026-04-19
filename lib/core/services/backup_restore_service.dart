@@ -123,8 +123,8 @@ class BackupService {
     String password,
   ) async {
     try {
-      await FilePicker.platform.clearTemporaryFiles();
-      final result = await FilePicker.platform.pickFiles(
+      await FilePicker.clearTemporaryFiles();
+      final result = await FilePicker.pickFiles(
         allowMultiple: false,
         type: FileType.any,
         dialogTitle: 'Select Backup File',
@@ -614,7 +614,7 @@ class BackupService {
   }
 
   static Future<Directory?> pickBackupFolder() async {
-    final String? selectedDir = await FilePicker.platform.getDirectoryPath();
+    final String? selectedDir = await FilePicker.getDirectoryPath();
     if (selectedDir != null) {
       return Directory(selectedDir);
     }

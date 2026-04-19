@@ -13,8 +13,11 @@ class NotificationRecord {
 
   late String title;
   late String body;
+
+  @Index()
   late DateTime timestamp;
 
+  @Index()
   String? type;
   late bool isRead;
   

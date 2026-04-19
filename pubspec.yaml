@@ -1,4 +1,5 @@
 name: mudra_manager
+
 description: "Mudra Manager — local-first personal finance app for India. Track expenses, budgets, goals, and more. 100% offline."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -43,38 +44,38 @@ dependencies:
   isar_community: ^3.3.0
   isar_community_flutter_libs: ^3.3.0
   path_provider: ^2.0.15 # To find the correct directory for the database
-  riverpod: ^2.4.0
-  flutter_riverpod: ^2.4.0
+  riverpod: ^3.2.1
+  flutter_riverpod: ^3.3.1
   intl: ^0.20.2
   uuid: ^4.0.0
-  google_fonts: ^6.2.1
+  google_fonts: ^8.0.2
   flutter_animate: ^4.2.0
   animations: ^2.0.11
   dynamic_color: ^1.7.0
   responsive_framework: ^1.5.1
   auto_size_text: ^3.0.0
-  fl_chart: ^0.71.0
+  fl_chart: ^1.2.0
   month_picker_dialog: ^6.0.3
   percent_indicator: ^4.2.2
-  local_auth: ^2.1.0
-  flutter_secure_storage: ^9.2.4
+  local_auth: ^3.0.1
+  flutter_secure_storage: ^10.0.0
   shared_preferences: ^2.5.3
   permission_handler: ^12.0.0+1
   crypto: ^3.0.6
-  package_info_plus: ^8.3.0
-  flutter_local_notifications: ^19.1.0
-  timezone: ^0.10.1
+  package_info_plus: ^9.0.1
+  flutter_local_notifications: ^21.0.0
+  timezone: ^0.11.0
   flutter_native_timezone_latest: ^1.0.0
   encrypt: ^5.0.3
-  file_picker: ^10.1.2
+  file_picker: ^11.0.2
   json_annotation: ^4.9.0
   envied: ^1.1.1
-  excel: ^2.1.0
+  excel: ^4.0.6
   pdf: ^3.10.1
   printing: ^5.12.0
   open_file: ^3.5.10
-  math_expressions: ^2.7.0
-  go_router: ^14.6.2
+  math_expressions: ^3.1.0
+  go_router: ^17.2.1
   home_widget: ^0.9.1
   url_launcher: ^6.3.1
   table_calendar: ^3.1.2
@@ -89,8 +90,8 @@ dependencies:
   mudra_plugin_sdk:
     path: ./mudra_plugin_sdk
   # Cloud providers for backup sync
-  google_sign_in: ^6.2.1
-  googleapis: ^13.2.0
+  google_sign_in: ^7.2.0
+  googleapis: ^16.0.0
   http: ^1.2.2
   visibility_detector: ^0.4.0+2
   in_app_purchase: ^3.2.3
@@ -102,10 +103,10 @@ dev_dependencies:
     sdk: flutter
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
   isar_community_generator: ^3.3.0
   build_runner: ^2.4.6 # Tool to run code generators
-  flutter_launcher_icons: ^0.13.1
+  flutter_launcher_icons: ^0.14.4
   json_serializable: ^6.7.1
   envied_generator: ^1.1.1
   plugin_platform_interface: ^2.1.8

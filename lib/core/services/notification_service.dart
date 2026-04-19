@@ -71,7 +71,7 @@ class NotificationService {
     );
 
     await _plugin.initialize(
-      initializationSettings,
+      settings: initializationSettings,
       onDidReceiveNotificationResponse: (details) {
         _handleNotificationTap(details.payload);
       },
@@ -88,18 +88,28 @@ class NotificationService {
   }
 
   static Future<void> scheduleDailyReminder(TimeOfDay time) async {
-    await _plugin.cancel(0);
+    await _plugin.cancel(id: 0);
     await _saveReminderTime(time);
 
     final scheduledDate = _nextInstanceOfTime(time);
     _log.i('Scheduling daily reminder at ${time.hour}:${time.minute}');
 
     await _plugin.zonedSchedule(
-      0,
-      '📊 Your day in numbers',
-      'Here\'s how yesterday went — take a quick look',
-      scheduledDate,
-      const NotificationDetails(
+
+
+      id: 0,
+
+
+      title: Tone.appL10n?.notif_dailyReminderTitle ?? '📊 Your day in numbers',
+
+
+      body: Tone.appL10n?.notif_dailyReminderBody ?? 'Here\'s how yesterday went — take a quick look',
+
+
+      scheduledDate: scheduledDate,
+
+
+      notificationDetails: const NotificationDetails(
         android: AndroidNotificationDetails(
           'daily_reminder_channel',
           'Daily Reminder',
@@ -188,7 +198,7 @@ class NotificationService {
   static Future<void> scheduleWeeklySummary([
     int weekday = DateTime.sunday,
   ]) async {
-    await _plugin.cancel(2);
+    await _plugin.cancel(id: 2);
 
     final now = tz.TZDateTime.now(tz.local);
     var scheduledDate = tz.TZDateTime(
@@ -209,11 +219,21 @@ class NotificationService {
     }
 
     await _plugin.zonedSchedule(
-      2,
-      '📅 Your week wrapped up',
-      'Let\'s see how the week went — tap to check',
-      scheduledDate,
-      const NotificationDetails(
+
+
+      id: 2,
+
+
+      title: Tone.appL10n?.notif_weeklyReminderTitle ?? '📅 Your week wrapped up',
+
+
+      body: Tone.appL10n?.notif_weeklyReminderBody ?? 'Let\'s see how the week went — tap to check',
+
+
+      scheduledDate: scheduledDate,
+
+
+      notificationDetails: const NotificationDetails(
         android: AndroidNotificationDetails(
           'weekly_summary_channel',
           'Weekly Summary',
@@ -265,17 +285,18 @@ class NotificationService {
     final lastWeekTotal = lastWeekTxns.fold<double>(0, (s, t) => s + t.baseAmount);
 
     if (thisWeekTotal <= 0) {
+      final zeroBody = Tone.appL10n?.notif_weeklyZeroBody ?? 'Zero expenses this week — that\'s impressive 💪';
       await showLocalNotification(
         id: 101,
         title: Tone.appL10n?.notif_weekInReviewTitle ?? '📅 Week in review',
-        body: 'Zero expenses this week — that\'s impressive 💪',
+        body: zeroBody,
         payload: 'statistics',
         dedupKey: 'weekly_summary',
         bypassThrottle: true,
       );
       await _logToDatabase(
-        '📅 Weekly Summary',
-        'No expenses this week — great discipline! 💪',
+        Tone.appL10n?.notif_weekInReviewTitle ?? '📅 Weekly Summary',
+        zeroBody,
         'weekly_summary',
       );
       return;
@@ -317,7 +338,7 @@ class NotificationService {
       dedupKey: 'weekly_summary',
       bypassThrottle: true,
     );
-    await _logToDatabase('📅 Your week in review', body, 'weekly_summary');
+    await _logToDatabase(Tone.appL10n?.notif_yourWeekInReviewTitle ?? '📅 Your week in review', body, 'weekly_summary');
   }
 
   static Future<void> _saveReminderTime(TimeOfDay time) async {
@@ -326,7 +347,7 @@ class NotificationService {
   }
 
   static Future<void> cancelReminder() async {
-    await _plugin.cancel(0);
+    await _plugin.cancel(id: 0);
   }
 
   static Future<TimeOfDay?> getSavedReminderTime() async {
@@ -476,7 +497,7 @@ class NotificationService {
       ),
     );
 
-    await _plugin.show(id, title, body, notificationDetails, payload: payload);
+    await _plugin.show(id: id, title: title, body: body, notificationDetails: notificationDetails, payload: payload);
   }
 
   /// Resolve Android notification channel based on notification type.
@@ -521,7 +542,7 @@ class NotificationService {
 
   static Future<void> scheduleMonthlyGoalReminder(String body) async {
     // ID 1 for monthly goal reminder
-    await _plugin.cancel(1);
+    await _plugin.cancel(id: 1);
 
     final now = tz.TZDateTime.now(tz.local);
     // Schedule for the 1st of next month at 9:00 AM
@@ -535,11 +556,21 @@ class NotificationService {
     );
 
     await _plugin.zonedSchedule(
-      1,
-      'Monthly Goal Status',
-      body,
-      scheduledDate,
-      const NotificationDetails(
+
+
+      id: 1,
+
+
+      title: Tone.appL10n?.notif_goalStatusTitle ?? 'Monthly Goal Status',
+
+
+      body: body,
+
+
+      scheduledDate: scheduledDate,
+
+
+      notificationDetails: const NotificationDetails(
         android: AndroidNotificationDetails(
           'goal_reminder_channel',
           'Goal Reminders',
@@ -564,7 +595,7 @@ class NotificationService {
 
     if (!enabled) return;
 
-    await _plugin.cancel(3);
+    await _plugin.cancel(id: 3);
 
     final savedTime = await getSavedStreakReminderTime();
     final time = savedTime ?? const TimeOfDay(hour: 20, minute: 0);
@@ -584,11 +615,21 @@ class NotificationService {
     }
 
     await _plugin.zonedSchedule(
-      3,
-      '🔥 $currentStreak days and counting!',
-      Tone.current.streakAtRisk(currentStreak),
-      scheduledDate,
-      const NotificationDetails(
+
+
+      id: 3,
+
+
+      title: Tone.appL10n?.notif_streakCountingTitle(currentStreak) ?? '🔥 $currentStreak days and counting!',
+
+
+      body: Tone.current.streakAtRisk(currentStreak),
+
+
+      scheduledDate: scheduledDate,
+
+
+      notificationDetails: const NotificationDetails(
         android: AndroidNotificationDetails(
           'streak_reminder_channel',
           'Streak Reminders',
@@ -609,52 +650,49 @@ class NotificationService {
   }
 
   static Future<void> cancelStreakReminder() async {
-    await _plugin.cancel(3);
+    await _plugin.cancel(id: 3);
   }
 
   static Future<void> showAchievementUnlocked(String title, int xp) async {
+    final body = Tone.appL10n?.notif_achievementBody(title, xp) ?? '$title — that\'s +$xp XP for you';
     await showLocalNotification(
       id: DateTime.now().microsecondsSinceEpoch % 100000000,
       title: Tone.appL10n?.notif_niceOneTitle ?? '🏆 Nice one!',
-      body: '$title — that\'s +$xp XP for you',
+      body: body,
       payload: 'achievements',
       bypassThrottle: true,
     );
     await _logToDatabase(
-      '🏆 Nice one!',
-      '$title — that\'s +$xp XP for you',
+      Tone.appL10n?.notif_niceOneTitle ?? '🏆 Nice one!',
+      body,
       'achievement',
     );
   }
 
   static Future<void> showLevelUp(int newLevel) async {
+    final body = Tone.appL10n?.notif_levelUpBody ?? 'You just leveled up — keep going!';
+    final title = Tone.appL10n?.notif_levelUpTitle(newLevel) ?? '🎉 Level $newLevel!';
     await showLocalNotification(
       id: DateTime.now().microsecondsSinceEpoch % 100000000,
-      title: Tone.appL10n?.notif_levelUpTitle(newLevel) ?? '🎉 Level $newLevel!',
-      body: 'You just leveled up — keep going!',
+      title: title,
+      body: body,
       payload: 'achievements',
       bypassThrottle: true,
     );
-    await _logToDatabase(
-      '🎉 Level Up!',
-      'Congratulations! You are now Level $newLevel',
-      'level_up',
-    );
+    await _logToDatabase(title, body, 'level_up');
   }
 
   static Future<void> showStreakMilestone(int days) async {
+    final body = Tone.appL10n?.notif_streakMilestoneBody ?? 'That\'s dedication — your streak is on fire';
+    final title = Tone.appL10n?.notif_streakDaysTitle(days) ?? '🔥 $days days straight!';
     await showLocalNotification(
       id: DateTime.now().microsecondsSinceEpoch % 100000000,
-      title: Tone.appL10n?.notif_streakDaysTitle(days) ?? '🔥 $days days straight!',
-      body: 'That\'s dedication — your streak is on fire',
+      title: title,
+      body: body,
       payload: 'achievements',
       bypassThrottle: true,
     );
-    await _logToDatabase(
-      '🔥 Streak Milestone!',
-      'Amazing! You have a $days-day streak',
-      'streak',
-    );
+    await _logToDatabase(title, body, 'streak');
   }
 
   static Future<void> _logToDatabase(

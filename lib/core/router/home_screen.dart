@@ -293,7 +293,7 @@ class HomePageState extends ConsumerState<HomePage>
             NavigationDestination(
               icon: Consumer(
                 builder: (context, ref, _) {
-                  final isPro = ref.watch(isProProvider).valueOrNull ?? false;
+                  final isPro = ref.watch(isProProvider).value ?? false;
                   return SvgPicture.asset(
                     isPro
                         ? 'assets/logo/nav/outline/pro_profile.svg'
@@ -309,7 +309,7 @@ class HomePageState extends ConsumerState<HomePage>
               ),
               selectedIcon: Consumer(
                 builder: (context, ref, _) {
-                  final isPro = ref.watch(isProProvider).valueOrNull ?? false;
+                  final isPro = ref.watch(isProProvider).value ?? false;
                   return SvgPicture.asset(
                     isPro
                         ? 'assets/logo/nav/solid/pro_profile.svg'
@@ -660,7 +660,7 @@ class HomePageState extends ConsumerState<HomePage>
 
   void initNotification() async {
     final savedTime = await NotificationService.getSavedReminderTime();
-    ref.read(reminderTimeProvider.notifier).state = savedTime;
+    ref.read(reminderTimeProvider.notifier).set(savedTime);
   }
 
   void _showExportDialog(BuildContext context) {

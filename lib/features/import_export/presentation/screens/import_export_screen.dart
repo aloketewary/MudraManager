@@ -380,7 +380,7 @@ class _ImportExportScreenState extends ConsumerState<ImportExportScreen> {
   Future<void> _pickAndImport() async {
     HapticFeedback.mediumImpact();
     try {
-      final result = await FilePicker.platform.pickFiles(
+      final result = await FilePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['xlsx', 'xls'],
         withData: true,

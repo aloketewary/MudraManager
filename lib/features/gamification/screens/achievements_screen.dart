@@ -158,7 +158,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
                           loading: () => const SizedBox.shrink(),
                           error: (_, __) => const SizedBox.shrink(),
                         ),
-                        if (streaksAsync.valueOrNull?.isNotEmpty == true)
+                        if (streaksAsync.value?.isNotEmpty == true)
                           const SizedBox(height: 20),
 
                         // ── CATEGORY CHIPS ──

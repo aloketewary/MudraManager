@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/providers/state_value.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/currency/currency_provider.dart';
@@ -35,4 +36,6 @@ void invalidateAll(WidgetRef ref) {
   ref.invalidate(dashboardDataProvider);
 }
 
-final reminderTimeProvider = StateProvider<TimeOfDay?>((ref) => null);
+final reminderTimeProvider = NotifierProvider<StateValue<TimeOfDay?>, TimeOfDay?>(
+  () => StateValue(null),
+);

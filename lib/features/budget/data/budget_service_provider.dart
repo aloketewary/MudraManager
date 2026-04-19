@@ -125,6 +125,7 @@ class BudgetService {
         budgets.map((b) async {
           await b.categories.load();
           await b.allocations.load();
+          await b.budgetTags.load();
           await Future.wait(b.allocations.map((a) => a.category.load()));
         }),
       );
@@ -174,17 +175,17 @@ class BudgetService {
 
         // Handle tag-wise budgets
         if (budget.budgetType == BudgetType.tagWise) {
-          await budget.budgetTags.load();
           final tagIds = budget.budgetTags.map((t) => t.id).toSet();
-          if (tagIds.isEmpty) continue;
 
           // Filter expenses that have any of the budget's tags
           double totalSpent = 0;
-          for (final t in allExpenses) {
-            if (t.date.isBefore(s) || t.date.isAfter(e)) continue;
-            await t.tags.load();
-            if (t.tags.any((tag) => tagIds.contains(tag.id))) {
-              totalSpent += t.baseAmount;
+          if (tagIds.isNotEmpty) {
+            for (final t in allExpenses) {
+              if (t.date.isBefore(s) || t.date.isAfter(e)) continue;
+              await t.tags.load();
+              if (t.tags.any((tag) => tagIds.contains(tag.id))) {
+                totalSpent += t.baseAmount;
+              }
             }
           }
 

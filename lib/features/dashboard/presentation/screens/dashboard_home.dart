@@ -433,7 +433,7 @@ class _HelpBanner extends ConsumerWidget {
                 GestureDetector(
                   onTap: () async {
                     await SharedPrefsUtil.instance.setHasSeenHelpGuide(true);
-                    ref.read(hasSeenHelpGuideProvider.notifier).state = true;
+                    ref.read(hasSeenHelpGuideProvider.notifier).set(true);
                   },
                   child: Icon(
                     LucideIcons.x,
@@ -458,12 +458,12 @@ class _AutoImportBanner extends ConsumerWidget {
     final granted = ref.watch(smsPermissionGrantedProvider);
     if (granted.isLoading) return const SizedBox.shrink();
 
-    final isGranted = granted.valueOrNull == true;
+    final isGranted = granted.value == true;
     final autoImportOn = SharedPrefsUtil.instance.getSmsImportEnabled();
     final spacing = ref.watch(spacingProvider);
 
     if (isGranted && autoImportOn) {
-      final pending = ref.watch(pendingCountProvider).valueOrNull ?? 0;
+      final pending = ref.watch(pendingCountProvider).value ?? 0;
       if (pending > 0) {
         return _buildActiveCard(context, ref, spacing, pending);
       }

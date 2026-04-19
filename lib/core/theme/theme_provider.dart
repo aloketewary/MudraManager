@@ -6,13 +6,14 @@ import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 enum AppThemeMode { system, light, dark, amoled }
 
 final highContrastModeProvider =
-    StateNotifierProvider<HighContrastNotifier, bool>(
-  (ref) => HighContrastNotifier(),
+    NotifierProvider<HighContrastNotifier, bool>(
+  HighContrastNotifier.new,
 );
 
-class HighContrastNotifier extends StateNotifier<bool> {
-  HighContrastNotifier() : super(false) {
-    state = SharedPrefsUtil.instance.getHighContrastMode();
+class HighContrastNotifier extends Notifier<bool> {
+  @override
+  bool build() {
+    return SharedPrefsUtil.instance.getHighContrastMode();
   }
 
   void toggle() {
@@ -27,20 +28,22 @@ class HighContrastNotifier extends StateNotifier<bool> {
 }
 
 final themeModeProvider =
-    StateNotifierProvider<ThemeModeNotifier, AppThemeMode>(
-  (ref) => ThemeModeNotifier(),
+    NotifierProvider<ThemeModeNotifier, AppThemeMode>(
+  ThemeModeNotifier.new,
 );
 
 final themeNotifierProvider =
-    StateNotifierProvider<ThemeNotifier, AppColorTheme>(
-  (ref) => ThemeNotifier(),
+    NotifierProvider<ThemeNotifier, AppColorTheme>(
+  ThemeNotifier.new,
 );
 
-class ThemeModeNotifier extends StateNotifier<AppThemeMode> {
+class ThemeModeNotifier extends Notifier<AppThemeMode> {
   static const _key = 'theme_mode';
 
-  ThemeModeNotifier() : super(AppThemeMode.system) {
+  @override
+  AppThemeMode build() {
     _load();
+    return AppThemeMode.system;
   }
 
   void _load() async {
@@ -60,11 +63,13 @@ class ThemeModeNotifier extends StateNotifier<AppThemeMode> {
   }
 }
 
-class ThemeNotifier extends StateNotifier<AppColorTheme> {
+class ThemeNotifier extends Notifier<AppColorTheme> {
   static const _key = 'selected_theme';
 
-  ThemeNotifier() : super(AppColorTheme.finance) {
+  @override
+  AppColorTheme build() {
     _loadTheme();
+    return AppColorTheme.finance;
   }
 
   Future<void> _loadTheme() async {
@@ -84,7 +89,6 @@ class ThemeNotifier extends StateNotifier<AppColorTheme> {
     await prefs.setString(_key, theme.name);
   }
 
-  /// Revert to free theme when Pro expires.
   Future<void> enforceFreeTheme() async {
     if (state.isPro) {
       await setTheme(AppColorTheme.finance);

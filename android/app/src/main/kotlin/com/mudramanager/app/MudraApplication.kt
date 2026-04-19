@@ -10,7 +10,6 @@ class MudraApplication : FlutterApplication() {
     override fun onCreate() {
         super.onCreate()
         createSilentWorkManagerChannel()
-        cancelStaleNotifications()
     }
 
     private fun createSilentWorkManagerChannel() {
@@ -43,25 +42,6 @@ class MudraApplication : FlutterApplication() {
             for (ch in nm.notificationChannels) {
                 if (!knownChannels.contains(ch.id)) {
                     nm.deleteNotificationChannel(ch.id)
-                }
-            }
-        }
-    }
-
-    /**
-     * Cancel any stale/orphaned notifications from previous builds
-     * that may show generic text like "Recurring transaction notification".
-     */
-    private fun cancelStaleNotifications() {
-        val nm = getSystemService(NotificationManager::class.java)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            for (sbn in nm.activeNotifications) {
-                val title = sbn.notification.extras?.getCharSequence("android.title")?.toString() ?: ""
-                val text = sbn.notification.extras?.getCharSequence("android.text")?.toString() ?: ""
-                // Cancel notifications with generic/stale text that shouldn't be showing
-                if (title.contains("Recurring transaction", ignoreCase = true) ||
-                    text.contains("Processing recurring", ignoreCase = true)) {
-                    nm.cancel(sbn.id)
                 }
             }
         }

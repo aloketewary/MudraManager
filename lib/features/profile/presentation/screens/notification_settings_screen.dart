@@ -91,22 +91,9 @@ class _NotificationSettingsScreenState
 
   Future<void> _toggleStreakReminder(bool enabled) async {
     HapticFeedback.mediumImpact();
-    final label = AppLocalizations.of(context)!.notifSettings_comeBackNudges;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('streak_reminder_enabled', enabled);
-    if (enabled) {
-      SnackbarService.success(BuddyMessages.toggledOn(label));
-    } else {
-      SnackbarService.success(BuddyMessages.toggledOff(label));
-    }
-    if (mounted) setState(() => _reEngagementEnabled = enabled);
-  }
-
-  Future<void> _toggleReEngagement(bool enabled) async {
-    HapticFeedback.mediumImpact();
     final label = AppLocalizations.of(context)!.notifSettings_streakReminder;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('re_engagement_enabled', enabled);
+    await prefs.setBool('streak_reminder_enabled', enabled);
     if (enabled) {
       SnackbarService.success(BuddyMessages.toggledOn(label));
     } else {
@@ -114,6 +101,19 @@ class _NotificationSettingsScreenState
       SnackbarService.success(BuddyMessages.toggledOff(label));
     }
     if (mounted) setState(() => _streakReminderEnabled = enabled);
+  }
+
+  Future<void> _toggleReEngagement(bool enabled) async {
+    HapticFeedback.mediumImpact();
+    final label = AppLocalizations.of(context)!.notifSettings_comeBackNudges;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('re_engagement_enabled', enabled);
+    if (enabled) {
+      SnackbarService.success(BuddyMessages.toggledOn(label));
+    } else {
+      SnackbarService.success(BuddyMessages.toggledOff(label));
+    }
+    if (mounted) setState(() => _reEngagementEnabled = enabled);
   }
 
   Future<void> _toggleSmartAlerts(bool enabled) async {
@@ -243,7 +243,9 @@ class _NotificationSettingsScreenState
   int get _activeCount =>
       (_dailySummaryEnabled ? 1 : 0) +
       (_weeklySummaryEnabled ? 1 : 0) +
-      (_streakReminderEnabled ? 1 : 0);
+      (_streakReminderEnabled ? 1 : 0) +
+      (_reEngagementEnabled ? 1 : 0) +
+      (_smartAlertsEnabled ? 1 : 0);
 
   @override
   Widget build(BuildContext context) {

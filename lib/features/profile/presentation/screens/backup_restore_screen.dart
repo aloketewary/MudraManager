@@ -32,7 +32,7 @@ class BackupRestoreScreen extends ConsumerWidget {
     final ctxt = AppLocalizations.of(context)!;
     final historyAsync = ref.watch(_backupHistoryProvider);
 
-    final lastBackup = historyAsync.valueOrNull?.isNotEmpty == true
+    final lastBackup = historyAsync.value?.isNotEmpty == true
         ? historyAsync.value!.first
         : null;
 
