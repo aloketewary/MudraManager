@@ -1,7 +1,9 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/gamification/models/achievement.dart';
 
 class AchievementUnlockDialog extends StatelessWidget {
@@ -191,7 +193,29 @@ class AchievementUnlockDialog extends StatelessWidget {
                       duration: 400.ms,
                     ),
 
-                const SizedBox(height: 32),
+                const SizedBox(height: 24),
+
+                // ── SHARE BUTTON ──
+                TextButton.icon(
+                  onPressed: () {
+                    final text = '🏆 I just unlocked "${achievement.title}" '
+                        'in Mudra Manager! +${achievement.rewardXP} XP\n\n'
+                        'Track your money the smart way 💰\n'
+                        'https://play.google.com/store/apps/details?id=com.mudramanager.app';
+                    Clipboard.setData(ClipboardData(text: text));
+                    SnackbarService.success('Copied! Share it with friends 🙌');
+                  },
+                  icon: Icon(LucideIcons.share2, color: accent, size: 16),
+                  label: Text(
+                    'Share',
+                    style: textTheme.labelMedium?.copyWith(
+                      color: accent,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ).animate().fadeIn(delay: 600.ms, duration: 400.ms),
+
+                const SizedBox(height: 16),
 
                 // ── TAP TO DISMISS ──
                 Text(

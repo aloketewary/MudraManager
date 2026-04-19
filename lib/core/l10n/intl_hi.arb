@@ -1,6 +1,6 @@
 {
   "@@locale": "hi",
-  "onboard_manageYourMoneyDescription": "पैसों को smart तरीके से manage करें, बिना किसी झंझट के।",
+  "onboard_manageYourMoneyDescription": "100% offline। Hindi, Bengali, English। India के लिए बना।",
   "@onboard_manageYourMoneyDescription": {
     "description": "Manage your money smartly & effortlessly."
   },
@@ -8,19 +8,19 @@
   "@onboard_welcomeToApp": {
     "description": "Welcome to Application"
   },
-  "onboard_TrackYourTransactions": "खर्चे track करें",
+  "onboard_TrackYourTransactions": "Bank SMS से Auto-track",
   "@onboard_TrackYourTransactions": {
     "description": "Track your Transactions"
   },
-  "onboard_SeeWhereYourMoneyGoes": "पैसा कहाँ जा रहा है, रोज़ देखें।",
+  "onboard_SeeWhereYourMoneyGoes": "50+ Indian banks support। HDFC, SBI, ICICI, Paytm, GPay — auto-import।",
   "@onboard_SeeWhereYourMoneyGoes": {
     "description": "See where your money goes, every day."
   },
-  "onboard_SetBudgetsAndGoals": "Budget और Goals सेट करें",
+  "onboard_SetBudgetsAndGoals": "Budget, Goals और Smart Alerts",
   "@onboard_SetBudgetsAndGoals": {
     "description": "Set Budgets and Goals"
   },
-  "onboard_stayOnTrackAndAchieveYourDream": "Track पर रहें, सपने पूरे करें।",
+  "onboard_stayOnTrackAndAchieveYourDream": "Overspend से पहले warning। जो ज़रूरी है उसके लिए save करें।",
   "@onboard_stayOnTrackAndAchieveYourDream": {
     "description": "Stay on track and achieve your dreams."
   },
@@ -2961,5 +2961,26 @@
         "type": "String"
       }
     }
-  }
+  },
+  "achieve_unlocked": "Unlock हो गया",
+  "achieve_inProgress": "चल रहा है",
+  "achieve_trophyShelf": "Trophy Shelf",
+  "achieve_streaks": "Streaks",
+  "achieve_totalXP": "Total XP",
+  "achieve_dailyCheckIn": "Daily Check-in",
+  "achieve_budgetAdherence": "Budget पालन",
+  "achieve_bestDays": "Best: {count} दिन",
+  "@achieve_bestDays": { "placeholders": { "count": { "type": "int" } } },
+  "achieve_noBadgesYet": "अभी कोई {category} badge नहीं",
+  "@achieve_noBadgesYet": { "placeholders": { "category": { "type": "String" } } },
+  "achieve_levelUpSnack": "🎉 Level Up! आप Level {level} पर हैं!",
+  "@achieve_levelUpSnack": { "placeholders": { "level": { "type": "int" } } },
+  "achieve_levelLabel": "Level {level}",
+  "@achieve_levelLabel": { "placeholders": { "level": { "type": "int" } } },
+  "achieve_catBudgeting": "Budgeting",
+  "achieve_catSavings": "बचत",
+  "achieve_catTracking": "Tracking",
+  "achieve_catMilestones": "Milestones",
+  "achieve_catEngagement": "Engagement",
+  "achieve_catAll": "सब"
 }

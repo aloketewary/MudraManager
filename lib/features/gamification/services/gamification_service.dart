@@ -1,9 +1,10 @@
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/models/budget.dart';
-import 'package:mudra_manager/core/db/models/category.dart';
+import 'package:mudra_manager/core/db/models/budget_type.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/services/notification_service.dart';
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/gamification/models/achievement.dart';
 import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
@@ -269,6 +270,9 @@ class GamificationService {
       await isar.writeTxn(() => isar.achievements.put(achievement!));
     }
 
+    // Skip if already unlocked — no need to keep writing
+    if (achievement.isUnlocked) return;
+
     // Check if this achievement is locked in a series
     if (achievement.series != null &&
         achievement.seriesOrder != null &&
@@ -295,7 +299,8 @@ class GamificationService {
       await _addXP(achievement.rewardXP, 'Achievement: ${achievement.title}');
       log.i('🏆 Achievement Unlocked: ${achievement.title}');
       SnackbarService.success(
-        '🏆 ${achievement.title} — nice, +${achievement.rewardXP} XP!',
+        Tone.appL10n?.notif_achievementBody(achievement.title, achievement.rewardXP) ??
+            '🏆 ${achievement.title} — nice, +${achievement.rewardXP} XP!',
       );
       NotificationService.showAchievementUnlocked(
         achievement.title,
@@ -354,7 +359,8 @@ class GamificationService {
       await _addXP(achievement.rewardXP, 'Achievement: ${achievement.title}');
       log.i('🏆 Achievement Unlocked: ${achievement.title}');
       SnackbarService.success(
-        '🏆 ${achievement.title} — nice, +${achievement.rewardXP} XP!',
+        Tone.appL10n?.notif_achievementBody(achievement.title, achievement.rewardXP) ??
+            '🏆 ${achievement.title} — nice, +${achievement.rewardXP} XP!',
       );
 
       NotificationService.showAchievementUnlocked(
@@ -414,7 +420,6 @@ class GamificationService {
 
   Future<void> _checkMonthlyBudgetCompletion() async {
     final now = DateTime.now();
-    // Only run on the 1st (checking previous month)
     if (now.day != 1) return;
 
     final lastMonth = DateTime(now.year, now.month - 1, 1);
@@ -427,27 +432,11 @@ class GamificationService {
 
     bool allUnderBudget = true;
     for (final budget in budgets) {
-      await budget.categories.load();
-      await budget.allocations.load();
       final (s, e) = budget.getCurrentPeriodRange(lastMonth);
-
-      // Only check budgets that were active last month
       if (s.isAfter(lastMonthEnd) || e.isBefore(lastMonth)) continue;
 
-      double totalSpent = 0;
-      for (final alloc in budget.allocations) {
-        await alloc.category.load();
-        if (alloc.category.value == null) continue;
-        totalSpent += await isar.transactions
-            .filter()
-            .isExpenseEqualTo(true)
-            .dateBetween(s, e)
-            .category((q) => q.idEqualTo(alloc.category.value!.id))
-            .amountProperty()
-            .sum();
-      }
-
-      if (totalSpent > budget.amount) {
+      final spent = await _calculateBudgetSpent(budget, s, e);
+      if (spent > budget.amount) {
         allUnderBudget = false;
         break;
       }
@@ -472,7 +461,9 @@ class GamificationService {
 
   void _onLevelUp(int newLevel, int gainedLevels) {
     log.d('🎉 Level Up! New Level: $newLevel');
-    SnackbarService.success('🎉 Level $newLevel! You just leveled up!');
+    SnackbarService.success(
+      Tone.appL10n?.notif_levelUpBody ?? '🎉 Level $newLevel! You just leveled up!',
+    );
     NotificationService.showLevelUp(newLevel);
   }
 
@@ -582,7 +573,7 @@ class GamificationService {
 
     await _checkStreaks(streak.currentCount);
 
-    await _addXP(5, 'Daily Streak: ${streak.currentCount}');
+    await _addXP(_calculateStreakXP(streak.currentCount), 'Daily Streak: ${streak.currentCount}');
   }
 
   Future<Streak> _getOrCreateStreak() async {
@@ -658,6 +649,56 @@ class GamificationService {
   /* =====================================================
      HELPERS
   ===================================================== */
+
+  /// Calculate total spent for a budget in a date range, handling all budget types.
+  Future<double> _calculateBudgetSpent(Budget budget, DateTime s, DateTime e) async {
+    final txns = await isar.transactions
+        .filter()
+        .isExpenseEqualTo(true)
+        .dateBetween(s, e)
+        .findAll();
+
+    if (budget.budgetType == BudgetType.tagWise) {
+      await budget.budgetTags.load();
+      final tagIds = budget.budgetTags.map((t) => t.id).toSet();
+      if (tagIds.isEmpty) return 0;
+      double spent = 0;
+      for (final t in txns) {
+        await t.tags.load();
+        if (t.tags.any((tag) => tagIds.contains(tag.id))) {
+          spent += t.baseAmount;
+        }
+      }
+      return spent;
+    }
+
+    if (budget.budgetType == BudgetType.dayWise ||
+        budget.budgetType == BudgetType.festival ||
+        budget.budgetType == BudgetType.travel) {
+      await budget.categories.load();
+      final categoryIds = budget.categories.map((c) => c.id).toList();
+      if (categoryIds.isEmpty) {
+        return txns.fold<double>(0.0, (sum, t) => sum + t.baseAmount);
+      }
+      for (final t in txns) {
+        await t.category.load();
+      }
+      return txns
+          .where((t) => t.category.value != null && categoryIds.contains(t.category.value!.id))
+          .fold<double>(0.0, (sum, t) => sum + t.baseAmount);
+    }
+
+    // categoryWise
+    await budget.categories.load();
+    final categoryIds = budget.categories.map((c) => c.id).toList();
+    if (categoryIds.isEmpty) return 0;
+    for (final t in txns) {
+      await t.category.load();
+    }
+    return txns
+        .where((t) => t.category.value != null && categoryIds.contains(t.category.value!.id))
+        .fold<double>(0.0, (sum, t) => sum + t.baseAmount);
+  }
 
   bool _isSameDay(DateTime a, DateTime b) {
     return a.year == b.year && a.month == b.month && a.day == b.day;
@@ -833,23 +874,8 @@ class GamificationService {
 
       bool allWithinBudget = true;
       for (final budget in budgets) {
-        await budget.categories.load();
-        await budget.allocations.load();
-
         final (s, e) = budget.getCurrentPeriodRange(yesterday);
-        double totalSpent = 0;
-
-        for (final alloc in budget.allocations) {
-          await alloc.category.load();
-          final spent = await isar.transactions
-              .filter()
-              .isExpenseEqualTo(true)
-              .dateBetween(s, e)
-              .category((q) => q.idEqualTo(alloc.category.value!.id))
-              .amountProperty()
-              .sum();
-          totalSpent += spent;
-        }
+        final totalSpent = await _calculateBudgetSpent(budget, s, e);
 
         if (totalSpent > budget.amount) {
           allWithinBudget = false;

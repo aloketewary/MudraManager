@@ -1,11 +1,11 @@
 {
   "@@locale": "bn",
-  "onboard_manageYourMoneyDescription": "টাকা-পয়সা smart ভাবে manage করুন, ঝামেলা ছাড়াই।",
+  "onboard_manageYourMoneyDescription": "100% offline। Hindi, Bengali, English। India-র জন্য তৈরি।",
   "onboard_welcomeToApp": "{appName}-এ স্বাগতম",
-  "onboard_TrackYourTransactions": "খরচ track করুন",
-  "onboard_SeeWhereYourMoneyGoes": "টাকা কোথায় যাচ্ছে, রোজ দেখুন।",
-  "onboard_SetBudgetsAndGoals": "Budget আর Goals সেট করুন",
-  "onboard_stayOnTrackAndAchieveYourDream": "Track-এ থাকুন, স্বপ্ন পূরণ করুন।",
+  "onboard_TrackYourTransactions": "Bank SMS থেকে Auto-track",
+  "onboard_SeeWhereYourMoneyGoes": "50+ Indian bank support। HDFC, SBI, ICICI, Paytm, GPay — auto-import।",
+  "onboard_SetBudgetsAndGoals": "Budget, Goals ও Smart Alerts",
+  "onboard_stayOnTrackAndAchieveYourDream": "Overspend-এর আগে warning। যা দরকার তার জন্য save করুন।",
   "onboard_GetStarted": "চলুন শুরু করি!",
   "onboard_letsSetupYourAccount": "চলুন আপনার account সেট আপ করি।",
   "onboard_howShouldWeCallYou": "আপনাকে কী নামে ডাকব?",
@@ -2162,5 +2162,26 @@
         "type": "String"
       }
     }
-  }
+  },
+  "achieve_unlocked": "Unlock হয়েছে",
+  "achieve_inProgress": "চলছে",
+  "achieve_trophyShelf": "Trophy Shelf",
+  "achieve_streaks": "Streaks",
+  "achieve_totalXP": "Total XP",
+  "achieve_dailyCheckIn": "Daily Check-in",
+  "achieve_budgetAdherence": "Budget মেনে চলা",
+  "achieve_bestDays": "Best: {count} দিন",
+  "@achieve_bestDays": { "placeholders": { "count": { "type": "int" } } },
+  "achieve_noBadgesYet": "এখনও কোনো {category} badge নেই",
+  "@achieve_noBadgesYet": { "placeholders": { "category": { "type": "String" } } },
+  "achieve_levelUpSnack": "🎉 Level Up! আপনি Level {level}-এ!",
+  "@achieve_levelUpSnack": { "placeholders": { "level": { "type": "int" } } },
+  "achieve_levelLabel": "Level {level}",
+  "@achieve_levelLabel": { "placeholders": { "level": { "type": "int" } } },
+  "achieve_catBudgeting": "Budgeting",
+  "achieve_catSavings": "সঞ্চয়",
+  "achieve_catTracking": "Tracking",
+  "achieve_catMilestones": "Milestones",
+  "achieve_catEngagement": "Engagement",
+  "achieve_catAll": "সব"
 }

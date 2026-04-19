@@ -66,6 +66,9 @@ class StandardExcelExportPlugin extends ExportPlugin {
     summary.cell(CellIndex.indexByString('B12')).value = TextCellValue('${data.savingsRate.toStringAsFixed(1)}%');
     summary.cell(CellIndex.indexByString('A13')).value = TextCellValue('Avg Daily Spend');
     summary.cell(CellIndex.indexByString('B13')).value = TextCellValue('${data.currency}${data.avgDailySpend.toStringAsFixed(2)}');
+
+    summary.cell(CellIndex.indexByString('A15')).value = TextCellValue('Made with Mudra Manager • mudramanager.com');
+    summary.cell(CellIndex.indexByString('A15')).cellStyle = CellStyle(fontSize: 9, fontColorHex: ExcelColor.fromHexString('#999999'));
   }
 
   void _createCategorySheet(Excel excel, ExportData data) {

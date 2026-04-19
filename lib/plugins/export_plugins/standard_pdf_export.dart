@@ -275,11 +275,19 @@ class StandardPdfExportPlugin extends ExportPlugin {
 
   pw.Widget _buildFooter(pw.Context context, DateTime now) {
     return pw.Container(
-      alignment: pw.Alignment.centerRight,
       margin: const pw.EdgeInsets.only(top: 10),
-      child: pw.Text(
-        'Page ${context.pageNumber} of ${context.pagesCount} • Generated on ${DateFormat('dd MMM yyyy, hh:mm a').format(now)}',
-        style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey),
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+        children: [
+          pw.Text(
+            'Made with Mudra Manager • mudramanager.com',
+            style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey),
+          ),
+          pw.Text(
+            'Page ${context.pageNumber} of ${context.pagesCount}',
+            style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey),
+          ),
+        ],
       ),
     );
   }

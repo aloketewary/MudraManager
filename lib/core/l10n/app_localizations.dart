@@ -103,7 +103,7 @@ abstract class AppLocalizations {
   /// Manage your money smartly & effortlessly.
   ///
   /// In en, this message translates to:
-  /// **'Manage your money smartly & effortlessly.'**
+  /// **'100% offline. Hindi, Bengali, English. Built for India.'**
   String get onboard_manageYourMoneyDescription;
 
   /// Welcome to Application
@@ -115,25 +115,25 @@ abstract class AppLocalizations {
   /// Track your Transactions
   ///
   /// In en, this message translates to:
-  /// **'Track your Transactions'**
+  /// **'Auto-track from Bank SMS'**
   String get onboard_TrackYourTransactions;
 
   /// See where your money goes, every day.
   ///
   /// In en, this message translates to:
-  /// **'See where your money goes, every day.'**
+  /// **'50+ Indian banks supported. HDFC, SBI, ICICI, Paytm, GPay — auto-imported.'**
   String get onboard_SeeWhereYourMoneyGoes;
 
   /// Set Budgets and Goals
   ///
   /// In en, this message translates to:
-  /// **'Set Budgets and Goals'**
+  /// **'Budgets, Goals & Smart Alerts'**
   String get onboard_SetBudgetsAndGoals;
 
   /// Stay on track and achieve your dreams.
   ///
   /// In en, this message translates to:
-  /// **'Stay on track and achieve your dreams.'**
+  /// **'Get warnings before you overspend. Save for what matters.'**
   String get onboard_stayOnTrackAndAchieveYourDream;
 
   /// Get Started!
@@ -9819,6 +9819,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your balance in {account} is {amount}'**
   String notif_lowBalanceBody(String account, String amount);
+
+  /// No description provided for @achieve_unlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlocked'**
+  String get achieve_unlocked;
+
+  /// No description provided for @achieve_inProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In Progress'**
+  String get achieve_inProgress;
+
+  /// No description provided for @achieve_trophyShelf.
+  ///
+  /// In en, this message translates to:
+  /// **'Trophy Shelf'**
+  String get achieve_trophyShelf;
+
+  /// No description provided for @achieve_streaks.
+  ///
+  /// In en, this message translates to:
+  /// **'Streaks'**
+  String get achieve_streaks;
+
+  /// No description provided for @achieve_totalXP.
+  ///
+  /// In en, this message translates to:
+  /// **'Total XP'**
+  String get achieve_totalXP;
+
+  /// No description provided for @achieve_dailyCheckIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Check-in'**
+  String get achieve_dailyCheckIn;
+
+  /// No description provided for @achieve_budgetAdherence.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget Adherence'**
+  String get achieve_budgetAdherence;
+
+  /// No description provided for @achieve_bestDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Best: {count} days'**
+  String achieve_bestDays(int count);
+
+  /// No description provided for @achieve_noBadgesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No {category} badges yet'**
+  String achieve_noBadgesYet(String category);
+
+  /// No description provided for @achieve_levelUpSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'🎉 Level Up! You are now Level {level}!'**
+  String achieve_levelUpSnack(int level);
+
+  /// No description provided for @achieve_levelLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Level {level}'**
+  String achieve_levelLabel(int level);
+
+  /// No description provided for @achieve_catBudgeting.
+  ///
+  /// In en, this message translates to:
+  /// **'Budgeting'**
+  String get achieve_catBudgeting;
+
+  /// No description provided for @achieve_catSavings.
+  ///
+  /// In en, this message translates to:
+  /// **'Savings'**
+  String get achieve_catSavings;
+
+  /// No description provided for @achieve_catTracking.
+  ///
+  /// In en, this message translates to:
+  /// **'Tracking'**
+  String get achieve_catTracking;
+
+  /// No description provided for @achieve_catMilestones.
+  ///
+  /// In en, this message translates to:
+  /// **'Milestones'**
+  String get achieve_catMilestones;
+
+  /// No description provided for @achieve_catEngagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Engagement'**
+  String get achieve_catEngagement;
+
+  /// No description provided for @achieve_catAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get achieve_catAll;
 }
 
 class _AppLocalizationsDelegate

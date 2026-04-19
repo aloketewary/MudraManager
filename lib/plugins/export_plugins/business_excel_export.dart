@@ -62,6 +62,8 @@ class BusinessExcelExportPlugin extends ExportPlugin {
     sheet.cell(CellIndex.indexByString('A9')).value = TextCellValue('Profit Margin');
     sheet.cell(CellIndex.indexByString('B9')).value =
         TextCellValue('${data.savingsRate.toStringAsFixed(2)}%');
+
+    sheet.cell(CellIndex.indexByString('A11')).value = TextCellValue('Made with Mudra Manager • mudramanager.com');
   }
 
   void _createProfitLoss(Excel excel, ExportData data) {

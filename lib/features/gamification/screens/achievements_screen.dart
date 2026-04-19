@@ -39,7 +39,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
     super.dispose();
   }
 
-  void _checkLevelUp(UserLevel? level) async {
+  void _checkLevelUp(UserLevel? level, AppLocalizations ctxt) async {
     if (level == null) return;
     final prefs = await SharedPreferences.getInstance();
     final lastSeen = prefs.getInt('last_seen_level');
@@ -53,7 +53,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
       Future.microtask(() {
         _confettiController.play();
         SnackbarService.success(
-          '🎉 Level Up! You are now Level ${level.level}!',
+          ctxt.achieve_levelUpSnack(level.level),
         );
       });
       await prefs.setInt('last_seen_level', level.level);
@@ -68,9 +68,10 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
     final spacing = ref.watch(spacingProvider);
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final ctxt = AppLocalizations.of(context)!;
 
     levelAsync.maybeWhen(
-      data: (level) => _checkLevelUp(level),
+      data: (level) => _checkLevelUp(level, ctxt),
       orElse: () {},
     );
 
@@ -101,7 +102,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
                   SliverAppBar(
                     expandedHeight: 260,
                     pinned: true,
-                    title: Text(AppLocalizations.of(context)!.title_achievements),
+                    title: Text(ctxt.title_achievements),
                     flexibleSpace: FlexibleSpaceBar(
                       background: levelAsync.when(
                         data: (level) => level != null
@@ -127,7 +128,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
                       delegate: SliverChildListDelegate([
                         // ── TROPHY SHELF ──
                         if (recentUnlocked.isNotEmpty) ...[
-                          _buildTrophyShelf(recentUnlocked, color, textTheme),
+                          _buildTrophyShelf(recentUnlocked, color, textTheme, ctxt),
                           const SizedBox(height: 20),
                         ],
 
@@ -139,6 +140,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
                             level?.totalXP ?? 0,
                             color,
                             textTheme,
+                            ctxt,
                           ),
                           loading: () => const SizedBox.shrink(),
                           error: (_, __) => const SizedBox.shrink(),
@@ -153,6 +155,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
                                   color,
                                   textTheme,
                                   spacing,
+                                  ctxt,
                                 )
                               : const SizedBox.shrink(),
                           loading: () => const SizedBox.shrink(),
@@ -162,13 +165,13 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
                           const SizedBox(height: 20),
 
                         // ── CATEGORY CHIPS ──
-                        _buildCategoryChips(color, textTheme),
+                        _buildCategoryChips(color, textTheme, ctxt),
                         const SizedBox(height: 16),
 
                         // ── UNLOCKED ──
                         if (unlocked.isNotEmpty) ...[
                           _buildSectionHeader(
-                            'Unlocked',
+                            ctxt.achieve_unlocked,
                             '${unlocked.length}',
                             color,
                             textTheme,
@@ -181,7 +184,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
                         // ── IN PROGRESS ──
                         if (locked.isNotEmpty) ...[
                           _buildSectionHeader(
-                            'In Progress',
+                            ctxt.achieve_inProgress,
                             '${locked.length}',
                             color,
                             textTheme,
@@ -205,7 +208,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
                                 const SizedBox(height: 12),
                                 Text(
                                   _filterCategory != null
-                                      ? 'No ${_categoryLabel(_filterCategory!).toLowerCase()} badges yet'
+                                      ? ctxt.achieve_noBadgesYet(_categoryLabel(_filterCategory!, ctxt).toLowerCase())
                                       : BuddyMessages.noTransactions,
                                   style: textTheme.bodyLarge?.copyWith(
                                     color: color.onSurfaceVariant,
@@ -255,6 +258,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
     List<Achievement> recentUnlocked,
     ColorScheme color,
     TextTheme textTheme,
+    AppLocalizations ctxt,
   ) {
     final items = recentUnlocked.take(10).toList();
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -269,7 +273,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionHeader(
-            'Trophy Shelf', '${items.length}', color, textTheme,),
+            ctxt.achieve_trophyShelf, '${items.length}', color, textTheme,),
         const SizedBox(height: 10),
         Container(
           decoration: BoxDecoration(
@@ -418,20 +422,20 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
   }
 
   // ── CATEGORY CHIPS (replaces bottom sheet filter) ──
-  Widget _buildCategoryChips(ColorScheme color, TextTheme textTheme) {
+  Widget _buildCategoryChips(ColorScheme color, TextTheme textTheme, AppLocalizations ctxt) {
     return SizedBox(
       height: 36,
       child: ListView(
         scrollDirection: Axis.horizontal,
         children: [
-          _categoryChip(null, 'All', LucideIcons.layoutGrid, color, textTheme),
+          _categoryChip(null, ctxt.achieve_catAll, LucideIcons.layoutGrid, color, textTheme),
           const SizedBox(width: 8),
           ...AchievementCategory.values.map((cat) {
             return Padding(
               padding: const EdgeInsets.only(right: 8),
               child: _categoryChip(
                 cat,
-                _categoryLabel(cat),
+                _categoryLabel(cat, ctxt),
                 _categoryIcon(cat),
                 color,
                 textTheme,
@@ -473,12 +477,13 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
     int totalXP,
     ColorScheme color,
     TextTheme textTheme,
+    AppLocalizations ctxt,
   ) {
     return Row(
       children: [
         _statPill(
           '$unlocked',
-          'Unlocked',
+          ctxt.achieve_unlocked,
           LucideIcons.trophy,
           color.primary,
           color,
@@ -487,7 +492,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
         const SizedBox(width: 8),
         _statPill(
           '$inProgress',
-          'In Progress',
+          ctxt.achieve_inProgress,
           LucideIcons.loader,
           color.tertiary,
           color,
@@ -496,7 +501,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
         const SizedBox(width: 8),
         _statPill(
           '$totalXP',
-          'Total XP',
+          ctxt.achieve_totalXP,
           LucideIcons.sparkles,
           color.primary,
           color,
@@ -550,11 +555,12 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
     ColorScheme color,
     TextTheme textTheme,
     AppSpacing spacing,
+    AppLocalizations ctxt,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('Streaks', '${streaks.length}', color, textTheme),
+        _buildSectionHeader(ctxt.achieve_streaks, '${streaks.length}', color, textTheme),
         const SizedBox(height: 10),
         Card(
           elevation: 0,
@@ -575,8 +581,8 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
                   ? LucideIcons.flame
                   : LucideIcons.piggyBank;
               final label = streak.type == 'daily_checkin'
-                  ? 'Daily Check-in'
-                  : 'Budget Adherence';
+                  ? ctxt.achieve_dailyCheckIn
+                  : ctxt.achieve_budgetAdherence;
               final accent = streak.type == 'daily_checkin'
                   ? color.tertiary
                   : color.primary;
@@ -610,7 +616,7 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
                                 ),
                               ),
                               Text(
-                                'Best: ${streak.longestCount} days',
+                                ctxt.achieve_bestDays(streak.longestCount),
                                 style: textTheme.bodySmall?.copyWith(
                                   color: color.onSurfaceVariant,
                                 ),
@@ -730,18 +736,18 @@ class _AchievementsScreenState extends ConsumerState<AchievementsScreen> {
     }
   }
 
-  String _categoryLabel(AchievementCategory cat) {
+  String _categoryLabel(AchievementCategory cat, AppLocalizations ctxt) {
     switch (cat) {
       case AchievementCategory.budgeting:
-        return 'Budgeting';
+        return ctxt.achieve_catBudgeting;
       case AchievementCategory.saving:
-        return 'Savings';
+        return ctxt.achieve_catSavings;
       case AchievementCategory.tracking:
-        return 'Tracking';
+        return ctxt.achieve_catTracking;
       case AchievementCategory.milestone:
-        return 'Milestones';
+        return ctxt.achieve_catMilestones;
       case AchievementCategory.engagement:
-        return 'Engagement';
+        return ctxt.achieve_catEngagement;
     }
   }
 
@@ -780,6 +786,7 @@ class _RankHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final rank = FinanceRank.getRankForLevel(level.level);
     final accent = color.primary;
+    final ctxt = AppLocalizations.of(context)!;
 
     return Container(
       decoration: BoxDecoration(
@@ -863,7 +870,7 @@ class _RankHeader extends StatelessWidget {
               ),
               const SizedBox(height: 2),
               Text(
-                'Level ${level.level}',
+                ctxt.achieve_levelLabel(level.level),
                 style: textTheme.bodySmall?.copyWith(
                   color: color.onSurfaceVariant,
                 ),

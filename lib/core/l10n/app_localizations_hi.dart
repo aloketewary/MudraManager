@@ -10,7 +10,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get onboard_manageYourMoneyDescription =>
-      'पैसों को smart तरीके से manage करें, बिना किसी झंझट के।';
+      '100% offline। Hindi, Bengali, English। India के लिए बना।';
 
   @override
   String onboard_welcomeToApp(Object appName) {
@@ -18,18 +18,18 @@ class AppLocalizationsHi extends AppLocalizations {
   }
 
   @override
-  String get onboard_TrackYourTransactions => 'खर्चे track करें';
+  String get onboard_TrackYourTransactions => 'Bank SMS से Auto-track';
 
   @override
   String get onboard_SeeWhereYourMoneyGoes =>
-      'पैसा कहाँ जा रहा है, रोज़ देखें।';
+      '50+ Indian banks support। HDFC, SBI, ICICI, Paytm, GPay — auto-import।';
 
   @override
-  String get onboard_SetBudgetsAndGoals => 'Budget और Goals सेट करें';
+  String get onboard_SetBudgetsAndGoals => 'Budget, Goals और Smart Alerts';
 
   @override
   String get onboard_stayOnTrackAndAchieveYourDream =>
-      'Track पर रहें, सपने पूरे करें।';
+      'Overspend से पहले warning। जो ज़रूरी है उसके लिए save करें।';
 
   @override
   String get onboard_GetStarted => 'चलो शुरू करें!';
@@ -5403,4 +5403,63 @@ class AppLocalizationsHi extends AppLocalizations {
   String notif_lowBalanceBody(String account, String amount) {
     return '$account में बस $amount बचा है';
   }
+
+  @override
+  String get achieve_unlocked => 'Unlock हो गया';
+
+  @override
+  String get achieve_inProgress => 'चल रहा है';
+
+  @override
+  String get achieve_trophyShelf => 'Trophy Shelf';
+
+  @override
+  String get achieve_streaks => 'Streaks';
+
+  @override
+  String get achieve_totalXP => 'Total XP';
+
+  @override
+  String get achieve_dailyCheckIn => 'Daily Check-in';
+
+  @override
+  String get achieve_budgetAdherence => 'Budget पालन';
+
+  @override
+  String achieve_bestDays(int count) {
+    return 'Best: $count दिन';
+  }
+
+  @override
+  String achieve_noBadgesYet(String category) {
+    return 'अभी कोई $category badge नहीं';
+  }
+
+  @override
+  String achieve_levelUpSnack(int level) {
+    return '🎉 Level Up! आप Level $level पर हैं!';
+  }
+
+  @override
+  String achieve_levelLabel(int level) {
+    return 'Level $level';
+  }
+
+  @override
+  String get achieve_catBudgeting => 'Budgeting';
+
+  @override
+  String get achieve_catSavings => 'बचत';
+
+  @override
+  String get achieve_catTracking => 'Tracking';
+
+  @override
+  String get achieve_catMilestones => 'Milestones';
+
+  @override
+  String get achieve_catEngagement => 'Engagement';
+
+  @override
+  String get achieve_catAll => 'सब';
 }
