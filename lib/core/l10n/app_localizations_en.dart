@@ -3037,7 +3037,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get goal_smartInsight => 'Smart Insight';
 
   @override
-  String get goal_onTrack => 'On Track ✅';
+  String get goal_onTrack => 'On Track';
 
   @override
   String get goal_onTrackDesc => 'This goal is very achievable 👍';
@@ -3531,12 +3531,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stats_overview => 'Overview';
 
   @override
-  String get stats_income => 'Income';
-
-  @override
-  String get stats_expense => 'Expense';
-
-  @override
   String get stats_trends => 'Trends';
 
   @override
@@ -3600,6 +3594,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stats_categoryImpact => 'CATEGORY IMPACT';
 
   @override
+  String get stats_income => 'Income';
+
+  @override
+  String get stats_expense => 'Expense';
+
+  @override
   String get stats_net => 'Net';
 
   @override
@@ -3636,15 +3636,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get stats_generating => 'Generating...';
-
-  @override
-  String get recap_income => 'Income';
-
-  @override
-  String get recap_expense => 'Expense';
-
-  @override
-  String get recap_saved => 'Saved';
 
   @override
   String get recap_belowAvg => 'Below avg';
@@ -3885,6 +3876,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get day_sunday => 'Sunday';
+
+  @override
+  String get recap_income => 'Income';
+
+  @override
+  String get recap_expense => 'Expense';
+
+  @override
+  String get recap_saved => 'Saved';
 
   @override
   String get recap_dailySpending => 'Daily Spending';
@@ -4912,6 +4912,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get goal_finishGoal => 'Finish this goal! 🚀';
+
+  @override
+  String get goal_onTrackStatus => 'On Track ✅';
 
   @override
   String get goal_behindPace => 'Behind pace ⚠️';

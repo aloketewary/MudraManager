@@ -5467,7 +5467,7 @@ abstract class AppLocalizations {
   /// No description provided for @goal_onTrack.
   ///
   /// In en, this message translates to:
-  /// **'On Track ✅'**
+  /// **'On Track'**
   String get goal_onTrack;
 
   /// No description provided for @goal_onTrackDesc.
@@ -6346,18 +6346,6 @@ abstract class AppLocalizations {
   /// **'Overview'**
   String get stats_overview;
 
-  /// No description provided for @stats_income.
-  ///
-  /// In en, this message translates to:
-  /// **'Income'**
-  String get stats_income;
-
-  /// No description provided for @stats_expense.
-  ///
-  /// In en, this message translates to:
-  /// **'Expense'**
-  String get stats_expense;
-
   /// No description provided for @stats_trends.
   ///
   /// In en, this message translates to:
@@ -6460,6 +6448,18 @@ abstract class AppLocalizations {
   /// **'CATEGORY IMPACT'**
   String get stats_categoryImpact;
 
+  /// No description provided for @stats_income.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get stats_income;
+
+  /// No description provided for @stats_expense.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense'**
+  String get stats_expense;
+
   /// No description provided for @stats_net.
   ///
   /// In en, this message translates to:
@@ -6525,24 +6525,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Generating...'**
   String get stats_generating;
-
-  /// No description provided for @recap_income.
-  ///
-  /// In en, this message translates to:
-  /// **'Income'**
-  String get recap_income;
-
-  /// No description provided for @recap_expense.
-  ///
-  /// In en, this message translates to:
-  /// **'Expense'**
-  String get recap_expense;
-
-  /// No description provided for @recap_saved.
-  ///
-  /// In en, this message translates to:
-  /// **'Saved'**
-  String get recap_saved;
 
   /// No description provided for @recap_belowAvg.
   ///
@@ -6993,6 +6975,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sunday'**
   String get day_sunday;
+
+  /// No description provided for @recap_income.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get recap_income;
+
+  /// No description provided for @recap_expense.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense'**
+  String get recap_expense;
+
+  /// No description provided for @recap_saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get recap_saved;
 
   /// No description provided for @recap_dailySpending.
   ///
@@ -8907,6 +8907,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Finish this goal! 🚀'**
   String get goal_finishGoal;
+
+  /// No description provided for @goal_onTrackStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'On Track ✅'**
+  String get goal_onTrackStatus;
 
   /// No description provided for @goal_behindPace.
   ///

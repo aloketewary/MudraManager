@@ -3025,7 +3025,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get goal_smartInsight => 'Smart তথ্য';
 
   @override
-  String get goal_onTrack => 'ঠিক চলছে ✅';
+  String get goal_onTrack => 'ঠিক চলছে';
 
   @override
   String get goal_onTrackDesc => 'এই goal সহজেই অর্জনযোগ্য 👍';
@@ -3513,12 +3513,6 @@ class AppLocalizationsBn extends AppLocalizations {
   String get stats_overview => 'সারসংক্ষেপ';
 
   @override
-  String get stats_income => 'আয়';
-
-  @override
-  String get stats_expense => 'খরচ';
-
-  @override
   String get stats_trends => 'প্রবণতা';
 
   @override
@@ -3582,6 +3576,12 @@ class AppLocalizationsBn extends AppLocalizations {
   String get stats_categoryImpact => 'CATEGORY প্রভাব';
 
   @override
+  String get stats_income => 'আয়';
+
+  @override
+  String get stats_expense => 'খরচ';
+
+  @override
   String get stats_net => 'নেট';
 
   @override
@@ -3617,15 +3617,6 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get stats_generating => 'তৈরি হচ্ছে...';
-
-  @override
-  String get recap_income => 'আয়';
-
-  @override
-  String get recap_expense => 'খরচ';
-
-  @override
-  String get recap_saved => 'সঞ্চিত';
 
   @override
   String get recap_belowAvg => 'গড়ের নিচে';
@@ -3870,6 +3861,15 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get day_sunday => 'রবিবার';
+
+  @override
+  String get recap_income => 'আয়';
+
+  @override
+  String get recap_expense => 'খরচ';
+
+  @override
+  String get recap_saved => 'সঞ্চিত';
 
   @override
   String get recap_dailySpending => 'দৈনিক খরচ';
@@ -4893,6 +4893,9 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get goal_finishGoal => 'এই goal শেষ করুন! 🚀';
+
+  @override
+  String get goal_onTrackStatus => 'ঠিক চলছে ✅';
 
   @override
   String get goal_behindPace => 'পিছিয়ে পড়ছে ⚠️';

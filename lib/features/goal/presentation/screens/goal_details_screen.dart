@@ -609,7 +609,7 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
   ) {
     final label = switch (health.status) {
       GoalStatus.ahead => ctxt.goal_aheadOfSchedule,
-      GoalStatus.onTrack => ctxt.goal_onTrack,
+      GoalStatus.onTrack => ctxt.goal_onTrackStatus,
       GoalStatus.behind => ctxt.goal_behindPace,
       GoalStatus.completed => ctxt.goal_completedSection,
       GoalStatus.noDeadline => ctxt.goal_flexibleTimeline,
