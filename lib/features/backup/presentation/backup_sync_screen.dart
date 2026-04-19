@@ -182,7 +182,6 @@ class _BackupSyncScreenState extends ConsumerState<BackupSyncScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Backup created successfully')),
         );
-        setState(() {});
       }
     } finally {
       setState(() => _isCreatingBackup = false);

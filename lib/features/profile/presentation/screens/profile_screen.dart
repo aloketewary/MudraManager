@@ -73,7 +73,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ? Padding(
                           padding: const EdgeInsets.only(right: 16),
                           child: Text(
-                            profile?.name ?? AppLocalizations.of(context)!.profile_awesomeUser,
+                            profile?.name ?? l10n.profile_awesomeUser,
                             style: textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: color.onSurface,
@@ -126,14 +126,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   items: [
                     _SettingItem(
                       LucideIcons.wallet,
-                      AppLocalizations.of(context)!.profile_accounts,
-                      AppLocalizations.of(context)!.profile_manageAccounts,
+                      l10n.profile_accounts,
+                      l10n.profile_manageAccounts,
                       () => context.push(AppRoutes.manageAccounts),
                     ),
                     _SettingItem(
                       LucideIcons.layoutGrid,
-                      AppLocalizations.of(context)!.profile_categories,
-                      AppLocalizations.of(context)!.profile_manageCategories,
+                      l10n.profile_categories,
+                      l10n.profile_manageCategories,
                       () => context.push(AppRoutes.manageCategories),
                     ),
                     _SettingItem(
@@ -145,7 +145,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     _SettingItem(
                       LucideIcons.lock,
                       l10n.title_security,
-                      AppLocalizations.of(context)!.profile_pinFingerprint,
+                      l10n.profile_pinFingerprint,
                       () => context.push(AppRoutes.security),
                     ),
                   ],
@@ -174,12 +174,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     _SettingItem(
                       LucideIcons.palette,
                       l10n.title_appearance,
-                      AppLocalizations.of(context)!.profile_themeDisplay,
+                      l10n.profile_themeDisplay,
                       () => context.push(AppRoutes.appearance),
                     ),
                     _SettingItem(
                       LucideIcons.languages,
-                      AppLocalizations.of(context)!.profile_language,
+                      l10n.profile_language,
                       Locale(SharedPrefsUtil.instance.getLanguage())
                           .displayName(),
                       () => context.push(AppRoutes.chooseLanguage),
@@ -200,20 +200,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     _SettingItem(
                       LucideIcons.layoutDashboard,
                       l10n.title_dashboardLayout,
-                      AppLocalizations.of(context)!.profile_customizeWidgets,
+                      l10n.profile_customizeWidgets,
                       () => context.push(AppRoutes.dashboardCustomize),
                       trailing: const ProBadge(),
                     ),
                     _SettingItem(
                       LucideIcons.arrowLeftRight,
-                      AppLocalizations.of(context)!.profile_importExport,
-                      AppLocalizations.of(context)!.profile_importExportDesc,
+                      l10n.profile_importExport,
+                      l10n.profile_importExportDesc,
                       () => context.push(AppRoutes.importExport),
                     ),
                     _SettingItem(
                       LucideIcons.puzzle,
                       l10n.title_plugins,
-                      AppLocalizations.of(context)!.profile_manageExtensions,
+                      l10n.profile_manageExtensions,
                       () => context.push(AppRoutes.marketplace),
                     ),
                   ],
@@ -230,14 +230,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   items: [
                     _SettingItem(
                       LucideIcons.circleQuestionMark,
-                      AppLocalizations.of(context)!.profile_helpSupport,
-                      AppLocalizations.of(context)!.profile_faqs,
+                      l10n.profile_helpSupport,
+                      l10n.profile_faqs,
                       () => context.push(AppRoutes.help),
                     ),
                     _SettingItem(
                       LucideIcons.info,
-                      AppLocalizations.of(context)!.profile_aboutApp,
-                      AppLocalizations.of(context)!.profile_versionInfo,
+                      l10n.profile_aboutApp,
+                      l10n.profile_versionInfo,
                       () => context.push(AppRoutes.about),
                     ),
                   ],
@@ -257,7 +257,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         _showLogoutBottomSheet(context, ref, color, textTheme),
                     icon: Icon(LucideIcons.logOut, size: 18, color: color.error),
                     label: Text(
-                      AppLocalizations.of(context)!.profile_logout,
+                      l10n.profile_logout,
                       style: textTheme.bodyMedium?.copyWith(color: color.error),
                     ),
                     style: TextButton.styleFrom(

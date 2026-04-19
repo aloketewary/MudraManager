@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
+import 'package:mudra_manager/core/providers/collection_watchers.dart';
+import 'package:mudra_manager/core/providers/date_change_provider.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
@@ -28,6 +30,8 @@ enum AlertType {
 
 final priorityAlertProvider =
     FutureProvider.autoDispose<PriorityAlert?>((ref) async {
+  ref.watch(transactionChangeProvider);
+  ref.watch(dateChangeProvider);
   final isar = ref.watch(isarServiceProvider);
   final db = await isar.getInstance();
 

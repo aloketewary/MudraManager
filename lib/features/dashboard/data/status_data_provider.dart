@@ -221,6 +221,7 @@ final customStatsProvider = FutureProvider.autoDispose.family<StatsData, String>
   ref,
   dateKey,
 ) async {
+  ref.watch(transactionChangeProvider);
   // Parse the date key format: "start_end"
   final parts = dateKey.split('_');
   if (parts.length != 2) {

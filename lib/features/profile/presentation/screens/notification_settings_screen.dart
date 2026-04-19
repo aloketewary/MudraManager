@@ -253,9 +253,10 @@ class _NotificationSettingsScreenState
     final textTheme = Theme.of(context).textTheme;
     final spacing = ref.watch(spacingProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ctxt = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(title: Text(AppLocalizations.of(context)!.title_notifications)),
+      appBar: AppBar(title: Text(ctxt.title_notifications)),
       body: !_loaded
           ? Padding(padding: EdgeInsets.all(spacing.cardHorizontal), child: Column(children: [const DashboardCardSkeleton(), SizedBox(height: spacing.elementGap), const DashboardCardSkeleton()]))
           : ListView(
@@ -312,7 +313,7 @@ class _NotificationSettingsScreenState
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              AppLocalizations.of(context)!.notifSettings_activeCount(_activeCount),
+                              ctxt.notifSettings_activeCount(_activeCount),
                               style: textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.w700,
                                 color: color.primary,
@@ -320,7 +321,7 @@ class _NotificationSettingsScreenState
                             ),
                             SizedBox(height: spacing.elementGapMin),
                             Text(
-                              AppLocalizations.of(context)!.notifSettings_summaryDesc,
+                              ctxt.notifSettings_summaryDesc,
                               style: textTheme.bodySmall?.copyWith(
                                 color: color.onSurfaceVariant,
                               ),
@@ -334,7 +335,7 @@ class _NotificationSettingsScreenState
                 const SizedBox(height: 24),
 
                 // ── DAILY SUMMARY ──
-                _buildSectionHeader(AppLocalizations.of(context)!.notifSettings_dailySummary, color, textTheme),
+                _buildSectionHeader(ctxt.notifSettings_dailySummary, color, textTheme),
                 const SizedBox(height: 10),
                 _buildGroupedCard(
                   color: color,
@@ -343,8 +344,8 @@ class _NotificationSettingsScreenState
                   children: [
                     _buildToggleRow(
                       icon: LucideIcons.calendarDays,
-                      title: AppLocalizations.of(context)!.notifSettings_dailySummary,
-                      subtitle: AppLocalizations.of(context)!.notifSettings_dailySummaryDesc,
+                      title: ctxt.notifSettings_dailySummary,
+                      subtitle: ctxt.notifSettings_dailySummaryDesc,
                       value: _dailySummaryEnabled,
                       onChanged: _toggleDailySummary,
                       color: color,
@@ -354,7 +355,7 @@ class _NotificationSettingsScreenState
                       _divider(color),
                       _buildTapRow(
                         icon: LucideIcons.clock,
-                        title: AppLocalizations.of(context)!.notifSettings_reminderTime,
+                        title: ctxt.notifSettings_reminderTime,
                         trailing: _reminderTime.format(context),
                         onTap: _selectTime,
                         color: color,
@@ -363,9 +364,9 @@ class _NotificationSettingsScreenState
                       _divider(color),
                       _buildTapRow(
                         icon: LucideIcons.send,
-                        title: AppLocalizations.of(context)!.notifSettings_sendTestNotif,
+                        title: ctxt.notifSettings_sendTestNotif,
                         onTap: () async {
-                          final msg = AppLocalizations.of(context)!.notifSettings_testNotifSent;
+                          final msg = ctxt.notifSettings_testNotifSent;
                           HapticFeedback.mediumImpact();
                           await NotificationService.showDailySummary();
                           SnackbarService.success(msg);
@@ -380,7 +381,7 @@ class _NotificationSettingsScreenState
 
                 // ── STREAK REMINDER ──
                 _buildSectionHeader(
-                  AppLocalizations.of(context)!.notifSettings_streakReminder,
+                  ctxt.notifSettings_streakReminder,
                   color,
                   textTheme,
                 ),
@@ -392,8 +393,8 @@ class _NotificationSettingsScreenState
                   children: [
                     _buildToggleRow(
                       icon: LucideIcons.flame,
-                      title: AppLocalizations.of(context)!.notifSettings_streakReminder,
-                      subtitle: AppLocalizations.of(context)!.notifSettings_dailyNudgeStreak,
+                      title: ctxt.notifSettings_streakReminder,
+                      subtitle: ctxt.notifSettings_dailyNudgeStreak,
                       value: _streakReminderEnabled,
                       onChanged: _toggleStreakReminder,
                       color: color,
@@ -404,7 +405,7 @@ class _NotificationSettingsScreenState
                       _divider(color),
                       _buildTapRow(
                         icon: LucideIcons.clock,
-                        title: AppLocalizations.of(context)!.notifSettings_reminderTime,
+                        title: ctxt.notifSettings_reminderTime,
                         trailing: _streakReminderTime.format(context),
                         onTap: _selectStreakReminderTime,
                         color: color,
@@ -417,7 +418,7 @@ class _NotificationSettingsScreenState
 
                 // ── WEEKLY SUMMARY ──
                 _buildSectionHeader(
-                  AppLocalizations.of(context)!.notifSettings_weeklySummary,
+                  ctxt.notifSettings_weeklySummary,
                   color,
                   textTheme,
                 ),
@@ -429,8 +430,8 @@ class _NotificationSettingsScreenState
                   children: [
                     _buildToggleRow(
                       icon: LucideIcons.calendarRange,
-                      title: AppLocalizations.of(context)!.notifSettings_weeklySummary,
-                      subtitle: AppLocalizations.of(context)!.notifSettings_weeklySchedule(_getDayName(_weeklyDay)),
+                      title: ctxt.notifSettings_weeklySummary,
+                      subtitle: ctxt.notifSettings_weeklySchedule(_getDayName(_weeklyDay)),
                       value: _weeklySummaryEnabled,
                       onChanged: _toggleWeeklySummary,
                       color: color,
@@ -440,7 +441,7 @@ class _NotificationSettingsScreenState
                       _divider(color),
                       _buildTapRow(
                         icon: LucideIcons.calendarCheck,
-                        title: AppLocalizations.of(context)!.notifSettings_summaryDay,
+                        title: ctxt.notifSettings_summaryDay,
                         trailing: _getDayName(_weeklyDay),
                         onTap: _selectWeeklyDay,
                         color: color,
@@ -449,9 +450,9 @@ class _NotificationSettingsScreenState
                       _divider(color),
                       _buildTapRow(
                         icon: LucideIcons.send,
-                        title: AppLocalizations.of(context)!.notifSettings_sendTestNotif,
+                        title: ctxt.notifSettings_sendTestNotif,
                         onTap: () async {
-                          final msg = AppLocalizations.of(context)!.notifSettings_testNotifSent;
+                          final msg = ctxt.notifSettings_testNotifSent;
                           HapticFeedback.mediumImpact();
                           await NotificationService.showWeeklySummary();
                           SnackbarService.success(msg);
@@ -472,9 +473,9 @@ class _NotificationSettingsScreenState
                   children: [
                     _buildToggleRow(
                       icon: LucideIcons.userCheck,
-                      title: AppLocalizations.of(context)!.notifSettings_comeBackNudges,
+                      title: ctxt.notifSettings_comeBackNudges,
                       subtitle:
-                          AppLocalizations.of(context)!.notifSettings_gentleReminders,
+                          ctxt.notifSettings_gentleReminders,
                       value: _reEngagementEnabled,
                       onChanged: _toggleReEngagement,
                       color: color,
@@ -492,9 +493,9 @@ class _NotificationSettingsScreenState
                   children: [
                     _buildToggleRow(
                       icon: LucideIcons.brain,
-                      title: AppLocalizations.of(context)!.notifSettings_smartAlerts,
+                      title: ctxt.notifSettings_smartAlerts,
                       subtitle:
-                          AppLocalizations.of(context)!.notifSettings_budgetWarningsDesc,
+                          ctxt.notifSettings_budgetWarningsDesc,
                       value: _smartAlertsEnabled,
                       onChanged: _toggleSmartAlerts,
                       color: color,
@@ -526,7 +527,7 @@ class _NotificationSettingsScreenState
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          AppLocalizations.of(context)!.notifSettings_localNotifDisclaimer,
+                          ctxt.notifSettings_localNotifDisclaimer,
                           style: textTheme.bodySmall?.copyWith(
                             color: color.onSurfaceVariant,
                             height: 1.4,

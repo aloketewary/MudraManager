@@ -7,6 +7,8 @@ import 'package:mudra_manager/core/db/models/budget_category_allocation.dart';
 import 'package:mudra_manager/core/db/models/budget_type.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
+import 'package:mudra_manager/core/providers/collection_watchers.dart';
+import 'package:mudra_manager/core/providers/date_change_provider.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
@@ -30,6 +32,8 @@ final budgetWithProgressProvider =
         (ref) async* {
   final budgetService = ref.watch(budgetServiceProvider);
   final isar = await ref.read(isarServiceProvider).getInstance();
+  ref.watch(dateChangeProvider);
+  ref.watch(transactionChangeProvider);
 
   await for (final budgets in isar.budgets
       .where()
@@ -60,11 +64,14 @@ final budgetWithProgressProvider =
 
 final budgetsWithProgressProvider =
     StreamProvider.autoDispose<List<BudgetWithProgress>>((ref) {
+  ref.watch(dateChangeProvider);
+  ref.watch(transactionChangeProvider);
   return ref.watch(budgetServiceProvider).watchBudgetsWithProgress();
 });
 
 final archivedBudgetsProvider =
     FutureProvider.autoDispose<List<ArchivedBudgetSummary>>((ref) async {
+  ref.watch(dateChangeProvider);
   final service = ref.watch(budgetServiceProvider);
   return service.getArchivedBudgets();
 });

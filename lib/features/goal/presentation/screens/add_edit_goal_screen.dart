@@ -152,6 +152,7 @@ class _AddEditGoalScreenState extends ConsumerState<AddEditGoalScreen> {
     } else {
       await service.updateGoal(goal);
     }
+    ref.invalidate(goalsProvider);
 
     HapticFeedback.mediumImpact();
     SnackbarService.success(

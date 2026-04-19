@@ -56,13 +56,13 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
   }
 
   Future<void> _deleteGoal() async {
+    final ctxt = AppLocalizations.of(context)!;
     final confirmed = await DialogUtils.showDeleteConfirmation(
       context,
-      title: AppLocalizations.of(context)!.goal_deleteGoalTitle,
+      title: ctxt.goal_deleteGoalTitle,
     );
     if (confirmed == true && mounted) {
       bool undone = false;
-      final ctxt = AppLocalizations.of(context)!;
 
       // Schedule actual delete after undo window
       Future.delayed(const Duration(seconds: 6), () async {
@@ -284,7 +284,7 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
                             if (daysLeft > 0) ...[
                               SizedBox(height: spacing.elementGapUltraMin),
                               Text(
-                                _formatDaysLeft(daysLeft),
+                                _formatDaysLeft(daysLeft, ctxt),
                                 style: textTheme.bodySmall?.copyWith(
                                   color: color.onSurfaceVariant,
                                 ),
@@ -334,7 +334,7 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
                 child: FilledButton.icon(
                   onPressed: () {
                     HapticFeedback.mediumImpact();
-                    _showQuickDepositSheet(context, goalColor, spacing);
+                    _showQuickDepositSheet(context, goalColor, spacing, ctxt);
                   },
                   icon: const Icon(LucideIcons.plus, size: 20),
                   label: Text(
@@ -935,9 +935,9 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
     BuildContext context,
     Color goalColor,
     AppSpacing spacing,
+    AppLocalizations ctxt,
   ) {
     final textTheme = Theme.of(context).textTheme;
-    final ctxt = AppLocalizations.of(context)!;
     final amountController = TextEditingController();
 
     showModalBottomSheet(
@@ -1004,7 +1004,6 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
                   ref.invalidate(goalsProvider);
                   if (context.mounted) {
                     Navigator.pop(context);
-                    setState(() {});
                     SnackbarService.success(
                       '${formatCurrency(amount, code: widget.goal.currencyCode, decimals: 0)} added to ${widget.goal.name}',
                     );
@@ -1030,8 +1029,7 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
     );
   }
 
-  String _formatDaysLeft(int days) {
-    final ctxt = AppLocalizations.of(context)!;
+  String _formatDaysLeft(int days, AppLocalizations ctxt) {
     if (days > 60) return ctxt.goal_monthsLeft((days / 30).round());
     return ctxt.goal_daysLeft(days);
   }

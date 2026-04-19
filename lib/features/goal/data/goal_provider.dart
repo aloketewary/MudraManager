@@ -64,7 +64,8 @@ class GoalService {
       }
     });
     await _updateGoalReminders();
-    if (goal != null && goal!.currentAmount >= goal!.targetAmount) {
+    final saved = goal;
+    if (saved != null && saved.currentAmount >= saved.targetAmount) {
       await gamificationService?.track(GamificationEvent.goalCompleted);
     }
   }

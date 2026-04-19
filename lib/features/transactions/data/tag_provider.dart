@@ -2,10 +2,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/tag.dart';
+import 'package:mudra_manager/core/providers/collection_watchers.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 
 
-final tagListProvider = FutureProvider<List<Tag>>((ref) async {
+final tagListProvider = FutureProvider.autoDispose<List<Tag>>((ref) async {
+  ref.watch(tagChangeProvider);
   final isarService = ref.watch(isarServiceProvider);
   final isar = await isarService.getInstance();
   return await isar.tags.where().sortByName().findAll();
