@@ -155,6 +155,9 @@ Future<void> _initializeBackgroundServices(ProviderContainer container) async {
       // Run recurring/bill/notification tasks
       await BackgroundTaskManager.runDeferredTasks();
       log.i('✅ All deferred tasks completed');
+
+      // Check for app updates (once per session)
+      await safeExecute(() => AppUpdateService.checkForUpdate());
     });
   });
 }
@@ -328,9 +331,6 @@ class _MudraManagerAppState extends ConsumerState<MudraManagerApp> {
             final l10n = AppLocalizations.of(context);
             if (l10n != null) Tone.syncL10n(l10n);
             NotificationService.setNavigatorKey(rootNavigatorKey);
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              AppUpdateService.checkForUpdate(context);
-            });
             return ResponsiveBreakpoints.builder(
               child: child!,
               breakpoints: [

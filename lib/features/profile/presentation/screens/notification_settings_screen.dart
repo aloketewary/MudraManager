@@ -368,7 +368,12 @@ class _NotificationSettingsScreenState
                         onTap: () async {
                           final msg = ctxt.notifSettings_testNotifSent;
                           HapticFeedback.mediumImpact();
-                          await NotificationService.showDailySummary();
+                          await NotificationService.showLocalNotification(
+                            id: DateTime.now().microsecondsSinceEpoch % 100000000,
+                            title: ctxt.notif_heresYesterdayTitle,
+                            body: ctxt.notifSettings_dailySummaryDesc,
+                            bypassThrottle: true,
+                          );
                           SnackbarService.success(msg);
                         },
                         color: color,
@@ -454,7 +459,12 @@ class _NotificationSettingsScreenState
                         onTap: () async {
                           final msg = ctxt.notifSettings_testNotifSent;
                           HapticFeedback.mediumImpact();
-                          await NotificationService.showWeeklySummary();
+                          await NotificationService.showLocalNotification(
+                            id: DateTime.now().microsecondsSinceEpoch % 100000000,
+                            title: ctxt.notif_yourWeekInReviewTitle,
+                            body: ctxt.notifSettings_summaryDesc,
+                            bypassThrottle: true,
+                          );
                           SnackbarService.success(msg);
                         },
                         color: color,

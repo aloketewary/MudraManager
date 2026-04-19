@@ -2,6 +2,7 @@ import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/budget.dart';
+import 'package:mudra_manager/core/db/models/budget_type.dart';
 import 'package:mudra_manager/core/db/models/notification_record.dart';
 import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
 import 'package:mudra_manager/core/db/models/sms_activity.dart';
@@ -94,30 +95,63 @@ class SmartNotificationService {
         continue;
       }
 
-      await budget.categories.load();
-      final categoryIds = budget.categories.map((c) => c.id).toList();
-      if (categoryIds.isEmpty) continue;
-
       final (start, end) = budget.getCurrentPeriodRange(now);
-      final transactions = await isar.transactions
-          .filter()
-          .isExpenseEqualTo(true)
-          .dateBetween(start, end)
-          .findAll();
 
-      for (final t in transactions) {
-        await t.category.load();
+      double spent;
+      if (budget.budgetType == BudgetType.tagWise) {
+        await budget.budgetTags.load();
+        final tagIds = budget.budgetTags.map((t) => t.id).toSet();
+        if (tagIds.isEmpty) continue;
+        final txns = await isar.transactions
+            .filter()
+            .isExpenseEqualTo(true)
+            .dateBetween(start, end)
+            .findAll();
+        spent = 0;
+        for (final t in txns) {
+          await t.tags.load();
+          if (t.tags.any((tag) => tagIds.contains(tag.id))) {
+            spent += t.baseAmount;
+          }
+        }
+      } else if (budget.budgetType == BudgetType.dayWise ||
+          budget.budgetType == BudgetType.festival ||
+          budget.budgetType == BudgetType.travel) {
+        await budget.categories.load();
+        final categoryIds = budget.categories.map((c) => c.id).toList();
+        final txns = await isar.transactions
+            .filter()
+            .isExpenseEqualTo(true)
+            .dateBetween(start, end)
+            .findAll();
+        if (categoryIds.isEmpty) {
+          spent = txns.fold<double>(0.0, (s, t) => s + t.baseAmount);
+        } else {
+          for (final t in txns) {
+            await t.category.load();
+          }
+          spent = txns
+              .where((t) => t.category.value != null && categoryIds.contains(t.category.value!.id))
+              .fold<double>(0.0, (s, t) => s + t.baseAmount);
+        }
+      } else {
+        await budget.categories.load();
+        final categoryIds = budget.categories.map((c) => c.id).toList();
+        if (categoryIds.isEmpty) continue;
+        final txns = await isar.transactions
+            .filter()
+            .isExpenseEqualTo(true)
+            .dateBetween(start, end)
+            .findAll();
+        for (final t in txns) {
+          await t.category.load();
+        }
+        spent = txns
+            .where((t) => t.category.value != null && categoryIds.contains(t.category.value!.id))
+            .fold<double>(0.0, (s, t) => s + t.baseAmount);
       }
 
-      final spent = transactions
-          .where(
-            (t) =>
-                t.category.value != null &&
-                categoryIds.contains(t.category.value!.id),
-          )
-          .fold<double>(0.0, (sum, t) => sum + t.baseAmount);
-
-      final pct = (spent / budget.amount * 100);
+      final pct = budget.amount > 0 ? (spent / budget.amount * 100) : 0.0;
 
       // Reset flags if spending dropped (new period started)
       if (pct < 80 && (budget.notifiedAt80 || budget.notifiedAt90 || budget.notifiedAt100)) {
