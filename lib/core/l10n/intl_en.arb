@@ -1,6 +1,6 @@
 {
   "@@locale": "en",
-  "onboard_manageYourMoneyDescription": "100% offline. Hindi, Bengali, English. Built for India.",
+  "onboard_manageYourMoneyDescription": "100% offline. Your data never leaves your device.",
   "@onboard_manageYourMoneyDescription": {
     "description": "Manage your money smartly & effortlessly."
   },
@@ -12,7 +12,7 @@
   "@onboard_TrackYourTransactions": {
     "description": "Track your Transactions"
   },
-  "onboard_SeeWhereYourMoneyGoes": "50+ Indian banks supported. HDFC, SBI, ICICI, Paytm, GPay — auto-imported.",
+  "onboard_SeeWhereYourMoneyGoes": "Auto-import from bank SMS & notifications. Works with 50+ banks.",
   "@onboard_SeeWhereYourMoneyGoes": {
     "description": "See where your money goes, every day."
   },

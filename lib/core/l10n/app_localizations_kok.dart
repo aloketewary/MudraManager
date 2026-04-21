@@ -4,9 +4,9 @@ import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
 
-/// The translations for English (`en`).
-class AppLocalizationsEn extends AppLocalizations {
-  AppLocalizationsEn([String locale = 'en']) : super(locale);
+/// The translations for Konkani (`kok`).
+class AppLocalizationsKok extends AppLocalizations {
+  AppLocalizationsKok([String locale = 'kok']) : super(locale);
 
   @override
   String get onboard_manageYourMoneyDescription =>

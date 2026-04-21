@@ -5,9 +5,43 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
+import 'app_localizations_ar.dart';
+import 'app_localizations_as.dart';
 import 'app_localizations_bn.dart';
+import 'app_localizations_bo.dart';
+import 'app_localizations_brx.dart';
+import 'app_localizations_de.dart';
+import 'app_localizations_doi.dart';
 import 'app_localizations_en.dart';
+import 'app_localizations_es.dart';
+import 'app_localizations_fr.dart';
+import 'app_localizations_gu.dart';
 import 'app_localizations_hi.dart';
+import 'app_localizations_id.dart';
+import 'app_localizations_ja.dart';
+import 'app_localizations_kn.dart';
+import 'app_localizations_ko.dart';
+import 'app_localizations_kok.dart';
+import 'app_localizations_mai.dart';
+import 'app_localizations_ml.dart';
+import 'app_localizations_mni.dart';
+import 'app_localizations_mr.dart';
+import 'app_localizations_ms.dart';
+import 'app_localizations_ne.dart';
+import 'app_localizations_or.dart';
+import 'app_localizations_pa.dart';
+import 'app_localizations_pt.dart';
+import 'app_localizations_sat.dart';
+import 'app_localizations_sd.dart';
+import 'app_localizations_si.dart';
+import 'app_localizations_sw.dart';
+import 'app_localizations_ta.dart';
+import 'app_localizations_te.dart';
+import 'app_localizations_th.dart';
+import 'app_localizations_tr.dart';
+import 'app_localizations_ur.dart';
+import 'app_localizations_vi.dart';
+import 'app_localizations_zh.dart';
 
 // ignore_for_file: type=lint
 
@@ -95,15 +129,49 @@ abstract class AppLocalizations {
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
+    Locale('ar'),
+    Locale('as'),
     Locale('bn'),
+    Locale('bo'),
+    Locale('brx'),
+    Locale('de'),
+    Locale('doi'),
     Locale('en'),
-    Locale('hi')
+    Locale('es'),
+    Locale('fr'),
+    Locale('gu'),
+    Locale('hi'),
+    Locale('id'),
+    Locale('ja'),
+    Locale('kn'),
+    Locale('ko'),
+    Locale('kok'),
+    Locale('mai'),
+    Locale('ml'),
+    Locale('mni'),
+    Locale('mr'),
+    Locale('ms'),
+    Locale('ne'),
+    Locale('or'),
+    Locale('pa'),
+    Locale('pt'),
+    Locale('sat'),
+    Locale('sd'),
+    Locale('si'),
+    Locale('sw'),
+    Locale('ta'),
+    Locale('te'),
+    Locale('th'),
+    Locale('tr'),
+    Locale('ur'),
+    Locale('vi'),
+    Locale('zh')
   ];
 
   /// Manage your money smartly & effortlessly.
   ///
   /// In en, this message translates to:
-  /// **'100% offline. Hindi, Bengali, English. Built for India.'**
+  /// **'100% offline. Your data never leaves your device.'**
   String get onboard_manageYourMoneyDescription;
 
   /// Welcome to Application
@@ -121,7 +189,7 @@ abstract class AppLocalizations {
   /// See where your money goes, every day.
   ///
   /// In en, this message translates to:
-  /// **'50+ Indian banks supported. HDFC, SBI, ICICI, Paytm, GPay — auto-imported.'**
+  /// **'Auto-import from bank SMS & notifications. Works with 50+ banks.'**
   String get onboard_SeeWhereYourMoneyGoes;
 
   /// Set Budgets and Goals
@@ -9933,8 +10001,45 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool isSupported(Locale locale) =>
-      <String>['bn', 'en', 'hi'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>[
+        'ar',
+        'as',
+        'bn',
+        'bo',
+        'brx',
+        'de',
+        'doi',
+        'en',
+        'es',
+        'fr',
+        'gu',
+        'hi',
+        'id',
+        'ja',
+        'kn',
+        'ko',
+        'kok',
+        'mai',
+        'ml',
+        'mni',
+        'mr',
+        'ms',
+        'ne',
+        'or',
+        'pa',
+        'pt',
+        'sat',
+        'sd',
+        'si',
+        'sw',
+        'ta',
+        'te',
+        'th',
+        'tr',
+        'ur',
+        'vi',
+        'zh'
+      ].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -9943,12 +10048,80 @@ class _AppLocalizationsDelegate
 AppLocalizations lookupAppLocalizations(Locale locale) {
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
+    case 'ar':
+      return AppLocalizationsAr();
+    case 'as':
+      return AppLocalizationsAs();
     case 'bn':
       return AppLocalizationsBn();
+    case 'bo':
+      return AppLocalizationsBo();
+    case 'brx':
+      return AppLocalizationsBrx();
+    case 'de':
+      return AppLocalizationsDe();
+    case 'doi':
+      return AppLocalizationsDoi();
     case 'en':
       return AppLocalizationsEn();
+    case 'es':
+      return AppLocalizationsEs();
+    case 'fr':
+      return AppLocalizationsFr();
+    case 'gu':
+      return AppLocalizationsGu();
     case 'hi':
       return AppLocalizationsHi();
+    case 'id':
+      return AppLocalizationsId();
+    case 'ja':
+      return AppLocalizationsJa();
+    case 'kn':
+      return AppLocalizationsKn();
+    case 'ko':
+      return AppLocalizationsKo();
+    case 'kok':
+      return AppLocalizationsKok();
+    case 'mai':
+      return AppLocalizationsMai();
+    case 'ml':
+      return AppLocalizationsMl();
+    case 'mni':
+      return AppLocalizationsMni();
+    case 'mr':
+      return AppLocalizationsMr();
+    case 'ms':
+      return AppLocalizationsMs();
+    case 'ne':
+      return AppLocalizationsNe();
+    case 'or':
+      return AppLocalizationsOr();
+    case 'pa':
+      return AppLocalizationsPa();
+    case 'pt':
+      return AppLocalizationsPt();
+    case 'sat':
+      return AppLocalizationsSat();
+    case 'sd':
+      return AppLocalizationsSd();
+    case 'si':
+      return AppLocalizationsSi();
+    case 'sw':
+      return AppLocalizationsSw();
+    case 'ta':
+      return AppLocalizationsTa();
+    case 'te':
+      return AppLocalizationsTe();
+    case 'th':
+      return AppLocalizationsTh();
+    case 'tr':
+      return AppLocalizationsTr();
+    case 'ur':
+      return AppLocalizationsUr();
+    case 'vi':
+      return AppLocalizationsVi();
+    case 'zh':
+      return AppLocalizationsZh();
   }
 
   throw FlutterError(

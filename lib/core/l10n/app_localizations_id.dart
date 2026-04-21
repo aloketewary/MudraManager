@@ -4,61 +4,61 @@ import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
 
-/// The translations for English (`en`).
-class AppLocalizationsEn extends AppLocalizations {
-  AppLocalizationsEn([String locale = 'en']) : super(locale);
+/// The translations for Indonesian (`id`).
+class AppLocalizationsId extends AppLocalizations {
+  AppLocalizationsId([String locale = 'id']) : super(locale);
 
   @override
   String get onboard_manageYourMoneyDescription =>
-      '100% offline. Your data never leaves your device.';
+      '100% offline. Data Anda tidak pernah keluar dari perangkat.';
 
   @override
   String onboard_welcomeToApp(Object appName) {
-    return 'Welcome to $appName';
+    return 'Selamat datang di $appName';
   }
 
   @override
-  String get onboard_TrackYourTransactions => 'Auto-track from Bank SMS';
+  String get onboard_TrackYourTransactions => 'Auto-impor dari SMS bank';
 
   @override
   String get onboard_SeeWhereYourMoneyGoes =>
-      'Auto-import from bank SMS & notifications. Works with 50+ banks.';
+      'Impor otomatis dari SMS & notifikasi bank. Mendukung 50+ bank.';
 
   @override
-  String get onboard_SetBudgetsAndGoals => 'Budgets, Goals & Smart Alerts';
+  String get onboard_SetBudgetsAndGoals => 'Anggaran, Target & Peringatan';
 
   @override
   String get onboard_stayOnTrackAndAchieveYourDream =>
-      'Get warnings before you overspend. Save for what matters.';
+      'Dapat peringatan sebelum boros. Tabung untuk yang penting.';
 
   @override
-  String get onboard_GetStarted => 'Get Started!';
+  String get onboard_GetStarted => 'Mulai!';
 
   @override
-  String get onboard_letsSetupYourAccount => 'Let\'s set up your account.';
+  String get onboard_letsSetupYourAccount => 'Ayo siapkan akun Anda.';
 
   @override
-  String get onboard_howShouldWeCallYou => 'How should we call you?';
+  String get onboard_howShouldWeCallYou => 'Siapa nama Anda?';
 
   @override
   String get onboard_enterYourNameToPersonalizeYourExperience =>
       'Enter your name to personalize your experience.';
 
   @override
-  String get onboard_enterYourName => 'Enter your name';
+  String get onboard_enterYourName => 'Masukkan nama Anda';
 
   @override
-  String get onboard_setupYourFirstAccount => 'Setup Your First Account';
+  String get onboard_setupYourFirstAccount => 'Siapkan akun pertama';
 
   @override
   String get onboard_letsCreateYourFirstAccount =>
       'Let\'s create your first account (let say: Cash).';
 
   @override
-  String get onboard_accountName => 'Account Name';
+  String get onboard_accountName => 'Nama akun';
 
   @override
-  String get onboard_initialBalance => 'Initial Balance';
+  String get onboard_initialBalance => 'Saldo awal';
 
   @override
   String get onboard_youCanUpdateOtherDetailsLaterAsWell =>
@@ -75,7 +75,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get onboard_youAreAllSet => 'You\'re all set!';
+  String get onboard_youAreAllSet => 'Semua siap!';
 
   @override
   String get onboard_letsStartManagingYourMoneyWisely =>
@@ -115,16 +115,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get app_settings_daily_reminder_title => 'Daily Expense Reminder';
 
   @override
-  String get home_screen_title => 'Home';
+  String get home_screen_title => 'Beranda';
 
   @override
-  String get transaction_screen_title => 'Activity';
+  String get transaction_screen_title => 'Aktivitas';
 
   @override
-  String get statistics_screen_title => 'Statistics';
+  String get statistics_screen_title => 'Statistik';
 
   @override
-  String get profile_screen_title => 'Profile';
+  String get profile_screen_title => 'Profil';
 
   @override
   String get add_edit_transaction_screen_title => 'Add Transaction';
@@ -154,34 +154,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get greeting_hello_text => 'Hello';
 
   @override
-  String get transaction_type_income => 'Income';
+  String get transaction_type_income => 'Pemasukan';
 
   @override
-  String get transaction_type_expense => 'Expense';
+  String get transaction_type_expense => 'Pengeluaran';
 
   @override
-  String get dashboard_add_transaction_text => 'Add transaction';
+  String get dashboard_add_transaction_text => 'Tambah transaksi';
 
   @override
   String get dashboard_add_transfer_text => 'Transfer';
 
   @override
-  String get dashboard_cash_flow_text => 'Cash Flow';
+  String get dashboard_cash_flow_text => 'Arus kas';
 
   @override
-  String get cash_flow_filter_type_day => 'Day';
+  String get cash_flow_filter_type_day => 'Hari';
 
   @override
-  String get cash_flow_filter_type_week => 'Week';
+  String get cash_flow_filter_type_week => 'Minggu';
 
   @override
-  String get cash_flow_filter_type_month => 'Month';
+  String get cash_flow_filter_type_month => 'Bulan';
 
   @override
-  String get cash_flow_filter_type_year => 'Year';
+  String get cash_flow_filter_type_year => 'Tahun';
 
   @override
-  String get dashboard_mini_budget_text => 'Budget';
+  String get dashboard_mini_budget_text => 'Anggaran';
 
   @override
   String get dashboard_mini_budget_not_found_text =>
@@ -194,13 +194,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transaction_list_cash_flow_screen_title => 'Transactions';
 
   @override
-  String get transaction_list_filter_all => 'All';
+  String get transaction_list_filter_all => 'Semua';
 
   @override
-  String get transaction_list_filter_income => 'Income';
+  String get transaction_list_filter_income => 'Pemasukan';
 
   @override
-  String get transaction_list_filter_expense => 'Expense';
+  String get transaction_list_filter_expense => 'Pengeluaran';
 
   @override
   String get transaction_list_pending_transaction_message_text =>
@@ -210,19 +210,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transaction_listPendingTransactionMessageActionLabel => 'Review';
 
   @override
-  String get transaction_noTransactionFoundText => 'No transactions found.';
+  String get transaction_noTransactionFoundText => 'Belum ada transaksi.';
 
   @override
-  String get transaction_deleteAlertTitleText => 'Delete Transaction?';
+  String get transaction_deleteAlertTitleText => 'Hapus transaksi?';
 
   @override
   String get transaction_deleteAlertBodyText => 'This action cannot be undone.';
 
   @override
-  String get transaction_deleteButtonActionText => 'Delete';
+  String get transaction_deleteButtonActionText => 'Hapus';
 
   @override
-  String get transaction_cancelButtonActionText => 'Cancel';
+  String get transaction_cancelButtonActionText => 'Batal';
 
   @override
   String get transaction_filterCategoryText => 'Filter Transactions';
@@ -381,19 +381,19 @@ class AppLocalizationsEn extends AppLocalizations {
       'Allocated amount exceeds total budget';
 
   @override
-  String get transaction_amountControllerText => 'Amount';
+  String get transaction_amountControllerText => 'Jumlah';
 
   @override
-  String get transaction_descriptionControllerText => 'Description (optional)';
+  String get transaction_descriptionControllerText => 'Deskripsi (opsional)';
 
   @override
   String get transaction_amountControllerErrorText => 'Enter amount';
 
   @override
-  String get transaction_selectAccountLabel => 'Select Account';
+  String get transaction_selectAccountLabel => 'Pilih akun';
 
   @override
-  String get transaction_selectCategoryLabel => 'Select Category';
+  String get transaction_selectCategoryLabel => 'Pilih kategori';
 
   @override
   String get transaction_selectTagLabel => 'Select Tag';
@@ -422,10 +422,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Select at least one Category';
 
   @override
-  String get transaction_incomeButtonLabel => 'INCOME';
+  String get transaction_incomeButtonLabel => 'Pemasukan';
 
   @override
-  String get transaction_expenseButtonLabel => 'EXPENSE';
+  String get transaction_expenseButtonLabel => 'Pengeluaran';
 
   @override
   String get statistics_weTrimDownDecimalInfoText =>
@@ -695,7 +695,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get common_noAccountsYet => 'No accounts yet';
 
   @override
-  String get common_loading => 'Loading...';
+  String get common_loading => 'Memuat...';
 
   @override
   String get common_editLabel => 'Edit';
@@ -852,7 +852,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transaction_editTransactionTitle => 'Edit Transaction';
 
   @override
-  String get transaction_dateLabel => 'Date';
+  String get transaction_dateLabel => 'Tanggal';
 
   @override
   String get transaction_addNoteHint => 'Add a note';
@@ -899,61 +899,61 @@ class AppLocalizationsEn extends AppLocalizations {
       'Automatically detect and import transactions from your bank notifications.';
 
   @override
-  String get nav_activity => 'Activity';
+  String get nav_activity => 'Aktivitas';
 
   @override
-  String get nav_manage => 'Manage';
+  String get nav_manage => 'Kelola';
 
   @override
-  String get nav_insights => 'Insights';
+  String get nav_insights => 'Analisis';
 
   @override
-  String get common_save => 'Save';
+  String get common_save => 'Simpan';
 
   @override
-  String get common_cancel => 'Cancel';
+  String get common_cancel => 'Batal';
 
   @override
-  String get common_next => 'Next';
+  String get common_next => 'Berikutnya';
 
   @override
-  String get common_back => 'Back';
+  String get common_back => 'Kembali';
 
   @override
   String get common_undo => 'Undo';
 
   @override
-  String get common_delete => 'Delete';
+  String get common_delete => 'Hapus';
 
   @override
   String get common_edit => 'Edit';
 
   @override
-  String get common_add => 'Add';
+  String get common_add => 'Tambah';
 
   @override
-  String get common_done => 'Done';
+  String get common_done => 'Selesai';
 
   @override
-  String get common_close => 'Close';
+  String get common_close => 'Tutup';
 
   @override
-  String get common_confirm => 'Confirm';
+  String get common_confirm => 'Konfirmasi';
 
   @override
   String get common_archive => 'Archive';
 
   @override
-  String get common_create => 'Create';
+  String get common_create => 'Buat';
 
   @override
-  String get common_update => 'Update';
+  String get common_update => 'Perbarui';
 
   @override
   String get common_remove => 'Remove';
 
   @override
-  String get common_search => 'Search';
+  String get common_search => 'Cari';
 
   @override
   String get common_filter => 'Filter';
@@ -965,10 +965,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get common_apply => 'Apply';
 
   @override
-  String get common_yes => 'Yes';
+  String get common_yes => 'Ya';
 
   @override
-  String get common_no => 'No';
+  String get common_no => 'Tidak';
 
   @override
   String get common_ok => 'OK';
@@ -977,52 +977,52 @@ class AppLocalizationsEn extends AppLocalizations {
   String get common_retry => 'Retry';
 
   @override
-  String get common_noData => 'No data';
+  String get common_noData => 'Belum ada data';
 
   @override
-  String get common_error => 'Something went wrong';
+  String get common_error => 'Terjadi kesalahan';
 
   @override
   String get common_required => 'Required';
 
   @override
-  String get title_budgets => 'Budgets';
+  String get title_budgets => 'Anggaran';
 
   @override
-  String get title_goals => 'Goals';
+  String get title_goals => 'Target';
 
   @override
-  String get title_bills => 'Bills';
+  String get title_bills => 'Tagihan';
 
   @override
   String get title_groups => 'Groups';
 
   @override
-  String get title_trips => 'Trips';
+  String get title_trips => 'Perjalanan';
 
   @override
   String get title_shared => 'Shared';
 
   @override
-  String get title_achievements => 'Achievements';
+  String get title_achievements => 'Pencapaian';
 
   @override
-  String get title_notifications => 'Notifications';
+  String get title_notifications => 'Notifikasi';
 
   @override
   String get title_appearance => 'Appearance';
 
   @override
-  String get title_currency => 'Currency';
+  String get title_currency => 'Mata uang';
 
   @override
-  String get title_security => 'Security';
+  String get title_security => 'Keamanan';
 
   @override
-  String get title_about => 'About';
+  String get title_about => 'Tentang';
 
   @override
-  String get title_analytics => 'Analytics';
+  String get title_analytics => 'Analisis';
 
   @override
   String get title_netWorth => 'Net Worth';
@@ -1103,31 +1103,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get section_archive => 'Archive';
 
   @override
-  String get label_income => 'Income';
+  String get label_income => 'Pemasukan';
 
   @override
-  String get label_expense => 'Expense';
+  String get label_expense => 'Pengeluaran';
 
   @override
-  String get label_balance => 'Balance';
+  String get label_balance => 'Saldo';
 
   @override
-  String get label_savings => 'Savings';
+  String get label_savings => 'Tabungan';
 
   @override
   String get label_total => 'Total';
 
   @override
-  String get label_amount => 'Amount';
+  String get label_amount => 'Jumlah';
 
   @override
-  String get label_date => 'Date';
+  String get label_date => 'Tanggal';
 
   @override
-  String get label_category => 'Category';
+  String get label_category => 'Kategori';
 
   @override
-  String get label_account => 'Account';
+  String get label_account => 'Akun';
 
   @override
   String get label_description => 'Description';
@@ -1145,19 +1145,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get label_to => 'To';
 
   @override
-  String get label_all => 'All';
+  String get label_all => 'Semua';
 
   @override
-  String get label_today => 'Today';
+  String get label_today => 'Hari ini';
 
   @override
-  String get label_yesterday => 'Yesterday';
+  String get label_yesterday => 'Kemarin';
 
   @override
   String get label_thisWeek => 'This Week';
 
   @override
-  String get label_thisMonth => 'This Month';
+  String get label_thisMonth => 'Bulan ini';
 
   @override
   String get label_thisYear => 'This Year';
@@ -1166,16 +1166,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get label_custom => 'Custom';
 
   @override
-  String get label_daily => 'Daily';
+  String get label_daily => 'Harian';
 
   @override
-  String get label_weekly => 'Weekly';
+  String get label_weekly => 'Mingguan';
 
   @override
-  String get label_monthly => 'Monthly';
+  String get label_monthly => 'Bulanan';
 
   @override
-  String get label_yearly => 'Yearly';
+  String get label_yearly => 'Tahunan';
 
   @override
   String get label_none => 'None';
@@ -1327,22 +1327,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get utility_addUtilities => 'Add Utilities';
 
   @override
-  String get profile_accounts => 'Accounts';
+  String get profile_accounts => 'Akun';
 
   @override
   String get profile_manageAccounts => 'Manage your accounts';
 
   @override
-  String get profile_categories => 'Categories';
+  String get profile_categories => 'Kategori';
 
   @override
   String get profile_manageCategories => 'Manage your categories';
 
   @override
-  String get profile_language => 'Language';
+  String get profile_language => 'Bahasa';
 
   @override
-  String get profile_notifications => 'Notifications';
+  String get profile_notifications => 'Notifikasi';
 
   @override
   String get profile_dailyWeeklySummaries => 'Daily & weekly summaries';
@@ -1390,7 +1390,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profile_pinFingerprint => 'PIN or Fingerprint';
 
   @override
-  String get profile_upgradePro => 'Upgrade to Pro';
+  String get profile_upgradePro => 'Upgrade ke Pro';
 
   @override
   String get profile_unlimitedFeatures =>
@@ -2958,7 +2958,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get goal_deleteGoal => 'Delete Goal';
 
   @override
-  String get goal_saved => 'Saved';
+  String get goal_saved => 'Terkumpul';
 
   @override
   String get goal_target => 'Target';
@@ -3100,16 +3100,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get account_whatWasThisFor => 'What was this transaction for?';
 
   @override
-  String get budget_used => 'Used';
+  String get budget_used => 'Terpakai';
 
   @override
   String get budget_selectAtLeastOneTag => 'Please select at least one tag';
 
   @override
-  String get budget_over => 'over';
+  String get budget_over => 'Melebihi';
 
   @override
-  String get budget_left => 'left';
+  String get budget_left => 'Sisa';
 
   @override
   String get budget_breakdown => 'BREAKDOWN';
@@ -4925,10 +4925,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get common_today => 'Today';
+  String get common_today => 'Hari ini';
 
   @override
-  String get common_yesterday => 'Yesterday';
+  String get common_yesterday => 'Kemarin';
 
   @override
   String get common_amount => 'Amount';
@@ -5333,7 +5333,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get onboard_continue => 'Continue';
+  String get onboard_continue => 'Lanjut';
 
   @override
   String get onboard_restoreFromBackup => 'Restore from Backup';
@@ -5407,7 +5407,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sms_infoNoPersonal => 'No personal messages are read';
 
   @override
-  String get dashboard_totalBalance => 'Total Balance';
+  String get dashboard_totalBalance => 'Total saldo';
 
   @override
   String get dashboard_netWorthLink => 'Net Worth';
@@ -5432,10 +5432,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get achieve_unlocked => 'Unlocked';
+  String get achieve_unlocked => 'Terbuka';
 
   @override
-  String get achieve_inProgress => 'In Progress';
+  String get achieve_inProgress => 'Berlangsung';
 
   @override
   String get achieve_trophyShelf => 'Trophy Shelf';
@@ -5454,7 +5454,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String achieve_bestDays(int count) {
-    return 'Best: $count days';
+    return 'Terbaik: $count hari';
   }
 
   @override
@@ -5476,7 +5476,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get achieve_catBudgeting => 'Budgeting';
 
   @override
-  String get achieve_catSavings => 'Savings';
+  String get achieve_catSavings => 'Tabungan';
 
   @override
   String get achieve_catTracking => 'Tracking';
@@ -5488,5 +5488,5 @@ class AppLocalizationsEn extends AppLocalizations {
   String get achieve_catEngagement => 'Engagement';
 
   @override
-  String get achieve_catAll => 'All';
+  String get achieve_catAll => 'Semua';
 }

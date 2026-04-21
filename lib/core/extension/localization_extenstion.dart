@@ -525,8 +525,76 @@ extension LocalizationExtension on Locale {
         return 'हिंदी';
       case 'BN':
         return 'বাংলা';
+      case 'ES':
+        return 'Español';
+      case 'PT':
+        return 'Português';
+      case 'ID':
+        return 'Bahasa Indonesia';
+      case 'FR':
+        return 'Français';
+      case 'DE':
+        return 'Deutsch';
+      case 'AR':
+        return 'العربية';
+      case 'TR':
+        return 'Türkçe';
+      case 'TH':
+        return 'ไทย';
+      case 'VI':
+        return 'Tiếng Việt';
+      case 'SW':
+        return 'Kiswahili';
+      case 'KO':
+        return '한국어';
+      case 'JA':
+        return '日本語';
+      case 'ZH':
+        return '中文';
+      case 'MS':
+        return 'Bahasa Melayu';
+      case 'TA':
+        return 'தமிழ்';
+      case 'TE':
+        return 'తెలుగు';
+      case 'MR':
+        return 'मराठी';
+      case 'GU':
+        return 'ગુજરાતી';
+      case 'KN':
+        return 'ಕನ್ನಡ';
+      case 'ML':
+        return 'മലയാളം';
+      case 'PA':
+        return 'ਪੰਜਾਬੀ';
+      case 'OR':
+        return 'ଓଡ଼ିଆ';
+      case 'AS':
+        return 'অসমীয়া';
+      case 'UR':
+        return 'اردو';
+      case 'SD':
+        return 'सिन्धी';
+      case 'NE':
+        return 'नेपाली';
+      case 'SI':
+        return 'සිංහල';
+      case 'BO':
+        return 'བོད་སྐད་';
+      case 'DOI':
+        return 'डोगरी';
+      case 'KOK':
+        return 'कोंकणी';
+      case 'MAI':
+        return 'मैथिली';
+      case 'MNI':
+        return 'মৈতৈলোন';
+      case 'SAT':
+        return 'ᱥᱟᱱᱛᱟᱣᱤ';
+      case 'BRX':
+        return 'बोडो';
       default:
-        return 'English';
+        return languageCode.toUpperCase();
     }
   }
 }
