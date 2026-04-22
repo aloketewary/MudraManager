@@ -3223,5 +3223,13 @@
   "@alert_budgetsNearLimit": { "placeholders": { "count": { "type": "int" } } },
   "alert_goalProgress": "Goal Progress",
   "alert_goalsAlmostComplete": "{count} goal(s) almost complete!",
-  "@alert_goalsAlmostComplete": { "placeholders": { "count": { "type": "int" } } }
+  "@alert_goalsAlmostComplete": { "placeholders": { "count": { "type": "int" } } },
+  "analytics_cashFlowForecast": "Cash Flow Forecast",
+  "analytics_thisMonthProjected": "This month (projected)",
+  "analytics_savingOnAverage": "You are saving on average",
+  "analytics_spendingExceedsIncome": "Spending exceeds income",
+  "recap_vsLastYear": "vs Last Year",
+  "common_income": "Income",
+  "common_expense": "Expense",
+  "common_transactions": "Transactions"
 }

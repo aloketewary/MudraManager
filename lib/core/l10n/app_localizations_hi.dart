@@ -5502,4 +5502,28 @@ class AppLocalizationsHi extends AppLocalizations {
   String alert_goalsAlmostComplete(int count) {
     return '$count goal(s) लगभग पूरे!';
   }
+
+  @override
+  String get analytics_cashFlowForecast => 'Cash Flow Forecast';
+
+  @override
+  String get analytics_thisMonthProjected => 'This month (projected)';
+
+  @override
+  String get analytics_savingOnAverage => 'You are saving on average';
+
+  @override
+  String get analytics_spendingExceedsIncome => 'Spending exceeds income';
+
+  @override
+  String get recap_vsLastYear => 'vs Last Year';
+
+  @override
+  String get common_income => 'Income';
+
+  @override
+  String get common_expense => 'Expense';
+
+  @override
+  String get common_transactions => 'Transactions';
 }

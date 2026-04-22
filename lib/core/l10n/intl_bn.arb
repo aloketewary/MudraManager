@@ -2198,5 +2198,13 @@
   "@alert_budgetsNearLimit": { "placeholders": { "count": { "type": "int" } } },
   "alert_goalProgress": "Goal Progress",
   "alert_goalsAlmostComplete": "{count}টি goal প্রায় শেষ!",
-  "@alert_goalsAlmostComplete": { "placeholders": { "count": { "type": "int" } } }
+  "@alert_goalsAlmostComplete": { "placeholders": { "count": { "type": "int" } } },
+  "analytics_cashFlowForecast": "Cash Flow পূর্বাভাস",
+  "analytics_thisMonthProjected": "এই মাসে (অনুমানিত)",
+  "analytics_savingOnAverage": "গড়ে সঞ্চয় হচ্ছে",
+  "analytics_spendingExceedsIncome": "খরচ income-এর চেয়ে বেশি",
+  "recap_vsLastYear": "গত বছরের তুলনায়",
+  "common_income": "আয়",
+  "common_expense": "খরচ",
+  "common_transactions": "Transactions"
 }

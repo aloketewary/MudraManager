@@ -10049,6 +10049,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} goal(s) almost complete!'**
   String alert_goalsAlmostComplete(int count);
+
+  /// No description provided for @analytics_cashFlowForecast.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash Flow Forecast'**
+  String get analytics_cashFlowForecast;
+
+  /// No description provided for @analytics_thisMonthProjected.
+  ///
+  /// In en, this message translates to:
+  /// **'This month (projected)'**
+  String get analytics_thisMonthProjected;
+
+  /// No description provided for @analytics_savingOnAverage.
+  ///
+  /// In en, this message translates to:
+  /// **'You are saving on average'**
+  String get analytics_savingOnAverage;
+
+  /// No description provided for @analytics_spendingExceedsIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Spending exceeds income'**
+  String get analytics_spendingExceedsIncome;
+
+  /// No description provided for @recap_vsLastYear.
+  ///
+  /// In en, this message translates to:
+  /// **'vs Last Year'**
+  String get recap_vsLastYear;
+
+  /// No description provided for @common_income.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get common_income;
+
+  /// No description provided for @common_expense.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense'**
+  String get common_expense;
+
+  /// No description provided for @common_transactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions'**
+  String get common_transactions;
 }
 
 class _AppLocalizationsDelegate
