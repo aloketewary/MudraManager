@@ -17,6 +17,7 @@ import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/refresh_helper.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/sms/data/sms_activity_service.dart';
+import 'package:mudra_manager/core/providers/singleton_providers.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
@@ -24,12 +25,12 @@ import 'package:mudra_manager/core/router/app_routes.dart';
 final smsActivityProvider =
     FutureProvider.autoDispose<List<SmsActivity>>((ref) async {
   ref.watch(smsRefreshProvider);
-  return await SmsActivityService.instance.getAllActivities();
+  return await ref.read(smsActivityServiceProvider).getAllActivities();
 });
 
 final pendingCountProvider = FutureProvider.autoDispose<int>((ref) async {
   ref.watch(smsRefreshProvider);
-  return await SmsActivityService.instance.getPendingCount();
+  return await ref.read(smsActivityServiceProvider).getPendingCount();
 });
 
 final smsRefreshProvider = NotifierProvider<StateValue<int>, int>(

@@ -2982,5 +2982,20 @@
   "achieve_catTracking": "Tracking",
   "achieve_catMilestones": "Milestones",
   "achieve_catEngagement": "Engagement",
-  "achieve_catAll": "सब"
+  "achieve_catAll": "सब",
+  "alert_actionNeeded": "Action ज़रूरी",
+  "alert_billsDueTomorrow": "कल {count} bill(s) due हैं",
+  "@alert_billsDueTomorrow": { "placeholders": { "count": { "type": "int" } } },
+  "alert_upcomingBills": "आने वाले Bills",
+  "alert_billsDueInDays": "2 दिन में {count} bill(s) due",
+  "@alert_billsDueInDays": { "placeholders": { "count": { "type": "int" } } },
+  "alert_budgetAlert": "Budget Alert",
+  "alert_budgetsExceeded": "{count} budget(s) पार हो गए",
+  "@alert_budgetsExceeded": { "placeholders": { "count": { "type": "int" } } },
+  "alert_budgetWarning": "Budget Warning",
+  "alert_budgetsNearLimit": "{count} budget(s) limit के करीब",
+  "@alert_budgetsNearLimit": { "placeholders": { "count": { "type": "int" } } },
+  "alert_goalProgress": "Goal Progress",
+  "alert_goalsAlmostComplete": "{count} goal(s) लगभग पूरे!",
+  "@alert_goalsAlmostComplete": { "placeholders": { "count": { "type": "int" } } }
 }

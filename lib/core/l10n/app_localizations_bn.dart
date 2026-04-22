@@ -5473,4 +5473,44 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get achieve_catAll => 'সব';
+
+  @override
+  String get alert_actionNeeded => 'Action দরকার';
+
+  @override
+  String alert_billsDueTomorrow(int count) {
+    return 'আগামীকাল $countটি bill due';
+  }
+
+  @override
+  String get alert_upcomingBills => 'আসন্ন Bills';
+
+  @override
+  String alert_billsDueInDays(int count) {
+    return '2 দিনে $countটি bill due';
+  }
+
+  @override
+  String get alert_budgetAlert => 'Budget Alert';
+
+  @override
+  String alert_budgetsExceeded(int count) {
+    return '$countটি budget পার হয়েছে';
+  }
+
+  @override
+  String get alert_budgetWarning => 'Budget Warning';
+
+  @override
+  String alert_budgetsNearLimit(int count) {
+    return '$countটি budget limit-এর কাছে';
+  }
+
+  @override
+  String get alert_goalProgress => 'Goal Progress';
+
+  @override
+  String alert_goalsAlmostComplete(int count) {
+    return '$countটি goal প্রায় শেষ!';
+  }
 }

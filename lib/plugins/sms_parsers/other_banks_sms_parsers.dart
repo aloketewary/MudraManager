@@ -11,7 +11,7 @@ class YesBankSmsParserPlugin extends SmsParserPlugin {
   String get bankName => 'YES';
 
   @override
-  List<String> get senderNames => ['YES'];
+  List<String> get senderNames => ['YES BANK', 'YESBNK'];
 
   @override
   String get iconPath => 'assets/logo/banks/yes.svg';
@@ -19,7 +19,8 @@ class YesBankSmsParserPlugin extends SmsParserPlugin {
   @override
   bool canParse(String sender) {
     final s = sender.toUpperCase();
-    return s.contains('YES') && (s.contains('BANK') || s.contains('BNK') || s == 'YESBNK');
+    return s.contains('YESBANK') || s.contains('YESBNK') ||
+        s.contains('YES BANK') || s.contains('YES BNK');
   }
 
   @override

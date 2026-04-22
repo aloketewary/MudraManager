@@ -7,6 +7,7 @@ import 'package:mudra_manager/shared/widgets/ambient_brand_section.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:mudra_manager/features/analytics/data/analytics_provider.dart';
+import 'package:intl/intl.dart';
 import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
 import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
@@ -38,6 +39,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     final categoryTrendsAsync = ref.watch(categoryTrendsProvider);
     final spendingByDayAsync = ref.watch(spendingByDayProvider);
     final isGuestMode = ref.watch(guestModeProvider);
+    final forecastAsync = ref.watch(cashFlowForecastProvider);
 
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
@@ -229,6 +231,88 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
 
             const SizedBox(height: 16),
 
+
+            // Cash Flow Forecast
+            forecastAsync.when(
+              data: (forecast) => Card(
+                elevation: 0,
+                color: color.surfaceContainerLow,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  side: BorderSide(color: color.outlineVariant.withValues(alpha: 0.5)),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(children: [
+                        Icon(LucideIcons.trendingUp, color: color.primary, size: 24),
+                        const SizedBox(width: 10),
+                        Text('Cash Flow Forecast', style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+                      ]),
+                      const SizedBox(height: 16),
+                      // Current month projection
+                      Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: forecast.projectedNet >= 0 ? FinanceColors.incomeColor(Theme.of(context).brightness).withValues(alpha: 0.08) : FinanceColors.expenseColor(Theme.of(context).brightness).withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                          Text('This month (projected)', style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant)),
+                          CurrencyText(
+                            amount: GuestModeUtil.applyGuestMode(forecast.projectedNet, isGuestMode),
+                            style: textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: forecast.projectedNet >= 0 ? FinanceColors.incomeColor(Theme.of(context).brightness) : FinanceColors.expenseColor(Theme.of(context).brightness),
+                            ),
+                          ),
+                        ]),
+                      ),
+                      const SizedBox(height: 12),
+                      // Next 3 months
+                      ...forecast.forecastMonths.map((m) => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 6),
+                        child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                          Text(DateFormat('MMM yyyy').format(m.month), style: textTheme.bodyMedium),
+                          Row(children: [
+                            CurrencyText(
+                              amount: GuestModeUtil.applyGuestMode(m.net, isGuestMode),
+                              style: textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: m.isPositive ? FinanceColors.incomeColor(Theme.of(context).brightness) : FinanceColors.expenseColor(Theme.of(context).brightness),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Icon(
+                              m.isPositive ? LucideIcons.trendingUp : LucideIcons.trendingDown,
+                              size: 16,
+                              color: m.isPositive ? FinanceColors.incomeColor(Theme.of(context).brightness) : FinanceColors.expenseColor(Theme.of(context).brightness),
+                            ),
+                          ]),
+                        ]),
+                      )),
+                      const SizedBox(height: 12),
+                      // Summary
+                      Center(
+                        child: Text(
+                          forecast.isPositive ? 'You are saving on average' : 'Spending exceeds income',
+                          style: textTheme.bodySmall?.copyWith(
+                            color: forecast.isPositive ? FinanceColors.incomeColor(Theme.of(context).brightness) : FinanceColors.expenseColor(Theme.of(context).brightness),
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              loading: () => const DashboardCardSkeleton(),
+              error: (_, __) => const SizedBox.shrink(),
+            ),
+
+            const SizedBox(height: 16),
             // Category Trends
             categoryTrendsAsync.when(
               data: (trends) {
@@ -381,7 +465,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                             BarChartData(
                               alignment: BarChartAlignment.spaceAround,
                               maxY: maxSpending * 1.2,
-                              barTouchData: BarTouchData(enabled: false),
+                              barTouchData: const BarTouchData(enabled: false),
                               titlesData: FlTitlesData(
                                 show: true,
                                 bottomTitles: AxisTitles(

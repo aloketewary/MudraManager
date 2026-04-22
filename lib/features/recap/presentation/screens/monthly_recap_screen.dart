@@ -1,4 +1,5 @@
 import 'package:mudra_manager/core/utils/safe_date_format.dart';
+import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
@@ -170,6 +171,14 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
                       SizedBox(height: spacing.sectionGap),
                     ],
 
+
+                    // ── YEAR-OVER-YEAR ──
+                    if (data.hasYoyData) ...[
+                      _sectionHeader("vs Last Year", LucideIcons.calendarRange, color, textTheme),
+                      const SizedBox(height: 10),
+                      _buildYoYComparison(data, color, textTheme, spacing),
+                      SizedBox(height: spacing.sectionGap),
+                    ],
                     // ── HIGHLIGHTS ──
                     _buildHighlights(data, color, textTheme, spacing),
                     SizedBox(height: spacing.sectionGap),
@@ -508,6 +517,47 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
         ],
       ),
     );
+  }
+
+
+  // ── YEAR-OVER-YEAR COMPARISON ──
+  Widget _buildYoYComparison(MonthlyRecapData data, ColorScheme color, TextTheme textTheme, AppSpacing spacing) {
+    final yoyIncome = data.yoyIncome ?? 0;
+    final yoyExpense = data.yoyExpense ?? 0;
+    final yoyTxnCount = data.yoyTransactionCount ?? 0;
+    return Card(
+      elevation: 0, margin: EdgeInsets.zero, color: color.surfaceContainerLow,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(spacing.radiusMedium), side: BorderSide(color: color.outlineVariant.withValues(alpha: 0.5))),
+      child: Padding(
+        padding: EdgeInsets.all(spacing.cardInner),
+        child: Column(children: [
+          _yoyRow("Income", yoyIncome, data.totalIncome, data.yoyIncomeChange, color, textTheme),
+          SizedBox(height: spacing.elementGap),
+          _yoyRow("Expense", yoyExpense, data.totalExpense, data.yoyExpenseChange, color, textTheme),
+          SizedBox(height: spacing.elementGap),
+          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+            Text("Transactions", style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant)),
+            Text("$yoyTxnCount → ${data.transactionCount}", style: textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600)),
+          ]),
+        ]),
+      ),
+    );
+  }
+
+  Widget _yoyRow(String label, double lastYear, double thisYear, double changePct, ColorScheme color, TextTheme textTheme) {
+    final isUp = changePct > 0;
+    final b = Theme.of(context).brightness; final changeColor = label == "Income" ? (isUp ? FinanceColors.incomeColor(b) : FinanceColors.expenseColor(b)) : (isUp ? FinanceColors.expenseColor(b) : FinanceColors.incomeColor(b));
+    return Row(children: [
+      Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(label, style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant)),
+        Text("$_currency${lastYear.toStringAsFixed(0)} → $_currency${thisYear.toStringAsFixed(0)}", style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
+      ])),
+      if (changePct != 0) Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(color: changeColor.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(8)),
+        child: Text("${isUp ? "+" : ""}${changePct.toStringAsFixed(0)}%", style: textTheme.labelSmall?.copyWith(color: changeColor, fontWeight: FontWeight.w700)),
+      ),
+    ]);
   }
 
   // ── HIGHLIGHTS ──

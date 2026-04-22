@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
-import 'package:mudra_manager/features/account/data/balance_history_service.dart';
+import 'package:mudra_manager/features/account/data/balance_history_provider.dart';
 
 final netWorthProvider = FutureProvider.autoDispose((ref) async {
   final accounts = await ref.watch(accountsProvider.future);
@@ -50,7 +50,7 @@ final netWorthProvider = FutureProvider.autoDispose((ref) async {
   double lastMonthNetWorth = 0.0;
 
   for (final account in accounts) {
-    final lastBalance = await BalanceHistoryService.instance
+    final lastBalance = await ref.read(balanceHistoryServiceProvider)
         .getBalanceOnDate(account.id, lastMonth);
     if (lastBalance != null) {
       if (account.accountType == AccountType.creditCard) {
@@ -85,7 +85,7 @@ final netWorthHistoryProvider = FutureProvider.autoDispose((ref) async {
     double dayNetWorth = 0.0;
 
     for (final account in accounts) {
-      final balance = await BalanceHistoryService.instance
+      final balance = await ref.read(balanceHistoryServiceProvider)
           .getBalanceOnDate(account.id, date);
       if (balance != null) {
         if (account.accountType == AccountType.creditCard) {

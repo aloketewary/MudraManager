@@ -5,7 +5,7 @@ import 'package:mudra_manager/features/budget/domain/overspend_prediction.dart';
 
 final overspendPredictionServiceProvider =
     Provider<OverspendPredictionService>((ref) {
-  return OverspendPredictionService.instance;
+  return OverspendPredictionService();
 });
 
 final overspendPredictionsProvider =

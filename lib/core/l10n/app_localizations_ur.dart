@@ -5489,4 +5489,44 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get achieve_catAll => 'All';
+
+  @override
+  String get alert_actionNeeded => 'Action Needed';
+
+  @override
+  String alert_billsDueTomorrow(int count) {
+    return '$count bill(s) due tomorrow';
+  }
+
+  @override
+  String get alert_upcomingBills => 'Upcoming Bills';
+
+  @override
+  String alert_billsDueInDays(int count) {
+    return '$count bill(s) due in 2 days';
+  }
+
+  @override
+  String get alert_budgetAlert => 'Budget Alert';
+
+  @override
+  String alert_budgetsExceeded(int count) {
+    return '$count budget(s) exceeded';
+  }
+
+  @override
+  String get alert_budgetWarning => 'Budget Warning';
+
+  @override
+  String alert_budgetsNearLimit(int count) {
+    return '$count budget(s) near limit';
+  }
+
+  @override
+  String get alert_goalProgress => 'Goal Progress';
+
+  @override
+  String alert_goalsAlmostComplete(int count) {
+    return '$count goal(s) almost complete!';
+  }
 }

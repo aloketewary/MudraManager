@@ -33,6 +33,97 @@ class AdvancedAnalyticsService {
     return count > 0 ? total / count : 0;
   }
 
+  /// Cash flow forecast for the next 3 months.
+  /// Uses weighted average of last 6 months for both income and expense.
+  Future<CashFlowForecast> forecastCashFlow() async {
+    final now = DateTime.now();
+    final transactions = await _transactionService.getAllForDashBoard();
+
+    // Build 6-month history
+    final incomeHistory = <double>[];
+    final expenseHistory = <double>[];
+    final months = <DateTime>[];
+
+    for (int i = 1; i <= 6; i++) {
+      final month = DateTime(now.year, now.month - i);
+      months.add(month);
+      double inc = 0, exp = 0;
+      for (final tx in transactions.where((t) =>
+          t.date.year == month.year && t.date.month == month.month && !t.isTransfer)) {
+        if (tx.isExpense) {
+          exp += tx.effectiveAmount;
+        } else {
+          inc += tx.effectiveAmount;
+        }
+      }
+      incomeHistory.add(inc);
+      expenseHistory.add(exp);
+    }
+
+    // Current month (partial)
+    double currentIncome = 0, currentExpense = 0;
+    for (final tx in transactions.where((t) =>
+        t.date.year == now.year && t.date.month == now.month && !t.isTransfer)) {
+      if (tx.isExpense) {
+        currentExpense += tx.effectiveAmount;
+      } else {
+        currentIncome += tx.effectiveAmount;
+      }
+    }
+
+    // Project current month to full month
+    final daysElapsed = now.day;
+    final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
+    final projectedIncome = daysElapsed > 0
+        ? currentIncome / daysElapsed * daysInMonth
+        : _weightedAvg(incomeHistory);
+    final projectedExpense = daysElapsed > 0
+        ? currentExpense / daysElapsed * daysInMonth
+        : _weightedAvg(expenseHistory);
+
+    // Forecast next 3 months using weighted average
+    final forecastMonths = <MonthForecast>[];
+    for (int i = 1; i <= 3; i++) {
+      final forecastMonth = DateTime(now.year, now.month + i);
+      final incForecast = _weightedAvg(incomeHistory);
+      final expForecast = _weightedAvg(expenseHistory);
+      forecastMonths.add(MonthForecast(
+        month: forecastMonth,
+        income: incForecast,
+        expense: expForecast,
+        net: incForecast - expForecast,
+      ));
+    }
+
+    // Runway: if net is negative, how many months until balance hits 0
+    // (simplified — doesn't account for recurring income)
+    final avgNet = forecastMonths.map((f) => f.net).reduce((a, b) => a + b) / 3;
+
+    return CashFlowForecast(
+      currentMonthIncome: currentIncome,
+      currentMonthExpense: currentExpense,
+      projectedMonthIncome: projectedIncome,
+      projectedMonthExpense: projectedExpense,
+      incomeHistory: incomeHistory,
+      expenseHistory: expenseHistory,
+      forecastMonths: forecastMonths,
+      avgMonthlyNet: avgNet,
+    );
+  }
+
+  double _weightedAvg(List<double> values) {
+    if (values.isEmpty) return 0;
+    const weights = [0.30, 0.25, 0.20, 0.12, 0.08, 0.05];
+    double sum = 0, wSum = 0;
+    for (int i = 0; i < values.length && i < weights.length; i++) {
+      if (values[i] > 0) {
+        sum += values[i] * weights[i];
+        wSum += weights[i];
+      }
+    }
+    return wSum > 0 ? sum / wSum : 0;
+  }
+
   // Calculate financial health score (0-100)
   Future<FinancialHealthScore> calculateHealthScore(double totalBalance) async {
     final now = DateTime.now();
@@ -141,27 +232,71 @@ class AdvancedAnalyticsService {
     final now = DateTime.now();
     final transactions = await _transactionService.getAllForDashBoard();
 
-    final trends = <String, CategoryTrend>{};
-
-    for (var tx in transactions.where((t) => t.isExpense)) {
-      final categoryName = tx.category.value?.name ?? 'Uncategorized';
-
-      if (!trends.containsKey(categoryName)) {
-        trends[categoryName] = CategoryTrend(
-          categoryName: categoryName,
-          thisMonth: 0,
-          lastMonth: 0,
-        );
-      }
-
-      if (tx.date.year == now.year && tx.date.month == now.month) {
-        trends[categoryName]!.thisMonth += tx.effectiveAmount;
-      } else if (tx.date.year == now.year && tx.date.month == now.month - 1) {
-        trends[categoryName]!.lastMonth += tx.effectiveAmount;
+    // Build 6-month history per category
+    final catMonths = <String, List<double>>{};
+    for (int i = 0; i < 6; i++) {
+      final month = DateTime(now.year, now.month - i);
+      for (final tx in transactions.where((t) =>
+          t.isExpense &&
+          t.date.year == month.year &&
+          t.date.month == month.month)) {
+        final name = tx.category.value?.name ?? 'Uncategorized';
+        catMonths.putIfAbsent(name, () => List.filled(6, 0.0));
+        catMonths[name]![i] += tx.effectiveAmount;
       }
     }
 
+    final trends = <String, CategoryTrend>{};
+    for (final entry in catMonths.entries) {
+      final history = entry.value; // [thisMonth, lastMonth, 2ago, 3ago, 4ago, 5ago]
+      final thisMonth = history[0];
+      final lastMonth = history[1];
+
+      // Predict next month using weighted average (recent months weigh more)
+      final weights = [0.35, 0.25, 0.20, 0.10, 0.05, 0.05];
+      double predicted = 0;
+      double totalWeight = 0;
+      for (int i = 0; i < 6; i++) {
+        if (history[i] > 0) {
+          predicted += history[i] * weights[i];
+          totalWeight += weights[i];
+        }
+      }
+      predicted = totalWeight > 0 ? predicted / totalWeight : 0;
+
+      // Determine trend direction from last 3 months
+      final recent3 = history.sublist(0, 3);
+      final direction = _classifyTrend(recent3);
+
+      // Anomaly: this month > 2x the average of months 1-5
+      final pastAvg = history.sublist(1).where((v) => v > 0).toList();
+      final avg = pastAvg.isNotEmpty
+          ? pastAvg.reduce((a, b) => a + b) / pastAvg.length
+          : 0.0;
+      final isAnomaly = avg > 0 && thisMonth > avg * 2;
+
+      trends[entry.key] = CategoryTrend(
+        categoryName: entry.key,
+        thisMonth: thisMonth,
+        lastMonth: lastMonth,
+        monthlyHistory: history,
+        predictedNextMonth: predicted,
+        direction: direction,
+        isAnomaly: isAnomaly,
+      );
+    }
+
     return trends;
+  }
+
+  TrendDirection _classifyTrend(List<double> recent3) {
+    if (recent3.length < 3) return TrendDirection.stable;
+    // recent3[0] = this month, [1] = last month, [2] = 2 months ago
+    final increasing = recent3[0] > recent3[1] && recent3[1] > recent3[2];
+    final decreasing = recent3[0] < recent3[1] && recent3[1] < recent3[2];
+    if (increasing) return TrendDirection.rising;
+    if (decreasing) return TrendDirection.falling;
+    return TrendDirection.stable;
   }
 
   // Predict budget exhaustion date
@@ -239,13 +374,66 @@ class CategoryTrend {
   final String categoryName;
   double thisMonth;
   double lastMonth;
+  final List<double> monthlyHistory; // last 6 months, newest first
+  final double predictedNextMonth;
+  final TrendDirection direction;
+  final bool isAnomaly;
 
   CategoryTrend({
     required this.categoryName,
     required this.thisMonth,
     required this.lastMonth,
+    this.monthlyHistory = const [],
+    this.predictedNextMonth = 0,
+    this.direction = TrendDirection.stable,
+    this.isAnomaly = false,
   });
 
   double get change => thisMonth - lastMonth;
   double get changePercent => lastMonth == 0 ? 0 : (change / lastMonth * 100);
+}
+
+enum TrendDirection { rising, falling, stable }
+
+
+class CashFlowForecast {
+  final double currentMonthIncome;
+  final double currentMonthExpense;
+  final double projectedMonthIncome;
+  final double projectedMonthExpense;
+  final List<double> incomeHistory; // last 6 months, newest first
+  final List<double> expenseHistory;
+  final List<MonthForecast> forecastMonths; // next 3 months
+  final double avgMonthlyNet;
+
+  CashFlowForecast({
+    required this.currentMonthIncome,
+    required this.currentMonthExpense,
+    required this.projectedMonthIncome,
+    required this.projectedMonthExpense,
+    required this.incomeHistory,
+    required this.expenseHistory,
+    required this.forecastMonths,
+    required this.avgMonthlyNet,
+  });
+
+  double get currentNet => currentMonthIncome - currentMonthExpense;
+  double get projectedNet => projectedMonthIncome - projectedMonthExpense;
+  bool get isPositive => avgMonthlyNet > 0;
+}
+
+class MonthForecast {
+  final DateTime month;
+  final double income;
+  final double expense;
+  final double net;
+
+  MonthForecast({
+    required this.month,
+    required this.income,
+    required this.expense,
+    required this.net,
+  });
+
+  bool get isPositive => net > 0;
 }

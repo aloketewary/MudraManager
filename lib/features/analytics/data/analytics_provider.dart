@@ -36,6 +36,24 @@ final categoryTrendsProvider =
   return await service.getCategoryTrends();
 });
 
+/// Categories with rising spending trend — sorted by change percentage.
+final risingCategoriesProvider =
+    FutureProvider.autoDispose<List<CategoryTrend>>((ref) async {
+  final trends = await ref.watch(categoryTrendsProvider.future);
+  return trends.values
+      .where((t) => t.direction == TrendDirection.rising && t.thisMonth > 0)
+      .toList()
+    ..sort((a, b) => b.changePercent.compareTo(a.changePercent));
+});
+
+/// Categories with anomalous spending this month.
+final anomalyCategoriesProvider =
+    FutureProvider.autoDispose<List<CategoryTrend>>((ref) async {
+  final trends = await ref.watch(categoryTrendsProvider.future);
+  return trends.values.where((t) => t.isAnomaly).toList()
+    ..sort((a, b) => b.thisMonth.compareTo(a.thisMonth));
+});
+
 final spendingByDayProvider =
     FutureProvider.autoDispose<Map<String, double>>((ref) async {
   ref.watch(transactionChangeProvider);
@@ -74,4 +92,12 @@ final monthlyExpenseTrendsProvider =
   }
 
   return categoryMonthlyData;
+});
+
+
+final cashFlowForecastProvider =
+    FutureProvider.autoDispose<CashFlowForecast>((ref) async {
+  ref.watch(transactionChangeProvider);
+  final service = ref.watch(analyticsServiceProvider);
+  return await service.forecastCashFlow();
 });

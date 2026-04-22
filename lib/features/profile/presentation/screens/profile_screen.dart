@@ -35,10 +35,11 @@ class ProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  AppLocalizations get l10n => AppLocalizations.of(context)!;
+
   @override
   Widget build(BuildContext context) {
     final spacing = ref.watch(spacingProvider);
-    final l10n = AppLocalizations.of(context)!;
     final profileAsync = ref.watch(userProfileProvider);
     final accountsAsync = ref.watch(accountsProvider);
     final categoriesAsync = ref.watch(categoryListProvider);
@@ -348,7 +349,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     const SizedBox(width: 14),
                     Expanded(
                       child: Text(
-                        isPro ? AppLocalizations.of(context)!.profile_proActiveLabel : AppLocalizations.of(context)!.profile_freeTierLabel,
+                        isPro ? l10n.profile_proActiveLabel : l10n.profile_freeTierLabel,
                         style: textTheme.bodyLarge?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
@@ -616,8 +617,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                   info.isPro
                                       ? info.label
                                       : info.isTrial
-                                          ? AppLocalizations.of(context)!.profile_fullAccessLabel
-                                          : AppLocalizations.of(context)!.profile_upgradeToProLabel,
+                                          ? l10n.profile_fullAccessLabel
+                                          : l10n.profile_upgradeToProLabel,
                                   style: textTheme.titleSmall?.copyWith(
                                     fontWeight: FontWeight.w700,
                                   ),
@@ -700,21 +701,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   String _subscriptionSubtitle(ProPlanInfo info) {
     if (info.isTrial) {
       final days = info.trialDaysRemaining ?? 0;
-      if (days > 30) return AppLocalizations.of(context)!.profile_fullAccessEnjoy;
-      if (days > 7) return AppLocalizations.of(context)!.profile_fullAccessDaysRemaining(days);
-      if (days > 0) return AppLocalizations.of(context)!.profile_fullAccessEndsIn(days);
-      return AppLocalizations.of(context)!.profile_trialEnded;
+      if (days > 30) return l10n.profile_fullAccessEnjoy;
+      if (days > 7) return l10n.profile_fullAccessDaysRemaining(days);
+      if (days > 0) return l10n.profile_fullAccessEndsIn(days);
+      return l10n.profile_trialEnded;
     }
-    if (!info.isPro) return AppLocalizations.of(context)!.profile_unlimitedDesc;
+    if (!info.isPro) return l10n.profile_unlimitedDesc;
 
     if (info.expiresAt != null) {
       final days = info.expiresAt!.difference(DateTime.now()).inDays;
-      if (days < 0) return AppLocalizations.of(context)!.profile_expiredRenew;
-      if (days == 0) return AppLocalizations.of(context)!.profile_expiresToday;
-      if (days == 1) return AppLocalizations.of(context)!.profile_renewsTomorrow;
-      return AppLocalizations.of(context)!.profile_renewsInDays(days);
+      if (days < 0) return l10n.profile_expiredRenew;
+      if (days == 0) return l10n.profile_expiresToday;
+      if (days == 1) return l10n.profile_renewsTomorrow;
+      return l10n.profile_renewsInDays(days);
     }
-    return AppLocalizations.of(context)!.profile_activeSubscription;
+    return l10n.profile_activeSubscription;
   }
 
   // ── HERO BACKGROUND ──
@@ -777,7 +778,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          profile?.name ?? AppLocalizations.of(context)!.profile_unknown,
+                          profile?.name ?? l10n.profile_unknown,
                           style: textTheme.headlineSmall?.copyWith(
                             fontWeight: FontWeight.w900,
                           ),
@@ -854,7 +855,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           height: 64,
           child: ClipOval(
             child: BoringAvatar(
-              name: profile?.name ?? AppLocalizations.of(context)!.profile_awesomeUser,
+              name: profile?.name ?? l10n.profile_awesomeUser,
               palette: BoringAvatarPalette([
                 color.primary,
                 color.tertiary,
@@ -967,7 +968,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   loading: () => '...',
                   error: (_, __) => '0',
                 ),
-                AppLocalizations.of(context)!.profile_accountsLabel,
+                l10n.profile_accountsLabel,
                 color,
                 textTheme,
               ),
@@ -981,7 +982,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   loading: () => '...',
                   error: (_, __) => '0',
                 ),
-                AppLocalizations.of(context)!.profile_categoriesLabel,
+                l10n.profile_categoriesLabel,
                 color,
                 textTheme,
               ),
@@ -995,7 +996,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   snapshot.hasData
                       ? (snapshot.data as List).length.toString()
                       : '...',
-                  AppLocalizations.of(context)!.profile_budgetsLabel,
+                  l10n.profile_budgetsLabel,
                   color,
                   textTheme,
                 ),
@@ -1007,7 +1008,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 child: _quickStat(
                   LucideIcons.flame,
                   '${streak.longestCount}',
-                  AppLocalizations.of(context)!.profile_bestStreakLabel,
+                  l10n.profile_bestStreakLabel,
                   color,
                   textTheme,
                   accentColor: color.tertiary,
@@ -1093,7 +1094,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        AppLocalizations.of(context)!.profile_yourAchievementsLabel,
+                        l10n.profile_yourAchievementsLabel,
                         style: textTheme.titleMedium
                             ?.copyWith(fontWeight: FontWeight.w600),
                       ),
@@ -1134,7 +1135,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   Icon(LucideIcons.trophy, color: color.primary, size: 24),
                   const SizedBox(width: 12),
                   Text(
-                    AppLocalizations.of(context)!.profile_yourAchievementsLabel,
+                    l10n.profile_yourAchievementsLabel,
                     style: textTheme.titleMedium
                         ?.copyWith(fontWeight: FontWeight.w600),
                   ),
@@ -1270,7 +1271,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     TextTheme textTheme,
     AppSpacing spacing,
   ) {
-    final l10n = AppLocalizations.of(context)!;
     final items = <_SettingItem>[
       _SettingItem(
         LucideIcons.bell,
@@ -1328,13 +1328,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             Icon(LucideIcons.user, size: 64, color: color.primary),
             const SizedBox(height: 16),
             Text(
-              AppLocalizations.of(context)!.profile_aboutMudra,
+              l10n.profile_aboutMudra,
               style:
                   textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             Text(
-              AppLocalizations.of(context)!.profile_aboutMudraDesc,
+              l10n.profile_aboutMudraDesc,
               style: textTheme.bodyMedium,
               textAlign: TextAlign.center,
             ),

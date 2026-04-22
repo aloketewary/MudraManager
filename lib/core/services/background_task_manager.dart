@@ -26,7 +26,7 @@ class BackgroundTaskManager {
   /// Call after UI is visible — only notifications and cleanup, no heavy processing.
   static Future<void> runDeferredTasks() async {
     try {
-      await BalanceHistoryService.instance.recordDailySnapshots();
+      await BalanceHistoryService(IsarService()).recordDailySnapshots();
       await SummaryScheduler.checkAndShowSummaries();
       await SmartNotificationService.instance.runSmartChecks();
       await SmsHashCleanupService.cleanupOldHashes();
@@ -81,7 +81,7 @@ class BackgroundTaskManager {
       await RecurringTransactionService(IsarService(), gamificationService)
           .processRecurringTransactions();
       await BillService.createPendingTransactionsForDueBills();
-      await BalanceHistoryService.instance.recordDailySnapshots();
+      await BalanceHistoryService(IsarService()).recordDailySnapshots();
       await SummaryScheduler.checkAndShowSummaries();
       await SmartNotificationService.instance.runSmartChecks();
       await SmsHashCleanupService.cleanupOldHashes();

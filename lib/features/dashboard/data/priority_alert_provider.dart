@@ -4,6 +4,7 @@ import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
 import 'package:mudra_manager/core/providers/collection_watchers.dart';
 import 'package:mudra_manager/core/providers/date_change_provider.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/features/goal/data/goal_provider.dart';
@@ -60,8 +61,8 @@ final priorityAlertProvider =
 
     if (billsDueTomorrow > 0) {
       return PriorityAlert(
-        title: 'Action Needed',
-        message:
+        title: Tone.appL10n?.alert_actionNeeded ?? 'Action Needed',
+        message: Tone.appL10n?.alert_billsDueTomorrow(billsDueTomorrow) ??
             '$billsDueTomorrow bill${billsDueTomorrow > 1 ? 's' : ''} due tomorrow',
         route: AppRoutes.recurringTransactions,
         type: AlertType.urgent,
@@ -69,8 +70,8 @@ final priorityAlertProvider =
     }
 
     return PriorityAlert(
-      title: 'Upcoming Bills',
-      message:
+      title: Tone.appL10n?.alert_upcomingBills ?? 'Upcoming Bills',
+      message: Tone.appL10n?.alert_billsDueInDays(upcomingBills.length) ??
           '${upcomingBills.length} bill${upcomingBills.length > 1 ? 's' : ''} due in 2 days',
       route: AppRoutes.recurringTransactions,
       type: AlertType.warning,
@@ -84,8 +85,8 @@ final priorityAlertProvider =
 
   if (overBudget.isNotEmpty) {
     return PriorityAlert(
-      title: 'Budget Alert',
-      message:
+      title: Tone.appL10n?.alert_budgetAlert ?? 'Budget Alert',
+      message: Tone.appL10n?.alert_budgetsExceeded(overBudget.length) ??
           '${overBudget.length} budget${overBudget.length > 1 ? 's' : ''} exceeded',
       route: AppRoutes.budgetDashboard,
       type: AlertType.urgent,
@@ -100,8 +101,8 @@ final priorityAlertProvider =
 
   if (nearLimit.isNotEmpty) {
     return PriorityAlert(
-      title: 'Budget Warning',
-      message:
+      title: Tone.appL10n?.alert_budgetWarning ?? 'Budget Warning',
+      message: Tone.appL10n?.alert_budgetsNearLimit(nearLimit.length) ??
           '${nearLimit.length} budget${nearLimit.length > 1 ? 's' : ''} near limit',
       route: AppRoutes.budgetDashboard,
       type: AlertType.warning,
@@ -118,8 +119,8 @@ final priorityAlertProvider =
 
   if (nearCompletion.isNotEmpty) {
     return PriorityAlert(
-      title: 'Goal Progress',
-      message:
+      title: Tone.appL10n?.alert_goalProgress ?? 'Goal Progress',
+      message: Tone.appL10n?.alert_goalsAlmostComplete(nearCompletion.length) ??
           '${nearCompletion.length} goal${nearCompletion.length > 1 ? 's' : ''} almost complete!',
       route: AppRoutes.goalScreen,
       type: AlertType.info,

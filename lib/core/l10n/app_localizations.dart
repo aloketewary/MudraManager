@@ -9989,6 +9989,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'All'**
   String get achieve_catAll;
+
+  /// No description provided for @alert_actionNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Action Needed'**
+  String get alert_actionNeeded;
+
+  /// No description provided for @alert_billsDueTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} bill(s) due tomorrow'**
+  String alert_billsDueTomorrow(int count);
+
+  /// No description provided for @alert_upcomingBills.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming Bills'**
+  String get alert_upcomingBills;
+
+  /// No description provided for @alert_billsDueInDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} bill(s) due in 2 days'**
+  String alert_billsDueInDays(int count);
+
+  /// No description provided for @alert_budgetAlert.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget Alert'**
+  String get alert_budgetAlert;
+
+  /// No description provided for @alert_budgetsExceeded.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} budget(s) exceeded'**
+  String alert_budgetsExceeded(int count);
+
+  /// No description provided for @alert_budgetWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget Warning'**
+  String get alert_budgetWarning;
+
+  /// No description provided for @alert_budgetsNearLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} budget(s) near limit'**
+  String alert_budgetsNearLimit(int count);
+
+  /// No description provided for @alert_goalProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal Progress'**
+  String get alert_goalProgress;
+
+  /// No description provided for @alert_goalsAlmostComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} goal(s) almost complete!'**
+  String alert_goalsAlmostComplete(int count);
 }
 
 class _AppLocalizationsDelegate

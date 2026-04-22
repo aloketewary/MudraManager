@@ -17,7 +17,7 @@ class GenericInternationalSmsParser extends SmsParserPlugin {
   String get bankName => 'Bank';
 
   @override
-  List<String> get senderNames => [];
+  List<String> get senderNames => ['BANK'];
 
   @override
   String get iconPath => 'assets/logo/banks/generic.svg';

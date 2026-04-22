@@ -3208,5 +3208,20 @@
   "achieve_catTracking": "Tracking",
   "achieve_catMilestones": "Milestones",
   "achieve_catEngagement": "Engagement",
-  "achieve_catAll": "All"
+  "achieve_catAll": "All",
+  "alert_actionNeeded": "Action Needed",
+  "alert_billsDueTomorrow": "{count} bill(s) due tomorrow",
+  "@alert_billsDueTomorrow": { "placeholders": { "count": { "type": "int" } } },
+  "alert_upcomingBills": "Upcoming Bills",
+  "alert_billsDueInDays": "{count} bill(s) due in 2 days",
+  "@alert_billsDueInDays": { "placeholders": { "count": { "type": "int" } } },
+  "alert_budgetAlert": "Budget Alert",
+  "alert_budgetsExceeded": "{count} budget(s) exceeded",
+  "@alert_budgetsExceeded": { "placeholders": { "count": { "type": "int" } } },
+  "alert_budgetWarning": "Budget Warning",
+  "alert_budgetsNearLimit": "{count} budget(s) near limit",
+  "@alert_budgetsNearLimit": { "placeholders": { "count": { "type": "int" } } },
+  "alert_goalProgress": "Goal Progress",
+  "alert_goalsAlmostComplete": "{count} goal(s) almost complete!",
+  "@alert_goalsAlmostComplete": { "placeholders": { "count": { "type": "int" } } }
 }
