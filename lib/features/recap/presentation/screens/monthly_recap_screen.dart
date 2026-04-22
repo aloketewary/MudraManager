@@ -174,7 +174,7 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
 
                     // ── YEAR-OVER-YEAR ──
                     if (data.hasYoyData) ...[
-                      _sectionHeader("vs Last Year", LucideIcons.calendarRange, color, textTheme),
+                      _sectionHeader(AppLocalizations.of(context)!.recap_vsLastYear, LucideIcons.calendarRange, color, textTheme),
                       const SizedBox(height: 10),
                       _buildYoYComparison(data, color, textTheme, spacing),
                       SizedBox(height: spacing.sectionGap),
@@ -531,12 +531,12 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
       child: Padding(
         padding: EdgeInsets.all(spacing.cardInner),
         child: Column(children: [
-          _yoyRow("Income", yoyIncome, data.totalIncome, data.yoyIncomeChange, color, textTheme),
+          _yoyRow(AppLocalizations.of(context)!.common_income, yoyIncome, data.totalIncome, data.yoyIncomeChange, color, textTheme, isIncome: true),
           SizedBox(height: spacing.elementGap),
-          _yoyRow("Expense", yoyExpense, data.totalExpense, data.yoyExpenseChange, color, textTheme),
+          _yoyRow(AppLocalizations.of(context)!.common_expense, yoyExpense, data.totalExpense, data.yoyExpenseChange, color, textTheme),
           SizedBox(height: spacing.elementGap),
           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            Text("Transactions", style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant)),
+            Text(AppLocalizations.of(context)!.common_transactions, style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant)),
             Text("$yoyTxnCount → ${data.transactionCount}", style: textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600)),
           ]),
         ]),
@@ -544,9 +544,9 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
     );
   }
 
-  Widget _yoyRow(String label, double lastYear, double thisYear, double changePct, ColorScheme color, TextTheme textTheme) {
+  Widget _yoyRow(String label, double lastYear, double thisYear, double changePct, ColorScheme color, TextTheme textTheme, {bool isIncome = false}) {
     final isUp = changePct > 0;
-    final b = Theme.of(context).brightness; final changeColor = label == "Income" ? (isUp ? FinanceColors.incomeColor(b) : FinanceColors.expenseColor(b)) : (isUp ? FinanceColors.expenseColor(b) : FinanceColors.incomeColor(b));
+    final b = Theme.of(context).brightness; final changeColor = isIncome ? (isUp ? FinanceColors.incomeColor(b) : FinanceColors.expenseColor(b)) : (isUp ? FinanceColors.expenseColor(b) : FinanceColors.incomeColor(b));
     return Row(children: [
       Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(label, style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant)),

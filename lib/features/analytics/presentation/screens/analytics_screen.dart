@@ -249,7 +249,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                       Row(children: [
                         Icon(LucideIcons.trendingUp, color: color.primary, size: 24),
                         const SizedBox(width: 10),
-                        Text('Cash Flow Forecast', style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+                        Text(AppLocalizations.of(context)!.analytics_cashFlowForecast, style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
                       ]),
                       const SizedBox(height: 16),
                       // Current month projection
@@ -260,7 +260,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                          Text('This month (projected)', style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant)),
+                          Text(AppLocalizations.of(context)!.analytics_thisMonthProjected, style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant)),
                           CurrencyText(
                             amount: GuestModeUtil.applyGuestMode(forecast.projectedNet, isGuestMode),
                             style: textTheme.titleSmall?.copyWith(
@@ -297,7 +297,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                       // Summary
                       Center(
                         child: Text(
-                          forecast.isPositive ? 'You are saving on average' : 'Spending exceeds income',
+                          forecast.isPositive ? AppLocalizations.of(context)!.analytics_savingOnAverage : AppLocalizations.of(context)!.analytics_spendingExceedsIncome,
                           style: textTheme.bodySmall?.copyWith(
                             color: forecast.isPositive ? FinanceColors.incomeColor(Theme.of(context).brightness) : FinanceColors.expenseColor(Theme.of(context).brightness),
                             fontStyle: FontStyle.italic,

@@ -5515,25 +5515,25 @@ class AppLocalizationsBn extends AppLocalizations {
   }
 
   @override
-  String get analytics_cashFlowForecast => 'Cash Flow Forecast';
+  String get analytics_cashFlowForecast => 'Cash Flow পূর্বাভাস';
 
   @override
-  String get analytics_thisMonthProjected => 'This month (projected)';
+  String get analytics_thisMonthProjected => 'এই মাসে (অনুমানিত)';
 
   @override
-  String get analytics_savingOnAverage => 'You are saving on average';
+  String get analytics_savingOnAverage => 'গড়ে সঞ্চয় হচ্ছে';
 
   @override
-  String get analytics_spendingExceedsIncome => 'Spending exceeds income';
+  String get analytics_spendingExceedsIncome => 'খরচ income-এর চেয়ে বেশি';
 
   @override
-  String get recap_vsLastYear => 'vs Last Year';
+  String get recap_vsLastYear => 'গত বছরের তুলনায়';
 
   @override
-  String get common_income => 'Income';
+  String get common_income => 'আয়';
 
   @override
-  String get common_expense => 'Expense';
+  String get common_expense => 'খরচ';
 
   @override
   String get common_transactions => 'Transactions';
