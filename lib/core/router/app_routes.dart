@@ -42,6 +42,7 @@ abstract class AppRoutes {
   static const financialHealth = '/financial-health';
   static const spendingPersonality = '/spending-personality';
   static const netWorth = '/net-worth';
+  static const taxEstimation = '/tax-estimation';
   static const monthlyComparison = '/monthly-comparison';
   static const monthlyRecap = '/monthly-recap';
 

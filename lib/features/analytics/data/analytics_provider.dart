@@ -1,8 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/providers/collection_watchers.dart';
 import 'package:mudra_manager/features/analytics/data/advanced_analytics_service.dart';
+import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/features/dashboard/data/status_data_provider.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
+import 'package:mudra_manager/features/analytics/data/tax_estimation_service.dart';
 
 final analyticsServiceProvider =
     Provider.autoDispose<AdvancedAnalyticsService>((ref) {
@@ -100,4 +102,17 @@ final cashFlowForecastProvider =
   ref.watch(transactionChangeProvider);
   final service = ref.watch(analyticsServiceProvider);
   return await service.forecastCashFlow();
+});
+
+final taxEstimationServiceProvider =
+    Provider.autoDispose<TaxEstimationService>((ref) {
+  final isarService = ref.watch(isarServiceProvider);
+  return TaxEstimationService(isarService);
+});
+
+final taxEstimationProvider =
+    FutureProvider.autoDispose<TaxEstimate>((ref) async {
+  ref.watch(transactionChangeProvider);
+  final service = ref.watch(taxEstimationServiceProvider);
+  return await service.estimateForFY(TaxEstimationService.currentFYStartYear());
 });

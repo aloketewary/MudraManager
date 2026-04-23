@@ -7,12 +7,15 @@ import 'package:mudra_manager/shared/widgets/ambient_brand_section.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:mudra_manager/features/analytics/data/analytics_provider.dart';
+import 'package:mudra_manager/features/analytics/data/tax_estimation_service.dart';
 import 'package:intl/intl.dart';
 import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
 import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
+import 'package:go_router/go_router.dart';
 
 class AnalyticsScreen extends ConsumerStatefulWidget {
   const AnalyticsScreen({super.key});
@@ -40,6 +43,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     final spendingByDayAsync = ref.watch(spendingByDayProvider);
     final isGuestMode = ref.watch(guestModeProvider);
     final forecastAsync = ref.watch(cashFlowForecastProvider);
+    final taxAsync = ref.watch(taxEstimationProvider);
 
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
@@ -313,6 +317,15 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             ),
 
             const SizedBox(height: 16),
+
+            // Tax Estimation
+            taxAsync.when(
+              data: (tax) => _buildTaxCard(tax, color, textTheme, isGuestMode, context),
+              loading: () => const DashboardCardSkeleton(),
+              error: (_, __) => const SizedBox.shrink(),
+            ),
+
+            const SizedBox(height: 16),
             // Category Trends
             categoryTrendsAsync.when(
               data: (trends) {
@@ -569,5 +582,131 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     if (score >= 60) return Colors.blue;
     if (score >= 40) return FinanceColors.statusWarning;
     return FinanceColors.statusDanger;
+  }
+
+  Widget _buildTaxCard(
+    TaxEstimate tax,
+    ColorScheme color,
+    TextTheme textTheme,
+    bool isGuestMode,
+    BuildContext context,
+  ) {
+    final brightness = Theme.of(context).brightness;
+    final ctxt = AppLocalizations.of(context)!;
+    final taxColor = tax.isZeroTax
+        ? FinanceColors.goodColor(brightness)
+        : color.onSurface;
+
+    return GestureDetector(
+      onTap: () => context.push(AppRoutes.taxEstimation),
+      child: Card(
+        elevation: 0,
+        color: color.surfaceContainerLow,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: color.outlineVariant.withValues(alpha: 0.5)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(LucideIcons.landmark, color: color.primary, size: 24),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      ctxt.tax_title,
+                      style: textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: color.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      ctxt.tax_newRegime,
+                      style: textTheme.labelSmall?.copyWith(
+                        color: color.primary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        tax.financialYear,
+                        style: textTheme.bodySmall?.copyWith(
+                          color: color.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      tax.isZeroTax
+                          ? Text(
+                              ctxt.tax_zeroTax,
+                              style: textTheme.titleMedium?.copyWith(
+                                color: taxColor,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            )
+                          : CurrencyText(
+                              amount: GuestModeUtil.applyGuestMode(
+                                tax.totalTax,
+                                isGuestMode,
+                              ),
+                              style: textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: taxColor,
+                              ),
+                            ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Text(
+                        ctxt.tax_viewDetails,
+                        style: textTheme.bodySmall?.copyWith(
+                          color: color.primary,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(
+                        LucideIcons.chevronRight,
+                        size: 16,
+                        color: color.primary,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              if (tax.isProjected) ...[
+                const SizedBox(height: 8),
+                Text(
+                  ctxt.tax_projected,
+                  style: textTheme.bodySmall?.copyWith(
+                    color: color.onSurfaceVariant,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

@@ -2665,6 +2665,18 @@ abstract class AppLocalizations {
   /// **'Add Utilities'**
   String get utility_addUtilities;
 
+  /// No description provided for @utility_analyticsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Health score, trends & forecasts'**
+  String get utility_analyticsSubtitle;
+
+  /// No description provided for @utility_taxSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimate your income tax'**
+  String get utility_taxSubtitle;
+
   /// No description provided for @profile_accounts.
   ///
   /// In en, this message translates to:
@@ -10097,6 +10109,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Transactions'**
   String get common_transactions;
+
+  /// No description provided for @tax_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax Estimation'**
+  String get tax_title;
+
+  /// No description provided for @tax_projected.
+  ///
+  /// In en, this message translates to:
+  /// **'Projected (year in progress)'**
+  String get tax_projected;
+
+  /// No description provided for @tax_estimatedTax.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated Tax'**
+  String get tax_estimatedTax;
+
+  /// No description provided for @tax_effectiveRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Effective Rate'**
+  String get tax_effectiveRate;
+
+  /// No description provided for @tax_monthlyTax.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get tax_monthlyTax;
+
+  /// No description provided for @tax_fyProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{elapsed} of {total} days'**
+  String tax_fyProgress(Object elapsed, Object total);
+
+  /// No description provided for @tax_slabBreakdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Slab Breakdown'**
+  String get tax_slabBreakdown;
+
+  /// No description provided for @tax_totalSlabTax.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Slab Tax'**
+  String get tax_totalSlabTax;
+
+  /// No description provided for @tax_computation.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax Computation'**
+  String get tax_computation;
+
+  /// No description provided for @tax_grossIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Gross Income'**
+  String get tax_grossIncome;
+
+  /// No description provided for @tax_standardDeduction.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard Deduction'**
+  String get tax_standardDeduction;
+
+  /// No description provided for @tax_taxableIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Taxable Income'**
+  String get tax_taxableIncome;
+
+  /// No description provided for @tax_baseTax.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax on Income'**
+  String get tax_baseTax;
+
+  /// No description provided for @tax_rebate87A.
+  ///
+  /// In en, this message translates to:
+  /// **'Rebate u/s 87A'**
+  String get tax_rebate87A;
+
+  /// No description provided for @tax_cess.
+  ///
+  /// In en, this message translates to:
+  /// **'Health & Education Cess (4%)'**
+  String get tax_cess;
+
+  /// No description provided for @tax_totalTax.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Tax Payable'**
+  String get tax_totalTax;
+
+  /// No description provided for @tax_incomeBreakdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Income Sources'**
+  String get tax_incomeBreakdown;
+
+  /// No description provided for @tax_disclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'This is an estimate based on New Tax Regime (FY 2025-26). Actual tax may vary. Consult a tax professional for accurate filing.'**
+  String get tax_disclaimer;
+
+  /// No description provided for @tax_noData.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough data to estimate tax'**
+  String get tax_noData;
+
+  /// No description provided for @tax_viewDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'View Tax Estimate'**
+  String get tax_viewDetails;
+
+  /// No description provided for @tax_zeroTax.
+  ///
+  /// In en, this message translates to:
+  /// **'No tax liability 🎉'**
+  String get tax_zeroTax;
+
+  /// No description provided for @tax_newRegime.
+  ///
+  /// In en, this message translates to:
+  /// **'New Regime'**
+  String get tax_newRegime;
 }
 
 class _AppLocalizationsDelegate

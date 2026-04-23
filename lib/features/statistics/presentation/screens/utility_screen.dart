@@ -71,6 +71,22 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
 
   static const _insights = [
     _UtilityDef(
+      id: 'analytics',
+      titleKey: 'title_analytics',
+      subtitleKey: 'utility_analyticsSubtitle',
+      icon: LucideIcons.chartBar,
+      route: AppRoutes.analytics,
+      section: _Section.insights,
+    ),
+    _UtilityDef(
+      id: 'tax_estimation',
+      titleKey: 'tax_title',
+      subtitleKey: 'utility_taxSubtitle',
+      icon: LucideIcons.landmark,
+      route: AppRoutes.taxEstimation,
+      section: _Section.insights,
+    ),
+    _UtilityDef(
       id: 'monthly_recap',
       titleKey: 'title_monthlyRecap',
       subtitleKey: 'recap_yourMonthAtGlance',

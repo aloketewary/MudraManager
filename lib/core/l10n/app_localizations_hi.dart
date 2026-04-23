@@ -1328,6 +1328,12 @@ class AppLocalizationsHi extends AppLocalizations {
   String get utility_addUtilities => 'उपयोगिताएं जोड़ें';
 
   @override
+  String get utility_analyticsSubtitle => 'Health score, trends और forecasts';
+
+  @override
+  String get utility_taxSubtitle => 'Income tax का अनुमान लगाएं';
+
+  @override
   String get profile_accounts => 'खाते';
 
   @override
@@ -5526,4 +5532,73 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get common_transactions => 'Transactions';
+
+  @override
+  String get tax_title => 'Tax Estimation';
+
+  @override
+  String get tax_projected => 'Projected (साल अभी चल रहा है)';
+
+  @override
+  String get tax_estimatedTax => 'अनुमानित Tax';
+
+  @override
+  String get tax_effectiveRate => 'Effective Rate';
+
+  @override
+  String get tax_monthlyTax => 'Monthly';
+
+  @override
+  String tax_fyProgress(Object elapsed, Object total) {
+    return '$total में से $elapsed दिन';
+  }
+
+  @override
+  String get tax_slabBreakdown => 'Slab Breakdown';
+
+  @override
+  String get tax_totalSlabTax => 'कुल Slab Tax';
+
+  @override
+  String get tax_computation => 'Tax Computation';
+
+  @override
+  String get tax_grossIncome => 'कुल आय';
+
+  @override
+  String get tax_standardDeduction => 'Standard Deduction';
+
+  @override
+  String get tax_taxableIncome => 'Taxable Income';
+
+  @override
+  String get tax_baseTax => 'Income पर Tax';
+
+  @override
+  String get tax_rebate87A => 'Rebate u/s 87A';
+
+  @override
+  String get tax_cess => 'Health & Education Cess (4%)';
+
+  @override
+  String get tax_totalTax => 'कुल Tax देना होगा';
+
+  @override
+  String get tax_incomeBreakdown => 'Income Sources';
+
+  @override
+  String get tax_disclaimer =>
+      'यह New Tax Regime (FY 2025-26) पर आधारित अनुमान है। असली tax अलग हो सकता है। सही filing के लिए tax professional से सलाह लें।';
+
+  @override
+  String get tax_noData => 'Tax estimate के लिए पर्याप्त data नहीं है';
+
+  @override
+  String get tax_viewDetails => 'Tax Estimate देखें';
+
+  @override
+  String get tax_zeroTax => 'कोई tax नहीं 🎉';
+
+  @override
+  String get tax_newRegime => 'New Regime';
 }

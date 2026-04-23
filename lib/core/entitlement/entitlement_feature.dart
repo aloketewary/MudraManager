@@ -42,6 +42,7 @@ const Map<String, ProFeature> gatedRoutes = {
   '/financial-health': ProFeature.advancedAnalytics,
   '/spending-personality': ProFeature.spendingPersonality,
   '/net-worth': ProFeature.netWorth,
+  '/tax-estimation': ProFeature.advancedAnalytics,
   '/monthly-recap': ProFeature.monthlyRecap,
   '/dashboard-customize': ProFeature.dashboardCustomize,
   '/backup-restore': ProFeature.cloudBackup,

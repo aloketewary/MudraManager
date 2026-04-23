@@ -13,6 +13,7 @@ import 'package:mudra_manager/features/analytics/presentation/screens/analytics_
 import 'package:mudra_manager/features/analytics/presentation/financial_health_screen.dart';
 import 'package:mudra_manager/features/analytics/presentation/spending_personality_screen.dart';
 import 'package:mudra_manager/features/analytics/presentation/net_worth_screen.dart';
+import 'package:mudra_manager/features/analytics/presentation/tax_estimation_screen.dart';
 import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
 import 'package:mudra_manager/features/budget/presentation/screens/add_budget_screen.dart';
 import 'package:mudra_manager/features/budget/presentation/screens/adaptive_budget_dashboard.dart';
@@ -391,6 +392,13 @@ class AppRouter {
                 builder: (context, state) => const ProGate(
                   feature: ProFeature.netWorth,
                   child: NetWorthScreen(),
+                ),
+              ),
+              GoRoute(
+                path: AppRoutes.taxEstimation,
+                builder: (context, state) => const ProGate(
+                  feature: ProFeature.advancedAnalytics,
+                  child: TaxEstimationScreen(),
                 ),
               ),
               GoRoute(
