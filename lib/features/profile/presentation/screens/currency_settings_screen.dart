@@ -347,9 +347,9 @@ class CurrencySettingsScreen extends ConsumerWidget {
             ],
           );
         },
-        loading: () => const Padding(
-          padding: EdgeInsets.all(16),
-          child: DashboardCardSkeleton(),
+        loading: () => Padding(
+          padding: EdgeInsets.all(spacing.cardInner),
+          child: const DashboardCardSkeleton(),
         ),
         error: (e, _) => Center(child: Text(ctxt.common_errorLoading)),
       ),

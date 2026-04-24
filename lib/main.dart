@@ -14,6 +14,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:mudra_manager/core/db/category_seeder.dart';
+import 'package:mudra_manager/core/db/field_encryption_service.dart';
+import 'package:mudra_manager/core/db/encryption_migration.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/l10n_provider.dart';
@@ -98,14 +100,20 @@ Future<void> _initializeBackgroundServices(ProviderContainer container) async {
     }
     log.i('✅ Isar initialized');
 
-    // 2. Critical seeds (fast, needed before UI renders categories)
+    // 2. Initialize field encryption (needs Android Keystore / iOS Keychain)
+    await safeExecute(() async {
+      await FieldEncryptionService.initialize();
+      log.i('✅ Field encryption initialized');
+    });
+
+    // 3. Critical seeds (fast, needed before UI renders categories)
     await safeExecute(() async {
       await CategorySeeder.seedDefaultKeywords(isar);
       await CategorySeeder.seedSystemCategories(isar);
       log.i('✅ Categories seeded');
     });
 
-    // 3. Entitlement (needed for pro gates in UI)
+    // 4. Entitlement (needed for pro gates in UI)
     await safeExecute(() async {
       final entitlement =
           EntitlementService(container.read(isarServiceProvider));
@@ -119,13 +127,13 @@ Future<void> _initializeBackgroundServices(ProviderContainer container) async {
       log.i('✅ Entitlement initialized');
     });
 
-    // 4. Schedule workmanager (no heavy work, just registers)
+    // 5. Schedule workmanager (no heavy work, just registers)
     await safeExecute(() async {
       await BackgroundTaskManager.initialize();
       log.i('✅ Background tasks scheduled');
     });
 
-    // 5. Defer everything else — run 3s after UI is visible
+    // 6. Defer everything else — run 3s after UI is visible
     Future.delayed(const Duration(seconds: 3), () async {
       await safeExecute(() async {
         final billing = container.read(billingServiceProvider);
@@ -151,6 +159,7 @@ Future<void> _initializeBackgroundServices(ProviderContainer container) async {
       // Migrations (one-time, guarded by SharedPrefs flags)
       await safeExecute(() => _migrateTransactionFields(isar));
       await safeExecute(() => _migrateCategoryAndParticipantFields(isar));
+      await safeExecute(() => EncryptionMigration.run(isar));
 
       // Run recurring/bill/notification tasks
       await BackgroundTaskManager.runDeferredTasks();

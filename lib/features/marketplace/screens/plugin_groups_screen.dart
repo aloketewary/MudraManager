@@ -415,7 +415,7 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
                               height: 36,
                               decoration: BoxDecoration(
                                 color: color.primary.withValues(alpha: 0.08),
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: BorderRadius.circular(spacing.radiusSmall),
                               ),
                               child: Center(
                                 child: _pluginIcon(plugin, color),
@@ -453,6 +453,7 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
                             // Config gear
                             if (hasConfig && isEnabled && !isStandard)
                               IconButton(
+                                tooltip: 'Settings',
                                 icon: Icon(
                                   LucideIcons.settings,
                                   size: 16,
@@ -646,7 +647,7 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
                       prefixText: option.prefix,
                       suffixText: option.suffix,
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(spacing.radiusMedium),
                       ),
                       filled: true,
                       fillColor:
@@ -664,7 +665,7 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(spacing.radiusMedium),
                         ),
                       ),
                       child: Text(AppLocalizations.of(context)!.common_cancel),
@@ -694,7 +695,7 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
                       style: FilledButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(spacing.radiusMedium),
                         ),
                       ),
                       child: Text(AppLocalizations.of(context)!.common_save),
@@ -726,6 +727,7 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
     }
     if (url.endsWith('.png')) {
       return Image.asset(
+        semanticLabel: 'Decorative image',
         url,
         width: 20,
         height: 20,
@@ -819,7 +821,7 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
                               decoration: InputDecoration(
                                 labelText: ctxt.plugins_remindBefore,
                                 border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
                                 ),
                               ),
                             ),
@@ -828,7 +830,7 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
                               Container(
                                 padding: EdgeInsets.all(spacing.cardInner),
                                 decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
                                   color: color.primary.withValues(alpha: 0.06),
                                   border: Border.all(
                                     color:
@@ -974,7 +976,7 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
                                         vertical: 16,
                                       ),
                                       shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
+                                        borderRadius: BorderRadius.circular(spacing.radiusMedium),
                                       ),
                                     ),
                                     child: Text(
@@ -1024,7 +1026,7 @@ class _PluginGroupsScreenState extends ConsumerState<PluginGroupsScreen> {
                                         vertical: 16,
                                       ),
                                       shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
+                                        borderRadius: BorderRadius.circular(spacing.radiusMedium),
                                       ),
                                     ),
                                     child: Text(

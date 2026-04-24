@@ -76,7 +76,7 @@ class SpendingPersonalityCard extends ConsumerWidget {
                       Row(
                         children: [
                           Container(
-                            padding: const EdgeInsets.all(8),
+                            padding: EdgeInsets.all(spacing.elementGap),
                             decoration: BoxDecoration(
                               color: archetype.color.withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(
@@ -156,6 +156,7 @@ class SpendingPersonalityCard extends ConsumerWidget {
                                 spacing.radiusSmall,
                               ),
                               child: LinearProgressIndicator(
+                                semanticsLabel: 'Progress',
                                 value: status.controlLevel,
                                 minHeight: 4,
                                 backgroundColor: color.surfaceContainerHighest,

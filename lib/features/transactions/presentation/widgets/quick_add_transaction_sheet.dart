@@ -287,7 +287,7 @@ class _QuickAddTransactionSheetState
                     if (_selectedCategory != null)
                       _buildSelectedLabel(
                         _selectedCategory!.parentCategory.value != null
-                            ? '${_selectedCategory!.name} · ${_selectedCategory!.parentCategory.value!.name}'
+                            ? '${_selectedCategory!.name} · ${_selectedCategory!.parentCategory.value?.name ?? ""}'
                             : _selectedCategory!.name,
                         Color(_selectedCategory!.colorValue ?? color.primary.toARGB32()),
                         textTheme,
@@ -561,7 +561,7 @@ class _QuickAddTransactionSheetState
     try {
       final txn = Transaction.create(
         date: DateTime.now(),
-        amount: double.parse(_amountController.text),
+        amount: double.tryParse(_amountController.text.replaceAll(',', '')) ?? 0,
         isExpense: _isExpense,
         description: _noteController.text,
       );

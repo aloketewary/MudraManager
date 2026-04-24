@@ -55,6 +55,7 @@ void main() {
       expect(AppRoutes.financialHealth, isNotEmpty);
       expect(AppRoutes.spendingPersonality, isNotEmpty);
       expect(AppRoutes.monthlyComparison, isNotEmpty);
+      expect(AppRoutes.taxEstimation, isNotEmpty);
     });
 
     test('settings routes defined', () {

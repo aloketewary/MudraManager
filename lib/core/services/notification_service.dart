@@ -355,7 +355,11 @@ class NotificationService {
     final saved = prefs.getString(_reminderTimeKey);
     if (saved == null) return null;
     final parts = saved.split(':');
-    return TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+    if (parts.length < 2) return null;
+    final hour = int.tryParse(parts[0]);
+    final minute = int.tryParse(parts[1]);
+    if (hour == null || minute == null) return null;
+    return TimeOfDay(hour: hour, minute: minute);
   }
 
   static Future<TimeOfDay?> getSavedStreakReminderTime() async {
@@ -363,7 +367,11 @@ class NotificationService {
     final saved = prefs.getString(_streakReminderTimeKey);
     if (saved == null) return null;
     final parts = saved.split(':');
-    return TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+    if (parts.length < 2) return null;
+    final hour = int.tryParse(parts[0]);
+    final minute = int.tryParse(parts[1]);
+    if (hour == null || minute == null) return null;
+    return TimeOfDay(hour: hour, minute: minute);
   }
 
   static Future<void> saveStreakReminderTime(TimeOfDay time) async {

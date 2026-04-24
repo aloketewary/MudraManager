@@ -1048,6 +1048,10 @@
   "@transaction_editTransactionTitle": {
     "description": "Title for edit transaction screen"
   },
+  "transaction_addExpenseTitle": "Add Expense",
+  "transaction_addIncomeTitle": "Add Income",
+  "transaction_accountRequired": "Account is required",
+  "transaction_categoryRequired": "Category is required",
   "transaction_dateLabel": "Date",
   "@transaction_dateLabel": {
     "description": "Label for date field"
@@ -3240,8 +3244,8 @@
   "tax_estimatedTax": "Estimated Tax",
   "tax_effectiveRate": "Effective Rate",
   "tax_monthlyTax": "Monthly",
-  "tax_fyProgress": "{elapsed} of {total} days",
-  "@tax_fyProgress": { "placeholders": { "elapsed": {}, "total": {} } },
+  "tax_fyProgress": "{elapsed} of {total} {total, plural, =1{day} other{days}}",
+  "@tax_fyProgress": { "placeholders": { "elapsed": { "type": "int" }, "total": { "type": "int" } } },
   "tax_slabBreakdown": "Slab Breakdown",
   "tax_totalSlabTax": "Total Slab Tax",
   "tax_computation": "Tax Computation",
@@ -3257,5 +3261,21 @@
   "tax_noData": "Not enough data to estimate tax",
   "tax_viewDetails": "View Tax Estimate",
   "tax_zeroTax": "No tax liability 🎉",
-  "tax_newRegime": "New Regime"
+  "tax_newRegime": "New Regime",
+
+  "category_merge": "Merge Category",
+  "category_mergeInto": "Merge into",
+  "category_mergeConfirm": "Merge",
+  "category_mergePreview": "{count} items will be moved to {target}",
+  "@category_mergePreview": { "placeholders": { "count": { "type": "int" }, "target": { "type": "String" } } },
+  "category_mergeSuccess": "Categories merged successfully",
+  "category_mergeSameError": "Cannot merge a category into itself",
+  "category_mergeSelectTarget": "Select target category",
+
+  "notif_morningInsightTitle": "☀️ Your morning money minute",
+  "notif_weeklyRecapNudgeTitle": "📊 Your weekly recap is ready",
+  "notif_yesterdaySpendTitle": "💰 Yesterday's spending",
+  "notif_weeklyRecapReadyTitle": "📊 Your weekly recap is waiting",
+  "notif_underBudgetStreakTitle": "🔥 {days} days under budget!",
+  "@notif_underBudgetStreakTitle": { "placeholders": { "days": { "type": "int" } } }
 }

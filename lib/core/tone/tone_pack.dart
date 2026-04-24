@@ -215,4 +215,23 @@ abstract class TonePack {
   String weeklySummaryNotif(String total, String topCategory, String trend);
   String streakAtRisk(int streak);
   String streakLost(int streak);
+
+  // ── Morning Insight (Growth) ──
+  String morningInsightSpent(String amount, String avg);
+  String morningInsightUnderAvg(String amount, String saved);
+  String get morningInsightZeroSpend;
+  String morningInsightTopCategory(String category, String amount);
+
+  // ── Under-Budget Streak (Growth) ──
+  String underBudgetStreakNotif(int days);
+  String underBudgetStreakBroken(String budget);
+
+  // ── Weekly Recap Nudge (Growth) ──
+  String weeklyRecapNudge(String hookStat);
+
+  // ── Content-Rich Re-engagement (Growth) ──
+  String reEngageDay2Sms(int count);
+  String reEngageDay3Budgets(int count);
+  String reEngageDay7Spend(String amount);
+  String weeklyRecapHookStat(String pct, String category);
 }

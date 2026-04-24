@@ -1,5 +1,6 @@
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
+import 'package:mudra_manager/core/db/extensions/transaction_links.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/models/budget.dart';
 import 'package:mudra_manager/core/db/models/user_profile.dart';
@@ -150,7 +151,7 @@ class MonthlyRecapService {
 
     // ── Current month transactions ──
     final txns =
-        await _isar.transactions.where().dateBetween(start, end).findAll();
+        await _isar.transactions.where().dateBetween(start, end).findAll().withLinks();
     double income = 0, expense = 0;
     final Map<String, double> catTotals = {};
     final Map<String, int> catCounts = {};
@@ -168,8 +169,6 @@ class MonthlyRecapService {
 
     for (final txn in txns) {
       if (txn.isTransfer) continue;
-      await txn.category.load();
-      await txn.account.load();
 
       if (txn.isExpense) {
         expense += txn.baseAmount;

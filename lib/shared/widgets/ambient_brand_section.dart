@@ -111,7 +111,7 @@ class AmbientBrandSection extends ConsumerWidget {
                           curve: Curves.easeOut,
                         ),
 
-                    const SizedBox(height: 8),
+                    SizedBox(height: spacing.elementGap),
 
                     // Title
                     Text(
@@ -122,7 +122,7 @@ class AmbientBrandSection extends ConsumerWidget {
                       ),
                     ).animate().fadeIn(duration: 400.ms, delay: 100.ms),
 
-                    const SizedBox(height: 2),
+                    SizedBox(height: spacing.elementGapUltraMin),
 
                     // Subtitle
                     Text(

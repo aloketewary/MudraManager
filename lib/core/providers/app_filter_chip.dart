@@ -88,6 +88,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
       backgroundColor: color.surface,
       appBar: AppBar(
         leading: IconButton(
+          tooltip: 'Close',
           icon: const Icon(LucideIcons.x),
           onPressed: () {
             HapticFeedback.mediumImpact();

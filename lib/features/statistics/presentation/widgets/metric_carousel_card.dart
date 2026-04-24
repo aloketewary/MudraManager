@@ -126,6 +126,7 @@ class MetricCarouselCard extends StatelessWidget {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(4),
                   child: LinearProgressIndicator(
+                    semanticsLabel: 'Progress',
                     value: progress / 100,
                     backgroundColor: baseColor.withValues(alpha: 0.2),
                     valueColor: AlwaysStoppedAnimation(baseColor),

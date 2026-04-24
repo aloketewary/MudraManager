@@ -28,7 +28,7 @@ class BudgetCard extends ConsumerWidget {
         final totalBudget = budgets.fold(0.0, (sum, b) => sum + b.budget.amount);
         final totalSpent = budgets.fold(0.0, (sum, b) => sum + b.spent);
         final remaining = totalBudget - totalSpent;
-        final percent = (totalSpent / totalBudget * 100).clamp(0.0, 100.0);
+        final percent = totalBudget > 0 ? (totalSpent / totalBudget * 100).clamp(0.0, 100.0) : 0.0;
         
         final daysInMonth = DateTime(DateTime.now().year, DateTime.now().month + 1, 0).day;
         final daysLeft = daysInMonth - DateTime.now().day + 1;

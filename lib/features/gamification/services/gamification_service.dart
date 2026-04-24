@@ -254,6 +254,9 @@ class GamificationService {
       case GamificationEvent.transactionTrackedToday:
         await _handleTrackingStreak();
         break;
+      case GamificationEvent.underBudgetDay:
+        await _handleUnderBudgetStreak();
+        break;
     }
   }
 
@@ -837,6 +840,9 @@ class GamificationService {
     // Check savings streak
     await _checkSavingsStreak(now);
 
+    // Check under-budget spending streak
+    await _handleUnderBudgetStreak();
+
     log.i('🎉 Check-in complete: Day $newStreak, +$xp XP');
     return 'Day $newStreak streak! +$xp XP';
   }
@@ -1024,6 +1030,90 @@ class GamificationService {
       await isar.writeTxn(() => isar.streaks.put(existing));
     } catch (e) {
       log.e('Error checking savings streak', e);
+    }
+  }
+
+  /// Under-budget spending streak: tracks consecutive days where
+  /// daily spend ≤ daily budget allowance (budget.amount / days in period).
+  Future<void> _handleUnderBudgetStreak() async {
+    try {
+      final now = DateTime.now();
+      final yesterday = now.subtract(const Duration(days: 1));
+      final yStart = DateTime(yesterday.year, yesterday.month, yesterday.day);
+      final yEnd = DateTime(yesterday.year, yesterday.month, yesterday.day, 23, 59, 59);
+
+      // Get active budgets that cover yesterday
+      final budgets = await isar.budgets
+          .filter()
+          .isArchivedEqualTo(false)
+          .startDateLessThan(yEnd)
+          .and()
+          .endDateGreaterThan(yStart)
+          .findAll();
+
+      if (budgets.isEmpty) return;
+
+      // Check if yesterday's spend was under all budgets' daily allowance
+      bool allUnder = true;
+      for (final budget in budgets) {
+        final (s, e) = budget.getCurrentPeriodRange(yesterday);
+        final daysInPeriod = e.difference(s).inDays + 1;
+        final dailyAllowance = daysInPeriod > 0 ? budget.amount / daysInPeriod : budget.amount;
+
+        final spent = await _calculateBudgetSpent(budget, yStart, yEnd);
+        if (spent > dailyAllowance) {
+          allUnder = false;
+          break;
+        }
+      }
+
+      final streak = await isar.streaks
+          .filter()
+          .typeEqualTo('under_budget_spending')
+          .findFirst();
+
+      final existing = streak ??
+          (Streak()
+            ..type = 'under_budget_spending'
+            ..currentCount = 0
+            ..longestCount = 0
+            ..lastChecked = null
+            ..lastUpdated = now);
+
+      final last = existing.lastChecked;
+      if (last != null && _isSameDay(last, now)) return;
+
+      if (allUnder) {
+        if (last != null && _isConsecutiveDay(last, now)) {
+          existing.currentCount++;
+        } else {
+          existing.currentCount = 1;
+        }
+        if (existing.currentCount > existing.longestCount) {
+          existing.longestCount = existing.currentCount;
+        }
+
+        if (existing.currentCount >= 3) {
+          await _setProgress('under_budget_3', existing.currentCount);
+        }
+        if (existing.currentCount >= 7) {
+          await _setProgress('under_budget_7', existing.currentCount);
+        }
+        if (existing.currentCount >= 30) {
+          await _setProgress('under_budget_30', existing.currentCount);
+        }
+
+        log.i('💰 Under-budget streak: ${existing.currentCount} days');
+      } else {
+        existing.currentCount = 0;
+        log.i('💰 Under-budget streak broken');
+      }
+
+      existing.lastChecked = now;
+      existing.lastUpdated = now;
+      await isar.writeTxn(() => isar.streaks.put(existing));
+    } catch (e) {
+      log.e('Error checking under-budget streak', e);
     }
   }
 }

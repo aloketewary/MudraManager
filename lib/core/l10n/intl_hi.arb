@@ -1048,6 +1048,10 @@
   "@transaction_editTransactionTitle": {
     "description": "Title for edit transaction screen"
   },
+  "transaction_addExpenseTitle": "खर्च जोड़ें",
+  "transaction_addIncomeTitle": "आमदनी जोड़ें",
+  "transaction_accountRequired": "Account चुनें",
+  "transaction_categoryRequired": "Category चुनें",
   "transaction_dateLabel": "तारीख",
   "@transaction_dateLabel": {
     "description": "Label for date field"
@@ -3014,8 +3018,8 @@
   "tax_estimatedTax": "अनुमानित Tax",
   "tax_effectiveRate": "Effective Rate",
   "tax_monthlyTax": "Monthly",
-  "tax_fyProgress": "{total} में से {elapsed} दिन",
-  "@tax_fyProgress": { "placeholders": { "elapsed": {}, "total": {} } },
+  "tax_fyProgress": "{total} में से {elapsed} {elapsed, plural, =1{दिन} other{दिन}}",
+  "@tax_fyProgress": { "placeholders": { "elapsed": { "type": "int" }, "total": { "type": "int" } } },
   "tax_slabBreakdown": "Slab Breakdown",
   "tax_totalSlabTax": "कुल Slab Tax",
   "tax_computation": "Tax Computation",
@@ -3031,5 +3035,21 @@
   "tax_noData": "Tax estimate के लिए पर्याप्त data नहीं है",
   "tax_viewDetails": "Tax Estimate देखें",
   "tax_zeroTax": "कोई tax नहीं 🎉",
-  "tax_newRegime": "New Regime"
+  "tax_newRegime": "New Regime",
+
+  "category_merge": "Category मर्ज करें",
+  "category_mergeInto": "इसमें merge करें",
+  "category_mergeConfirm": "Merge",
+  "category_mergePreview": "{count} items {target} में move होंगे",
+  "@category_mergePreview": { "placeholders": { "count": { "type": "int" }, "target": { "type": "String" } } },
+  "category_mergeSuccess": "Categories merge हो गईं ✅",
+  "category_mergeSameError": "एक ही category में merge नहीं कर सकते",
+  "category_mergeSelectTarget": "Target category चुनें",
+
+  "notif_morningInsightTitle": "☀️ सुबह का पैसा update",
+  "notif_weeklyRecapNudgeTitle": "📊 हफ़्ते का recap तैयार है",
+  "notif_yesterdaySpendTitle": "💰 कल का खर्च",
+  "notif_weeklyRecapReadyTitle": "📊 Weekly recap आपका इंतज़ार कर रहा है",
+  "notif_underBudgetStreakTitle": "🔥 {days} दिन budget में!",
+  "@notif_underBudgetStreakTitle": { "placeholders": { "days": { "type": "int" } } }
 }

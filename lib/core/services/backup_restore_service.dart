@@ -130,7 +130,7 @@ class BackupService {
         dialogTitle: 'Select Backup File',
       );
 
-      if (result == null || result.files.single.path == null) {
+      if (result == null || result.files.isEmpty || result.files.first.path == null) {
         _log.w('No file selected');
         return null;
       }
@@ -140,7 +140,7 @@ class BackupService {
         return null;
       }
 
-      final selectedFile = File(result.files.single.path!);
+      final selectedFile = File(result.files.first.path!);
       final fileContent = await selectedFile.readAsString();
       final backupData = jsonDecode(fileContent);
 

@@ -644,6 +644,7 @@ class _AnimatedBarState extends State<_AnimatedBar>
         builder: (_, __) => ClipRRect(
           borderRadius: BorderRadius.circular(widget.radius),
           child: LinearProgressIndicator(
+            semanticsLabel: 'Progress',
             value: _anim.value * widget.progress,
             minHeight: 8,
             backgroundColor: widget.barColor.withValues(alpha: 0.1),

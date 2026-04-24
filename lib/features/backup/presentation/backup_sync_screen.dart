@@ -21,6 +21,12 @@ class _BackupSyncScreenState extends ConsumerState<BackupSyncScreen> {
   bool _isCreatingBackup = false;
 
   @override
+  void dispose() {
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -146,6 +152,7 @@ class _BackupSyncScreenState extends ConsumerState<BackupSyncScreen> {
                           '${_formatFileSize(backup.size)} • ${_formatDate(backup.date)}',
                         ),
                         trailing: IconButton(
+                          tooltip: 'Share',
                           icon: const Icon(LucideIcons.share2),
                           onPressed: () => _shareBackup(backup),
                         ),

@@ -179,7 +179,7 @@ void main() {
   }
 
   int calculateTestConfidence(
-      double? amount, bool? isIncome, String? account, String? merchant) {
+      double? amount, bool? isIncome, String? account, String? merchant,) {
     int score = 0;
     if (amount != null && amount > 0) score += 35;
     if (isIncome != null) score += 25;
@@ -504,7 +504,7 @@ void main() {
         expect(parser.id, isNotEmpty, reason: '${parser.bankName} has empty ID');
         expect(parser.bankName, isNotEmpty);
         expect(parser.senderNames, isNotEmpty,
-            reason: '${parser.bankName} has no sender names');
+            reason: '${parser.bankName} has no sender names',);
       }
     });
 
@@ -518,7 +518,7 @@ void main() {
               ? '$senderName BANK'
               : senderName;
           expect(parser.canParse(testSender), isTrue,
-              reason: '${parser.bankName} cannot parse sender "$testSender"');
+              reason: '${parser.bankName} cannot parse sender "$testSender"',);
         }
       }
     });
@@ -536,12 +536,12 @@ void main() {
 
       for (final entry in rcsNames.entries) {
         final parser = allParsers.where((p) =>
-            p.bankName.toUpperCase() == entry.key.toUpperCase()).firstOrNull;
+            p.bankName.toUpperCase() == entry.key.toUpperCase(),).firstOrNull;
         if (parser == null) continue;
 
         for (final name in entry.value) {
           expect(parser.canParse(name), isTrue,
-              reason: '${parser.bankName} cannot parse RCS name "$name"');
+              reason: '${parser.bankName} cannot parse RCS name "$name"',);
         }
       }
     });
@@ -558,7 +558,7 @@ void main() {
       final dartHash = generateDartHash(sender, timestamp, body);
 
       expect(ktHash, isNot(dartHash),
-          reason: 'Two dedup layers must use different hash inputs');
+          reason: 'Two dedup layers must use different hash inputs',);
     });
 
     test('in-memory dedup (Kotlin hash) is per-drain-session', () {

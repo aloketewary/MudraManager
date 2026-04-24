@@ -77,6 +77,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
+                    tooltip: 'Languages',
                     icon: Icon(
                       LucideIcons.languages,
                       color: color.onSurfaceVariant,
@@ -166,6 +167,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                               ),
                               child: index == 0
                                   ? Image.asset(
+                                    semanticLabel: 'Decorative image',
                                       'assets/logo/logo.png',
                                       width: 64,
                                       height: 64,
@@ -291,7 +293,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        SizedBox(width: spacing.radiusMedium),
                       ],
                       Expanded(
                         child: SizedBox(
@@ -319,7 +321,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                                   ),
                                 ),
                                 if (isLast) ...[
-                                  const SizedBox(width: 8),
+                                  SizedBox(width: spacing.elementGap),
                                   const Icon(LucideIcons.arrowRight, size: 18),
                                 ],
                               ],

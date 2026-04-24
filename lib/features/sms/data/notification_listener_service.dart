@@ -36,10 +36,9 @@ class NotificationListenerBridge with WidgetsBindingObserver {
   Timer? _retryTimer;
 
   Future<Isar> _getIsar() async {
-    if (Isar.instanceNames.isEmpty) {
-      return await IsarService.initIsar();
-    }
-    return Isar.getInstance()!;
+    final existing = Isar.getInstance();
+    if (existing != null && existing.isOpen) return existing;
+    return await IsarService.initIsar();
   }
 
   void initialize() {

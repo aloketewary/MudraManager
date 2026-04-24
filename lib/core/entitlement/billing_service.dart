@@ -116,7 +116,11 @@ class BillingService {
   }
 
   Future<void> restorePurchases() async {
-    await _iap.restorePurchases();
+    try {
+      await _iap.restorePurchases();
+    } catch (e) {
+      _log.w('Restore purchases failed', e);
+    }
   }
 
   // ── Purchase handling ──────────────────────────────────

@@ -90,7 +90,7 @@ class BudgetOverviewCard extends ConsumerWidget {
                     );
                   },
                 ),
-                const SizedBox(width: 16),
+                SizedBox(width: spacing.sectionGap),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -134,7 +134,7 @@ class BudgetOverviewCard extends ConsumerWidget {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: spacing.elementGap),
                       Row(
                         children: [
                           Expanded(
@@ -147,7 +147,7 @@ class BudgetOverviewCard extends ConsumerWidget {
                               textTheme,
                             ),
                           ),
-                          const SizedBox(width: 12),
+                          SizedBox(width: spacing.radiusMedium),
                           Expanded(
                             child: _buildMetricItem(
                               'Per Day',

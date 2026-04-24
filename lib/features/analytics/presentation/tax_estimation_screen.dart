@@ -98,7 +98,7 @@ class _TaxContent extends ConsumerWidget {
   ) {
     final taxColor = tax.isZeroTax
         ? FinanceColors.goodColor(brightness)
-        : FinanceColors.dangerColor(brightness);
+        : color.onSurface;
 
     return Container(
       padding: EdgeInsets.all(spacing.cardInner),
@@ -172,6 +172,7 @@ class _TaxContent extends ConsumerWidget {
           SizedBox(height: spacing.elementGap),
           // FY progress
           LinearProgressIndicator(
+            semanticsLabel: 'Progress',
             value: tax.progressPercent.clamp(0.0, 1.0),
             backgroundColor: color.surfaceContainerHighest,
             color: color.primary,

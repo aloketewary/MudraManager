@@ -123,7 +123,7 @@ class _ModernCashFlowCardState extends ConsumerState<ModernCashFlowCard> {
               color: color.primary,
             ),
           ),
-          const SizedBox(width: 4),
+          SizedBox(width: spacing.elementGapMin),
           AdaptiveText(
             '(${DateFormat(
               'dd',

@@ -1,4 +1,5 @@
 import 'package:isar_community/isar.dart';
+import 'package:mudra_manager/core/db/extensions/transaction_links.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 
@@ -23,7 +24,8 @@ class TaxEstimationService {
         .filter()
         .isTransferEqualTo(false)
         .dateBetween(fyStart, fyEnd)
-        .findAll();
+        .findAll()
+        .withLinks();
 
     double totalIncome = 0;
     double totalExpense = 0;
@@ -31,7 +33,6 @@ class TaxEstimationService {
     final expenseByCategory = <String, double>{};
 
     for (final txn in txns) {
-      await txn.category.load();
       final catName = txn.category.value?.name ?? 'Other';
       if (txn.isExpense) {
         totalExpense += txn.baseAmount;

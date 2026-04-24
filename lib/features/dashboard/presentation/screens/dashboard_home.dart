@@ -207,12 +207,15 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                         _revealNext(widgets.length);
                       });
                     }
+                    final child = _WidgetErrorBoundary(
+                      id: widget.id,
+                      child: _buildTrackedWidget(context, ref, widget),
+                    );
+                    // Skip fade-in animation after first launch
+                    if (_hasAnimatedOnce) return child;
                     return _StaggeredEntry(
                       key: ValueKey(widget.id),
-                      child: _WidgetErrorBoundary(
-                        id: widget.id,
-                        child: _buildTrackedWidget(context, ref, widget),
-                      ),
+                      child: child,
                     );
                   }
                   return const SizedBox.shrink();

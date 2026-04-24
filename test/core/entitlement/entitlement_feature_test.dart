@@ -46,6 +46,7 @@ void main() {
     test('analytics routes are gated', () {
       expect(gatedRoutes['/analytics'], ProFeature.advancedAnalytics);
       expect(gatedRoutes['/financial-health'], ProFeature.advancedAnalytics);
+      expect(gatedRoutes['/tax-estimation'], ProFeature.advancedAnalytics);
       expect(gatedRoutes['/spending-personality'], ProFeature.spendingPersonality);
     });
 

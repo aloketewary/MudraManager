@@ -852,6 +852,18 @@ class AppLocalizationsHi extends AppLocalizations {
   String get transaction_editTransactionTitle => 'लेन-देन संपादित करें';
 
   @override
+  String get transaction_addExpenseTitle => 'खर्च जोड़ें';
+
+  @override
+  String get transaction_addIncomeTitle => 'आमदनी जोड़ें';
+
+  @override
+  String get transaction_accountRequired => 'Account चुनें';
+
+  @override
+  String get transaction_categoryRequired => 'Category चुनें';
+
+  @override
   String get transaction_dateLabel => 'तारीख';
 
   @override
@@ -5549,8 +5561,14 @@ class AppLocalizationsHi extends AppLocalizations {
   String get tax_monthlyTax => 'Monthly';
 
   @override
-  String tax_fyProgress(Object elapsed, Object total) {
-    return '$total में से $elapsed दिन';
+  String tax_fyProgress(int elapsed, int total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      elapsed,
+      locale: localeName,
+      other: 'दिन',
+      one: 'दिन',
+    );
+    return '$total में से $elapsed $_temp0';
   }
 
   @override
@@ -5601,4 +5619,45 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get tax_newRegime => 'New Regime';
+
+  @override
+  String get category_merge => 'Category मर्ज करें';
+
+  @override
+  String get category_mergeInto => 'इसमें merge करें';
+
+  @override
+  String get category_mergeConfirm => 'Merge';
+
+  @override
+  String category_mergePreview(int count, String target) {
+    return '$count items $target में move होंगे';
+  }
+
+  @override
+  String get category_mergeSuccess => 'Categories merge हो गईं ✅';
+
+  @override
+  String get category_mergeSameError => 'एक ही category में merge नहीं कर सकते';
+
+  @override
+  String get category_mergeSelectTarget => 'Target category चुनें';
+
+  @override
+  String get notif_morningInsightTitle => '☀️ सुबह का पैसा update';
+
+  @override
+  String get notif_weeklyRecapNudgeTitle => '📊 हफ़्ते का recap तैयार है';
+
+  @override
+  String get notif_yesterdaySpendTitle => '💰 कल का खर्च';
+
+  @override
+  String get notif_weeklyRecapReadyTitle =>
+      '📊 Weekly recap आपका इंतज़ार कर रहा है';
+
+  @override
+  String notif_underBudgetStreakTitle(int days) {
+    return '🔥 $days दिन budget में!';
+  }
 }

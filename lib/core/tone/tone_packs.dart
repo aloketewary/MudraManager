@@ -469,6 +469,47 @@ class FriendlyTonePack extends TonePack {
   @override
   String streakLost(int streak) =>
       'Your $streak-day streak ended — it happens! One tap starts a new one';
+
+  // ── Growth: Morning Insight ──
+  @override
+  String morningInsightSpent(String amount, String avg) =>
+      'You spent ${BaseCurrency.symbol}$amount yesterday — your daily avg is ${BaseCurrency.symbol}$avg';
+  @override
+  String morningInsightUnderAvg(String amount, String saved) =>
+      'Only ${BaseCurrency.symbol}$amount yesterday — ${BaseCurrency.symbol}$saved under your average! 🎉';
+  @override
+  String get morningInsightZeroSpend =>
+      'Zero spend yesterday — your wallet thanks you! 💪';
+  @override
+  String morningInsightTopCategory(String category, String amount) =>
+      'Most went to $category (${BaseCurrency.symbol}$amount)';
+
+  // ── Growth: Under-Budget Streak ──
+  @override
+  String underBudgetStreakNotif(int days) =>
+      '🔥 $days days under budget — you\'re crushing it!';
+  @override
+  String underBudgetStreakBroken(String budget) =>
+      '$budget went over today — tomorrow\'s a fresh start!';
+
+  // ── Growth: Weekly Recap Nudge ──
+  @override
+  String weeklyRecapNudge(String hookStat) =>
+      '$hookStat — tap to see your full weekly recap 📊';
+
+  // ── Growth: Content-Rich Re-engagement ──
+  @override
+  String reEngageDay2Sms(int count) =>
+      '📩 $count SMS transactions waiting — takes 5 seconds to review';
+  @override
+  String reEngageDay3Budgets(int count) =>
+      '💰 You have $count active budget${count > 1 ? 's' : ''} — check how they\'re doing';
+  @override
+  String reEngageDay7Spend(String amount) =>
+      'You spent $amount this week. See the full breakdown.';
+  @override
+  String weeklyRecapHookStat(String pct, String category) =>
+      '$pct% of your spending went to $category';
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -932,6 +973,47 @@ class ProfessionalTonePack extends TonePack {
   @override
   String streakLost(int streak) =>
       '$streak-day streak ended. Resume tracking to begin a new one.';
+
+  // ── Growth: Morning Insight ──
+  @override
+  String morningInsightSpent(String amount, String avg) =>
+      'Yesterday: ${BaseCurrency.symbol}$amount spent. Daily average: ${BaseCurrency.symbol}$avg.';
+  @override
+  String morningInsightUnderAvg(String amount, String saved) =>
+      '${BaseCurrency.symbol}$amount spent yesterday — ${BaseCurrency.symbol}$saved below average.';
+  @override
+  String get morningInsightZeroSpend =>
+      'No expenditure recorded yesterday.';
+  @override
+  String morningInsightTopCategory(String category, String amount) =>
+      'Primary category: $category (${BaseCurrency.symbol}$amount).';
+
+  // ── Growth: Under-Budget Streak ──
+  @override
+  String underBudgetStreakNotif(int days) =>
+      '$days consecutive days within budget.';
+  @override
+  String underBudgetStreakBroken(String budget) =>
+      '$budget exceeded today. Review spending.';
+
+  // ── Growth: Weekly Recap Nudge ──
+  @override
+  String weeklyRecapNudge(String hookStat) =>
+      '$hookStat — view your weekly summary.';
+
+  // ── Growth: Content-Rich Re-engagement ──
+  @override
+  String reEngageDay2Sms(int count) =>
+      '$count SMS transactions detected. Review required.';
+  @override
+  String reEngageDay3Budgets(int count) =>
+      '$count active budget${count > 1 ? 's' : ''} require attention.';
+  @override
+  String reEngageDay7Spend(String amount) =>
+      'Weekly expenditure: $amount. View full summary.';
+  @override
+  String weeklyRecapHookStat(String pct, String category) =>
+      '$pct% of expenditure allocated to $category.';
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1423,6 +1505,47 @@ class MotivationalTonePack extends TonePack {
   @override
   String streakLost(int streak) =>
       'Your $streak-day streak ended — but comebacks are the best stories! 💪';
+
+  // ── Growth: Morning Insight ──
+  @override
+  String morningInsightSpent(String amount, String avg) =>
+      'You spent ${BaseCurrency.symbol}$amount yesterday — avg is ${BaseCurrency.symbol}$avg. Stay focused! 💪';
+  @override
+  String morningInsightUnderAvg(String amount, String saved) =>
+      '${BaseCurrency.symbol}$amount yesterday — ${BaseCurrency.symbol}$saved saved vs your average! Amazing! 🎉';
+  @override
+  String get morningInsightZeroSpend =>
+      'Zero spend yesterday — that\'s willpower! Champion move! 🏆';
+  @override
+  String morningInsightTopCategory(String category, String amount) =>
+      '$category led at ${BaseCurrency.symbol}$amount — stay aware!';
+
+  // ── Growth: Under-Budget Streak ──
+  @override
+  String underBudgetStreakNotif(int days) =>
+      '🔥 $days days under budget — unstoppable! Keep pushing!';
+  @override
+  String underBudgetStreakBroken(String budget) =>
+      '$budget went over — but every day is a chance to reset! 💪';
+
+  // ── Growth: Weekly Recap Nudge ──
+  @override
+  String weeklyRecapNudge(String hookStat) =>
+      '$hookStat — your weekly recap is ready! Let\'s review! 📊';
+
+  // ── Growth: Content-Rich Re-engagement ──
+  @override
+  String reEngageDay2Sms(int count) =>
+      '📩 $count SMS transactions waiting — takes 5 seconds! 💪';
+  @override
+  String reEngageDay3Budgets(int count) =>
+      '💰 $count active budget${count > 1 ? 's' : ''} — see how you\'re doing! 💪';
+  @override
+  String reEngageDay7Spend(String amount) =>
+      '$amount spent this week — let\'s see the breakdown! 📊';
+  @override
+  String weeklyRecapHookStat(String pct, String category) =>
+      '$pct% of your spending went to $category — interesting!';
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1878,4 +2001,45 @@ class CalmTonePack extends TonePack {
   @override
   String streakLost(int streak) =>
       'A $streak-day rhythm ended. Begin again when ready.';
+
+  // ── Growth: Morning Insight ──
+  @override
+  String morningInsightSpent(String amount, String avg) =>
+      '${BaseCurrency.symbol}$amount yesterday. Your rhythm: ${BaseCurrency.symbol}$avg/day.';
+  @override
+  String morningInsightUnderAvg(String amount, String saved) =>
+      '${BaseCurrency.symbol}$amount yesterday. ${BaseCurrency.symbol}$saved lighter than usual.';
+  @override
+  String get morningInsightZeroSpend =>
+      'A still day. Nothing spent.';
+  @override
+  String morningInsightTopCategory(String category, String amount) =>
+      'Mostly $category (${BaseCurrency.symbol}$amount).';
+
+  // ── Growth: Under-Budget Streak ──
+  @override
+  String underBudgetStreakNotif(int days) =>
+      '$days days within your boundaries. Steady.';
+  @override
+  String underBudgetStreakBroken(String budget) =>
+      '$budget crossed its boundary. Breathe and begin again.';
+
+  // ── Growth: Weekly Recap Nudge ──
+  @override
+  String weeklyRecapNudge(String hookStat) =>
+      '$hookStat — your week awaits review.';
+
+  // ── Growth: Content-Rich Re-engagement ──
+  @override
+  String reEngageDay2Sms(int count) =>
+      '$count transactions await your attention.';
+  @override
+  String reEngageDay3Budgets(int count) =>
+      '$count budget${count > 1 ? 's' : ''} in motion. A moment to check.';
+  @override
+  String reEngageDay7Spend(String amount) =>
+      '$amount this week. Your recap awaits.';
+  @override
+  String weeklyRecapHookStat(String pct, String category) =>
+      '$pct% flowed to $category.';
 }

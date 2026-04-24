@@ -1,6 +1,7 @@
 import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
+import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
 import 'package:mudra_manager/core/db/models/sms_activity.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
@@ -25,10 +26,9 @@ class SmsActivityService {
   SmsActivityService._();
 
   Future<Isar> _getIsar() async {
-    if (Isar.instanceNames.isEmpty) {
-      return await IsarService.initIsar();
-    }
-    return Isar.getInstance()!;
+    final existing = Isar.getInstance();
+    if (existing != null && existing.isOpen) return existing;
+    return await IsarService.initIsar();
   }
 
   double? _normalizeAmount(double? amount) {
@@ -250,6 +250,9 @@ class SmsActivityService {
       activity.confidence = (activity.confidence! - 15).clamp(0, 100);
       _log.d('[$corrId] RCS confidence penalty applied: ${activity.confidence}%');
     }
+
+    // ── Encrypt sensitive fields before any Isar write
+    activity.encryptFields();
 
     // ── 1. Check for transfer pair (opposite direction, same amount, different account, within 15 min)
     final transferPair = await _claimTransferPair(activity);
@@ -699,7 +702,11 @@ class SmsActivityService {
 
   Future<List<SmsActivity>> getAllActivities() async {
     final isar = await _getIsar();
-    return await isar.smsActivitys.where().sortByCreatedAtDesc().findAll();
+    return await isar.smsActivitys
+        .where()
+        .sortByCreatedAtDesc()
+        .findAll()
+        .withDecryption();
   }
 
   Future<List<SmsActivity>> getActivitiesByStatus(ActivityStatus status) async {
@@ -708,7 +715,8 @@ class SmsActivityService {
         .filter()
         .statusEqualTo(status)
         .sortByCreatedAtDesc()
-        .findAll();
+        .findAll()
+        .withDecryption();
   }
 
   Future<int> getPendingCount() async {

@@ -94,6 +94,7 @@ class AchievementUnlockDialog extends StatelessWidget {
                         ),
                         child: Center(
                           child: Image.asset(
+                            semanticLabel: 'Decorative image',
                             'assets/icons/100/${achievement.icon}.png',
                             width: 64,
                             height: 64,

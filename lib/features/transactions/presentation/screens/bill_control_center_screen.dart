@@ -116,6 +116,7 @@ class _BillControlCenterScreenState
         elevation: 0,
         actions: [
           IconButton(
+            tooltip: 'Add',
             icon: const Icon(LucideIcons.plus),
             onPressed: () {
               HapticFeedback.mediumImpact();

@@ -70,6 +70,7 @@ class CommandCenterScreen extends ConsumerWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             IconButton(
+                              tooltip: 'Search',
                               icon: Icon(LucideIcons.search, color: color.onSurface),
                               onPressed: () {
                                 HapticFeedback.mediumImpact();
@@ -77,6 +78,7 @@ class CommandCenterScreen extends ConsumerWidget {
                               },
                             ),
                             IconButton(
+                              tooltip: 'Notifications',
                               icon: Icon(LucideIcons.bell,
                                   color: color.onSurface,),
                               onPressed: () {

@@ -3,6 +3,7 @@ import 'package:mudra_manager/core/utils/safe_date_format.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
+import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -1108,12 +1109,31 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                       child: OutlinedButton.icon(
                         onPressed: () async {
                           HapticFeedback.mediumImpact();
+                          final activity = widget.activity;
+                          final previousStatus = activity.status;
                           Navigator.pop(context);
+
                           await SmsActivityService.instance
-                              .rejectActivity(widget.activity, null);
+                              .rejectActivity(activity, null);
                           ref.invalidate(smsActivityProvider);
                           ref.invalidate(pendingCountProvider);
                           ref.read(smsRefreshProvider.notifier).update((v) => v + 1);
+
+                          SnackbarService.success(
+                            ctxt.smsActivity_rejected,
+                            actionLabel: ctxt.common_undo,
+                            onAction: () async {
+                              final isar = await ref.read(isarServiceProvider).getInstance();
+                              await isar.writeTxn(() async {
+                                activity.status = previousStatus;
+                                activity.reviewNotes = null;
+                                await isar.smsActivitys.put(activity);
+                              });
+                              ref.invalidate(smsActivityProvider);
+                              ref.invalidate(pendingCountProvider);
+                              ref.read(smsRefreshProvider.notifier).update((v) => v + 1);
+                            },
+                          );
                         },
                         icon: const Icon(LucideIcons.x, size: 16),
                         label: Text(ctxt.smsActivity_reject),

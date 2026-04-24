@@ -189,7 +189,7 @@ void main() {
       expect(kotlinSenderDetection(''), 'UNKNOWN');
       expect(
         dartSenderDetection(
-            '', 'Rs.500 debited from HDFC Bank a/c XX1234'),
+            '', 'Rs.500 debited from HDFC Bank a/c XX1234',),
         'HDFC Bank',
       );
     });
@@ -199,7 +199,7 @@ void main() {
 
   group('Step 2: checkForTransactionalMessage', () {
     for (final entry in testMessages.entries) {
-      test('${entry.key}', () {
+      test(entry.key, () {
         final body = entry.value['body'] as String;
         final expected = entry.value['expectTransactional'] as bool;
         expect(
@@ -265,14 +265,14 @@ void main() {
 
         expect(parsed, isNotNull, reason: 'Parser returned null for: $sender');
         expect(parsed!.amount, expectedAmount,
-            reason: 'Amount mismatch for $sender');
+            reason: 'Amount mismatch for $sender',);
         if (expectedIncome != null) {
           expect(parsed.isIncome, expectedIncome,
-              reason: 'Direction mismatch for $sender');
+              reason: 'Direction mismatch for $sender',);
         }
         if (expectedAccount != null) {
           expect(parsed.account, expectedAccount,
-              reason: 'Account mismatch for $sender');
+              reason: 'Account mismatch for $sender',);
         }
       });
     }
@@ -423,7 +423,7 @@ void main() {
       // 5. Dart hash (different from Kotlin hash — that's by design)
       final dartHash = generateSmsHash(sender, rcsTimestamp, rawBody);
       expect(dartHash, isNot(ktHash),
-          reason: 'Kotlin and Dart hashes use different inputs — two separate dedup layers');
+          reason: 'Kotlin and Dart hashes use different inputs — two separate dedup layers',);
 
       // 6. Parse via BankSmsParser (legacy fallback since plugins not loaded in test)
       final parsed = await BankSmsParser.parse(sender, rawBody);

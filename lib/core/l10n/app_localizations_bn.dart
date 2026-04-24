@@ -856,6 +856,18 @@ class AppLocalizationsBn extends AppLocalizations {
   String get transaction_editTransactionTitle => 'লেনদেন সম্পাদনা করুন';
 
   @override
+  String get transaction_addExpenseTitle => 'খরচ যোগ করুন';
+
+  @override
+  String get transaction_addIncomeTitle => 'আয় যোগ করুন';
+
+  @override
+  String get transaction_accountRequired => 'Account বেছে নিন';
+
+  @override
+  String get transaction_categoryRequired => 'Category বেছে নিন';
+
+  @override
   String get transaction_dateLabel => 'তারিখ';
 
   @override
@@ -5560,8 +5572,14 @@ class AppLocalizationsBn extends AppLocalizations {
   String get tax_monthlyTax => 'Monthly';
 
   @override
-  String tax_fyProgress(Object elapsed, Object total) {
-    return '$total-এর মধ্যে $elapsed দিন';
+  String tax_fyProgress(int elapsed, int total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      elapsed,
+      locale: localeName,
+      other: 'দিন',
+      one: 'দিন',
+    );
+    return '$total-এর মধ্যে $elapsed $_temp0';
   }
 
   @override
@@ -5612,4 +5630,44 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get tax_newRegime => 'New Regime';
+
+  @override
+  String get category_merge => 'Category merge করুন';
+
+  @override
+  String get category_mergeInto => 'এটাতে merge করুন';
+
+  @override
+  String get category_mergeConfirm => 'Merge';
+
+  @override
+  String category_mergePreview(int count, String target) {
+    return '$countটি item $target-এ move হবে';
+  }
+
+  @override
+  String get category_mergeSuccess => 'Categories merge হয়ে গেছে ✅';
+
+  @override
+  String get category_mergeSameError => 'একই category-তে merge করা যাবে না';
+
+  @override
+  String get category_mergeSelectTarget => 'Target category বেছে নিন';
+
+  @override
+  String get notif_morningInsightTitle => '☀️ সকালের টাকার update';
+
+  @override
+  String get notif_weeklyRecapNudgeTitle => '📊 সপ্তাহের recap তৈরি';
+
+  @override
+  String get notif_yesterdaySpendTitle => '💰 গতকালের খরচ';
+
+  @override
+  String get notif_weeklyRecapReadyTitle => '📊 Weekly recap অপেক্ষা করছে';
+
+  @override
+  String notif_underBudgetStreakTitle(int days) {
+    return '🔥 $days দিন budget-এর মধ্যে!';
+  }
 }

@@ -76,6 +76,7 @@ class _MonthPickerSheetState extends State<_MonthPickerSheet> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               IconButton(
+                tooltip: 'Previous',
                 icon: const Icon(LucideIcons.chevronLeft, size: 20),
                 onPressed: _year > widget.first.year
                     ? () => setState(() => _year--)
@@ -86,6 +87,7 @@ class _MonthPickerSheetState extends State<_MonthPickerSheet> {
                 style: text.titleLarge?.copyWith(fontWeight: FontWeight.w800),
               ),
               IconButton(
+                tooltip: 'Next',
                 icon: const Icon(LucideIcons.chevronRight, size: 20),
                 onPressed: _year < widget.last.year
                     ? () => setState(() => _year++)

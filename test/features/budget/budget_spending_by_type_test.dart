@@ -145,7 +145,7 @@ void main() {
       );
 
       final spent = await budgetService.calculateSpentAmount(budget,
-          start: DateTime(2024, 3, 1), end: DateTime(2024, 3, 31));
+          start: DateTime(2024, 3, 1), end: DateTime(2024, 3, 31),);
       expect(spent, 800); // 500 + 300, not 200 (transport)
     });
 
@@ -160,7 +160,7 @@ void main() {
       );
 
       final spent = await budgetService.calculateSpentAmount(budget,
-          start: DateTime(2024, 3, 1), end: DateTime(2024, 3, 31));
+          start: DateTime(2024, 3, 1), end: DateTime(2024, 3, 31),);
       expect(spent, 0);
     });
   });
@@ -182,7 +182,7 @@ void main() {
       );
 
       final spent = await budgetService.calculateSpentAmount(budget,
-          start: DateTime(2024, 3, 1), end: DateTime(2024, 3, 31));
+          start: DateTime(2024, 3, 1), end: DateTime(2024, 3, 31),);
       expect(spent, 1300); // 1000 + 300 (both have vacation tag)
     });
 
@@ -198,7 +198,7 @@ void main() {
       );
 
       final spent = await budgetService.calculateSpentAmount(budget,
-          start: DateTime(2024, 3, 1), end: DateTime(2024, 3, 31));
+          start: DateTime(2024, 3, 1), end: DateTime(2024, 3, 31),);
       expect(spent, 0);
     });
 
@@ -216,7 +216,7 @@ void main() {
       );
 
       final spent = await budgetService.calculateSpentAmount(budget,
-          start: DateTime(2024, 3, 1), end: DateTime(2024, 3, 31));
+          start: DateTime(2024, 3, 1), end: DateTime(2024, 3, 31),);
       expect(spent, 500); // counted once, not twice
     });
   });
@@ -235,7 +235,7 @@ void main() {
       );
 
       final spent = await budgetService.calculateSpentAmount(budget,
-          start: DateTime(2024, 3, 5), end: DateTime(2024, 3, 5));
+          start: DateTime(2024, 3, 5), end: DateTime(2024, 3, 5),);
       expect(spent, 800); // all expenses
     });
 
@@ -254,7 +254,7 @@ void main() {
       );
 
       final spent = await budgetService.calculateSpentAmount(budget,
-          start: DateTime(2024, 3, 5), end: DateTime(2024, 3, 5));
+          start: DateTime(2024, 3, 5), end: DateTime(2024, 3, 5),);
       expect(spent, 500); // only food
     });
   });
@@ -273,7 +273,7 @@ void main() {
       );
 
       final spent = await budgetService.calculateSpentAmount(budget,
-          start: DateTime(2024, 10, 15), end: DateTime(2024, 10, 31));
+          start: DateTime(2024, 10, 15), end: DateTime(2024, 10, 31),);
       expect(spent, 5000); // 2000 + 3000
     });
   });
@@ -291,7 +291,7 @@ void main() {
       );
 
       final spent = await budgetService.calculateSpentAmount(budget,
-          start: DateTime(2024, 6, 8), end: DateTime(2024, 6, 15));
+          start: DateTime(2024, 6, 8), end: DateTime(2024, 6, 15),);
       expect(spent, 4000);
     });
   });
@@ -306,7 +306,7 @@ void main() {
       );
 
       final spent = await budgetService.calculateSpentAmount(budget,
-          start: DateTime(2024, 3, 5), end: DateTime(2024, 3, 5));
+          start: DateTime(2024, 3, 5), end: DateTime(2024, 3, 5),);
       expect(spent, 0);
     });
 
@@ -327,7 +327,7 @@ void main() {
       );
 
       final spent = await budgetService.calculateSpentAmount(budget,
-          start: DateTime(2024, 3, 5), end: DateTime(2024, 3, 5));
+          start: DateTime(2024, 3, 5), end: DateTime(2024, 3, 5),);
       expect(spent, 0);
     });
 
@@ -351,7 +351,7 @@ void main() {
       );
 
       final spent = await budgetService.calculateSpentAmount(budget,
-          start: DateTime(2024, 3, 5), end: DateTime(2024, 3, 5));
+          start: DateTime(2024, 3, 5), end: DateTime(2024, 3, 5),);
       // baseAmount should be convertedAmount (8300) if set, else amount (100)
       expect(spent, txn.baseAmount);
     });
@@ -373,7 +373,7 @@ void main() {
 
       // Query week 2 range
       final spent = await budgetService.calculateSpentAmount(budget,
-          start: DateTime(2024, 3, 11), end: DateTime(2024, 3, 17));
+          start: DateTime(2024, 3, 11), end: DateTime(2024, 3, 17),);
       expect(spent, 300); // only week 2
     });
   });

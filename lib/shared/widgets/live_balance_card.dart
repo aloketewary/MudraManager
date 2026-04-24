@@ -111,6 +111,7 @@ class LiveBalanceCard extends StatelessWidget {
                             ClipRRect(
                               borderRadius: BorderRadius.circular(4),
                               child: LinearProgressIndicator(
+                                semanticsLabel: 'Progress',
                                 value: 0.7,
                                 minHeight: 6,
                                 backgroundColor: color.surface,

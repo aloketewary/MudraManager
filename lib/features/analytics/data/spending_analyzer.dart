@@ -1,4 +1,5 @@
 import 'package:isar_community/isar.dart';
+import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/budget.dart';
 import 'package:mudra_manager/core/db/models/goal.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
@@ -39,10 +40,9 @@ class SpendingPersonality {
 
 class SpendingAnalyzer {
   static Future<Isar> _getIsar() async {
-    if (Isar.instanceNames.isEmpty) {
-      throw Exception('Isar not initialized');
-    }
-    return Isar.getInstance()!;
+    final existing = Isar.getInstance();
+    if (existing != null && existing.isOpen) return existing;
+    return await IsarService.initIsar();
   }
 
   static Future<SpendingPersonality?> analyzePersonality() async {

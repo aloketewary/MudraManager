@@ -43,6 +43,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
   String? _tripCurrency;
   bool _isActive = true;
   bool _isInitialized = false;
+  bool _saving = false;
 
   bool get isEditMode => widget.tripId != null;
   late bool _isTrip;
@@ -188,6 +189,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
   }
 
   Future<void> _saveTrip(Trip? originalTrip) async {
+    if (_saving) return;
     if (_nameController.text.trim().isEmpty) {
       SnackbarService.error(BuddyMessages.tripNameRequired(_isTrip));
       return;
@@ -206,6 +208,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
         return;
       }
     }
+    setState(() => _saving = true);
     HapticFeedback.mediumImpact();
 
     final budget = _isTrip && _budgetController.text.trim().isNotEmpty

@@ -1741,6 +1741,30 @@ abstract class AppLocalizations {
   /// **'Edit Transaction'**
   String get transaction_editTransactionTitle;
 
+  /// No description provided for @transaction_addExpenseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Expense'**
+  String get transaction_addExpenseTitle;
+
+  /// No description provided for @transaction_addIncomeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Income'**
+  String get transaction_addIncomeTitle;
+
+  /// No description provided for @transaction_accountRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Account is required'**
+  String get transaction_accountRequired;
+
+  /// No description provided for @transaction_categoryRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Category is required'**
+  String get transaction_categoryRequired;
+
   /// Label for date field
   ///
   /// In en, this message translates to:
@@ -10143,8 +10167,8 @@ abstract class AppLocalizations {
   /// No description provided for @tax_fyProgress.
   ///
   /// In en, this message translates to:
-  /// **'{elapsed} of {total} days'**
-  String tax_fyProgress(Object elapsed, Object total);
+  /// **'{elapsed} of {total} {total, plural, =1{day} other{days}}'**
+  String tax_fyProgress(int elapsed, int total);
 
   /// No description provided for @tax_slabBreakdown.
   ///
@@ -10241,6 +10265,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'New Regime'**
   String get tax_newRegime;
+
+  /// No description provided for @category_merge.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge Category'**
+  String get category_merge;
+
+  /// No description provided for @category_mergeInto.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge into'**
+  String get category_mergeInto;
+
+  /// No description provided for @category_mergeConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge'**
+  String get category_mergeConfirm;
+
+  /// No description provided for @category_mergePreview.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} items will be moved to {target}'**
+  String category_mergePreview(int count, String target);
+
+  /// No description provided for @category_mergeSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories merged successfully'**
+  String get category_mergeSuccess;
+
+  /// No description provided for @category_mergeSameError.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot merge a category into itself'**
+  String get category_mergeSameError;
+
+  /// No description provided for @category_mergeSelectTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Select target category'**
+  String get category_mergeSelectTarget;
+
+  /// No description provided for @notif_morningInsightTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'☀️ Your morning money minute'**
+  String get notif_morningInsightTitle;
+
+  /// No description provided for @notif_weeklyRecapNudgeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'📊 Your weekly recap is ready'**
+  String get notif_weeklyRecapNudgeTitle;
+
+  /// No description provided for @notif_yesterdaySpendTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'💰 Yesterday\'s spending'**
+  String get notif_yesterdaySpendTitle;
+
+  /// No description provided for @notif_weeklyRecapReadyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'📊 Your weekly recap is waiting'**
+  String get notif_weeklyRecapReadyTitle;
+
+  /// No description provided for @notif_underBudgetStreakTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'🔥 {days} days under budget!'**
+  String notif_underBudgetStreakTitle(int days);
 }
 
 class _AppLocalizationsDelegate

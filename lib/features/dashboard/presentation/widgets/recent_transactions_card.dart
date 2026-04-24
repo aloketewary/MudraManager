@@ -136,7 +136,7 @@ class RecentTransactionsCard extends ConsumerWidget {
                             size: 20,
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        SizedBox(width: spacing.radiusMedium),
 
                         // Category & Account Info
                         Expanded(
@@ -150,7 +150,7 @@ class RecentTransactionsCard extends ConsumerWidget {
                                 ),
                                 maxLines: 1,
                               ),
-                              const SizedBox(height: 2),
+                              SizedBox(height: spacing.elementGapUltraMin),
                               AdaptiveText(
                                 account?.name ?? 'Unknown',
                                 style: textTheme.bodySmall?.copyWith(
@@ -191,7 +191,7 @@ class RecentTransactionsCard extends ConsumerWidget {
                                 ),
                                 prefixText: '≈',
                               ),
-                            const SizedBox(height: 2),
+                            SizedBox(height: spacing.elementGapUltraMin),
                             Text(
                               _formatDate(transaction.date, ctxt),
                               style: textTheme.bodySmall?.copyWith(

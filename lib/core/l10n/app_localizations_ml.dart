@@ -852,6 +852,18 @@ class AppLocalizationsMl extends AppLocalizations {
   String get transaction_editTransactionTitle => 'Edit Transaction';
 
   @override
+  String get transaction_addExpenseTitle => 'Add Expense';
+
+  @override
+  String get transaction_addIncomeTitle => 'Add Income';
+
+  @override
+  String get transaction_accountRequired => 'Account is required';
+
+  @override
+  String get transaction_categoryRequired => 'Category is required';
+
+  @override
   String get transaction_dateLabel => 'Date';
 
   @override
@@ -5576,8 +5588,14 @@ class AppLocalizationsMl extends AppLocalizations {
   String get tax_monthlyTax => 'Monthly';
 
   @override
-  String tax_fyProgress(Object elapsed, Object total) {
-    return '$elapsed of $total days';
+  String tax_fyProgress(int elapsed, int total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: 'days',
+      one: 'day',
+    );
+    return '$elapsed of $total $_temp0';
   }
 
   @override
@@ -5628,4 +5646,44 @@ class AppLocalizationsMl extends AppLocalizations {
 
   @override
   String get tax_newRegime => 'New Regime';
+
+  @override
+  String get category_merge => 'Merge Category';
+
+  @override
+  String get category_mergeInto => 'Merge into';
+
+  @override
+  String get category_mergeConfirm => 'Merge';
+
+  @override
+  String category_mergePreview(int count, String target) {
+    return '$count items will be moved to $target';
+  }
+
+  @override
+  String get category_mergeSuccess => 'Categories merged successfully';
+
+  @override
+  String get category_mergeSameError => 'Cannot merge a category into itself';
+
+  @override
+  String get category_mergeSelectTarget => 'Select target category';
+
+  @override
+  String get notif_morningInsightTitle => '☀️ Your morning money minute';
+
+  @override
+  String get notif_weeklyRecapNudgeTitle => '📊 Your weekly recap is ready';
+
+  @override
+  String get notif_yesterdaySpendTitle => '💰 Yesterday\'s spending';
+
+  @override
+  String get notif_weeklyRecapReadyTitle => '📊 Your weekly recap is waiting';
+
+  @override
+  String notif_underBudgetStreakTitle(int days) {
+    return '🔥 $days days under budget!';
+  }
 }

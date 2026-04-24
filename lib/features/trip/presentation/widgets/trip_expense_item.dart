@@ -53,6 +53,7 @@ class TripExpenseItem extends StatelessWidget {
             ),
             if (onDelete != null)
               IconButton(
+                tooltip: 'Delete',
                 icon: const Icon(LucideIcons.trash2, size: 20),
                 onPressed: onDelete,
               ),

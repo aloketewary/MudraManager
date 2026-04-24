@@ -535,9 +535,44 @@ class SmartNotificationService {
     if (lastCheckIn == null) return;
 
     final daysSince = DateTime.now().difference(lastCheckIn).inDays;
-    if (daysSince < 2) return;
+    if (daysSince < 1) return;
 
     final isar = await IsarService().getInstance();
+
+    // ── Day 1: Content-rich first re-open nudge ──
+    if (daysSince == 1) {
+      // Only fire if user has transactions (not brand new)
+      final txnCount = await isar.transactions.count();
+      if (txnCount == 0) return;
+
+      final yesterday = DateTime.now().subtract(const Duration(days: 1));
+      final yStart = DateTime(yesterday.year, yesterday.month, yesterday.day);
+      final yEnd = DateTime(yesterday.year, yesterday.month, yesterday.day, 23, 59, 59);
+      final yTxns = await isar.transactions
+          .filter()
+          .isExpenseEqualTo(true)
+          .isTransferEqualTo(false)
+          .dateBetween(yStart, yEnd)
+          .findAll();
+      final ySpend = yTxns.fold<double>(0, (s, t) => s + t.baseAmount);
+
+      if (ySpend > 0) {
+        await _emit(
+          isar,
+          type: 're_engage_day1',
+          title: Tone.appL10n?.notif_yesterdaySpendTitle ?? '💰 Yesterday\'s spending',
+          body: Tone.current.morningInsightSpent(
+            ySpend.toStringAsFixed(0),
+            '', // no avg needed for day 1
+          ),
+          channel: 're_engagement',
+          channelName: 'Re-engagement',
+          primaryAction: 'View Details',
+          actionData: '{"type": "open_home"}',
+        );
+      }
+      return;
+    }
 
     if (daysSince >= 14) {
       // Streak loss message
@@ -554,8 +589,31 @@ class SmartNotificationService {
         primaryAction: 'Open App',
         actionData: '{"type": "open_home"}',
       );
+    } else if (daysSince >= 7) {
+      // Day 7: Weekly recap hook
+      final weekAgo = DateTime.now().subtract(const Duration(days: 7));
+      final weekTxns = await isar.transactions
+          .filter()
+          .isExpenseEqualTo(true)
+          .isTransferEqualTo(false)
+          .dateGreaterThan(weekAgo)
+          .findAll();
+      final weekTotal = weekTxns.fold<double>(0, (s, t) => s + t.baseAmount);
+
+      await _emit(
+        isar,
+        type: 're_engage_day7',
+        title: Tone.appL10n?.notif_weeklyRecapReadyTitle ?? '📊 Your weekly recap is waiting',
+        body: weekTotal > 0
+            ? Tone.current.reEngageDay7Spend(_formatAmount(weekTotal.round()))
+            : Tone.current.reEngageQuickNudge,
+        channel: 're_engagement',
+        channelName: 'Re-engagement',
+        primaryAction: 'View Recap',
+        actionData: '{"type": "view_recap"}',
+      );
     } else if (daysSince >= 5) {
-      // Estimate missed spending
+      // Day 5: Estimate missed spending
       final thirtyDaysAgo = DateTime.now().subtract(const Duration(days: 30));
       final recentExpenses = await isar.transactions
           .filter()
@@ -580,47 +638,66 @@ class SmartNotificationService {
         actionData: '{"type": "open_home"}',
       );
     } else if (daysSince >= 3) {
-      // Day 3-4: streak just broke
-      final streak =
-          await isar.streaks.filter().typeEqualTo('daily_checkin').findFirst();
-      final lostStreak = streak?.longestCount ?? 0;
-      if (lostStreak >= 3) {
-        await _emit(
-          isar,
-          type: 're_engage_streak_lost',
-          title: Tone.appL10n?.notif_streakEndedTitle(lostStreak) ?? '💔 $lostStreak-day streak ended',
-          body: Tone.current.streakLost(lostStreak),
-          channel: 're_engagement',
-          channelName: 'Re-engagement',
-          primaryAction: 'Start Fresh',
-          actionData: '{"type": "open_home"}',
-        );
+      // Day 3: Budget status hook
+      final budgets = await isar.budgets
+          .filter()
+          .isArchivedEqualTo(false)
+          .findAll();
+
+      String body;
+      if (budgets.isNotEmpty) {
+        body = Tone.current.reEngageDay3Budgets(budgets.length);
       } else {
-        await _emit(
-          isar,
-          type: 're_engage_day3',
-          title: Tone.appL10n?.notif_fewDaysUntrackedTitle ?? '📊 A few days untracked',
-          body: Tone.current.reEngageQuickNudge,
-          channel: 're_engagement',
-          channelName: 'Re-engagement',
-          primaryAction: 'Open App',
-          actionData: '{"type": "open_home"}',
-        );
+        final streak =
+            await isar.streaks.filter().typeEqualTo('daily_checkin').findFirst();
+        final lostStreak = streak?.longestCount ?? 0;
+        if (lostStreak >= 3) {
+          body = Tone.current.streakLost(lostStreak);
+        } else {
+          body = Tone.current.reEngageQuickNudge;
+        }
       }
+
+      await _emit(
+        isar,
+        type: 're_engage_day3',
+        title: Tone.appL10n?.notif_fewDaysUntrackedTitle ?? '📊 A few days untracked',
+        body: body,
+        channel: 're_engagement',
+        channelName: 'Re-engagement',
+        primaryAction: 'Open App',
+        actionData: '{"type": "open_home"}',
+      );
     } else {
       // Day 2: streak at risk
       final streak =
           await isar.streaks.filter().typeEqualTo('daily_checkin').findFirst();
       final currentStreak = streak?.currentCount ?? 0;
+
+      // Content-rich: show pending SMS count if any
+      final pendingCount = await isar.smsActivitys
+          .filter()
+          .statusEqualTo(ActivityStatus.pending)
+          .or()
+          .statusEqualTo(ActivityStatus.needsReview)
+          .count();
+
+      String body;
+      if (currentStreak >= 3) {
+        body = Tone.current.streakAtRisk(currentStreak);
+      } else if (pendingCount > 0) {
+        body = Tone.current.reEngageDay2Sms(pendingCount);
+      } else {
+        body = Tone.current.reEngageQuickNudge;
+      }
+
       await _emit(
         isar,
         type: 're_engage_day2',
         title: currentStreak >= 3
             ? Tone.appL10n?.notif_streakOnLineTitle(currentStreak) ?? '🔥 $currentStreak-day streak on the line!'
             : Tone.appL10n?.notif_quickActionTitle ?? '⚡ 5 seconds is all it takes',
-        body: currentStreak >= 3
-            ? Tone.current.streakAtRisk(currentStreak)
-            : Tone.current.reEngageQuickNudge,
+        body: body,
         channel: 're_engagement',
         channelName: 'Re-engagement',
         primaryAction: currentStreak >= 3 ? 'Keep Streak' : 'Add Transaction',
@@ -635,6 +712,133 @@ class SmartNotificationService {
     return amount.toString();
   }
 
+  // ─── 10. MORNING MONEY MINUTE (☀️) ───
+  /// Fires a personalized spending insight once per morning.
+  /// Shows yesterday's spend vs daily average + top category.
+  Future<void> checkMorningInsight() async {
+    final now = DateTime.now();
+    // Only fire between 7 AM and 11 AM
+    if (now.hour < 7 || now.hour >= 11) return;
+
+    final isar = await IsarService().getInstance();
+    final yesterday = now.subtract(const Duration(days: 1));
+    final yStart = DateTime(yesterday.year, yesterday.month, yesterday.day);
+    final yEnd = DateTime(yesterday.year, yesterday.month, yesterday.day, 23, 59, 59);
+
+    final yesterdayTxns = await isar.transactions
+        .filter()
+        .isExpenseEqualTo(true)
+        .isTransferEqualTo(false)
+        .dateBetween(yStart, yEnd)
+        .findAll();
+
+    final yesterdaySpend = yesterdayTxns.fold<double>(0, (s, t) => s + t.baseAmount);
+
+    // Calculate 30-day daily average (excluding yesterday)
+    final thirtyDaysAgo = yStart.subtract(const Duration(days: 30));
+    final pastExpenses = await isar.transactions
+        .filter()
+        .isExpenseEqualTo(true)
+        .isTransferEqualTo(false)
+        .dateBetween(thirtyDaysAgo, yStart.subtract(const Duration(seconds: 1)))
+        .findAll();
+
+    final pastTotal = pastExpenses.fold<double>(0, (s, t) => s + t.baseAmount);
+    final dailyAvg = pastTotal / 30;
+
+    // Need at least some history
+    if (pastExpenses.isEmpty && yesterdayTxns.isEmpty) return;
+
+    String body;
+    if (yesterdaySpend <= 0) {
+      body = Tone.current.morningInsightZeroSpend;
+    } else if (dailyAvg > 0 && yesterdaySpend < dailyAvg) {
+      final saved = (dailyAvg - yesterdaySpend).toStringAsFixed(0);
+      body = Tone.current.morningInsightUnderAvg(
+        yesterdaySpend.toStringAsFixed(0),
+        saved,
+      );
+    } else {
+      body = Tone.current.morningInsightSpent(
+        yesterdaySpend.toStringAsFixed(0),
+        dailyAvg.toStringAsFixed(0),
+      );
+    }
+
+    // Add top category if there was spending
+    if (yesterdayTxns.isNotEmpty) {
+      final catSpend = <String, double>{};
+      for (final t in yesterdayTxns) {
+        t.category.loadSync();
+        final name = t.category.value?.name ?? 'Other';
+        catSpend[name] = (catSpend[name] ?? 0) + t.baseAmount;
+      }
+      if (catSpend.isNotEmpty) {
+        final top = catSpend.entries.reduce((a, b) => a.value > b.value ? a : b);
+        body += '\n${Tone.current.morningInsightTopCategory(top.key, top.value.toStringAsFixed(0))}';
+      }
+    }
+
+    await _emit(
+      isar,
+      type: 'morning_insight',
+      title: Tone.appL10n?.notif_morningInsightTitle ?? '☀️ Your morning money minute',
+      body: body,
+      channel: 'smart_alerts',
+      channelName: 'Smart Alerts',
+      primaryAction: 'View Dashboard',
+      actionData: jsonEncode({'type': 'open_home'}),
+    );
+  }
+
+  // ─── 11. WEEKLY RECAP NUDGE (📊) ───
+  /// Fires on Sunday evening with a hook stat to drive recap screen opens.
+  Future<void> checkWeeklyRecapNudge() async {
+    final now = DateTime.now();
+    // Only fire on Sunday, between 5 PM and 9 PM
+    if (now.weekday != DateTime.sunday) return;
+    if (now.hour < 17 || now.hour >= 21) return;
+
+    final isar = await IsarService().getInstance();
+    final startOfWeek = DateTime(now.year, now.month, now.day)
+        .subtract(Duration(days: now.weekday - 1));
+
+    final weekTxns = await isar.transactions
+        .filter()
+        .isExpenseEqualTo(true)
+        .isTransferEqualTo(false)
+        .dateBetween(startOfWeek, now)
+        .findAll();
+
+    if (weekTxns.isEmpty) return;
+
+    final weekTotal = weekTxns.fold<double>(0, (s, t) => s + t.baseAmount);
+
+    // Find top category for the hook
+    final catSpend = <String, double>{};
+    for (final t in weekTxns) {
+      t.category.loadSync();
+      final name = t.category.value?.name ?? 'Other';
+      catSpend[name] = (catSpend[name] ?? 0) + t.baseAmount;
+    }
+    final topCat = catSpend.entries.reduce((a, b) => a.value > b.value ? a : b);
+    final topPct = (topCat.value / weekTotal * 100).toStringAsFixed(0);
+
+    final hookStat = Tone.current.weeklyRecapHookStat(topPct, topCat.key);
+
+    await _emit(
+      isar,
+      type: 'weekly_recap_nudge',
+      title: Tone.appL10n?.notif_weeklyRecapNudgeTitle ?? '📊 Your weekly recap is ready',
+      body: Tone.current.weeklyRecapNudge(hookStat),
+      channel: 'summaries',
+      channelName: 'Summaries',
+      primaryAction: 'View Recap',
+      actionData: jsonEncode({'type': 'view_recap'}),
+    );
+  }
+
+
   // ─── MASTER RUN ───
   Future<void> runSmartChecks() async {
     final prefs = await SharedPreferences.getInstance();
@@ -644,6 +848,7 @@ class SmartNotificationService {
       await checkReEngagement();
       return;
     }
+    await checkMorningInsight();
     await checkUpcomingBills();
     await checkBudgetAlerts();
     await checkUnusualSpending();
@@ -651,6 +856,7 @@ class SmartNotificationService {
     await checkPendingSmsTransactions();
     await checkSavingsOpportunity();
     await checkMoneyLeaks();
+    await checkWeeklyRecapNudge();
     // Weekly summary handled by SummaryScheduler in _runAllTasks
     await checkReEngagement();
     _log.i('All smart checks completed');

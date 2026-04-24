@@ -31,6 +31,7 @@ class BudgetCategoryAllocation extends StatelessWidget {
       child: ListTile(
         title: Text(categoryName, style: textTheme.titleSmall),
         subtitle: LinearProgressIndicator(
+          semanticsLabel: 'Progress',
           value: percentage / 100,
           backgroundColor: color.surfaceContainerHighest,
           valueColor: AlwaysStoppedAnimation(color.primary),
@@ -43,6 +44,7 @@ class BudgetCategoryAllocation extends StatelessWidget {
               style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             IconButton(
+              tooltip: 'Edit',
               icon: const Icon(LucideIcons.pencil, size: 20),
               onPressed: () {
                 HapticFeedback.lightImpact();
@@ -50,6 +52,7 @@ class BudgetCategoryAllocation extends StatelessWidget {
               },
             ),
             IconButton(
+              tooltip: 'Delete',
               icon: const Icon(LucideIcons.trash2, size: 20),
               onPressed: () {
                 HapticFeedback.mediumImpact();

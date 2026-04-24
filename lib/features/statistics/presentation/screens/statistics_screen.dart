@@ -25,6 +25,7 @@ import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
+import 'package:mudra_manager/shared/widgets/inline_error.dart';
 
 class StatisticsScreen extends ConsumerStatefulWidget {
   const StatisticsScreen({super.key});
@@ -967,7 +968,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                 );
               },
               loading: () => const SizedBox.shrink(),
-              error: (_, __) => const SizedBox.shrink(),
+              error: (_, __) => const InlineError(),
             );
           },
         ),
@@ -1066,7 +1067,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                                               ),
                                             ),
                                             if (trend.changePercent != 0) ...[
-                                              const SizedBox(width: 8),
+                                              SizedBox(width: spacing.elementGap),
                                               Container(
                                                 padding:
                                                     const EdgeInsets.symmetric(
@@ -1119,7 +1120,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                                         ),
                                       ],
                                     ),
-                                    const SizedBox(height: 8),
+                                    SizedBox(height: spacing.elementGap),
                                     _AnimatedMetricBar(
                                       progress: (trend.thisMonth /
                                               sortedTrends.first.thisMonth)
@@ -1137,7 +1138,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                 );
               },
               loading: () => const SizedBox.shrink(),
-              error: (_, __) => const SizedBox.shrink(),
+              error: (_, __) => const InlineError(),
             );
           },
         ),
@@ -1198,7 +1199,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                                         size: 16,
                                         color: color.tertiary,
                                       ),
-                                      const SizedBox(width: 8),
+                                      SizedBox(width: spacing.elementGap),
                                       Text(
                                         ts.tag.name,
                                         style: textTheme.bodyLarge?.copyWith(
@@ -1215,7 +1216,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
-                                      const SizedBox(width: 8),
+                                      SizedBox(width: spacing.elementGap),
                                       Text(
                                         '${ts.count} txn',
                                         style: textTheme.bodySmall?.copyWith(
@@ -1226,10 +1227,11 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 8),
+                              SizedBox(height: spacing.elementGap),
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(4),
                                 child: LinearProgressIndicator(
+                                  semanticsLabel: 'Progress',
                                   value:
                                       (ts.amount / maxAmount).clamp(0.0, 1.0),
                                   backgroundColor:
@@ -1249,7 +1251,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
             );
           },
           loading: () => const SizedBox.shrink(),
-          error: (_, __) => const SizedBox.shrink(),
+          error: (_, __) => const InlineError(),
         );
       },
     );
@@ -1504,7 +1506,7 @@ class _NetWorthCard extends ConsumerWidget {
         );
       },
       loading: () => const SizedBox.shrink(),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (_, __) => const InlineError(),
     );
   }
 }
@@ -1593,13 +1595,13 @@ class _PulseCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Icon(icon, color: cardColor, size: 20),
-                const SizedBox(height: 8),
+                SizedBox(height: spacing.elementGap),
                 Text(
                   label,
                   style: textTheme.bodySmall
                       ?.copyWith(color: color.onSurfaceVariant),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: spacing.elementGapMin),
                 isPercentage
                     ? Text(
                         '${value.toStringAsFixed(1)}%',
@@ -1681,6 +1683,7 @@ class _AnimatedScoreRingState extends State<_AnimatedScoreRing>
                 width: 72,
                 height: 72,
                 child: CircularProgressIndicator(
+                  semanticsLabel: 'Loading',
                   value: value,
                   strokeWidth: 6,
                   strokeCap: StrokeCap.round,
@@ -1754,6 +1757,7 @@ class _AnimatedMetricBarState extends State<_AnimatedMetricBar>
       child: AnimatedBuilder(
         animation: _anim,
         builder: (_, __) => LinearProgressIndicator(
+          semanticsLabel: 'Progress',
           value: _anim.value * widget.progress,
           minHeight: 8,
           backgroundColor: widget.bgColor,
@@ -1833,6 +1837,7 @@ class _FullScreenTrendChartState extends ConsumerState<_FullScreenTrendChart> {
       backgroundColor: color.surface,
       appBar: AppBar(
         leading: IconButton(
+          tooltip: 'Close',
           icon: const Icon(LucideIcons.x),
           onPressed: widget.onClose,
         ),
@@ -1847,6 +1852,7 @@ class _FullScreenTrendChartState extends ConsumerState<_FullScreenTrendChart> {
         actions: [
           if (_selectedMonthIndex != null)
             IconButton(
+              tooltip: 'Back',
               icon: const Icon(LucideIcons.arrowLeft),
               onPressed: () => setState(() => _selectedMonthIndex = null),
             ),

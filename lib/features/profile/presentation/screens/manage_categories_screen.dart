@@ -11,8 +11,12 @@ import 'package:mudra_manager/core/utils/dialog_utils.dart';
 import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
 import 'package:mudra_manager/core/utils/icon_helper.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
+import 'package:mudra_manager/core/db/isar_service.dart';
+import 'package:mudra_manager/core/logging/app_log.dart';
+import 'package:mudra_manager/core/logging/logger_provider.dart';
 import 'package:mudra_manager/core/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/features/category/data/category_provider.dart';
+import 'package:mudra_manager/features/category/data/category_merge_service.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
@@ -651,6 +655,15 @@ class _CategoryRowState extends State<_CategoryRow> {
               },
             ),
             ListTile(
+              leading: Icon(LucideIcons.merge, color: color.tertiary),
+              title: Text(ctxt.category_merge),
+              onTap: () {
+                HapticFeedback.mediumImpact();
+                Navigator.pop(ctx);
+                _showMergeSheet(context, category, color, textTheme);
+              },
+            ),
+            ListTile(
               leading: Icon(LucideIcons.trash2, color: color.error),
               title: Text(
                 ctxt.categories_delete,
@@ -668,5 +681,120 @@ class _CategoryRowState extends State<_CategoryRow> {
         ),
       ),
     );
+  }
+
+  void _showMergeSheet(
+    BuildContext context,
+    Category source,
+    ColorScheme color,
+    TextTheme textTheme,
+  ) {
+    final ctxt = AppLocalizations.of(context)!;
+    final candidates = widget.allCategories
+        .where((c) => c.id != source.id && c.categoryType == source.categoryType && !c.isSystem)
+        .toList();
+
+    if (candidates.isEmpty) {
+      SnackbarService.info(ctxt.category_mergeSameError);
+      return;
+    }
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: color.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 12),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: color.onSurfaceVariant.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                '${ctxt.category_mergeInto} "${source.name}"',
+                style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              ),
+            ),
+            const Divider(height: 1),
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.4,
+              ),
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: candidates.length,
+                itemBuilder: (_, i) {
+                  final target = candidates[i];
+                  final catColor = Color(target.colorValue ?? Colors.grey.toARGB32());
+                  return ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: catColor.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        IconHelper.getIconData(target.iconName),
+                        color: catColor,
+                        size: 20,
+                      ),
+                    ),
+                    title: Text(target.name),
+                    onTap: () async {
+                      Navigator.pop(ctx);
+                      await _executeMerge(context, source, target);
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _executeMerge(
+    BuildContext context,
+    Category source,
+    Category target,
+  ) async {
+    final ctxt = AppLocalizations.of(context)!;
+    // This is inside _CategoryRowState which is a State, not ConsumerState.
+    // Access Isar directly for the merge.
+    final isarService = IsarService();
+    final mergeService = CategoryMergeService(
+      isarService,
+      AppLog(getLogger(), 'CategoryMerge'),
+    );
+
+    final preview = await mergeService.preview(source.id, target.id);
+
+    if (!context.mounted) return;
+
+    final confirmed = await DialogUtils.showDeleteConfirmation(
+      context,
+      title: ctxt.category_merge,
+      message: ctxt.category_mergePreview(preview.totalAffected, target.name),
+      deleteText: ctxt.category_mergeConfirm,
+    );
+
+    if (confirmed != true) return;
+
+    await mergeService.merge(source.id, target.id);
+
+    if (context.mounted) {
+      SnackbarService.success(ctxt.category_mergeSuccess);
+    }
   }
 }

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/shared/widgets/ambient_brand_section.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
+import 'package:mudra_manager/shared/widgets/inline_error.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:mudra_manager/features/analytics/data/analytics_provider.dart';
 import 'package:mudra_manager/features/analytics/data/tax_estimation_service.dart';
@@ -159,7 +160,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 ),
               ),
               loading: () => const DashboardCardSkeleton(),
-              error: (_, __) => const SizedBox.shrink(),
+              error: (_, __) => const InlineError(),
             ),
 
             const SizedBox(height: 16),
@@ -230,7 +231,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 ),
               ),
               loading: () => const DashboardCardSkeleton(),
-              error: (_, __) => const SizedBox.shrink(),
+              error: (_, __) => const InlineError(),
             ),
 
             const SizedBox(height: 16),
@@ -313,7 +314,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 ),
               ),
               loading: () => const DashboardCardSkeleton(),
-              error: (_, __) => const SizedBox.shrink(),
+              error: (_, __) => const InlineError(),
             ),
 
             const SizedBox(height: 16),
@@ -322,7 +323,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             taxAsync.when(
               data: (tax) => _buildTaxCard(tax, color, textTheme, isGuestMode, context),
               loading: () => const DashboardCardSkeleton(),
-              error: (_, __) => const SizedBox.shrink(),
+              error: (_, __) => const InlineError(),
             ),
 
             const SizedBox(height: 16),
@@ -416,6 +417,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                                     ),
                                     const SizedBox(height: 4),
                                     LinearProgressIndicator(
+                                      semanticsLabel: 'Progress',
                                       value: (trend.thisMonth /
                                               sortedTrends.first.thisMonth)
                                           .clamp(0.0, 1.0),
@@ -433,7 +435,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 );
               },
               loading: () => const DashboardCardSkeleton(),
-              error: (_, __) => const SizedBox.shrink(),
+              error: (_, __) => const InlineError(),
             ),
 
             const SizedBox(height: 16),
@@ -531,7 +533,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 );
               },
               loading: () => const DashboardCardSkeleton(),
-              error: (_, __) => const SizedBox.shrink(),
+              error: (_, __) => const InlineError(),
             ),
 
             const SizedBox(height: 24),

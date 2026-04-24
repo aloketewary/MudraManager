@@ -161,7 +161,7 @@ void main() {
       expect(a.smsHash, isNotEmpty);
       expect(a.date, isNotNull);
       expect(a.confidence, isNotNull);
-      expect(a.confidence!, greaterThan(0));
+      expect(a.confidence, greaterThan(0));
     });
 
     test('RCS ICICI credit: display name sender, all fields', () async {
@@ -178,7 +178,7 @@ void main() {
       expect(a.amount, 15000.0);
       expect(a.isIncome, true);
       expect(a.account, '1234');
-      expect(a.confidence!, greaterThan(50));
+      expect(a.confidence, greaterThan(50));
     });
 
     test('OTP message: filtered before parser, no DB record', () async {
@@ -294,22 +294,22 @@ void main() {
         title: 'HDFCBK',
         body: 'Rs.800 debited from a/c XX6988. Avl Bal Rs.49,200',
         timestamp: 1713168000000,
-      ));
+      ),);
       results.add(await processNotification(
         title: 'HDFCBK',
         body: 'Your OTP is 123456. Do not share.',
         timestamp: 1713168010000,
-      ));
+      ),);
       results.add(await processNotification(
         title: 'ICICIB',
         body: 'Get 10% cashback. Visit https://icici.com/offer',
         timestamp: 1713168020000,
-      ));
+      ),);
       results.add(await processNotification(
         title: 'ICICIB',
         body: 'Your a/c XX1234 is credited with Rs.5,000. Info: UPI/CR. Avl bal Rs.80,000',
         timestamp: 1713168030000,
-      ));
+      ),);
 
       expect(results.where((r) => r == ParseResult.skipped).length, 2);
       expect(await isar.smsActivitys.count(), 2);
@@ -1009,7 +1009,7 @@ void main() {
 
       expect(r1, isNot(ParseResult.skipped));
       expect(r2, ParseResult.duplicate,
-          reason: 'Exact same RCS notification should be deduped by Kotlin hash');
+          reason: 'Exact same RCS notification should be deduped by Kotlin hash',);
     });
   });
 
@@ -1395,7 +1395,7 @@ void main() {
         body: 'Rs.999 debited from a/c XX6988 for subscription to Netflix. Explore now at hdfc.com',
       );
       expect(r, isNot(ParseResult.skipped),
-          reason: 'hasConfirmedTrn=true bypasses promo filter');
+          reason: 'hasConfirmedTrn=true bypasses promo filter',);
     });
   });
 
@@ -1544,7 +1544,7 @@ void main() {
         body: 'Rs.1500 debited from a/c XX6988. Your pending balance will be updated.',
       );
       expect(r, isNot(ParseResult.skipped),
-          reason: 'hasConfirmedTrn=true bypasses future filter');
+          reason: 'hasConfirmedTrn=true bypasses future filter',);
     });
   });
 
@@ -1603,7 +1603,7 @@ void main() {
         body: 'Rs.5000 debited from a/c XX6988 for credit card due payment.',
       );
       expect(r, isNot(ParseResult.skipped),
-          reason: 'hasConfirmedTrn=true bypasses bill reminder filter');
+          reason: 'hasConfirmedTrn=true bypasses bill reminder filter',);
     });
   });
 
@@ -1812,12 +1812,12 @@ void main() {
         timestamp: 1713295000000,
       );
       expect(r, isNot(ParseResult.skipped),
-          reason: 'Real debit with cashback note should NOT be filtered');
+          reason: 'Real debit with cashback note should NOT be filtered',);
       final a = (await isar.smsActivitys.where().findAll()).last;
       // Must parse the DEBIT amount (1499), not the cashback amount (50)
       expect(a.amount, 1499.0);
       expect(a.isIncome, false,
-          reason: 'This is a debit, not a cashback credit');
+          reason: 'This is a debit, not a cashback credit',);
     });
   });
 }

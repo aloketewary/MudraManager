@@ -419,7 +419,7 @@ class HomePageState extends ConsumerState<HomePage>
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: spacing.radiusMedium),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -560,6 +560,7 @@ class HomePageState extends ConsumerState<HomePage>
                   alignment: Alignment.center,
                   children: [
                     IconButton(
+                      tooltip: 'Notifications',
                       icon: const Icon(LucideIcons.bell, size: 28),
                       onPressed: () => context.push(AppRoutes.notifications),
                     ),
@@ -611,6 +612,7 @@ class HomePageState extends ConsumerState<HomePage>
           ),
           actions: [
             IconButton(
+              tooltip: 'Search',
               onPressed: () {
                 HapticFeedback.mediumImpact();
                 transactionListKey.currentState?.toggleSearch();
@@ -618,6 +620,7 @@ class HomePageState extends ConsumerState<HomePage>
               icon: const Icon(LucideIcons.search),
             ),
             IconButton(
+              tooltip: 'Filter',
               onPressed: () => transactionListKey.currentState
                   ?.showFilterBottomSheet(context, spacing),
               icon: const Icon(LucideIcons.listFilter),
@@ -647,6 +650,7 @@ class HomePageState extends ConsumerState<HomePage>
           ),
           actions: [
             IconButton(
+              tooltip: 'Download',
               icon: const Icon(LucideIcons.download),
               onPressed: () => _showExportDialog(context),
             ),

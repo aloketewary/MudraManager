@@ -224,6 +224,7 @@ class _UndoSnackbarContentState extends State<_UndoSnackbarContent>
               alignment: Alignment.center,
               children: [
                 CircularProgressIndicator(
+                  semanticsLabel: 'Loading',
                   value: 1.0 - _controller.value,
                   strokeWidth: 2.5,
                   strokeCap: StrokeCap.round,

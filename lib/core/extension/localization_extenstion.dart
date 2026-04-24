@@ -192,6 +192,8 @@ extension AppLocalizationsHelper on AppLocalizations {
         return title_backupShare;
       case 'title_exchangeRates':
         return title_exchangeRates;
+      case 'tax_title':
+        return tax_title;
       case 'title_recurringTransactions':
         return title_recurringTransactions;
       case 'title_billControlCenter':
@@ -368,6 +370,10 @@ extension AppLocalizationsHelper on AppLocalizations {
         return utility_customizeUtilities;
       case 'utility_addUtilities':
         return utility_addUtilities;
+      case 'utility_taxSubtitle':
+        return utility_taxSubtitle;
+      case 'utility_analyticsSubtitle':
+        return utility_analyticsSubtitle;
 
       // Profile
       case 'profile_accounts':

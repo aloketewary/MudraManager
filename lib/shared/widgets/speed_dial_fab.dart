@@ -176,26 +176,30 @@ class ExpandableFabState extends State<ExpandableFab>
                   child: InkWell(
                     onTap: _toggle,
                     borderRadius: BorderRadius.circular(26),
-                    child: SizedBox(
-                      width: _collapsedWidth,
-                      height: _height,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            LucideIcons.plus,
-                            size: 20,
-                            color: color.onPrimaryContainer,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Add',
-                            style: textTheme.labelLarge?.copyWith(
+                    child: Semantics(
+                      button: true,
+                      label: 'Add transaction',
+                      child: SizedBox(
+                        width: _collapsedWidth,
+                        height: _height,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              LucideIcons.plus,
+                              size: 20,
                               color: color.onPrimaryContainer,
-                              fontWeight: FontWeight.w700,
                             ),
-                          ),
-                        ],
+                            const SizedBox(width: 8),
+                            Text(
+                              'Add',
+                              style: textTheme.labelLarge?.copyWith(
+                                color: color.onPrimaryContainer,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -262,35 +266,39 @@ class ExpandableFabState extends State<ExpandableFab>
     required VoidCallback onTap,
   }) {
     return Expanded(
-      child: InkWell(
-        onTap: onTap,
-        child: SizedBox(
-          height: _height,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(5),
-                decoration: BoxDecoration(
-                  color: accentColor.withValues(alpha: 0.12),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(icon, size: 16, color: accentColor),
-              ),
-              const SizedBox(width: 6),
-              Flexible(
-                child: Text(
-                  label,
-                  style: textTheme.labelMedium?.copyWith(
-                    color: color.onSurface,
-                    fontWeight: FontWeight.w600,
+      child: Semantics(
+        button: true,
+        label: label,
+        child: InkWell(
+          onTap: onTap,
+          child: SizedBox(
+            height: _height,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                    color: accentColor.withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  child: Icon(icon, size: 16, color: accentColor),
                 ),
-              ),
-            ],
+                const SizedBox(width: 6),
+                Flexible(
+                  child: Text(
+                    label,
+                    style: textTheme.labelMedium?.copyWith(
+                      color: color.onSurface,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -79,6 +79,10 @@ class _AddEditTransactionScreenState
   bool _initialized = false;
   bool _saving = false;
   bool _tripManuallyCleared = false;
+  bool _showAccountError = false;
+  bool _showCategoryError = false;
+  final _accountKey = GlobalKey();
+  final _categoryKey = GlobalKey();
 
   Trip? _selectedTrip;
   List<TripParticipant> _selectedParticipants = [];
@@ -248,6 +252,20 @@ class _AddEditTransactionScreenState
     super.dispose();
   }
 
+  void _scrollToKey(GlobalKey key) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final ctx = key.currentContext;
+      if (ctx != null) {
+        Scrollable.ensureVisible(
+          ctx,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+          alignment: 0.3,
+        );
+      }
+    });
+  }
+
   void _showCalculator(BuildContext context, Function(double) onResult) {
     showModalBottomSheet(
       context: context,
@@ -296,10 +314,33 @@ class _AddEditTransactionScreenState
         ),
         title: Text(
           _isEditing
-              ? 'Edit Transaction'
-              : (_isExpense ? 'Add Expense' : 'Add Income'),
+              ? ctxt.transaction_editTransactionTitle
+              : (_isExpense ? ctxt.transaction_addExpenseTitle : ctxt.transaction_addIncomeTitle),
           style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
+        actions: [
+          TextButton(
+            onPressed: _saving ? null : _saveTransaction,
+            child: _saving
+                ? SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: color.primary,
+                    ),
+                  )
+                : Text(
+                    _isEditing
+                        ? ctxt.common_update
+                        : ctxt.common_save,
+                    style: textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+          ),
+          SizedBox(width: spacing.cardHorizontal),
+        ],
       ),
       body: Form(
         key: _formKey,
@@ -621,48 +662,58 @@ class _AddEditTransactionScreenState
                   ),
                   SizedBox(height: spacing.sectionGap),
                   // ── Account selector ──
-                  AccountSelector(
-                    selectedAccount: _selectedAccount,
-                    balanceMap: _balanceMap,
-                    scrollController: _accountScrollController,
-                    alreadyScrolled: _accountScrolled,
-                    smsAccountNumber: widget.smsActivity?.account,
-                    smsBankName: widget.smsActivity?.fromBank,
-                    addLabel: ctxt.common_addLabel,
-                    onSelected: (account) {
-                      setState(() {
-                        _selectedAccount = account;
-                        _accountScrolled = true;
-                      });
-                    },
-                    onAddResult: () {
-                      ref
-                          .read(accountServiceProvider)
-                          .getAccountBalanceMap()
-                          .then((val) {
-                        if (mounted) setState(() => _balanceMap = val);
-                      });
-                    },
-                    onShowUnlockPrompt: _showUnlockPrompt,
+                  KeyedSubtree(
+                    key: _accountKey,
+                    child: AccountSelector(
+                      selectedAccount: _selectedAccount,
+                      balanceMap: _balanceMap,
+                      scrollController: _accountScrollController,
+                      alreadyScrolled: _accountScrolled,
+                      smsAccountNumber: widget.smsActivity?.account,
+                      smsBankName: widget.smsActivity?.fromBank,
+                      addLabel: ctxt.common_addLabel,
+                      showError: _showAccountError,
+                      onSelected: (account) {
+                        setState(() {
+                          _selectedAccount = account;
+                          _accountScrolled = true;
+                          _showAccountError = false;
+                        });
+                      },
+                      onAddResult: () {
+                        ref
+                            .read(accountServiceProvider)
+                            .getAccountBalanceMap()
+                            .then((val) {
+                          if (mounted) setState(() => _balanceMap = val);
+                        });
+                      },
+                      onShowUnlockPrompt: _showUnlockPrompt,
+                    ),
                   ),
 
                   SizedBox(height: spacing.sectionGap),
 
                   // ── Category selector ──
-                  CategorySelector(
-                    isExpense: _isExpense,
-                    selectedCategory: _selectedCategory,
-                    categoryScrollController: _categoryScrollController,
-                    subcategoryScrollController: _subcategoryScrollController,
-                    alreadyScrolled: _categoryScrolled,
-                    addLabel: ctxt.common_addLabel,
-                    onSelected: (cat) {
-                      setState(() {
-                        _selectedCategory = cat;
-                        _categoryScrolled = true;
-                      });
-                    },
-                    expandedParentFinder: (parents) => parents,
+                  KeyedSubtree(
+                    key: _categoryKey,
+                    child: CategorySelector(
+                      isExpense: _isExpense,
+                      selectedCategory: _selectedCategory,
+                      categoryScrollController: _categoryScrollController,
+                      subcategoryScrollController: _subcategoryScrollController,
+                      alreadyScrolled: _categoryScrolled,
+                      addLabel: ctxt.common_addLabel,
+                      showError: _showCategoryError,
+                      onSelected: (cat) {
+                        setState(() {
+                          _selectedCategory = cat;
+                          _categoryScrolled = true;
+                          _showCategoryError = false;
+                        });
+                      },
+                      expandedParentFinder: (parents) => parents,
+                    ),
                   ),
                   SizedBox(height: spacing.sectionGap),
 
@@ -853,41 +904,7 @@ class _AddEditTransactionScreenState
                 ],
               ),
             ),
-            // ── Pinned save button ──
-            Padding(
-              padding: EdgeInsets.fromLTRB(
-                spacing.cardHorizontal,
-                spacing.elementGap,
-                spacing.cardHorizontal,
-                spacing.cardHorizontalMax +
-                    MediaQuery.of(context).padding.bottom,
-              ),
-              child: FilledButton(
-                onPressed: _saving ? null : _saveTransaction,
-                style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                  ),
-                  minimumSize: const Size(double.infinity, 52),
-                ),
-                child: _saving
-                    ? SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: color.onPrimary,
-                        ),
-                      )
-                    : Text(
-                        _isEditing
-                            ? 'Update Transaction'
-                            : ctxt.transaction_saveTransactionButtonLabel,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-              ),
-            ),
+
           ],
         ),
       ),
@@ -903,6 +920,8 @@ class _AddEditTransactionScreenState
       return;
     }
     if (_selectedAccount == null) {
+      setState(() => _showAccountError = true);
+      _scrollToKey(_accountKey);
       SnackbarService.error(BuddyMessages.pickAccount);
       return;
     }
@@ -916,6 +935,8 @@ class _AddEditTransactionScreenState
     }
 
     if (_selectedCategory == null) {
+      setState(() => _showCategoryError = true);
+      _scrollToKey(_categoryKey);
       SnackbarService.error(BuddyMessages.pickCategory);
       return;
     }
@@ -923,7 +944,8 @@ class _AddEditTransactionScreenState
     setState(() => _saving = true);
 
     try {
-      final amount = double.parse(_amountController.text);
+      final amount = double.tryParse(_amountController.text.replaceAll(',', '')) ?? 0;
+      if (amount <= 0) return;
 
       final String? saveCurrency = _effectiveCurrency;
       double? convertedAmount;

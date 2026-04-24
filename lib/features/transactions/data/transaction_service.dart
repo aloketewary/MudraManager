@@ -4,6 +4,7 @@ import 'package:mudra_manager/core/db/models/trip.dart';
 import 'package:mudra_manager/core/services/plugin_service.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
+import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/exchange_rate.dart';
 import 'package:mudra_manager/core/db/models/frequency.dart';
@@ -31,6 +32,8 @@ class TransactionService {
     // Capture tags BEFORE entering writeTxn — toList() triggers loadSync()
     // which can't run inside a write transaction
     final tagsToSave = txn.tags.toList();
+
+    txn.encryptFields();
 
     try {
       await isar.writeTxn(() async {
@@ -82,6 +85,7 @@ class TransactionService {
     for (final t in txns) {
       t.category.loadSync();
       t.account.loadSync();
+      t.decryptFields();
     }
   }
 
@@ -117,6 +121,7 @@ class TransactionService {
     for (final t in allTransactions) {
       t.category.loadSync();
       t.account.loadSync();
+      t.decryptFields();
     }
 
     return allTransactions;
@@ -381,6 +386,9 @@ class TransactionService {
       allTxns = allTxns.where((t) => t.isExpense && !t.isTransfer).toList();
     }
 
+    for (final t in allTxns) {
+      t.decryptFields();
+    }
     return allTxns;
   }
 
@@ -400,6 +408,10 @@ class TransactionService {
       query = query.isExpenseEqualTo(true).isTransferEqualTo(false);
     }
 
-    return await query.sortByDateDesc().findAll();
+    final txns = await query.sortByDateDesc().findAll();
+    for (final t in txns) {
+      t.decryptFields();
+    }
+    return txns;
   }
 }
