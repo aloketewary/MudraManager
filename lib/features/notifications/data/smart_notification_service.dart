@@ -14,6 +14,8 @@ import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/features/gamification/models/achievement.dart';
 import 'dart:convert';
 
+import 'package:mudra_manager/features/notifications/data/smart_check.dart';
+import 'package:mudra_manager/features/notifications/data/all_checks.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SmartNotificationService {
@@ -839,25 +841,36 @@ class SmartNotificationService {
   }
 
 
+  // ─── Extracted checks (independently testable) ───
+  static final List<SmartCheck> checks = [
+    MorningInsightCheck(),
+    UnusualSpendingCheck(),
+    PendingSmsCheck(),
+    MoneyLeakCheck(),
+    WeeklyRecapNudgeCheck(),
+  ];
+
   // ─── MASTER RUN ───
   Future<void> runSmartChecks() async {
     final prefs = await SharedPreferences.getInstance();
     final smartEnabled = prefs.getBool('smart_alerts_enabled') ?? true;
     if (!smartEnabled) {
-      // Weekly summary handled by SummaryScheduler in _runAllTasks
       await checkReEngagement();
       return;
     }
-    await checkMorningInsight();
+    // Extracted checks
+    for (final check in checks) {
+      try {
+        await check.run();
+      } catch (e) {
+        _log.e('Smart check "${check.type}" failed', e);
+      }
+    }
+    // Inline checks (complex, to be extracted in follow-up)
     await checkUpcomingBills();
     await checkBudgetAlerts();
-    await checkUnusualSpending();
     await checkBalanceDropPrediction();
-    await checkPendingSmsTransactions();
     await checkSavingsOpportunity();
-    await checkMoneyLeaks();
-    await checkWeeklyRecapNudge();
-    // Weekly summary handled by SummaryScheduler in _runAllTasks
     await checkReEngagement();
     _log.i('All smart checks completed');
   }

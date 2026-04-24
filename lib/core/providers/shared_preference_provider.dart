@@ -1,5 +1,6 @@
 import 'dart:collection';
 
+import 'package:mudra_manager/core/services/auto_backup_service.dart';
 import 'package:mudra_manager/features/sms/domain/detection_level.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -46,9 +47,10 @@ class SharedPrefsUtil {
   Future<void> setAccountDisplayStyle(String style) =>
       _prefs.setString(_accountDisplayStyleKey, style);
 
-  // Save onboarding completion
+  // Save onboarding completion (also stamps timestamp)
   void setOnboardingComplete() {
     _prefs.setBool('onboarding_complete', true);
+    _prefs.setInt('onboarding_completed_at', DateTime.now().millisecondsSinceEpoch);
   }
 
   // Check if onboarding is complete
@@ -230,4 +232,35 @@ class SharedPrefsUtil {
   Future<void> setDetectionMode(DetectionSensitivity mode) async {
     await _prefs.setString('detection_mode', mode.name);
   }
+
+  // App mode (simple / full)
+  String getAppMode() => _prefs.getString('app_mode') ?? 'simple';
+  Future<void> setAppMode(String mode) => _prefs.setString('app_mode', mode);
+
+  // First transaction nudge
+  bool getFirstTxnNudgeDismissed() => _prefs.getBool('first_txn_nudge_dismissed') ?? false;
+  Future<void> setFirstTxnNudgeDismissed() => _prefs.setBool('first_txn_nudge_dismissed', true);
+
+  // Starter transactions offered during onboarding
+  bool getStarterTxnsOffered() => _prefs.getBool('starter_txns_offered') ?? false;
+  Future<void> setStarterTxnsOffered() => _prefs.setBool('starter_txns_offered', true);
+
+  // Onboarding completion timestamp
+  DateTime? getOnboardingCompletedAt() {
+    final ms = _prefs.getInt('onboarding_completed_at');
+    return ms != null ? DateTime.fromMillisecondsSinceEpoch(ms) : null;
+  }
+  Future<void> setOnboardingCompletedAt(DateTime dt) =>
+      _prefs.setInt('onboarding_completed_at', dt.millisecondsSinceEpoch);
+
+  // Auto backup frequency
+  BackupFrequency getAutoBackupFrequency() {
+    final value = _prefs.getString('auto_backup_frequency') ?? 'never';
+    return BackupFrequency.values.firstWhere(
+      (e) => e.name == value,
+      orElse: () => BackupFrequency.never,
+    );
+  }
+  Future<void> setAutoBackupFrequency(String frequency) =>
+      _prefs.setString('auto_backup_frequency', frequency);
 }

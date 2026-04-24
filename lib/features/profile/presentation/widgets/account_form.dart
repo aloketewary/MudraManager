@@ -14,6 +14,7 @@ import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/simple_color_picker.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
+import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 
@@ -978,7 +979,9 @@ class _AccountFormState extends ConsumerState<AccountForm> {
         await gamificationService.track(GamificationEvent.accountCreated);
       }
 
-      invalidateAll(ref);
+      ref.invalidate(accountsProvider);
+      ref.invalidate(allAccountsProvider);
+      ref.invalidate(frequencySortedAccountsProvider);
       if (context.mounted) context.pop(true);
     } finally {
       if (mounted) setState(() => _saving = false);

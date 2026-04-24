@@ -12,6 +12,7 @@ import 'package:mudra_manager/core/logging/logger_provider.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/core/services/background_task_manager.dart';
 import 'package:mudra_manager/core/services/card_interaction_tracker.dart';
 import 'package:mudra_manager/core/services/notification_service.dart';
 import 'package:mudra_manager/core/utils/refresh_helper.dart';
@@ -21,11 +22,13 @@ import 'package:mudra_manager/core/widgets/dashboard_widget_plugin.dart';
 import 'package:mudra_manager/core/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/features/budget/data/budget_alert_provider.dart';
 import 'package:mudra_manager/features/budget/data/budget_alert_service.dart';
+import 'package:mudra_manager/features/dashboard/data/background_health_provider.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/dashboard_data_provider.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/permission_provider.dart';
 import 'package:mudra_manager/features/dashboard/presentation/providers/widget_preferences_provider.dart';
 import 'package:mudra_manager/features/profile/data/help_guide_provider.dart';
 import 'package:mudra_manager/features/sms/presentation/screens/sms_activity_screen.dart';
+import 'package:mudra_manager/features/transactions/presentation/widgets/quick_add_transaction_sheet.dart';
 import 'package:mudra_manager/shared/widgets/ambient_brand_section.dart';
 import 'package:mudra_manager/shared/widgets/budget_alert_banner.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
@@ -169,6 +172,14 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
       );
     }
 
+    // Data is ready — check for zero-state (new user, no transactions)
+    final data = dashboardAsync.value;
+    final hasTransactions = data != null && data.transactions.isNotEmpty;
+    final nudgeDismissed = SharedPrefsUtil.instance.getFirstTxnNudgeDismissed();
+    final onboardedAt = SharedPrefsUtil.instance.getOnboardingCompletedAt();
+    final isNewUser = onboardedAt != null &&
+        DateTime.now().difference(onboardedAt).inHours < 24;
+
     // Data is ready — stagger only once
     if (!_allRevealed && _revealedCount == 0 && widgets.isNotEmpty) {
       _revealNext(widgets.length);
@@ -177,6 +188,17 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
     final visibleCount = _allRevealed ? widgets.length : _revealedCount;
 
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          HapticFeedback.mediumImpact();
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            builder: (_) => const QuickAddTransactionSheet(compact: true),
+          );
+        },
+        child: const Icon(LucideIcons.plus),
+      ),
       body: RefreshIndicator(
         onRefresh: () => RefreshHelper.withMinDuration(() async {
           ref.invalidate(dashboardDataProvider);
@@ -197,6 +219,22 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
             SliverToBoxAdapter(
               child: RepaintBoundary(child: _AutoImportBanner()),
             ),
+            SliverToBoxAdapter(
+              child: RepaintBoundary(child: _BackgroundHealthBanner()),
+            ),
+            // Zero-state: first-transaction nudge for new users
+            if (!hasTransactions && !nudgeDismissed)
+              SliverToBoxAdapter(
+                child: RepaintBoundary(
+                  child: _FirstTransactionNudge(
+                    isNewUser: isNewUser,
+                    onDismiss: () {
+                      SharedPrefsUtil.instance.setFirstTxnNudgeDismissed();
+                      ref.invalidate(dashboardDataProvider);
+                    },
+                  ),
+                ),
+              ),
             SliverList(
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
@@ -732,6 +770,70 @@ class _AutoImportBanner extends ConsumerWidget {
 
 
 
+class _BackgroundHealthBanner extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final unhealthy = ref.watch(backgroundTaskUnhealthyProvider).value ?? false;
+    if (!unhealthy) return const SizedBox.shrink();
+
+    final spacing = ref.watch(spacingProvider);
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: spacing.cardHorizontal,
+        vertical: spacing.cardVertical,
+      ),
+      child: Container(
+        padding: EdgeInsets.all(spacing.cardInner),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(spacing.radiusMedium),
+          color: color.errorContainer.withValues(alpha: 0.3),
+          border: Border.all(color: color.error.withValues(alpha: 0.3)),
+        ),
+        child: Row(
+          children: [
+            Icon(LucideIcons.triangleAlert, size: 20, color: color.error),
+            SizedBox(width: spacing.elementGap),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    AppLocalizations.of(context)!.dashboard_bgSyncIssueTitle,
+                    style: textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: color.onErrorContainer,
+                    ),
+                  ),
+                  Text(
+                    AppLocalizations.of(context)!.dashboard_bgSyncIssueDesc,
+                    style: textTheme.bodySmall?.copyWith(
+                      color: color.onErrorContainer.withValues(alpha: 0.7),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            GestureDetector(
+              onTap: () async {
+                await BackgroundTaskManager.dismissFailureBanner();
+                ref.invalidate(backgroundTaskUnhealthyProvider);
+              },
+              child: Icon(
+                LucideIcons.x,
+                size: 18,
+                color: color.onErrorContainer.withValues(alpha: 0.6),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _WidgetErrorBoundary extends StatefulWidget {
   final String id;
   final Widget child;
@@ -755,5 +857,231 @@ class _WidgetErrorBoundaryState extends State<_WidgetErrorBoundary> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _hasError = false;
+  }
+}
+
+class _FirstTransactionNudge extends ConsumerWidget {
+  final bool isNewUser;
+  final VoidCallback onDismiss;
+
+  const _FirstTransactionNudge({
+    required this.isNewUser,
+    required this.onDismiss,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final spacing = ref.watch(spacingProvider);
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ctxt = AppLocalizations.of(context)!;
+    final accent = color.primary;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: spacing.cardHorizontal,
+        vertical: spacing.cardVertical,
+      ),
+      child: Column(
+        children: [
+          // Main nudge card
+          GestureDetector(
+            onTap: () {
+              HapticFeedback.mediumImpact();
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                builder: (_) => const QuickAddTransactionSheet(),
+              );
+            },
+            child: Container(
+              padding: EdgeInsets.all(spacing.cardInner),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    accent.withValues(alpha: isDark ? 0.2 : 0.12),
+                    accent.withValues(alpha: isDark ? 0.08 : 0.04),
+                  ],
+                ),
+                border: Border.all(color: accent.withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(spacing.elementGap),
+                    decoration: BoxDecoration(
+                      color: accent.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                    ),
+                    child: Icon(LucideIcons.plus, color: accent, size: 22),
+                  ),
+                  SizedBox(width: spacing.elementGap),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          ctxt.dashboard_addFirstExpense,
+                          style: textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: color.onSurface,
+                          ),
+                        ),
+                        SizedBox(height: spacing.elementGapUltraMin),
+                        Text(
+                          ctxt.dashboard_addFirstExpenseDesc,
+                          style: textTheme.bodySmall?.copyWith(
+                            color: color.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    LucideIcons.chevronRight,
+                    size: 18,
+                    color: color.onSurfaceVariant,
+                  ),
+                  SizedBox(width: spacing.elementGap),
+                  GestureDetector(
+                    onTap: onDismiss,
+                    child: Icon(
+                      LucideIcons.x,
+                      size: 18,
+                      color: color.onSurfaceVariant.withValues(alpha: 0.6),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // Quick actions grid for new users
+          if (isNewUser) ...[
+            SizedBox(height: spacing.elementGap),
+            Container(
+              padding: EdgeInsets.all(spacing.cardInner),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                color: color.surfaceContainerLow,
+                border: Border.all(
+                  color: color.outlineVariant.withValues(alpha: 0.5),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    ctxt.dashboard_meanwhile,
+                    style: textTheme.labelMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: color.onSurfaceVariant,
+                    ),
+                  ),
+                  SizedBox(height: spacing.elementGap),
+                  Row(
+                    children: [
+                      _QuickActionChip(
+                        icon: LucideIcons.plus,
+                        label: ctxt.dashboard_addExpense,
+                        onTap: () => showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          builder: (_) => const QuickAddTransactionSheet(),
+                        ),
+                      ),
+                      SizedBox(width: spacing.elementGap),
+                      _QuickActionChip(
+                        icon: LucideIcons.target,
+                        label: ctxt.dashboard_setBudget,
+                        onTap: () => context.push(AppRoutes.addBudget),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: spacing.elementGap),
+                  Row(
+                    children: [
+                      _QuickActionChip(
+                        icon: LucideIcons.piggyBank,
+                        label: ctxt.dashboard_createGoal,
+                        onTap: () => context.push(AppRoutes.addGoal),
+                      ),
+                      SizedBox(width: spacing.elementGap),
+                      _QuickActionChip(
+                        icon: LucideIcons.landmark,
+                        label: ctxt.dashboard_addAccount,
+                        onTap: () => context.push(AppRoutes.addAccount),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: spacing.elementGap),
+                  Text(
+                    ctxt.dashboard_testTip,
+                    style: textTheme.bodySmall?.copyWith(
+                      color: color.onSurfaceVariant.withValues(alpha: 0.7),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _QuickActionChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _QuickActionChip({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Expanded(
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.mediumImpact();
+          onTap();
+        },
+        borderRadius: BorderRadius.circular(10),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: color.surfaceContainerHighest.withValues(alpha: 0.5),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 16, color: color.primary),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  label,
+                  style: textTheme.labelMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

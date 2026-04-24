@@ -15,6 +15,7 @@ import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/core/services/notification_service.dart';
 import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/utils/error_tracker.dart';
+import 'package:mudra_manager/core/utils/unicode_normalizer.dart';
 import 'package:mudra_manager/features/sms/data/sms_processor_service.dart';
 
 class NotificationListenerBridge with WidgetsBindingObserver {
@@ -173,7 +174,10 @@ class NotificationListenerBridge with WidgetsBindingObserver {
 
         // Build unified rawBody from all available text fields.
         // For RCS, bigText often has the FULL message while text is truncated.
-        final rawBody = _buildRawBody(text, bigText, subText, title);
+        // Normalize Unicode styled text (bold/italic/etc.) to plain ASCII.
+        final rawBody = normalizeUnicode(
+          _buildRawBody(text, bigText, subText, title),
+        );
         if (rawBody.trim().isEmpty) continue;
 
         if (_isDuplicate(hash)) {
@@ -181,7 +185,7 @@ class NotificationListenerBridge with WidgetsBindingObserver {
           continue;
         }
 
-        final sender = _detectSender(title, rawBody);
+        final sender = _detectSender(normalizeUnicode(title), rawBody);
         if (isRcs) {
           _log.i('[$corrId] RCS from $sender (${data['package']})');
         }

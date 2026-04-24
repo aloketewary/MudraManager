@@ -281,6 +281,7 @@ class ManageCategoriesScreen extends ConsumerWidget {
                   extra: {'category': category},
                 ),
                 onDelete: () => _deleteCategory(context, ref, category, ctxt),
+                onDeleteSubcategory: (sub) => _deleteCategory(context, ref, sub, ctxt),
               ),
               if (!isLast)
                 Divider(
@@ -344,6 +345,7 @@ class _CategoryRow extends StatefulWidget {
   final AsyncValue<Map<int, int>> transactionCounts;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
+  final void Function(Category subcategory) onDeleteSubcategory;
 
   const _CategoryRow({
     required this.category,
@@ -352,6 +354,7 @@ class _CategoryRow extends StatefulWidget {
     required this.transactionCounts,
     required this.onEdit,
     required this.onDelete,
+    required this.onDeleteSubcategory,
   });
 
   @override
@@ -527,7 +530,7 @@ class _CategoryRowState extends State<_CategoryRow> {
                       AppRoutes.addCategory,
                       extra: {'category': sub},
                     ),
-                    onDelete: widget.onDelete,
+                    onDelete: () => widget.onDeleteSubcategory(sub),
                   );
                 },
                 child: Padding(

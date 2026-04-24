@@ -115,8 +115,12 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
             grouped.putIfAbsent(account.accountType, () => []).add(account);
           }
 
-          final totalBalance =
-              _baseBalanceMap.values.fold(0.0, (a, b) => a + b);
+          final totalBalance = activeAccounts.fold<double>(0.0, (sum, acc) {
+            final balance = _baseBalanceMap[acc.id] ?? 0.0;
+            return acc.accountType == AccountType.creditCard
+                ? sum - balance
+                : sum + balance;
+          });
 
           return RefreshIndicator(
             onRefresh: () => RefreshHelper.withMinDuration(() async {

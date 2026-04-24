@@ -562,7 +562,7 @@ class CurrencySettingsScreen extends ConsumerWidget {
       final archivedCount = await currencyService.changeBaseCurrency(newCurrency);
 
       BaseCurrency.sync(newCurrency);
-      invalidateAll(ref);
+      invalidateAfterCurrencyChange(ref);
 
       if (context.mounted) {
         Navigator.of(context).pop(); // dismiss loading

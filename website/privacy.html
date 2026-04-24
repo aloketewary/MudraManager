@@ -1,133 +1,75 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Privacy Policy - Mudra Manager</title>
+    <title>Privacy Policy — Mudra Manager</title>
     <link rel="icon" href="assets/logo.png">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#6366f1',
-                        secondary: '#8b5cf6',
-                    }
-                }
-            }
-        }
-    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="2026.css">
+    <style>
+        .legal h2 { font-size: 1.2rem; margin-bottom: 10px; margin-top: 40px; }
+        .legal h2:first-of-type { margin-top: 0; }
+        .legal p, .legal li { font-size: 14px; color: var(--fg2); line-height: 1.7; }
+        .legal ul { margin-left: 16px; margin-top: 8px; }
+        .legal li { margin-bottom: 6px; list-style: none; padding-left: 16px; position: relative; }
+        .legal li::before { content: '•'; position: absolute; left: 0; color: var(--fg3); }
+        .legal h3 { font-size: 14px; font-weight: 600; margin-top: 20px; margin-bottom: 6px; color: var(--fg); }
+        .tldr { padding: 16px 20px; border-radius: var(--radius); background: color-mix(in srgb, var(--green) 6%, transparent); border: 1px solid color-mix(in srgb, var(--green) 12%, transparent); margin-bottom: 24px; font-size: 14px; font-weight: 600; color: var(--green); }
+        .sec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px; }
+        .sec-box { padding: 14px; border-radius: var(--radius-sm); background: color-mix(in srgb, var(--fg) 3%, transparent); text-align: center; }
+        .sec-box small { font-size: 11px; color: var(--fg3); display: block; }
+        .sec-box strong { font-size: 14px; color: var(--green); display: block; margin-top: 2px; }
+    </style>
 </head>
-<body class="bg-white">
-    <nav class="fixed w-full bg-white/95 backdrop-blur-sm z-50 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-20">
-                <a href="index.html" class="flex items-center space-x-3">
-                    <img src="assets/logo.png" alt="Mudra Manager" class="h-12 w-12">
-                    <span class="text-2xl font-bold text-slate-900">Mudra Manager</span>
-                </a>
-                <a href="index.html" class="text-slate-600 hover:text-primary transition">← Back to Home</a>
-            </div>
+<body>
+    <nav class="nav" role="navigation"><a href="index.html" class="nav-logo"><img src="assets/logo.png" alt="" width="28" height="28"><span>Mudra Manager</span></a><div class="nav-links"><button class="theme-btn" id="theme-toggle" aria-label="Toggle theme"><i class="fas fa-circle-half-stroke"></i></button><a href="index.html" style="font-size:13px;color:var(--fg2)">← Home</a></div></nav>
+
+    <main id="main">
+    <section class="legal" style="max-width:720px">
+        <span class="label">Legal</span>
+        <h1 style="font-size:clamp(2.2rem,5vw,3.2rem);margin-bottom:4px">Privacy Policy</h1>
+        <p style="color:var(--fg3);margin-bottom:40px">Last updated: June 2026</p>
+
+        <h2>1. Introduction</h2>
+        <p>Mudra Manager is committed to protecting your privacy. Short version: we don't collect any of your data.</p>
+
+        <h2>2. Information We Collect</h2>
+        <div class="tldr">TL;DR — We collect nothing. Zero. Nada.</div>
+        <h3>2.1 Local Data</h3>
+        <p>All financial data stored locally with AES-256 encryption:</p>
+        <ul><li>Transaction records, accounts, budgets, goals</li><li>Categories, tags, preferences</li></ul>
+        <h3>2.2 SMS/Notification Data</h3>
+        <p>With permission, we read bank SMS/RCS locally. Never transmitted anywhere.</p>
+        <h3>2.3 Permissions</h3>
+        <ul><li><strong>Notification Access:</strong> Bank SMS/RCS (optional)</li><li><strong>Storage:</strong> Export reports and backups</li><li><strong>Biometric:</strong> Secure app access (optional)</li></ul>
+
+        <h2>3. Usage</h2>
+        <p>Data used solely for on-device app functionality. Nothing leaves your phone.</p>
+
+        <h2>4. Security</h2>
+        <div class="sec-grid">
+            <div class="sec-box"><small>Storage</small><strong>Local only</strong></div>
+            <div class="sec-box"><small>Encryption</small><strong>AES-256</strong></div>
+            <div class="sec-box"><small>Cloud</small><strong>None</strong></div>
+            <div class="sec-box"><small>Key storage</small><strong>Keystore</strong></div>
         </div>
-    </nav>
 
-    <main class="pt-32 pb-20 px-4">
-        <div class="max-w-4xl mx-auto">
-            <h1 class="text-5xl font-bold mb-6 text-slate-900">Privacy Policy</h1>
-            <p class="text-slate-600 mb-8">Last updated: February 2026</p>
+        <h2>5. Data Sharing</h2>
+        <p>We do not share, sell, or transmit your data. We have no servers.</p>
 
-            <div class="prose prose-lg max-w-none space-y-8">
-                <section>
-                    <h2 class="text-3xl font-bold text-slate-900 mb-4">1. Introduction</h2>
-                    <p class="text-slate-600 leading-relaxed">Mudra Manager ("we", "our", or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your information when you use our mobile application.</p>
-                </section>
+        <h2>6. Your Rights</h2>
+        <ul><li>Access, export, or delete all data at any time</li><li>Revoke permissions at any time</li></ul>
 
-                <section>
-                    <h2 class="text-3xl font-bold text-slate-900 mb-4">2. Information We Collect</h2>
-                    <h3 class="text-xl font-semibold text-slate-800 mb-3">2.1 Local Data</h3>
-                    <p class="text-slate-600 leading-relaxed mb-4">Mudra Manager uses a local-first architecture. All your financial data is stored locally on your device using Isar database. This includes:</p>
-                    <ul class="list-disc pl-6 text-slate-600 space-y-2">
-                        <li>Transaction records (income, expenses, transfers)</li>
-                        <li>Account information</li>
-                        <li>Budget settings</li>
-                        <li>Financial goals</li>
-                        <li>Categories and tags</li>
-                    </ul>
+        <h2>7. Children</h2>
+        <p>Not intended for users under 13.</p>
 
-                    <h3 class="text-xl font-semibold text-slate-800 mb-3 mt-6">2.2 SMS Data</h3>
-                    <p class="text-slate-600 leading-relaxed">With your permission, we access SMS messages to automatically detect and parse financial transactions from banks and payment services. SMS data is processed locally on your device and is never transmitted to our servers.</p>
-
-                    <h3 class="text-xl font-semibold text-slate-800 mb-3 mt-6">2.3 Device Permissions</h3>
-                    <p class="text-slate-600 leading-relaxed">We request the following permissions:</p>
-                    <ul class="list-disc pl-6 text-slate-600 space-y-2">
-                        <li><strong>SMS:</strong> To read transaction messages from banks</li>
-                        <li><strong>Storage:</strong> To export reports and backup data</li>
-                        <li><strong>Biometric:</strong> For secure app access (optional)</li>
-                    </ul>
-                </section>
-
-                <section>
-                    <h2 class="text-3xl font-bold text-slate-900 mb-4">3. How We Use Your Information</h2>
-                    <p class="text-slate-600 leading-relaxed mb-4">Your data is used solely to provide app functionality:</p>
-                    <ul class="list-disc pl-6 text-slate-600 space-y-2">
-                        <li>Track and categorize your financial transactions</li>
-                        <li>Generate spending insights and reports</li>
-                        <li>Help you manage budgets and achieve financial goals</li>
-                        <li>Provide personalized financial analytics</li>
-                    </ul>
-                </section>
-
-                <section>
-                    <h2 class="text-3xl font-bold text-slate-900 mb-4">4. Data Storage and Security</h2>
-                    <p class="text-slate-600 leading-relaxed mb-4">We take your security seriously:</p>
-                    <ul class="list-disc pl-6 text-slate-600 space-y-2">
-                        <li><strong>Local Storage:</strong> All data is stored locally on your device</li>
-                        <li><strong>No Cloud Sync:</strong> We do not transmit your financial data to any servers</li>
-                        <li><strong>Biometric Protection:</strong> Optional fingerprint/face unlock</li>
-                        <li><strong>Encryption:</strong> Sensitive data is encrypted on your device</li>
-                    </ul>
-                </section>
-
-                <section>
-                    <h2 class="text-3xl font-bold text-slate-900 mb-4">5. Data Sharing</h2>
-                    <p class="text-slate-600 leading-relaxed">We do not share, sell, or transmit your personal financial data to any third parties. Your data stays on your device.</p>
-                </section>
-
-                <section>
-                    <h2 class="text-3xl font-bold text-slate-900 mb-4">6. Your Rights</h2>
-                    <p class="text-slate-600 leading-relaxed mb-4">You have complete control over your data:</p>
-                    <ul class="list-disc pl-6 text-slate-600 space-y-2">
-                        <li>Access all your data within the app</li>
-                        <li>Export your data to Excel or PDF</li>
-                        <li>Delete your data by uninstalling the app</li>
-                        <li>Revoke SMS permissions at any time</li>
-                    </ul>
-                </section>
-
-                <section>
-                    <h2 class="text-3xl font-bold text-slate-900 mb-4">7. Children's Privacy</h2>
-                    <p class="text-slate-600 leading-relaxed">Mudra Manager is not intended for users under 13 years of age. We do not knowingly collect information from children.</p>
-                </section>
-
-                <section>
-                    <h2 class="text-3xl font-bold text-slate-900 mb-4">8. Changes to This Policy</h2>
-                    <p class="text-slate-600 leading-relaxed">We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new policy in the app and updating the "Last updated" date.</p>
-                </section>
-
-                <section>
-                    <h2 class="text-3xl font-bold text-slate-900 mb-4">9. Contact Us</h2>
-                    <p class="text-slate-600 leading-relaxed">If you have questions about this Privacy Policy, please contact us at:</p>
-                    <p class="text-primary font-semibold mt-2">support@mudramanager.com</p>
-                </section>
-            </div>
-        </div>
+        <h2>8. Contact</h2>
+        <p>Questions? <a href="mailto:support@mudramanager.com" class="link-arrow">support@mudramanager.com →</a></p>
+    </section>
     </main>
 
-    <footer class="bg-slate-900 text-white py-8">
-        <div class="max-w-7xl mx-auto px-4 text-center">
-            <p class="text-slate-400">&copy; 2025 Mudra Manager. All rights reserved.</p>
-        </div>
-    </footer>
+    <footer><div class="foot-inner"><div class="foot-brand"><img src="assets/logo.png" alt="" width="24" height="24"> Mudra Manager</div><div class="foot-links"><a href="terms.html">Terms</a><a href="support.html">Support</a><a href="index.html">Home</a></div><div class="foot-copy">© 2026</div></div></footer>
+    <script src="2026.js"></script>
 </body>
 </html>

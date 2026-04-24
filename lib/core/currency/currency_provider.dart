@@ -9,6 +9,7 @@ final currencyServiceProvider = FutureProvider<CurrencyService>((ref) async {
   final config = AppConfigService(isar);
   final service = CurrencyService(isar, config);
   await service.seedIfEmpty();
+  await service.loadRateCache();
   // Sync static accessor
   final base = await service.getBaseCurrency();
   BaseCurrency.sync(base);

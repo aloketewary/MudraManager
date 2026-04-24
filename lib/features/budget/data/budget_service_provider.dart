@@ -11,6 +11,7 @@ import 'package:mudra_manager/core/providers/collection_watchers.dart';
 import 'package:mudra_manager/core/providers/date_change_provider.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
+import 'package:mudra_manager/core/utils/budget_spent_calculator.dart';
 import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
 import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
 import 'package:mudra_manager/features/gamification/services/gamification_service.dart';
@@ -97,59 +98,12 @@ class BudgetService {
     DateTime? end,
   }) async {
     final isar = await isarService.getInstance();
-    final s = start ?? budget.startDate;
-    final e = end ?? budget.endDate;
-
-    final transactions = await isar.transactions
-        .filter()
-        .isExpenseEqualTo(true)
-        .dateBetween(s, e)
-        .findAll();
-
-    // Tag-wise: filter by tags
-    if (budget.budgetType == BudgetType.tagWise) {
-      await budget.budgetTags.load();
-      final tagIds = budget.budgetTags.map((t) => t.id).toSet();
-      if (tagIds.isEmpty) return 0;
-      double spent = 0;
-      for (final t in transactions) {
-        await t.tags.load();
-        if (t.tags.any((tag) => tagIds.contains(tag.id))) {
-          spent += t.baseAmount;
-        }
-      }
-      return spent;
-    }
-
-    // Day-wise / Festival / Travel: all expenses in period
-    if (budget.budgetType == BudgetType.dayWise ||
-        budget.budgetType == BudgetType.festival ||
-        budget.budgetType == BudgetType.travel) {
-      await budget.categories.load();
-      final categoryIds = budget.categories.map((c) => c.id).toList();
-      // If categories are linked, filter by them; otherwise sum all
-      if (categoryIds.isEmpty) {
-        return transactions.fold<double>(0.0, (sum, t) => sum + t.baseAmount);
-      }
-      for (final t in transactions) {
-        await t.category.load();
-      }
-      return transactions
-          .where((t) => t.category.value != null && categoryIds.contains(t.category.value!.id))
-          .fold<double>(0.0, (sum, t) => sum + t.baseAmount);
-    }
-
-    // Category-wise (default): filter by categories
-    await budget.categories.load();
-    final categoryIds = budget.categories.map((c) => c.id).toList();
-    if (categoryIds.isEmpty) return 0;
-
-    for (final t in transactions) {
-      await t.category.load();
-    }
-    return transactions
-        .where((t) => t.category.value != null && categoryIds.contains(t.category.value!.id))
-        .fold<double>(0.0, (sum, t) => sum + t.baseAmount);
+    return BudgetSpentCalculator.calculate(
+      isar,
+      budget,
+      start ?? budget.startDate,
+      end ?? budget.endDate,
+    );
   }
 
   Stream<List<BudgetWithProgress>> watchBudgetsWithProgress() async* {

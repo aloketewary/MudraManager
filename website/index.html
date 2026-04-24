@@ -1,339 +1,249 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mudra Manager — Smart Personal Finance Tracker</title>
-    <meta name="description" content="India's smartest personal finance app. Track expenses, manage budgets, split bills, and achieve financial goals — all offline, all yours.">
-    <meta name="keywords" content="expense tracker, budget app, personal finance, India, UPI, SMS tracking, split bills">
-    <meta property="og:title" content="Mudra Manager — Smart Personal Finance Tracker">
-    <meta property="og:description" content="Track expenses, manage budgets, and achieve financial goals with Mudra Manager">
+    <title>Mudra Manager — Your Money, Your Rules</title>
+    <meta name="description" content="India's smartest offline personal finance app. Auto-import bank SMS, manage budgets, split bills — 100% private, AES-256 encrypted.">
+    <meta property="og:title" content="Mudra Manager — Your Money, Your Rules">
+    <meta property="og:description" content="Track expenses, manage budgets, and achieve financial goals — all offline, all yours.">
     <meta property="og:image" content="assets/logo.png">
     <link rel="icon" href="assets/logo.png">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#6366f1',
-                        secondary: '#8b5cf6',
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-20px); } }
-        .float-animation { animation: float 3s ease-in-out infinite; }
-        html { scroll-behavior: smooth; }
-    </style>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const images = document.querySelectorAll('.carousel-img');
-            let current = 0;
-            setInterval(() => {
-                images[current].classList.add('hidden');
-                current = (current + 1) % images.length;
-                images[current].classList.remove('hidden');
-            }, 3000);
-        });
+    <link rel="stylesheet" href="2026.css">
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"MobileApplication","name":"Mudra Manager","operatingSystem":"Android","applicationCategory":"FinanceApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"INR"},"description":"India's smartest offline personal finance app.","url":"https://mudramanager.com","author":{"@type":"Person","name":"Aloke Tewary"}}
     </script>
 </head>
+<body>
+    <a href="#main" class="skip-link">Skip to content</a>
 
-<body class="bg-white">
-    <!-- Navigation -->
-    <nav class="fixed w-full bg-white/95 backdrop-blur-sm z-50 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-20">
-                <div class="flex items-center space-x-3">
-                    <img src="assets/logo.png" alt="Mudra Manager" class="h-12 w-12">
-                    <span class="text-2xl font-bold text-slate-900">Mudra Manager</span>
-                </div>
-                <div class="hidden md:flex items-center space-x-8">
-                    <a href="#features" class="text-slate-600 hover:text-primary transition font-medium">Features</a>
-                    <a href="whatsnew.html" class="text-slate-600 hover:text-primary transition font-medium">What's New</a>
-                    <a href="support.html" class="text-slate-600 hover:text-primary transition font-medium">Support</a>
-                </div>
-                <a href="https://play.google.com/store/apps/details?id=com.mudramanager.app" target="_blank"
-                    class="bg-primary text-white px-8 py-3 rounded-xl font-semibold hover:bg-primary/90 transition-all duration-300 shadow-lg shadow-primary/30">
-                    Download Free
-                </a>
-            </div>
+    <!-- NAV -->
+    <nav class="nav" role="navigation" aria-label="Main">
+        <a href="#" class="nav-logo"><img src="assets/logo.png" alt="" width="28" height="28"><span>Mudra Manager</span></a>
+        <div class="nav-links">
+            <a href="#features">Features</a>
+            <a href="#security">Security</a>
+            <a href="whatsnew.html">Changelog</a>
+            <a href="support.html">Support</a>
+            <button class="theme-btn" aria-label="Toggle theme" id="theme-toggle"><i class="fas fa-circle-half-stroke"></i></button>
         </div>
+        <a href="https://play.google.com/store/apps/details?id=com.mudramanager.app" target="_blank" class="nav-cta">Download</a>
+        <button class="nav-burger" id="menu-btn" aria-label="Menu"><span></span><span></span></button>
     </nav>
 
-    <!-- Hero Section -->
-    <section class="pt-32 pb-20 px-4 bg-gradient-to-b from-slate-50 to-white">
-        <div class="max-w-7xl mx-auto">
-            <div class="grid lg:grid-cols-2 gap-16 items-center">
-                <div class="space-y-8">
-                    <div class="inline-flex items-center space-x-2 bg-green-500/10 text-green-600 px-5 py-2.5 rounded-full text-sm font-semibold">
-                        <span class="relative flex h-3 w-3">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-                        </span>
-                        <span>Now Live on Google Play</span>
-                    </div>
+    <!-- MOBILE MENU -->
+    <div class="mobile-menu" id="mobile-menu">
+        <a href="#features" class="mm-link">Features</a>
+        <a href="#security" class="mm-link">Security</a>
+        <a href="whatsnew.html">Changelog</a>
+        <a href="support.html">Support</a>
+        <button id="theme-toggle-m" class="theme-btn-m"><i class="fas fa-circle-half-stroke"></i> Toggle theme</button>
+    </div>
 
-                    <h1 class="text-6xl lg:text-7xl font-bold leading-tight text-slate-900">
-                        Master Your
-                        <span class="block bg-gradient-to-r from-primary via-purple-500 to-secondary bg-clip-text text-transparent">
-                            Money Journey
-                        </span>
-                    </h1>
+    <main id="main">
 
-                    <p class="text-xl text-slate-600 leading-relaxed max-w-xl">
-                        India's smartest personal finance app. Track expenses, manage budgets, split bills — all offline, all yours. No cloud, no tracking.
-                    </p>
-
-                    <div class="flex flex-col sm:flex-row gap-6 items-start">
-                        <a href="https://play.google.com/store/apps/details?id=com.mudramanager.app" target="_blank"
-                            class="inline-block transform hover:scale-105 transition-transform duration-300">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg"
-                                alt="Get it on Google Play" class="h-16">
-                        </a>
-                        <div class="flex items-center space-x-3 text-slate-500">
-                            <i class="fas fa-shield-alt text-green-500"></i>
-                            <span class="text-sm">100% offline · No account needed · Free</span>
-                        </div>
-                    </div>
+    <!-- HERO -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-badge anim-up" style="--d:0">
+                <span class="pulse"></span> v3.5 — AES-256 encrypted
+            </div>
+            <h1 class="hero-h1">
+                <span class="anim-up" style="--d:1">Your money.</span>
+                <span class="anim-up gradient-text" style="--d:2">Your rules.</span>
+            </h1>
+            <p class="hero-sub anim-up" style="--d:3">India's smartest offline finance app. Auto-import bank SMS from 50+ banks, manage budgets, split trips — encrypted, private, free.</p>
+            <div class="hero-actions anim-up" style="--d:4">
+                <a href="https://play.google.com/store/apps/details?id=com.mudramanager.app" target="_blank" class="btn-primary">
+                    <i class="fab fa-google-play"></i>
+                    <div><small>GET IT ON</small><strong>Google Play</strong></div>
+                </a>
+                <div class="hero-pills">
+                    <span><i class="fas fa-wifi-slash"></i> Offline</span>
+                    <span><i class="fas fa-lock"></i> Encrypted</span>
+                    <span><i class="fas fa-heart"></i> Free</span>
                 </div>
+            </div>
+        </div>
+        <div class="hero-phone anim-up" style="--d:2" id="hero-phone">
+            <div class="phone-frame">
+                <div class="phone-notch"></div>
+                <div class="phone-screen">
+                    <img src="assets/flutter_01.png" alt="Dashboard" class="phone-img active">
+                    <img src="assets/flutter_07.png" alt="Statistics" class="phone-img">
+                    <img src="assets/flutter_05.png" alt="SMS" class="phone-img">
+                    <img src="assets/flutter_06.png" alt="Budget" class="phone-img">
+                    <img src="assets/flutter_08.png" alt="Goals" class="phone-img">
+                </div>
+            </div>
+        </div>
+        <div class="hero-fade"></div>
+    </section>
 
-                <!-- Phone Mockup -->
-                <div class="relative flex justify-center lg:justify-end">
-                    <div class="relative float-animation">
-                        <div class="relative w-[340px] h-[700px] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-[65px] p-3.5 shadow-2xl">
-                            <div class="absolute top-7 left-1/2 -translate-x-1/2 w-28 h-8 bg-slate-950 rounded-full z-10 shadow-inner"></div>
-                            <div class="relative w-full h-full bg-white rounded-[55px] overflow-hidden shadow-inner">
-                                <div id="carousel" class="w-full h-full">
-                                    <img src="assets/dashboard.jpeg" alt="Dashboard" class="carousel-img w-full h-full object-cover">
-                                    <img src="assets/statistics.jpeg" alt="Statistics" class="carousel-img w-full h-full object-cover hidden">
-                                    <img src="assets/activity.jpeg" alt="Activity" class="carousel-img w-full h-full object-cover hidden">
-                                    <img src="assets/utilities.jpeg" alt="Utilities" class="carousel-img w-full h-full object-cover hidden">
-                                </div>
-                            </div>
-                            <div class="absolute -right-1 top-36 w-1 h-14 bg-slate-700 rounded-l"></div>
-                            <div class="absolute -right-1 top-52 w-1 h-20 bg-slate-700 rounded-l"></div>
-                        </div>
-                        <div class="absolute -top-6 -right-6 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-3 rounded-2xl text-sm font-bold shadow-xl animate-bounce">
-                            <i class="fas fa-check-circle mr-2"></i>Free to Use
-                        </div>
-                        <div class="absolute -bottom-6 -left-6 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-2xl text-sm font-bold shadow-xl">
-                            <i class="fas fa-lock mr-2"></i>100% Offline
-                        </div>
-                    </div>
+    <!-- STATS -->
+    <section class="stats">
+        <div class="stat"><span class="stat-n" data-target="50" data-suffix="+">0</span><span class="stat-l">Banks</span></div>
+        <div class="stat"><span class="stat-n" data-target="37">0</span><span class="stat-l">Languages</span></div>
+        <div class="stat"><span class="stat-n" data-target="35" data-suffix="+">0</span><span class="stat-l">Achievements</span></div>
+        <div class="stat"><span class="stat-n" data-target="0">0</span><span class="stat-l">Data Collected</span></div>
+    </section>
+
+    <!-- INTERACTIVE PREVIEW -->
+    <section class="preview reveal-section">
+        <span class="label">See It In Action</span>
+        <h2>Know where every rupee goes</h2>
+        <div class="preview-tabs">
+            <button class="ptab active" data-i="0">Dashboard</button>
+            <button class="ptab" data-i="1">Auto-Import</button>
+            <button class="ptab" data-i="2">Analytics</button>
+            <button class="ptab" data-i="3">Budgets</button>
+        </div>
+        <div class="preview-device">
+            <div class="pdev-frame">
+                <img src="assets/flutter_01.png" alt="Dashboard" loading="lazy" class="pdev-img active" data-s="0">
+                <img src="assets/flutter_05.png" alt="Auto-Import" loading="lazy" class="pdev-img" data-s="1">
+                <img src="assets/flutter_07.png" alt="Analytics" loading="lazy" class="pdev-img" data-s="2">
+                <img src="assets/flutter_06.png" alt="Budgets" loading="lazy" class="pdev-img" data-s="3">
+            </div>
+        </div>
+        <p class="preview-cap" id="pcap">AI insights, balances, and alerts at a glance</p>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="features" id="features">
+        <span class="label">Features</span>
+        <h2>Everything you need.<br>Nothing you don't.</h2>
+        <div class="feat-grid">
+            <div class="feat-card feat-wide reveal-section" data-accent="indigo">
+                <div class="feat-icon"><i class="fas fa-bolt"></i></div>
+                <span class="feat-badge">Core</span>
+                <h3>SMS Auto-Import</h3>
+                <p>Reads bank SMS & RCS from 50+ Indian banks — HDFC, SBI, ICICI, Axis, Paytm, GPay. Transactions appear automatically.</p>
+            </div>
+            <div class="feat-card reveal-section" data-accent="emerald" id="security">
+                <div class="feat-icon"><i class="fas fa-shield-halved"></i></div>
+                <h3>AES-256 Encrypted</h3>
+                <p>SMS body, merchant info, and notes encrypted at rest. Key in Android Keystore.</p>
+            </div>
+            <div class="feat-card reveal-section" data-accent="amber">
+                <div class="feat-icon"><i class="fas fa-chart-pie"></i></div>
+                <h3>Smart Budgets</h3>
+                <p>4-step guided creation. Category allocation, pace tracking, alerts at 80% and 100%.</p>
+            </div>
+            <div class="feat-card reveal-section" data-accent="pink">
+                <div class="feat-icon"><i class="fas fa-bullseye"></i></div>
+                <h3>Savings Goals</h3>
+                <p>Targets with deadlines. Milestones, progress rings, confetti, smart deposits.</p>
+            </div>
+            <div class="feat-card feat-wide reveal-section" data-accent="cyan">
+                <div class="feat-icon"><i class="fas fa-chart-line"></i></div>
+                <h3>Analytics & Insights</h3>
+                <p>Financial health score, spending personality, monthly comparisons. Morning Money Minute at 9 AM daily.</p>
+            </div>
+            <div class="feat-card feat-sm reveal-section"><i class="fas fa-plane"></i><strong>Trips & Splits</strong><span>Group splitting, settlements</span></div>
+            <div class="feat-card feat-sm reveal-section"><i class="fas fa-repeat"></i><strong>Recurring Bills</strong><span>Auto-create, SMS-match</span></div>
+            <div class="feat-card feat-sm reveal-section"><i class="fas fa-trophy"></i><strong>Gamification</strong><span>35+ achievements, streaks</span></div>
+        </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="how reveal-section">
+        <span class="label">How It Works</span>
+        <h2>Three taps to clarity</h2>
+        <div class="how-steps">
+            <div class="step"><div class="step-n">1</div><h3>Enable SMS</h3><p>Grant notification access. Mudra reads bank SMS locally.</p></div>
+            <div class="step-line"></div>
+            <div class="step"><div class="step-n">2</div><h3>Auto-Track</h3><p>Transactions appear. Smart categorization learns your patterns.</p></div>
+            <div class="step-line"></div>
+            <div class="step"><div class="step-n">3</div><h3>Stay in Control</h3><p>Budgets, goals, insights keep you on track.</p></div>
+        </div>
+    </section>
+
+    <!-- COMPARISON -->
+    <section class="compare reveal-section">
+        <span class="label">Why Mudra</span>
+        <h2>Not another expense tracker</h2>
+        <div class="compare-grid">
+            <div class="cmp-row cmp-head"><span></span><span class="cmp-us">Mudra</span><span>Others</span></div>
+            <div class="cmp-row"><span>Works offline</span><span class="cmp-us"><i class="fas fa-check"></i></span><span class="cmp-no"><i class="fas fa-xmark"></i></span></div>
+            <div class="cmp-row"><span>No account needed</span><span class="cmp-us"><i class="fas fa-check"></i></span><span class="cmp-no"><i class="fas fa-xmark"></i></span></div>
+            <div class="cmp-row"><span>AES-256 encryption</span><span class="cmp-us"><i class="fas fa-check"></i></span><span class="cmp-no"><i class="fas fa-xmark"></i></span></div>
+            <div class="cmp-row"><span>Indian bank SMS</span><span class="cmp-us">50+</span><span class="cmp-no">Limited</span></div>
+            <div class="cmp-row"><span>Hindi & Bengali</span><span class="cmp-us"><i class="fas fa-check"></i></span><span class="cmp-no"><i class="fas fa-xmark"></i></span></div>
+            <div class="cmp-row"><span>Data collection</span><span class="cmp-us">Zero</span><span class="cmp-no">Analytics</span></div>
+        </div>
+    </section>
+
+    <!-- PRIVACY -->
+    <section class="privacy reveal-section">
+        <div class="priv-card">
+            <div class="priv-text">
+                <span class="label" style="color:var(--green)">Privacy</span>
+                <h2>Your data never leaves your device.</h2>
+                <p>No cloud. No accounts. No servers. No analytics. No tracking. AES-256 encrypted. We literally can't see your data.</p>
+                <a href="privacy.html" class="link-arrow">Privacy policy →</a>
+            </div>
+            <div class="priv-stats">
+                <div class="ps"><i class="fas fa-database"></i><small>Servers</small><strong>Zero</strong></div>
+                <div class="ps"><i class="fas fa-user"></i><small>Accounts</small><strong>None</strong></div>
+                <div class="ps"><i class="fas fa-lock"></i><small>Encryption</small><strong>AES-256</strong></div>
+                <div class="ps"><i class="fas fa-fingerprint"></i><small>Biometric</small><strong>Yes</strong></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- BUILT BY -->
+    <section class="built reveal-section">
+        <div class="built-card">
+            <div class="built-avatar">A</div>
+            <div>
+                <span class="label">Built By</span>
+                <h3>Aloke Tewary</h3>
+                <p>Software engineer who got tired of finance apps that sell your data.</p>
+                <div class="built-links">
+                    <a href="https://linkedin.com/in/aloketewary" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                    <a href="https://github.com/aloketewary" target="_blank" aria-label="GitHub"><i class="fab fa-github"></i></a>
+                    <a href="mailto:support@mudramanager.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- What's New Section -->
-    <section id="whats-new" class="py-24 bg-white">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="text-center mb-16">
-                <h2 class="text-5xl font-bold mb-6 text-slate-900">What's New</h2>
-                <p class="text-xl text-slate-600 max-w-2xl mx-auto">The latest update makes Mudra Manager feel truly personal</p>
-            </div>
-            <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-                <div class="bg-gradient-to-br from-primary/5 to-purple-500/5 p-8 rounded-3xl border border-primary/10">
-                    <div class="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-6">
-                        <i class="fas fa-comment-dots text-2xl text-primary"></i>
-                    </div>
-                    <h3 class="text-xl font-bold mb-3 text-slate-900">Choose Your Voice</h3>
-                    <p class="text-slate-600">Pick how Mudra talks to you — Friendly, Professional, Motivational, or Calm. Every message adapts.</p>
-                </div>
-                <div class="bg-gradient-to-br from-amber-500/5 to-orange-500/5 p-8 rounded-3xl border border-amber-500/10">
-                    <div class="w-14 h-14 bg-amber-500/10 rounded-2xl flex items-center justify-center mb-6">
-                        <i class="fas fa-bell text-2xl text-amber-600"></i>
-                    </div>
-                    <h3 class="text-xl font-bold mb-3 text-slate-900">Smart Notifications</h3>
-                    <p class="text-slate-600">Context-aware alerts for budgets, bills, streaks, and spending spikes — in your chosen tone.</p>
-                </div>
-                <div class="bg-gradient-to-br from-green-500/5 to-emerald-500/5 p-8 rounded-3xl border border-green-500/10">
-                    <div class="w-14 h-14 bg-green-500/10 rounded-2xl flex items-center justify-center mb-6">
-                        <i class="fas fa-trophy text-2xl text-green-600"></i>
-                    </div>
-                    <h3 class="text-xl font-bold mb-3 text-slate-900">Streaks & Achievements</h3>
-                    <p class="text-slate-600">Build daily tracking habits with streaks, XP, levels, and 30+ unlockable achievements.</p>
-                </div>
-            </div>
+    <!-- CTA -->
+    <section class="cta reveal-section">
+        <h2>Start tracking.<br><span>Stop guessing.</span></h2>
+        <p>Free to download. No account needed.</p>
+        <a href="https://play.google.com/store/apps/details?id=com.mudramanager.app" target="_blank" class="btn-primary btn-lg">
+            <i class="fab fa-google-play"></i> Download Free
+        </a>
+        <div class="cta-checks">
+            <span><i class="fas fa-check"></i> No sign-up</span>
+            <span><i class="fas fa-check"></i> No credit card</span>
+            <span><i class="fas fa-check"></i> No tracking</span>
         </div>
     </section>
 
-    <!-- Features Section -->
-    <section id="features" class="py-24 bg-slate-50">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="text-center mb-20">
-                <h2 class="text-5xl font-bold mb-6 text-slate-900">Everything You Need</h2>
-                <p class="text-xl text-slate-600 max-w-2xl mx-auto">Powerful features designed to make financial management effortless</p>
-            </div>
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div class="group relative bg-white p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-slate-100 hover:border-primary/20 hover:-translate-y-2">
-                    <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-blue-500/30">
-                        <i class="fas fa-chart-line text-3xl text-white"></i>
-                    </div>
-                    <h3 class="text-2xl font-bold mb-4 text-slate-900">Smart Dashboard</h3>
-                    <p class="text-slate-600 leading-relaxed">Real-time financial overview with AI insights, hero moments, and customizable cards</p>
-                </div>
-                <div class="group relative bg-white p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-slate-100 hover:border-primary/20 hover:-translate-y-2">
-                    <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-purple-500/30">
-                        <i class="fas fa-bell text-3xl text-white"></i>
-                    </div>
-                    <h3 class="text-2xl font-bold mb-4 text-slate-900">Auto-Import</h3>
-                    <p class="text-slate-600 leading-relaxed">Automatically detect and import transactions from bank notifications — zero effort</p>
-                </div>
-                <div class="group relative bg-white p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-slate-100 hover:border-primary/20 hover:-translate-y-2">
-                    <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-green-500/30">
-                        <i class="fas fa-wallet text-3xl text-white"></i>
-                    </div>
-                    <h3 class="text-2xl font-bold mb-4 text-slate-900">Budget Management</h3>
-                    <p class="text-slate-600 leading-relaxed">Set monthly budgets with category allocations and intelligent overspending alerts</p>
-                </div>
-                <div class="group relative bg-white p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-slate-100 hover:border-primary/20 hover:-translate-y-2">
-                    <div class="w-16 h-16 bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-amber-500/30">
-                        <i class="fas fa-bullseye text-3xl text-white"></i>
-                    </div>
-                    <h3 class="text-2xl font-bold mb-4 text-slate-900">Goals & Savings</h3>
-                    <p class="text-slate-600 leading-relaxed">Set financial goals and track your progress with visual milestones</p>
-                </div>
-                <div class="group relative bg-white p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-slate-100 hover:border-primary/20 hover:-translate-y-2">
-                    <div class="w-16 h-16 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-cyan-500/30">
-                        <i class="fas fa-plane text-3xl text-white"></i>
-                    </div>
-                    <h3 class="text-2xl font-bold mb-4 text-slate-900">Trips & Splits</h3>
-                    <p class="text-slate-600 leading-relaxed">Track travel expenses and split bills with friends — settlements made easy</p>
-                </div>
-                <div class="group relative bg-white p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-slate-100 hover:border-primary/20 hover:-translate-y-2">
-                    <div class="w-16 h-16 bg-gradient-to-br from-pink-500 to-pink-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-pink-500/30">
-                        <i class="fas fa-chart-pie text-3xl text-white"></i>
-                    </div>
-                    <h3 class="text-2xl font-bold mb-4 text-slate-900">Analytics & Reports</h3>
-                    <p class="text-slate-600 leading-relaxed">Spending personality, financial health score, category trends, and exportable reports</p>
-                </div>
-                <div class="group relative bg-white p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-slate-100 hover:border-primary/20 hover:-translate-y-2">
-                    <div class="w-16 h-16 bg-gradient-to-br from-rose-500 to-rose-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-rose-500/30">
-                        <i class="fas fa-redo text-3xl text-white"></i>
-                    </div>
-                    <h3 class="text-2xl font-bold mb-4 text-slate-900">Recurring Bills</h3>
-                    <p class="text-slate-600 leading-relaxed">Never miss a payment — auto-track subscriptions and get reminders before due dates</p>
-                </div>
-                <div class="group relative bg-white p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-slate-100 hover:border-primary/20 hover:-translate-y-2">
-                    <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-indigo-500/30">
-                        <i class="fas fa-shield-alt text-3xl text-white"></i>
-                    </div>
-                    <h3 class="text-2xl font-bold mb-4 text-slate-900">Privacy First</h3>
-                    <p class="text-slate-600 leading-relaxed">Everything stays on your device. No cloud, no accounts, no data collection. Encrypted local storage.</p>
-                </div>
-                <div class="group relative bg-white p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-slate-100 hover:border-primary/20 hover:-translate-y-2">
-                    <div class="w-16 h-16 bg-gradient-to-br from-teal-500 to-teal-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-teal-500/30">
-                        <i class="fas fa-language text-3xl text-white"></i>
-                    </div>
-                    <h3 class="text-2xl font-bold mb-4 text-slate-900">Multi-Language</h3>
-                    <p class="text-slate-600 leading-relaxed">English, Hindi, and Bengali — with more languages coming soon</p>
-                </div>
-            </div>
-        </div>
-    </section>
+    </main>
 
-    <!-- Stats Section -->
-    <section class="py-20 bg-gradient-to-r from-primary via-purple-600 to-secondary text-white relative overflow-hidden">
-        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMC41IiBvcGFjaXR5PSIwLjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-20"></div>
-        <div class="max-w-7xl mx-auto px-4 relative">
-            <div class="grid md:grid-cols-4 gap-12 text-center">
-                <div class="space-y-2">
-                    <div class="text-5xl font-bold">15+</div>
-                    <div class="text-lg opacity-90">Core Features</div>
-                </div>
-                <div class="space-y-2">
-                    <div class="text-5xl font-bold">30+</div>
-                    <div class="text-lg opacity-90">Achievements</div>
-                </div>
-                <div class="space-y-2">
-                    <div class="text-5xl font-bold">4</div>
-                    <div class="text-lg opacity-90">Tone Personalities</div>
-                </div>
-                <div class="space-y-2">
-                    <div class="text-5xl font-bold">🇮🇳</div>
-                    <div class="text-lg opacity-90">Made in India</div>
-                </div>
-            </div>
-        </div>
-    </section>
+    <!-- FLOATING CTA -->
+    <a href="https://play.google.com/store/apps/details?id=com.mudramanager.app" target="_blank" class="float-cta" id="float-cta" aria-label="Download">
+        <i class="fab fa-google-play"></i><span>Download</span>
+    </a>
 
-    <!-- Download CTA -->
-    <section id="download" class="py-24 bg-white">
-        <div class="max-w-4xl mx-auto px-4 text-center">
-            <h2 class="text-5xl font-bold mb-6 text-slate-900">Start Your Financial Journey</h2>
-            <p class="text-xl text-slate-600 mb-12 max-w-2xl mx-auto">Free to download. No account needed. Your data never leaves your device.</p>
-
-            <a href="https://play.google.com/store/apps/details?id=com.mudramanager.app" target="_blank"
-                class="inline-block transform hover:scale-105 transition-transform duration-300 mb-12">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg"
-                    alt="Get it on Google Play" class="h-20 mx-auto">
-            </a>
-
-            <div class="grid md:grid-cols-3 gap-6 max-w-3xl mx-auto">
-                <div class="bg-slate-50 p-6 rounded-2xl">
-                    <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-3 mx-auto">
-                        <i class="fas fa-bolt text-xl text-white"></i>
-                    </div>
-                    <h3 class="font-bold text-slate-900 mb-2">Quick Setup</h3>
-                    <p class="text-sm text-slate-600">Name, account, tone — you're tracking in under a minute</p>
-                </div>
-                <div class="bg-slate-50 p-6 rounded-2xl">
-                    <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mb-3 mx-auto">
-                        <i class="fas fa-lock text-xl text-white"></i>
-                    </div>
-                    <h3 class="font-bold text-slate-900 mb-2">Zero Data Collection</h3>
-                    <p class="text-sm text-slate-600">No servers, no cloud, no tracking — ever</p>
-                </div>
-                <div class="bg-slate-50 p-6 rounded-2xl">
-                    <div class="w-12 h-12 bg-gradient-to-br from-pink-500 to-pink-600 rounded-xl flex items-center justify-center mb-3 mx-auto">
-                        <i class="fas fa-gift text-xl text-white"></i>
-                    </div>
-                    <h3 class="font-bold text-slate-900 mb-2">Free Forever</h3>
-                    <p class="text-sm text-slate-600">Core features are free. Pro unlocks advanced analytics.</p>
-                </div>
+    <!-- FOOTER -->
+    <footer>
+        <div class="foot-inner">
+            <div class="foot-brand"><img src="assets/logo.png" alt="" width="24" height="24"> Mudra Manager</div>
+            <div class="foot-links">
+                <a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="support.html">Support</a><a href="whatsnew.html">Changelog</a>
             </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="bg-slate-900 text-white py-16">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="grid md:grid-cols-4 gap-12 mb-12">
-                <div class="md:col-span-2">
-                    <div class="flex items-center space-x-3 mb-6">
-                        <img src="assets/logo.png" alt="Mudra Manager" class="h-12 w-12">
-                        <span class="text-2xl font-bold">Mudra Manager</span>
-                    </div>
-                    <p class="text-slate-400 text-lg mb-6">Your trusted personal finance companion. Track, manage, and grow your wealth — privately.</p>
-                </div>
-                <div>
-                    <h3 class="font-bold text-lg mb-4">Quick Links</h3>
-                    <ul class="space-y-3 text-slate-400">
-                        <li><a href="#features" class="hover:text-white transition">Features</a></li>
-                        <li><a href="privacy.html" class="hover:text-white transition">Privacy Policy</a></li>
-                        <li><a href="terms.html" class="hover:text-white transition">Terms of Service</a></li>
-                        <li><a href="support.html" class="hover:text-white transition">Support</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="font-bold text-lg mb-4">Contact</h3>
-                    <ul class="space-y-3 text-slate-400">
-                        <li><a href="mailto:support@mudramanager.com" class="hover:text-white transition">support@mudramanager.com</a></li>
-                        <li>Made with ❤️ in India</li>
-                    </ul>
-                </div>
-            </div>
-            <div class="border-t border-slate-800 pt-8 text-center text-slate-400">
-                <p>&copy; 2025 Mudra Manager. All rights reserved.</p>
-            </div>
+            <div class="foot-copy">Made with <span style="color:#ef4444">♥</span> in India · © 2026</div>
         </div>
     </footer>
-</body>
 
+    <script src="2026.js"></script>
+</body>
 </html>

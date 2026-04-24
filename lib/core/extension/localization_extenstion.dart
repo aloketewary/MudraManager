@@ -91,6 +91,92 @@ extension AppLocalizationsHelper on AppLocalizations {
       case 'onboard_SmartAutoTrackingDesc':
         return onboard_SmartAutoTrackingDesc;
 
+      // Starter transactions (onboarding step 5)
+      case 'onboard_whatDidYouSpend':
+        return onboard_whatDidYouSpend;
+      case 'onboard_addFewToStart':
+        return onboard_addFewToStart;
+      case 'onboard_skipAddLater':
+        return onboard_skipAddLater;
+      case 'onboard_starterCoffee':
+        return onboard_starterCoffee;
+      case 'onboard_starterTransport':
+        return onboard_starterTransport;
+      case 'onboard_starterLunch':
+        return onboard_starterLunch;
+      case 'onboard_starterGroceries':
+        return onboard_starterGroceries;
+
+      // Dashboard zero-state
+      case 'dashboard_listeningTitle':
+        return dashboard_listeningTitle;
+      case 'dashboard_waitingForSms':
+        return dashboard_waitingForSms;
+      case 'dashboard_meanwhile':
+        return dashboard_meanwhile;
+      case 'dashboard_addExpense':
+        return dashboard_addExpense;
+      case 'dashboard_setBudget':
+        return dashboard_setBudget;
+      case 'dashboard_createGoal':
+        return dashboard_createGoal;
+      case 'dashboard_addAccount':
+        return dashboard_addAccount;
+      case 'dashboard_testTip':
+        return dashboard_testTip;
+      case 'dashboard_addFirstExpense':
+        return dashboard_addFirstExpense;
+      case 'dashboard_addFirstExpenseDesc':
+        return dashboard_addFirstExpenseDesc;
+
+      // Quick-add compact
+      case 'quickAdd_title':
+        return quickAdd_title;
+      case 'quickAdd_recentCategories':
+        return quickAdd_recentCategories;
+      case 'quickAdd_moreOptions':
+        return quickAdd_moreOptions;
+
+      // App mode
+      case 'mode_simple':
+        return mode_simple;
+      case 'mode_full':
+        return mode_full;
+      case 'mode_simpleDesc':
+        return mode_simpleDesc;
+      case 'mode_fullDesc':
+        return mode_fullDesc;
+      case 'mode_switchToFull':
+        return mode_switchToFull;
+      case 'mode_switchToSimple':
+        return mode_switchToSimple;
+      case 'mode_pickTitle':
+        return mode_pickTitle;
+      case 'mode_pickDesc':
+        return mode_pickDesc;
+
+      // Cloud backup
+      case 'backup_cloudBackup':
+        return backup_cloudBackup;
+      case 'backup_cloudRestore':
+        return backup_cloudRestore;
+      case 'backup_signInGoogle':
+        return backup_signInGoogle;
+      case 'backup_uploadSuccess':
+        return backup_uploadSuccess;
+      case 'backup_uploadFailed':
+        return backup_uploadFailed;
+      case 'backup_cloudBackups':
+        return backup_cloudBackups;
+      case 'backup_noCloudBackups':
+        return backup_noCloudBackups;
+      case 'backup_signInRequired':
+        return backup_signInRequired;
+      case 'backup_signOut':
+        return backup_signOut;
+      case 'backup_cloudSubtitle':
+        return backup_cloudSubtitle;
+
       // Navigation
       case 'nav_activity':
         return nav_activity;

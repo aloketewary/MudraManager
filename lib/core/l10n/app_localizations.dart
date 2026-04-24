@@ -10337,6 +10337,330 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'🔥 {days} days under budget!'**
   String notif_underBudgetStreakTitle(int days);
+
+  /// No description provided for @dashboard_bgSyncIssueTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Background sync may not be working'**
+  String get dashboard_bgSyncIssueTitle;
+
+  /// No description provided for @dashboard_bgSyncIssueDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Bills and alerts may be delayed. Try reopening the app.'**
+  String get dashboard_bgSyncIssueDesc;
+
+  /// No description provided for @onboard_whatDidYouSpend.
+  ///
+  /// In en, this message translates to:
+  /// **'What did you spend today?'**
+  String get onboard_whatDidYouSpend;
+
+  /// No description provided for @onboard_addFewToStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a few to see your dashboard come alive'**
+  String get onboard_addFewToStart;
+
+  /// No description provided for @onboard_skipAddLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip — I\'ll add later'**
+  String get onboard_skipAddLater;
+
+  /// No description provided for @onboard_starterCoffee.
+  ///
+  /// In en, this message translates to:
+  /// **'Coffee / Tea'**
+  String get onboard_starterCoffee;
+
+  /// No description provided for @onboard_starterTransport.
+  ///
+  /// In en, this message translates to:
+  /// **'Transport'**
+  String get onboard_starterTransport;
+
+  /// No description provided for @onboard_starterLunch.
+  ///
+  /// In en, this message translates to:
+  /// **'Lunch / Dinner'**
+  String get onboard_starterLunch;
+
+  /// No description provided for @onboard_starterGroceries.
+  ///
+  /// In en, this message translates to:
+  /// **'Groceries'**
+  String get onboard_starterGroceries;
+
+  /// No description provided for @onboard_starterAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} expenses added!'**
+  String onboard_starterAdded(int count);
+
+  /// No description provided for @dashboard_listeningTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Listening for transactions...'**
+  String get dashboard_listeningTitle;
+
+  /// No description provided for @dashboard_waitingForSms.
+  ///
+  /// In en, this message translates to:
+  /// **'Your next bank notification will appear here automatically'**
+  String get dashboard_waitingForSms;
+
+  /// No description provided for @dashboard_meanwhile.
+  ///
+  /// In en, this message translates to:
+  /// **'Meanwhile, try:'**
+  String get dashboard_meanwhile;
+
+  /// No description provided for @dashboard_addExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Expense'**
+  String get dashboard_addExpense;
+
+  /// No description provided for @dashboard_setBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Budget'**
+  String get dashboard_setBudget;
+
+  /// No description provided for @dashboard_createGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Goal'**
+  String get dashboard_createGoal;
+
+  /// No description provided for @dashboard_addAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Account'**
+  String get dashboard_addAccount;
+
+  /// No description provided for @dashboard_testTip.
+  ///
+  /// In en, this message translates to:
+  /// **'💡 Tip: Send a small UPI payment to see auto-import in action!'**
+  String get dashboard_testTip;
+
+  /// No description provided for @dashboard_addFirstExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first expense'**
+  String get dashboard_addFirstExpense;
+
+  /// No description provided for @dashboard_addFirstExpenseDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to quickly log what you spent today'**
+  String get dashboard_addFirstExpenseDesc;
+
+  /// No description provided for @quickAdd_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Add'**
+  String get quickAdd_title;
+
+  /// No description provided for @quickAdd_recentCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent categories'**
+  String get quickAdd_recentCategories;
+
+  /// No description provided for @quickAdd_moreOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'More options'**
+  String get quickAdd_moreOptions;
+
+  /// No description provided for @mode_simple.
+  ///
+  /// In en, this message translates to:
+  /// **'Simple'**
+  String get mode_simple;
+
+  /// No description provided for @mode_full.
+  ///
+  /// In en, this message translates to:
+  /// **'Full'**
+  String get mode_full;
+
+  /// No description provided for @mode_simpleDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses, budgets & SMS tracking'**
+  String get mode_simpleDesc;
+
+  /// No description provided for @mode_fullDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything — trips, goals, analytics, gamification'**
+  String get mode_fullDesc;
+
+  /// No description provided for @mode_switchToFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to Full Mode'**
+  String get mode_switchToFull;
+
+  /// No description provided for @mode_switchToSimple.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to Simple Mode'**
+  String get mode_switchToSimple;
+
+  /// No description provided for @mode_pickTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How do you want to use Mudra?'**
+  String get mode_pickTitle;
+
+  /// No description provided for @mode_pickDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'You can change this anytime in settings'**
+  String get mode_pickDesc;
+
+  /// No description provided for @backup_cloudBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud Backup'**
+  String get backup_cloudBackup;
+
+  /// No description provided for @backup_cloudRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore from Cloud'**
+  String get backup_cloudRestore;
+
+  /// No description provided for @backup_signInGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with Google'**
+  String get backup_signInGoogle;
+
+  /// No description provided for @backup_signedInAs.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in as {email}'**
+  String backup_signedInAs(String email);
+
+  /// No description provided for @backup_uploadingToDrive.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading to Google Drive...'**
+  String get backup_uploadingToDrive;
+
+  /// No description provided for @backup_uploadSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup uploaded to Google Drive'**
+  String get backup_uploadSuccess;
+
+  /// No description provided for @backup_uploadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to upload backup'**
+  String get backup_uploadFailed;
+
+  /// No description provided for @backup_cloudBackups.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud Backups'**
+  String get backup_cloudBackups;
+
+  /// No description provided for @backup_noCloudBackups.
+  ///
+  /// In en, this message translates to:
+  /// **'No cloud backups found'**
+  String get backup_noCloudBackups;
+
+  /// No description provided for @backup_downloading.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading from Google Drive...'**
+  String get backup_downloading;
+
+  /// No description provided for @backup_signInRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to Google to use cloud backup'**
+  String get backup_signInRequired;
+
+  /// No description provided for @backup_signOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get backup_signOut;
+
+  /// No description provided for @backup_cloudSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Encrypted backup to Google Drive'**
+  String get backup_cloudSubtitle;
+
+  /// No description provided for @backup_autoBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto Backup'**
+  String get backup_autoBackup;
+
+  /// No description provided for @backup_autoBackupDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic local backups, keeps last 7 days'**
+  String get backup_autoBackupDesc;
+
+  /// No description provided for @backup_autoFrequency.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup frequency'**
+  String get backup_autoFrequency;
+
+  /// No description provided for @backup_autoNever.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get backup_autoNever;
+
+  /// No description provided for @backup_autoDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily'**
+  String get backup_autoDaily;
+
+  /// No description provided for @backup_autoWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get backup_autoWeekly;
+
+  /// No description provided for @backup_autoSetPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a backup password to enable auto backup'**
+  String get backup_autoSetPassword;
+
+  /// No description provided for @backup_autoEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto backup enabled ({frequency})'**
+  String backup_autoEnabled(String frequency);
+
+  /// No description provided for @backup_autoLastRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Last auto backup: {date}'**
+  String backup_autoLastRun(String date);
+
+  /// No description provided for @backup_proRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro feature'**
+  String get backup_proRequired;
 }
 
 class _AppLocalizationsDelegate

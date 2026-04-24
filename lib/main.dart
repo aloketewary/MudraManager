@@ -23,6 +23,7 @@ import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/core/router/app_router.dart';
 import 'package:mudra_manager/core/services/app_update_service.dart';
 import 'package:mudra_manager/core/services/background_task_manager.dart';
+import 'package:mudra_manager/core/services/auto_backup_service.dart';
 import 'package:mudra_manager/core/services/notification_service.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:mudra_manager/core/theme/app_theme.dart';
@@ -163,6 +164,10 @@ Future<void> _initializeBackgroundServices(ProviderContainer container) async {
 
       // Run recurring/bill/notification tasks
       await BackgroundTaskManager.runDeferredTasks();
+
+      // Cleanup old auto backups (rolling 7-day retention)
+      await safeExecute(() => AutoBackupService.cleanupOldBackups());
+
       log.i('✅ All deferred tasks completed');
 
       // Check for app updates (once per session)

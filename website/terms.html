@@ -1,129 +1,46 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Terms of Service - Mudra Manager</title>
+    <title>Terms of Service — Mudra Manager</title>
     <link rel="icon" href="assets/logo.png">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#6366f1',
-                        secondary: '#8b5cf6',
-                    }
-                }
-            }
-        }
-    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="2026.css">
+    <style>
+        .legal h2 { font-size: 1.2rem; margin-bottom: 10px; margin-top: 40px; }
+        .legal h2:first-of-type { margin-top: 0; }
+        .legal p, .legal li { font-size: 14px; color: var(--fg2); line-height: 1.7; }
+        .legal ul { margin-left: 16px; margin-top: 8px; }
+        .legal li { margin-bottom: 6px; list-style: none; padding-left: 16px; position: relative; }
+        .legal li::before { content: '•'; position: absolute; left: 0; color: var(--fg3); }
+    </style>
 </head>
-<body class="bg-white">
-    <nav class="fixed w-full bg-white/95 backdrop-blur-sm z-50 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-20">
-                <a href="index.html" class="flex items-center space-x-3">
-                    <img src="assets/logo.png" alt="Mudra Manager" class="h-12 w-12">
-                    <span class="text-2xl font-bold text-slate-900">Mudra Manager</span>
-                </a>
-                <a href="index.html" class="text-slate-600 hover:text-primary transition">← Back to Home</a>
-            </div>
-        </div>
-    </nav>
+<body>
+    <nav class="nav" role="navigation"><a href="index.html" class="nav-logo"><img src="assets/logo.png" alt="" width="28" height="28"><span>Mudra Manager</span></a><div class="nav-links"><button class="theme-btn" id="theme-toggle" aria-label="Toggle theme"><i class="fas fa-circle-half-stroke"></i></button><a href="index.html" style="font-size:13px;color:var(--fg2)">← Home</a></div></nav>
 
-    <main class="pt-32 pb-20 px-4">
-        <div class="max-w-4xl mx-auto">
-            <h1 class="text-5xl font-bold mb-6 text-slate-900">Terms of Service</h1>
-            <p class="text-slate-600 mb-8">Last updated: February 2026</p>
+    <main id="main">
+    <section class="legal" style="max-width:720px">
+        <span class="label">Legal</span>
+        <h1 style="font-size:clamp(2.2rem,5vw,3.2rem);margin-bottom:4px">Terms of Service</h1>
+        <p style="color:var(--fg3);margin-bottom:40px">Last updated: June 2026</p>
 
-            <div class="prose prose-lg max-w-none space-y-8">
-                <section>
-                    <h2 class="text-3xl font-bold text-slate-900 mb-4">1. Acceptance of Terms</h2>
-                    <p class="text-slate-600 leading-relaxed">By downloading, installing, or using Mudra Manager, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use the app.</p>
-                </section>
-
-                <section>
-                    <h2 class="text-3xl font-bold text-slate-900 mb-4">2. Description of Service</h2>
-                    <p class="text-slate-600 leading-relaxed">Mudra Manager is a personal finance management application that helps you track expenses, manage budgets, and achieve financial goals. The app operates locally on your device and does not require an internet connection for core functionality.</p>
-                </section>
-
-                <section>
-                    <h2 class="text-3xl font-bold text-slate-900 mb-4">3. User Responsibilities</h2>
-                    <p class="text-slate-600 leading-relaxed mb-4">You agree to:</p>
-                    <ul class="list-disc pl-6 text-slate-600 space-y-2">
-                        <li>Provide accurate information when using the app</li>
-                        <li>Keep your device secure and protected</li>
-                        <li>Not use the app for any illegal purposes</li>
-                        <li>Not attempt to reverse engineer or modify the app</li>
-                        <li>Maintain backups of your important financial data</li>
-                    </ul>
-                </section>
-
-                <section>
-                    <h2 class="text-3xl font-bold text-slate-900 mb-4">4. Free Service</h2>
-                    <p class="text-slate-600 leading-relaxed">Mudra Manager is currently provided free of charge. We may introduce optional premium features in the future, but core functionality will always remain free.</p>
-                </section>
-
-                <section>
-                    <h2 class="text-3xl font-bold text-slate-900 mb-4">5. Data and Privacy</h2>
-                    <p class="text-slate-600 leading-relaxed">All your financial data is stored locally on your device. We do not have access to your data. You are responsible for backing up your data. Please refer to our Privacy Policy for more details.</p>
-                </section>
-
-                <section>
-                    <h2 class="text-3xl font-bold text-slate-900 mb-4">6. SMS Permissions</h2>
-                    <p class="text-slate-600 leading-relaxed">The app requests SMS permissions to automatically detect financial transactions. This feature is optional and can be disabled at any time. SMS data is processed locally and never transmitted to our servers.</p>
-                </section>
-
-                <section>
-                    <h2 class="text-3xl font-bold text-slate-900 mb-4">7. Disclaimer of Warranties</h2>
-                    <p class="text-slate-600 leading-relaxed mb-4">Mudra Manager is provided "as is" without warranties of any kind. We do not guarantee that:</p>
-                    <ul class="list-disc pl-6 text-slate-600 space-y-2">
-                        <li>The app will be error-free or uninterrupted</li>
-                        <li>All SMS transactions will be detected accurately</li>
-                        <li>The app will meet your specific requirements</li>
-                        <li>Data will never be lost (please maintain backups)</li>
-                    </ul>
-                </section>
-
-                <section>
-                    <h2 class="text-3xl font-bold text-slate-900 mb-4">8. Limitation of Liability</h2>
-                    <p class="text-slate-600 leading-relaxed">We are not liable for any damages arising from your use of the app, including but not limited to data loss, financial decisions based on app data, or device issues.</p>
-                </section>
-
-                <section>
-                    <h2 class="text-3xl font-bold text-slate-900 mb-4">9. Financial Advice Disclaimer</h2>
-                    <p class="text-slate-600 leading-relaxed">Mudra Manager is a tool for tracking and organizing your finances. It does not provide financial, investment, or tax advice. Always consult with qualified professionals for financial decisions.</p>
-                </section>
-
-                <section>
-                    <h2 class="text-3xl font-bold text-slate-900 mb-4">10. Updates and Changes</h2>
-                    <p class="text-slate-600 leading-relaxed">We may update the app and these terms from time to time. Continued use of the app after updates constitutes acceptance of the new terms.</p>
-                </section>
-
-                <section>
-                    <h2 class="text-3xl font-bold text-slate-900 mb-4">11. Termination</h2>
-                    <p class="text-slate-600 leading-relaxed">You may stop using the app at any time by uninstalling it from your device. We reserve the right to discontinue the app at any time.</p>
-                </section>
-
-                <section>
-                    <h2 class="text-3xl font-bold text-slate-900 mb-4">12. Governing Law</h2>
-                    <p class="text-slate-600 leading-relaxed">These terms are governed by the laws of India. Any disputes shall be subject to the exclusive jurisdiction of courts in India.</p>
-                </section>
-
-                <section>
-                    <h2 class="text-3xl font-bold text-slate-900 mb-4">13. Contact Information</h2>
-                    <p class="text-slate-600 leading-relaxed">For questions about these Terms of Service, contact us at:</p>
-                    <p class="text-primary font-semibold mt-2">support@mudramanager.com</p>
-                </section>
-            </div>
-        </div>
+        <h2>1. Acceptance</h2><p>By using Mudra Manager, you agree to these Terms.</p>
+        <h2>2. Service</h2><p>A personal finance app operating 100% locally on your device.</p>
+        <h2>3. Responsibilities</h2>
+        <ul><li>Provide accurate information</li><li>Keep your device secure</li><li>Do not reverse engineer the app</li><li>Maintain backups</li></ul>
+        <h2>4. Pricing</h2><p>Core features free forever. Optional Pro via Google Play.</p>
+        <h2>5. Privacy</h2><p>All data local with AES-256 encryption. See <a href="privacy.html" class="link-arrow">Privacy Policy →</a></p>
+        <h2>6. SMS</h2><p>Optional notification access for bank transaction detection. Revocable. Local only.</p>
+        <h2>7. Disclaimer</h2><p>Provided "as is." No guarantee of error-free operation or accurate SMS detection.</p>
+        <h2>8. Liability</h2><p>Not liable for damages from app use, data loss, or financial decisions.</p>
+        <h2>9. Not Advice</h2><p>Tracking tool, not a financial advisor.</p>
+        <h2>10. Law</h2><p>Governed by laws of India.</p>
+        <h2>11. Contact</h2><p><a href="mailto:support@mudramanager.com" class="link-arrow">support@mudramanager.com →</a></p>
+    </section>
     </main>
 
-    <footer class="bg-slate-900 text-white py-8">
-        <div class="max-w-7xl mx-auto px-4 text-center">
-            <p class="text-slate-400">&copy; 2025 Mudra Manager. All rights reserved.</p>
-        </div>
-    </footer>
+    <footer><div class="foot-inner"><div class="foot-brand"><img src="assets/logo.png" alt="" width="24" height="24"> Mudra Manager</div><div class="foot-links"><a href="privacy.html">Privacy</a><a href="support.html">Support</a><a href="index.html">Home</a></div><div class="foot-copy">© 2026</div></div></footer>
+    <script src="2026.js"></script>
 </body>
 </html>

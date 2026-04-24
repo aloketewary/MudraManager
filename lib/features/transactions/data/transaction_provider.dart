@@ -89,21 +89,7 @@ final sectionedTransactionsProvider = FutureProvider.autoDispose
     transactionsByMonthAndTypeProvider(arg).future,
   );
 
-  if (transactions.isEmpty) return [];
-
-  final List<TxListEntry> sectioned = [];
-  DateTime? currentDate;
-
-  for (var tx in transactions) {
-    final txDate = DateTime(tx.date.year, tx.date.month, tx.date.day);
-    if (currentDate == null || txDate != currentDate) {
-      currentDate = txDate;
-      sectioned.add(TxHeader(txDate));
-    }
-    sectioned.add(TxItem(tx));
-  }
-
-  return sectioned;
+  return buildSectionedList(transactions);
 });
 
 final sectionedTransactionsByDateRangeProvider = FutureProvider.autoDispose
@@ -134,24 +120,7 @@ final sectionedTransactionsByDateRangeProvider = FutureProvider.autoDispose
     ).future,
   );
 
-  if (transactions.isEmpty) return [];
-
-  final List<TxListEntry> sectioned = [];
-  DateTime? currentDate;
-
-  for (var tx in transactions) {
-    final txDate = DateTime(tx.date.year, tx.date.month, tx.date.day);
-    if (currentDate == null ||
-        currentDate.year != txDate.year ||
-        currentDate.month != txDate.month ||
-        currentDate.day != txDate.day) {
-      currentDate = txDate;
-      sectioned.add(TxHeader(txDate));
-    }
-    sectioned.add(TxItem(tx));
-  }
-
-  return sectioned;
+  return buildSectionedList(transactions);
 });
 
 final allSectionedTransactionsProvider = FutureProvider.autoDispose
@@ -180,22 +149,7 @@ final allSectionedTransactionsProvider = FutureProvider.autoDispose
 
   if (transactions.isEmpty) return [];
 
-  final List<TxListEntry> sectioned = [];
-  DateTime? currentDate;
-
-  for (var tx in transactions) {
-    final txDate = DateTime(tx.date.year, tx.date.month, tx.date.day);
-    if (currentDate == null ||
-        currentDate.year != txDate.year ||
-        currentDate.month != txDate.month ||
-        currentDate.day != txDate.day) {
-      currentDate = txDate;
-      sectioned.add(TxHeader(txDate));
-    }
-    sectioned.add(TxItem(tx));
-  }
-
-  return sectioned;
+  return buildSectionedList(transactions);
 });
 
 // OPTIMIZED: Filter at database level
@@ -233,39 +187,22 @@ final filteredSectionedTransactionsProvider = FutureProvider.autoDispose.family<
 
   if (transactions.isEmpty) return [];
 
-  final List<TxListEntry> sectioned = [];
-  DateTime? currentDate;
-
-  for (var tx in transactions) {
-    final txDate = DateTime(tx.date.year, tx.date.month, tx.date.day);
-    if (currentDate == null ||
-        currentDate.year != txDate.year ||
-        currentDate.month != txDate.month ||
-        currentDate.day != txDate.day) {
-      currentDate = txDate;
-      sectioned.add(TxHeader(txDate));
-    }
-    sectioned.add(TxItem(tx));
-  }
-
-  return sectioned;
+  return buildSectionedList(transactions);
 });
 
 final transactionCountsProvider = FutureProvider.autoDispose<Map<Id, int>>((
   ref,
 ) async {
-  final isar = Isar.getInstance(); // or inject
+  final isar = await ref.watch(isarServiceProvider).getInstance();
   final counts = <Id, int>{};
-  final categories = await isar?.categorys
-      .where()
-      .findAll(); // your actual category collection name
+  final categories = await isar.categorys.where().findAll();
 
-  for (final cat in categories ?? []) {
-    final count = await isar?.transactions
+  for (final cat in categories) {
+    final count = await isar.transactions
         .filter()
         .category((q) => q.idEqualTo(cat.id))
         .count();
-    counts[cat.id] = count ?? 0;
+    counts[cat.id] = count;
   }
 
   return counts;

@@ -1,185 +1,77 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>What's New — Mudra Manager</title>
-    <meta name="description" content="Latest updates and release notes for Mudra Manager">
+    <title>Changelog — Mudra Manager</title>
     <link rel="icon" href="assets/logo.png">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#6366f1',
-                        secondary: '#8b5cf6',
-                    }
-                }
-            }
-        }
-    </script>
+    <link rel="stylesheet" href="2026.css">
     <style>
-        html { scroll-behavior: smooth; }
-        .timeline-line { position: absolute; left: 23px; top: 0; bottom: 0; width: 2px; background: linear-gradient(to bottom, #6366f1, #e2e8f0); }
+        .tl { position: relative; max-width: 720px; margin: 0 auto; }
+        .tl-line { position: absolute; left: 23px; top: 0; bottom: 0; width: 2px; background: linear-gradient(to bottom, var(--accent), color-mix(in srgb, var(--fg) 8%, transparent) 80%); }
+        .tl-item { position: relative; padding-left: 64px; margin-bottom: 48px; }
+        .tl-dot { position: absolute; left: 0; top: 4px; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; z-index: 1; }
+        .tl-dot.latest { background: var(--accent); box-shadow: 0 0 24px color-mix(in srgb, var(--accent) 40%, transparent); }
+        .tl-dot.old { background: color-mix(in srgb, var(--fg) 12%, transparent); color: var(--fg3); }
+        .tl-card { padding: 28px; border-radius: var(--radius-lg); border: 1px solid color-mix(in srgb, var(--fg) 6%, transparent); background: color-mix(in srgb, var(--fg) 2%, transparent); }
+        .tl-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 16px; }
+        .tl-ver { font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 100px; }
+        .tl-ver.latest { background: var(--accent); color: #fff; }
+        .tl-ver.old { background: color-mix(in srgb, var(--fg) 8%, transparent); color: var(--fg3); }
+        .tl-date { font-size: 12px; color: var(--fg3); }
+        .tl-tag { font-size: 10px; font-weight: 700; padding: 2px 10px; border-radius: 100px; background: color-mix(in srgb, var(--green) 12%, transparent); color: var(--green); }
+        .tl-card h3 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+        .tl-card .summary { font-size: 14px; color: var(--fg2); margin-bottom: 16px; }
+        .tl-feat { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 10px; }
+        .tl-feat-icon { width: 20px; height: 20px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 9px; flex-shrink: 0; margin-top: 2px; }
+        .tl-feat-icon.new { background: color-mix(in srgb, var(--accent) 15%, transparent); color: var(--accent); }
+        .tl-feat-icon.improved { background: color-mix(in srgb, var(--amber) 15%, transparent); color: var(--amber); }
+        .tl-feat span { font-size: 13px; } .tl-feat strong { color: var(--fg); } .tl-feat span { color: var(--fg2); }
+        .tl-fixes { margin-top: 20px; padding-top: 16px; border-top: 1px solid color-mix(in srgb, var(--fg) 5%, transparent); }
+        .tl-fixes h4 { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--fg3); margin-bottom: 10px; }
+        .tl-fixes li { font-size: 12px; color: var(--fg3); margin-bottom: 6px; list-style: none; padding-left: 16px; position: relative; }
+        .tl-fixes li::before { content: '✓'; position: absolute; left: 0; color: var(--green); font-size: 10px; }
+        .tl-end { padding-left: 64px; position: relative; }
+        .tl-end .tl-dot { background: color-mix(in srgb, var(--fg) 10%, transparent); }
+        .tl-end p { font-size: 12px; color: var(--fg3); }
+        @media (max-width: 600px) { .tl-line { display: none; } .tl-dot { display: none; } .tl-item, .tl-end { padding-left: 0; } }
     </style>
 </head>
+<body>
+    <nav class="nav" role="navigation"><a href="index.html" class="nav-logo"><img src="assets/logo.png" alt="" width="28" height="28"><span>Mudra Manager</span></a><div class="nav-links"><button class="theme-btn" id="theme-toggle" aria-label="Toggle theme"><i class="fas fa-circle-half-stroke"></i></button><a href="https://play.google.com/store/apps/details?id=com.mudramanager.app" target="_blank" class="nav-cta">Update Now</a></div></nav>
 
-<body class="bg-white">
-    <!-- Navigation -->
-    <nav class="fixed w-full bg-white/95 backdrop-blur-sm z-50 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-20">
-                <a href="index.html" class="flex items-center space-x-3">
-                    <img src="assets/logo.png" alt="Mudra Manager" class="h-12 w-12">
-                    <span class="text-2xl font-bold text-slate-900">Mudra Manager</span>
-                </a>
-                <a href="https://play.google.com/store/apps/details?id=com.mudramanager.app" target="_blank"
-                    class="bg-primary text-white px-8 py-3 rounded-xl font-semibold hover:bg-primary/90 transition-all duration-300 shadow-lg shadow-primary/30">
-                    Update Now
-                </a>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Header -->
-    <section class="pt-32 pb-12 px-4 bg-gradient-to-b from-slate-50 to-white">
-        <div class="max-w-3xl mx-auto text-center">
-            <h1 class="text-5xl font-bold text-slate-900 mb-4">What's New</h1>
-            <p class="text-xl text-slate-600">Every update, every improvement — all in one place</p>
+    <main id="main">
+    <section style="max-width:720px;padding-bottom:0">
+        <span class="label">Changelog</span>
+        <h1 style="font-size:clamp(2.2rem,5vw,3.2rem);margin-bottom:8px">What's New</h1>
+        <p style="font-size:17px;color:var(--fg2)">Every update, every improvement.</p>
+    </section>
+    <section style="max-width:800px;padding-top:48px">
+        <div class="tl">
+            <div class="tl-line"></div>
+            <div id="tl-content"><p style="text-align:center;color:var(--fg3);font-size:13px"><i class="fas fa-spinner fa-spin"></i> Loading...</p></div>
         </div>
     </section>
+    </main>
 
-    <!-- Changelog Timeline (rendered by JS) -->
-    <section class="pb-24 px-4">
-        <div id="changelog" class="max-w-3xl mx-auto relative">
-            <div class="timeline-line hidden md:block"></div>
-            <!-- Loading state -->
-            <div id="changelog-loading" class="text-center py-12 text-slate-400">
-                <i class="fas fa-spinner fa-spin text-2xl mb-4"></i>
-                <p>Loading changelog...</p>
-            </div>
-        </div>
-    </section>
+    <footer><div class="foot-inner"><div class="foot-brand"><img src="assets/logo.png" alt="" width="24" height="24"> Mudra Manager</div><div class="foot-links"><a href="index.html">Home</a><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="support.html">Support</a></div><div class="foot-copy">© 2026</div></div></footer>
 
-    <!-- Footer -->
-    <footer class="bg-slate-900 text-white py-12">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
-                <div class="flex items-center space-x-3">
-                    <img src="assets/logo.png" alt="Mudra Manager" class="h-10 w-10">
-                    <span class="text-xl font-bold">Mudra Manager</span>
-                </div>
-                <div class="flex items-center space-x-6 text-slate-400 text-sm">
-                    <a href="index.html" class="hover:text-white transition">Home</a>
-                    <a href="privacy.html" class="hover:text-white transition">Privacy</a>
-                    <a href="terms.html" class="hover:text-white transition">Terms</a>
-                    <a href="support.html" class="hover:text-white transition">Support</a>
-                </div>
-                <p class="text-slate-500 text-sm">&copy; 2025 Mudra Manager</p>
-            </div>
-        </div>
-    </footer>
-
+    <script src="2026.js"></script>
     <script>
-        const typeConfig = {
-            new:      { icon: 'plus',   bg: 'bg-primary/10',   color: 'text-primary' },
-            improved: { icon: 'wrench', bg: 'bg-amber-500/10', color: 'text-amber-600' },
-            removed:  { icon: 'minus',  bg: 'bg-red-500/10',   color: 'text-red-500' },
-        };
-
-        function formatDate(dateStr) {
-            const d = new Date(dateStr + 'T00:00:00');
-            return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-        }
-
-        function renderFeature(f) {
-            const cfg = typeConfig[f.type] || typeConfig.new;
-            return `
-                <div class="flex items-start gap-3">
-                    <span class="mt-1 flex-shrink-0 w-6 h-6 ${cfg.bg} rounded-full flex items-center justify-center">
-                        <i class="fas fa-${cfg.icon} ${cfg.color} text-xs"></i>
-                    </span>
-                    <div>
-                        <span class="font-semibold text-slate-900">${f.title}</span>
-                        <span class="text-slate-500"> — ${f.description}</span>
-                    </div>
-                </div>`;
-        }
-
-        function renderFixes(fixes) {
-            if (!fixes || fixes.length === 0) return '';
-            return `
-                <div class="mt-6 pt-6 border-t border-slate-100">
-                    <p class="text-sm font-semibold text-slate-700 mb-3">Bug Fixes</p>
-                    <ul class="space-y-2 text-sm text-slate-500">
-                        ${fixes.map(fix => `
-                            <li class="flex items-start gap-2">
-                                <i class="fas fa-check text-green-500 mt-1 text-xs"></i>
-                                ${fix}
-                            </li>`).join('')}
-                    </ul>
-                </div>`;
-        }
-
-        function renderRelease(release, isFirst) {
-            const dotColor = isFirst ? 'bg-primary shadow-lg shadow-primary/30' : 'bg-slate-300';
-            const tagHtml = release.tag
-                ? `<span class="bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full">${release.tag}</span>`
-                : '';
-            const versionColor = isFirst ? 'bg-primary' : 'bg-slate-700';
-
-            return `
-                <div class="relative pl-0 md:pl-16 mb-16">
-                    <div class="hidden md:flex absolute left-0 top-1 w-12 h-12 ${dotColor} rounded-full items-center justify-center z-10">
-                        <i class="fas fa-${release.icon || 'code-branch'} text-white text-lg"></i>
-                    </div>
-                    <div class="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow">
-                        <div class="flex flex-wrap items-center gap-3 mb-6">
-                            <span class="${versionColor} text-white text-sm font-bold px-4 py-1.5 rounded-full">v${release.version}</span>
-                            <span class="text-slate-500 text-sm font-medium">${formatDate(release.date)}</span>
-                            ${tagHtml}
-                        </div>
-                        <h2 class="text-2xl font-bold text-slate-900 mb-2">${release.title}</h2>
-                        <p class="text-slate-500 mb-6">${release.summary}</p>
-                        <div class="space-y-4">
-                            ${release.features.map(renderFeature).join('')}
-                        </div>
-                        ${renderFixes(release.fixes)}
-                    </div>
-                </div>`;
-        }
-
-        function renderEndMarker() {
-            return `
-                <div class="relative pl-0 md:pl-16">
-                    <div class="hidden md:flex absolute left-0 top-0 w-12 h-12 bg-slate-200 rounded-full items-center justify-center z-10">
-                        <i class="fas fa-flag text-slate-400 text-lg"></i>
-                    </div>
-                    <p class="text-slate-400 text-sm font-medium pt-3">You're all caught up!</p>
-                </div>`;
-        }
-
-        // Fetch and render
-        fetch('changelog.json')
-            .then(res => res.json())
-            .then(releases => {
-                const container = document.getElementById('changelog');
-                const loading = document.getElementById('changelog-loading');
-                loading.remove();
-
-                const html = releases.map((r, i) => renderRelease(r, i === 0)).join('') + renderEndMarker();
-                // Keep the timeline line, append after it
-                container.insertAdjacentHTML('beforeend', html);
-            })
-            .catch(err => {
-                document.getElementById('changelog-loading').innerHTML = `
-                    <i class="fas fa-exclamation-triangle text-2xl mb-4 text-amber-500"></i>
-                    <p>Could not load changelog. <a href="changelog.json" class="text-primary underline">View raw</a></p>`;
-            });
+    const tc={new:{icon:'plus',cls:'new'},improved:{icon:'wrench',cls:'improved'},removed:{icon:'minus',cls:'new'}};
+    function fmtDate(d){return new Date(d+'T00:00:00').toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});}
+    function renderR(r,first){
+        const dot=first?'latest':'old', ver=first?'latest':'old';
+        const tag=r.tag?`<span class="tl-tag">${r.tag}</span>`:'';
+        const feats=r.features.map(f=>{const c=tc[f.type]||tc.new;return`<div class="tl-feat"><div class="tl-feat-icon ${c.cls}"><i class="fas fa-${c.icon}"></i></div><span><strong>${f.title}</strong> — ${f.description}</span></div>`;}).join('');
+        const fixes=r.fixes?.length?`<div class="tl-fixes"><h4>Bug Fixes</h4><ul>${r.fixes.map(f=>`<li>${f}</li>`).join('')}</ul></div>`:'';
+        return`<div class="tl-item"><div class="tl-dot ${dot}"><i class="fas fa-${r.icon||'code-branch'}"></i></div><div class="tl-card"><div class="tl-meta"><span class="tl-ver ${ver}">v${r.version}</span><span class="tl-date">${fmtDate(r.date)}</span>${tag}</div><h3>${r.title}</h3><p class="summary">${r.summary}</p>${feats}${fixes}</div></div>`;
+    }
+    fetch('changelog.json').then(r=>r.json()).then(data=>{
+        document.getElementById('tl-content').innerHTML=data.map((r,i)=>renderR(r,i===0)).join('')+`<div class="tl-end"><div class="tl-dot old"><i class="fas fa-flag"></i></div><p>You're all caught up.</p></div>`;
+    }).catch(()=>{document.getElementById('tl-content').innerHTML='<p style="color:var(--fg3)">Could not load. <a href="changelog.json" style="color:var(--accent)">View raw</a></p>';});
     </script>
 </body>
-
 </html>

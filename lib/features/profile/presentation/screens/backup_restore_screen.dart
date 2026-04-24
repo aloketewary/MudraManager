@@ -1,7 +1,11 @@
+import 'package:mudra_manager/core/entitlement/entitlement_feature.dart';
 import 'package:mudra_manager/core/utils/safe_date_format.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
-// lib/features/profile/presentation/screens/backup_restore_screen.dart
-
+import 'dart:convert';
+import 'dart:io';
+import 'package:encrypt/encrypt.dart' as encrypt;
+import 'package:mudra_manager/core/services/google_drive_service.dart';
+import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,6 +15,8 @@ import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/services/backup_restore_service.dart';
+import 'package:mudra_manager/core/services/auto_backup_service.dart';
+import 'package:mudra_manager/shared/widgets/pro_gate.dart';
 import 'package:mudra_manager/core/utils/dialog_utils.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
@@ -155,6 +161,24 @@ class BackupRestoreScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 24),
 
+          // ── CLOUD BACKUP (Pro) ──
+          _buildSectionHeader(ctxt.backup_cloudBackup, color, textTheme, isPro: true),
+          const SizedBox(height: 10),
+          ProGate(
+            feature: ProFeature.cloudBackup,
+            child: _CloudBackupSection(color: color, textTheme: textTheme, spacing: spacing),
+          ),
+          const SizedBox(height: 24),
+
+          // ── AUTO BACKUP (Pro) ──
+          _buildSectionHeader(ctxt.backup_autoBackup, color, textTheme, isPro: true),
+          const SizedBox(height: 10),
+          ProGate(
+            feature: ProFeature.autoBackup,
+            child: _AutoBackupSection(color: color, textTheme: textTheme, spacing: spacing),
+          ),
+          const SizedBox(height: 24),
+
           // ── BACKUP HISTORY ──
           _buildSectionHeader(ctxt.backup_history, color, textTheme),
           const SizedBox(height: 10),
@@ -271,17 +295,43 @@ class BackupRestoreScreen extends ConsumerWidget {
   Widget _buildSectionHeader(
     String title,
     ColorScheme color,
-    TextTheme textTheme,
-  ) {
+    TextTheme textTheme, {
+    bool isPro = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(left: 4),
-      child: Text(
-        title,
-        style: textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.w700,
-          color: color.primary,
-          letterSpacing: 0.5,
-        ),
+      child: Row(
+        children: [
+          Text(
+            title,
+            style: textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: color.primary,
+              letterSpacing: 0.5,
+            ),
+          ),
+          if (isPro) ...[
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                  color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+                ),
+              ),
+              child: Text(
+                'PRO',
+                style: textTheme.labelSmall?.copyWith(
+                  color: const Color(0xFFD4AF37),
+                  fontWeight: FontWeight.w800,
+                  fontSize: 9,
+                ),
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }
@@ -492,5 +542,743 @@ class BackupRestoreScreen extends ConsumerWidget {
     if (diff.inDays < 1) return ctxt.backup_hoursAgo(diff.inHours);
     if (diff.inDays < 7) return ctxt.backup_daysAgo(diff.inDays);
     return safeDateFormat('yMMMd', ctxt.localeName).format(date);
+  }
+}
+
+class _CloudBackupSection extends ConsumerStatefulWidget {
+  final ColorScheme color;
+  final TextTheme textTheme;
+  final AppSpacing spacing;
+
+  const _CloudBackupSection({
+    required this.color,
+    required this.textTheme,
+    required this.spacing,
+  });
+
+  @override
+  ConsumerState<_CloudBackupSection> createState() =>
+      _CloudBackupSectionState();
+}
+
+class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
+  bool _isLoading = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = widget.color;
+    final textTheme = widget.textTheme;
+    final spacing = widget.spacing;
+    final ctxt = AppLocalizations.of(context)!;
+    final isSignedIn = ref.watch(driveSignedInProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    if (!isSignedIn) {
+      return _buildSignInCard(color, textTheme, spacing, ctxt, isDark);
+    }
+
+    return _buildCloudActions(color, textTheme, spacing, ctxt, isDark);
+  }
+
+  Widget _buildSignInCard(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    AppLocalizations ctxt,
+    bool isDark,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        color: color.surfaceContainerLow,
+        border: Border.all(
+          color: color.outlineVariant.withValues(alpha: 0.5),
+        ),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            LucideIcons.cloudOff,
+            size: 36,
+            color: color.onSurfaceVariant.withValues(alpha: 0.4),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            ctxt.backup_signInRequired,
+            style: textTheme.bodyMedium?.copyWith(
+              color: color.onSurfaceVariant,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          FilledButton.icon(
+            onPressed: _isLoading ? null : _signIn,
+            icon: const Icon(LucideIcons.logIn, size: 18),
+            label: Text(ctxt.backup_signInGoogle),
+            style: FilledButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(spacing.radiusMedium),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCloudActions(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    AppLocalizations ctxt,
+    bool isDark,
+  ) {
+    final driveBackups = ref.watch(driveBackupsProvider);
+    final email = ref.watch(driveEmailProvider);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Signed-in status + actions
+        Card(
+          elevation: 0,
+          margin: EdgeInsets.zero,
+          color: color.surfaceContainerLow,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(spacing.radiusMedium),
+            side: BorderSide(
+              color: color.outlineVariant.withValues(alpha: 0.5),
+            ),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            children: [
+              // Signed-in pill
+              if (email != null)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                  child: Row(
+                    children: [
+                      Icon(LucideIcons.circleCheck,
+                          size: 16, color: color.primary),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          ctxt.backup_signedInAs(email),
+                          style: textTheme.bodySmall?.copyWith(
+                            color: color.onSurfaceVariant,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: _signOut,
+                        child: Text(
+                          ctxt.backup_signOut,
+                          style: textTheme.labelSmall?.copyWith(
+                            color: color.error,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              // Upload to Drive
+              InkWell(
+                onTap: _isLoading ? null : _uploadToDrive,
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: color.primary.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: _isLoading
+                            ? SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: color.primary,
+                                ),
+                              )
+                            : Icon(LucideIcons.cloudUpload,
+                                color: color.primary, size: 20),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              ctxt.backup_cloudBackup,
+                              style: textTheme.bodyLarge?.copyWith(
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            Text(
+                              ctxt.backup_cloudSubtitle,
+                              style: textTheme.bodySmall?.copyWith(
+                                color: color.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Icon(LucideIcons.chevronRight,
+                          color: color.onSurfaceVariant, size: 20),
+                    ],
+                  ),
+                ),
+              ),
+              Divider(
+                height: 1,
+                indent: 58,
+                color: color.outlineVariant.withValues(alpha: 0.4),
+              ),
+              // Restore from Drive
+              InkWell(
+                onTap: _isLoading ? null : () => _showCloudRestoreSheet(ctxt),
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: color.primary.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(LucideIcons.cloudDownload,
+                            color: color.primary, size: 20),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              ctxt.backup_cloudRestore,
+                              style: textTheme.bodyLarge?.copyWith(
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            Text(
+                              ctxt.backup_cloudBackups,
+                              style: textTheme.bodySmall?.copyWith(
+                                color: color.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Show count badge if backups exist
+                      driveBackups.maybeWhen(
+                        data: (backups) => backups.isNotEmpty
+                            ? Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: color.primary.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Text(
+                                  '${backups.length}',
+                                  style: textTheme.labelSmall?.copyWith(
+                                    color: color.primary,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                              )
+                            : const SizedBox.shrink(),
+                        orElse: () => const SizedBox.shrink(),
+                      ),
+                      const SizedBox(width: 8),
+                      Icon(LucideIcons.chevronRight,
+                          color: color.onSurfaceVariant, size: 20),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _signIn() async {
+    setState(() => _isLoading = true);
+    try {
+      final success = await GoogleDriveService.signIn();
+      if (success) {
+        ref.read(driveSignedInProvider.notifier).set(true);
+        ref.read(driveEmailProvider.notifier).set(
+            GoogleDriveService.userEmail,
+        );
+        ref.invalidate(driveBackupsProvider);
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _signOut() async {
+    await GoogleDriveService.signOut();
+    ref.read(driveSignedInProvider.notifier).set(false);
+    ref.read(driveEmailProvider.notifier).set(null);
+  }
+
+  Future<void> _uploadToDrive() async {
+    final ctxt = AppLocalizations.of(context)!;
+    final password = await DialogUtils.showPasswordDialog(
+      context,
+      isRestore: false,
+    );
+    if (password == null || !mounted) return;
+
+    setState(() => _isLoading = true);
+    try {
+      final localPath = await BackupService.createEncryptedBackup(
+        password,
+        interactive: false,
+      );
+      if (localPath == null) {
+        SnackbarService.error(BuddyMessages.backupFailed);
+        return;
+      }
+
+      final uploaded = await GoogleDriveService.uploadBackup(localPath);
+      if (uploaded) {
+        SnackbarService.success(ctxt.backup_uploadSuccess);
+        ref.invalidate(driveBackupsProvider);
+        ref.invalidate(_backupHistoryProvider);
+      } else {
+        SnackbarService.error(ctxt.backup_uploadFailed);
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  void _showCloudRestoreSheet(AppLocalizations ctxt) {
+    final driveBackups = ref.read(driveBackupsProvider);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => DraggableScrollableSheet(
+        initialChildSize: 0.5,
+        maxChildSize: 0.8,
+        minChildSize: 0.3,
+        expand: false,
+        builder: (context, scrollController) {
+          final color = Theme.of(context).colorScheme;
+          final textTheme = Theme.of(context).textTheme;
+
+          return Column(
+            children: [
+              const SizedBox(height: 12),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: color.onSurfaceVariant.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  ctxt.backup_cloudBackups,
+                  style: textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: driveBackups.when(
+                  data: (backups) {
+                    if (backups.isEmpty) {
+                      return Center(
+                        child: Text(
+                          ctxt.backup_noCloudBackups,
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: color.onSurfaceVariant,
+                          ),
+                        ),
+                      );
+                    }
+                    return ListView.separated(
+                      controller: scrollController,
+                      itemCount: backups.length,
+                      separatorBuilder: (_, __) => Divider(
+                        height: 1,
+                        indent: 58,
+                        color: color.outlineVariant.withValues(alpha: 0.4),
+                      ),
+                      itemBuilder: (_, i) {
+                        final backup = backups[i];
+                        return ListTile(
+                          leading: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: color.tertiary.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Icon(LucideIcons.cloud,
+                                color: color.tertiary, size: 20),
+                          ),
+                          title: Text(
+                            backup.name,
+                            style: textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          subtitle: Text(
+                            '${_formatFileSize(backup.size)} • ${safeDateFormat('yMMMd').add_jm().format(backup.date)}',
+                            style: textTheme.bodySmall?.copyWith(
+                              color: color.onSurfaceVariant,
+                            ),
+                          ),
+                          trailing: Icon(LucideIcons.download,
+                              color: color.primary, size: 20),
+                          onTap: () {
+                            Navigator.pop(context);
+                            _restoreFromDrive(backup);
+                          },
+                        );
+                      },
+                    );
+                  },
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (_, __) => Center(
+                    child: Text(
+                      'Failed to load cloud backups',
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: color.error,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Future<void> _restoreFromDrive(DriveBackupInfo backup) async {
+    final ctxt = AppLocalizations.of(context)!;
+    final password = await DialogUtils.showPasswordDialog(
+      context,
+      isRestore: true,
+    );
+    if (password == null || !mounted) return;
+
+    setState(() => _isLoading = true);
+    try {
+      final localPath = await GoogleDriveService.downloadBackup(backup.id);
+      if (localPath == null) {
+        SnackbarService.error(ctxt.backup_uploadFailed);
+        return;
+      }
+
+      final isar = await ref.read(isarServiceProvider).getInstance();
+      if (!mounted) return;
+
+      // Read the downloaded file and restore
+      final file = File(localPath);
+      final fileContent = await file.readAsString();
+      final backupData = jsonDecode(fileContent);
+
+      final key = BackupService.deriveKey(password);
+      final iv = encrypt.IV.fromBase64(backupData['iv']);
+      final encrypter = encrypt.Encrypter(encrypt.AES(key));
+
+      final decrypted = encrypter.decrypt64(backupData['data'], iv: iv);
+      final data = jsonDecode(decrypted);
+
+      if (data['db'] != null) {
+        await BackupService.performRestore(isar, data['db']);
+      }
+      if (data['settings'] != null) {
+        await SharedPrefsUtil.instance.importAll(data['settings']);
+      }
+
+      SnackbarService.success(BuddyMessages.restoreSuccess);
+      ref.invalidate(_backupHistoryProvider);
+    } catch (e) {
+      SnackbarService.error(
+        'Restore failed: Invalid password or corrupted file',
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  String _formatFileSize(int bytes) {
+    if (bytes < 1024) return '$bytes B';
+    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
+    return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+  }
+}
+
+class _AutoBackupSection extends ConsumerStatefulWidget {
+  final ColorScheme color;
+  final TextTheme textTheme;
+  final AppSpacing spacing;
+
+  const _AutoBackupSection({
+    required this.color,
+    required this.textTheme,
+    required this.spacing,
+  });
+
+  @override
+  ConsumerState<_AutoBackupSection> createState() => _AutoBackupSectionState();
+}
+
+class _AutoBackupSectionState extends ConsumerState<_AutoBackupSection> {
+  BackupFrequency _frequency = BackupFrequency.never;
+  bool _hasPassword = false;
+  List<AutoBackupInfo> _recentBackups = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadState();
+  }
+
+  Future<void> _loadState() async {
+    final password = await AutoBackupService.getBackupPassword();
+    final backups = await AutoBackupService.listAutoBackups();
+    if (!mounted) return;
+    setState(() {
+      _hasPassword = password != null && password.isNotEmpty;
+      _recentBackups = backups;
+      _frequency = SharedPrefsUtil.instance.getAutoBackupFrequency();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final color = widget.color;
+    final textTheme = widget.textTheme;
+    final spacing = widget.spacing;
+    final ctxt = AppLocalizations.of(context)!;
+
+    return Card(
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      color: color.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        side: BorderSide(
+          color: color.outlineVariant.withValues(alpha: 0.5),
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        children: [
+          // Description
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: color.primary.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(LucideIcons.timer, color: color.primary, size: 20),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        ctxt.backup_autoBackup,
+                        style: textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      Text(
+                        ctxt.backup_autoBackupDesc,
+                        style: textTheme.bodySmall?.copyWith(
+                          color: color.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          // Frequency selector
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                Text(
+                  ctxt.backup_autoFrequency,
+                  style: textTheme.labelMedium?.copyWith(
+                    color: color.onSurfaceVariant,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const Spacer(),
+                SegmentedButton<BackupFrequency>(
+                  segments: [
+                    ButtonSegment(
+                      value: BackupFrequency.never,
+                      label: Text(ctxt.backup_autoNever),
+                    ),
+                    ButtonSegment(
+                      value: BackupFrequency.daily,
+                      label: Text(ctxt.backup_autoDaily),
+                    ),
+                    ButtonSegment(
+                      value: BackupFrequency.weekly,
+                      label: Text(ctxt.backup_autoWeekly),
+                    ),
+                  ],
+                  selected: {_frequency},
+                  onSelectionChanged: (selected) => _setFrequency(selected.first),
+                  style: ButtonStyle(
+                    visualDensity: VisualDensity.compact,
+                    textStyle: WidgetStatePropertyAll(
+                      textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Password setup prompt
+          if (_frequency != BackupFrequency.never && !_hasPassword) ...[
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: InkWell(
+                onTap: _setPassword,
+                borderRadius: BorderRadius.circular(10),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: color.errorContainer.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: color.error.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(LucideIcons.keyRound, size: 16, color: color.error),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          ctxt.backup_autoSetPassword,
+                          style: textTheme.bodySmall?.copyWith(
+                            color: color.onErrorContainer,
+                          ),
+                        ),
+                      ),
+                      Icon(LucideIcons.chevronRight, size: 16, color: color.error),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+
+          // Recent auto backups
+          if (_recentBackups.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Divider(
+              height: 1,
+              color: color.outlineVariant.withValues(alpha: 0.4),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+              child: Row(
+                children: [
+                  Icon(LucideIcons.history, size: 14, color: color.onSurfaceVariant),
+                  const SizedBox(width: 8),
+                  Text(
+                    ctxt.backup_autoLastRun(
+                      safeDateFormat('yMMMd').add_jm().format(_recentBackups.first.date),
+                    ),
+                    style: textTheme.bodySmall?.copyWith(
+                      color: color.onSurfaceVariant,
+                    ),
+                  ),
+                  const Spacer(),
+                  Text(
+                    '${_recentBackups.length} saved',
+                    style: textTheme.labelSmall?.copyWith(
+                      color: color.onSurfaceVariant.withValues(alpha: 0.6),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+
+          const SizedBox(height: 14),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _setFrequency(BackupFrequency freq) async {
+    setState(() => _frequency = freq);
+    await SharedPrefsUtil.instance.setAutoBackupFrequency(freq.name);
+
+    if (freq == BackupFrequency.never) {
+      await AutoBackupService.cancelAutoBackup();
+    } else {
+      if (!_hasPassword) {
+        await _setPassword();
+        if (!_hasPassword) {
+          // User cancelled password — revert to never
+          setState(() => _frequency = BackupFrequency.never);
+          await SharedPrefsUtil.instance.setAutoBackupFrequency('never');
+          return;
+        }
+      }
+      await AutoBackupService.scheduleAutoBackup(freq);
+    }
+  }
+
+  Future<void> _setPassword() async {
+    final password = await DialogUtils.showPasswordDialog(
+      context,
+      isRestore: false,
+    );
+    if (password == null || password.isEmpty) return;
+
+    await AutoBackupService.setBackupPassword(password);
+    if (mounted) {
+      setState(() => _hasPassword = true);
+      SnackbarService.success('Backup password set');
+    }
   }
 }

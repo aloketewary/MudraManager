@@ -1,6 +1,6 @@
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
-import 'package:mudra_manager/core/db/models/exchange_rate.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/db/models/frequency.dart';
 import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
@@ -168,13 +168,10 @@ class RecurringTransactionService {
     double? rateUsed;
 
     if (accountCurrency != null) {
-      final rate = await isar.exchangeRates
-          .filter()
-          .currencyCodeEqualTo(accountCurrency)
-          .findFirst();
-      if (rate != null) {
-        convertedAmount = recurring.amount * rate.rateToBase;
-        rateUsed = rate.rateToBase;
+      final r = CurrencyService.getCachedRate(accountCurrency);
+      if (r != null) {
+        convertedAmount = recurring.amount * r;
+        rateUsed = r;
       }
     }
 

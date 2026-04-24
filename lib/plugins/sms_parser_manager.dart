@@ -1,4 +1,5 @@
 import 'package:mudra_manager/plugins/sms_parsers/rbl_sms_parser.dart';
+import 'package:mudra_manager/plugins/sms_parsers/federal_bank_sms_parser.dart';
 import 'package:mudra_manager/plugins/sms_parsers/brazil_sms_parser.dart';
 import 'package:mudra_manager/plugins/sms_parsers/indonesia_sms_parser.dart';
 import 'package:mudra_manager/plugins/sms_parsers/mea_region_sms_parser.dart';
@@ -42,6 +43,7 @@ class SmsParserManager {
       IdfcSmsParserPlugin(),
       AuBankSmsParserPlugin(),
       RblSmsParserPlugin(),
+      FederalBankSmsParserPlugin(),
       BrazilSmsParser(),
       IndonesiaSmsParser(),
       MeaRegionSmsParser(),

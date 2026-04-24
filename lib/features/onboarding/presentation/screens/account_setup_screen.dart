@@ -1,5 +1,6 @@
 import 'dart:async' show Timer;
 
+import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +12,8 @@ import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/shared/widgets/currency_badge.dart';
 import 'package:mudra_manager/core/currency/currency_provider.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
+import 'package:mudra_manager/core/db/models/category.dart';
+import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/models/user_profile.dart';
 import 'package:mudra_manager/core/entitlement/entitlement_provider.dart';
 import 'package:mudra_manager/core/extension/localization_extenstion.dart';
@@ -44,6 +47,15 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
   bool _startFresh = false;
   final Set<String> _selectedPackIds = {'com.mudra.pack.default'};
   String _selectedCurrency = 'INR';
+
+  // Starter transaction state
+  final _starterControllers = <String, TextEditingController>{};
+  static const _starterItems = [
+    ('onboard_starterCoffee', 'coffee', LucideIcons.coffee),
+    ('onboard_starterTransport', 'car', LucideIcons.car),
+    ('onboard_starterLunch', 'utensils', LucideIcons.utensils),
+    ('onboard_starterGroceries', 'shoppingCart', LucideIcons.shoppingCart),
+  ];
 
   // Typewriter animation for account name hint
   static const _hintExamples = ['Cash', 'Wallet', 'SBI Bank', 'Paytm', 'GPay'];
@@ -152,6 +164,13 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
     } else if (_step == 3) {
       HapticFeedback.lightImpact();
       setState(() => _step = 4);
+    } else if (_step == 4) {
+      HapticFeedback.lightImpact();
+      setState(() => _step = 5);
+      // Initialize starter controllers
+      for (final item in _starterItems) {
+        _starterControllers.putIfAbsent(item.$1, () => TextEditingController());
+      }
     } else {
       _completeSetup();
     }
@@ -237,6 +256,11 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
       // Stamp install date for trial period
       await ref.read(entitlementServiceProvider).stampInstallDate();
 
+      // Save starter transactions if any amounts were entered
+      if (_starterControllers.isNotEmpty) {
+        await _saveStarterTransactions(isar);
+      }
+
       if (context.mounted) {
         context.go(AppRoutes.home);
       }
@@ -284,7 +308,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                     ),
                     const Spacer(),
                     Row(
-                      children: List.generate(5, (i) {
+                      children: List.generate(6, (i) {
                         final active = i <= _step;
                         return AnimatedContainer(
                           duration: const Duration(milliseconds: 300),
@@ -324,50 +348,14 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                       ),
                     );
                   },
-                  child: _step == 0
-                      ? _buildNameStep(
-                          color,
-                          textTheme,
-                          spacing,
-                          ctxt,
-                          accent,
-                          isDark,
-                        )
-                      : _step == 1
-                          ? _buildCurrencyStep(
-                              color,
-                              textTheme,
-                              spacing,
-                              accent,
-                              isDark,
-                              ctxt,
-                            )
-                          : _step == 2
-                              ? _buildAccountStep(
-                                  color,
-                                  textTheme,
-                                  spacing,
-                                  ctxt,
-                                  accent,
-                                  isDark,
-                                )
-                              : _step == 3
-                                  ? _buildToneStep(
-                                      color,
-                                      textTheme,
-                                      spacing,
-                                      isDark,
-                                      accent,
-                                      ctxt,
-                                    )
-                                  : _buildPackPickerStep(
-                                      color,
-                                      textTheme,
-                                      spacing,
-                                      isDark,
-                                      accent,
-                                      ctxt,
-                                    ),
+                  child: switch (_step) {
+                    0 => _buildNameStep(color, textTheme, spacing, ctxt, accent, isDark),
+                    1 => _buildCurrencyStep(color, textTheme, spacing, accent, isDark, ctxt),
+                    2 => _buildAccountStep(color, textTheme, spacing, ctxt, accent, isDark),
+                    3 => _buildToneStep(color, textTheme, spacing, isDark, accent, ctxt),
+                    4 => _buildPackPickerStep(color, textTheme, spacing, isDark, accent, ctxt),
+                    _ => _buildStarterTxnStep(color, textTheme, spacing, ctxt, accent, isDark),
+                  },
                 ),
               ),
 
@@ -405,7 +393,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    _step < 4
+                                    _step < 5
                                         ? ctxt.onboard_continue
                                         : ctxt.translate('onboard_GetStarted'),
                                     style: const TextStyle(
@@ -413,7 +401,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                                       fontSize: 16,
                                     ),
                                   ),
-                                  if (_step == 4) ...[
+                                  if (_step == 5) ...[
                                     const SizedBox(width: 8),
                                     const Icon(
                                       LucideIcons.arrowRight,
@@ -435,6 +423,18 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
                         ),
                         label: Text(
                           ctxt.onboard_restoreFromBackup,
+                          style: textTheme.labelLarge?.copyWith(
+                            color: color.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                    ],
+                    if (_step == 5) ...[
+                      const SizedBox(height: 12),
+                      TextButton(
+                        onPressed: _isLoading ? null : _completeSetup,
+                        child: Text(
+                          ctxt.onboard_skipAddLater,
                           style: textTheme.labelLarge?.copyWith(
                             color: color.onSurfaceVariant,
                           ),
@@ -1349,9 +1349,199 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
       ],
     );
   }
+
+  // ── STEP 5: STARTER TRANSACTIONS ──
+  Widget _buildStarterTxnStep(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    AppLocalizations ctxt,
+    Color accent,
+    bool isDark,
+  ) {
+    return SingleChildScrollView(
+      key: const ValueKey('starter_step'),
+      padding: EdgeInsets.symmetric(horizontal: spacing.cardHorizontalMax + 8),
+      child: Column(
+        children: [
+          const SizedBox(height: 32),
+          TweenAnimationBuilder<double>(
+            duration: const Duration(milliseconds: 600),
+            curve: Curves.easeOutBack,
+            tween: Tween(begin: 0.0, end: 1.0),
+            builder: (context, value, child) => Opacity(
+              opacity: value.clamp(0.0, 1.0),
+              child: Transform.scale(scale: value, child: child),
+            ),
+            child: Container(
+              padding: const EdgeInsets.all(5),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: accent.withValues(alpha: 0.25),
+                  width: 2.5,
+                ),
+              ),
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      accent.withValues(alpha: isDark ? 0.2 : 0.14),
+                      accent.withValues(alpha: isDark ? 0.08 : 0.05),
+                    ],
+                  ),
+                ),
+                child: Icon(LucideIcons.receiptText, size: 48, color: accent),
+              ),
+            ),
+          ),
+          const SizedBox(height: 32),
+          Text(
+            ctxt.onboard_whatDidYouSpend,
+            style: textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+              color: color.onSurface,
+              letterSpacing: -0.5,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            ctxt.onboard_addFewToStart,
+            style: textTheme.bodyLarge?.copyWith(
+              color: color.onSurfaceVariant,
+              height: 1.5,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 28),
+          ..._starterItems.map((item) {
+            final controller = _starterControllers[item.$1]!;
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: accent.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                    ),
+                    child: Icon(item.$3, size: 20, color: accent),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      ctxt.translate(item.$1),
+                      style: textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    width: 120,
+                    child: TextField(
+                      controller: controller,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      textAlign: TextAlign.end,
+                      decoration: InputDecoration(
+                        hintText: '0',
+                        prefixText: '\u20b9 ',
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 10,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                          borderSide: BorderSide(
+                            color: color.outlineVariant.withValues(alpha: 0.4),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                          borderSide: BorderSide(color: accent, width: 2),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _saveStarterTransactions(Isar isar) async {
+    final account = await isar.accounts.where().findFirst();
+    if (account == null) return;
+
+    final categories = await isar.categorys.where().findAll();
+    final now = DateTime.now();
+    final txns = <Transaction>[];
+
+    for (final item in _starterItems) {
+      final controller = _starterControllers[item.$1];
+      if (controller == null) continue;
+      final amount = double.tryParse(controller.text.replaceAll(',', ''));
+      if (amount == null || amount <= 0) continue;
+
+      final cat = _matchCategory(categories, item.$2);
+      final txn = Transaction.create(
+        date: now,
+        amount: amount,
+        isExpense: true,
+        description: '',
+      );
+      txn.account.value = account;
+      if (cat != null) txn.category.value = cat;
+      txns.add(txn);
+    }
+
+    if (txns.isEmpty) return;
+
+    await isar.writeTxn(() async {
+      for (final txn in txns) {
+        await isar.transactions.put(txn);
+        await txn.account.save();
+        await txn.category.save();
+      }
+    });
+
+    await SharedPrefsUtil.instance.setStarterTxnsOffered();
+  }
+
+  Category? _matchCategory(List<Category> categories, String iconHint) {
+    // Try matching by icon name first
+    final byIcon = categories.where(
+      (c) => c.iconName?.toLowerCase() == iconHint.toLowerCase(),
+    ).firstOrNull;
+    if (byIcon != null) return byIcon;
+
+    // Fallback: match by common names
+    final nameMap = {
+      'coffee': ['coffee', 'cafe', 'tea', 'beverage'],
+      'car': ['transport', 'travel', 'auto', 'cab', 'uber', 'ola'],
+      'utensils': ['food', 'lunch', 'dinner', 'restaurant', 'eating'],
+      'shoppingCart': ['grocery', 'groceries', 'shopping', 'supermarket'],
+    };
+    final keywords = nameMap[iconHint] ?? [];
+    for (final kw in keywords) {
+      final match = categories.where(
+        (c) => c.name.toLowerCase().contains(kw),
+      ).firstOrNull;
+      if (match != null) return match;
+    }
+    return categories.firstOrNull;
+  }
 }
 
-/// Full searchable currency list for onboarding.
 class _AllCurrenciesSheet extends StatefulWidget {
   final String selected;
   const _AllCurrenciesSheet({required this.selected});

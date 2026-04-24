@@ -6,7 +6,6 @@ import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
-import 'package:mudra_manager/core/db/models/exchange_rate.dart';
 import 'package:mudra_manager/core/db/models/frequency.dart';
 import 'package:mudra_manager/core/utils/date_arithmetic.dart';
 import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
@@ -260,13 +259,10 @@ class TransactionService {
     double? debitConverted;
     double? debitRate;
     if (fromCur != null) {
-      final rate = await isar.exchangeRates
-          .filter()
-          .currencyCodeEqualTo(fromCur)
-          .findFirst();
-      if (rate != null) {
-        debitConverted = amount * rate.rateToBase;
-        debitRate = rate.rateToBase;
+      final r = CurrencyService.getCachedRate(fromCur);
+      if (r != null) {
+        debitConverted = amount * r;
+        debitRate = r;
       }
     }
 
@@ -275,13 +271,10 @@ class TransactionService {
     double? creditConverted;
     double? creditRate;
     if (toCur != null) {
-      final rate = await isar.exchangeRates
-          .filter()
-          .currencyCodeEqualTo(toCur)
-          .findFirst();
-      if (rate != null) {
-        creditConverted = effectiveCreditAmount * rate.rateToBase;
-        creditRate = rate.rateToBase;
+      final r = CurrencyService.getCachedRate(toCur);
+      if (r != null) {
+        creditConverted = effectiveCreditAmount * r;
+        creditRate = r;
       }
     }
 

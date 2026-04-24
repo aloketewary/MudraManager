@@ -5660,4 +5660,182 @@ class AppLocalizationsHi extends AppLocalizations {
   String notif_underBudgetStreakTitle(int days) {
     return '🔥 $days दिन budget में!';
   }
+
+  @override
+  String get dashboard_bgSyncIssueTitle =>
+      'Background sync में दिक्कत हो सकती है';
+
+  @override
+  String get dashboard_bgSyncIssueDesc =>
+      'Bills और alerts में देरी हो सकती है। App दोबारा खोलें।';
+
+  @override
+  String get onboard_whatDidYouSpend => 'आज क्या खर्च किया?';
+
+  @override
+  String get onboard_addFewToStart =>
+      'कुछ add करें — dashboard तुरंत live हो जाएगा';
+
+  @override
+  String get onboard_skipAddLater => 'Skip — बाद में करूँगा';
+
+  @override
+  String get onboard_starterCoffee => 'चाय / Coffee';
+
+  @override
+  String get onboard_starterTransport => 'Transport';
+
+  @override
+  String get onboard_starterLunch => 'खाना';
+
+  @override
+  String get onboard_starterGroceries => 'Groceries';
+
+  @override
+  String onboard_starterAdded(int count) {
+    return '$count expenses add हो गए!';
+  }
+
+  @override
+  String get dashboard_listeningTitle => 'Transactions सुन रहे हैं...';
+
+  @override
+  String get dashboard_waitingForSms =>
+      'अगला bank notification यहाँ अपने आप आ जाएगा';
+
+  @override
+  String get dashboard_meanwhile => 'तब तक, try करें:';
+
+  @override
+  String get dashboard_addExpense => 'Expense Add करें';
+
+  @override
+  String get dashboard_setBudget => 'Budget बनाएं';
+
+  @override
+  String get dashboard_createGoal => 'Goal बनाएं';
+
+  @override
+  String get dashboard_addAccount => 'Account जोड़ें';
+
+  @override
+  String get dashboard_testTip =>
+      '💡 Tip: एक छोटा UPI payment भेजें — auto-import देखें!';
+
+  @override
+  String get dashboard_addFirstExpense => 'पहला खर्च add करें';
+
+  @override
+  String get dashboard_addFirstExpenseDesc =>
+      'आज क्या खर्च किया? Tap करके बताएं';
+
+  @override
+  String get quickAdd_title => 'Quick Add';
+
+  @override
+  String get quickAdd_recentCategories => 'Recent categories';
+
+  @override
+  String get quickAdd_moreOptions => 'और options';
+
+  @override
+  String get mode_simple => 'Simple';
+
+  @override
+  String get mode_full => 'Full';
+
+  @override
+  String get mode_simpleDesc => 'Expenses, budgets और SMS tracking';
+
+  @override
+  String get mode_fullDesc => 'सब कुछ — trips, goals, analytics, gamification';
+
+  @override
+  String get mode_switchToFull => 'Full Mode में जाएं';
+
+  @override
+  String get mode_switchToSimple => 'Simple Mode में जाएं';
+
+  @override
+  String get mode_pickTitle => 'Mudra कैसे use करना चाहेंगे?';
+
+  @override
+  String get mode_pickDesc => 'बाद में settings से बदल सकते हैं';
+
+  @override
+  String get backup_cloudBackup => 'Cloud Backup';
+
+  @override
+  String get backup_cloudRestore => 'Cloud से Restore करें';
+
+  @override
+  String get backup_signInGoogle => 'Google से Sign in करें';
+
+  @override
+  String backup_signedInAs(String email) {
+    return '$email से signed in';
+  }
+
+  @override
+  String get backup_uploadingToDrive => 'Google Drive पर upload हो रहा है...';
+
+  @override
+  String get backup_uploadSuccess => 'Backup Google Drive पर upload हो गया';
+
+  @override
+  String get backup_uploadFailed => 'Backup upload नहीं हो पाया';
+
+  @override
+  String get backup_cloudBackups => 'Cloud Backups';
+
+  @override
+  String get backup_noCloudBackups => 'कोई cloud backup नहीं मिला';
+
+  @override
+  String get backup_downloading => 'Google Drive से download हो रहा है...';
+
+  @override
+  String get backup_signInRequired =>
+      'Cloud backup के लिए Google से sign in करें';
+
+  @override
+  String get backup_signOut => 'Sign out';
+
+  @override
+  String get backup_cloudSubtitle => 'Google Drive पर encrypted backup';
+
+  @override
+  String get backup_autoBackup => 'Auto Backup';
+
+  @override
+  String get backup_autoBackupDesc =>
+      'Automatic local backup, पिछले 7 दिन रखता है';
+
+  @override
+  String get backup_autoFrequency => 'Backup frequency';
+
+  @override
+  String get backup_autoNever => 'Off';
+
+  @override
+  String get backup_autoDaily => 'Daily';
+
+  @override
+  String get backup_autoWeekly => 'Weekly';
+
+  @override
+  String get backup_autoSetPassword => 'Auto backup के लिए password set करें';
+
+  @override
+  String backup_autoEnabled(String frequency) {
+    return 'Auto backup on ($frequency)';
+  }
+
+  @override
+  String backup_autoLastRun(String date) {
+    return 'पिछला auto backup: $date';
+  }
+
+  @override
+  String get backup_proRequired => 'Pro feature';
 }

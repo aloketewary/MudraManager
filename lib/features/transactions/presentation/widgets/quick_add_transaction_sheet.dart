@@ -22,7 +22,8 @@ import 'package:mudra_manager/features/transactions/data/transaction_provider.da
 import 'package:mudra_manager/shared/widgets/transaction_form/transaction_form_widgets.dart';
 
 class QuickAddTransactionSheet extends ConsumerStatefulWidget {
-  const QuickAddTransactionSheet({super.key});
+  final bool compact;
+  const QuickAddTransactionSheet({super.key, this.compact = false});
 
   @override
   ConsumerState<QuickAddTransactionSheet> createState() =>
@@ -40,6 +41,13 @@ class _QuickAddTransactionSheetState
   Account? _selectedAccount;
   Category? _selectedCategory;
   bool _saving = false;
+  late bool _showFullMode;
+
+  @override
+  void initState() {
+    super.initState();
+    _showFullMode = !widget.compact;
+  }
 
   @override
   void dispose() {
@@ -154,8 +162,9 @@ class _QuickAddTransactionSheetState
             ),
             SizedBox(height: spacing.sectionGap),
 
-            // ── Account ──
-            accountsAsync.when(
+            // ── Account (hidden in compact, auto-selected) ──
+            if (_showFullMode)
+              accountsAsync.when(
               data: (accounts) {
                 if (_selectedAccount == null && accounts.isNotEmpty) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -253,9 +262,15 @@ class _QuickAddTransactionSheetState
               loading: () => const SizedBox(height: 48),
               error: (_, __) => const SizedBox(),
             ),
-            SizedBox(height: spacing.sectionGap),
+            if (_showFullMode)
+              SizedBox(height: spacing.sectionGap),
 
             // ── Category ──
+            if (!_showFullMode) ...[
+              // Compact: 4×2 grid of frequent categories
+              _buildCompactCategoryGrid(color, textTheme, spacing),
+              SizedBox(height: spacing.sectionGap),
+            ] else
             categoriesAsync.when(
               data: (categories) {
                 final parents = categories
@@ -472,8 +487,9 @@ class _QuickAddTransactionSheetState
             ),
             SizedBox(height: spacing.sectionGap),
 
-            // ── Note ──
-            TextField(
+            // ── Note (hidden in compact until expanded) ──
+            if (_showFullMode)
+              TextField(
               controller: _noteController,
               decoration: InputDecoration(
                 hintText: 'Add note (optional)',
@@ -494,7 +510,24 @@ class _QuickAddTransactionSheetState
                 isDense: true,
               ),
             ),
-            SizedBox(height: spacing.sectionGap),
+            if (_showFullMode)
+              SizedBox(height: spacing.sectionGap),
+
+            // ── More options (compact mode only) ──
+            if (!_showFullMode) ...[
+              TextButton.icon(
+                onPressed: () => setState(() => _showFullMode = true),
+                icon: Icon(LucideIcons.chevronDown, size: 16, color: color.onSurfaceVariant),
+                label: Text(
+                  'More options',
+                  style: textTheme.labelMedium?.copyWith(
+                    color: color.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            ],
+
+            SizedBox(height: spacing.elementGap),
 
             // ── Save ──
             FilledButton(
@@ -522,6 +555,90 @@ class _QuickAddTransactionSheetState
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildCompactCategoryGrid(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
+    // Reuse already-cached providers — no new Isar queries
+    final categoriesAsync = _isExpense
+        ? ref.watch(expenseCategoriesProvider)
+        : ref.watch(incomeCategoriesProvider);
+
+    // Auto-select account from already-cached list
+    if (_selectedAccount == null) {
+      final accountsAsync = ref.watch(accountsProvider);
+      accountsAsync.whenData((accounts) {
+        if (accounts.isNotEmpty && _selectedAccount == null) {
+          final primary = accounts.where((a) => a.isPrimary).firstOrNull;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) setState(() => _selectedAccount = primary ?? accounts.first);
+          });
+        }
+      });
+    }
+
+    return categoriesAsync.when(
+      data: (categories) {
+        final parents = categories
+            .where((c) => c.parentCategory.value == null)
+            .take(8)
+            .toList();
+        if (parents.isEmpty) return const SizedBox.shrink();
+        return Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: parents.map((cat) {
+            final isSelected = _selectedCategory?.id == cat.id;
+            final catColor = Color(cat.colorValue ?? color.primary.toARGB32());
+            return GestureDetector(
+              onTap: () {
+                HapticFeedback.selectionClick();
+                setState(() => _selectedCategory = cat);
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? catColor.withValues(alpha: 0.12)
+                      : color.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                  border: Border.all(
+                    color: isSelected
+                        ? catColor.withValues(alpha: 0.5)
+                        : color.outlineVariant.withValues(alpha: 0.2),
+                    width: isSelected ? 1.5 : 1,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      IconHelper.iconFromName(cat.iconName ?? 'category'),
+                      size: 16,
+                      color: catColor,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      cat.name,
+                      style: textTheme.labelMedium?.copyWith(
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                        color: isSelected ? color.onSurface : color.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        );
+      },
+      loading: () => const SizedBox(height: 48),
+      error: (_, __) => const SizedBox.shrink(),
     );
   }
 

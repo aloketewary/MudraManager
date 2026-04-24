@@ -12,7 +12,8 @@ import 'package:mudra_manager/features/dashboard/presentation/providers/dashboar
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
 import 'package:mudra_manager/features/gamification/services/gamification_service.dart';
 
-final isarServiceProvider = Provider<IsarService>((ref) => IsarService());
+final _isarService = IsarService();
+final isarServiceProvider = Provider<IsarService>((ref) => _isarService);
 
 final gamificationServiceInitProvider = FutureProvider<GamificationService>((ref) async {
   final isar = await ref.watch(isarServiceProvider).getInstance();
@@ -21,7 +22,9 @@ final gamificationServiceInitProvider = FutureProvider<GamificationService>((ref
   return service;
 });
 
-void invalidateAll(WidgetRef ref) {
+/// Full provider reset — only for currency change (all amounts recalculate).
+/// Do NOT use for normal operations — reactive watchers handle those.
+void invalidateAfterCurrencyChange(WidgetRef ref) {
   ref.invalidate(currencyServiceProvider);
   ref.invalidate(baseCurrencyProvider);
   ref.invalidate(accountServiceProvider);

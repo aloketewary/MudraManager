@@ -13,6 +13,7 @@ import 'package:mudra_manager/core/entitlement/entitlement_products.dart';
 import 'package:mudra_manager/core/entitlement/entitlement_provider.dart';
 import 'package:mudra_manager/core/extension/localization_extenstion.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
+import 'package:mudra_manager/core/providers/app_mode_provider.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
@@ -22,6 +23,7 @@ import 'package:mudra_manager/features/budget/data/budget_service_provider.dart'
 import 'package:mudra_manager/features/category/data/category_provider.dart';
 import 'package:mudra_manager/features/profile/data/user_profile_provider.dart';
 import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
+import 'package:mudra_manager/features/sms/presentation/screens/sms_activity_screen.dart';
 import 'package:mudra_manager/shared/widgets/pro_gate.dart';
 import 'package:mudra_manager/shared/widgets/ambient_brand_section.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
@@ -113,8 +115,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 SizedBox(height: spacing.sectionGap),
 
                 // ── ACHIEVEMENTS ──
-                _buildAchievementsCard(color, textTheme, spacing),
-                const SizedBox(height: 24),
+                if (!ref.watch(isSimpleModeProvider))
+                  _buildAchievementsCard(color, textTheme, spacing),
+                if (!ref.watch(isSimpleModeProvider))
+                  const SizedBox(height: 24),
                 // ── SUBSCRIPTION STATUS ──
                 _buildSubscriptionCard(color, textTheme, spacing, isDark),
                 // ── CORE SETTINGS ──
@@ -185,41 +189,59 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           .displayName(),
                       () => context.push(AppRoutes.chooseLanguage),
                     ),
+                    _SettingItem(
+                      LucideIcons.layoutGrid,
+                      ref.watch(isSimpleModeProvider)
+                          ? l10n.mode_switchToFull
+                          : l10n.mode_switchToSimple,
+                      ref.watch(isSimpleModeProvider)
+                          ? l10n.mode_simpleDesc
+                          : l10n.mode_fullDesc,
+                      () async {
+                        final notifier = ref.read(appModeProvider.notifier);
+                        final current = ref.read(appModeProvider);
+                        await notifier.setMode(
+                          current == AppMode.simple ? AppMode.full : AppMode.simple,
+                        );
+                      },
+                    ),
                   ],
                 ),
 
                 const SizedBox(height: 24),
 
                 // ── ADVANCED ──
-                _buildSectionHeader(l10n.section_advanced, color, textTheme),
-                const SizedBox(height: 10),
-                _buildGroupedCard(
-                  color,
-                  textTheme,
-                  spacing,
-                  items: [
-                    _SettingItem(
-                      LucideIcons.layoutDashboard,
-                      l10n.title_dashboardLayout,
-                      l10n.profile_customizeWidgets,
-                      () => context.push(AppRoutes.dashboardCustomize),
-                      trailing: const ProBadge(),
-                    ),
-                    _SettingItem(
-                      LucideIcons.arrowLeftRight,
-                      l10n.profile_importExport,
-                      l10n.profile_importExportDesc,
-                      () => context.push(AppRoutes.importExport),
-                    ),
-                    _SettingItem(
-                      LucideIcons.puzzle,
-                      l10n.title_plugins,
-                      l10n.profile_manageExtensions,
-                      () => context.push(AppRoutes.marketplace),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
+                if (!ref.watch(isSimpleModeProvider)) ...[
+                  _buildSectionHeader(l10n.section_advanced, color, textTheme),
+                  const SizedBox(height: 10),
+                  _buildGroupedCard(
+                    color,
+                    textTheme,
+                    spacing,
+                    items: [
+                      _SettingItem(
+                        LucideIcons.layoutDashboard,
+                        l10n.title_dashboardLayout,
+                        l10n.profile_customizeWidgets,
+                        () => context.push(AppRoutes.dashboardCustomize),
+                        trailing: const ProBadge(),
+                      ),
+                      _SettingItem(
+                        LucideIcons.arrowLeftRight,
+                        l10n.profile_importExport,
+                        l10n.profile_importExportDesc,
+                        () => context.push(AppRoutes.importExport),
+                      ),
+                      _SettingItem(
+                        LucideIcons.puzzle,
+                        l10n.title_plugins,
+                        l10n.profile_manageExtensions,
+                        () => context.push(AppRoutes.marketplace),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                ],
 
                 // ── SUPPORT & LEGAL ──
                 _buildSectionHeader(l10n.section_supportLegal, color, textTheme),
@@ -1271,31 +1293,55 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     TextTheme textTheme,
     AppSpacing spacing,
   ) {
-    final items = <_SettingItem>[
-      _SettingItem(
-        LucideIcons.bell,
-        l10n.profile_notifications,
-        l10n.profile_dailyWeeklySummaries,
-        () => context.push(AppRoutes.notificationSettings),
-      ),
-      _SettingItem(
-        LucideIcons.bellRing,
-        l10n.profile_autoImport,
-        l10n.profile_autoImportDesc,
-        () => context.push(AppRoutes.smsImport),
-      ),
-      _SettingItem(
-        LucideIcons.cloudUpload,
-        l10n.profile_backupRestore,
-        l10n.profile_manageData,
-        () => context.push(AppRoutes.backupRestore),
-        trailing: const ProBadge(),
-      ),
-    ];
-
     return Consumer(
       builder: (context, ref, _) {
-        final extraItems = [...items];
+        final pendingCount = ref.watch(pendingCountProvider).value ?? 0;
+        final extraItems = <_SettingItem>[
+          _SettingItem(
+            LucideIcons.bell,
+            l10n.profile_notifications,
+            l10n.profile_dailyWeeklySummaries,
+            () => context.push(AppRoutes.notificationSettings),
+          ),
+          _SettingItem(
+            LucideIcons.bellRing,
+            l10n.profile_autoImport,
+            pendingCount > 0
+                ? '$pendingCount pending review'
+                : l10n.profile_autoImportDesc,
+            () => context.push(
+              pendingCount > 0 ? AppRoutes.smsActivity : AppRoutes.smsImport,
+            ),
+            trailing: pendingCount > 0
+                ? Container(
+                    margin: const EdgeInsets.only(left: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: color.error,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      '$pendingCount',
+                      style: TextStyle(
+                        color: color.onError,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  )
+                : null,
+          ),
+          _SettingItem(
+            LucideIcons.cloudUpload,
+            l10n.profile_backupRestore,
+            l10n.profile_manageData,
+            () => context.push(AppRoutes.backupRestore),
+            trailing: const ProBadge(),
+          ),
+        ];
 
         return _buildGroupedCard(color, textTheme, spacing, items: extraItems);
       },

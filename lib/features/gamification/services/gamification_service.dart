@@ -1,12 +1,12 @@
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/models/budget.dart';
-import 'package:mudra_manager/core/db/models/budget_type.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/services/notification_service.dart';
 import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/gamification/models/achievement.dart';
+import 'package:mudra_manager/core/utils/budget_spent_calculator.dart';
 import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
 import 'package:mudra_manager/features/gamification/providers/achievement_registry.dart';
 
@@ -653,55 +653,9 @@ class GamificationService {
      HELPERS
   ===================================================== */
 
-  /// Calculate total spent for a budget in a date range, handling all budget types.
-  Future<double> _calculateBudgetSpent(Budget budget, DateTime s, DateTime e) async {
-    final txns = await isar.transactions
-        .filter()
-        .isExpenseEqualTo(true)
-        .dateBetween(s, e)
-        .findAll();
-
-    if (budget.budgetType == BudgetType.tagWise) {
-      await budget.budgetTags.load();
-      final tagIds = budget.budgetTags.map((t) => t.id).toSet();
-      if (tagIds.isEmpty) return 0;
-      double spent = 0;
-      for (final t in txns) {
-        await t.tags.load();
-        if (t.tags.any((tag) => tagIds.contains(tag.id))) {
-          spent += t.baseAmount;
-        }
-      }
-      return spent;
-    }
-
-    if (budget.budgetType == BudgetType.dayWise ||
-        budget.budgetType == BudgetType.festival ||
-        budget.budgetType == BudgetType.travel) {
-      await budget.categories.load();
-      final categoryIds = budget.categories.map((c) => c.id).toList();
-      if (categoryIds.isEmpty) {
-        return txns.fold<double>(0.0, (sum, t) => sum + t.baseAmount);
-      }
-      for (final t in txns) {
-        await t.category.load();
-      }
-      return txns
-          .where((t) => t.category.value != null && categoryIds.contains(t.category.value!.id))
-          .fold<double>(0.0, (sum, t) => sum + t.baseAmount);
-    }
-
-    // categoryWise
-    await budget.categories.load();
-    final categoryIds = budget.categories.map((c) => c.id).toList();
-    if (categoryIds.isEmpty) return 0;
-    for (final t in txns) {
-      await t.category.load();
-    }
-    return txns
-        .where((t) => t.category.value != null && categoryIds.contains(t.category.value!.id))
-        .fold<double>(0.0, (sum, t) => sum + t.baseAmount);
-  }
+  /// Calculate total spent for a budget in a date range.
+  Future<double> _calculateBudgetSpent(Budget budget, DateTime s, DateTime e) =>
+      BudgetSpentCalculator.calculate(isar, budget, s, e);
 
   bool _isSameDay(DateTime a, DateTime b) {
     return a.year == b.year && a.month == b.month && a.day == b.day;
@@ -850,6 +804,7 @@ class GamificationService {
   Future<void> _checkBudgetAdherence() async {
     try {
       final now = DateTime.now();
+      if (await _isBeforeTrackingStart(now)) return;
       final yesterday = now.subtract(const Duration(days: 1));
       final yesterdayStart = DateTime(
         yesterday.year,
@@ -944,11 +899,26 @@ class GamificationService {
     }
   }
 
+  /// Returns true if yesterday is before the app install date — no meaningful
+  /// "yesterday" data exists yet, so daily-comparison checks should be skipped.
+  Future<bool> _isBeforeTrackingStart(DateTime now) async {
+    final config = await isar.appConfigs
+        .filter()
+        .keyEqualTo('ent_install_date')
+        .findFirst();
+    if (config?.dateValue == null) return true;
+    final install = config!.dateValue!;
+    final installDay = DateTime(install.year, install.month, install.day);
+    final yesterday = DateTime(now.year, now.month, now.day)
+        .subtract(const Duration(days: 1));
+    return yesterday.isBefore(installDay);
+  }
+
   Future<void> _checkZeroSpendDay(DateTime now) async {
     try {
-      // Don't award zero-spend if user has no transactions at all (fresh install)
       final totalTxns = await isar.transactions.count();
       if (totalTxns == 0) return;
+      if (await _isBeforeTrackingStart(now)) return;
 
       final yesterday = now.subtract(const Duration(days: 1));
       final start = DateTime(yesterday.year, yesterday.month, yesterday.day);
@@ -972,6 +942,7 @@ class GamificationService {
     try {
       final totalTxns = await isar.transactions.count();
       if (totalTxns == 0) return;
+      if (await _isBeforeTrackingStart(now)) return;
       final yesterday = now.subtract(const Duration(days: 1));
       final start = DateTime(yesterday.year, yesterday.month, yesterday.day);
       final end =

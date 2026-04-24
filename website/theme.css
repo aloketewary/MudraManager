@@ -1,0 +1,61 @@
+/* ── Mudra Manager Shared Theme ── */
+
+body { font-family: 'Inter', system-ui, sans-serif; }
+html { scroll-behavior: smooth; }
+
+/* Glassmorphism nav */
+.glass-dark { background: rgba(15,23,42,0.8); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); }
+html:not(.dark) .glass-dark { background: rgba(255,255,255,0.85); }
+
+/* Focus visible */
+*:focus-visible { outline: 2px solid #818cf8; outline-offset: 2px; border-radius: 4px; }
+
+/* ── Light mode overrides ── */
+
+/* Base */
+html:not(.dark) body { background: #ffffff; color: #0f172a; }
+
+/* Text */
+html:not(.dark) .text-white { color: #0f172a; }
+html:not(.dark) .text-slate-400 { color: #64748b; }
+html:not(.dark) .text-slate-500 { color: #64748b; }
+html:not(.dark) .text-slate-600 { color: #475569; }
+html:not(.dark) .text-slate-700 { color: #334155; }
+html:not(.dark) .text-slate-300 { color: #1e293b; }
+html:not(.dark) .font-black { color: #0f172a; }
+html:not(.dark) h1, html:not(.dark) h2, html:not(.dark) h3 { color: #0f172a; }
+
+/* Backgrounds */
+html:not(.dark) .bg-slate-950 { background: #ffffff; }
+html:not(.dark) .bg-slate-900 { background: #f1f5f9; }
+html:not(.dark) .bg-slate-800 { background: #e2e8f0; }
+html:not(.dark) .bg-white\/5 { background: rgba(0,0,0,0.03); }
+html:not(.dark) .bg-white\/\[0\.03\] { background: rgba(0,0,0,0.02); }
+html:not(.dark) .bg-white\/\[0\.02\] { background: rgba(0,0,0,0.02); }
+
+/* Borders */
+html:not(.dark) .border-white\/5 { border-color: rgba(0,0,0,0.08); }
+html:not(.dark) .border-white\/10 { border-color: rgba(0,0,0,0.1); }
+html:not(.dark) .border-slate-700\/50 { border-color: #e2e8f0; }
+
+/* Gradient cards */
+html:not(.dark) .bg-gradient-to-br.from-indigo-500\/10 { background: linear-gradient(to bottom right, rgba(99,102,241,0.06), rgba(139,92,246,0.02)); }
+html:not(.dark) .bg-gradient-to-br.from-emerald-500\/10 { background: linear-gradient(to bottom right, rgba(16,185,129,0.06), rgba(20,184,166,0.02)); }
+html:not(.dark) .bg-gradient-to-br.from-amber-500\/10 { background: linear-gradient(to bottom right, rgba(245,158,11,0.06), rgba(249,115,22,0.02)); }
+html:not(.dark) .bg-gradient-to-br.from-pink-500\/10 { background: linear-gradient(to bottom right, rgba(236,72,153,0.06), rgba(244,63,94,0.02)); }
+html:not(.dark) .bg-gradient-to-br.from-cyan-500\/10 { background: linear-gradient(to bottom right, rgba(6,182,212,0.06), rgba(59,130,246,0.02)); }
+html:not(.dark) .bg-gradient-to-br.from-slate-900 { background: linear-gradient(to bottom right, #f8fafc, #f1f5f9); }
+
+/* Table */
+html:not(.dark) td, html:not(.dark) th { color: #334155; }
+
+/* Footer */
+html:not(.dark) footer { border-color: rgba(0,0,0,0.08); }
+
+/* Details/FAQ */
+html:not(.dark) details { background: rgba(0,0,0,0.02); border-color: rgba(0,0,0,0.06); }
+html:not(.dark) details summary { color: #0f172a; }
+html:not(.dark) details[open] summary { color: #6366f1; }
+html:not(.dark) details p { color: #475569; }
+html:not(.dark) details summary::after { color: #94a3b8; }
+html:not(.dark) details[open] summary::after { color: #6366f1; }

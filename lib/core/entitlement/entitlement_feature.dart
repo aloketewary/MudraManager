@@ -18,6 +18,7 @@ enum ProFeature {
 
   // ── Backup ──
   cloudBackup,
+  autoBackup,
 
   // ── Plugins ──
   premiumPlugins, // extra category packs, etc.
@@ -45,5 +46,4 @@ const Map<String, ProFeature> gatedRoutes = {
   '/tax-estimation': ProFeature.advancedAnalytics,
   '/monthly-recap': ProFeature.monthlyRecap,
   '/dashboard-customize': ProFeature.dashboardCustomize,
-  '/backup-restore': ProFeature.cloudBackup,
 };

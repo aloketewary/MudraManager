@@ -25,7 +25,24 @@ class CurrencyService {
   final Isar _isar;
   final AppConfigService _config;
 
+  /// In-memory rate cache. Populated on first access, invalidated on update.
+  /// Accessible via [cachedRates] for hot paths that can't await.
+  static Map<String, double>? _rateCache;
+
   CurrencyService(this._isar, this._config);
+
+  /// Returns the cached rate map. Returns empty if not yet loaded.
+  /// Call [loadRateCache] at startup to populate.
+  static Map<String, double> get cachedRates => _rateCache ?? const {};
+
+  /// Load all rates into memory. Call once at startup (deferred tier).
+  Future<void> loadRateCache() async {
+    _rateCache = await getAllRates();
+  }
+
+  /// Get a rate from cache (sync, no DB hit). Returns null if not cached.
+  static double? getCachedRate(String currencyCode) =>
+      _rateCache?[currencyCode];
 
   // ── Base currency ──────────────────────────────────────────────
 
@@ -38,11 +55,21 @@ class CurrencyService {
   // ── Rate lookup ────────────────────────────────────────────────
 
   Future<double?> getRate(String currencyCode) async {
+    // Try cache first
+    final cached = _rateCache?[currencyCode];
+    if (cached != null) return cached;
+
     final rate = await _isar.exchangeRates
         .filter()
         .currencyCodeEqualTo(currencyCode)
         .findFirst();
-    return rate?.rateToBase;
+    final value = rate?.rateToBase;
+    // Populate cache entry
+    if (value != null) {
+      _rateCache ??= {};
+      _rateCache![currencyCode] = value;
+    }
+    return value;
   }
 
   Future<Map<String, double>> getAllRates() async {
@@ -123,6 +150,9 @@ class CurrencyService {
     await _isar.writeTxn(() async {
       await _isar.exchangeRates.putAll(rates);
     });
+
+    // Invalidate cache so next access picks up fresh rates
+    _rateCache = null;
   }
 
   // ── Change base currency (archives all transactions) ───────────

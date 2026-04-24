@@ -63,8 +63,8 @@ void main() {
       }
     });
 
-    test('backup route is gated', () {
-      expect(gatedRoutes['/backup-restore'], ProFeature.cloudBackup);
+    test('backup route is free (cloud/auto gated at widget level)', () {
+      expect(gatedRoutes['/backup-restore'], isNull);
     });
   });
 

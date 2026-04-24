@@ -10,11 +10,17 @@ import 'package:mudra_manager/features/gamification/services/gamification_servic
 import 'package:mudra_manager/features/notifications/data/smart_notification_service.dart';
 import 'package:mudra_manager/features/sms/data/sms_cleanup_service.dart';
 import 'package:mudra_manager/features/transactions/data/recurring_transaction_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
 
 class BackgroundTaskManager {
   static const String _dailyTaskName = 'dailyBackgroundTask';
+  static const String _consecutiveFailuresKey = 'bg_task_consecutive_failures';
+  static const String _lastFailureKey = 'bg_task_last_failure';
   static final AppLog _log = AppLog(getLogger(), 'BackgroundTaskManager');
+
+  /// Number of consecutive failures before showing a banner.
+  static const int failureThreshold = 3;
 
   /// Call at app start — only schedules workmanager, no heavy work.
   static Future<void> initialize() async {
@@ -87,11 +93,49 @@ class BackgroundTaskManager {
       await SmsHashCleanupService.cleanupOldHashes();
       await CategoryRuleService(isar).cleanupOldRules();
 
+      await _recordSuccess();
       _log.i('All background tasks completed');
     } catch (e) {
       _log.e('Background tasks failed', e);
+      await _recordFailure(e);
       ErrorTracker.record('background_task', 'runAllTasks failed', e);
     }
+  }
+
+  // ── Failure tracking ──
+
+  static Future<void> _recordSuccess() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt(_consecutiveFailuresKey, 0);
+    } catch (_) {}
+  }
+
+  static Future<void> _recordFailure(Object error) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final current = prefs.getInt(_consecutiveFailuresKey) ?? 0;
+      await prefs.setInt(_consecutiveFailuresKey, current + 1);
+      await prefs.setString(_lastFailureKey, error.toString());
+    } catch (_) {}
+  }
+
+  /// Returns the number of consecutive background task failures.
+  static Future<int> getConsecutiveFailures() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getInt(_consecutiveFailuresKey) ?? 0;
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  /// Resets the failure counter (called when user dismisses the banner).
+  static Future<void> dismissFailureBanner() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt(_consecutiveFailuresKey, 0);
+    } catch (_) {}
   }
 }
 

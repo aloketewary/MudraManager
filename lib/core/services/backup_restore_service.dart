@@ -75,7 +75,7 @@ class BackupService {
         'timestamp': DateTime.now().toIso8601String(),
       });
 
-      final key = _deriveKey(password);
+      final key = deriveKey(password);
       final iv = encrypt.IV.fromSecureRandom(16);
       final encrypter = encrypt.Encrypter(encrypt.AES(key));
       final encrypted = encrypter.encrypt(content, iv: iv);
@@ -144,7 +144,7 @@ class BackupService {
       final fileContent = await selectedFile.readAsString();
       final backupData = jsonDecode(fileContent);
 
-      final key = _deriveKey(password);
+      final key = deriveKey(password);
       final iv = encrypt.IV.fromBase64(backupData['iv']);
       final encrypter = encrypt.Encrypter(encrypt.AES(key));
 
@@ -175,7 +175,7 @@ class BackupService {
     }
   }
 
-  static encrypt.Key _deriveKey(String password) {
+  static encrypt.Key deriveKey(String password) {
     final bytes = utf8.encode(password);
     final hash = sha256.convert(bytes);
     return encrypt.Key(Uint8List.fromList(hash.bytes));
