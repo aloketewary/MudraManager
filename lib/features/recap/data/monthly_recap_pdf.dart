@@ -9,13 +9,16 @@ class MonthlyRecapPdf {
   static Future<Uint8List> generate(MonthlyRecapData data) async {
     final pdf = pw.Document();
     final font =
-        pw.Font.ttf(await rootBundle.load('assets/fonts/NotoSans-Regular.ttf'));
+        pw.Font.ttf(await rootBundle.load('assets/fonts/Inter-Variable.ttf'));
     final fallbackFont = pw.Font.ttf(
       await rootBundle
-          .load('assets/fonts/NotoSansDevanagari-VariableFont_wdth,wght.ttf'),
+          .load('assets/fonts/NotoSansDevanagari-Variable.ttf'),
+    );
+    final bengaliFallback = pw.Font.ttf(
+      await rootBundle.load('assets/fonts/NotoSansBengali-Variable.ttf'),
     );
     final theme =
-        pw.ThemeData.withFont(base: font, fontFallback: [fallbackFont]);
+        pw.ThemeData.withFont(base: font, fontFallback: [fallbackFont, bengaliFallback]);
 
     final monthName = safeDateFormat('MMMM yyyy').format(data.month);
     final now = DateTime.now();

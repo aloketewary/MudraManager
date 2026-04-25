@@ -3,73 +3,254 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#08080c" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)">
     <title>Privacy Policy — Mudra Manager</title>
+    <meta name="description" content="Mudra Manager privacy policy. We collect nothing. All data stays on your device with AES-256 encryption.">
     <link rel="icon" href="assets/logo.png">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="2026.css">
     <style>
         .legal h2 { font-size: 1.2rem; margin-bottom: 10px; margin-top: 40px; }
         .legal h2:first-of-type { margin-top: 0; }
-        .legal p, .legal li { font-size: 14px; color: var(--fg2); line-height: 1.7; }
+        .legal p, .legal li { font-size: 14px; color: var(--dim); line-height: 1.7; }
         .legal ul { margin-left: 16px; margin-top: 8px; }
         .legal li { margin-bottom: 6px; list-style: none; padding-left: 16px; position: relative; }
-        .legal li::before { content: '•'; position: absolute; left: 0; color: var(--fg3); }
-        .legal h3 { font-size: 14px; font-weight: 600; margin-top: 20px; margin-bottom: 6px; color: var(--fg); }
+        .legal li::before { content: '•'; position: absolute; left: 0; color: var(--mute); }
+        .legal h3 { font-size: 14px; font-weight: 600; margin-top: 20px; margin-bottom: 6px; color: var(--text); }
         .tldr { padding: 16px 20px; border-radius: var(--radius); background: color-mix(in srgb, var(--green) 6%, transparent); border: 1px solid color-mix(in srgb, var(--green) 12%, transparent); margin-bottom: 24px; font-size: 14px; font-weight: 600; color: var(--green); }
         .sec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px; }
-        .sec-box { padding: 14px; border-radius: var(--radius-sm); background: color-mix(in srgb, var(--fg) 3%, transparent); text-align: center; }
-        .sec-box small { font-size: 11px; color: var(--fg3); display: block; }
+        .sec-box { padding: 14px; border-radius: var(--radius-sm); background: var(--tint); text-align: center; }
+        .sec-box small { font-size: 11px; color: var(--mute); display: block; }
         .sec-box strong { font-size: 14px; color: var(--green); display: block; margin-top: 2px; }
+        .legal table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 13px; }
+        .legal th, .legal td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+        .legal th { color: var(--text); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+        .legal td { color: var(--dim); }
     </style>
 </head>
 <body>
-    <nav class="nav" role="navigation"><a href="index.html" class="nav-logo"><img src="assets/logo.png" alt="" width="28" height="28"><span>Mudra Manager</span></a><div class="nav-links"><button class="theme-btn" id="theme-toggle" aria-label="Toggle theme"><i class="fas fa-circle-half-stroke"></i></button><a href="index.html" style="font-size:13px;color:var(--fg2)">← Home</a></div></nav>
+    <a href="#main" class="skip">Skip to content</a>
+
+    <nav class="nav" role="navigation" aria-label="Main">
+        <a href="index.html" class="nav-logo"><img src="assets/logo.png" alt="" width="24" height="24">Mudra Manager</a>
+        <div class="nav-r">
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="features.html">Features</a>
+                <a href="whatsnew.html">Changelog</a>
+                <a href="support.html">Support</a>
+            </div>
+            <button class="nav-theme" id="theme-toggle" aria-label="Toggle theme"><i class="fas fa-sun theme-icon"></i></button>
+            <a href="https://play.google.com/store/apps/details?id=com.mudramanager.app" target="_blank" class="nav-dl">Download</a>
+            <button class="nav-burger" id="menu-btn" aria-label="Menu"><span></span><span></span></button>
+        </div>
+    </nav>
+
+    <div class="mob" id="mob">
+        <button class="mob-close" id="mob-close" aria-label="Close menu"><i class="fas fa-xmark"></i></button>
+        <a href="index.html" class="ml">Home</a>
+        <a href="features.html" class="ml">Features</a>
+        <a href="whatsnew.html" class="ml">Changelog</a>
+        <a href="support.html" class="ml">Support</a>
+        <button onclick="flip()" style="color:var(--mute);font-size:14px;text-align:left;margin-top:12px"><i class="fas fa-circle-half-stroke" style="margin-right:6px"></i>Toggle theme</button>
+    </div>
 
     <main id="main">
-    <section class="legal" style="max-width:720px">
+    <section class="legal page">
         <span class="label">Legal</span>
         <h1 style="font-size:clamp(2.2rem,5vw,3.2rem);margin-bottom:4px">Privacy Policy</h1>
-        <p style="color:var(--fg3);margin-bottom:40px">Last updated: June 2026</p>
+        <p style="color:var(--mute);margin-bottom:40px">Effective date: April 24, 2026 · Last updated: April 24, 2026</p>
 
-        <h2>1. Introduction</h2>
-        <p>Mudra Manager is committed to protecting your privacy. Short version: we don't collect any of your data.</p>
+        <h2>1. Who We Are</h2>
+        <p>Mudra Manager: Budget Tracker ("Mudra Manager," "the App," "we," "us," or "our") is a personal finance application developed and published by Aloke Tewary, an individual developer based in India. This Privacy Policy explains how we handle information in connection with the App (available on Google Play) and this website (mudramanager.com).</p>
+        <p>By installing, accessing, or using the App or visiting this website, you acknowledge that you have read and understood this Privacy Policy.</p>
 
-        <h2>2. Information We Collect</h2>
-        <div class="tldr">TL;DR — We collect nothing. Zero. Nada.</div>
-        <h3>2.1 Local Data</h3>
-        <p>All financial data stored locally with AES-256 encryption:</p>
-        <ul><li>Transaction records, accounts, budgets, goals</li><li>Categories, tags, preferences</li></ul>
-        <h3>2.2 SMS/Notification Data</h3>
-        <p>With permission, we read bank SMS/RCS locally. Never transmitted anywhere.</p>
-        <h3>2.3 Permissions</h3>
-        <ul><li><strong>Notification Access:</strong> Bank SMS/RCS (optional)</li><li><strong>Storage:</strong> Export reports and backups</li><li><strong>Biometric:</strong> Secure app access (optional)</li></ul>
-
-        <h2>3. Usage</h2>
-        <p>Data used solely for on-device app functionality. Nothing leaves your phone.</p>
-
-        <h2>4. Security</h2>
+        <h2>2. Our Core Privacy Principle</h2>
+        <div class="tldr">TL;DR — Mudra Manager is a local-first application. We do not operate servers, do not create user accounts, and do not collect, transmit, store, or process your personal or financial data on any remote system.</div>
         <div class="sec-grid">
-            <div class="sec-box"><small>Storage</small><strong>Local only</strong></div>
+            <div class="sec-box"><small>Data storage</small><strong>Device only</strong></div>
             <div class="sec-box"><small>Encryption</small><strong>AES-256</strong></div>
-            <div class="sec-box"><small>Cloud</small><strong>None</strong></div>
-            <div class="sec-box"><small>Key storage</small><strong>Keystore</strong></div>
+            <div class="sec-box"><small>Cloud servers</small><strong>None</strong></div>
+            <div class="sec-box"><small>User accounts</small><strong>None</strong></div>
         </div>
 
-        <h2>5. Data Sharing</h2>
-        <p>We do not share, sell, or transmit your data. We have no servers.</p>
+        <h2>3. Information Stored on Your Device</h2>
+        <p>All data created or processed by the App resides exclusively on your device's local storage using the Isar database engine. This includes:</p>
+        <ul>
+            <li>Transaction records (amounts, dates, merchants, categories, notes, descriptions)</li>
+            <li>Account information (account names, types, balances, last 4 digits of account numbers)</li>
+            <li>Budgets, savings goals, trip expenses, and split records</li>
+            <li>Categories, tags, and user preferences</li>
+            <li>SMS/notification message bodies processed for transaction detection</li>
+            <li>Gamification data (achievements, streaks, XP, levels)</li>
+            <li>Plugin preferences and marketplace selections</li>
+            <li>App settings (theme, language, tone, notification preferences)</li>
+        </ul>
+        <p><strong>We never have access to this data.</strong> It is not transmitted to us or any third party. We have no technical means to retrieve, view, or recover your data.</p>
 
-        <h2>6. Your Rights</h2>
-        <ul><li>Access, export, or delete all data at any time</li><li>Revoke permissions at any time</li></ul>
+        <h2>4. Sensitive Data &amp; Encryption</h2>
+        <h3>4.1 Encrypted Fields</h3>
+        <p>The following data is encrypted at rest using AES-256 field-level encryption before being stored in the local database:</p>
+        <ul>
+            <li><strong>SMS/notification message bodies</strong> — may contain bank account numbers, transaction amounts, UPI references, and merchant information</li>
+            <li><strong>Merchant/payee names</strong> extracted from SMS messages</li>
+            <li><strong>Transaction descriptions</strong> — user-entered notes that may contain sensitive information</li>
+        </ul>
+        <h3>4.2 Encryption Key Management</h3>
+        <p>The 256-bit AES encryption key is generated once on first launch and stored in the Android Keystore (hardware-backed secure storage). The key:</p>
+        <ul>
+            <li>Never leaves the device's secure hardware enclave</li>
+            <li>Is not accessible to other applications or to us</li>
+            <li>Is bound to the device — it cannot be extracted or transferred</li>
+            <li>Is lost if the App is uninstalled (encrypted data becomes permanently unreadable)</li>
+        </ul>
+        <h3>4.3 Graceful Degradation</h3>
+        <p>If the Android Keystore is unavailable (rare hardware/OS issue), the App continues to function normally but without field-level encryption. Data is still protected by Android's app-private storage sandbox.</p>
 
-        <h2>7. Children</h2>
-        <p>Not intended for users under 13.</p>
+        <h2>5. Permissions We Request</h2>
+        <p>The App requests only the permissions necessary for its functionality. All permissions are optional and revocable at any time through your device's Settings.</p>
+        <table>
+            <tr><th>Permission</th><th>Purpose</th><th>Required?</th></tr>
+            <tr><td>Notification Access (NotificationListenerService)</td><td>Read bank SMS and RCS notifications to automatically detect and create transactions. Messages are processed entirely on-device and never transmitted.</td><td>Optional</td></tr>
+            <tr><td>Storage / Media</td><td>Export financial reports (Excel, PDF) and backup files to your device storage.</td><td>Optional</td></tr>
+            <tr><td>Biometric (Fingerprint / Face)</td><td>Secure app access via biometric authentication. Biometric data is handled entirely by Android's BiometricPrompt API — we never access or store biometric templates.</td><td>Optional</td></tr>
+            <tr><td>Internet</td><td>Fetch currency exchange rates (the only network call the App makes). See Section 6.</td><td>Optional</td></tr>
+            <tr><td>Notifications</td><td>Display local notifications (budget alerts, bill reminders, spending insights). All generated on-device.</td><td>Optional</td></tr>
+        </table>
 
-        <h2>8. Contact</h2>
-        <p>Questions? <a href="mailto:support@mudramanager.com" class="link-arrow">support@mudramanager.com →</a></p>
+        <h3>5.1 SMS/Notification Processing Details</h3>
+        <p>When Notification Access is granted:</p>
+        <ul>
+            <li>The App's background service (NotificationListenerService) intercepts notifications from messaging apps (SMS, Google Messages, Samsung Messages)</li>
+            <li>Messages are filtered on-device to identify bank/financial transaction notifications</li>
+            <li>Non-financial messages (OTPs, promotions, personal messages) are discarded immediately and never stored</li>
+            <li>Financial messages are parsed locally using bank-specific and generic parsers to extract transaction data</li>
+            <li>The original message body is encrypted (AES-256) before storage</li>
+            <li>Last 4 digits of account numbers may be used for automatic account matching</li>
+            <li><strong>No message content is ever transmitted off your device</strong></li>
+        </ul>
+
+        <h2>6. Network Communications</h2>
+        <p>Mudra Manager makes <strong>one type of network call</strong>:</p>
+        <ul>
+            <li><strong>Currency exchange rates</strong> — periodic requests to fetch current exchange rates for multi-currency conversion. These requests contain no personal data, no device identifiers, and no financial information. Only the currency pair is sent.</li>
+        </ul>
+        <p>All other App functionality operates entirely offline with zero network dependency.</p>
+
+        <h2>7. Third-Party Services</h2>
+        <h3>7.1 Google Play Billing / RevenueCat</h3>
+        <p>If you purchase the optional Pro upgrade, the transaction is processed entirely by Google Play's billing system. RevenueCat SDK manages subscription state. These services may collect:</p>
+        <ul>
+            <li>Purchase transaction IDs and subscription status</li>
+            <li>Google Play account information (as per Google's privacy policy)</li>
+        </ul>
+        <p>We do not receive or store your payment method details (credit card, UPI, etc.). We receive only a purchase verification token to unlock Pro features. See <a href="https://www.revenuecat.com/privacy" target="_blank" class="link-arrow">RevenueCat Privacy Policy →</a> and <a href="https://policies.google.com/privacy" target="_blank" class="link-arrow">Google Privacy Policy →</a></p>
+
+        <h3>7.2 Google Play Store</h3>
+        <p>The App is distributed via Google Play, which may collect device information, crash reports, and usage statistics as per Google's policies. We have access to aggregated, anonymized analytics through the Google Play Console (install counts, crash rates by device model, country-level distribution). This data does not identify individual users.</p>
+
+        <h3>7.3 No Other Third-Party SDKs</h3>
+        <p>The App does not include any analytics SDKs, advertising SDKs, crash reporting SDKs, or social media SDKs. There is no Firebase, no Google Analytics, no Facebook SDK, no AppsFlyer, no Mixpanel, or any similar service.</p>
+
+        <h2>8. This Website</h2>
+        <p>This website (mudramanager.com) is a static site. It:</p>
+        <ul>
+            <li>Does not use cookies, tracking pixels, or analytics services</li>
+            <li>Does not collect personal information</li>
+            <li>Does not use contact forms (support is via direct email)</li>
+            <li>Loads fonts from Google Fonts and icons from cdnjs (Font Awesome), which may log standard web server access data (IP address, browser type) per their respective privacy policies</li>
+        </ul>
+
+        <h2>9. Data Retention &amp; Deletion</h2>
+        <ul>
+            <li><strong>Your data persists</strong> on your device for as long as the App is installed</li>
+            <li><strong>To delete all data:</strong> Use Settings → Clear All Data within the App, or uninstall the App. Both actions permanently and irreversibly destroy all local data including the encryption key</li>
+            <li><strong>We cannot delete your data</strong> because we never have access to it. There is nothing on our end to delete</li>
+            <li><strong>Exported files</strong> (Excel, PDF, backup files) saved to your device storage persist independently of the App and must be deleted manually</li>
+            <li><strong>Backup files</strong> contain encrypted fields. If restored on a different device, encrypted fields will be unreadable (the encryption key is device-bound)</li>
+        </ul>
+
+        <h2>10. Data Portability</h2>
+        <p>You can export your complete financial data at any time in the following formats:</p>
+        <ul>
+            <li>Excel (.xlsx) — full transaction history with categories, accounts, and amounts</li>
+            <li>PDF — formatted financial reports</li>
+            <li>Encrypted backup — full App state for restore on the same device</li>
+        </ul>
+        <p>There is no data lock-in. Your data is always accessible and exportable.</p>
+
+        <h2>11. Children's Privacy</h2>
+        <p>The App is not directed at children under the age of 13 (or the applicable age of digital consent in your jurisdiction). We do not knowingly collect or process data from children. Since all data is local and we have no user accounts, we have no means to identify the age of any user. If you are a parent or guardian and believe your child is using the App, please note that all data is local to the device and can be deleted by uninstalling the App.</p>
+
+        <h2>12. International Users</h2>
+        <p>The App is available globally through Google Play. Since all data processing occurs locally on your device:</p>
+        <ul>
+            <li>No cross-border data transfer occurs (your data never leaves your device)</li>
+            <li>The App complies with data localization requirements by design — data is stored where you are</li>
+            <li>GDPR (EU), DPDPA (India), CCPA (California), LGPD (Brazil), and similar data protection regulations are satisfied by our zero-collection architecture</li>
+        </ul>
+
+        <h2>13. Compliance with Indian Law</h2>
+        <h3>13.1 Digital Personal Data Protection Act, 2023 (DPDPA)</h3>
+        <p>Under the DPDPA, Mudra Manager's position is as follows:</p>
+        <ul>
+            <li>We do not act as a "Data Fiduciary" as defined under the DPDPA because we do not determine the purpose and means of processing personal data — all processing occurs locally on your device under your control</li>
+            <li>We do not collect, store, or process personal data on any system we operate</li>
+            <li>No consent mechanism is required from us because no personal data flows to us. Device-level permissions (notification access, storage) are governed by Android's permission framework</li>
+            <li>Your rights under the DPDPA (access, correction, erasure, portability) are exercisable directly through the App's built-in features</li>
+        </ul>
+        <h3>13.2 Information Technology Act, 2000</h3>
+        <p>The App implements reasonable security practices (AES-256 encryption, Android Keystore) as contemplated under Section 43A of the IT Act and the Information Technology (Reasonable Security Practices and Procedures) Rules, 2011.</p>
+
+        <h2>14. Security Measures</h2>
+        <ul>
+            <li>AES-256 field-level encryption for sensitive data (SMS bodies, merchant names, transaction descriptions)</li>
+            <li>Encryption keys stored in Android Keystore (hardware-backed)</li>
+            <li>App-private storage sandbox (inaccessible to other apps without root access)</li>
+            <li>Optional biometric/PIN lock for App access</li>
+            <li>Guest mode to hide financial amounts when sharing your screen</li>
+            <li>No remote access, no cloud sync, no server-side storage</li>
+        </ul>
+        <p>While we implement strong security measures, no system is perfectly secure. Physical access to an unlocked, rooted device could potentially expose local data. We recommend keeping your device updated, using a screen lock, and enabling the App's biometric/PIN protection.</p>
+
+        <h2>15. Changes to This Policy</h2>
+        <p>We may update this Privacy Policy to reflect changes in the App's functionality or applicable law. Changes will be:</p>
+        <ul>
+            <li>Posted on this page with an updated "Last updated" date</li>
+            <li>Noted in the App's changelog (What's New) for significant changes</li>
+            <li>Effective immediately upon posting unless otherwise stated</li>
+        </ul>
+        <p>Your continued use of the App after changes constitutes acceptance of the updated policy. We encourage you to review this page periodically.</p>
+
+        <h2>16. Contact</h2>
+        <p>For privacy-related questions, concerns, or requests:</p>
+        <p><strong>Aloke Tewary</strong><br>
+        Email: <a href="mailto:support@mudramanager.com" class="link-arrow">support@mudramanager.com →</a><br>
+        Website: mudramanager.com</p>
+        <p>We aim to respond to all privacy inquiries within 30 days.</p>
+
     </section>
     </main>
 
-    <footer><div class="foot-inner"><div class="foot-brand"><img src="assets/logo.png" alt="" width="24" height="24"> Mudra Manager</div><div class="foot-links"><a href="terms.html">Terms</a><a href="support.html">Support</a><a href="index.html">Home</a></div><div class="foot-copy">© 2026</div></div></footer>
+    <footer>
+        <div class="foot">
+            <div class="foot-logo"><img src="assets/logo.png" alt="" width="20" height="20"> Mudra Manager: Budget Tracker</div>
+            <div class="foot-links">
+                <a href="privacy.html">Privacy</a>
+                <a href="terms.html">Terms</a>
+                <a href="support.html">Support</a>
+                <a href="whatsnew.html">Changelog</a>
+                <a href="features.html">Features</a>
+            </div>
+            <span style="display:flex;align-items:center;gap:8px">
+                Built by <a href="https://linkedin.com/in/aloketewary" target="_blank" style="color:var(--accent);font-weight:600">Aloke Tewary</a>
+                · Made with <span style="color:#ef4444">♥</span> in India · © 2026
+            </span>
+        </div>
+    </footer>
     <script src="2026.js"></script>
 </body>
 </html>

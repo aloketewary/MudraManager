@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/providers/app_mode_provider.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 
-class ExpandableFab extends StatefulWidget {
+class ExpandableFab extends ConsumerStatefulWidget {
   final AnimationController? visibilityController;
   final EdgeInsets padding;
 
@@ -15,10 +17,10 @@ class ExpandableFab extends StatefulWidget {
   });
 
   @override
-  State<ExpandableFab> createState() => ExpandableFabState();
+  ConsumerState<ExpandableFab> createState() => ExpandableFabState();
 }
 
-class ExpandableFabState extends State<ExpandableFab>
+class ExpandableFabState extends ConsumerState<ExpandableFab>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final CurvedAnimation _curve;
@@ -28,6 +30,7 @@ class ExpandableFabState extends State<ExpandableFab>
   // Collapsed pill width / expanded bar width — measured via layout
   static const _collapsedWidth = 100.0;
   static const _expandedWidth = 340.0;
+  static const _simpleExpandedWidth = 240.0;
   static const _height = 52.0;
 
   @override
@@ -138,7 +141,8 @@ class ExpandableFabState extends State<ExpandableFab>
   Widget _buildBar(BuildContext context, double t) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final width = lerpDouble(_collapsedWidth, _expandedWidth, t)!;
+    final isSimple = ref.watch(isSimpleModeProvider);
+    final width = lerpDouble(_collapsedWidth, isSimple ? _simpleExpandedWidth : _expandedWidth, t)!;
 
     return GestureDetector(
       // Tap bar background to collapse when expanded
@@ -236,6 +240,7 @@ class ExpandableFabState extends State<ExpandableFab>
                             extra: {'isIncome': true},
                           ),
                         ),
+                        if (!isSimple) ...[
                         _buildDivider(color, t),
                         _buildActionItem(
                           icon: LucideIcons.arrowLeftRight,
@@ -245,6 +250,7 @@ class ExpandableFabState extends State<ExpandableFab>
                           textTheme: textTheme,
                           onTap: () => _onItemTap(AppRoutes.transfer),
                         ),
+                        ],
                       ],
                     ),
                   ),

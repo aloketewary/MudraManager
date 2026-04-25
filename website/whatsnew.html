@@ -3,60 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#08080c" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)">
     <title>Changelog — Mudra Manager</title>
+    <meta name="description" content="Every update and improvement to Mudra Manager. See what's new in the latest release.">
     <link rel="icon" href="assets/logo.png">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="2026.css">
     <style>
         .tl { position: relative; max-width: 720px; margin: 0 auto; }
-        .tl-line { position: absolute; left: 23px; top: 0; bottom: 0; width: 2px; background: linear-gradient(to bottom, var(--accent), color-mix(in srgb, var(--fg) 8%, transparent) 80%); }
+        .tl-line { position: absolute; left: 23px; top: 0; bottom: 0; width: 2px; background: linear-gradient(to bottom, var(--accent), var(--line) 80%); }
         .tl-item { position: relative; padding-left: 64px; margin-bottom: 48px; }
         .tl-dot { position: absolute; left: 0; top: 4px; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; z-index: 1; }
         .tl-dot.latest { background: var(--accent); box-shadow: 0 0 24px color-mix(in srgb, var(--accent) 40%, transparent); }
-        .tl-dot.old { background: color-mix(in srgb, var(--fg) 12%, transparent); color: var(--fg3); }
-        .tl-card { padding: 28px; border-radius: var(--radius-lg); border: 1px solid color-mix(in srgb, var(--fg) 6%, transparent); background: color-mix(in srgb, var(--fg) 2%, transparent); }
+        .tl-dot.old { background: var(--tint-strong); color: var(--mute); }
+        .tl-card { padding: 28px; border-radius: var(--radius-lg); border: 1px solid var(--line); background: var(--tint); }
         .tl-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 16px; }
         .tl-ver { font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 100px; }
         .tl-ver.latest { background: var(--accent); color: #fff; }
-        .tl-ver.old { background: color-mix(in srgb, var(--fg) 8%, transparent); color: var(--fg3); }
-        .tl-date { font-size: 12px; color: var(--fg3); }
+        .tl-ver.old { background: var(--tint-strong); color: var(--mute); }
+        .tl-date { font-size: 12px; color: var(--mute); }
         .tl-tag { font-size: 10px; font-weight: 700; padding: 2px 10px; border-radius: 100px; background: color-mix(in srgb, var(--green) 12%, transparent); color: var(--green); }
         .tl-card h3 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
-        .tl-card .summary { font-size: 14px; color: var(--fg2); margin-bottom: 16px; }
+        .tl-card .summary { font-size: 14px; color: var(--dim); margin-bottom: 16px; }
         .tl-feat { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 10px; }
         .tl-feat-icon { width: 20px; height: 20px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 9px; flex-shrink: 0; margin-top: 2px; }
         .tl-feat-icon.new { background: color-mix(in srgb, var(--accent) 15%, transparent); color: var(--accent); }
         .tl-feat-icon.improved { background: color-mix(in srgb, var(--amber) 15%, transparent); color: var(--amber); }
-        .tl-feat span { font-size: 13px; } .tl-feat strong { color: var(--fg); } .tl-feat span { color: var(--fg2); }
-        .tl-fixes { margin-top: 20px; padding-top: 16px; border-top: 1px solid color-mix(in srgb, var(--fg) 5%, transparent); }
-        .tl-fixes h4 { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--fg3); margin-bottom: 10px; }
-        .tl-fixes li { font-size: 12px; color: var(--fg3); margin-bottom: 6px; list-style: none; padding-left: 16px; position: relative; }
+        .tl-feat span { font-size: 13px; } .tl-feat strong { color: var(--text); } .tl-feat span { color: var(--dim); }
+        .tl-fixes { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line); }
+        .tl-fixes h4 { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--mute); margin-bottom: 10px; }
+        .tl-fixes li { font-size: 12px; color: var(--mute); margin-bottom: 6px; list-style: none; padding-left: 16px; position: relative; }
         .tl-fixes li::before { content: '✓'; position: absolute; left: 0; color: var(--green); font-size: 10px; }
         .tl-end { padding-left: 64px; position: relative; }
-        .tl-end .tl-dot { background: color-mix(in srgb, var(--fg) 10%, transparent); }
-        .tl-end p { font-size: 12px; color: var(--fg3); }
+        .tl-end .tl-dot { background: var(--tint-strong); }
+        .tl-end p { font-size: 12px; color: var(--mute); }
         @media (max-width: 600px) { .tl-line { display: none; } .tl-dot { display: none; } .tl-item, .tl-end { padding-left: 0; } }
     </style>
 </head>
 <body>
-    <nav class="nav" role="navigation"><a href="index.html" class="nav-logo"><img src="assets/logo.png" alt="" width="28" height="28"><span>Mudra Manager</span></a><div class="nav-links"><button class="theme-btn" id="theme-toggle" aria-label="Toggle theme"><i class="fas fa-circle-half-stroke"></i></button><a href="https://play.google.com/store/apps/details?id=com.mudramanager.app" target="_blank" class="nav-cta">Update Now</a></div></nav>
+    <a href="#main" class="skip">Skip to content</a>
+
+    <nav class="nav" role="navigation" aria-label="Main">
+        <a href="index.html" class="nav-logo"><img src="assets/logo.png" alt="" width="24" height="24">Mudra Manager</a>
+        <div class="nav-r">
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="features.html">Features</a>
+                <a href="whatsnew.html">Changelog</a>
+                <a href="support.html">Support</a>
+            </div>
+            <button class="nav-theme" id="theme-toggle" aria-label="Toggle theme"><i class="fas fa-sun theme-icon"></i></button>
+            <a href="https://play.google.com/store/apps/details?id=com.mudramanager.app" target="_blank" class="nav-dl">Download</a>
+            <button class="nav-burger" id="menu-btn" aria-label="Menu"><span></span><span></span></button>
+        </div>
+    </nav>
+
+    <div class="mob" id="mob">
+        <button class="mob-close" id="mob-close" aria-label="Close menu"><i class="fas fa-xmark"></i></button>
+        <a href="index.html" class="ml">Home</a>
+        <a href="features.html" class="ml">Features</a>
+        <a href="whatsnew.html" class="ml">Changelog</a>
+        <a href="support.html" class="ml">Support</a>
+        <button onclick="flip()" style="color:var(--mute);font-size:14px;text-align:left;margin-top:12px"><i class="fas fa-circle-half-stroke" style="margin-right:6px"></i>Toggle theme</button>
+    </div>
 
     <main id="main">
-    <section style="max-width:720px;padding-bottom:0">
+    <div class="page-header">
         <span class="label">Changelog</span>
-        <h1 style="font-size:clamp(2.2rem,5vw,3.2rem);margin-bottom:8px">What's New</h1>
-        <p style="font-size:17px;color:var(--fg2)">Every update, every improvement.</p>
-    </section>
-    <section style="max-width:800px;padding-top:48px">
+        <h1>What's New</h1>
+        <p class="sub">Every update, every improvement.</p>
+    </div>
+    <section style="max-width:800px;margin:0 auto;padding:48px clamp(20px,4vw,64px) 80px">
         <div class="tl">
             <div class="tl-line"></div>
-            <div id="tl-content"><p style="text-align:center;color:var(--fg3);font-size:13px"><i class="fas fa-spinner fa-spin"></i> Loading...</p></div>
+            <div id="tl-content"><p style="text-align:center;color:var(--mute);font-size:13px"><i class="fas fa-spinner fa-spin"></i> Loading...</p></div>
         </div>
     </section>
     </main>
 
-    <footer><div class="foot-inner"><div class="foot-brand"><img src="assets/logo.png" alt="" width="24" height="24"> Mudra Manager</div><div class="foot-links"><a href="index.html">Home</a><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="support.html">Support</a></div><div class="foot-copy">© 2026</div></div></footer>
+    <footer>
+        <div class="foot">
+            <div class="foot-logo"><img src="assets/logo.png" alt="" width="20" height="20"> Mudra Manager: Budget Tracker</div>
+            <div class="foot-links">
+                <a href="privacy.html">Privacy</a>
+                <a href="terms.html">Terms</a>
+                <a href="support.html">Support</a>
+                <a href="whatsnew.html">Changelog</a>
+                <a href="features.html">Features</a>
+            </div>
+            <span style="display:flex;align-items:center;gap:8px">
+                Built by <a href="https://linkedin.com/in/aloketewary" target="_blank" style="color:var(--accent);font-weight:600">Aloke Tewary</a>
+                · Made with <span style="color:#ef4444">♥</span> in India · © 2026
+            </span>
+        </div>
+    </footer>
 
     <script src="2026.js"></script>
     <script>
@@ -69,9 +112,14 @@
         const fixes=r.fixes?.length?`<div class="tl-fixes"><h4>Bug Fixes</h4><ul>${r.fixes.map(f=>`<li>${f}</li>`).join('')}</ul></div>`:'';
         return`<div class="tl-item"><div class="tl-dot ${dot}"><i class="fas fa-${r.icon||'code-branch'}"></i></div><div class="tl-card"><div class="tl-meta"><span class="tl-ver ${ver}">v${r.version}</span><span class="tl-date">${fmtDate(r.date)}</span>${tag}</div><h3>${r.title}</h3><p class="summary">${r.summary}</p>${feats}${fixes}</div></div>`;
     }
-    fetch('changelog.json').then(r=>r.json()).then(data=>{
+    const ctrl=new AbortController();
+    setTimeout(()=>ctrl.abort(),8000);
+    fetch('changelog.json',{signal:ctrl.signal}).then(r=>r.json()).then(data=>{
         document.getElementById('tl-content').innerHTML=data.map((r,i)=>renderR(r,i===0)).join('')+`<div class="tl-end"><div class="tl-dot old"><i class="fas fa-flag"></i></div><p>You're all caught up.</p></div>`;
-    }).catch(()=>{document.getElementById('tl-content').innerHTML='<p style="color:var(--fg3)">Could not load. <a href="changelog.json" style="color:var(--accent)">View raw</a></p>';});
+    }).catch(e=>{
+        const msg=e.name==='AbortError'?'Took too long to load.':'Could not load changelog.';
+        document.getElementById('tl-content').innerHTML=`<p style="color:var(--mute);text-align:center">${msg} <a href="changelog.json" style="color:var(--accent)">View raw</a> · <button onclick="location.reload()" style="color:var(--accent);background:none;border:none;cursor:pointer;font:inherit">Retry</button></p>`;
+    });
     </script>
 </body>
 </html>

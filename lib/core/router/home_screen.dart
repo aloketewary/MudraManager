@@ -334,7 +334,7 @@ class HomePageState extends ConsumerState<HomePage>
                           : (isDark ? Colors.white : Colors.black),
                       BlendMode.srcIn,
                     ),
-                  ).animate(target: effectiveIndex == 4 ? 1 : 0).scale(
+                  ).animate(target: (isSimple ? effectiveIndex == 2 : effectiveIndex == 4) ? 1 : 0).scale(
                         begin: const Offset(0.9, 0.9),
                         end: const Offset(1, 1),
                         curve: Curves.easeOutCubic,
@@ -644,7 +644,7 @@ class HomePageState extends ConsumerState<HomePage>
       case 2:
         return AppBar(
           automaticallyImplyLeading: false,
-          title: Text('Manage', style: textTheme.titleLarge),
+          title: Text(ctxt.nav_manage, style: textTheme.titleLarge),
           actions: [
             IconButton(
               onPressed: () {
@@ -659,7 +659,7 @@ class HomePageState extends ConsumerState<HomePage>
         return AppBar(
           automaticallyImplyLeading: false,
           title: Text(
-            'Insights',
+            ctxt.nav_insights,
             style: textTheme.titleLarge,
           ),
           actions: [

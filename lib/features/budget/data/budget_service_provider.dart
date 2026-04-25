@@ -29,45 +29,44 @@ final budgetStreamProvider = StreamProvider.autoDispose<List<Budget>>((ref) {
 });
 
 final budgetWithProgressProvider =
-    StreamProvider.autoDispose<List<(Budget, double, DateTime, DateTime)>>(
-        (ref) async* {
-  final budgetService = ref.watch(budgetServiceProvider);
-  final isar = await ref.read(isarServiceProvider).getInstance();
+    FutureProvider.autoDispose<List<(Budget, double, DateTime, DateTime)>>(
+        (ref) async {
   ref.watch(dateChangeProvider);
   ref.watch(transactionChangeProvider);
+  final budgetService = ref.watch(budgetServiceProvider);
+  final isar = await ref.read(isarServiceProvider).getInstance();
 
-  await for (final budgets in isar.budgets
+  final budgets = await isar.budgets
       .where()
       .isArchivedEqualTo(false)
-      .watch(fireImmediately: true)) {
-    final List<(Budget, double, DateTime, DateTime)> result = [];
-    final now = DateTime.now();
-    for (final budget in budgets) {
-      // Filter out expired one-time budgets
-      if (budget.recurrence == BudgetRecurrence.none &&
-          budget.endDate.isBefore(
-            DateTime(now.year, now.month, now.day, 23, 59, 59),
-          )) {
-        continue;
-      }
+      .findAll();
 
-      final (s, e) = budget.getCurrentPeriodRange(now);
-      final spent = await budgetService.calculateSpentAmount(
-        budget,
-        start: s,
-        end: e,
-      );
-      result.add((budget, spent, s, e));
+  final List<(Budget, double, DateTime, DateTime)> result = [];
+  final now = DateTime.now();
+  for (final budget in budgets) {
+    if (budget.recurrence == BudgetRecurrence.none &&
+        budget.endDate.isBefore(
+          DateTime(now.year, now.month, now.day, 23, 59, 59),
+        )) {
+      continue;
     }
-    yield result;
+
+    final (s, e) = budget.getCurrentPeriodRange(now);
+    final spent = await budgetService.calculateSpentAmount(
+      budget,
+      start: s,
+      end: e,
+    );
+    result.add((budget, spent, s, e));
   }
+  return result;
 });
 
 final budgetsWithProgressProvider =
-    StreamProvider.autoDispose<List<BudgetWithProgress>>((ref) {
+    FutureProvider.autoDispose<List<BudgetWithProgress>>((ref) async {
   ref.watch(dateChangeProvider);
   ref.watch(transactionChangeProvider);
-  return ref.watch(budgetServiceProvider).watchBudgetsWithProgress();
+  return ref.watch(budgetServiceProvider).getBudgetsWithProgress();
 });
 
 final archivedBudgetsProvider =
@@ -106,171 +105,154 @@ class BudgetService {
     );
   }
 
-  Stream<List<BudgetWithProgress>> watchBudgetsWithProgress() async* {
+  Future<List<BudgetWithProgress>> getBudgetsWithProgress() async {
     final isar = await isarService.getInstance();
-    await for (final budgets in isar.budgets
+    final budgets = await isar.budgets
         .where()
         .isArchivedEqualTo(false)
-        .watch(fireImmediately: true)) {
-      final now = DateTime.now();
+        .findAll();
 
-      // ── 1. Load all links in parallel per budget ──
-      await Future.wait(
-        budgets.map((b) async {
-          await b.categories.load();
-          await b.allocations.load();
-          await b.budgetTags.load();
-          await Future.wait(b.allocations.map((a) => a.category.load()));
-        }),
-      );
+    final now = DateTime.now();
 
-      // ── 2. Find widest date range across all budgets ──
-      DateTime earliest = now;
-      DateTime latest = now;
-      final budgetRanges = <int, (DateTime, DateTime)>{};
-      for (final budget in budgets) {
-        final (s, e) = budget.getCurrentPeriodRange(now);
-        budgetRanges[budget.id] = (s, e);
-        if (s.isBefore(earliest)) earliest = s;
-        if (e.isAfter(latest)) latest = e;
+    // ── 1. Load all links in parallel per budget ──
+    await Future.wait(
+      budgets.map((b) async {
+        await b.categories.load();
+        await b.allocations.load();
+        await b.budgetTags.load();
+        await Future.wait(b.allocations.map((a) => a.category.load()));
+      }),
+    );
+
+    // ── 2. Find widest date range across all budgets ──
+    DateTime earliest = now;
+    DateTime latest = now;
+    final budgetRanges = <int, (DateTime, DateTime)>{};
+    for (final budget in budgets) {
+      final (s, e) = budget.getCurrentPeriodRange(now);
+      budgetRanges[budget.id] = (s, e);
+      if (s.isBefore(earliest)) earliest = s;
+      if (e.isAfter(latest)) latest = e;
+    }
+
+    // ── 3. Single query: all expenses in the widest range ──
+    final allExpenses = await isar.transactions
+        .filter()
+        .isExpenseEqualTo(true)
+        .dateBetween(earliest, latest)
+        .findAll();
+
+    // Pre-load category links for filtering
+    await Future.wait(allExpenses.map((t) => t.category.load()));
+
+    // ── 4. Index by category ID for O(1) lookup ──
+    final expensesByCat = <int, List<Transaction>>{};
+    for (final t in allExpenses) {
+      final cat = t.category.value;
+      if (cat == null) continue;
+      final catId = cat.id;
+      expensesByCat.putIfAbsent(catId, () => []).add(t);
+
+      await cat.parentCategory.load();
+      final parentId = cat.parentCategory.value?.id;
+      if (parentId != null && parentId != catId) {
+        expensesByCat.putIfAbsent(parentId, () => []).add(t);
       }
+    }
 
-      // ── 3. Single query: all expenses in the widest range ──
-      final allExpenses = await isar.transactions
-          .filter()
-          .isExpenseEqualTo(true)
-          .dateBetween(earliest, latest)
-          .findAll();
+    // ── 5. Compute per-budget ──
+    final List<BudgetWithProgress> list = [];
+    for (final budget in budgets) {
+      final (s, e) = budgetRanges[budget.id]!;
 
-      // Pre-load category links for filtering
-      await Future.wait(allExpenses.map((t) => t.category.load()));
-
-      // ── 4. Index by category ID for O(1) lookup ──
-      // Also index child category transactions under their parent ID
-      final expensesByCat = <int, List<Transaction>>{};
-      for (final t in allExpenses) {
-        final cat = t.category.value;
-        if (cat == null) continue;
-        final catId = cat.id;
-        expensesByCat.putIfAbsent(catId, () => []).add(t);
-
-        // If this category has a parent, also index under parent
-        await cat.parentCategory.load();
-        final parentId = cat.parentCategory.value?.id;
-        if (parentId != null && parentId != catId) {
-          expensesByCat.putIfAbsent(parentId, () => []).add(t);
-        }
-      }
-
-      // ── 5. Compute per-budget with zero additional queries ──
-      final List<BudgetWithProgress> list = [];
-      for (final budget in budgets) {
-        final (s, e) = budgetRanges[budget.id]!;
-
-        // Handle tag-wise budgets
-        if (budget.budgetType == BudgetType.tagWise) {
-          final tagIds = budget.budgetTags.map((t) => t.id).toSet();
-
-          // Filter expenses that have any of the budget's tags
-          double totalSpent = 0;
-          if (tagIds.isNotEmpty) {
-            for (final t in allExpenses) {
-              if (t.date.isBefore(s) || t.date.isAfter(e)) continue;
-              await t.tags.load();
-              if (t.tags.any((tag) => tagIds.contains(tag.id))) {
-                totalSpent += t.baseAmount;
-              }
+      // Handle tag-wise budgets
+      if (budget.budgetType == BudgetType.tagWise) {
+        final tagIds = budget.budgetTags.map((t) => t.id).toSet();
+        double totalSpent = 0;
+        if (tagIds.isNotEmpty) {
+          for (final t in allExpenses) {
+            if (t.date.isBefore(s) || t.date.isAfter(e)) continue;
+            await t.tags.load();
+            if (t.tags.any((tag) => tagIds.contains(tag.id))) {
+              totalSpent += t.baseAmount;
             }
           }
-
-          if (totalSpent > budget.amount) {
-            PluginService().emitBudget(totalSpent, budget.amount);
-          }
-
-          list.add(
-            BudgetWithProgress(
-              budget: budget,
-              spent: totalSpent,
-              categorySpendings: [],
-              startDate: s,
-              endDate: e,
-            ),
-          );
-          continue;
         }
-
-        double totalSpent = 0;
-        final catSpendings = <CategorySpending>[];
-
-        if (budget.allocations.isNotEmpty) {
-          // Category-wise: use allocations
-          for (final alloc in budget.allocations) {
-            final cat = alloc.category.value;
-            if (cat == null) continue; // deleted category — skip
-            final catTxns = expensesByCat[cat.id] ?? [];
-            final spent = catTxns
-                .where((t) => !t.date.isBefore(s) && !t.date.isAfter(e))
-                .fold<double>(0.0, (sum, t) => sum + t.baseAmount);
-
-            totalSpent += spent;
-            catSpendings.add(
-              CategorySpending(
-                category: cat,
-                allocated: alloc.amount,
-                spent: spent,
-              ),
-            );
-          }
-        } else {
-          // No allocations (dayWise, festival, travel): show all category spending
-          final periodExpenses = allExpenses
-              .where((t) => !t.date.isBefore(s) && !t.date.isAfter(e))
-              .toList();
-          final catMap = <int, (Category, double)>{};
-          for (final t in periodExpenses) {
-            final cat = t.category.value;
-            if (cat == null) continue;
-            final existing = catMap[cat.id];
-            catMap[cat.id] = (cat, (existing?.$2 ?? 0) + t.baseAmount);
-            totalSpent += t.baseAmount;
-          }
-          for (final entry in catMap.entries) {
-            catSpendings.add(
-              CategorySpending(
-                category: entry.value.$1,
-                allocated: budget.amount * (entry.value.$2 / (totalSpent > 0 ? totalSpent : 1)),
-                spent: entry.value.$2,
-              ),
-            );
-          }
-          catSpendings.sort((a, b2) => b2.spent.compareTo(a.spent));
-        }
-
-        // Detect deleted categories
-        final expectedAllocCount = budget.allocations.length;
-        final validAllocCount = catSpendings.length;
-        final hasInvalid = budget.budgetType == BudgetType.categoryWise &&
-            expectedAllocCount > 0 &&
-            validAllocCount < expectedAllocCount;
-
         if (totalSpent > budget.amount) {
           PluginService().emitBudget(totalSpent, budget.amount);
         }
-
-        list.add(
-          BudgetWithProgress(
-            budget: budget,
-            spent: totalSpent,
-            categorySpendings: catSpendings,
-            startDate: s,
-            endDate: e,
-            hasInvalidCategories: hasInvalid,
-          ),
-        );
+        list.add(BudgetWithProgress(
+          budget: budget,
+          spent: totalSpent,
+          categorySpendings: [],
+          startDate: s,
+          endDate: e,
+        ));
+        continue;
       }
-      yield list;
+
+      double totalSpent = 0;
+      final catSpendings = <CategorySpending>[];
+
+      if (budget.allocations.isNotEmpty) {
+        for (final alloc in budget.allocations) {
+          final cat = alloc.category.value;
+          if (cat == null) continue;
+          final catTxns = expensesByCat[cat.id] ?? [];
+          final spent = catTxns
+              .where((t) => !t.date.isBefore(s) && !t.date.isAfter(e))
+              .fold<double>(0.0, (sum, t) => sum + t.baseAmount);
+          totalSpent += spent;
+          catSpendings.add(CategorySpending(
+            category: cat,
+            allocated: alloc.amount,
+            spent: spent,
+          ));
+        }
+      } else {
+        final periodExpenses = allExpenses
+            .where((t) => !t.date.isBefore(s) && !t.date.isAfter(e))
+            .toList();
+        final catMap = <int, (Category, double)>{};
+        for (final t in periodExpenses) {
+          final cat = t.category.value;
+          if (cat == null) continue;
+          final existing = catMap[cat.id];
+          catMap[cat.id] = (cat, (existing?.$2 ?? 0) + t.baseAmount);
+          totalSpent += t.baseAmount;
+        }
+        for (final entry in catMap.entries) {
+          catSpendings.add(CategorySpending(
+            category: entry.value.$1,
+            allocated: budget.amount * (entry.value.$2 / (totalSpent > 0 ? totalSpent : 1)),
+            spent: entry.value.$2,
+          ));
+        }
+        catSpendings.sort((a, b2) => b2.spent.compareTo(a.spent));
+      }
+
+      final expectedAllocCount = budget.allocations.length;
+      final validAllocCount = catSpendings.length;
+      final hasInvalid = budget.budgetType == BudgetType.categoryWise &&
+          expectedAllocCount > 0 &&
+          validAllocCount < expectedAllocCount;
+
+      if (totalSpent > budget.amount) {
+        PluginService().emitBudget(totalSpent, budget.amount);
+      }
+
+      list.add(BudgetWithProgress(
+        budget: budget,
+        spent: totalSpent,
+        categorySpendings: catSpendings,
+        startDate: s,
+        endDate: e,
+        hasInvalidCategories: hasInvalid,
+      ));
     }
+    return list;
   }
+
 
   Future<void> save(Budget bud, {List<BudgetCategoryAllocation> newAllocations = const []}) async {
     final isar = await isarService.getInstance();

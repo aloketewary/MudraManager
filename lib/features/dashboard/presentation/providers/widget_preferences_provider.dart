@@ -3,6 +3,7 @@ import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/dashboard_widget_preference.dart';
 import 'package:mudra_manager/core/entitlement/entitlement_provider.dart';
+import 'package:mudra_manager/core/providers/app_mode_provider.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/core/widgets/dashboard_widget_plugin.dart';
@@ -155,6 +156,7 @@ final orderedDashboardWidgetsProvider =
   final smartEnabled = ref.watch(smartOrderEnabledProvider);
   final smartScores =
       smartEnabled ? ref.watch(smartWidgetScoresProvider) : <String, double>{};
+  final isSimple = ref.watch(isSimpleModeProvider);
 
   return preferencesAsync.when(
     data: (preferences) {
@@ -162,6 +164,7 @@ final orderedDashboardWidgetsProvider =
       final widgets = DashboardWidgetRegistry.widgets;
 
       final visibleWidgets = widgets.where((widget) {
+        if (isSimple && widget.fullModeOnly) return false;
         final pref = prefMap[widget.id];
         return pref?.visible ?? widget.defaultVisible;
       }).toList();

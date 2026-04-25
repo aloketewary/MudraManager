@@ -1988,7 +1988,7 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
 
     try {
       final fontData =
-          await rootBundle.load('assets/fonts/NotoSans-Regular.ttf');
+          await rootBundle.load('assets/fonts/Inter-Variable.ttf');
       final font = pw.Font.ttf(fontData);
       final now = DateTime.now();
       final pdf = pw.Document();

@@ -27,6 +27,9 @@ class GoalsWidgetPlugin extends DashboardWidgetPlugin {
   String get description => 'Track your savings goals and progress';
 
   @override
+  bool get fullModeOnly => true;
+
+  @override
   Widget build(BuildContext context, WidgetRef ref) {
     return const RepaintBoundary(child: GoalCard());
   }

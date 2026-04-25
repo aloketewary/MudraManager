@@ -3,47 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#08080c" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)">
     <title>Support — Mudra Manager</title>
+    <meta name="description" content="Get help with Mudra Manager. FAQ, email support, bug reports, and feature requests.">
     <link rel="icon" href="assets/logo.png">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="2026.css">
     <style>
-        details { border: 1px solid color-mix(in srgb, var(--fg) 6%, transparent); border-radius: var(--radius); padding: 20px 24px; background: color-mix(in srgb, var(--fg) 2%, transparent); }
+        details { border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 24px; background: var(--tint); transition: border-color 0.2s; }
         details + details { margin-top: 8px; }
-        summary { font-size: 14px; font-weight: 600; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+        details[open] { border-color: color-mix(in srgb, var(--accent) 15%, transparent); }
+        summary { font-size: 14px; font-weight: 600; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; min-height: 44px; }
         summary::-webkit-details-marker { display: none; }
-        summary::after { content: '+'; font-size: 18px; color: var(--fg3); transition: transform 0.2s; }
+        summary::after { content: '+'; font-size: 18px; color: var(--mute); transition: color 0.2s; }
         details[open] summary { color: var(--accent); }
         details[open] summary::after { content: '−'; color: var(--accent); }
-        details p { font-size: 13px; color: var(--fg2); margin-top: 12px; line-height: 1.7; }
+        details p { font-size: 13px; color: var(--dim); margin-top: 12px; line-height: 1.7; }
         .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 48px; }
-        .contact-card { padding: 24px; border-radius: var(--radius); border: 1px solid color-mix(in srgb, var(--fg) 6%, transparent); background: color-mix(in srgb, var(--fg) 2%, transparent); transition: border-color 0.2s; }
+        .contact-card { padding: 24px; border-radius: var(--radius); border: 1px solid var(--line); background: var(--tint); transition: border-color 0.2s; display: block; }
         .contact-card:hover { border-color: color-mix(in srgb, var(--accent) 25%, transparent); }
         .contact-card .ci { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
         .contact-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
-        .contact-card p { font-size: 13px; color: var(--fg3); }
+        .contact-card p { font-size: 13px; color: var(--mute); margin: 0; }
         .feat-req { text-align: center; padding: 40px; border-radius: var(--radius-lg); background: color-mix(in srgb, var(--accent) 4%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 10%, transparent); margin-top: 48px; }
         .feat-req h3 { font-size: 20px; margin-bottom: 8px; }
-        .feat-req p { font-size: 14px; color: var(--fg2); margin-bottom: 20px; }
+        .feat-req p { font-size: 14px; color: var(--dim); margin-bottom: 20px; }
         @media (max-width: 600px) { .contact-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
-    <nav class="nav" role="navigation"><a href="index.html" class="nav-logo"><img src="assets/logo.png" alt="" width="28" height="28"><span>Mudra Manager</span></a><div class="nav-links"><button class="theme-btn" id="theme-toggle" aria-label="Toggle theme"><i class="fas fa-circle-half-stroke"></i></button><a href="index.html" style="font-size:13px;color:var(--fg2)">← Home</a></div></nav>
+    <a href="#main" class="skip">Skip to content</a>
+
+    <nav class="nav" role="navigation" aria-label="Main">
+        <a href="index.html" class="nav-logo"><img src="assets/logo.png" alt="" width="24" height="24">Mudra Manager</a>
+        <div class="nav-r">
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="features.html">Features</a>
+                <a href="whatsnew.html">Changelog</a>
+                <a href="support.html">Support</a>
+            </div>
+            <button class="nav-theme" id="theme-toggle" aria-label="Toggle theme"><i class="fas fa-sun theme-icon"></i></button>
+            <a href="https://play.google.com/store/apps/details?id=com.mudramanager.app" target="_blank" class="nav-dl">Download</a>
+            <button class="nav-burger" id="menu-btn" aria-label="Menu"><span></span><span></span></button>
+        </div>
+    </nav>
+
+    <div class="mob" id="mob">
+        <button class="mob-close" id="mob-close" aria-label="Close menu"><i class="fas fa-xmark"></i></button>
+        <a href="index.html" class="ml">Home</a>
+        <a href="features.html" class="ml">Features</a>
+        <a href="whatsnew.html" class="ml">Changelog</a>
+        <a href="support.html" class="ml">Support</a>
+        <button onclick="flip()" style="color:var(--mute);font-size:14px;text-align:left;margin-top:12px"><i class="fas fa-circle-half-stroke" style="margin-right:6px"></i>Toggle theme</button>
+    </div>
 
     <main id="main">
-    <section style="max-width:720px">
+    <section class="page">
         <span class="label">Help Center</span>
         <h1 style="font-size:clamp(2.2rem,5vw,3.2rem);margin-bottom:8px">Support</h1>
-        <p style="font-size:17px;color:var(--fg2);margin-bottom:48px">Get answers or reach out — we respond within 24 hours.</p>
+        <p style="font-size:17px;color:var(--dim);margin-bottom:48px">Get answers or reach out — we respond within 24 hours.</p>
 
         <div class="contact-grid">
-            <a href="mailto:support@mudramanager.com" class="contact-card">
+            <a href="mailto:support@mudramanager.com" class="contact-card" aria-label="Email support at support@mudramanager.com">
                 <div class="ci" style="background:color-mix(in srgb, var(--accent) 12%, transparent)"><i class="fas fa-envelope" style="color:var(--accent)"></i></div>
                 <h3>Email Support</h3><p>support@mudramanager.com</p>
             </a>
-            <a href="mailto:support@mudramanager.com?subject=Bug Report" class="contact-card">
+            <a href="mailto:support@mudramanager.com?subject=Bug Report" class="contact-card" aria-label="Report a bug via email">
                 <div class="ci" style="background:color-mix(in srgb, #ec4899 12%, transparent)"><i class="fas fa-bug" style="color:#ec4899"></i></div>
                 <h3>Report a Bug</h3><p>Include steps to reproduce</p>
             </a>
@@ -61,12 +90,27 @@
         <div class="feat-req">
             <h3>Have a feature request?</h3>
             <p>We build what users ask for.</p>
-            <a href="mailto:support@mudramanager.com?subject=Feature Request" class="btn-primary" style="display:inline-flex"><i class="fas fa-lightbulb"></i> Share Your Idea</a>
+            <a href="mailto:support@mudramanager.com?subject=Feature Request" class="btn-primary"><i class="fas fa-lightbulb"></i> Share Your Idea</a>
         </div>
     </section>
     </main>
 
-    <footer><div class="foot-inner"><div class="foot-brand"><img src="assets/logo.png" alt="" width="24" height="24"> Mudra Manager</div><div class="foot-links"><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="index.html">Home</a></div><div class="foot-copy">© 2026</div></div></footer>
+    <footer>
+        <div class="foot">
+            <div class="foot-logo"><img src="assets/logo.png" alt="" width="20" height="20"> Mudra Manager: Budget Tracker</div>
+            <div class="foot-links">
+                <a href="privacy.html">Privacy</a>
+                <a href="terms.html">Terms</a>
+                <a href="support.html">Support</a>
+                <a href="whatsnew.html">Changelog</a>
+                <a href="features.html">Features</a>
+            </div>
+            <span style="display:flex;align-items:center;gap:8px">
+                Built by <a href="https://linkedin.com/in/aloketewary" target="_blank" style="color:var(--accent);font-weight:600">Aloke Tewary</a>
+                · Made with <span style="color:#ef4444">♥</span> in India · © 2026
+            </span>
+        </div>
+    </footer>
     <script src="2026.js"></script>
 </body>
 </html>

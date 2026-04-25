@@ -3,223 +3,225 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mudra Manager — Your Money, Your Rules</title>
-    <meta name="description" content="India's smartest offline personal finance app. Auto-import bank SMS, manage budgets, split bills — 100% private, AES-256 encrypted.">
-    <meta property="og:title" content="Mudra Manager — Your Money, Your Rules">
-    <meta property="og:description" content="Track expenses, manage budgets, and achieve financial goals — all offline, all yours.">
+    <title>Mudra Manager: Budget Tracker — Your Money, Your Rules</title>
+    <meta name="description" content="The smartest offline budget tracker. Auto-import bank transactions, manage budgets, split bills — 100% private, AES-256 encrypted. Works with 50+ banks worldwide.">
+    <meta property="og:title" content="Mudra Manager: Budget Tracker — Your Money, Your Rules">
+    <meta property="og:description" content="Track expenses, manage budgets, achieve financial goals — all offline, all yours. 50+ banks, 150+ currencies, 37 languages.">
     <meta property="og:image" content="assets/logo.png">
+    <meta name="theme-color" content="#08080c" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)">
     <link rel="icon" href="assets/logo.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="2026.css">
-    <script type="application/ld+json">
-    {"@context":"https://schema.org","@type":"MobileApplication","name":"Mudra Manager","operatingSystem":"Android","applicationCategory":"FinanceApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"INR"},"description":"India's smartest offline personal finance app.","url":"https://mudramanager.com","author":{"@type":"Person","name":"Aloke Tewary"}}
-    </script>
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"MobileApplication","name":"Mudra Manager: Budget Tracker","operatingSystem":"Android","applicationCategory":"FinanceApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"INR"},"url":"https://mudramanager.com","author":{"@type":"Person","name":"Aloke Tewary"}}</script>
 </head>
 <body>
-    <a href="#main" class="skip-link">Skip to content</a>
+    <a href="#main" class="skip">Skip to content</a>
 
-    <!-- NAV -->
     <nav class="nav" role="navigation" aria-label="Main">
-        <a href="#" class="nav-logo"><img src="assets/logo.png" alt="" width="28" height="28"><span>Mudra Manager</span></a>
-        <div class="nav-links">
-            <a href="#features">Features</a>
-            <a href="#security">Security</a>
-            <a href="whatsnew.html">Changelog</a>
-            <a href="support.html">Support</a>
-            <button class="theme-btn" aria-label="Toggle theme" id="theme-toggle"><i class="fas fa-circle-half-stroke"></i></button>
+        <a href="#" class="nav-logo"><img src="assets/logo.png" alt="" width="24" height="24">Mudra Manager</a>
+        <div class="nav-r">
+            <div class="nav-links">
+                <a href="#how">How It Works</a>
+                <a href="features.html">Features</a>
+                <a href="#privacy">Security</a>
+                <a href="whatsnew.html">Changelog</a>
+                <a href="support.html">Support</a>
+            </div>
+            <button class="nav-theme" id="theme-toggle" aria-label="Toggle theme"><i class="fas fa-sun theme-icon"></i></button>
+            <a href="https://play.google.com/store/apps/details?id=com.mudramanager.app" target="_blank" class="nav-dl">Download</a>
+            <button class="nav-burger" id="menu-btn" aria-label="Menu"><span></span><span></span></button>
         </div>
-        <a href="https://play.google.com/store/apps/details?id=com.mudramanager.app" target="_blank" class="nav-cta">Download</a>
-        <button class="nav-burger" id="menu-btn" aria-label="Menu"><span></span><span></span></button>
     </nav>
 
-    <!-- MOBILE MENU -->
-    <div class="mobile-menu" id="mobile-menu">
-        <a href="#features" class="mm-link">Features</a>
-        <a href="#security" class="mm-link">Security</a>
+    <div class="mob" id="mob">
+        <button class="mob-close" id="mob-close" aria-label="Close menu"><i class="fas fa-xmark"></i></button>
+        <a href="#how" class="ml">How It Works</a>
+        <a href="features.html" class="ml">Features</a>
+        <a href="#privacy" class="ml">Security</a>
         <a href="whatsnew.html">Changelog</a>
         <a href="support.html">Support</a>
-        <button id="theme-toggle-m" class="theme-btn-m"><i class="fas fa-circle-half-stroke"></i> Toggle theme</button>
+        <button onclick="flip()" style="color:var(--mute);font-size:14px;text-align:left;margin-top:12px"><i class="fas fa-circle-half-stroke" style="margin-right:6px"></i>Toggle theme</button>
     </div>
 
     <main id="main">
 
     <!-- HERO -->
     <section class="hero">
-        <div class="hero-content">
-            <div class="hero-badge anim-up" style="--d:0">
-                <span class="pulse"></span> v3.5 — AES-256 encrypted
+        <div class="hero-glow"></div>
+        <div class="hero-inner">
+            <div class="hero-text">
+                <p class="mono up" style="--i:0"><span></span>Zero servers · Zero tracking · Zero accounts</p>
+                <h1 class="up" style="--i:1">Track every<br>expense.<br><em>Automatically.</em></h1>
+                <p class="hero-desc up" style="--i:2">Your bank sends SMS. Mudra turns them into insights. Budgets, goals, analytics — all offline, all encrypted, all free.</p>
+                <div class="hero-actions up" style="--i:3">
+                    <a href="https://play.google.com/store/apps/details?id=com.mudramanager.app" target="_blank" class="hero-btn">
+                        <i class="fab fa-google-play"></i> Download Free
+                    </a>
+                    <div class="hero-pills">
+                        <span>50+ banks</span>
+                        <span>·</span>
+                        <span>150+ currencies</span>
+                        <span>·</span>
+                        <span>37 languages</span>
+                    </div>
+                </div>
+                <p class="hero-proof up" style="--i:4">
+                    <i class="fas fa-shield-halved"></i> AES-256 encrypted · 100% offline · No sign-up needed
+                </p>
             </div>
-            <h1 class="hero-h1">
-                <span class="anim-up" style="--d:1">Your money.</span>
-                <span class="anim-up gradient-text" style="--d:2">Your rules.</span>
-            </h1>
-            <p class="hero-sub anim-up" style="--d:3">India's smartest offline finance app. Auto-import bank SMS from 50+ banks, manage budgets, split trips — encrypted, private, free.</p>
-            <div class="hero-actions anim-up" style="--d:4">
-                <a href="https://play.google.com/store/apps/details?id=com.mudramanager.app" target="_blank" class="btn-primary">
-                    <i class="fab fa-google-play"></i>
-                    <div><small>GET IT ON</small><strong>Google Play</strong></div>
-                </a>
-                <div class="hero-pills">
-                    <span><i class="fas fa-wifi-slash"></i> Offline</span>
-                    <span><i class="fas fa-lock"></i> Encrypted</span>
-                    <span><i class="fas fa-heart"></i> Free</span>
+            <div class="hero-phone up" style="--i:2" id="hero-phone">
+                <div class="frame">
+                    <div class="notch"></div>
+                    <div class="screen" id="carousel">
+                        <img src="assets/dashboard_screen.png" alt="Dashboard" class="on" data-ci="0">
+                        <img src="assets/compare_month_screen.png" alt="Analytics" data-ci="1">
+                        <img src="assets/auto_import_activity_screen.png" alt="SMS Import" data-ci="2">
+                        <img src="assets/budget_dashboard.png" alt="Budgets" data-ci="3">
+                        <img src="assets/goal_dashboard.png" alt="Goals" data-ci="4">
+                    </div>
+                </div>
+                <div class="hero-dots" id="hero-dots">
+                    <button class="on" data-ci="0" aria-label="Slide 1"></button>
+                    <button data-ci="1" aria-label="Slide 2"></button>
+                    <button data-ci="2" aria-label="Slide 3"></button>
+                    <button data-ci="3" aria-label="Slide 4"></button>
+                    <button data-ci="4" aria-label="Slide 5"></button>
                 </div>
             </div>
         </div>
-        <div class="hero-phone anim-up" style="--d:2" id="hero-phone">
-            <div class="phone-frame">
-                <div class="phone-notch"></div>
-                <div class="phone-screen">
-                    <img src="assets/flutter_01.png" alt="Dashboard" class="phone-img active">
-                    <img src="assets/flutter_07.png" alt="Statistics" class="phone-img">
-                    <img src="assets/flutter_05.png" alt="SMS" class="phone-img">
-                    <img src="assets/flutter_06.png" alt="Budget" class="phone-img">
-                    <img src="assets/flutter_08.png" alt="Goals" class="phone-img">
-                </div>
+    </section>
+
+    <!-- HOW IT WORKS — 3-step pipeline -->
+    <section class="pipeline reveal" id="how">
+        <p class="mono">How It Works</p>
+        <div class="pipeline-steps">
+            <div class="pipeline-step">
+                <div class="pipeline-icon"><i class="fas fa-message"></i></div>
+                <strong>SMS arrives</strong>
+                <span>Bank sends a transaction SMS to your phone</span>
+            </div>
+            <div class="pipeline-arrow"><i class="fas fa-arrow-right"></i></div>
+            <div class="pipeline-step">
+                <div class="pipeline-icon accent-icon"><i class="fas fa-microchip"></i></div>
+                <strong>Mudra reads it locally</strong>
+                <span>On-device parser extracts amount, merchant, category</span>
+            </div>
+            <div class="pipeline-arrow"><i class="fas fa-arrow-right"></i></div>
+            <div class="pipeline-step">
+                <div class="pipeline-icon green-icon"><i class="fas fa-check"></i></div>
+                <strong>Transaction appears</strong>
+                <span>Categorized, encrypted, ready — without lifting a finger</span>
             </div>
         </div>
-        <div class="hero-fade"></div>
     </section>
 
-    <!-- STATS -->
-    <section class="stats">
-        <div class="stat"><span class="stat-n" data-target="50" data-suffix="+">0</span><span class="stat-l">Banks</span></div>
-        <div class="stat"><span class="stat-n" data-target="37">0</span><span class="stat-l">Languages</span></div>
-        <div class="stat"><span class="stat-n" data-target="35" data-suffix="+">0</span><span class="stat-l">Achievements</span></div>
-        <div class="stat"><span class="stat-n" data-target="0">0</span><span class="stat-l">Data Collected</span></div>
-    </section>
-
-    <!-- INTERACTIVE PREVIEW -->
-    <section class="preview reveal-section">
-        <span class="label">See It In Action</span>
-        <h2>Know where every rupee goes</h2>
-        <div class="preview-tabs">
-            <button class="ptab active" data-i="0">Dashboard</button>
-            <button class="ptab" data-i="1">Auto-Import</button>
-            <button class="ptab" data-i="2">Analytics</button>
-            <button class="ptab" data-i="3">Budgets</button>
+    <!-- THE TRANSPARENT APP (signature section — moved up) -->
+    <section class="transparent reveal" id="privacy">
+        <p class="mono" style="color:var(--green)">The Transparent App</p>
+        <h2>We can prove we<br>don't spy on you.</h2>
+        <p class="transparent-sub">Right now, this website knows:</p>
+        <div class="trans-stage" id="trans-stage">
+            <div class="trans-item can" data-reveal="1"><i class="fas fa-check-circle"></i><span>Your screen size: <strong id="t-screen"></strong></span></div>
+            <div class="trans-item can" data-reveal="2"><i class="fas fa-check-circle"></i><span>Your theme: <strong id="t-theme"></strong></span></div>
+            <div class="trans-divider" data-reveal="3">That's it. We tried to find out more:</div>
+            <div class="trans-item cant" data-reveal="4"><i class="fas fa-circle-xmark"></i><span>Your name</span></div>
+            <div class="trans-item cant" data-reveal="5"><i class="fas fa-circle-xmark"></i><span>Your email</span></div>
+            <div class="trans-item cant" data-reveal="6"><i class="fas fa-circle-xmark"></i><span>Your location</span></div>
+            <div class="trans-item cant" data-reveal="7"><i class="fas fa-circle-xmark"></i><span>Your browsing history</span></div>
+            <div class="trans-item cant" data-reveal="8"><i class="fas fa-circle-xmark"></i><span>Your financial data</span></div>
+            <div class="trans-item cant" data-reveal="9"><i class="fas fa-circle-xmark"></i><span>Your bank details</span></div>
         </div>
-        <div class="preview-device">
-            <div class="pdev-frame">
-                <img src="assets/flutter_01.png" alt="Dashboard" loading="lazy" class="pdev-img active" data-s="0">
-                <img src="assets/flutter_05.png" alt="Auto-Import" loading="lazy" class="pdev-img" data-s="1">
-                <img src="assets/flutter_07.png" alt="Analytics" loading="lazy" class="pdev-img" data-s="2">
-                <img src="assets/flutter_06.png" alt="Budgets" loading="lazy" class="pdev-img" data-s="3">
-            </div>
-        </div>
-        <p class="preview-cap" id="pcap">AI insights, balances, and alerts at a glance</p>
+        <p class="trans-quote" data-reveal="10">Our app works the same way.<br><strong>AES-256 encrypted. Zero servers. Your data stays yours.</strong></p>
     </section>
 
-    <!-- FEATURES -->
+    <!-- FEATURES — tabbed (replaces sticky scroll) -->
     <section class="features" id="features">
-        <span class="label">Features</span>
-        <h2>Everything you need.<br>Nothing you don't.</h2>
-        <div class="feat-grid">
-            <div class="feat-card feat-wide reveal-section" data-accent="indigo">
-                <div class="feat-icon"><i class="fas fa-bolt"></i></div>
-                <span class="feat-badge">Core</span>
-                <h3>SMS Auto-Import</h3>
-                <p>Reads bank SMS & RCS from 50+ Indian banks — HDFC, SBI, ICICI, Axis, Paytm, GPay. Transactions appear automatically.</p>
-            </div>
-            <div class="feat-card reveal-section" data-accent="emerald" id="security">
-                <div class="feat-icon"><i class="fas fa-shield-halved"></i></div>
-                <h3>AES-256 Encrypted</h3>
-                <p>SMS body, merchant info, and notes encrypted at rest. Key in Android Keystore.</p>
-            </div>
-            <div class="feat-card reveal-section" data-accent="amber">
-                <div class="feat-icon"><i class="fas fa-chart-pie"></i></div>
-                <h3>Smart Budgets</h3>
-                <p>4-step guided creation. Category allocation, pace tracking, alerts at 80% and 100%.</p>
-            </div>
-            <div class="feat-card reveal-section" data-accent="pink">
-                <div class="feat-icon"><i class="fas fa-bullseye"></i></div>
-                <h3>Savings Goals</h3>
-                <p>Targets with deadlines. Milestones, progress rings, confetti, smart deposits.</p>
-            </div>
-            <div class="feat-card feat-wide reveal-section" data-accent="cyan">
-                <div class="feat-icon"><i class="fas fa-chart-line"></i></div>
-                <h3>Analytics & Insights</h3>
-                <p>Financial health score, spending personality, monthly comparisons. Morning Money Minute at 9 AM daily.</p>
-            </div>
-            <div class="feat-card feat-sm reveal-section"><i class="fas fa-plane"></i><strong>Trips & Splits</strong><span>Group splitting, settlements</span></div>
-            <div class="feat-card feat-sm reveal-section"><i class="fas fa-repeat"></i><strong>Recurring Bills</strong><span>Auto-create, SMS-match</span></div>
-            <div class="feat-card feat-sm reveal-section"><i class="fas fa-trophy"></i><strong>Gamification</strong><span>35+ achievements, streaks</span></div>
-        </div>
-    </section>
-
-    <!-- HOW IT WORKS -->
-    <section class="how reveal-section">
-        <span class="label">How It Works</span>
-        <h2>Three taps to clarity</h2>
-        <div class="how-steps">
-            <div class="step"><div class="step-n">1</div><h3>Enable SMS</h3><p>Grant notification access. Mudra reads bank SMS locally.</p></div>
-            <div class="step-line"></div>
-            <div class="step"><div class="step-n">2</div><h3>Auto-Track</h3><p>Transactions appear. Smart categorization learns your patterns.</p></div>
-            <div class="step-line"></div>
-            <div class="step"><div class="step-n">3</div><h3>Stay in Control</h3><p>Budgets, goals, insights keep you on track.</p></div>
-        </div>
-    </section>
-
-    <!-- COMPARISON -->
-    <section class="compare reveal-section">
-        <span class="label">Why Mudra</span>
-        <h2>Not another expense tracker</h2>
-        <div class="compare-grid">
-            <div class="cmp-row cmp-head"><span></span><span class="cmp-us">Mudra</span><span>Others</span></div>
-            <div class="cmp-row"><span>Works offline</span><span class="cmp-us"><i class="fas fa-check"></i></span><span class="cmp-no"><i class="fas fa-xmark"></i></span></div>
-            <div class="cmp-row"><span>No account needed</span><span class="cmp-us"><i class="fas fa-check"></i></span><span class="cmp-no"><i class="fas fa-xmark"></i></span></div>
-            <div class="cmp-row"><span>AES-256 encryption</span><span class="cmp-us"><i class="fas fa-check"></i></span><span class="cmp-no"><i class="fas fa-xmark"></i></span></div>
-            <div class="cmp-row"><span>Indian bank SMS</span><span class="cmp-us">50+</span><span class="cmp-no">Limited</span></div>
-            <div class="cmp-row"><span>Hindi & Bengali</span><span class="cmp-us"><i class="fas fa-check"></i></span><span class="cmp-no"><i class="fas fa-xmark"></i></span></div>
-            <div class="cmp-row"><span>Data collection</span><span class="cmp-us">Zero</span><span class="cmp-no">Analytics</span></div>
-        </div>
-    </section>
-
-    <!-- PRIVACY -->
-    <section class="privacy reveal-section">
-        <div class="priv-card">
-            <div class="priv-text">
-                <span class="label" style="color:var(--green)">Privacy</span>
-                <h2>Your data never leaves your device.</h2>
-                <p>No cloud. No accounts. No servers. No analytics. No tracking. AES-256 encrypted. We literally can't see your data.</p>
-                <a href="privacy.html" class="link-arrow">Privacy policy →</a>
-            </div>
-            <div class="priv-stats">
-                <div class="ps"><i class="fas fa-database"></i><small>Servers</small><strong>Zero</strong></div>
-                <div class="ps"><i class="fas fa-user"></i><small>Accounts</small><strong>None</strong></div>
-                <div class="ps"><i class="fas fa-lock"></i><small>Encryption</small><strong>AES-256</strong></div>
-                <div class="ps"><i class="fas fa-fingerprint"></i><small>Biometric</small><strong>Yes</strong></div>
-            </div>
-        </div>
-    </section>
-
-    <!-- BUILT BY -->
-    <section class="built reveal-section">
-        <div class="built-card">
-            <div class="built-avatar">A</div>
-            <div>
-                <span class="label">Built By</span>
-                <h3>Aloke Tewary</h3>
-                <p>Software engineer who got tired of finance apps that sell your data.</p>
-                <div class="built-links">
-                    <a href="https://linkedin.com/in/aloketewary" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
-                    <a href="https://github.com/aloketewary" target="_blank" aria-label="GitHub"><i class="fab fa-github"></i></a>
-                    <a href="mailto:support@mudramanager.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
+        <div class="features-inner">
+            <div class="features-text">
+                <div class="features-tabs">
+                    <button class="ftab on" data-tab="0"><i class="fas fa-bolt"></i> Automation</button>
+                    <button class="ftab" data-tab="1"><i class="fas fa-brain"></i> Intelligence</button>
+                    <button class="ftab" data-tab="2"><i class="fas fa-shield"></i> Control</button>
                 </div>
+                <div class="features-panels">
+                    <div class="fpanel on" data-panel="0">
+                        <h2>Your bank sends SMS.<br>Mudra does the rest.</h2>
+                        <p>Reads notifications from 50+ banks worldwide. Transactions appear without you lifting a finger.</p>
+                        <ul>
+                            <li>HDFC, SBI, Nubank, BCA, Revolut, and more</li>
+                            <li>Smart categorization learns your patterns</li>
+                            <li>100% local — nothing sent anywhere</li>
+                        </ul>
+                    </div>
+                    <div class="fpanel" data-panel="1">
+                        <h2>Insights that<br>change behavior.</h2>
+                        <p>Financial health score, spending personality, money leak detection. Morning Money Minute at 9 AM daily.</p>
+                        <ul>
+                            <li>Category trends and weekly recaps</li>
+                            <li>Unusual spending alerts</li>
+                            <li>Export to Excel and PDF</li>
+                        </ul>
+                    </div>
+                    <div class="fpanel" data-panel="2">
+                        <h2>Budgets that<br>fight for you.</h2>
+                        <p>4-step guided creation. Alerts at 80% and 100%. Under-budget streaks earn achievements.</p>
+                        <ul>
+                            <li>Daily, weekly, monthly, yearly</li>
+                            <li>Category, tag, festival, travel types</li>
+                            <li>35+ achievements and XP levels</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="features-phone">
+                <div class="frame">
+                    <img src="assets/auto_import_activity_screen.png" alt="SMS Auto-Import" class="on" data-fp="0" loading="lazy">
+                    <img src="assets/compare_month_screen.png" alt="Analytics" data-fp="1" loading="lazy">
+                    <img src="assets/budget_details.png" alt="Budgets" data-fp="2" loading="lazy">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- LIVE LEDGER (signature UX — simulated SMS pipeline) -->
+    <section class="ledger reveal" id="ledger">
+        <p class="mono">See It In Action</p>
+        <h2>Watch it work.<br><span class="dim">No download needed.</span></h2>
+        <div class="ledger-stage">
+            <div class="ledger-phone">
+                <div class="ledger-sms" id="ledger-sms">
+                    <div class="sms-bubble" id="sms-bubble">
+                        <span class="sms-sender" id="sms-sender">HDFC Bank</span>
+                        <span class="sms-body" id="sms-body">Rs 450.00 debited from A/c XX4521 for SWIGGY on 15-Jun</span>
+                    </div>
+                </div>
+                <div class="ledger-arrow"><i class="fas fa-arrow-down"></i></div>
+                <div class="ledger-txn" id="ledger-txn">
+                    <div class="txn-card" id="txn-card">
+                        <div class="txn-icon" id="txn-icon"><i class="fas fa-utensils"></i></div>
+                        <div class="txn-info">
+                            <strong id="txn-merchant">Swiggy</strong>
+                            <span id="txn-cat">Food & Dining</span>
+                        </div>
+                        <span class="txn-amount" id="txn-amount">-₹450</span>
+                    </div>
+                </div>
+                <div class="ledger-lock" id="ledger-lock"><i class="fas fa-lock"></i> Encrypted & stored locally</div>
             </div>
         </div>
     </section>
 
     <!-- CTA -->
-    <section class="cta reveal-section">
+    <section class="final-cta reveal">
         <h2>Start tracking.<br><span>Stop guessing.</span></h2>
         <p>Free to download. No account needed.</p>
-        <a href="https://play.google.com/store/apps/details?id=com.mudramanager.app" target="_blank" class="btn-primary btn-lg">
+        <a href="https://play.google.com/store/apps/details?id=com.mudramanager.app" target="_blank" class="hero-btn" style="font-size:17px;padding:16px 36px;border-radius:14px">
             <i class="fab fa-google-play"></i> Download Free
         </a>
-        <div class="cta-checks">
+        <div class="checks">
             <span><i class="fas fa-check"></i> No sign-up</span>
             <span><i class="fas fa-check"></i> No credit card</span>
             <span><i class="fas fa-check"></i> No tracking</span>
@@ -228,19 +230,24 @@
 
     </main>
 
-    <!-- FLOATING CTA -->
-    <a href="https://play.google.com/store/apps/details?id=com.mudramanager.app" target="_blank" class="float-cta" id="float-cta" aria-label="Download">
-        <i class="fab fa-google-play"></i><span>Download</span>
+    <a href="https://play.google.com/store/apps/details?id=com.mudramanager.app" target="_blank" class="fcta" id="fcta" aria-label="Download Free">
+        <i class="fab fa-google-play"></i><span>Download Free</span>
     </a>
 
-    <!-- FOOTER -->
     <footer>
-        <div class="foot-inner">
-            <div class="foot-brand"><img src="assets/logo.png" alt="" width="24" height="24"> Mudra Manager</div>
+        <div class="foot">
+            <div class="foot-logo"><img src="assets/logo.png" alt="" width="20" height="20"> Mudra Manager: Budget Tracker</div>
             <div class="foot-links">
-                <a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="support.html">Support</a><a href="whatsnew.html">Changelog</a>
+                <a href="privacy.html">Privacy</a>
+                <a href="terms.html">Terms</a>
+                <a href="support.html">Support</a>
+                <a href="whatsnew.html">Changelog</a>
+                <a href="features.html">Features</a>
             </div>
-            <div class="foot-copy">Made with <span style="color:#ef4444">♥</span> in India · © 2026</div>
+            <span style="display:flex;align-items:center;gap:8px">
+                Built by <a href="https://linkedin.com/in/aloketewary" target="_blank" style="color:var(--accent);font-weight:600">Aloke Tewary</a>
+                · Made with <span style="color:#ef4444">♥</span> in India · © 2026
+            </span>
         </div>
     </footer>
 

@@ -27,6 +27,9 @@ class NetWorthWidgetPlugin extends DashboardWidgetPlugin {
   String get description => 'Track your total net worth with historical trends';
 
   @override
+  bool get fullModeOnly => true;
+
+  @override
   Widget build(BuildContext context, WidgetRef ref) {
     return const NetWorthCard(globalPadding: 0);
   }

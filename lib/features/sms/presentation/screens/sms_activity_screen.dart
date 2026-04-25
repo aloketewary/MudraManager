@@ -1,4 +1,5 @@
 import 'package:mudra_manager/core/providers/state_value.dart';
+import 'package:mudra_manager/core/theme/app_theme.dart';
 import 'package:mudra_manager/core/utils/safe_date_format.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
@@ -900,7 +901,7 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                   widget.activity.body,
                   style: textTheme.bodySmall?.copyWith(
                     height: 1.5,
-                    fontFamily: 'monospace',
+                    fontFamily: AppTheme.monoFontFamily,
                   ),
                 ),
               ),

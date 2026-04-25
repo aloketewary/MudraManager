@@ -3,44 +3,268 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#08080c" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)">
     <title>Terms of Service — Mudra Manager</title>
+    <meta name="description" content="Mudra Manager terms of service. Read before using the App.">
     <link rel="icon" href="assets/logo.png">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="2026.css">
     <style>
         .legal h2 { font-size: 1.2rem; margin-bottom: 10px; margin-top: 40px; }
         .legal h2:first-of-type { margin-top: 0; }
-        .legal p, .legal li { font-size: 14px; color: var(--fg2); line-height: 1.7; }
+        .legal p, .legal li { font-size: 14px; color: var(--dim); line-height: 1.7; }
         .legal ul { margin-left: 16px; margin-top: 8px; }
         .legal li { margin-bottom: 6px; list-style: none; padding-left: 16px; position: relative; }
-        .legal li::before { content: '•'; position: absolute; left: 0; color: var(--fg3); }
+        .legal li::before { content: '•'; position: absolute; left: 0; color: var(--mute); }
+        .legal h3 { font-size: 14px; font-weight: 600; margin-top: 20px; margin-bottom: 6px; color: var(--text); }
     </style>
 </head>
 <body>
-    <nav class="nav" role="navigation"><a href="index.html" class="nav-logo"><img src="assets/logo.png" alt="" width="28" height="28"><span>Mudra Manager</span></a><div class="nav-links"><button class="theme-btn" id="theme-toggle" aria-label="Toggle theme"><i class="fas fa-circle-half-stroke"></i></button><a href="index.html" style="font-size:13px;color:var(--fg2)">← Home</a></div></nav>
+    <a href="#main" class="skip">Skip to content</a>
+
+    <nav class="nav" role="navigation" aria-label="Main">
+        <a href="index.html" class="nav-logo"><img src="assets/logo.png" alt="" width="24" height="24">Mudra Manager</a>
+        <div class="nav-r">
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="features.html">Features</a>
+                <a href="whatsnew.html">Changelog</a>
+                <a href="support.html">Support</a>
+            </div>
+            <button class="nav-theme" id="theme-toggle" aria-label="Toggle theme"><i class="fas fa-sun theme-icon"></i></button>
+            <a href="https://play.google.com/store/apps/details?id=com.mudramanager.app" target="_blank" class="nav-dl">Download</a>
+            <button class="nav-burger" id="menu-btn" aria-label="Menu"><span></span><span></span></button>
+        </div>
+    </nav>
+
+    <div class="mob" id="mob">
+        <button class="mob-close" id="mob-close" aria-label="Close menu"><i class="fas fa-xmark"></i></button>
+        <a href="index.html" class="ml">Home</a>
+        <a href="features.html" class="ml">Features</a>
+        <a href="whatsnew.html" class="ml">Changelog</a>
+        <a href="support.html" class="ml">Support</a>
+        <button onclick="flip()" style="color:var(--mute);font-size:14px;text-align:left;margin-top:12px"><i class="fas fa-circle-half-stroke" style="margin-right:6px"></i>Toggle theme</button>
+    </div>
 
     <main id="main">
-    <section class="legal" style="max-width:720px">
+    <section class="legal page">
         <span class="label">Legal</span>
         <h1 style="font-size:clamp(2.2rem,5vw,3.2rem);margin-bottom:4px">Terms of Service</h1>
-        <p style="color:var(--fg3);margin-bottom:40px">Last updated: June 2026</p>
+        <p style="color:var(--mute);margin-bottom:40px">Effective date: April 24, 2026 · Last updated: April 24, 2026</p>
 
-        <h2>1. Acceptance</h2><p>By using Mudra Manager, you agree to these Terms.</p>
-        <h2>2. Service</h2><p>A personal finance app operating 100% locally on your device.</p>
-        <h2>3. Responsibilities</h2>
-        <ul><li>Provide accurate information</li><li>Keep your device secure</li><li>Do not reverse engineer the app</li><li>Maintain backups</li></ul>
-        <h2>4. Pricing</h2><p>Core features free forever. Optional Pro via Google Play.</p>
-        <h2>5. Privacy</h2><p>All data local with AES-256 encryption. See <a href="privacy.html" class="link-arrow">Privacy Policy →</a></p>
-        <h2>6. SMS</h2><p>Optional notification access for bank transaction detection. Revocable. Local only.</p>
-        <h2>7. Disclaimer</h2><p>Provided "as is." No guarantee of error-free operation or accurate SMS detection.</p>
-        <h2>8. Liability</h2><p>Not liable for damages from app use, data loss, or financial decisions.</p>
-        <h2>9. Not Advice</h2><p>Tracking tool, not a financial advisor.</p>
-        <h2>10. Law</h2><p>Governed by laws of India.</p>
-        <h2>11. Contact</h2><p><a href="mailto:support@mudramanager.com" class="link-arrow">support@mudramanager.com →</a></p>
+        <h2>1. Acceptance of Terms</h2>
+        <p>These Terms of Service ("Terms") constitute a legally binding agreement between you ("User," "you," or "your") and Aloke Tewary ("Developer," "we," "us," or "our"), governing your use of the Mudra Manager: Budget Tracker application ("the App") and the website at mudramanager.com ("the Website").</p>
+        <p>By downloading, installing, accessing, or using the App, you agree to be bound by these Terms and our <a href="privacy.html" class="link-arrow">Privacy Policy →</a>. If you do not agree to these Terms, do not use the App.</p>
+
+        <h2>2. Description of Service</h2>
+        <p>Mudra Manager is a personal finance tracking application that operates primarily offline on your Android device. The App provides:</p>
+        <ul>
+            <li>Manual and automated (SMS/notification-based) transaction recording</li>
+            <li>Budget creation and tracking</li>
+            <li>Savings goal management</li>
+            <li>Trip expense tracking and group expense splitting</li>
+            <li>Financial analytics and insights</li>
+            <li>Data export (Excel, PDF) and local backup/restore</li>
+            <li>Multi-currency support with exchange rate conversion</li>
+            <li>Gamification features (achievements, streaks, levels)</li>
+            <li>Plugin marketplace for extended functionality</li>
+        </ul>
+        <p>The App is a <strong>financial tracking tool only</strong>. It is not a bank, payment processor, financial advisor, tax consultant, or regulated financial service.</p>
+
+        <h2>3. Eligibility</h2>
+        <p>You must be at least 13 years of age (or the minimum age of digital consent in your jurisdiction) to use the App. By using the App, you represent and warrant that you meet this age requirement. If you are between 13 and 18 years of age (or the age of majority in your jurisdiction), you represent that your parent or legal guardian has reviewed and agreed to these Terms.</p>
+
+        <h2>4. User Account</h2>
+        <p>The App does not require or create any user account. There is no registration, no email verification, no phone number collection, and no login process. Your use of the App is entirely anonymous to us.</p>
+
+        <h2>5. SMS &amp; Notification Access</h2>
+        <h3>5.1 How It Works</h3>
+        <p>The App offers an optional feature to automatically detect financial transactions by reading bank SMS and RCS notifications. This feature:</p>
+        <ul>
+            <li>Requires explicit permission grant through Android's Notification Access settings</li>
+            <li>Processes all messages entirely on your device — no data is transmitted</li>
+            <li>Uses pattern-matching parsers to identify financial transactions from 50+ banks</li>
+            <li>Automatically categorizes transactions based on learned patterns</li>
+        </ul>
+        <h3>5.2 Accuracy Disclaimer</h3>
+        <p><strong>SMS/notification parsing is provided on a best-effort basis and is inherently imperfect.</strong> You acknowledge and agree that:</p>
+        <ul>
+            <li>The App may fail to detect some transactions (false negatives)</li>
+            <li>The App may incorrectly parse transaction amounts, merchants, dates, or categories (false positives or misclassification)</li>
+            <li>The App may misidentify non-financial messages as transactions</li>
+            <li>Bank SMS formats change without notice, which may temporarily break parsing for specific banks</li>
+            <li>RCS and rich messaging formats may not be fully supported</li>
+            <li>Dual-SIM configurations may affect sender detection accuracy</li>
+        </ul>
+        <p><strong>You are solely responsible for verifying the accuracy of all automatically imported transactions.</strong> The App is not a substitute for reviewing your bank statements. Do not rely solely on the App for financial record-keeping, tax filing, dispute resolution, or any purpose where transaction accuracy is critical.</p>
+        <h3>5.3 Revocation</h3>
+        <p>You may revoke Notification Access at any time through your device's Settings → Apps → Special Access → Notification Access. Previously imported transactions will remain in the App until you delete them.</p>
+
+        <h2>6. Pricing &amp; Subscriptions</h2>
+        <h3>6.1 Free Tier</h3>
+        <p>Core features of the App are available free of charge with no time limitation. The free tier includes transaction tracking, budgets, goals, SMS auto-import, analytics, and export functionality.</p>
+        <h3>6.2 Pro Upgrade</h3>
+        <p>An optional Pro upgrade is available via Google Play's in-app purchase system, providing access to additional features such as unlimited accounts and advanced analytics. Pro pricing is displayed in the App and on Google Play in your local currency.</p>
+        <h3>6.3 Billing &amp; Refunds</h3>
+        <p>All purchases are processed by Google Play. We do not directly handle payment information. Refund requests are governed by <a href="https://support.google.com/googleplay/answer/2479637" target="_blank" class="link-arrow">Google Play's refund policy →</a>. For subscription cancellations, use Google Play → Subscriptions. We may, at our sole discretion, offer additional refunds for technical issues — contact <a href="mailto:support@mudramanager.com" class="link-arrow">support@mudramanager.com →</a></p>
+        <h3>6.4 Price Changes</h3>
+        <p>We reserve the right to modify Pro pricing at any time. Price changes will not affect existing active subscriptions until renewal. You will be notified of price changes through Google Play's standard notification mechanism before your next billing cycle.</p>
+
+        <h2>7. Intellectual Property</h2>
+        <h3>7.1 Ownership</h3>
+        <p>The App, including its source code, design, user interface, graphics, icons, logos, text, documentation, and all related intellectual property, is the exclusive property of Aloke Tewary and is protected by applicable copyright, trademark, and other intellectual property laws of India and international treaties.</p>
+        <h3>7.2 Trademarks</h3>
+        <p>"Mudra Manager," the Mudra Manager logo, and "Your money, your language, your rules" are trademarks of Aloke Tewary. You may not use these marks without prior written permission, except as necessary to refer to the App in a factual, non-misleading manner (e.g., in a review or article).</p>
+        <h3>7.3 License Grant</h3>
+        <p>Subject to these Terms, we grant you a limited, non-exclusive, non-transferable, revocable license to install and use the App on Android devices that you own or control, solely for your personal, non-commercial financial tracking purposes.</p>
+        <h3>7.4 Restrictions</h3>
+        <p>You may not:</p>
+        <ul>
+            <li>Copy, modify, distribute, sell, lease, sublicense, or create derivative works of the App</li>
+            <li>Reverse engineer, decompile, disassemble, or attempt to extract the source code of the App, except to the extent permitted by applicable law</li>
+            <li>Remove, alter, or obscure any copyright, trademark, or other proprietary notices</li>
+            <li>Use the App for any commercial purpose, including reselling parsed transaction data</li>
+            <li>Use automated means to access or interact with the App (bots, scrapers, etc.)</li>
+            <li>Circumvent any technical protection measures in the App</li>
+        </ul>
+        <h3>7.5 Your Data</h3>
+        <p>You retain full ownership of all financial data you create or import into the App. We claim no ownership or license over your data. Since your data never leaves your device, we have no access to it.</p>
+
+        <h2>8. User Responsibilities</h2>
+        <p>You agree to:</p>
+        <ul>
+            <li>Use the App in compliance with all applicable laws and regulations</li>
+            <li>Maintain the security of your device (screen lock, OS updates, avoiding rooted/compromised devices)</li>
+            <li>Regularly back up your data using the App's export/backup features — we cannot recover lost data</li>
+            <li>Verify the accuracy of automatically imported transactions against your bank statements</li>
+            <li>Not rely on the App as your sole financial record for tax, legal, or regulatory purposes</li>
+            <li>Not use the App to facilitate any illegal activity, including money laundering, tax evasion, or fraud</li>
+        </ul>
+
+        <h2>9. Data Loss &amp; Backup</h2>
+        <p>Because all data is stored locally on your device:</p>
+        <ul>
+            <li><strong>Uninstalling the App permanently deletes all data</strong>, including the encryption key. This is irreversible.</li>
+            <li><strong>Device loss, theft, damage, or factory reset</strong> will result in permanent data loss if no backup exists</li>
+            <li><strong>Backup files are encrypted with a device-bound key.</strong> Backups restored on a different device will have unreadable encrypted fields (amounts and categories will be intact, but SMS bodies and descriptions will not be recoverable)</li>
+            <li><strong>We cannot recover your data</strong> under any circumstances. We do not have copies, backups, or access to your data</li>
+        </ul>
+        <p>You are solely responsible for maintaining backups of your financial data.</p>
+
+        <h2>10. Disclaimer of Warranties</h2>
+        <p><strong>THE APP IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND, WHETHER EXPRESS, IMPLIED, OR STATUTORY.</strong> To the maximum extent permitted by applicable law, we expressly disclaim all warranties, including but not limited to:</p>
+        <ul>
+            <li><strong>Merchantability</strong> — we do not warrant that the App is fit for any particular commercial purpose</li>
+            <li><strong>Fitness for a particular purpose</strong> — we do not warrant that the App will meet your specific requirements</li>
+            <li><strong>Accuracy</strong> — we do not warrant that SMS parsing, transaction categorization, budget calculations, exchange rates, analytics, or any other App output is accurate, complete, or reliable</li>
+            <li><strong>Uninterrupted operation</strong> — we do not warrant that the App will be error-free, bug-free, or available without interruption</li>
+            <li><strong>Security</strong> — while we implement AES-256 encryption and other security measures, we do not warrant that the App is immune to all security threats, particularly on rooted or compromised devices</li>
+            <li><strong>Compatibility</strong> — we do not warrant that the App will function correctly on all Android devices, OS versions, or configurations</li>
+        </ul>
+
+        <h2>11. Limitation of Liability</h2>
+        <p><strong>TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW:</strong></p>
+        <ul>
+            <li>We shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including but not limited to loss of profits, data, goodwill, or other intangible losses</li>
+            <li>We shall not be liable for any damages arising from: (a) your use of or inability to use the App; (b) inaccurate SMS parsing or transaction categorization; (c) financial decisions made based on App data; (d) data loss due to device failure, uninstallation, or any other cause; (e) unauthorized access to your device or data; (f) any third-party actions or services (Google Play, RevenueCat)</li>
+            <li><strong>Our total aggregate liability</strong> for all claims arising from or related to the App shall not exceed the amount you paid to us for the App in the twelve (12) months preceding the claim, or INR 1,000 (Indian Rupees One Thousand), whichever is greater</li>
+        </ul>
+        <p>Some jurisdictions do not allow the exclusion or limitation of certain damages. In such jurisdictions, our liability shall be limited to the maximum extent permitted by law.</p>
+
+        <h2>12. Indemnification</h2>
+        <p>You agree to indemnify, defend, and hold harmless Aloke Tewary from and against any claims, liabilities, damages, losses, costs, and expenses (including reasonable legal fees) arising from or related to:</p>
+        <ul>
+            <li>Your use or misuse of the App</li>
+            <li>Your violation of these Terms</li>
+            <li>Your violation of any applicable law or regulation</li>
+            <li>Any financial decisions you make based on data from the App</li>
+            <li>Any dispute between you and a third party (bank, tax authority, etc.) related to data from the App</li>
+        </ul>
+
+        <h2>13. Not Financial Advice</h2>
+        <p>The App is a tracking and organizational tool. <strong>Nothing in the App constitutes financial advice, tax advice, investment advice, or any other form of professional advice.</strong> Specifically:</p>
+        <ul>
+            <li>Budget suggestions, spending insights, financial health scores, and spending personality analyses are informational only and should not be the basis for financial decisions</li>
+            <li>Exchange rates are approximate and should not be used for actual currency conversion transactions</li>
+            <li>The App does not replace professional financial planning, accounting, or tax preparation services</li>
+            <li>Always consult qualified professionals for financial, tax, or legal decisions</li>
+        </ul>
+
+        <h2>14. Modifications to the App &amp; Terms</h2>
+        <h3>14.1 App Updates</h3>
+        <p>We may update the App from time to time to add features, fix bugs, improve performance, or comply with legal requirements. Updates are distributed through Google Play. We are not obligated to provide any specific updates, maintain backward compatibility, or continue supporting older versions.</p>
+        <h3>14.2 Changes to Terms</h3>
+        <p>We reserve the right to modify these Terms at any time. Changes will be posted on this page with an updated effective date. Material changes will be noted in the App's changelog. Your continued use of the App after changes are posted constitutes acceptance of the modified Terms. If you disagree with any changes, your sole remedy is to stop using and uninstall the App.</p>
+
+        <h2>15. Termination</h2>
+        <ul>
+            <li><strong>By you:</strong> You may stop using the App at any time by uninstalling it. This permanently deletes all local data.</li>
+            <li><strong>By us:</strong> We may discontinue the App or revoke your license if you violate these Terms. Given the App's offline nature, termination primarily means removal from Google Play and cessation of updates.</li>
+            <li><strong>Effect:</strong> Sections 7 (Intellectual Property), 10 (Disclaimer), 11 (Limitation of Liability), 12 (Indemnification), 17 (Governing Law), and 18 (Dispute Resolution) survive termination.</li>
+        </ul>
+
+        <h2>16. Force Majeure</h2>
+        <p>We shall not be liable for any failure or delay in performance due to causes beyond our reasonable control, including but not limited to: natural disasters, pandemics, war, terrorism, government actions, power failures, internet disruptions, Google Play outages, or changes in Android OS that affect App functionality.</p>
+
+        <h2>17. Governing Law</h2>
+        <p>These Terms shall be governed by and construed in accordance with the laws of India, without regard to conflict of law principles. The courts of competent jurisdiction in India shall have exclusive jurisdiction over any disputes arising from these Terms, subject to the dispute resolution provisions in Section 18.</p>
+
+        <h2>18. Dispute Resolution</h2>
+        <h3>18.1 Informal Resolution</h3>
+        <p>Before initiating any formal proceedings, you agree to first contact us at <a href="mailto:support@mudramanager.com" class="link-arrow">support@mudramanager.com →</a> and attempt to resolve the dispute informally for at least 30 days.</p>
+        <h3>18.2 Arbitration</h3>
+        <p>If informal resolution fails, any dispute arising from or relating to these Terms or the App shall be resolved by binding arbitration in accordance with the Arbitration and Conciliation Act, 1996 (India). The arbitration shall be conducted by a sole arbitrator mutually agreed upon, in English, and the seat of arbitration shall be in India. The arbitrator's decision shall be final and binding.</p>
+        <h3>18.3 Class Action Waiver</h3>
+        <p>To the maximum extent permitted by applicable law, you agree that any dispute resolution proceedings will be conducted only on an individual basis and not in a class, consolidated, or representative action.</p>
+        <h3>18.4 Exceptions</h3>
+        <p>Nothing in this section prevents either party from seeking injunctive or other equitable relief in a court of competent jurisdiction for intellectual property infringement or other urgent matters.</p>
+
+        <h2>19. Export Compliance</h2>
+        <p>The App uses AES-256 encryption. You are responsible for compliance with any applicable export control laws and regulations in your jurisdiction related to the use of encryption software. The App is not intended for use in any jurisdiction where its use would be prohibited by law.</p>
+
+        <h2>20. Open Source Acknowledgment</h2>
+        <p>The App incorporates open-source software components, each governed by their respective licenses (MIT, BSD, Apache 2.0, etc.). A list of open-source licenses is available within the App under Settings → About → Open Source Licenses. These Terms do not limit your rights under applicable open-source licenses.</p>
+
+        <h2>21. Severability</h2>
+        <p>If any provision of these Terms is held to be invalid, illegal, or unenforceable by a court of competent jurisdiction, that provision shall be modified to the minimum extent necessary to make it enforceable, or if modification is not possible, severed from these Terms. The remaining provisions shall continue in full force and effect.</p>
+
+        <h2>22. Entire Agreement</h2>
+        <p>These Terms, together with the <a href="privacy.html" class="link-arrow">Privacy Policy →</a>, constitute the entire agreement between you and us regarding the App and supersede all prior agreements, understandings, and communications, whether written or oral.</p>
+
+        <h2>23. Waiver</h2>
+        <p>Our failure to enforce any provision of these Terms shall not constitute a waiver of that provision or any other provision. Any waiver must be in writing and signed by us to be effective.</p>
+
+        <h2>24. Assignment</h2>
+        <p>You may not assign or transfer your rights or obligations under these Terms without our prior written consent. We may assign our rights and obligations without restriction, including in connection with a merger, acquisition, or sale of assets.</p>
+
+        <h2>25. Contact</h2>
+        <p>For questions about these Terms:</p>
+        <p><strong>Aloke Tewary</strong><br>
+        Email: <a href="mailto:support@mudramanager.com" class="link-arrow">support@mudramanager.com →</a><br>
+        Website: mudramanager.com</p>
+
     </section>
     </main>
 
-    <footer><div class="foot-inner"><div class="foot-brand"><img src="assets/logo.png" alt="" width="24" height="24"> Mudra Manager</div><div class="foot-links"><a href="privacy.html">Privacy</a><a href="support.html">Support</a><a href="index.html">Home</a></div><div class="foot-copy">© 2026</div></div></footer>
+    <footer>
+        <div class="foot">
+            <div class="foot-logo"><img src="assets/logo.png" alt="" width="20" height="20"> Mudra Manager: Budget Tracker</div>
+            <div class="foot-links">
+                <a href="privacy.html">Privacy</a>
+                <a href="terms.html">Terms</a>
+                <a href="support.html">Support</a>
+                <a href="whatsnew.html">Changelog</a>
+                <a href="features.html">Features</a>
+            </div>
+            <span style="display:flex;align-items:center;gap:8px">
+                Built by <a href="https://linkedin.com/in/aloketewary" target="_blank" style="color:var(--accent);font-weight:600">Aloke Tewary</a>
+                · Made with <span style="color:#ef4444">♥</span> in India · © 2026
+            </span>
+        </div>
+    </footer>
     <script src="2026.js"></script>
 </body>
 </html>

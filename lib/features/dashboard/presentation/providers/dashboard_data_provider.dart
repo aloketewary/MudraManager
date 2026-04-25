@@ -98,7 +98,7 @@ final dashboardDataProvider =
         getRecentTransactions(isar),
         ref.read(accountsProvider.future),
         accountService.getAccountBalanceMap(),
-        budgetService.watchBudgetsWithProgress().first,
+        budgetService.getBudgetsWithProgress(),
         isar.recurringTransactions
             .filter()
             .isActiveEqualTo(true)

@@ -52,12 +52,15 @@ class BusinessPdfExportPlugin extends ExportPlugin {
 
   Future<pw.ThemeData> _loadFont() async {
     final font =
-        pw.Font.ttf(await rootBundle.load('assets/fonts/NotoSans-Regular.ttf'));
+        pw.Font.ttf(await rootBundle.load('assets/fonts/Inter-Variable.ttf'));
     final fallback = pw.Font.ttf(
       await rootBundle
-          .load('assets/fonts/NotoSansDevanagari-VariableFont_wdth,wght.ttf'),
+          .load('assets/fonts/NotoSansDevanagari-Variable.ttf'),
     );
-    return pw.ThemeData.withFont(base: font, fontFallback: [fallback]);
+    final bengaliFallback = pw.Font.ttf(
+      await rootBundle.load('assets/fonts/NotoSansBengali-Variable.ttf'),
+    );
+    return pw.ThemeData.withFont(base: font, fontFallback: [fallback, bengaliFallback]);
   }
 
   pw.Widget _buildHeader(ExportData data) {
