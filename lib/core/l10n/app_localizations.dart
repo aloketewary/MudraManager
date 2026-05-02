@@ -10128,6 +10128,252 @@ abstract class AppLocalizations {
   /// **'Spending exceeds income'**
   String get analytics_spendingExceedsIncome;
 
+  /// No description provided for @health_scoreBreakdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Score Breakdown'**
+  String get health_scoreBreakdown;
+
+  /// No description provided for @health_savings.
+  ///
+  /// In en, this message translates to:
+  /// **'Savings'**
+  String get health_savings;
+
+  /// No description provided for @health_spending.
+  ///
+  /// In en, this message translates to:
+  /// **'Spending'**
+  String get health_spending;
+
+  /// No description provided for @health_debt.
+  ///
+  /// In en, this message translates to:
+  /// **'Debt'**
+  String get health_debt;
+
+  /// No description provided for @health_emergency.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency'**
+  String get health_emergency;
+
+  /// No description provided for @health_liquidityRunway.
+  ///
+  /// In en, this message translates to:
+  /// **'Liquidity Runway'**
+  String get health_liquidityRunway;
+
+  /// No description provided for @health_balanceCoversMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'Your balance covers {months} months of expenses'**
+  String health_balanceCoversMonths(String months);
+
+  /// No description provided for @health_days.
+  ///
+  /// In en, this message translates to:
+  /// **'days'**
+  String get health_days;
+
+  /// No description provided for @health_nDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} days'**
+  String health_nDays(String n);
+
+  /// No description provided for @health_safe.
+  ///
+  /// In en, this message translates to:
+  /// **'Safe'**
+  String get health_safe;
+
+  /// No description provided for @health_moderate.
+  ///
+  /// In en, this message translates to:
+  /// **'Moderate'**
+  String get health_moderate;
+
+  /// No description provided for @health_risk.
+  ///
+  /// In en, this message translates to:
+  /// **'Risk'**
+  String get health_risk;
+
+  /// No description provided for @health_categoryHealth.
+  ///
+  /// In en, this message translates to:
+  /// **'Category Health'**
+  String get health_categoryHealth;
+
+  /// No description provided for @health_stable.
+  ///
+  /// In en, this message translates to:
+  /// **'Stable →'**
+  String get health_stable;
+
+  /// No description provided for @health_high.
+  ///
+  /// In en, this message translates to:
+  /// **'High ↑'**
+  String get health_high;
+
+  /// No description provided for @health_reduced.
+  ///
+  /// In en, this message translates to:
+  /// **'Reduced ↓'**
+  String get health_reduced;
+
+  /// No description provided for @health_whatYouCanDo.
+  ///
+  /// In en, this message translates to:
+  /// **'What You Can Do'**
+  String get health_whatYouCanDo;
+
+  /// No description provided for @health_verdictExcellent.
+  ///
+  /// In en, this message translates to:
+  /// **'you\'re in great shape'**
+  String get health_verdictExcellent;
+
+  /// No description provided for @health_verdictGood.
+  ///
+  /// In en, this message translates to:
+  /// **'you\'re on track'**
+  String get health_verdictGood;
+
+  /// No description provided for @health_verdictFair.
+  ///
+  /// In en, this message translates to:
+  /// **'room for improvement'**
+  String get health_verdictFair;
+
+  /// No description provided for @health_verdictPoor.
+  ///
+  /// In en, this message translates to:
+  /// **'needs attention'**
+  String get health_verdictPoor;
+
+  /// No description provided for @health_of100.
+  ///
+  /// In en, this message translates to:
+  /// **'of 100'**
+  String get health_of100;
+
+  /// No description provided for @health_errorLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load health data'**
+  String get health_errorLoading;
+
+  /// No description provided for @analytics_cashFlowTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash Flow Forecast'**
+  String get analytics_cashFlowTitle;
+
+  /// No description provided for @analytics_currentMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Month'**
+  String get analytics_currentMonth;
+
+  /// No description provided for @analytics_projected.
+  ///
+  /// In en, this message translates to:
+  /// **'Projected'**
+  String get analytics_projected;
+
+  /// No description provided for @analytics_forecast3Month.
+  ///
+  /// In en, this message translates to:
+  /// **'3-Month Forecast'**
+  String get analytics_forecast3Month;
+
+  /// No description provided for @analytics_monthlyNet.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Net'**
+  String get analytics_monthlyNet;
+
+  /// No description provided for @analytics_income.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get analytics_income;
+
+  /// No description provided for @analytics_expense.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense'**
+  String get analytics_expense;
+
+  /// No description provided for @analytics_net.
+  ///
+  /// In en, this message translates to:
+  /// **'Net'**
+  String get analytics_net;
+
+  /// No description provided for @analytics_avgMonthlyNet.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg Monthly Net'**
+  String get analytics_avgMonthlyNet;
+
+  /// No description provided for @analytics_noForecastData.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough data to forecast'**
+  String get analytics_noForecastData;
+
+  /// No description provided for @analytics_spendingTrendsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Spending Trends'**
+  String get analytics_spendingTrendsTitle;
+
+  /// No description provided for @analytics_predictedNextMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Predicted next month'**
+  String get analytics_predictedNextMonth;
+
+  /// No description provided for @analytics_anomaly.
+  ///
+  /// In en, this message translates to:
+  /// **'Anomaly'**
+  String get analytics_anomaly;
+
+  /// No description provided for @analytics_vsLastMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'vs last month'**
+  String get analytics_vsLastMonth;
+
+  /// No description provided for @analytics_risingCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Rising Categories'**
+  String get analytics_risingCategories;
+
+  /// No description provided for @analytics_anomalyCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Anomaly Detected'**
+  String get analytics_anomalyCategories;
+
+  /// No description provided for @analytics_allCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'All Categories'**
+  String get analytics_allCategories;
+
+  /// No description provided for @analytics_noTrendData.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough data for trends'**
+  String get analytics_noTrendData;
+
   /// No description provided for @recap_vsLastYear.
   ///
   /// In en, this message translates to:
@@ -10823,6 +11069,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Around the {day}th of each month'**
   String subscription_dayOfMonth(int day);
+
+  /// No description provided for @cc_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit Card Bills'**
+  String get cc_title;
+
+  /// No description provided for @cc_totalOutstanding.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Outstanding'**
+  String get cc_totalOutstanding;
+
+  /// No description provided for @cc_acrossCards.
+  ///
+  /// In en, this message translates to:
+  /// **'Across {count} cards'**
+  String cc_acrossCards(int count);
+
+  /// No description provided for @cc_noCards.
+  ///
+  /// In en, this message translates to:
+  /// **'No credit cards added'**
+  String get cc_noCards;
+
+  /// No description provided for @cc_noCardsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a credit card account to track bills here'**
+  String get cc_noCardsHint;
+
+  /// No description provided for @cc_minimumDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Min. Due'**
+  String get cc_minimumDue;
+
+  /// No description provided for @cc_cycleSpend.
+  ///
+  /// In en, this message translates to:
+  /// **'Cycle Spend'**
+  String get cc_cycleSpend;
+
+  /// No description provided for @cc_utilization.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit Utilization'**
+  String get cc_utilization;
+
+  /// No description provided for @cc_nextStatement.
+  ///
+  /// In en, this message translates to:
+  /// **'Statement'**
+  String get cc_nextStatement;
+
+  /// No description provided for @cc_nextDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Due'**
+  String get cc_nextDue;
+
+  /// No description provided for @cc_payMinimum.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay Minimum'**
+  String get cc_payMinimum;
+
+  /// No description provided for @cc_payFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay Full'**
+  String get cc_payFull;
+
+  /// No description provided for @cc_utilitySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Due dates, outstanding & limits'**
+  String get cc_utilitySubtitle;
 }
 
 class _AppLocalizationsDelegate

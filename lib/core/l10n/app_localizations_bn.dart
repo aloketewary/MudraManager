@@ -5555,6 +5555,133 @@ class AppLocalizationsBn extends AppLocalizations {
   String get analytics_spendingExceedsIncome => 'খরচ income-এর চেয়ে বেশি';
 
   @override
+  String get health_scoreBreakdown => 'Score Breakdown';
+
+  @override
+  String get health_savings => 'Savings';
+
+  @override
+  String get health_spending => 'Spending';
+
+  @override
+  String get health_debt => 'ঋণ';
+
+  @override
+  String get health_emergency => 'Emergency Fund';
+
+  @override
+  String get health_liquidityRunway => 'Liquidity Runway';
+
+  @override
+  String health_balanceCoversMonths(String months) {
+    return 'আপনার balance $months মাসের খরচ cover করে';
+  }
+
+  @override
+  String get health_days => 'দিন';
+
+  @override
+  String health_nDays(String n) {
+    return '$n দিন';
+  }
+
+  @override
+  String get health_safe => 'Safe';
+
+  @override
+  String get health_moderate => 'মাঝামাঝি';
+
+  @override
+  String get health_risk => 'Risk';
+
+  @override
+  String get health_categoryHealth => 'Category Health';
+
+  @override
+  String get health_stable => 'Stable →';
+
+  @override
+  String get health_high => 'বেশি ↑';
+
+  @override
+  String get health_reduced => 'কম ↓';
+
+  @override
+  String get health_whatYouCanDo => 'কী করতে পারেন';
+
+  @override
+  String get health_verdictExcellent => 'অসাধারণ অবস্থায়';
+
+  @override
+  String get health_verdictGood => 'সঠিক track-এ আছেন';
+
+  @override
+  String get health_verdictFair => 'উন্নতির সুযোগ আছে';
+
+  @override
+  String get health_verdictPoor => 'মনোযোগ দরকার';
+
+  @override
+  String get health_of100 => 'এর মধ্যে 100';
+
+  @override
+  String get health_errorLoading => 'Health data load হয়নি';
+
+  @override
+  String get analytics_cashFlowTitle => 'Cash Flow পূর্বাভাস';
+
+  @override
+  String get analytics_currentMonth => 'এই মাসে';
+
+  @override
+  String get analytics_projected => 'Projected';
+
+  @override
+  String get analytics_forecast3Month => '3 মাসের Forecast';
+
+  @override
+  String get analytics_monthlyNet => 'Monthly Net';
+
+  @override
+  String get analytics_income => 'Income';
+
+  @override
+  String get analytics_expense => 'Expense';
+
+  @override
+  String get analytics_net => 'Net';
+
+  @override
+  String get analytics_avgMonthlyNet => 'Avg Monthly Net';
+
+  @override
+  String get analytics_noForecastData => 'Forecast-এর জন্য যথেষ্ট data নেই';
+
+  @override
+  String get analytics_spendingTrendsTitle => 'Spending Trends';
+
+  @override
+  String get analytics_predictedNextMonth => 'পরের মাসের অনুমান';
+
+  @override
+  String get analytics_anomaly => 'Anomaly';
+
+  @override
+  String get analytics_vsLastMonth => 'গত মাসের তুলনায়';
+
+  @override
+  String get analytics_risingCategories => 'বাড়তি Categories';
+
+  @override
+  String get analytics_anomalyCategories => 'Anomaly Detected';
+
+  @override
+  String get analytics_allCategories => 'সব Categories';
+
+  @override
+  String get analytics_noTrendData => 'Trends-এর জন্য যথেষ্ট data নেই';
+
+  @override
   String get recap_vsLastYear => 'গত বছরের তুলনায়';
 
   @override
@@ -5945,4 +6072,45 @@ class AppLocalizationsBn extends AppLocalizations {
   String subscription_dayOfMonth(int day) {
     return 'প্রতি মাসে $day তারিখের আশেপাশে';
   }
+
+  @override
+  String get cc_title => 'Credit Card Bills';
+
+  @override
+  String get cc_totalOutstanding => 'মোট বকেয়া';
+
+  @override
+  String cc_acrossCards(int count) {
+    return '$count টি card-এ';
+  }
+
+  @override
+  String get cc_noCards => 'কোনো credit card নেই';
+
+  @override
+  String get cc_noCardsHint => 'Bills track করতে credit card account যোগ করুন';
+
+  @override
+  String get cc_minimumDue => 'Min. Due';
+
+  @override
+  String get cc_cycleSpend => 'Cycle খরচ';
+
+  @override
+  String get cc_utilization => 'Credit Utilization';
+
+  @override
+  String get cc_nextStatement => 'Statement';
+
+  @override
+  String get cc_nextDue => 'Due';
+
+  @override
+  String get cc_payMinimum => 'Minimum দিন';
+
+  @override
+  String get cc_payFull => 'পুরোটা দিন';
+
+  @override
+  String get cc_utilitySubtitle => 'Due dates, বকেয়া ও limits';
 }

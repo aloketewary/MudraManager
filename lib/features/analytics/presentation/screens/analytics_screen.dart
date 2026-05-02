@@ -239,7 +239,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
 
             // Cash Flow Forecast
             forecastAsync.when(
-              data: (forecast) => Card(
+              data: (forecast) => GestureDetector(
+                onTap: () => context.push(AppRoutes.cashFlowForecast),
+                child: Card(
                 elevation: 0,
                 color: color.surfaceContainerLow,
                 shape: RoundedRectangleBorder(
@@ -312,7 +314,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                     ],
                   ),
                 ),
-              ),
+              )),
               loading: () => const DashboardCardSkeleton(),
               error: (_, __) => const InlineError(),
             ),
@@ -334,7 +336,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 final sortedTrends = trends.values.toList()
                   ..sort((a, b) => b.thisMonth.compareTo(a.thisMonth));
 
-                return Card(
+                return GestureDetector(
+                  onTap: () => context.push(AppRoutes.spendingTrends),
+                  child: Card(
                   elevation: 0,
                   color: color.surfaceContainerLow,
                   child: Padding(
@@ -432,7 +436,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                       ],
                     ),
                   ),
-                );
+                ));
               },
               loading: () => const DashboardCardSkeleton(),
               error: (_, __) => const InlineError(),

@@ -5544,6 +5544,133 @@ class AppLocalizationsHi extends AppLocalizations {
   String get analytics_spendingExceedsIncome => 'खर्च income से ज़्यादा है';
 
   @override
+  String get health_scoreBreakdown => 'Score Breakdown';
+
+  @override
+  String get health_savings => 'Savings';
+
+  @override
+  String get health_spending => 'Spending';
+
+  @override
+  String get health_debt => 'कर्ज़';
+
+  @override
+  String get health_emergency => 'Emergency Fund';
+
+  @override
+  String get health_liquidityRunway => 'Liquidity Runway';
+
+  @override
+  String health_balanceCoversMonths(String months) {
+    return 'आपका balance $months महीने का खर्च cover करता है';
+  }
+
+  @override
+  String get health_days => 'दिन';
+
+  @override
+  String health_nDays(String n) {
+    return '$n दिन';
+  }
+
+  @override
+  String get health_safe => 'Safe';
+
+  @override
+  String get health_moderate => 'ठीक-ठाक';
+
+  @override
+  String get health_risk => 'Risk';
+
+  @override
+  String get health_categoryHealth => 'Category Health';
+
+  @override
+  String get health_stable => 'Stable →';
+
+  @override
+  String get health_high => 'ज़्यादा ↑';
+
+  @override
+  String get health_reduced => 'कम ↓';
+
+  @override
+  String get health_whatYouCanDo => 'क्या कर सकते हैं';
+
+  @override
+  String get health_verdictExcellent => 'बहुत बढ़िया स्थिति है';
+
+  @override
+  String get health_verdictGood => 'सही track पर हैं';
+
+  @override
+  String get health_verdictFair => 'सुधार की गुंजाइश है';
+
+  @override
+  String get health_verdictPoor => 'ध्यान देने की ज़रूरत है';
+
+  @override
+  String get health_of100 => 'में से 100';
+
+  @override
+  String get health_errorLoading => 'Health data load नहीं हो पाया';
+
+  @override
+  String get analytics_cashFlowTitle => 'Cash Flow पूर्वानुमान';
+
+  @override
+  String get analytics_currentMonth => 'इस महीने';
+
+  @override
+  String get analytics_projected => 'Projected';
+
+  @override
+  String get analytics_forecast3Month => '3 महीने का Forecast';
+
+  @override
+  String get analytics_monthlyNet => 'Monthly Net';
+
+  @override
+  String get analytics_income => 'Income';
+
+  @override
+  String get analytics_expense => 'Expense';
+
+  @override
+  String get analytics_net => 'Net';
+
+  @override
+  String get analytics_avgMonthlyNet => 'Avg Monthly Net';
+
+  @override
+  String get analytics_noForecastData => 'Forecast के लिए काफ़ी data नहीं है';
+
+  @override
+  String get analytics_spendingTrendsTitle => 'Spending Trends';
+
+  @override
+  String get analytics_predictedNextMonth => 'अगले महीने का अनुमान';
+
+  @override
+  String get analytics_anomaly => 'Anomaly';
+
+  @override
+  String get analytics_vsLastMonth => 'पिछले महीने से';
+
+  @override
+  String get analytics_risingCategories => 'बढ़ती Categories';
+
+  @override
+  String get analytics_anomalyCategories => 'Anomaly Detected';
+
+  @override
+  String get analytics_allCategories => 'सभी Categories';
+
+  @override
+  String get analytics_noTrendData => 'Trends के लिए काफ़ी data नहीं है';
+
+  @override
   String get recap_vsLastYear => 'पिछले साल से';
 
   @override
@@ -5938,4 +6065,46 @@ class AppLocalizationsHi extends AppLocalizations {
   String subscription_dayOfMonth(int day) {
     return 'हर महीने $day तारीख के आसपास';
   }
+
+  @override
+  String get cc_title => 'Credit Card Bills';
+
+  @override
+  String get cc_totalOutstanding => 'कुल बकाया';
+
+  @override
+  String cc_acrossCards(int count) {
+    return '$count cards पर';
+  }
+
+  @override
+  String get cc_noCards => 'कोई credit card नहीं है';
+
+  @override
+  String get cc_noCardsHint =>
+      'Bills track करने के लिए credit card account जोड़ें';
+
+  @override
+  String get cc_minimumDue => 'Min. Due';
+
+  @override
+  String get cc_cycleSpend => 'Cycle खर्च';
+
+  @override
+  String get cc_utilization => 'Credit Utilization';
+
+  @override
+  String get cc_nextStatement => 'Statement';
+
+  @override
+  String get cc_nextDue => 'Due';
+
+  @override
+  String get cc_payMinimum => 'Minimum भरें';
+
+  @override
+  String get cc_payFull => 'पूरा भरें';
+
+  @override
+  String get cc_utilitySubtitle => 'Due dates, बकाया और limits';
 }

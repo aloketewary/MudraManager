@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mudra_manager/core/db/models/transaction.dart';
 
 // Mirrors the logic from subscription_detector_provider.dart
 String normalizeKey(String desc) {

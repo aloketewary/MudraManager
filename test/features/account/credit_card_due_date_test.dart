@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mudra_manager/core/db/models/account.dart';
 
 void main() {
   group('Credit card due date calculation', () {

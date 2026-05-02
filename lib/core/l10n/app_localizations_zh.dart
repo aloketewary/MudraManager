@@ -5571,6 +5571,133 @@ class AppLocalizationsZh extends AppLocalizations {
   String get analytics_spendingExceedsIncome => 'Spending exceeds income';
 
   @override
+  String get health_scoreBreakdown => 'Score Breakdown';
+
+  @override
+  String get health_savings => 'Savings';
+
+  @override
+  String get health_spending => 'Spending';
+
+  @override
+  String get health_debt => 'Debt';
+
+  @override
+  String get health_emergency => 'Emergency';
+
+  @override
+  String get health_liquidityRunway => 'Liquidity Runway';
+
+  @override
+  String health_balanceCoversMonths(String months) {
+    return 'Your balance covers $months months of expenses';
+  }
+
+  @override
+  String get health_days => 'days';
+
+  @override
+  String health_nDays(String n) {
+    return '$n days';
+  }
+
+  @override
+  String get health_safe => 'Safe';
+
+  @override
+  String get health_moderate => 'Moderate';
+
+  @override
+  String get health_risk => 'Risk';
+
+  @override
+  String get health_categoryHealth => 'Category Health';
+
+  @override
+  String get health_stable => 'Stable →';
+
+  @override
+  String get health_high => 'High ↑';
+
+  @override
+  String get health_reduced => 'Reduced ↓';
+
+  @override
+  String get health_whatYouCanDo => 'What You Can Do';
+
+  @override
+  String get health_verdictExcellent => 'you\'re in great shape';
+
+  @override
+  String get health_verdictGood => 'you\'re on track';
+
+  @override
+  String get health_verdictFair => 'room for improvement';
+
+  @override
+  String get health_verdictPoor => 'needs attention';
+
+  @override
+  String get health_of100 => 'of 100';
+
+  @override
+  String get health_errorLoading => 'Unable to load health data';
+
+  @override
+  String get analytics_cashFlowTitle => 'Cash Flow Forecast';
+
+  @override
+  String get analytics_currentMonth => 'Current Month';
+
+  @override
+  String get analytics_projected => 'Projected';
+
+  @override
+  String get analytics_forecast3Month => '3-Month Forecast';
+
+  @override
+  String get analytics_monthlyNet => 'Monthly Net';
+
+  @override
+  String get analytics_income => 'Income';
+
+  @override
+  String get analytics_expense => 'Expense';
+
+  @override
+  String get analytics_net => 'Net';
+
+  @override
+  String get analytics_avgMonthlyNet => 'Avg Monthly Net';
+
+  @override
+  String get analytics_noForecastData => 'Not enough data to forecast';
+
+  @override
+  String get analytics_spendingTrendsTitle => 'Spending Trends';
+
+  @override
+  String get analytics_predictedNextMonth => 'Predicted next month';
+
+  @override
+  String get analytics_anomaly => 'Anomaly';
+
+  @override
+  String get analytics_vsLastMonth => 'vs last month';
+
+  @override
+  String get analytics_risingCategories => 'Rising Categories';
+
+  @override
+  String get analytics_anomalyCategories => 'Anomaly Detected';
+
+  @override
+  String get analytics_allCategories => 'All Categories';
+
+  @override
+  String get analytics_noTrendData => 'Not enough data for trends';
+
+  @override
   String get recap_vsLastYear => 'vs Last Year';
 
   @override
@@ -5965,4 +6092,45 @@ class AppLocalizationsZh extends AppLocalizations {
   String subscription_dayOfMonth(int day) {
     return 'Around the ${day}th of each month';
   }
+
+  @override
+  String get cc_title => 'Credit Card Bills';
+
+  @override
+  String get cc_totalOutstanding => 'Total Outstanding';
+
+  @override
+  String cc_acrossCards(int count) {
+    return 'Across $count cards';
+  }
+
+  @override
+  String get cc_noCards => 'No credit cards added';
+
+  @override
+  String get cc_noCardsHint => 'Add a credit card account to track bills here';
+
+  @override
+  String get cc_minimumDue => 'Min. Due';
+
+  @override
+  String get cc_cycleSpend => 'Cycle Spend';
+
+  @override
+  String get cc_utilization => 'Credit Utilization';
+
+  @override
+  String get cc_nextStatement => 'Statement';
+
+  @override
+  String get cc_nextDue => 'Due';
+
+  @override
+  String get cc_payMinimum => 'Pay Minimum';
+
+  @override
+  String get cc_payFull => 'Pay Full';
+
+  @override
+  String get cc_utilitySubtitle => 'Due dates, outstanding & limits';
 }

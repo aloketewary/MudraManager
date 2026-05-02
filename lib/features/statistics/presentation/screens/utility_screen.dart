@@ -48,6 +48,14 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
       route: AppRoutes.trips,
       section: _Section.active,
     ),
+    _UtilityDef(
+      id: 'credit_cards',
+      titleKey: 'cc_title',
+      subtitleKey: 'cc_utilitySubtitle',
+      icon: LucideIcons.creditCard,
+      route: AppRoutes.creditCardBills,
+      section: _Section.active,
+    ),
   ];
 
   static const _planning = [
@@ -322,27 +330,24 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
               staggerIndex: 0,
             ),
             SizedBox(height: spacing.elementGap),
-            Row(
+            GridView.count(
+              crossAxisCount: 2,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              mainAxisSpacing: spacing.elementGap,
+              crossAxisSpacing: spacing.elementGap,
+              childAspectRatio: 1.5,
               children: activeVisible
                   .asMap()
                   .entries
                   .map(
-                    (e) => Expanded(
-                      child: Padding(
-                        padding: EdgeInsets.only(
-                          right: e.key != activeVisible.length - 1
-                              ? spacing.elementGap
-                              : 0,
-                        ),
-                        child: _buildCard(
-                          e.value,
-                          color,
-                          textTheme,
-                          spacing,
-                          e.key,
-                          l10n,
-                        ),
-                      ),
+                    (e) => _buildCard(
+                      e.value,
+                      color,
+                      textTheme,
+                      spacing,
+                      e.key,
+                      l10n,
                     ),
                   )
                   .toList(),
@@ -571,7 +576,6 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
         },
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
         child: SizedBox(
-          height: 120,
           child: Stack(
             children: [
               // Large background icon — slow float

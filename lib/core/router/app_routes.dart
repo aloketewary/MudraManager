@@ -43,6 +43,8 @@ abstract class AppRoutes {
   static const spendingPersonality = '/spending-personality';
   static const netWorth = '/net-worth';
   static const taxEstimation = '/tax-estimation';
+  static const cashFlowForecast = '/cash-flow-forecast';
+  static const spendingTrends = '/spending-trends';
   static const monthlyComparison = '/monthly-comparison';
   static const monthlyRecap = '/monthly-recap';
 
@@ -75,6 +77,7 @@ abstract class AppRoutes {
   static const achievements = '/achievements';
   static const marketplace = '/marketplace';
   static const creditCardReminders = '/credit-card-reminders';
+  static const creditCardBills = '/credit-card-bills';
 
   // Upgrade
   static const upgrade = '/upgrade';

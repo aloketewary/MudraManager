@@ -3,7 +3,6 @@ import 'package:mudra_manager/core/services/background_task_manager.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
-import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';

@@ -462,6 +462,10 @@ extension AppLocalizationsHelper on AppLocalizations {
         return utility_taxSubtitle;
       case 'utility_analyticsSubtitle':
         return utility_analyticsSubtitle;
+      case 'cc_title':
+        return cc_title;
+      case 'cc_utilitySubtitle':
+        return cc_utilitySubtitle;
 
       // Profile
       case 'profile_accounts':

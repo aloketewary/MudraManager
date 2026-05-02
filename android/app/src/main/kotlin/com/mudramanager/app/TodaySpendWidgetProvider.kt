@@ -17,7 +17,7 @@ class TodaySpendWidgetProvider : AppWidgetProvider() {
             val widgetData = HomeWidgetPlugin.getData(context)
             views.setTextViewText(R.id.today_spend_amount, widgetData.getString("todayExpense", "₹0"))
 
-            val budgetRemaining = widgetData.getString("budgetRemaining", "")
+            val budgetRemaining = widgetData.getString("budgetRemaining", "") ?: ""
             if (budgetRemaining.isNotEmpty()) {
                 views.setViewVisibility(R.id.budget_section, View.VISIBLE)
                 views.setTextViewText(R.id.budget_remaining_text, budgetRemaining)

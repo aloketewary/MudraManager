@@ -13,7 +13,6 @@ import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/models/trip.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
-import 'package:mudra_manager/core/utils/date_arithmetic.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_service.dart';
 
 late Isar isar;
@@ -399,9 +398,9 @@ void main() {
       final cat = await seedCategory('Food');
       final acc = await seedAccount('Cash');
 
-      final t1 = await addExpense(100, cat, acc, date: DateTime(2025, 1, 1));
+      await addExpense(100, cat, acc, date: DateTime(2025, 1, 1));
       final t2 = await addExpense(200, cat, acc, date: DateTime(2025, 2, 1));
-      final t3 = await addExpense(300, cat, acc, date: DateTime(2025, 3, 1));
+      await addExpense(300, cat, acc, date: DateTime(2025, 3, 1));
 
       await service.deleteTransaction(t2.id);
 
