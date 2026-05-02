@@ -19,6 +19,7 @@ final transactionProvider = Provider<TransactionService>((ref) {
 
 final filteredTransactionProvider = FutureProvider.autoDispose
     .family<List<Transaction>, String>((ref, type) async {
+  ref.watch(transactionChangeProvider);
   final service = ref.watch(transactionProvider);
 
   if (type == 'income') {
@@ -32,6 +33,7 @@ final filteredTransactionProvider = FutureProvider.autoDispose
 
 final transactionsByMonthProvider = FutureProvider.autoDispose
     .family<List<Transaction>, DateTime>((ref, monthDate) async {
+  ref.watch(transactionChangeProvider);
   final service = ref.watch(transactionProvider);
 
   final start = DateTime(monthDate.year, monthDate.month);
@@ -45,6 +47,7 @@ final transactionsByMonthAndTypeProvider = FutureProvider.autoDispose
   ref,
   arg,
 ) async {
+  ref.watch(transactionChangeProvider);
   final service = ref.watch(transactionProvider);
   final start = DateTime(arg.month.year, arg.month.month, 1);
   final end = DateTime(
@@ -67,6 +70,7 @@ final transactionsByMonthAndTypeProvider = FutureProvider.autoDispose
 final transactionsByDateRangeProvider = FutureProvider.autoDispose
     .family<List<Transaction>, ({DateTime start, DateTime end, String type})>(
         (ref, arg) async {
+  ref.watch(transactionChangeProvider);
   final service = ref.watch(transactionProvider);
   if (arg.type == 'all') {
     return service.getByDateRange(arg.start, arg.end);
@@ -156,6 +160,7 @@ final allSectionedTransactionsProvider = FutureProvider.autoDispose
 final filteredSectionedTransactionsProvider = FutureProvider.autoDispose.family<
     List<TxListEntry>,
     ({String type, int? categoryId, int? tagId, String? searchQuery})>((ref, arg) async {
+  ref.watch(transactionChangeProvider);
   final service = ref.watch(transactionProvider);
 
   List<Transaction> transactions;
@@ -193,6 +198,7 @@ final filteredSectionedTransactionsProvider = FutureProvider.autoDispose.family<
 final transactionCountsProvider = FutureProvider.autoDispose<Map<Id, int>>((
   ref,
 ) async {
+  ref.watch(transactionChangeProvider);
   final isar = await ref.watch(isarServiceProvider).getInstance();
   final counts = <Id, int>{};
   final categories = await isar.categorys.where().findAll();
@@ -210,6 +216,7 @@ final transactionCountsProvider = FutureProvider.autoDispose<Map<Id, int>>((
 
 
 final quickAmountsProvider = FutureProvider.autoDispose<List<int>>((ref) async {
+  ref.watch(transactionChangeProvider);
   final service = ref.watch(transactionProvider);
   final transactions = await service.getByType(isExpense: true);
 

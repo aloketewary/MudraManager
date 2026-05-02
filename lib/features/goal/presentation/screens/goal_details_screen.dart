@@ -24,6 +24,7 @@ import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 import 'package:confetti/confetti.dart';
 import 'dart:math' as math;
 import 'package:mudra_manager/core/router/app_routes.dart';
+import 'package:mudra_manager/shared/widgets/milestone_share_sheet.dart';
 
 class GoalDetailsScreen extends ConsumerStatefulWidget {
   final Goal goal;
@@ -1012,6 +1013,32 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
                       SnackbarService.success(
                         Tone.current.goalMilestone100(widget.goal.name),
                       );
+                      if (context.mounted) {
+                        final ctxt = AppLocalizations.of(context)!;
+                        Future.delayed(
+                          const Duration(milliseconds: 1500),
+                          () {
+                            if (!context.mounted) return;
+                            showMilestoneShareSheet(
+                              context,
+                              MilestoneData(
+                                emoji: '🎯',
+                                title: ctxt.milestone_goalReachedTitle,
+                                stat: widget.goal.name,
+                                description: ctxt.milestone_goalReachedDesc(
+                                  formatCurrency(
+                                    widget.goal.targetAmount,
+                                    code: widget.goal.currencyCode,
+                                    decimals: 0,
+                                  ),
+                                ),
+                                icon: LucideIcons.goal,
+                                accent: const Color(0xFF4CAF50),
+                              ),
+                            );
+                          },
+                        );
+                      }
                     }
                   }
                 }

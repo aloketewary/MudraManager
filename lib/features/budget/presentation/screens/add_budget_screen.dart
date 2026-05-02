@@ -1,4 +1,5 @@
 import 'package:isar_community/isar.dart';
+import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/shared/widgets/inline_error.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
@@ -1136,8 +1137,8 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    Text(
-                      formatCurrency(displayAmount, code: BaseCurrency.code),
+                    CurrencyText(
+                      amount: displayAmount,
                       style: textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                         color: autoDistributed ? color.onSurfaceVariant : color.onSurface,
@@ -1264,7 +1265,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
                 children: [
                   Text(ctxt.budget_totalBudget, style: textTheme.bodySmall?.copyWith(color: color.onTertiaryContainer)),
                   SizedBox(height: spacing.elementGapUltraMin),
-                  Text(formatCurrency(totalAmount, code: BaseCurrency.code), style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: color.onTertiaryContainer)),
+                  CurrencyText(amount: totalAmount, style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: color.onTertiaryContainer)),
                 ],
               ),
               Column(
@@ -1272,7 +1273,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
                 children: [
                   Text(ctxt.budget_allocated, style: textTheme.bodySmall?.copyWith(color: color.onTertiaryContainer)),
                   SizedBox(height: spacing.elementGapUltraMin),
-                  Text(formatCurrency(totalAlloc, code: BaseCurrency.code), style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: color.onTertiaryContainer)),
+                  CurrencyText(amount: totalAlloc, style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: color.onTertiaryContainer)),
                 ],
               ),
             ],
@@ -1293,7 +1294,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(remaining >= 0 ? ctxt.budget_remaining : ctxt.budget_overBudget, style: textTheme.bodySmall?.copyWith(color: color.onTertiaryContainer)),
-              Text(formatCurrency(remaining.abs(), code: BaseCurrency.code), style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: remaining < 0 ? color.error : color.onTertiaryContainer)),
+              CurrencyText(amount: remaining.abs(), style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: remaining < 0 ? color.error : color.onTertiaryContainer)),
             ],
           ),
         ],

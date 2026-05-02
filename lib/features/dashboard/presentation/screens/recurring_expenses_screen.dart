@@ -1,4 +1,5 @@
 import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -87,8 +88,9 @@ class RecurringExpensesScreen extends ConsumerWidget {
                         ),
                     ],
                   ),
-                  trailing: Text(
-                    formatCurrency(expense.amount, decimals: 0),
+                  trailing: CurrencyText(
+                    amount: expense.amount,
+                    compact: false,
                     style: textTheme.titleMedium
                         ?.copyWith(fontWeight: FontWeight.bold),
                   ),

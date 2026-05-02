@@ -1,17 +1,18 @@
 import 'dart:convert';
 import 'package:isar_community/isar.dart';
-import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/sms_activity.dart';
 import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/features/notifications/data/smart_check.dart';
 
 class PendingSmsCheck extends SmartCheck {
+  PendingSmsCheck(super.isarService);
+
   @override
   String get type => 'pending_sms';
 
   @override
   Future<void> run() async {
-    final isar = await IsarService().getInstance();
+    final isar = await isarService.getInstance();
     final pendingCount = await isar.smsActivitys
         .filter()
         .statusEqualTo(ActivityStatus.pending)

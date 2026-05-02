@@ -1545,6 +1545,9 @@
   "txnList_allCategories": "সব শ্রেণী",
   "txnList_selectDateRange": "তারিখ সীমা বেছে নিন",
   "txnList_clearDateRange": "তারিখ সীমা মুছুন",
+  "txnList_convertToTransfer": "Transfer-এ বদলান",
+  "txnList_convertToTransferDesc": "এটা আসলে আপনার accounts-এর মধ্যে transfer ছিল",
+  "txnList_convertedToTransfer": "Transfer-এ বদলানো হয়েছে",
   "stats_today": "আজ",
   "stats_week": "সপ্তাহ",
   "stats_month": "মাস",
@@ -2316,5 +2319,42 @@
   "@backup_autoEnabled": { "placeholders": { "frequency": { "type": "String" } } },
   "backup_autoLastRun": "শেষ auto backup: {date}",
   "@backup_autoLastRun": { "placeholders": { "date": { "type": "String" } } },
-  "backup_proRequired": "Pro feature"
+  "backup_proRequired": "Pro feature",
+
+  "onboard_skip": "Skip করুন",
+  "onboard_languages": "ভাষা",
+  "onboard_smartTrackingMergedDesc": "Bank SMS থেকে auto-import, budget তৈরি করুন, goals track করুন — সব এক জায়গায়।",
+
+  "sms_celebrationTitle": "প্রথম SMS transaction! 🎉",
+  "sms_celebrationBody": "Mudra আপনার bank SMS থেকে নিজে থেকেই transaction save করেছে। এখন থেকে খরচ আপনা আপনি track হবে।",
+  "sms_celebrationCta": "চলো, শুরু করি!",
+
+  "milestone_shareButton": "Story-তে Share করুন",
+  "milestone_goalReachedTitle": "Goal সম্পূর্ণ!",
+  "milestone_goalReachedDesc": "{amount} সেভ করে target পূরণ করেছেন 🌟",
+  "@milestone_goalReachedDesc": { "placeholders": { "amount": { "type": "String" } } },
+  "milestone_streakTitle": "{days} দিনের Streak!",
+  "@milestone_streakTitle": { "placeholders": { "days": { "type": "int" } } },
+  "milestone_streakDesc": "লাগাতার {days} দিন খরচ track করেছেন",
+  "@milestone_streakDesc": { "placeholders": { "days": { "type": "int" } } },
+  "milestone_underBudgetTitle": "Budget-এর মধ্যে!",
+  "milestone_underBudgetDesc": "পুরো মাস budget-এর মধ্যে ছিলেন 💪",
+
+  "account_creditLimit": "Credit Limit",
+  "account_statementDay": "Statement Day",
+  "account_dueDay": "Due Day",
+  "account_daysUntilDue": "{days} দিন বাকি",
+  "@account_daysUntilDue": { "placeholders": { "days": { "type": "int" } } },
+  "account_dueToday": "আজ due!",
+  "account_overdue": "{days} দিন overdue",
+  "@account_overdue": { "placeholders": { "days": { "type": "int" } } },
+
+  "subscription_title": "Subscriptions ধরা পড়েছে",
+  "subscription_monthlyTotal": "প্রতি মাসে {amount}",
+  "@subscription_monthlyTotal": { "placeholders": { "amount": { "type": "String" } } },
+  "subscription_occurrences": "4 মাসে {count} বার",
+  "@subscription_occurrences": { "placeholders": { "count": { "type": "int" } } },
+  "subscription_none": "এখনও কোনো subscription detect হয়নি",
+  "subscription_dayOfMonth": "প্রতি মাসে {day} তারিখের আশেপাশে",
+  "@subscription_dayOfMonth": { "placeholders": { "day": { "type": "int" } } }
 }

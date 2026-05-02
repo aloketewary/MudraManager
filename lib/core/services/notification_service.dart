@@ -159,6 +159,11 @@ class NotificationService {
     double totalIncome = 0;
     final categorySpending = <String, double>{};
 
+    // Batch-load categories once before the loop
+    for (final tx in transactions) {
+      tx.category.loadSync();
+    }
+
     for (final tx in transactions) {
       if (tx.isTransfer) continue;
 
@@ -302,10 +307,12 @@ class NotificationService {
       return;
     }
 
-    // Top category
+    // Top category — batch-load once
+    for (final t in thisWeekTxns) {
+      t.category.loadSync();
+    }
     final catSpend = <String, double>{};
     for (final t in thisWeekTxns) {
-      await t.category.load();
       final name = t.category.value?.name ?? 'Other';
       catSpend[name] = (catSpend[name] ?? 0) + t.baseAmount;
     }
@@ -545,6 +552,20 @@ class NotificationService {
         GoRouter.of(context).go(AppRoutes.achievements);
       case 'sms_activity':
         GoRouter.of(context).go(AppRoutes.smsActivity);
+      case 'view_budget':
+        GoRouter.of(context).go(AppRoutes.budgetDashboard);
+      case 'view_bills':
+        GoRouter.of(context).go(AppRoutes.recurringTransactions);
+      case 'view_accounts':
+        GoRouter.of(context).go(AppRoutes.manageAccounts);
+      case 'view_sms':
+        GoRouter.of(context).go(AppRoutes.smsActivity);
+      case 'view_recap':
+        GoRouter.of(context).go(AppRoutes.monthlyRecap);
+      case 'view_statistics':
+        GoRouter.of(context).go(AppRoutes.statistics);
+      case 'open_home':
+        GoRouter.of(context).go(AppRoutes.home);
     }
   }
 

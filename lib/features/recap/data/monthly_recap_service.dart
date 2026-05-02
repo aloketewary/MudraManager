@@ -1,5 +1,6 @@
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
+import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/extensions/transaction_links.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/models/budget.dart';
@@ -136,8 +137,8 @@ class CategoryFrequency {
 }
 
 class MonthlyRecapService {
-  final Isar _isar;
-  MonthlyRecapService(this._isar);
+  final IsarService _isarService;
+  MonthlyRecapService(this._isarService);
 
   Future<MonthlyRecapData> generate(
     DateTime month, {
@@ -148,6 +149,8 @@ class MonthlyRecapService {
     final end = DateTime(month.year, month.month + 1, 0, 23, 59, 59);
     final daysInMonth = end.day;
     final midDay = (daysInMonth / 2).ceil();
+
+    final _isar = await _isarService.getInstance();
 
     // ── Current month transactions ──
     final txns =

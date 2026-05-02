@@ -204,6 +204,10 @@ class NotificationListenerBridge with WidgetsBindingObserver {
         switch (parseResult) {
           case ParseResult.approved:
             approved++;
+            // Mark first-ever SMS import for celebration on dashboard
+            if (!SharedPrefsUtil.instance.getSmsFirstImportCelebrated()) {
+              SharedPrefsUtil.instance.setSmsFirstImportReady();
+            }
             final matches = RegExp(
               r'(?:(?:[\p{Sc}]|[A-Z]{3})\s*)?(\d{1,3}(?:[,\s.]\d{3})*(?:[.,]\d{1,2})?)',
               unicode: true,

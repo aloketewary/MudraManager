@@ -55,6 +55,11 @@ class MarketplaceService {
     'idfc_sms_parser',
     'aubank_sms_parser',
     'rbl_sms_parser',
+    'federal_bank_sms_parser',
+    'pnb_sms_parser',
+    'bob_sms_parser',
+    'canara_sms_parser',
+    'unionbank_sms_parser',
     'brazil_sms_parser',
     'indonesia_sms_parser',
     'mea_region_sms_parser',
@@ -125,13 +130,14 @@ class MarketplaceService {
     _enabledCache[pluginId] = enabled;
 
     if (CategoryPackRegistry.isPack(pluginId)) {
+      final catService = CategoryManagementService(IsarService());
       if (enabled) {
-        await CategoryManagementService.installPack(pluginId);
+        await catService.installPack(pluginId);
       } else {
         final enabledPacks = await _getEnabledPackIds();
-        await CategoryManagementService.removePack(pluginId, enabledPacks);
+        await catService.removePack(pluginId, enabledPacks);
         if (enabledPacks.isEmpty) {
-          await CategoryManagementService.clearAll();
+          await catService.clearAll();
         }
       }
     }
@@ -306,6 +312,54 @@ class MarketplaceService {
       description: 'Parse RBL Bank SMS messages',
       author: 'Mudra Team',
       iconUrl: 'assets/logo/banks/rbl.svg',
+      downloads: 0,
+      rating: 5.0,
+      packageUrl: 'bundled',
+      group: PluginGroup.smsParser,
+    ),
+    PluginMetadata(
+      id: 'pnb_sms_parser',
+      name: 'Punjab National Bank',
+      version: '1.0.0',
+      description: 'Parse PNB SMS messages',
+      author: 'Mudra Team',
+      iconUrl: 'assets/logo/banks/generic.svg',
+      downloads: 0,
+      rating: 5.0,
+      packageUrl: 'bundled',
+      group: PluginGroup.smsParser,
+    ),
+    PluginMetadata(
+      id: 'bob_sms_parser',
+      name: 'Bank of Baroda',
+      version: '1.0.0',
+      description: 'Parse Bank of Baroda SMS messages',
+      author: 'Mudra Team',
+      iconUrl: 'assets/logo/banks/generic.svg',
+      downloads: 0,
+      rating: 5.0,
+      packageUrl: 'bundled',
+      group: PluginGroup.smsParser,
+    ),
+    PluginMetadata(
+      id: 'canara_sms_parser',
+      name: 'Canara Bank',
+      version: '1.0.0',
+      description: 'Parse Canara Bank SMS messages',
+      author: 'Mudra Team',
+      iconUrl: 'assets/logo/banks/generic.svg',
+      downloads: 0,
+      rating: 5.0,
+      packageUrl: 'bundled',
+      group: PluginGroup.smsParser,
+    ),
+    PluginMetadata(
+      id: 'unionbank_sms_parser',
+      name: 'Union Bank of India',
+      version: '1.0.0',
+      description: 'Parse Union Bank SMS messages',
+      author: 'Mudra Team',
+      iconUrl: 'assets/logo/banks/generic.svg',
       downloads: 0,
       rating: 5.0,
       packageUrl: 'bundled',

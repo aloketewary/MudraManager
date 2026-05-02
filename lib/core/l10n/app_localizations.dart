@@ -6408,6 +6408,24 @@ abstract class AppLocalizations {
   /// **'Clear Date Range'**
   String get txnList_clearDateRange;
 
+  /// No description provided for @txnList_convertToTransfer.
+  ///
+  /// In en, this message translates to:
+  /// **'Convert to Transfer'**
+  String get txnList_convertToTransfer;
+
+  /// No description provided for @txnList_convertToTransferDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'This was actually a transfer between your accounts'**
+  String get txnList_convertToTransferDesc;
+
+  /// No description provided for @txnList_convertedToTransfer.
+  ///
+  /// In en, this message translates to:
+  /// **'Converted to transfer'**
+  String get txnList_convertedToTransfer;
+
   /// No description provided for @stats_today.
   ///
   /// In en, this message translates to:
@@ -10661,6 +10679,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pro feature'**
   String get backup_proRequired;
+
+  /// No description provided for @onboard_skip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get onboard_skip;
+
+  /// No description provided for @onboard_languages.
+  ///
+  /// In en, this message translates to:
+  /// **'Languages'**
+  String get onboard_languages;
+
+  /// No description provided for @onboard_smartTrackingMergedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-import from bank SMS, set budgets, track goals — all in one place.'**
+  String get onboard_smartTrackingMergedDesc;
+
+  /// No description provided for @sms_celebrationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your first SMS transaction! 🎉'**
+  String get sms_celebrationTitle;
+
+  /// No description provided for @sms_celebrationBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Mudra just auto-imported a transaction from your bank SMS. From now on, your expenses track themselves.'**
+  String get sms_celebrationBody;
+
+  /// No description provided for @sms_celebrationCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Awesome, let\'s go!'**
+  String get sms_celebrationCta;
+
+  /// No description provided for @milestone_shareButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Share to Story'**
+  String get milestone_shareButton;
+
+  /// No description provided for @milestone_goalReachedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal Reached!'**
+  String get milestone_goalReachedTitle;
+
+  /// No description provided for @milestone_goalReachedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved {amount} and hit the target 🌟'**
+  String milestone_goalReachedDesc(String amount);
+
+  /// No description provided for @milestone_streakTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{days}-Day Streak!'**
+  String milestone_streakTitle(int days);
+
+  /// No description provided for @milestone_streakDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Tracked expenses every day for {days} days straight'**
+  String milestone_streakDesc(int days);
+
+  /// No description provided for @milestone_underBudgetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Under Budget!'**
+  String get milestone_underBudgetTitle;
+
+  /// No description provided for @milestone_underBudgetDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Stayed within budget for the entire month 💪'**
+  String get milestone_underBudgetDesc;
+
+  /// No description provided for @account_creditLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit Limit'**
+  String get account_creditLimit;
+
+  /// No description provided for @account_statementDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Statement Day'**
+  String get account_statementDay;
+
+  /// No description provided for @account_dueDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Due Day'**
+  String get account_dueDay;
+
+  /// No description provided for @account_daysUntilDue.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days until due'**
+  String account_daysUntilDue(int days);
+
+  /// No description provided for @account_dueToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Due today!'**
+  String get account_dueToday;
+
+  /// No description provided for @account_overdue.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue by {days} days'**
+  String account_overdue(int days);
+
+  /// No description provided for @subscription_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Detected Subscriptions'**
+  String get subscription_title;
+
+  /// No description provided for @subscription_monthlyTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount}/month total'**
+  String subscription_monthlyTotal(String amount);
+
+  /// No description provided for @subscription_occurrences.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} charges in 4 months'**
+  String subscription_occurrences(int count);
+
+  /// No description provided for @subscription_none.
+  ///
+  /// In en, this message translates to:
+  /// **'No recurring subscriptions detected yet'**
+  String get subscription_none;
+
+  /// No description provided for @subscription_dayOfMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Around the {day}th of each month'**
+  String subscription_dayOfMonth(int day);
 }
 
 class _AppLocalizationsDelegate

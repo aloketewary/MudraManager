@@ -2368,6 +2368,9 @@
   "txnList_allCategories": "All Categories",
   "txnList_selectDateRange": "Select Date Range",
   "txnList_clearDateRange": "Clear Date Range",
+  "txnList_convertToTransfer": "Convert to Transfer",
+  "txnList_convertToTransferDesc": "This was actually a transfer between your accounts",
+  "txnList_convertedToTransfer": "Converted to transfer",
   "stats_today": "Today",
   "stats_week": "Week",
   "stats_month": "Month",
@@ -3341,5 +3344,42 @@
   "@backup_autoEnabled": { "placeholders": { "frequency": { "type": "String" } } },
   "backup_autoLastRun": "Last auto backup: {date}",
   "@backup_autoLastRun": { "placeholders": { "date": { "type": "String" } } },
-  "backup_proRequired": "Pro feature"
+  "backup_proRequired": "Pro feature",
+
+  "onboard_skip": "Skip",
+  "onboard_languages": "Languages",
+  "onboard_smartTrackingMergedDesc": "Auto-import from bank SMS, set budgets, track goals — all in one place.",
+
+  "sms_celebrationTitle": "Your first SMS transaction! 🎉",
+  "sms_celebrationBody": "Mudra just auto-imported a transaction from your bank SMS. From now on, your expenses track themselves.",
+  "sms_celebrationCta": "Awesome, let's go!",
+
+  "milestone_shareButton": "Share to Story",
+  "milestone_goalReachedTitle": "Goal Reached!",
+  "milestone_goalReachedDesc": "Saved {amount} and hit the target 🌟",
+  "@milestone_goalReachedDesc": { "placeholders": { "amount": { "type": "String" } } },
+  "milestone_streakTitle": "{days}-Day Streak!",
+  "@milestone_streakTitle": { "placeholders": { "days": { "type": "int" } } },
+  "milestone_streakDesc": "Tracked expenses every day for {days} days straight",
+  "@milestone_streakDesc": { "placeholders": { "days": { "type": "int" } } },
+  "milestone_underBudgetTitle": "Under Budget!",
+  "milestone_underBudgetDesc": "Stayed within budget for the entire month 💪",
+
+  "account_creditLimit": "Credit Limit",
+  "account_statementDay": "Statement Day",
+  "account_dueDay": "Due Day",
+  "account_daysUntilDue": "{days} days until due",
+  "@account_daysUntilDue": { "placeholders": { "days": { "type": "int" } } },
+  "account_dueToday": "Due today!",
+  "account_overdue": "Overdue by {days} days",
+  "@account_overdue": { "placeholders": { "days": { "type": "int" } } },
+
+  "subscription_title": "Detected Subscriptions",
+  "subscription_monthlyTotal": "{amount}/month total",
+  "@subscription_monthlyTotal": { "placeholders": { "amount": { "type": "String" } } },
+  "subscription_occurrences": "{count} charges in 4 months",
+  "@subscription_occurrences": { "placeholders": { "count": { "type": "int" } } },
+  "subscription_none": "No recurring subscriptions detected yet",
+  "subscription_dayOfMonth": "Around the {day}th of each month",
+  "@subscription_dayOfMonth": { "placeholders": { "day": { "type": "int" } } }
 }

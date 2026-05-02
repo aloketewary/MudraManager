@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:isar_community/isar.dart';
+import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/notification_record.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
@@ -9,6 +11,10 @@ import 'package:mudra_manager/core/services/notification_service.dart';
 /// Each check is independently testable and runs in isolation.
 /// Wire new checks into [SmartNotificationService.checks].
 abstract class SmartCheck {
+  final IsarService isarService;
+
+  SmartCheck(this.isarService);
+
   /// Unique type string for dedup (one per day per type).
   String get type;
 
@@ -55,10 +61,20 @@ class SmartNotificationEmitter {
 
     await isar.writeTxn(() => isar.notificationRecords.put(record));
 
+    // Extract route from actionData JSON for tap navigation
+    String? payload;
+    if (actionData != null) {
+      try {
+        final data = jsonDecode(actionData) as Map<String, dynamic>;
+        payload = data['type'] as String?;
+      } catch (_) {}
+    }
+
     await NotificationService.showLocalNotification(
       id: type.hashCode.abs() % 2147483647,
       title: title,
       body: body,
+      payload: payload,
       dedupKey: type,
     );
 

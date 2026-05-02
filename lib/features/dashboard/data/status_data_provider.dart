@@ -184,7 +184,6 @@ final statsProvider = FutureProvider.autoDispose.family<StatsData, String>((
   for (final cat in cats.where((c) => c.categoryType == CategoryType.expense)) {
     final monthlyData = <int, double>{};
     for (final txn in expenseTxns) {
-      txn.category.loadSync();
       if (txn.category.value?.id == cat.id) {
         final monthIndex = (txn.date.year - trendStart.year) * 12 +
             (txn.date.month - trendStart.month);
@@ -246,6 +245,11 @@ final customStatsProvider = FutureProvider.autoDispose.family<StatsData, String>
       .sortByDateDesc()
       .findAll();
 
+  // Batch-load categories once
+  for (final txn in allTxns) {
+    txn.category.loadSync();
+  }
+
   double income = 0;
   double expense = 0;
   final Map<int, double> dailyIncome = {};
@@ -255,7 +259,6 @@ final customStatsProvider = FutureProvider.autoDispose.family<StatsData, String>
 
   for (final txn in allTxns) {
     final dayIndex = txn.date.difference(start).inDays;
-    txn.category.loadSync();
     final catName = txn.category.value?.name ?? 'Unknown';
 
     if (txn.isExpense) {
@@ -300,7 +303,6 @@ final customStatsProvider = FutureProvider.autoDispose.family<StatsData, String>
   for (final cat in cats.where((c) => c.categoryType == CategoryType.expense)) {
     final monthlyData = <int, double>{};
     for (final txn in expenseTxns) {
-      txn.category.loadSync();
       if (txn.category.value?.id == cat.id) {
         final monthIndex = (txn.date.year - trendStart.year) * 12 +
             (txn.date.month - trendStart.month);

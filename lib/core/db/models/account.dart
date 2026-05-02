@@ -26,6 +26,15 @@ class Account {
   /// Currency code for this account (e.g. "USD"). Null = base currency.
   String? currencyCode;
 
+  /// Credit card: day of month the statement is generated (1-31).
+  int? statementDay;
+
+  /// Credit card: day of month the payment is due (1-31).
+  int? dueDay;
+
+  /// Credit card: total credit limit.
+  double? creditLimit;
+
   // A field to mark if the account is active or closed/hidden
   @Index() // Index for easily filtering active accounts
   bool isActive = true;

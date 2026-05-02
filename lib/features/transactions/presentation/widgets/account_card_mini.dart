@@ -1,4 +1,5 @@
 import 'package:mudra_manager/core/currency/currency_meta.dart';
+import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:flutter/material.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/extension/account_type_extenstion.dart';
@@ -84,8 +85,10 @@ class AccountCardMini extends StatelessWidget {
                             ConnectionState.waiting) {
                           return const Text('...');
                         }
-                        return Text(
-                          formatCurrency(snapshot.data ?? 0, decimals: 2),
+                        return CurrencyText(
+                          amount: snapshot.data ?? 0,
+                          compact: false,
+                          fixedLength: 2,
                           style: textTheme.labelLarge?.copyWith(
                             color: textColor,
                           ),

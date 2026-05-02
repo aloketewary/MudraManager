@@ -37,8 +37,8 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
   }
 
   Future<MonthlyRecapData> _loadData() async {
-    final isar = await ref.read(isarServiceProvider).getInstance();
-    return MonthlyRecapService(isar)
+    final isarService = ref.read(isarServiceProvider);
+    return MonthlyRecapService(isarService)
         .generate(_selectedMonth, currency: _currency);
   }
 

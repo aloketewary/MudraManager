@@ -245,6 +245,12 @@ class SharedPrefsUtil {
   bool getStarterTxnsOffered() => _prefs.getBool('starter_txns_offered') ?? false;
   Future<void> setStarterTxnsOffered() => _prefs.setBool('starter_txns_offered', true);
 
+  // SMS first import celebration
+  bool getSmsFirstImportReady() => _prefs.getBool('sms_first_import_ready') ?? false;
+  Future<void> setSmsFirstImportReady() => _prefs.setBool('sms_first_import_ready', true);
+  bool getSmsFirstImportCelebrated() => _prefs.getBool('sms_first_import_celebrated') ?? false;
+  Future<void> setSmsFirstImportCelebrated() => _prefs.setBool('sms_first_import_celebrated', true);
+
   // Onboarding completion timestamp
   DateTime? getOnboardingCompletedAt() {
     final ms = _prefs.getInt('onboarding_completed_at');

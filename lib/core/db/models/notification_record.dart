@@ -5,6 +5,7 @@ part 'notification_record.g.dart';
 
 enum NotificationPriority { low, normal, high, urgent }
 enum NotificationCategory { system, financial, trip, budget }
+enum NotificationSource { smart, sms, scheduled, event }
 
 @collection
 @JsonSerializable()
@@ -41,6 +42,10 @@ class NotificationRecord {
   int? budgetId;
   
   bool isArchived = false;
+
+  @enumerated
+  @JsonKey(defaultValue: NotificationSource.smart)
+  late NotificationSource source;
 
   NotificationRecord();
 

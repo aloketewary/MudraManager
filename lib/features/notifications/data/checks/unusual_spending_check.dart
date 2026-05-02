@@ -1,17 +1,18 @@
 import 'package:isar_community/isar.dart';
-import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/notification_record.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/features/notifications/data/smart_check.dart';
 
 class UnusualSpendingCheck extends SmartCheck {
+  UnusualSpendingCheck(super.isarService);
+
   @override
   String get type => 'unusual_spending';
 
   @override
   Future<void> run() async {
-    final isar = await IsarService().getInstance();
+    final isar = await isarService.getInstance();
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 

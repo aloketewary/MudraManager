@@ -4,6 +4,7 @@ import 'package:home_widget/home_widget.dart';
 import 'package:isar_community/isar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
+import 'package:mudra_manager/core/db/models/budget.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
@@ -14,6 +15,7 @@ class WidgetService {
   static const _widgetNames = [
     'com.mudramanager.app.QuickAddWidgetProvider',
     'com.mudramanager.app.BalanceWidgetProvider',
+    'com.mudramanager.app.TodaySpendWidgetProvider',
   ];
   static final _log = AppLog(getLogger(), 'WidgetService');
 
@@ -86,6 +88,9 @@ class WidgetService {
         formatCurrency(todayIncome, code: BaseCurrency.code, decimals: 0),
       );
 
+      // Budget remaining for Today's Spend widget
+      await _pushBudgetRemaining(isar);
+
       try {
         for (final name in _widgetNames) {
           await HomeWidget.updateWidget(androidName: name);
@@ -100,6 +105,53 @@ class WidgetService {
       );
     } catch (e) {
       _log.e('Error updating widget', e);
+    }
+  }
+
+  static Future<void> _pushBudgetRemaining(
+    Isar isar,
+  ) async {
+    try {
+      final now = DateTime.now();
+      final budgets = await isar.budgets
+          .filter()
+          .isArchivedEqualTo(false)
+          .findAll();
+
+      // Find the first active budget that covers today
+      Budget? active;
+      for (final b in budgets) {
+        if (b.startDate.isBefore(now) &&
+            b.endDate.isAfter(now) &&
+            b.amount > 0) {
+          active = b;
+          break;
+        }
+      }
+
+      if (active != null) {
+        // Sum all expenses in the budget period
+        final periodTxns = await isar.transactions
+            .filter()
+            .dateBetween(active.startDate, active.endDate)
+            .isExpenseEqualTo(true)
+            .isTransferEqualTo(false)
+            .findAll();
+        double spent = 0;
+        for (final t in periodTxns) {
+          spent += t.baseAmount;
+        }
+        final remaining = active.amount - spent;
+        final label = remaining >= 0
+            ? '${formatCurrency(remaining, code: BaseCurrency.code, decimals: 0)} left'
+            : '${formatCurrency(remaining.abs(), code: BaseCurrency.code, decimals: 0)} over';
+        await HomeWidget.saveWidgetData<String>('budgetRemaining', label);
+      } else {
+        await HomeWidget.saveWidgetData<String>('budgetRemaining', '');
+      }
+    } catch (e) {
+      _log.d('Budget remaining skipped: $e');
+      await HomeWidget.saveWidgetData<String>('budgetRemaining', '');
     }
   }
 }

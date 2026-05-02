@@ -32,6 +32,7 @@ import 'package:mudra_manager/features/transactions/presentation/widgets/quick_a
 import 'package:mudra_manager/shared/widgets/ambient_brand_section.dart';
 import 'package:mudra_manager/shared/widgets/budget_alert_banner.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
+import 'package:mudra_manager/features/dashboard/presentation/widgets/sms_success_celebration_sheet.dart';
 
 class DashboardHome extends ConsumerStatefulWidget {
   const DashboardHome({super.key});
@@ -54,6 +55,7 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
       if (!mounted) return;
       _performDailyCheckIn();
       ref.read(reconciliationServiceProvider).patchUncategorizedTransactions();
+      _checkSmsFirstImportCelebration();
     });
   }
 
@@ -88,6 +90,21 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
         log.i('✅ Daily check-in completed');
       }
     }
+  }
+
+  void _checkSmsFirstImportCelebration() {
+    final prefs = SharedPrefsUtil.instance;
+    if (!prefs.getSmsFirstImportReady() || prefs.getSmsFirstImportCelebrated()) {
+      return;
+    }
+    prefs.setSmsFirstImportCelebrated();
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => const SmsSuccessCelebrationSheet(),
+    );
   }
 
   void _revealNext(int total) {

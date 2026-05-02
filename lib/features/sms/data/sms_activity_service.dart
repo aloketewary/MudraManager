@@ -155,6 +155,7 @@ class SmsActivityService {
     String? category,
     String corrId = '',
     bool isRcs = false,
+    String? currencyCode,
   }) async {
     final isar = await _getIsar();
     final categories = await isar.categorys.where().findAll();
@@ -191,7 +192,8 @@ class SmsActivityService {
       ..merchant = parsed?.merchant ??
           CategoryMatcherService.detectMerchant(body, categories)
       ..isLikelyTransfer = parsed?.isLikelyTransfer ?? false
-      ..paymentType = CategoryMatcherService.detectPaymentType(body);
+      ..paymentType = CategoryMatcherService.detectPaymentType(body)
+      ..currencyCode = currencyCode;
 
     // If parser did not provide a category, try learned rules first, then robust matching
     bool categoryHighConfidence = false;

@@ -90,6 +90,8 @@ extension AppLocalizationsHelper on AppLocalizations {
         return onboard_SmartAutoTracking;
       case 'onboard_SmartAutoTrackingDesc':
         return onboard_SmartAutoTrackingDesc;
+      case 'onboard_smartTrackingMergedDesc':
+        return onboard_smartTrackingMergedDesc;
 
       // Starter transactions (onboarding step 5)
       case 'onboard_whatDidYouSpend':

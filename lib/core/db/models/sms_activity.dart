@@ -57,5 +57,8 @@ class SmsActivity {
   // Review notes
   String? reviewNotes;
 
+  /// Currency code from SMS parser (e.g. "USD", "EUR"). Null = base currency.
+  String? currencyCode;
+
   SmsActivity();
 }

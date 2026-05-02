@@ -1,17 +1,18 @@
 import 'dart:convert';
 import 'package:isar_community/isar.dart';
-import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/features/notifications/data/smart_check.dart';
 
 class MoneyLeakCheck extends SmartCheck {
+  MoneyLeakCheck(super.isarService);
+
   @override
   String get type => 'money_leak';
 
   @override
   Future<void> run() async {
-    final isar = await IsarService().getInstance();
+    final isar = await isarService.getInstance();
     final now = DateTime.now();
     if (now.day < 14) return;
 
@@ -25,9 +26,13 @@ class MoneyLeakCheck extends SmartCheck {
 
     if (txns.isEmpty) return;
 
-    final catStats = <String, ({int count, double total})>{};
+    // Batch-load categories once before aggregation
     for (final t in txns) {
       t.category.loadSync();
+    }
+
+    final catStats = <String, ({int count, double total})>{};
+    for (final t in txns) {
       final name = t.category.value?.name ?? 'Other';
       final prev = catStats[name] ?? (count: 0, total: 0.0);
       catStats[name] = (count: prev.count + 1, total: prev.total + t.baseAmount);

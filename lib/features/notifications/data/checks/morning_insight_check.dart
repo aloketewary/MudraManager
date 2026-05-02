@@ -1,11 +1,12 @@
 import 'dart:convert';
 import 'package:isar_community/isar.dart';
-import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/features/notifications/data/smart_check.dart';
 
 class MorningInsightCheck extends SmartCheck {
+  MorningInsightCheck(super.isarService);
+
   @override
   String get type => 'morning_insight';
 
@@ -14,7 +15,7 @@ class MorningInsightCheck extends SmartCheck {
     final now = DateTime.now();
     if (now.hour < 7 || now.hour >= 11) return;
 
-    final isar = await IsarService().getInstance();
+    final isar = await isarService.getInstance();
     final yesterday = now.subtract(const Duration(days: 1));
     final yStart = DateTime(yesterday.year, yesterday.month, yesterday.day);
     final yEnd = DateTime(yesterday.year, yesterday.month, yesterday.day, 23, 59, 59);
@@ -58,9 +59,12 @@ class MorningInsightCheck extends SmartCheck {
     }
 
     if (yesterdayTxns.isNotEmpty) {
-      final catSpend = <String, double>{};
+      // Batch-load categories once
       for (final t in yesterdayTxns) {
         t.category.loadSync();
+      }
+      final catSpend = <String, double>{};
+      for (final t in yesterdayTxns) {
         final name = t.category.value?.name ?? 'Other';
         catSpend[name] = (catSpend[name] ?? 0) + t.baseAmount;
       }

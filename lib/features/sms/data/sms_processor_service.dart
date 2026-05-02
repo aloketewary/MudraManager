@@ -163,6 +163,7 @@ class SmsProcessorService {
         category: parsedSms.transactionType,
         corrId: corrId,
         isRcs: isRcs,
+        currencyCode: parsedSms.currency,
       );
 
       PluginService().emitSms(sender, '');

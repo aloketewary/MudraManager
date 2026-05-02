@@ -40,10 +40,13 @@ class _AccountFormState extends ConsumerState<AccountForm> {
   late TextEditingController _nameController;
   late TextEditingController _accountNumberController;
   late TextEditingController _balanceController;
+  late TextEditingController _creditLimitController;
   late AccountType _selectedType;
   late Color _selectedColor;
   String? _selectedCurrency;
   bool _saving = false;
+  int? _statementDay;
+  int? _dueDay;
 
   bool get _isEditing => widget.account != null;
   AppLocalizations get ctxt => AppLocalizations.of(context)!;
@@ -74,6 +77,11 @@ class _AccountFormState extends ConsumerState<AccountForm> {
     _balanceController = TextEditingController(
       text: widget.account?.initialBalance.toString() ?? '',
     );
+    _creditLimitController = TextEditingController(
+      text: widget.account?.creditLimit?.toString() ?? '',
+    );
+    _statementDay = widget.account?.statementDay;
+    _dueDay = widget.account?.dueDay;
     _selectedType = widget.account?.accountType ?? AccountType.cash;
     _selectedColor = widget.account?.colorValue != null
         ? Color(widget.account!.colorValue!)
@@ -86,6 +94,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
     _nameController.dispose();
     _accountNumberController.dispose();
     _balanceController.dispose();
+    _creditLimitController.dispose();
     super.dispose();
   }
 
@@ -464,7 +473,91 @@ class _AccountFormState extends ConsumerState<AccountForm> {
           style: textTheme.bodyLarge,
           validator: (v) => v == null || v.isEmpty ? 'Required' : null,
         ),
+        if (isCreditCard) ...[
+          SizedBox(height: spacing.sectionGap),
+          TextFormField(
+            controller: _creditLimitController,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: InputDecoration(
+              labelText: ctxt.account_creditLimit,
+              prefixIcon: Icon(LucideIcons.gauge, size: 18, color: _selectedColor),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(spacing.radiusMedium),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                borderSide: BorderSide(color: _selectedColor, width: 2),
+              ),
+            ),
+            style: textTheme.bodyLarge,
+          ),
+          SizedBox(height: spacing.sectionGap),
+          Row(
+            children: [
+              Expanded(
+                child: _buildDayPicker(
+                  label: ctxt.account_statementDay,
+                  value: _statementDay,
+                  icon: LucideIcons.calendarRange,
+                  onChanged: (v) => setState(() => _statementDay = v),
+                  color: color,
+                  textTheme: textTheme,
+                  spacing: spacing,
+                ),
+              ),
+              SizedBox(width: spacing.elementGap),
+              Expanded(
+                child: _buildDayPicker(
+                  label: ctxt.account_dueDay,
+                  value: _dueDay,
+                  icon: LucideIcons.calendarClock,
+                  onChanged: (v) => setState(() => _dueDay = v),
+                  color: color,
+                  textTheme: textTheme,
+                  spacing: spacing,
+                ),
+              ),
+            ],
+          ),
+        ],
       ],
+    );
+  }
+
+  // ── DAY PICKER (for credit card statement/due day) ──
+  Widget _buildDayPicker({
+    required String label,
+    required int? value,
+    required IconData icon,
+    required ValueChanged<int?> onChanged,
+    required ColorScheme color,
+    required TextTheme textTheme,
+    required AppSpacing spacing,
+  }) {
+    return InputDecorator(
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon, size: 18, color: _selectedColor),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<int?>(
+          value: value,
+          isExpanded: true,
+          isDense: true,
+          hint: Text('—', style: textTheme.bodyLarge),
+          items: [
+            DropdownMenuItem<int?>(value: null, child: Text('—', style: textTheme.bodyLarge)),
+            ...List.generate(31, (i) => i + 1).map(
+              (day) => DropdownMenuItem(value: day, child: Text('$day', style: textTheme.bodyLarge)),
+            ),
+          ],
+          onChanged: onChanged,
+        ),
+      ),
     );
   }
 
@@ -968,6 +1061,18 @@ class _AccountFormState extends ConsumerState<AccountForm> {
         ..colorValue = _selectedColor.toARGB32()
         ..currencyCode = _selectedCurrency
         ..isActive = true;
+
+      if (_selectedType == AccountType.creditCard) {
+        account
+          ..statementDay = _statementDay
+          ..dueDay = _dueDay
+          ..creditLimit = double.tryParse(_creditLimitController.text);
+      } else {
+        account
+          ..statementDay = null
+          ..dueDay = null
+          ..creditLimit = null;
+      }
 
       await isar.writeTxn(() async {
         await isar.accounts.put(account);

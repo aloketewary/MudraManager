@@ -86,10 +86,13 @@ void main() {
   group('GoalHealth.contributionThisMonth', () {
     test('sums contributions in current month', () {
       final now = DateTime.now();
+      // Use mid-month dates to avoid month-boundary flakiness
+      final thisMonth15 = DateTime(now.year, now.month, 15);
+      final thisMonth16 = DateTime(now.year, now.month, 16);
       final goal = Goal.create(name: 'Test', targetAmount: 10000);
       goal.contributions = [
-        GoalContribution.create(500)..date = now,
-        GoalContribution.create(300)..date = now.subtract(const Duration(days: 2)),
+        GoalContribution.create(500)..date = thisMonth15,
+        GoalContribution.create(300)..date = thisMonth16,
         GoalContribution.create(1000)..date = DateTime(now.year, now.month - 1, 15),
       ];
 

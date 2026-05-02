@@ -1040,7 +1040,6 @@ class _AddEditTransactionScreenState
       await WidgetService.updateWidget(ref);
 
       if (context.mounted) {
-        ref.invalidate(transactionProvider);
         ref.invalidate(accountServiceProvider);
         ref.invalidate(budgetServiceProvider);
         if (widget.smsActivity != null) {

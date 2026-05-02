@@ -3511,6 +3511,16 @@ class AppLocalizationsBn extends AppLocalizations {
   String get txnList_clearDateRange => 'তারিখ সীমা মুছুন';
 
   @override
+  String get txnList_convertToTransfer => 'Transfer-এ বদলান';
+
+  @override
+  String get txnList_convertToTransferDesc =>
+      'এটা আসলে আপনার accounts-এর মধ্যে transfer ছিল';
+
+  @override
+  String get txnList_convertedToTransfer => 'Transfer-এ বদলানো হয়েছে';
+
+  @override
   String get stats_today => 'আজ';
 
   @override
@@ -5845,4 +5855,94 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get backup_proRequired => 'Pro feature';
+
+  @override
+  String get onboard_skip => 'Skip করুন';
+
+  @override
+  String get onboard_languages => 'ভাষা';
+
+  @override
+  String get onboard_smartTrackingMergedDesc =>
+      'Bank SMS থেকে auto-import, budget তৈরি করুন, goals track করুন — সব এক জায়গায়।';
+
+  @override
+  String get sms_celebrationTitle => 'প্রথম SMS transaction! 🎉';
+
+  @override
+  String get sms_celebrationBody =>
+      'Mudra আপনার bank SMS থেকে নিজে থেকেই transaction save করেছে। এখন থেকে খরচ আপনা আপনি track হবে।';
+
+  @override
+  String get sms_celebrationCta => 'চলো, শুরু করি!';
+
+  @override
+  String get milestone_shareButton => 'Story-তে Share করুন';
+
+  @override
+  String get milestone_goalReachedTitle => 'Goal সম্পূর্ণ!';
+
+  @override
+  String milestone_goalReachedDesc(String amount) {
+    return '$amount সেভ করে target পূরণ করেছেন 🌟';
+  }
+
+  @override
+  String milestone_streakTitle(int days) {
+    return '$days দিনের Streak!';
+  }
+
+  @override
+  String milestone_streakDesc(int days) {
+    return 'লাগাতার $days দিন খরচ track করেছেন';
+  }
+
+  @override
+  String get milestone_underBudgetTitle => 'Budget-এর মধ্যে!';
+
+  @override
+  String get milestone_underBudgetDesc => 'পুরো মাস budget-এর মধ্যে ছিলেন 💪';
+
+  @override
+  String get account_creditLimit => 'Credit Limit';
+
+  @override
+  String get account_statementDay => 'Statement Day';
+
+  @override
+  String get account_dueDay => 'Due Day';
+
+  @override
+  String account_daysUntilDue(int days) {
+    return '$days দিন বাকি';
+  }
+
+  @override
+  String get account_dueToday => 'আজ due!';
+
+  @override
+  String account_overdue(int days) {
+    return '$days দিন overdue';
+  }
+
+  @override
+  String get subscription_title => 'Subscriptions ধরা পড়েছে';
+
+  @override
+  String subscription_monthlyTotal(String amount) {
+    return 'প্রতি মাসে $amount';
+  }
+
+  @override
+  String subscription_occurrences(int count) {
+    return '4 মাসে $count বার';
+  }
+
+  @override
+  String get subscription_none => 'এখনও কোনো subscription detect হয়নি';
+
+  @override
+  String subscription_dayOfMonth(int day) {
+    return 'প্রতি মাসে $day তারিখের আশেপাশে';
+  }
 }

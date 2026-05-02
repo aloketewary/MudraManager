@@ -3528,6 +3528,16 @@ class AppLocalizationsMs extends AppLocalizations {
   String get txnList_clearDateRange => 'Clear Date Range';
 
   @override
+  String get txnList_convertToTransfer => 'Convert to Transfer';
+
+  @override
+  String get txnList_convertToTransferDesc =>
+      'This was actually a transfer between your accounts';
+
+  @override
+  String get txnList_convertedToTransfer => 'Converted to transfer';
+
+  @override
   String get stats_today => 'Today';
 
   @override
@@ -5864,4 +5874,95 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String get backup_proRequired => 'Pro feature';
+
+  @override
+  String get onboard_skip => 'Skip';
+
+  @override
+  String get onboard_languages => 'Languages';
+
+  @override
+  String get onboard_smartTrackingMergedDesc =>
+      'Auto-import from bank SMS, set budgets, track goals — all in one place.';
+
+  @override
+  String get sms_celebrationTitle => 'Your first SMS transaction! 🎉';
+
+  @override
+  String get sms_celebrationBody =>
+      'Mudra just auto-imported a transaction from your bank SMS. From now on, your expenses track themselves.';
+
+  @override
+  String get sms_celebrationCta => 'Awesome, let\'s go!';
+
+  @override
+  String get milestone_shareButton => 'Share to Story';
+
+  @override
+  String get milestone_goalReachedTitle => 'Goal Reached!';
+
+  @override
+  String milestone_goalReachedDesc(String amount) {
+    return 'Saved $amount and hit the target 🌟';
+  }
+
+  @override
+  String milestone_streakTitle(int days) {
+    return '$days-Day Streak!';
+  }
+
+  @override
+  String milestone_streakDesc(int days) {
+    return 'Tracked expenses every day for $days days straight';
+  }
+
+  @override
+  String get milestone_underBudgetTitle => 'Under Budget!';
+
+  @override
+  String get milestone_underBudgetDesc =>
+      'Stayed within budget for the entire month 💪';
+
+  @override
+  String get account_creditLimit => 'Credit Limit';
+
+  @override
+  String get account_statementDay => 'Statement Day';
+
+  @override
+  String get account_dueDay => 'Due Day';
+
+  @override
+  String account_daysUntilDue(int days) {
+    return '$days days until due';
+  }
+
+  @override
+  String get account_dueToday => 'Due today!';
+
+  @override
+  String account_overdue(int days) {
+    return 'Overdue by $days days';
+  }
+
+  @override
+  String get subscription_title => 'Detected Subscriptions';
+
+  @override
+  String subscription_monthlyTotal(String amount) {
+    return '$amount/month total';
+  }
+
+  @override
+  String subscription_occurrences(int count) {
+    return '$count charges in 4 months';
+  }
+
+  @override
+  String get subscription_none => 'No recurring subscriptions detected yet';
+
+  @override
+  String subscription_dayOfMonth(int day) {
+    return 'Around the ${day}th of each month';
+  }
 }

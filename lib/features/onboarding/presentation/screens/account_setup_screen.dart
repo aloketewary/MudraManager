@@ -243,7 +243,7 @@ class _AccountSetupScreenState extends ConsumerState<AccountSetupScreen> {
       });
 
       if (!_startFresh && _selectedPackIds.isNotEmpty) {
-        await CategoryManagementService.installPacks(
+        await ref.read(categoryManagementServiceProvider).installPacks(
           _selectedPackIds.toList(),
         );
       }

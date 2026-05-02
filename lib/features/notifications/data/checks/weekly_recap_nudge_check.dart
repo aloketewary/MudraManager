@@ -1,11 +1,12 @@
 import 'dart:convert';
 import 'package:isar_community/isar.dart';
-import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/features/notifications/data/smart_check.dart';
 
 class WeeklyRecapNudgeCheck extends SmartCheck {
+  WeeklyRecapNudgeCheck(super.isarService);
+
   @override
   String get type => 'weekly_recap_nudge';
 
@@ -15,7 +16,7 @@ class WeeklyRecapNudgeCheck extends SmartCheck {
     if (now.weekday != DateTime.sunday) return;
     if (now.hour < 17 || now.hour >= 21) return;
 
-    final isar = await IsarService().getInstance();
+    final isar = await isarService.getInstance();
     final startOfWeek = DateTime(now.year, now.month, now.day)
         .subtract(Duration(days: now.weekday - 1));
 
@@ -30,9 +31,13 @@ class WeeklyRecapNudgeCheck extends SmartCheck {
 
     final weekTotal = weekTxns.fold<double>(0, (s, t) => s + t.baseAmount);
 
-    final catSpend = <String, double>{};
+    // Batch-load categories once before aggregation
     for (final t in weekTxns) {
       t.category.loadSync();
+    }
+
+    final catSpend = <String, double>{};
+    for (final t in weekTxns) {
       final name = t.category.value?.name ?? 'Other';
       catSpend[name] = (catSpend[name] ?? 0) + t.baseAmount;
     }
