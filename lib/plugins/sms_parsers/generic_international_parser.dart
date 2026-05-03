@@ -100,6 +100,11 @@ class GenericInternationalSmsParser extends SmsParserPlugin {
   }
 
   bool _isCredit(String upper) {
+    // "received from your A/c" = debit, not credit
+    if (upper.contains('RECEIVED') && !ParsedSms.isReceivedCredit(upper)) {
+      return false;
+    }
+
     const creditKeywords = [
       'CREDITED', 'CREDIT', 'DEPOSITED', 'RECEIVED',
       'REFUND', 'CASHBACK', 'ADDED',

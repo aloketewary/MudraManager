@@ -975,6 +975,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get common_reset => 'Restablecer';
 
   @override
+  String get common_viewDetails => 'View details';
+
+  @override
   String get common_apply => 'Apply';
 
   @override
@@ -1341,6 +1344,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get utility_analyticsSubtitle => 'Health score, trends & forecasts';
+
+  @override
+  String get utility_cashFlowSubtitle => 'Income vs expense projections';
+
+  @override
+  String get utility_spendingTrendsSubtitle =>
+      'Category-wise spending patterns';
 
   @override
   String get utility_taxSubtitle => 'Estimate your income tax';
@@ -5786,6 +5796,21 @@ class AppLocalizationsEs extends AppLocalizations {
   String get tax_newRegime => 'New Regime';
 
   @override
+  String get tax_oldRegime => 'Old Regime';
+
+  @override
+  String get tax_regimeComparison => 'Which Regime Saves More?';
+
+  @override
+  String tax_regimeSavings(String regime) {
+    return '$regime saves you';
+  }
+
+  @override
+  String get tax_oldRegimeDisclaimer =>
+      'Old Regime estimate uses standard deduction only. With HRA, 80C, 80D deductions, savings could be higher.';
+
+  @override
   String get category_merge => 'Merge Category';
 
   @override
@@ -6001,6 +6026,9 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get backup_passwordSet => 'Backup password set';
+
+  @override
   String get backup_proRequired => 'Pro feature';
 
   @override
@@ -6093,6 +6121,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String subscription_dayOfMonth(int day) {
     return 'Around the ${day}th of each month';
   }
+
+  @override
+  String get subscription_trackAsRecurring => 'Track as recurring bill';
 
   @override
   String get cc_title => 'Credit Card Bills';

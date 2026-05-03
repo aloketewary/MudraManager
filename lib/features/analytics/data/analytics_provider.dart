@@ -24,6 +24,7 @@ final financialHealthProvider =
   ref,
 ) async {
   ref.watch(transactionChangeProvider);
+  ref.watch(accountChangeProvider);
   final service = ref.watch(analyticsServiceProvider);
   final totalBalance = await ref.watch(totalAccountBalanceProvider.future);
   return await service.calculateHealthScore(totalBalance);

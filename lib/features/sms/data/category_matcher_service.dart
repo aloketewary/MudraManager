@@ -39,10 +39,10 @@ class CategoryMatcherService {
       if (!_isNoiseName(name)) return name;
     }
 
-    // "at MERCHANT" pattern for card/POS
+    // "at MERCHANT" pattern for card/POS (cap at 5 words to avoid garbage)
     // e.g. "debited at Amazon" or "spent at Swiggy"
     final atMatch = RegExp(
-      r'(?:at|At)\s+([A-Za-z][A-Za-z0-9\s&\-]{2,30})(?:\s+on|\s+Ref|\.|\s*$)',
+      r'(?:at|At)\s+([A-Za-z][A-Za-z0-9]+(?:\s+[A-Za-z0-9&\-]+){0,4})(?:\s+on|\s+Ref|\.|\s*$)',
     ).firstMatch(smsBody);
     if (atMatch != null) {
       final name = atMatch.group(1)!.trim();
@@ -71,9 +71,12 @@ class CategoryMatcherService {
   };
 
   static bool _isNoiseName(String name) {
+    final lower = name.toLowerCase();
     return name.length < 2 ||
-        _noiseNames.contains(name.toLowerCase()) ||
-        RegExp(r'^\d+$').hasMatch(name);
+        _noiseNames.contains(lower) ||
+        RegExp(r'^\d').hasMatch(name) ||
+        RegExp(r'^(INR|RS|USD|EUR|GBP|AED)\b', caseSensitive: false)
+            .hasMatch(name);
   }
 
   static String _humanizeName(String vpaId) {
@@ -155,8 +158,8 @@ class CategoryMatcherService {
         }
       }
 
-      // Require at least 2 word matches OR 1 exact match for consideration
-      if (wordMatches < 2 && exactMatches < 1) continue;
+      // Require at least 1 exact match for consideration
+      if (exactMatches < 1 && wordMatches < 1) continue;
 
       // Additional penalty for common false positive categories like "subscription"
       if (category.name.toLowerCase().contains('subscription') ||

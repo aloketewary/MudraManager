@@ -124,7 +124,8 @@ class PaytmSmsParserPlugin extends SmsParserPlugin {
             .firstMatch(body)
             ?.group(1)
             ?.toLowerCase();
-    final isIncome = typeMatch == 'received' || typeMatch == 'credited';
+    final isIncome = typeMatch == 'credited' ||
+        (typeMatch == 'received' && ParsedSms.isReceivedCredit(body));
     final account = _accountRegex.firstMatch(body)?.group(1);
 
     return ParsedSms(

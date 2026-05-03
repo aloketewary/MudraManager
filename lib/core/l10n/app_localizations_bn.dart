@@ -978,6 +978,9 @@ class AppLocalizationsBn extends AppLocalizations {
   String get common_reset => 'রিসেট';
 
   @override
+  String get common_viewDetails => 'বিস্তারিত দেখুন';
+
+  @override
   String get common_apply => 'প্রযোগ';
 
   @override
@@ -1344,6 +1347,12 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get utility_analyticsSubtitle => 'Health score, trends ও forecasts';
+
+  @override
+  String get utility_cashFlowSubtitle => 'Income vs খরচ-এর projection';
+
+  @override
+  String get utility_spendingTrendsSubtitle => 'Category-wise খরচের patterns';
 
   @override
   String get utility_taxSubtitle => 'Income tax-এর আনুমানিক হিসাব';
@@ -5769,6 +5778,21 @@ class AppLocalizationsBn extends AppLocalizations {
   String get tax_newRegime => 'New Regime';
 
   @override
+  String get tax_oldRegime => 'Old Regime';
+
+  @override
+  String get tax_regimeComparison => 'কোন Regime-এ বেশি সাশ্রয়?';
+
+  @override
+  String tax_regimeSavings(String regime) {
+    return '$regime-এ সাশ্রয়';
+  }
+
+  @override
+  String get tax_oldRegimeDisclaimer =>
+      'Old Regime estimate শুধু standard deduction-এর উপর। HRA, 80C, 80D deductions থাকলে সাশ্রয় আরও বেশি হতে পারে।';
+
+  @override
   String get category_merge => 'Category merge করুন';
 
   @override
@@ -5981,6 +6005,9 @@ class AppLocalizationsBn extends AppLocalizations {
   }
 
   @override
+  String get backup_passwordSet => 'Backup password set হয়েছে';
+
+  @override
   String get backup_proRequired => 'Pro feature';
 
   @override
@@ -6072,6 +6099,10 @@ class AppLocalizationsBn extends AppLocalizations {
   String subscription_dayOfMonth(int day) {
     return 'প্রতি মাসে $day তারিখের আশেপাশে';
   }
+
+  @override
+  String get subscription_trackAsRecurring =>
+      'Recurring bill হিসেবে track করুন';
 
   @override
   String get cc_title => 'Credit Card Bills';

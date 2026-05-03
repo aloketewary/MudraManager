@@ -1397,14 +1397,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     ColorScheme color,
     TextTheme textTheme,
   ) {
+    final spacing = ref.read(spacingProvider);
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusLarge)),
       ),
       builder: (ctx) {
         return Padding(
-          padding: const EdgeInsets.all(24),
+          padding: EdgeInsets.all(spacing.sectionGap),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -1416,22 +1417,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: spacing.sectionGap),
               Icon(LucideIcons.logOut, size: 48, color: color.error),
-              const SizedBox(height: 16),
+              SizedBox(height: spacing.elementGap),
               Text(
                 BuddyMessages.logoutTitle,
                 style:
                     textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: spacing.elementGapMin),
               Text(
                 BuddyMessages.logoutMessage,
                 style: textTheme.bodyMedium
                     ?.copyWith(color: color.onSurfaceVariant),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: spacing.sectionGap),
               Row(
                 children: [
                   Expanded(
@@ -1441,15 +1442,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         context.pop();
                       },
                       style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        padding: EdgeInsets.symmetric(vertical: spacing.elementGap),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(spacing.radiusMedium),
                         ),
                       ),
                       child: Text(BuddyMessages.deleteCancel),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: spacing.elementGap),
                   Expanded(
                     child: FilledButton(
                       onPressed: () async {
@@ -1458,8 +1459,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         final isar =
                             await ref.read(isarServiceProvider).getInstance();
                         await isar.writeTxn(() async => await isar.clear());
-                        prefs.clear();
-                        prefs.setLanguage(lang);
+                        await prefs.clear();
+                        await prefs.setLanguage(lang);
                         BaseCurrency.sync('INR');
                         ref.invalidate(baseCurrencyProvider);
                         ref.invalidate(currencyServiceProvider);
@@ -1470,10 +1471,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         if (ctx.mounted) ctx.go(AppRoutes.onboarding);
                       },
                       style: FilledButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        padding: EdgeInsets.symmetric(vertical: spacing.elementGap),
                         backgroundColor: color.error,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(spacing.radiusMedium),
                         ),
                       ),
                       child: Text(BuddyMessages.logoutConfirm),
@@ -1481,7 +1482,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: spacing.elementGapMin),
             ],
           ),
         );

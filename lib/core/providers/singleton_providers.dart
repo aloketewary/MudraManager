@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/features/notifications/data/smart_notification_service.dart';
+import 'package:mudra_manager/features/sms/data/recurring_detector_service.dart';
 import 'package:mudra_manager/features/sms/data/sms_activity_service.dart';
 import 'package:mudra_manager/features/sms/data/sms_processor_service.dart';
 import 'package:mudra_manager/plugins/sms_parser_manager.dart';
@@ -36,3 +38,10 @@ final exportPluginManagerProvider = Provider<ExportPluginManager>(
 final pluginServiceProvider = Provider<PluginService>(
   (ref) => PluginService(),
 );
+
+/// RecurringDetectorService with proper IsarService injection.
+final recurringDetectorServiceProvider =
+    Provider.autoDispose<RecurringDetectorService>((ref) {
+  final isarService = ref.watch(isarServiceProvider);
+  return RecurringDetectorService(isarService);
+});

@@ -352,7 +352,7 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
                   )
                   .toList(),
             ),
-            SizedBox(height: spacing.sectionGap * 1.5),
+            SizedBox(height: spacing.sectionGap),
           ],
 
           // 2. Planning
@@ -391,7 +391,7 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
                   )
                   .toList(),
             ),
-            SizedBox(height: spacing.sectionGap * 1.5),
+            SizedBox(height: spacing.sectionGap),
           ],
 
           // 3. Insights
@@ -468,78 +468,85 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
       builder: (context, ref, _) {
         final alertAsync = ref.watch(priorityAlertProvider);
         return alertAsync.maybeWhen(
-          data: (alert) {
-            if (alert == null) return const SizedBox.shrink();
-
-            final alertColor = alert.type == AlertType.urgent
-                ? color.error
-                : alert.type == AlertType.warning
-                    ? color.tertiary
-                    : color.primary;
+          data: (alerts) {
+            if (alerts.isEmpty) return const SizedBox.shrink();
 
             return Padding(
               padding: EdgeInsets.only(bottom: spacing.sectionGap),
-              child: InkWell(
-                onTap: () {
-                  HapticFeedback.mediumImpact();
-                  context.push(alert.route);
-                },
-                borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                child: Container(
-                  padding: EdgeInsets.all(spacing.cardInner),
-                  decoration: BoxDecoration(
-                    color: alertColor.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                    border: Border.all(
-                      color: alertColor.withValues(alpha: 0.25),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: EdgeInsets.all(spacing.elementGap),
+              child: Column(
+                children: alerts.map((alert) {
+                  final alertColor = alert.type == AlertType.urgent
+                      ? color.error
+                      : alert.type == AlertType.warning
+                          ? color.tertiary
+                          : color.primary;
+
+                  return Padding(
+                    padding: EdgeInsets.only(bottom: spacing.elementGap),
+                    child: InkWell(
+                      onTap: () {
+                        HapticFeedback.mediumImpact();
+                        context.push(alert.route);
+                      },
+                      borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                      child: Container(
+                        padding: EdgeInsets.all(spacing.cardInner),
                         decoration: BoxDecoration(
-                          color: alertColor.withValues(alpha: 0.15),
-                          shape: BoxShape.circle,
+                          color: alertColor.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                          border: Border.all(
+                            color: alertColor.withValues(alpha: 0.25),
+                          ),
                         ),
-                        child: Icon(
-                          alert.type == AlertType.urgent
-                              ? LucideIcons.circleAlert
-                              : LucideIcons.triangleAlert,
-                          color: alertColor,
-                          size: 18,
-                        ),
-                      ),
-                      SizedBox(width: spacing.elementGap * 1.5),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        child: Row(
                           children: [
-                            Text(
-                              alert.title,
-                              style: textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
+                            Container(
+                              padding: EdgeInsets.all(spacing.elementGap),
+                              decoration: BoxDecoration(
+                                color: alertColor.withValues(alpha: 0.15),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                alert.type == AlertType.urgent
+                                    ? LucideIcons.circleAlert
+                                    : LucideIcons.triangleAlert,
+                                color: alertColor,
+                                size: 18,
                               ),
                             ),
-                            Text(
-                              alert.message,
-                              style: textTheme.bodySmall?.copyWith(
-                                color: color.onSurfaceVariant,
+                            SizedBox(width: spacing.elementGap * 1.5),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    alert.title,
+                                    style: textTheme.titleSmall?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    alert.message,
+                                    style: textTheme.bodySmall?.copyWith(
+                                      color: color.onSurfaceVariant,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
                               ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Icon(
+                              LucideIcons.chevronRight,
+                              size: 16,
+                              color: color.onSurfaceVariant.withValues(alpha: 0.5),
                             ),
                           ],
                         ),
                       ),
-                      Icon(
-                        LucideIcons.chevronRight,
-                        size: 16,
-                        color: color.onSurfaceVariant.withValues(alpha: 0.5),
-                      ),
-                    ],
-                  ),
-                ),
+                    ),
+                  );
+                }).toList(),
               ),
             );
           },

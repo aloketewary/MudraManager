@@ -100,7 +100,63 @@ class TaxEstimationService {
       expenseByCategory: expenseByCategory,
       daysElapsed: daysElapsed,
       totalDays: totalDays,
+      oldRegimeEstimate: _estimateOldRegime(projectedIncome),
     );
+  }
+
+  /// Old Tax Regime estimation (simplified — no HRA/80C/80D input yet).
+  /// Uses standard deduction of ₹50,000 and basic exemption of ₹2.5L.
+  OldRegimeEstimate _estimateOldRegime(double grossIncome) {
+    const oldStdDeduction = 50000.0;
+    final taxableIncome =
+        (grossIncome - oldStdDeduction).clamp(0, double.infinity);
+
+    final slabs = _calculateOldRegimeTax(taxableIncome.toDouble());
+    final baseTax = slabs.fold<double>(0, (s, e) => s + e.tax);
+
+    // Rebate u/s 87A: No tax if taxable income <= 5,00,000
+    final rebate = taxableIncome <= 500000 ? baseTax : 0.0;
+    final taxAfterRebate = baseTax - rebate;
+    final cess = taxAfterRebate * 0.04;
+    final totalTax = taxAfterRebate + cess;
+
+    return OldRegimeEstimate(
+      standardDeduction: oldStdDeduction,
+      taxableIncome: taxableIncome.toDouble(),
+      slabBreakdown: slabs,
+      baseTax: baseTax,
+      rebate: rebate,
+      cess: cess,
+      totalTax: totalTax,
+    );
+  }
+
+  /// Old Tax Regime slabs (unchanged since FY 2020-21)
+  List<TaxSlab> _calculateOldRegimeTax(double taxableIncome) {
+    final slabs = <TaxSlab>[];
+    var remaining = taxableIncome;
+
+    final brackets = [
+      (limit: 250000.0, rate: 0.0, label: '0 - 2.5L'),
+      (limit: 250000.0, rate: 0.05, label: '2.5L - 5L'),
+      (limit: 500000.0, rate: 0.20, label: '5L - 10L'),
+      (limit: double.infinity, rate: 0.30, label: 'Above 10L'),
+    ];
+
+    for (final bracket in brackets) {
+      if (remaining <= 0) break;
+      final taxable = remaining.clamp(0, bracket.limit);
+      final tax = taxable * bracket.rate;
+      slabs.add(TaxSlab(
+        label: bracket.label,
+        rate: bracket.rate * 100,
+        taxableAmount: taxable.toDouble(),
+        tax: tax,
+      ));
+      remaining -= taxable;
+    }
+
+    return slabs;
   }
 
   /// New Tax Regime slabs (FY 2025-26, Budget 2025)
@@ -160,6 +216,7 @@ class TaxEstimate {
   final Map<String, double> expenseByCategory;
   final int daysElapsed;
   final int totalDays;
+  final OldRegimeEstimate? oldRegimeEstimate;
 
   TaxEstimate({
     required this.financialYear,
@@ -180,11 +237,41 @@ class TaxEstimate {
     required this.expenseByCategory,
     required this.daysElapsed,
     required this.totalDays,
+    this.oldRegimeEstimate,
   });
 
   bool get isZeroTax => totalTax <= 0;
   double get projectedSavings => projectedAnnualIncome - totalExpense;
   double get progressPercent => daysElapsed / totalDays;
+
+  /// Which regime saves more tax?
+  bool get oldRegimeBetter =>
+      oldRegimeEstimate != null && oldRegimeEstimate!.totalTax < totalTax;
+  double get regimeSavings => oldRegimeEstimate != null
+      ? (totalTax - oldRegimeEstimate!.totalTax).abs()
+      : 0;
+}
+
+class OldRegimeEstimate {
+  final double standardDeduction;
+  final double taxableIncome;
+  final List<TaxSlab> slabBreakdown;
+  final double baseTax;
+  final double rebate;
+  final double cess;
+  final double totalTax;
+
+  OldRegimeEstimate({
+    required this.standardDeduction,
+    required this.taxableIncome,
+    required this.slabBreakdown,
+    required this.baseTax,
+    required this.rebate,
+    required this.cess,
+    required this.totalTax,
+  });
+
+  bool get isZeroTax => totalTax <= 0;
 }
 
 class TaxSlab {

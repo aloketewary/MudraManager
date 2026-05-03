@@ -661,7 +661,7 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
                   child: Row(
                     children: [
                       Icon(LucideIcons.circleCheck,
-                          size: 16, color: color.primary),
+                          size: 16, color: color.primary,),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -708,7 +708,7 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
                                 ),
                               )
                             : Icon(LucideIcons.cloudUpload,
-                                color: color.primary, size: 20),
+                                color: color.primary, size: 20,),
                       ),
                       const SizedBox(width: 14),
                       Expanded(
@@ -731,7 +731,7 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
                         ),
                       ),
                       Icon(LucideIcons.chevronRight,
-                          color: color.onSurfaceVariant, size: 20),
+                          color: color.onSurfaceVariant, size: 20,),
                     ],
                   ),
                 ),
@@ -756,7 +756,7 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Icon(LucideIcons.cloudDownload,
-                            color: color.primary, size: 20),
+                            color: color.primary, size: 20,),
                       ),
                       const SizedBox(width: 14),
                       Expanded(
@@ -783,7 +783,7 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
                         data: (backups) => backups.isNotEmpty
                             ? Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 2),
+                                    horizontal: 8, vertical: 2,),
                                 decoration: BoxDecoration(
                                   color: color.primary.withValues(alpha: 0.12),
                                   borderRadius: BorderRadius.circular(10),
@@ -801,7 +801,7 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
                       ),
                       const SizedBox(width: 8),
                       Icon(LucideIcons.chevronRight,
-                          color: color.onSurfaceVariant, size: 20),
+                          color: color.onSurfaceVariant, size: 20,),
                     ],
                   ),
                 ),
@@ -936,7 +936,7 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Icon(LucideIcons.cloud,
-                                color: color.tertiary, size: 20),
+                                color: color.tertiary, size: 20,),
                           ),
                           title: Text(
                             backup.name,
@@ -951,7 +951,7 @@ class _CloudBackupSectionState extends ConsumerState<_CloudBackupSection> {
                             ),
                           ),
                           trailing: Icon(LucideIcons.download,
-                              color: color.primary, size: 20),
+                              color: color.primary, size: 20,),
                           onTap: () {
                             Navigator.pop(context);
                             _restoreFromDrive(backup);
@@ -1094,18 +1094,18 @@ class _AutoBackupSectionState extends ConsumerState<_AutoBackupSection> {
         children: [
           // Description
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
+            padding: EdgeInsets.fromLTRB(spacing.cardInner, spacing.cardInner - 2, spacing.cardInner, 0),
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: EdgeInsets.all(spacing.elementGap),
                   decoration: BoxDecoration(
                     color: color.primary.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(LucideIcons.timer, color: color.primary, size: 20),
                 ),
-                const SizedBox(width: 14),
+                SizedBox(width: spacing.cardInner - 2),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1129,11 +1129,11 @@ class _AutoBackupSectionState extends ConsumerState<_AutoBackupSection> {
             ),
           ),
 
-          const SizedBox(height: 12),
+          SizedBox(height: spacing.elementGap + 4),
 
           // Frequency selector
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: EdgeInsets.symmetric(horizontal: spacing.cardInner),
             child: Row(
               children: [
                 Text(
@@ -1174,14 +1174,14 @@ class _AutoBackupSectionState extends ConsumerState<_AutoBackupSection> {
 
           // Password setup prompt
           if (_frequency != BackupFrequency.never && !_hasPassword) ...[
-            const SizedBox(height: 12),
+            SizedBox(height: spacing.elementGap + 4),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: EdgeInsets.symmetric(horizontal: spacing.cardInner),
               child: InkWell(
                 onTap: _setPassword,
                 borderRadius: BorderRadius.circular(10),
                 child: Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: EdgeInsets.all(spacing.elementGap + 4),
                   decoration: BoxDecoration(
                     color: color.errorContainer.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(10),
@@ -1192,7 +1192,7 @@ class _AutoBackupSectionState extends ConsumerState<_AutoBackupSection> {
                   child: Row(
                     children: [
                       Icon(LucideIcons.keyRound, size: 16, color: color.error),
-                      const SizedBox(width: 10),
+                      SizedBox(width: spacing.elementGap + 2),
                       Expanded(
                         child: Text(
                           ctxt.backup_autoSetPassword,
@@ -1211,17 +1211,17 @@ class _AutoBackupSectionState extends ConsumerState<_AutoBackupSection> {
 
           // Recent auto backups
           if (_recentBackups.isNotEmpty) ...[
-            const SizedBox(height: 12),
+            SizedBox(height: spacing.elementGap + 4),
             Divider(
               height: 1,
               color: color.outlineVariant.withValues(alpha: 0.4),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+              padding: EdgeInsets.fromLTRB(spacing.cardInner, spacing.elementGap + 2, spacing.cardInner, 0),
               child: Row(
                 children: [
                   Icon(LucideIcons.history, size: 14, color: color.onSurfaceVariant),
-                  const SizedBox(width: 8),
+                  SizedBox(width: spacing.elementGap),
                   Text(
                     ctxt.backup_autoLastRun(
                       safeDateFormat('yMMMd').add_jm().format(_recentBackups.first.date),
@@ -1242,7 +1242,7 @@ class _AutoBackupSectionState extends ConsumerState<_AutoBackupSection> {
             ),
           ],
 
-          const SizedBox(height: 14),
+          SizedBox(height: spacing.cardInner - 2),
         ],
       ),
     );
@@ -1269,6 +1269,7 @@ class _AutoBackupSectionState extends ConsumerState<_AutoBackupSection> {
   }
 
   Future<void> _setPassword() async {
+    final ctxt = AppLocalizations.of(context)!;
     final password = await DialogUtils.showPasswordDialog(
       context,
       isRestore: false,
@@ -1278,7 +1279,7 @@ class _AutoBackupSectionState extends ConsumerState<_AutoBackupSection> {
     await AutoBackupService.setBackupPassword(password);
     if (mounted) {
       setState(() => _hasPassword = true);
-      SnackbarService.success('Backup password set');
+      SnackbarService.success(ctxt.backup_passwordSet);
     }
   }
 }

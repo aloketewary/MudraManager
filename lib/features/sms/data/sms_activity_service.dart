@@ -460,7 +460,7 @@ class SmsActivityService {
     );
 
     // Detect recurring patterns
-    await RecurringDetectorService.detectAndTagRecurring(transaction);
+    await RecurringDetectorService(IsarService()).detectAndTagRecurring(transaction);
 
     _log.i(
       'Activity approved: ID ${activity.id} -> Transaction ${transaction.id}',

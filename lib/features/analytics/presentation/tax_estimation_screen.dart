@@ -69,6 +69,12 @@ class _TaxContent extends ConsumerWidget {
           _buildDeductionsCard(color, textTheme, brightness, isGuestMode),
           SizedBox(height: spacing.sectionGap),
 
+          // Regime comparison
+          if (tax.oldRegimeEstimate != null)
+            _buildRegimeComparisonCard(color, textTheme, brightness, isGuestMode),
+          if (tax.oldRegimeEstimate != null)
+            SizedBox(height: spacing.sectionGap),
+
           // Top income categories
           if (tax.incomeByCategory.isNotEmpty) ...[
             _buildCategoryCard(
@@ -441,6 +447,143 @@ class _TaxContent extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildRegimeComparisonCard(
+    ColorScheme color,
+    TextTheme textTheme,
+    Brightness brightness,
+    bool isGuestMode,
+  ) {
+    final oldRegime = tax.oldRegimeEstimate!;
+    final newBetter = !tax.oldRegimeBetter;
+    final savings = tax.regimeSavings;
+    final betterColor = FinanceColors.goodColor(brightness);
+
+    return Container(
+      padding: EdgeInsets.all(spacing.cardInner),
+      decoration: BoxDecoration(
+        color: betterColor.withValues(alpha: 0.06),
+        borderRadius: spacing.borderRadiusLarge,
+        border: Border.all(color: betterColor.withValues(alpha: 0.25)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(children: [
+            Icon(LucideIcons.scale, color: betterColor, size: spacing.iconLG),
+            SizedBox(width: spacing.elementGap),
+            Text(
+              ctxt.tax_regimeComparison,
+              style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+            ),
+          ]),
+          SizedBox(height: spacing.sectionGap),
+          // Side-by-side comparison
+          Row(children: [
+            Expanded(child: _regimeColumn(
+              ctxt.tax_newRegime,
+              tax.totalTax,
+              newBetter,
+              color, textTheme, isGuestMode, betterColor,
+            )),
+            SizedBox(width: spacing.elementGap),
+            Expanded(child: _regimeColumn(
+              ctxt.tax_oldRegime,
+              oldRegime.totalTax,
+              !newBetter,
+              color, textTheme, isGuestMode, betterColor,
+            )),
+          ]),
+          SizedBox(height: spacing.sectionGap),
+          // Verdict
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(spacing.elementGap),
+            decoration: BoxDecoration(
+              color: betterColor.withValues(alpha: 0.08),
+              borderRadius: spacing.borderRadiusMedium,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(LucideIcons.circleCheck, size: 16, color: betterColor),
+                SizedBox(width: spacing.elementGapMin),
+                Text(
+                  ctxt.tax_regimeSavings(
+                    newBetter ? ctxt.tax_newRegime : ctxt.tax_oldRegime,
+                  ),
+                  style: textTheme.bodySmall?.copyWith(
+                    color: betterColor, fontWeight: FontWeight.w600,
+                  ),
+                ),
+                SizedBox(width: spacing.elementGapMin),
+                CurrencyText(
+                  amount: GuestModeUtil.applyGuestMode(savings, isGuestMode),
+                  fixedLength: 0,
+                  style: textTheme.bodySmall?.copyWith(
+                    color: betterColor, fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: spacing.elementGap),
+          Text(
+            ctxt.tax_oldRegimeDisclaimer,
+            style: textTheme.bodySmall?.copyWith(
+              color: color.onSurfaceVariant,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _regimeColumn(
+    String label,
+    double totalTax,
+    bool isBetter,
+    ColorScheme color,
+    TextTheme textTheme,
+    bool isGuestMode,
+    Color betterColor,
+  ) {
+    return Container(
+      padding: EdgeInsets.all(spacing.elementGap),
+      decoration: BoxDecoration(
+        color: isBetter
+            ? betterColor.withValues(alpha: 0.08)
+            : color.surfaceContainerLow,
+        borderRadius: spacing.borderRadiusMedium,
+        border: Border.all(
+          color: isBetter
+              ? betterColor.withValues(alpha: 0.3)
+              : color.outlineVariant.withValues(alpha: 0.5),
+        ),
+      ),
+      child: Column(children: [
+        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Text(label, style: textTheme.labelMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+          )),
+          if (isBetter) ...[
+            SizedBox(width: spacing.elementGapMin),
+            Icon(LucideIcons.circleCheck, size: 14, color: betterColor),
+          ],
+        ]),
+        SizedBox(height: spacing.elementGapMin),
+        CurrencyText(
+          amount: GuestModeUtil.applyGuestMode(totalTax, isGuestMode),
+          fixedLength: 0,
+          style: textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: isBetter ? betterColor : color.onSurface,
+          ),
+        ),
+      ]),
     );
   }
 

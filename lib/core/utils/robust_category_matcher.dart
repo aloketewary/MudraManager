@@ -1,4 +1,5 @@
 import 'package:mudra_manager/core/db/models/category.dart';
+import 'package:mudra_manager/core/utils/category_noise_words.dart';
 
 /// Result of category matching with confidence and strategy info
 class CategoryMatchResult {
@@ -28,6 +29,13 @@ class RobustCategoryMatcher {
     double? amount,
     bool? isIncome,
   }) {
+    if (text.trim().isEmpty) {
+      return _applyDefaultFallback(
+        relevantCategories.isEmpty ? allCategories : relevantCategories,
+        amount,
+      );
+    }
+
     if (relevantCategories.isEmpty) {
       return _applyDefaultFallback(allCategories, amount);
     }
@@ -102,11 +110,8 @@ class RobustCategoryMatcher {
 
       for (final keyword in category.keywords!) {
         final keywordLower = keyword.toLowerCase();
-        if (RegExp(
-          r'\b' + RegExp.escape(keywordLower) + r'\b',
-          caseSensitive: false,
-        ).hasMatch(textLower)) {
-          // Longer keywords are more specific = higher score
+        if (kCategoryNoiseWords.contains(keywordLower)) continue;
+        if (_hasWordBoundaryMatch(textLower, keywordLower)) {
           score += keywordLower.length * 3;
           matches++;
         }
@@ -139,7 +144,6 @@ class RobustCategoryMatcher {
     List<Category> categories,
   ) {
     final textLower = text.toLowerCase();
-    final noiseWords = _getNoiseWords();
     Category? bestMatch;
     int maxScore = 0;
 
@@ -151,12 +155,9 @@ class RobustCategoryMatcher {
 
       for (final keyword in category.keywords!) {
         final keywordLower = keyword.toLowerCase();
-
-        // Skip noise words
-        if (noiseWords.contains(keywordLower)) continue;
+        if (kCategoryNoiseWords.contains(keywordLower)) continue;
 
         if (textLower.contains(keywordLower)) {
-          // Substring match with reduced score vs exact word
           score += keywordLower.length * 2;
           matches++;
         }
@@ -198,11 +199,13 @@ class RobustCategoryMatcher {
         (textLower.contains('food') ||
             textLower.contains('coffee') ||
             textLower.contains('restaurant'))) {
-      final match = categories.firstWhereOrNull(
-        (c) =>
-            c.name.toLowerCase().contains('food') ||
-            c.name.toLowerCase().contains('dining'),
-      );
+      final match = categories
+          .where(
+            (c) =>
+                c.name.toLowerCase().contains('food') ||
+                c.name.toLowerCase().contains('dining'),
+          )
+          .firstOrNull;
       if (match != null) {
         return CategoryMatchResult(
           category: match,
@@ -213,24 +216,15 @@ class RobustCategoryMatcher {
     }
 
     // Round amounts (10, 50, 100, 500, 1000, 5000) often go to transfers/utilities
-    final roundAmounts = [
-      10,
-      20,
-      50,
-      100,
-      200,
-      500,
-      1000,
-      2000,
-      5000,
-      10000,
-    ];
+    const roundAmounts = {10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000};
     if (roundAmounts.contains(amount.toInt())) {
-      final match = categories.firstWhereOrNull(
-        (c) =>
-            c.name.toLowerCase().contains('transfer') ||
-            c.name.toLowerCase().contains('utility'),
-      );
+      final match = categories
+          .where(
+            (c) =>
+                c.name.toLowerCase().contains('transfer') ||
+                c.name.toLowerCase().contains('utility'),
+          )
+          .firstOrNull;
       if (match != null) {
         return CategoryMatchResult(
           category: match,
@@ -257,7 +251,7 @@ class RobustCategoryMatcher {
     }
 
     // Try to find "Others", "Miscellaneous", or "General"
-    final fallbackNames = [
+    const fallbackNames = [
       'others',
       'other',
       'miscellaneous',
@@ -267,9 +261,9 @@ class RobustCategoryMatcher {
     ];
 
     for (final name in fallbackNames) {
-      final match = categories.firstWhereOrNull(
-        (c) => c.name.toLowerCase() == name,
-      );
+      final match = categories
+          .where((c) => c.name.toLowerCase() == name)
+          .firstOrNull;
       if (match != null) {
         return CategoryMatchResult(
           category: match,
@@ -287,50 +281,25 @@ class RobustCategoryMatcher {
     );
   }
 
-  /// Get common noise words that should be filtered out
-  static Set<String> _getNoiseWords() {
-    return const {
-      'debited',
-      'credited',
-      'account',
-      'balance',
-      'available',
-      'transaction',
-      'transfer',
-      'payment',
-      'received',
-      'sent',
-      'bank',
-      'upi',
-      'neft',
-      'imps',
-      'rtgs',
-      'ref',
-      'inr',
-      'your',
-      'from',
-      'has',
-      'been',
-      'the',
-      'for',
-      'with',
-      'on',
-      'at',
-      'to',
-      'and',
-      'or',
-      'a',
-      'an',
-    };
-  }
-}
+  /// Word boundary match that handles keywords with special characters.
+  /// `\b` only works at word-char boundaries — fails for keywords like
+  /// "food & dining" or "e-wallet". This checks the chars before/after
+  /// the match instead.
+  static bool _hasWordBoundaryMatch(String text, String keyword) {
+    var start = 0;
+    while (true) {
+      final idx = text.indexOf(keyword, start);
+      if (idx == -1) return false;
 
-extension<T> on List<T> {
-  /// Returns the first element matching the predicate, or null
-  T? firstWhereOrNull(bool Function(T) test) {
-    for (final element in this) {
-      if (test(element)) return element;
+      final before = idx > 0 ? text[idx - 1] : ' ';
+      final afterIdx = idx + keyword.length;
+      final after = afterIdx < text.length ? text[afterIdx] : ' ';
+
+      if (_isNonWord(before) && _isNonWord(after)) return true;
+      start = idx + 1;
     }
-    return null;
   }
+
+  static bool _isNonWord(String ch) =>
+      !RegExp(r'[a-zA-Z0-9]').hasMatch(ch);
 }

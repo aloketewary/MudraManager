@@ -49,7 +49,7 @@ class AdvancedAnalyticsService {
       months.add(month);
       double inc = 0, exp = 0;
       for (final tx in transactions.where((t) =>
-          t.date.year == month.year && t.date.month == month.month && !t.isTransfer)) {
+          t.date.year == month.year && t.date.month == month.month && !t.isTransfer,)) {
         if (tx.isExpense) {
           exp += tx.effectiveAmount;
         } else {
@@ -63,7 +63,7 @@ class AdvancedAnalyticsService {
     // Current month (partial)
     double currentIncome = 0, currentExpense = 0;
     for (final tx in transactions.where((t) =>
-        t.date.year == now.year && t.date.month == now.month && !t.isTransfer)) {
+        t.date.year == now.year && t.date.month == now.month && !t.isTransfer,)) {
       if (tx.isExpense) {
         currentExpense += tx.effectiveAmount;
       } else {
@@ -92,7 +92,7 @@ class AdvancedAnalyticsService {
         income: incForecast,
         expense: expForecast,
         net: incForecast - expForecast,
-      ));
+      ),);
     }
 
     // Runway: if net is negative, how many months until balance hits 0
@@ -239,7 +239,7 @@ class AdvancedAnalyticsService {
       for (final tx in transactions.where((t) =>
           t.isExpense &&
           t.date.year == month.year &&
-          t.date.month == month.month)) {
+          t.date.month == month.month,)) {
         final name = tx.category.value?.name ?? 'Uncategorized';
         catMonths.putIfAbsent(name, () => List.filled(6, 0.0));
         catMonths[name]![i] += tx.effectiveAmount;

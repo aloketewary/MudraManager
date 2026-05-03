@@ -59,8 +59,8 @@ class SharedPrefsUtil {
   }
 
   // Save onboarding completion
-  void setLanguage(String locale) {
-    _prefs.setString('user_language', locale);
+  Future<void> setLanguage(String locale) async {
+    await _prefs.setString('user_language', locale);
   }
 
   // Check if onboarding is complete
@@ -109,8 +109,8 @@ class SharedPrefsUtil {
     _prefs.remove(_processedHashesKey);
   }
 
-  void clear() {
-    _prefs.clear();
+  Future<void> clear() async {
+    await _prefs.clear();
   }
 
   Future<void> saveBackupDate(DateTime date) async {

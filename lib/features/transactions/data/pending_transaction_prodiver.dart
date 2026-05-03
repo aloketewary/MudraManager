@@ -7,6 +7,7 @@ import 'package:mudra_manager/core/db/models/category.dart' as db_category;
 import 'package:mudra_manager/core/db/models/pending_transaction.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
+import 'package:mudra_manager/core/providers/collection_watchers.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/utils/transaction_msg_util.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_matching_service.dart';
@@ -18,12 +19,14 @@ final pendingTxnServiceProvider = Provider<PendingTransactionService>((ref) {
 });
 
 final pendingTxnCountProvider = FutureProvider.autoDispose<int>((ref) async {
+  ref.watch(pendingTransactionChangeProvider);
   final service = ref.watch(pendingTxnServiceProvider);
   return await service.countPendingTransaction();
 });
 
 final pendingTxnDataProvider =
     FutureProvider.autoDispose<List<PendingTransaction?>>((ref) async {
+      ref.watch(pendingTransactionChangeProvider);
       final service = ref.watch(pendingTxnServiceProvider);
       return await service.getAllPendingTransaction();
     });

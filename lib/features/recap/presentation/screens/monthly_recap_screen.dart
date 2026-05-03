@@ -537,9 +537,9 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
           SizedBox(height: spacing.elementGap),
           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
             Text(AppLocalizations.of(context)!.common_transactions, style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant)),
-            Text("$yoyTxnCount → ${data.transactionCount}", style: textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600)),
-          ]),
-        ]),
+            Text('$yoyTxnCount → ${data.transactionCount}', style: textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600)),
+          ],),
+        ],),
       ),
     );
   }
@@ -550,14 +550,14 @@ class _MonthlyRecapScreenState extends ConsumerState<MonthlyRecapScreen> {
     return Row(children: [
       Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(label, style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant)),
-        Text("$_currency${lastYear.toStringAsFixed(0)} → $_currency${thisYear.toStringAsFixed(0)}", style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
-      ])),
+        Text('$_currency${lastYear.toStringAsFixed(0)} → $_currency${thisYear.toStringAsFixed(0)}', style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
+      ],),),
       if (changePct != 0) Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(color: changeColor.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(8)),
         child: Text("${isUp ? "+" : ""}${changePct.toStringAsFixed(0)}%", style: textTheme.labelSmall?.copyWith(color: changeColor, fontWeight: FontWeight.w700)),
       ),
-    ]);
+    ],);
   }
 
   // ── HIGHLIGHTS ──

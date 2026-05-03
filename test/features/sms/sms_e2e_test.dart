@@ -1838,7 +1838,7 @@ void main() {
         pkg: 'com.google.android.apps.messaging',
       );
       expect(r, isNot(ParseResult.skipped),
-          reason: 'Bold Unicode should be normalized before parsing');
+          reason: 'Bold Unicode should be normalized before parsing',);
       final a = (await isar.smsActivitys.where().findAll()).last;
       expect(a.amount, 70.0);
       expect(a.isIncome, false);
@@ -1878,7 +1878,7 @@ void main() {
         timestamp: 1713553300000,
       );
       expect(r, ParseResult.skipped,
-          reason: 'Bold OTP should still be filtered after normalization');
+          reason: 'Bold OTP should still be filtered after normalization',);
     });
 
     test('bold promo message: still filtered', () async {

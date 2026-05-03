@@ -1,6 +1,7 @@
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
+import 'package:mudra_manager/core/services/auto_backup_service.dart';
 import 'package:mudra_manager/core/services/category_rule_service.dart';
 import 'package:mudra_manager/core/utils/error_tracker.dart';
 import 'package:mudra_manager/features/account/data/balance_history_service.dart';
@@ -75,6 +76,26 @@ class BackgroundTaskManager {
     }
   }
 
+  /// Run auto backup task — used by workmanager callback.
+  static Future<void> _runAutoBackup() async {
+    try {
+      final password = await AutoBackupService.getBackupPassword();
+      if (password == null || password.isEmpty) {
+        _log.w('No backup password set, skipping auto backup');
+        return;
+      }
+
+      final path = await AutoBackupService.createAutoBackup(password);
+      if (path != null) {
+        _log.i('Auto backup completed: $path');
+        await AutoBackupService.cleanupOldBackups();
+      }
+    } catch (e) {
+      _log.e('Auto backup failed', e);
+      ErrorTracker.record('auto_backup', 'runAutoBackup failed', e);
+    }
+  }
+
   /// Full task run — used by workmanager callback only.
   static Future<void> _runAllTasks() async {
     try {
@@ -143,7 +164,11 @@ class BackgroundTaskManager {
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
     try {
-      await BackgroundTaskManager._runAllTasks();
+      if (task == AutoBackupService.taskName) {
+        await BackgroundTaskManager._runAutoBackup();
+      } else {
+        await BackgroundTaskManager._runAllTasks();
+      }
       return true;
     } catch (_) {
       return false;

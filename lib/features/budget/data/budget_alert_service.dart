@@ -6,8 +6,9 @@ import 'package:mudra_manager/features/notifications/data/smart_notification_ser
 
 class BudgetAlertService {
   final IsarService isarService;
+  final SmartNotificationService _notificationService;
 
-  BudgetAlertService(this.isarService);
+  BudgetAlertService(this.isarService, this._notificationService);
 
   Future<List<BudgetAlert>> checkBudgetsAfterTransaction(
     Transaction transaction,
@@ -95,7 +96,7 @@ class BudgetAlertService {
     final warnings = alerts.where((a) => a.threshold != 100).toList();
 
     if (exceeded.isNotEmpty) {
-      await SmartNotificationService.instance.notifyBudgetExceeded(
+      await _notificationService.notifyBudgetExceeded(
         names: exceeded.map((a) => a.budget.name).toList(),
         spent: exceeded.first.spent,
         limit: exceeded.first.budget.amount,
@@ -103,7 +104,7 @@ class BudgetAlertService {
     }
 
     if (warnings.isNotEmpty) {
-      await SmartNotificationService.instance.notifyBudgetWarning(
+      await _notificationService.notifyBudgetWarning(
         names: warnings.map((a) => a.budget.name).toList(),
         percentage: warnings.first.percentage,
       );

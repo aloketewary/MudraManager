@@ -81,15 +81,15 @@ class CreditCardBillsScreen extends ConsumerWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(LucideIcons.creditCard, size: 64,
-              color: color.onSurfaceVariant.withValues(alpha: 0.3)),
+              color: color.onSurfaceVariant.withValues(alpha: 0.3),),
           SizedBox(height: spacing.sectionGap),
           Text(ctxt.cc_noCards, style: textTheme.titleMedium?.copyWith(
             color: color.onSurfaceVariant,
-          )),
+          ),),
           SizedBox(height: spacing.elementGap),
           Text(ctxt.cc_noCardsHint, style: textTheme.bodySmall?.copyWith(
             color: color.onSurfaceVariant.withValues(alpha: 0.6),
-          )),
+          ),),
         ],
       ),
     );
@@ -189,7 +189,7 @@ class CreditCardBillsScreen extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(spacing.radiusSmall),
                   ),
                   child: Icon(LucideIcons.creditCard, size: 20,
-                      color: cardColor),
+                      color: cardColor,),
                 ),
                 SizedBox(width: spacing.elementGap),
                 Expanded(
@@ -198,7 +198,7 @@ class CreditCardBillsScreen extends ConsumerWidget {
                     children: [
                       Text(card.name, style: textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w700,
-                      )),
+                      ),),
                       if (card.accountNumber != null)
                         Text('•••• ${card.accountNumber}',
                           style: textTheme.labelSmall?.copyWith(
@@ -222,7 +222,7 @@ class CreditCardBillsScreen extends ConsumerWidget {
                     child: Text(dueStatus, style: textTheme.labelSmall?.copyWith(
                       color: dueColor,
                       fontWeight: FontWeight.w600,
-                    )),
+                    ),),
                   ),
               ],
             ),
@@ -258,7 +258,7 @@ class CreditCardBillsScreen extends ConsumerWidget {
                     child: _metricColumn(
                       ctxt.cc_cycleSpend,
                       GuestModeUtil.applyGuestMode(
-                          summary.billingCycleSpend, isGuest),
+                          summary.billingCycleSpend, isGuest,),
                       color.secondary,
                       textTheme, spacing,
                       currencyCode: card.currencyCode,
@@ -271,7 +271,7 @@ class CreditCardBillsScreen extends ConsumerWidget {
           // Utilization bar
           if (hasLimit) ...[
             Divider(height: 1,
-                color: color.outlineVariant.withValues(alpha: 0.3)),
+                color: color.outlineVariant.withValues(alpha: 0.3),),
             Padding(
               padding: EdgeInsets.all(spacing.cardInner),
               child: _buildUtilization(
@@ -284,7 +284,7 @@ class CreditCardBillsScreen extends ConsumerWidget {
           // Dates row
           if (card.statementDay != null || card.dueDay != null) ...[
             Divider(height: 1,
-                color: color.outlineVariant.withValues(alpha: 0.3)),
+                color: color.outlineVariant.withValues(alpha: 0.3),),
             Padding(
               padding: EdgeInsets.symmetric(
                 horizontal: spacing.cardInner,
@@ -320,7 +320,7 @@ class CreditCardBillsScreen extends ConsumerWidget {
           // Pay action
           if (summary.outstanding > 0) ...[
             Divider(height: 1,
-                color: color.outlineVariant.withValues(alpha: 0.3)),
+                color: color.outlineVariant.withValues(alpha: 0.3),),
             Padding(
               padding: EdgeInsets.all(spacing.cardInner),
               child: Row(
@@ -362,7 +362,7 @@ class CreditCardBillsScreen extends ConsumerWidget {
       children: [
         Text(label, style: textTheme.labelSmall?.copyWith(
           color: accentColor.withValues(alpha: 0.7),
-        )),
+        ),),
         SizedBox(height: spacing.elementGapUltraMin),
         CurrencyText(
           amount: amount,
@@ -397,7 +397,7 @@ class CreditCardBillsScreen extends ConsumerWidget {
           children: [
             Text(ctxt.cc_utilization, style: textTheme.labelSmall?.copyWith(
               color: color.onSurfaceVariant,
-            )),
+            ),),
             Text(
               '${utilPct.toStringAsFixed(0)}%',
               style: textTheme.labelSmall?.copyWith(
@@ -453,10 +453,10 @@ class CreditCardBillsScreen extends ConsumerWidget {
         SizedBox(width: spacing.elementGapMin),
         Text('$label ', style: textTheme.labelSmall?.copyWith(
           color: accentColor.withValues(alpha: 0.7),
-        )),
+        ),),
         Text(value, style: textTheme.labelSmall?.copyWith(
           fontWeight: FontWeight.w600,
-        )),
+        ),),
       ],
     );
   }
@@ -471,7 +471,7 @@ class CreditCardBillsScreen extends ConsumerWidget {
         HapticFeedback.lightImpact();
         context.push(AppRoutes.addTransaction, extra: {
           'isIncome': false,
-        });
+        },);
       },
       style: OutlinedButton.styleFrom(
         foregroundColor: accent,
@@ -484,7 +484,7 @@ class CreditCardBillsScreen extends ConsumerWidget {
       child: Text(label, style: textTheme.labelSmall?.copyWith(
         color: accent,
         fontWeight: FontWeight.w600,
-      )),
+      ),),
     );
   }
 

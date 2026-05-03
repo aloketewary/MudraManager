@@ -97,7 +97,7 @@ class BobSmsParserPlugin extends SmsParserPlugin {
     final b = body.toLowerCase();
     return b.contains('credited') ||
         b.contains('deposited') ||
-        b.contains('received');
+        ParsedSms.isReceivedCredit(body);
   }
 
   String? _extractAccount(String body) {

@@ -1,36 +1,13 @@
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/category_rule.dart';
+import 'package:mudra_manager/core/utils/category_noise_words.dart';
 import 'package:mudra_manager/core/utils/transaction_msg_util.dart';
 
 class CategoryMatcher {
-  static const _noiseWords = {
-    'debited',
-    'credited',
-    'account',
-    'balance',
-    'available',
-    'transaction',
-    'transfer',
-    'payment',
-    'received',
-    'sent',
-    'bank',
-    'upi',
-    'neft',
-    'imps',
-    'rtgs',
-    'ref',
-    'inr',
-    'your',
-    'from',
-    'has',
-    'been',
-    'the',
-    'for',
-    'with',
-  };
+  static const _noiseWords = kCategoryNoiseWords;
 
   static Category? matchByKeywords(String text, List<Category> categories) {
+    if (text.trim().isEmpty || categories.isEmpty) return null;
     final lowerText = text.toLowerCase();
     Category? bestMatch;
     int maxScore = 0;

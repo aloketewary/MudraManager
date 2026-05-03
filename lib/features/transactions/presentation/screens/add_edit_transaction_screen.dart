@@ -28,11 +28,12 @@ import 'package:mudra_manager/features/account/data/account_access_provider.dart
 import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/budget/data/budget_alert_provider.dart';
 import 'package:mudra_manager/features/budget/data/budget_alert_service.dart';
+import 'package:mudra_manager/features/notifications/data/smart_notification_service.dart';
 import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
 import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
 import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
 import 'package:mudra_manager/features/sms/data/sms_activity_service.dart';
-import 'package:mudra_manager/features/sms/data/recurring_detector_service.dart';
+import 'package:mudra_manager/core/providers/singleton_providers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mudra_manager/features/sms/data/tag_matcher_service.dart';
 import 'package:mudra_manager/features/sms/presentation/screens/sms_activity_screen.dart';
@@ -945,7 +946,10 @@ class _AddEditTransactionScreenState
 
     try {
       final amount = double.tryParse(_amountController.text.replaceAll(',', '')) ?? 0;
-      if (amount <= 0) return;
+      if (amount <= 0) {
+        SnackbarService.error(BuddyMessages.invalidAmount);
+        return;
+      }
 
       final String? saveCurrency = _effectiveCurrency;
       double? convertedAmount;
@@ -961,18 +965,36 @@ class _AddEditTransactionScreenState
         }
       }
 
-      final txn = Transaction.create(
-        date: _selectedDate,
-        amount: amount,
-        isExpense: _isExpense,
-        description: _descController.text,
-        currencyCode: saveCurrency,
-        convertedAmount: convertedAmount,
-        rateUsed: rateUsed,
-      );
-
-      if (_isEditing && widget.transaction!.id != Isar.autoIncrement) {
-        txn.id = widget.transaction!.id;
+      final Transaction txn;
+      if (_isEditing) {
+        // Preserve existing transaction fields during update
+        final existing = widget.transaction!;
+        txn = Transaction.create(
+          date: _selectedDate,
+          amount: amount,
+          isExpense: _isExpense,
+          description: _descController.text,
+          currencyCode: saveCurrency,
+          convertedAmount: convertedAmount,
+          rateUsed: rateUsed,
+        );
+        txn.id = existing.id;
+        // Carry over fields that the edit screen doesn't modify
+        txn.isFromSms = existing.isFromSms;
+        txn.smsActivityId = existing.smsActivityId;
+        txn.isSharedExpense = existing.isSharedExpense;
+        txn.isSettlement = existing.isSettlement;
+        txn.myShare = existing.myShare;
+      } else {
+        txn = Transaction.create(
+          date: _selectedDate,
+          amount: amount,
+          isExpense: _isExpense,
+          description: _descController.text,
+          currencyCode: saveCurrency,
+          convertedAmount: convertedAmount,
+          rateUsed: rateUsed,
+        );
       }
 
       txn.account.value = _selectedAccount;
@@ -1032,13 +1054,10 @@ class _AddEditTransactionScreenState
           merchant: widget.smsActivity!.merchant,
           recipient: widget.smsActivity!.toAccount,
         );
-        await RecurringDetectorService.detectAndTagRecurring(txn);
+        await ref.read(recurringDetectorServiceProvider).detectAndTagRecurring(txn);
       }
 
-      await _checkLowBalance(txn.account.value);
-      await _checkBudgetAlerts(txn);
-      await WidgetService.updateWidget(ref);
-
+      // Pop first so the user sees immediate feedback, then run side effects
       if (context.mounted) {
         ref.invalidate(accountServiceProvider);
         ref.invalidate(budgetServiceProvider);
@@ -1053,11 +1072,19 @@ class _AddEditTransactionScreenState
 
         context.pop(true);
         SnackbarService.success(
-          widget.transaction == null
-              ? BuddyMessages.txnAdded
-              : BuddyMessages.txnUpdated,
+          _isEditing
+              ? BuddyMessages.txnUpdated
+              : BuddyMessages.txnAdded,
         );
       }
+
+      // Fire-and-forget side effects after pop
+      _checkLowBalance(txn.account.value);
+      _checkBudgetAlerts(txn);
+      WidgetService.updateWidget(ref);
+    } catch (e) {
+      SnackbarService.error(BuddyMessages.txnAdded); // fallback error
+      debugPrint('Save transaction error: $e');
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -1584,6 +1611,7 @@ class _AddEditTransactionScreenState
     if (!txn.isExpense || txn.isTransfer) return;
     final alertService = BudgetAlertService(
       ref.read(isarServiceProvider),
+      SmartNotificationService.instance,
     );
 
     final alerts = await alertService.checkBudgetsAfterTransaction(txn);

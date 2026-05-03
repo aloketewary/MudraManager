@@ -62,6 +62,7 @@ class FederalBankSmsParserPlugin extends SmsParserPlugin {
         b.contains('credited') ||
         b.contains('sent') ||
         b.contains('received') ||
+        b.contains('recieved') ||
         b.contains('spent') ||
         b.contains('paid') ||
         b.contains('withdrawn');
@@ -98,7 +99,7 @@ class FederalBankSmsParserPlugin extends SmsParserPlugin {
 
   bool _isCredit(String body) {
     final b = body.toLowerCase();
-    if (b.contains('credited') || b.contains('received')) return true;
+    if (b.contains('credited') || ParsedSms.isReceivedCredit(body)) return true;
     if (b.contains('debited') || b.contains('sent') || b.contains('spent') || b.contains('paid')) return false;
     return false;
   }

@@ -1975,6 +1975,12 @@ abstract class AppLocalizations {
   /// **'Reset'**
   String get common_reset;
 
+  /// No description provided for @common_viewDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'View details'**
+  String get common_viewDetails;
+
   /// No description provided for @common_apply.
   ///
   /// In en, this message translates to:
@@ -2694,6 +2700,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Health score, trends & forecasts'**
   String get utility_analyticsSubtitle;
+
+  /// No description provided for @utility_cashFlowSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Income vs expense projections'**
+  String get utility_cashFlowSubtitle;
+
+  /// No description provided for @utility_spendingTrendsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Category-wise spending patterns'**
+  String get utility_spendingTrendsSubtitle;
 
   /// No description provided for @utility_taxSubtitle.
   ///
@@ -10530,6 +10548,30 @@ abstract class AppLocalizations {
   /// **'New Regime'**
   String get tax_newRegime;
 
+  /// No description provided for @tax_oldRegime.
+  ///
+  /// In en, this message translates to:
+  /// **'Old Regime'**
+  String get tax_oldRegime;
+
+  /// No description provided for @tax_regimeComparison.
+  ///
+  /// In en, this message translates to:
+  /// **'Which Regime Saves More?'**
+  String get tax_regimeComparison;
+
+  /// No description provided for @tax_regimeSavings.
+  ///
+  /// In en, this message translates to:
+  /// **'{regime} saves you'**
+  String tax_regimeSavings(String regime);
+
+  /// No description provided for @tax_oldRegimeDisclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Old Regime estimate uses standard deduction only. With HRA, 80C, 80D deductions, savings could be higher.'**
+  String get tax_oldRegimeDisclaimer;
+
   /// No description provided for @category_merge.
   ///
   /// In en, this message translates to:
@@ -10920,6 +10962,12 @@ abstract class AppLocalizations {
   /// **'Last auto backup: {date}'**
   String backup_autoLastRun(String date);
 
+  /// No description provided for @backup_passwordSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup password set'**
+  String get backup_passwordSet;
+
   /// No description provided for @backup_proRequired.
   ///
   /// In en, this message translates to:
@@ -11069,6 +11117,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Around the {day}th of each month'**
   String subscription_dayOfMonth(int day);
+
+  /// No description provided for @subscription_trackAsRecurring.
+  ///
+  /// In en, this message translates to:
+  /// **'Track as recurring bill'**
+  String get subscription_trackAsRecurring;
 
   /// No description provided for @cc_title.
   ///

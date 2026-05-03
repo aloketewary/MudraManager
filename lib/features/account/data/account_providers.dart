@@ -24,9 +24,25 @@ final accountServiceProvider = Provider((ref) {
 });
 
 final allAccountsProvider = FutureProvider.autoDispose((ref) async {
+  ref.watch(accountChangeProvider);
+  ref.watch(transactionChangeProvider);
   final isarService = ref.watch(isarServiceProvider);
   final isar = await isarService.getInstance();
   return await isar.accounts.where().findAll();
+});
+
+final accountBalanceMapProvider = FutureProvider.autoDispose<Map<int, double>>((ref) async {
+  ref.watch(accountChangeProvider);
+  ref.watch(transactionChangeProvider);
+  final service = ref.watch(accountServiceProvider);
+  return service.getAccountBalanceMap();
+});
+
+final accountBaseBalanceMapProvider = FutureProvider.autoDispose<Map<int, double>>((ref) async {
+  ref.watch(accountChangeProvider);
+  ref.watch(transactionChangeProvider);
+  final service = ref.watch(accountServiceProvider);
+  return service.getAccountBalanceMapInBase();
 });
 
 final balanceVisibilityProvider =
@@ -58,6 +74,7 @@ final frequencySortedAccountsProvider =
   final accounts = await ref.watch(accountsProvider.future);
   if (accounts.isEmpty) return accounts;
 
+  ref.watch(transactionChangeProvider);
   final isar = await ref.watch(isarServiceProvider).getInstance();
   final cutoff = DateTime.now().subtract(const Duration(days: 30));
 

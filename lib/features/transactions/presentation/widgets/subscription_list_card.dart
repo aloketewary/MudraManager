@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
+import 'package:mudra_manager/core/db/models/frequency.dart';
+import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/features/transactions/data/subscription_detector_provider.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 
@@ -122,59 +126,90 @@ class _SubscriptionRow extends ConsumerWidget {
     final spacing = ref.watch(spacingProvider);
     final ctxt = AppLocalizations.of(context)!;
 
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: spacing.cardInner,
-        vertical: spacing.cardVerticalMin,
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: color.primaryContainer.withValues(alpha: 0.4),
-              borderRadius: BorderRadius.circular(spacing.radiusSmall),
+    return InkWell(
+      onTap: () => _trackAsRecurring(context, ctxt),
+      borderRadius: BorderRadius.circular(spacing.radiusSmall),
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: spacing.cardInner,
+          vertical: spacing.cardVerticalMin,
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: color.primaryContainer.withValues(alpha: 0.4),
+                borderRadius: BorderRadius.circular(spacing.radiusSmall),
+              ),
+              child: Icon(
+                LucideIcons.receipt,
+                size: 16,
+                color: color.primary,
+              ),
             ),
-            child: Icon(
-              LucideIcons.receipt,
-              size: 16,
-              color: color.primary,
-            ),
-          ),
-          SizedBox(width: spacing.elementGap),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  sub.name,
-                  style: textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+            SizedBox(width: spacing.elementGap),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    sub.name,
+                    style: textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  sub.estimatedDayOfMonth != null
-                      ? ctxt.subscription_dayOfMonth(sub.estimatedDayOfMonth!)
-                      : ctxt.subscription_occurrences(sub.occurrences),
-                  style: textTheme.bodySmall?.copyWith(
-                    color: color.onSurfaceVariant,
+                  Text(
+                    sub.estimatedDayOfMonth != null
+                        ? ctxt.subscription_dayOfMonth(sub.estimatedDayOfMonth!)
+                        : ctxt.subscription_occurrences(sub.occurrences),
+                    style: textTheme.bodySmall?.copyWith(
+                      color: color.onSurfaceVariant,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          CurrencyText(
-            amount: sub.avgAmount,
-            style: textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: color.error,
+            CurrencyText(
+              amount: sub.avgAmount,
+              style: textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: color.error,
+              ),
             ),
-          ),
-        ],
+            SizedBox(width: spacing.elementGapMin),
+            Tooltip(
+              message: ctxt.subscription_trackAsRecurring,
+              child: Icon(
+                LucideIcons.chevronRight,
+                size: 16,
+                color: color.onSurfaceVariant.withValues(alpha: 0.5),
+              ),
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  void _trackAsRecurring(BuildContext context, AppLocalizations ctxt) {
+    final now = DateTime.now();
+    final nextDueDay = sub.estimatedDayOfMonth ?? now.day;
+    // Next due date: next month on the estimated day
+    final nextDue = DateTime(now.year, now.month + 1, nextDueDay);
+
+    final recurring = RecurringTransaction()
+      ..amount = sub.avgAmount
+      ..isExpense = true
+      ..description = sub.name
+      ..frequency = Frequency.monthly
+      ..startDate = sub.lastSeen
+      ..nextDueDate = nextDue
+      ..isActive = true;
+
+    context.push(AppRoutes.addRecurring, extra: {'recurring': recurring});
   }
 }

@@ -1,7 +1,9 @@
 import 'package:mudra_manager/core/utils/safe_date_format.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/features/dashboard/presentation/widgets/financial_health_card.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mudra_manager/shared/widgets/ambient_brand_section.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
@@ -133,6 +135,10 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                       _buildNarrativeZone(d, color, textTheme, spacing),
                       SizedBox(height: spacing.sectionGap),
 
+                      // SPENDING TRENDS
+                      _buildSpendingTrendsLink(color, textTheme, spacing),
+                      SizedBox(height: spacing.sectionGap),
+
                       // ZONE 3: THE INTELLIGENCE (Insights & Actions)
                       _buildIntelligenceZone(
                         d,
@@ -147,13 +153,17 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                       _buildTagSpendingZone(color, textTheme, spacing),
                       SizedBox(height: spacing.elementGap),
 
-                      // ZONE 4: FINANCIAL HEALTH
+                      // CASH FLOW FORECAST
+                      _buildCashFlowLink(color, textTheme, spacing),
+                      SizedBox(height: spacing.elementGap),
+
+                      // FINANCIAL HEALTH
                       const FinancialHealthCard(
                         globalPadding: 0,
                       ),
                       SizedBox(height: spacing.elementGap),
 
-                      // ZONE 5: SPENDING PERSONALITY
+                      // SPENDING PERSONALITY
                       const SpendingPersonalityCard(
                         globalPadding: 0,
                       ),
@@ -227,6 +237,104 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSpendingTrendsLink(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
+    final ctxt = AppLocalizations.of(context)!;
+    return Card(
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      color: color.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        side: BorderSide(color: color.outlineVariant.withValues(alpha: 0.5)),
+      ),
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.mediumImpact();
+          context.push(AppRoutes.spendingTrends);
+        },
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        child: Padding(
+          padding: EdgeInsets.all(spacing.cardInner),
+          child: Row(
+            children: [
+              Icon(LucideIcons.chartSpline, color: color.primary, size: 22),
+              SizedBox(width: spacing.elementGap),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      ctxt.analytics_spendingTrendsTitle,
+                      style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      ctxt.utility_spendingTrendsSubtitle,
+                      style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(LucideIcons.chevronRight, size: 16, color: color.onSurfaceVariant.withValues(alpha: 0.5)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCashFlowLink(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
+    final ctxt = AppLocalizations.of(context)!;
+    return Card(
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      color: color.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        side: BorderSide(color: color.outlineVariant.withValues(alpha: 0.5)),
+      ),
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.mediumImpact();
+          context.push(AppRoutes.cashFlowForecast);
+        },
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        child: Padding(
+          padding: EdgeInsets.all(spacing.cardInner),
+          child: Row(
+            children: [
+              Icon(LucideIcons.trendingUp, color: color.primary, size: 22),
+              SizedBox(width: spacing.elementGap),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      ctxt.analytics_cashFlowForecast,
+                      style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      ctxt.utility_cashFlowSubtitle,
+                      style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(LucideIcons.chevronRight, size: 16, color: color.onSurfaceVariant.withValues(alpha: 0.5)),
+            ],
+          ),
+        ),
       ),
     );
   }

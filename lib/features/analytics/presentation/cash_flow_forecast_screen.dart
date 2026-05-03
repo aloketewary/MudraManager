@@ -92,32 +92,32 @@ class CashFlowForecastScreen extends ConsumerWidget {
               Icon(LucideIcons.calendarDays, size: 18, color: color.primary),
               SizedBox(width: spacing.elementGap),
               Text(ctxt.analytics_currentMonth,
-                  style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
-            ]),
+                  style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),),
+            ],),
             SizedBox(height: spacing.sectionGap),
             Row(children: [
               Expanded(child: _statColumn(
                 ctxt.analytics_income,
                 GuestModeUtil.applyGuestMode(f.currentMonthIncome, isGuestMode),
                 incomeColor, textTheme,
-              )),
+              ),),
               Expanded(child: _statColumn(
                 ctxt.analytics_expense,
                 GuestModeUtil.applyGuestMode(f.currentMonthExpense, isGuestMode),
                 expenseColor, textTheme,
-              )),
+              ),),
               Expanded(child: _statColumn(
                 ctxt.analytics_net,
                 GuestModeUtil.applyGuestMode(f.currentNet, isGuestMode),
                 f.currentNet >= 0 ? incomeColor : expenseColor, textTheme,
-              )),
-            ]),
+              ),),
+            ],),
             SizedBox(height: spacing.sectionGap),
             Divider(color: color.outlineVariant.withValues(alpha: 0.3)),
             SizedBox(height: spacing.elementGap),
             Row(children: [
               Text(ctxt.analytics_projected,
-                  style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant)),
+                  style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),),
               const Spacer(),
               CurrencyText(
                 amount: GuestModeUtil.applyGuestMode(f.projectedNet, isGuestMode),
@@ -126,7 +126,7 @@ class CashFlowForecastScreen extends ConsumerWidget {
                   color: f.projectedNet >= 0 ? incomeColor : expenseColor,
                 ),
               ),
-            ]),
+            ],),
           ],
         ),
       ),
@@ -144,7 +144,7 @@ class CashFlowForecastScreen extends ConsumerWidget {
           fontWeight: FontWeight.w700, color: accent,
         ),
       ),
-    ]);
+    ],);
   }
 
   Widget _buildTrendChart(
@@ -196,15 +196,15 @@ class CashFlowForecastScreen extends ConsumerWidget {
               Icon(LucideIcons.chartLine, size: 18, color: color.primary),
               SizedBox(width: spacing.elementGap),
               Text(ctxt.analytics_monthlyNet,
-                  style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
-            ]),
+                  style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),),
+            ],),
             SizedBox(height: spacing.sectionGap),
             // Legend
             Row(children: [
               _legendDot(incomeColor, ctxt.analytics_income, textTheme),
               SizedBox(width: spacing.sectionGap),
               _legendDot(expenseColor, ctxt.analytics_expense, textTheme),
-            ]),
+            ],),
             SizedBox(height: spacing.elementGap),
             SizedBox(
               height: 200,
@@ -246,7 +246,7 @@ class CashFlowForecastScreen extends ConsumerWidget {
                         ),
                       );
                     },
-                  )),
+                  ),),
                 ),
                 lineTouchData: const LineTouchData(enabled: false),
                 // Forecast zone
@@ -263,7 +263,7 @@ class CashFlowForecastScreen extends ConsumerWidget {
                   _buildLine(incomeSpots, incomeColor, f.incomeHistory.length),
                   _buildLine(expenseSpots, expenseColor, f.incomeHistory.length),
                 ],
-              )),
+              ),),
             ),
           ],
         ),
@@ -292,7 +292,7 @@ class CashFlowForecastScreen extends ConsumerWidget {
       Container(width: 8, height: 8, decoration: BoxDecoration(color: c, shape: BoxShape.circle)),
       const SizedBox(width: 4),
       Text(label, style: textTheme.labelSmall),
-    ]);
+    ],);
   }
 
   Widget _buildForecastTable(
@@ -324,19 +324,19 @@ class CashFlowForecastScreen extends ConsumerWidget {
               Icon(LucideIcons.table, size: 18, color: color.primary),
               SizedBox(width: spacing.elementGap),
               Text(ctxt.analytics_forecast3Month,
-                  style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
-            ]),
+                  style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),),
+            ],),
             SizedBox(height: spacing.sectionGap),
             // Header
             Row(children: [
               Expanded(flex: 3, child: Text('', style: textTheme.labelSmall)),
               Expanded(flex: 3, child: Text(ctxt.analytics_income,
-                  style: textTheme.labelSmall?.copyWith(color: incomeColor), textAlign: TextAlign.end)),
+                  style: textTheme.labelSmall?.copyWith(color: incomeColor), textAlign: TextAlign.end,),),
               Expanded(flex: 3, child: Text(ctxt.analytics_expense,
-                  style: textTheme.labelSmall?.copyWith(color: expenseColor), textAlign: TextAlign.end)),
+                  style: textTheme.labelSmall?.copyWith(color: expenseColor), textAlign: TextAlign.end,),),
               Expanded(flex: 3, child: Text(ctxt.analytics_net,
-                  style: textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w600), textAlign: TextAlign.end)),
-            ]),
+                  style: textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w600), textAlign: TextAlign.end,),),
+            ],),
             SizedBox(height: spacing.elementGap),
             ...f.forecastMonths.map((m) => Padding(
               padding: EdgeInsets.only(bottom: spacing.elementGap),
@@ -344,19 +344,19 @@ class CashFlowForecastScreen extends ConsumerWidget {
                 Expanded(flex: 3, child: Text(
                   DateFormat('MMM yy').format(m.month),
                   style: textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500),
-                )),
+                ),),
                 Expanded(flex: 3, child: CurrencyText(
                   amount: GuestModeUtil.applyGuestMode(m.income, isGuestMode),
                   fixedLength: 0, compact: true,
                   style: textTheme.bodySmall?.copyWith(color: incomeColor),
                   textAlign: TextAlign.end,
-                )),
+                ),),
                 Expanded(flex: 3, child: CurrencyText(
                   amount: GuestModeUtil.applyGuestMode(m.expense, isGuestMode),
                   fixedLength: 0, compact: true,
                   style: textTheme.bodySmall?.copyWith(color: expenseColor),
                   textAlign: TextAlign.end,
-                )),
+                ),),
                 Expanded(flex: 3, child: CurrencyText(
                   amount: GuestModeUtil.applyGuestMode(m.net, isGuestMode),
                   fixedLength: 0, compact: true,
@@ -365,9 +365,9 @@ class CashFlowForecastScreen extends ConsumerWidget {
                     color: m.isPositive ? incomeColor : expenseColor,
                   ),
                   textAlign: TextAlign.end,
-                )),
-              ]),
-            )),
+                ),),
+              ],),
+            ),),
           ],
         ),
       ),
@@ -404,7 +404,7 @@ class CashFlowForecastScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(ctxt.analytics_avgMonthlyNet,
-                style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant)),
+                style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),),
             CurrencyText(
               amount: GuestModeUtil.applyGuestMode(f.avgMonthlyNet, isGuestMode),
               fixedLength: 0,
@@ -413,12 +413,12 @@ class CashFlowForecastScreen extends ConsumerWidget {
               ),
             ),
           ],
-        )),
+        ),),
         Icon(
           f.isPositive ? LucideIcons.circleCheck : LucideIcons.circleAlert,
           color: netColor, size: 20,
         ),
-      ]),
+      ],),
     );
   }
 }

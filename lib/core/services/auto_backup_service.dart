@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/services/backup_restore_service.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
@@ -14,10 +15,6 @@ class AutoBackupService {
   static const String _autoBackupPrefix = 'mudra_auto_';
   static final _log = AppLog(getLogger(), 'AutoBackup');
   static const _storage = FlutterSecureStorage();
-
-  static Future<void> initialize() async {
-    await Workmanager().initialize(callbackDispatcher);
-  }
 
   static Future<void> setBackupPassword(String password) async {
     await _storage.write(key: _backupPasswordKey, value: password);
@@ -59,6 +56,9 @@ class AutoBackupService {
   /// Returns the file path if successful.
   static Future<String?> createAutoBackup(String password) async {
     try {
+      // Ensure Isar is initialized (critical for background isolate)
+      await IsarService().getInstance();
+
       final directory = await getApplicationDocumentsDirectory();
       final dateTime = DateTime.now();
       final fileName =
@@ -77,8 +77,6 @@ class AutoBackupService {
   }
 
   static Future<List<int>?> _createBackupBytes(String password) async {
-    // Use BackupService to create the encrypted backup content
-    // but save it ourselves with the auto prefix
     final path = await BackupService.createEncryptedBackup(
       password,
       interactive: false,
@@ -88,7 +86,6 @@ class AutoBackupService {
     final file = File(path);
     final bytes = await file.readAsBytes();
 
-    // Delete the standard-named file since we'll save with auto prefix
     try {
       await file.delete();
     } catch (_) {}
@@ -184,35 +181,6 @@ class AutoBackupInfo {
     required this.name,
     required this.date,
     required this.size,
-  });
-}
-
-@pragma('vm:entry-point')
-void callbackDispatcher() {
-  final log = AppLog(getLogger(), 'AutoBackup');
-  Workmanager().executeTask((task, inputData) async {
-    if (task == AutoBackupService.taskName) {
-      try {
-        final password = await AutoBackupService.getBackupPassword();
-        if (password == null || password.isEmpty) {
-          log.w('No backup password set, skipping auto backup');
-          return true;
-        }
-
-        final path = await AutoBackupService.createAutoBackup(password);
-        if (path != null) {
-          log.i('Auto backup completed: $path');
-          // Cleanup old backups after successful new one
-          await AutoBackupService.cleanupOldBackups();
-        }
-
-        return true;
-      } catch (e) {
-        log.e('Auto backup failed', e);
-        return false;
-      }
-    }
-    return false;
   });
 }
 

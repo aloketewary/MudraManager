@@ -117,7 +117,7 @@ class SpendingTrendsScreen extends ConsumerWidget {
                 Icon(icon, size: 18, color: accent),
                 SizedBox(width: spacing.elementGap),
                 Text(title, style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
-              ]),
+              ],),
               SizedBox(height: spacing.sectionGap),
               ...items.map((t) => _buildTrendRow(t, color, textTheme, spacing, isGuestMode, ctxt: ctxt)),
             ],
@@ -152,7 +152,7 @@ class SpendingTrendsScreen extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(trend.categoryName,
-                      style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
+                      style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),),
                   if (trend.isAnomaly)
                     Container(
                       margin: EdgeInsets.only(top: spacing.elementGapUltraMin),
@@ -164,7 +164,7 @@ class SpendingTrendsScreen extends ConsumerWidget {
                       child: Text('⚠ Anomaly',
                           style: textTheme.labelSmall?.copyWith(
                             color: FinanceColors.statusDanger, fontSize: 10,
-                          )),
+                          ),),
                     ),
                 ],
               ),
@@ -194,10 +194,10 @@ class SpendingTrendsScreen extends ConsumerWidget {
                       '${trend.changePercent.abs().toStringAsFixed(0)}%',
                       style: textTheme.labelSmall?.copyWith(color: changeColor),
                     ),
-                  ]),
+                  ],),
               ],
             ),
-          ]),
+          ],),
           // Predicted next month
           if (trend.predictedNextMonth > 0)
             Padding(
@@ -218,7 +218,7 @@ class SpendingTrendsScreen extends ConsumerWidget {
                     color: color.primary, fontWeight: FontWeight.w600,
                   ),
                 ),
-              ]),
+              ],),
             ),
         ],
       ),
@@ -259,7 +259,7 @@ class SpendingTrendsScreen extends ConsumerWidget {
           ),
         ),
       ],
-    ));
+    ),);
   }
 
   Widget _buildAllCategories(
@@ -287,8 +287,8 @@ class SpendingTrendsScreen extends ConsumerWidget {
               Icon(LucideIcons.layers, size: 18, color: color.primary),
               SizedBox(width: spacing.elementGap),
               Text(ctxt.analytics_allCategories,
-                  style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
-            ]),
+                  style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),),
+            ],),
             SizedBox(height: spacing.sectionGap),
             ...sorted.map((t) => _buildTrendRow(t, color, textTheme, spacing, isGuestMode, ctxt: ctxt)),
           ],
