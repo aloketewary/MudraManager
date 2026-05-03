@@ -186,6 +186,8 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
         ref.invalidate(transactionProvider);
         ref.invalidate(accountServiceProvider);
         ref.invalidate(allSectionedTransactionsProvider);
+        ref.invalidate(sectionedTransactionsProvider);
+        ref.invalidate(sectionedTransactionsByDateRangeProvider);
 
         SnackbarService.success(
           _isEditing ? 'Transfer updated' : 'Transfer completed',

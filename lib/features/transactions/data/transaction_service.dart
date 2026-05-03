@@ -197,6 +197,39 @@ class TransactionService {
     log.i('Transaction deleted successfully');
   }
 
+  /// Atomically deletes both legs of a transfer in a single writeTxn.
+  Future<void> deleteTransferAtomic(int txnId) async {
+    log.d('Deleting transfer atomically: $txnId');
+    final isar = await isarService.getInstance();
+    final txn = await isar.transactions.get(txnId);
+    if (txn == null) return;
+
+    await txn.related.load();
+    final relatedId = txn.related.value?.id;
+
+    await isar.writeTxn(() async {
+      await _cleanupTripLink(isar, txnId);
+      if (relatedId != null) {
+        await _cleanupTripLink(isar, relatedId);
+        await isar.transactions.delete(relatedId);
+      }
+      await isar.transactions.delete(txnId);
+    });
+    log.i('Transfer deleted atomically: $txnId + $relatedId');
+  }
+
+  /// Atomically deletes a pair of transactions (for merge-as-transfer cleanup).
+  Future<void> deleteTransactionPair(int id1, int id2) async {
+    log.d('Deleting transaction pair: $id1 + $id2');
+    final isar = await isarService.getInstance();
+    await isar.writeTxn(() async {
+      await _cleanupTripLink(isar, id1);
+      await _cleanupTripLink(isar, id2);
+      await isar.transactions.deleteAll([id1, id2]);
+    });
+    log.i('Transaction pair deleted atomically: $id1 + $id2');
+  }
+
   /// Cleans up any TripTransaction + SplitExpense linked to this transaction.
   Future<void> _cleanupTripLink(Isar isar, int transactionId) async {
     final tripTxn = await isar.tripTransactions
