@@ -16,7 +16,13 @@ class ChooseLanguageScreen extends ConsumerStatefulWidget {
 }
 
 class _ChooseLanguageScreenState extends ConsumerState<ChooseLanguageScreen> {
-  static final List<String> betaLanguage = ['bn', 'hi'];
+  static final List<String> betaLanguage = [
+    'bn', 'hi', 'es', 'pt', 'id',
+    'fr', 'de', 'ar', 'tr', 'th', 'vi', 'sw',
+    'ko', 'ja', 'zh', 'ms', 'ta', 'te', 'mr', 'gu', 'kn', 'ml',
+    'pa', 'or', 'as', 'ur', 'sd', 'ne', 'si', 'bo',
+    'doi', 'kok', 'mai', 'mni', 'sat', 'brx',
+  ];
 
   @override
   Widget build(BuildContext context) {

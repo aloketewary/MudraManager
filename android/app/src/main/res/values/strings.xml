@@ -3,4 +3,6 @@
     <string name="app_name">Mudra Manager</string>
     <string name="widget_description">Quick add transactions and view balance</string>
     <string name="simple_widget_description">Quick add transaction</string>
+    <string name="balance_widget_description">View balance, expense and income at a glance</string>
+    <string name="today_spend_widget_description">See today\'s spending at a glance</string>
 </resources>

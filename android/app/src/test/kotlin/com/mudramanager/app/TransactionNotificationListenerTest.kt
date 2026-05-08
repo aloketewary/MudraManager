@@ -37,15 +37,20 @@ class TransactionNotificationListenerTest {
     }
 
     // ─────────────────────────────────────────────────────────────────────
-    // extractMessageText — tested via the helper exposed through reflection
+    // extractAllText — tested via reflection (private method)
+    // Returns ExtractedText(primary, bigText, subText)
     // ─────────────────────────────────────────────────────────────────────
 
-    private fun extractMessageText(extras: Bundle): String {
+    private fun extractPrimaryText(extras: Bundle): String {
         val listener = TransactionNotificationListener()
         val method = TransactionNotificationListener::class.java
-            .getDeclaredMethod("extractMessageText", Bundle::class.java)
+            .getDeclaredMethod("extractAllText", Bundle::class.java)
         method.isAccessible = true
-        return method.invoke(listener, extras) as String
+        val result = method.invoke(listener, extras)
+        // ExtractedText is a private data class — access .primary via reflection
+        val primaryField = result!!.javaClass.getDeclaredField("primary")
+        primaryField.isAccessible = true
+        return primaryField.get(result) as String
     }
 
     /** RCS/MessagingStyle: text comes from EXTRA_MESSAGES last bundle. */
@@ -58,7 +63,7 @@ class TransactionNotificationListenerTest {
             putParcelableArray(Notification.EXTRA_MESSAGES, arrayOf(msgBundle))
         }
 
-        val result = extractMessageText(extras)
+        val result = extractPrimaryText(extras)
 
         assertEquals("AED 500.00 credited to your account XX3456", result)
     }
@@ -72,7 +77,7 @@ class TransactionNotificationListenerTest {
             putParcelableArray(Notification.EXTRA_MESSAGES, arrayOf(msg1, msg2))
         }
 
-        val result = extractMessageText(extras)
+        val result = extractPrimaryText(extras)
 
         assertEquals("Rs.5000.00 debited from A/c XX1234", result)
     }
@@ -87,7 +92,7 @@ class TransactionNotificationListenerTest {
             )
         }
 
-        val result = extractMessageText(extras)
+        val result = extractPrimaryText(extras)
 
         assertEquals("Rs.2500.00 debited from A/c XX9876 on 15-Jan-25", result)
     }
@@ -99,7 +104,7 @@ class TransactionNotificationListenerTest {
             putCharSequence(Notification.EXTRA_TEXT, "USD 120.50 charged to account XX5678")
         }
 
-        val result = extractMessageText(extras)
+        val result = extractPrimaryText(extras)
 
         assertEquals("USD 120.50 charged to account XX5678", result)
     }
@@ -112,7 +117,7 @@ class TransactionNotificationListenerTest {
             putCharSequence(Notification.EXTRA_BIG_TEXT, "GBP 250.00 debited from Barclays XX9012")
         }
 
-        val result = extractMessageText(extras)
+        val result = extractPrimaryText(extras)
 
         assertEquals("GBP 250.00 debited from Barclays XX9012", result)
     }
@@ -120,7 +125,7 @@ class TransactionNotificationListenerTest {
     /** All sources absent → returns empty string. */
     @Test
     fun `extractMessageText returns empty string when no text sources present`() {
-        val result = extractMessageText(Bundle())
+        val result = extractPrimaryText(Bundle())
         assertEquals("", result)
     }
 
@@ -134,8 +139,13 @@ class TransactionNotificationListenerTest {
             val obj = org.json.JSONObject()
             obj.put("title", entry["title"])
             obj.put("text", entry["text"])
+            obj.put("bigText", entry.getOrDefault("bigText", ""))
+            obj.put("subText", entry.getOrDefault("subText", ""))
             obj.put("package", entry["package"])
             obj.put("timestamp", entry["timestamp"])
+            obj.put("hash", entry.getOrDefault("hash", ""))
+            obj.put("corrId", entry.getOrDefault("corrId", ""))
+            obj.put("isRcs", entry.getOrDefault("isRcs", false))
             array.put(obj)
         }
         context.getSharedPreferences(prefsName, Context.MODE_PRIVATE)
@@ -195,5 +205,39 @@ class TransactionNotificationListenerTest {
 
         assertEquals("ICICIBK", result[0]["title"])
         assertEquals("Rs 2500.00 debited from a/c XX9876", result[0]["text"])
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // Package filtering
+    // ─────────────────────────────────────────────────────────────────────
+
+    @Test
+    fun `smsPackages includes Google Messages for RCS`() {
+        val packages = TransactionNotificationListener.getSupportedPackages()
+        assertTrue(packages.contains("com.google.android.apps.messaging"))
+    }
+
+    @Test
+    fun `smsPackages includes Samsung Messages for RCS`() {
+        val packages = TransactionNotificationListener.getSupportedPackages()
+        assertTrue(packages.contains("com.samsung.android.messaging"))
+    }
+
+    @Test
+    fun `smsPackages includes Truecaller`() {
+        val packages = TransactionNotificationListener.getSupportedPackages()
+        assertTrue(packages.contains("com.truecaller"))
+    }
+
+    @Test
+    fun `smsPackages includes Nothing Phone`() {
+        val packages = TransactionNotificationListener.getSupportedPackages()
+        assertTrue(packages.contains("com.nothing.mms"))
+    }
+
+    @Test
+    fun `smsPackages does not include test app`() {
+        val packages = TransactionNotificationListener.getSupportedPackages()
+        assertFalse(packages.contains("com.example.myapplication"))
     }
 }

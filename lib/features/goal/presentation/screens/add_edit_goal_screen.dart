@@ -129,14 +129,13 @@ class _AddEditGoalScreenState extends ConsumerState<AddEditGoalScreen> {
 
     setState(() => _saving = true);
 
+    final router = GoRouter.of(context);
     final goal = widget.goal ?? Goal();
     goal.name = _nameController.text.trim();
-    goal.targetAmount = double.parse(_amountController.text.trim());
-    goal.currentAmount = double.parse(
-      _currentAmountController.text.trim().isEmpty
-          ? '0'
-          : _currentAmountController.text.trim(),
-    );
+    goal.targetAmount = double.tryParse(_amountController.text.trim().replaceAll(',', '')) ?? 0;
+    goal.currentAmount = double.tryParse(
+      _currentAmountController.text.trim().replaceAll(',', ''),
+    ) ?? 0;
     goal.targetDate = _targetDate;
     goal.iconName = _selectedIcon;
     goal.colorValue = _selectedColor.toARGB32();
@@ -151,6 +150,7 @@ class _AddEditGoalScreenState extends ConsumerState<AddEditGoalScreen> {
     } else {
       await service.updateGoal(goal);
     }
+    ref.invalidate(goalsProvider);
 
     HapticFeedback.mediumImpact();
     SnackbarService.success(
@@ -158,7 +158,7 @@ class _AddEditGoalScreenState extends ConsumerState<AddEditGoalScreen> {
           ? BuddyMessages.goalCreated
           : BuddyMessages.goalUpdated,
     );
-    if (mounted) context.pop();
+    router.pop();
   }
 
   // ── BUILD (scaffold) ── will call sub-builders ──
@@ -315,15 +315,6 @@ class _AddEditGoalScreenState extends ConsumerState<AddEditGoalScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Emotion line
-          Text(
-            emotionLine,
-            style: textTheme.bodySmall?.copyWith(
-              color: _selectedColor,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          SizedBox(height: spacing.elementGap),
           Row(
             children: [
               Container(
@@ -340,12 +331,25 @@ class _AddEditGoalScreenState extends ConsumerState<AddEditGoalScreen> {
               ),
               SizedBox(width: spacing.elementGap),
               Expanded(
-                child: Text(
-                  displayName,
-                  style: textTheme.titleMedium
-                      ?.copyWith(fontWeight: FontWeight.bold),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      displayName,
+                      style: textTheme.titleMedium
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    SizedBox(height: spacing.elementGapUltraMin),
+                    Text(
+                      emotionLine,
+                      style: textTheme.bodySmall?.copyWith(
+                        color: _selectedColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -522,8 +526,7 @@ class _AddEditGoalScreenState extends ConsumerState<AddEditGoalScreen> {
           ),
           style: textTheme.bodyLarge,
           validator: (v) => v == null ||
-                  double.tryParse(v.trim()) == null ||
-                  double.parse(v.trim()) <= 0
+                  (double.tryParse(v.trim().replaceAll(',', '')) ?? 0) <= 0
               ? ctxt.goal_enterValidTarget
               : null,
         ),
@@ -733,7 +736,7 @@ class _AddEditGoalScreenState extends ConsumerState<AddEditGoalScreen> {
                       }).toList(),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: spacing.radiusMedium),
                   GestureDetector(
                     onTap: _pickColor,
                     child: Container(
@@ -913,6 +916,7 @@ class _AddEditGoalScreenState extends ConsumerState<AddEditGoalScreen> {
                 ),
                 if (_targetDate != null)
                   IconButton(
+                    tooltip: 'Close',
                     icon: Icon(
                       LucideIcons.x,
                       size: 18,
@@ -967,6 +971,7 @@ class _AddEditGoalScreenState extends ConsumerState<AddEditGoalScreen> {
             ),
             const Spacer(),
             IconButton(
+              tooltip: 'Chevronup',
               icon: Icon(
                 LucideIcons.chevronUp,
                 size: 16,

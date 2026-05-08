@@ -4,9 +4,11 @@ import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/goal.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/services/notification_service.dart';
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
 import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
 import 'package:mudra_manager/features/gamification/services/gamification_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 final goalServiceProvider = Provider<GoalService>((ref) {
   final isarService = ref.watch(isarServiceProvider);
@@ -62,12 +64,16 @@ class GoalService {
       }
     });
     await _updateGoalReminders();
-    if (goal != null && goal!.currentAmount >= goal!.targetAmount) {
+    final saved = goal;
+    if (saved != null && saved.currentAmount >= saved.targetAmount) {
       await gamificationService?.track(GamificationEvent.goalCompleted);
     }
   }
 
   Future<void> _updateGoalReminders() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!(prefs.getBool('smart_alerts_enabled') ?? true)) return;
+
     final isar = await isarService.getInstance();
     final goals = await isar.goals.where().findAll();
     if (goals.isEmpty) {
@@ -76,12 +82,12 @@ class GoalService {
       return;
     }
 
-    String summary = 'You have ${goals.length} active goals.';
     final topGoal = goals.reduce(
       (a, b) => a.progressPercent > b.progressPercent ? a : b,
     );
-    summary +=
-        ' ${topGoal.name} is ${(topGoal.progressPercent * 100).toStringAsFixed(0)}% complete!';
+    final pct = (topGoal.progressPercent * 100).toStringAsFixed(0);
+    final summary = Tone.appL10n?.notif_goalStatusBody(goals.length, topGoal.name, pct) ??
+        'You have ${goals.length} active goals. ${topGoal.name} is $pct% complete!';
 
     await NotificationService.scheduleMonthlyGoalReminder(summary);
   }

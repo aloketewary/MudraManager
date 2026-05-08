@@ -118,7 +118,7 @@ class NoDataFound extends StatelessWidget {
           shape: BoxShape.circle,
           color: color.surfaceContainerHighest,
         ),
-        child: Image.asset(imagePath!, width: 80, height: 80),
+        child: Image.asset(imagePath!, width: 80, height: 80, semanticLabel: 'Decorative image'),
       );
     }
 

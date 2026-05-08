@@ -1,237 +1,216 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Features - Mudra Manager</title>
+    <meta name="theme-color" content="#08080c" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)">
+    <title>Features — Mudra Manager: Budget Tracker</title>
+    <meta name="description" content="Every feature in Mudra Manager explained — SMS auto-import, budgets, goals, analytics, encryption, gamification, and more.">
     <link rel="icon" href="assets/logo.png">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#6366f1',
-                        secondary: '#8b5cf6',
-                    }
-                }
-            }
-        }
-    </script>
+    <link rel="stylesheet" href="2026.css">
 </head>
-<body class="bg-white">
-    <nav class="fixed w-full bg-white/95 backdrop-blur-sm z-50 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-20">
-                <a href="index.html" class="flex items-center space-x-3">
-                    <img src="assets/logo.png" alt="Mudra Manager" class="h-12 w-12">
-                    <span class="text-2xl font-bold text-slate-900">Mudra Manager</span>
-                </a>
-                <a href="index.html" class="text-slate-600 hover:text-primary transition">← Back to Home</a>
+<body>
+    <a href="#main" class="skip">Skip to content</a>
+
+    <nav class="nav" role="navigation" aria-label="Main">
+        <a href="index.html" class="nav-logo"><img src="assets/logo.png" alt="" width="24" height="24">Mudra Manager</a>
+        <div class="nav-r">
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="features.html">Features</a>
+                <a href="whatsnew.html">Changelog</a>
+                <a href="support.html">Support</a>
             </div>
+            <button class="nav-theme" id="theme-toggle" aria-label="Toggle theme"><i class="fas fa-sun theme-icon"></i></button>
+            <a href="https://play.google.com/store/apps/details?id=com.mudramanager.app" target="_blank" class="nav-dl">Download</a>
+            <button class="nav-burger" id="menu-btn" aria-label="Menu"><span></span><span></span></button>
         </div>
     </nav>
 
-    <!-- Hero -->
-    <section class="pt-32 pb-20 px-4 bg-gradient-to-b from-slate-50 to-white">
-        <div class="max-w-7xl mx-auto text-center">
-            <h1 class="text-6xl font-bold mb-6 text-slate-900">Powerful Features</h1>
-            <p class="text-2xl text-slate-600 max-w-3xl mx-auto">Everything you need to take control of your finances in one beautiful app</p>
+    <div class="mob" id="mob">
+        <button class="mob-close" id="mob-close" aria-label="Close menu"><i class="fas fa-xmark"></i></button>
+        <a href="index.html" class="ml">Home</a>
+        <a href="features.html" class="ml">Features</a>
+        <a href="whatsnew.html" class="ml">Changelog</a>
+        <a href="support.html" class="ml">Support</a>
+        <button onclick="flip()" style="color:var(--mute);font-size:14px;text-align:left;margin-top:12px"><i class="fas fa-circle-half-stroke" style="margin-right:6px"></i>Toggle theme</button>
+    </div>
+
+    <main id="main">
+
+    <div class="page-header">
+        <p class="mono">Deep Dive</p>
+        <h1 style="font-size:clamp(2.5rem,6vw,4.5rem)">Every feature,<br>explained.</h1>
+        <p class="sub">Everything you need to take control of your finances. Nothing you don't.</p>
+    </div>
+
+    <div class="story">
+
+        <div class="story-item reveal">
+            <div class="story-text">
+                <p class="mono">Automation</p>
+                <h2>Your bank talks.<br>Mudra listens.</h2>
+                <p>Reads SMS and RCS notifications from 50+ banks worldwide. Transactions appear without you lifting a finger.</p>
+                <ul>
+                    <li>HDFC, SBI, ICICI, Nubank, BCA, Revolut, and more</li>
+                    <li>Dual-SIM and RCS support (Google Messages, Samsung)</li>
+                    <li>Smart category matching learns your patterns</li>
+                    <li>100% local processing — nothing sent anywhere</li>
+                </ul>
+            </div>
+            <div class="story-visual">
+                <div class="mini-phone"><img src="assets/auto_import_activity_screen.png" alt="SMS Auto-Import" loading="lazy"></div>
+            </div>
         </div>
-    </section>
 
-    <!-- Features Grid -->
-    <section class="py-20 px-4">
-        <div class="max-w-7xl mx-auto">
-            <!-- Feature 1 -->
-            <div class="grid lg:grid-cols-2 gap-16 items-center mb-32">
-                <div class="order-2 lg:order-1">
-                    <div class="inline-block bg-blue-100 text-blue-600 px-4 py-2 rounded-full text-sm font-semibold mb-6">Dashboard</div>
-                    <h2 class="text-4xl font-bold mb-6 text-slate-900">Smart Dashboard</h2>
-                    <p class="text-xl text-slate-600 mb-8 leading-relaxed">Get a complete overview of your financial health at a glance. Beautiful charts, real-time updates, and intelligent insights help you make better financial decisions.</p>
-                    <ul class="space-y-4">
-                        <li class="flex items-start">
-                            <i class="fas fa-check-circle text-blue-500 text-xl mr-3 mt-1"></i>
-                            <span class="text-slate-700">Real-time balance tracking across all accounts</span>
-                        </li>
-                        <li class="flex items-start">
-                            <i class="fas fa-check-circle text-blue-500 text-xl mr-3 mt-1"></i>
-                            <span class="text-slate-700">Interactive charts and spending trends</span>
-                        </li>
-                        <li class="flex items-start">
-                            <i class="fas fa-check-circle text-blue-500 text-xl mr-3 mt-1"></i>
-                            <span class="text-slate-700">Quick access to recent transactions</span>
-                        </li>
-                    </ul>
-                </div>
-                <div class="order-1 lg:order-2">
-                    <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-3xl p-12 shadow-2xl">
-                        <i class="fas fa-chart-line text-8xl text-blue-500"></i>
-                    </div>
-                </div>
+        <div class="story-item reveal">
+            <div class="story-text">
+                <p class="mono">Intelligence</p>
+                <h2>Insights that<br>actually help.</h2>
+                <p>Financial health score, spending personality, monthly comparisons. Morning Money Minute delivers a personalized insight at 9 AM every day.</p>
+                <ul>
+                    <li>Category trends and money leak detection</li>
+                    <li>Weekly recap nudge with top spending category</li>
+                    <li>Savings opportunity alerts</li>
+                    <li>Export to Excel and PDF</li>
+                </ul>
             </div>
-
-            <!-- Feature 2 -->
-            <div class="grid lg:grid-cols-2 gap-16 items-center mb-32">
-                <div>
-                    <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-3xl p-12 shadow-2xl">
-                        <i class="fas fa-sms text-8xl text-purple-500"></i>
-                    </div>
-                </div>
-                <div>
-                    <div class="inline-block bg-purple-100 text-purple-600 px-4 py-2 rounded-full text-sm font-semibold mb-6">Automation</div>
-                    <h2 class="text-4xl font-bold mb-6 text-slate-900">SMS Auto-Import</h2>
-                    <p class="text-xl text-slate-600 mb-8 leading-relaxed">Never manually enter a transaction again. Automatically detect and parse financial transactions from your bank and wallet SMS messages.</p>
-                    <ul class="space-y-4">
-                        <li class="flex items-start">
-                            <i class="fas fa-check-circle text-purple-500 text-xl mr-3 mt-1"></i>
-                            <span class="text-slate-700">Supports all major Indian banks and wallets</span>
-                        </li>
-                        <li class="flex items-start">
-                            <i class="fas fa-check-circle text-purple-500 text-xl mr-3 mt-1"></i>
-                            <span class="text-slate-700">Intelligent parsing and categorization</span>
-                        </li>
-                        <li class="flex items-start">
-                            <i class="fas fa-check-circle text-purple-500 text-xl mr-3 mt-1"></i>
-                            <span class="text-slate-700">100% local processing - no data sent to servers</span>
-                        </li>
-                    </ul>
-                </div>
+            <div class="story-visual">
+                <div class="mini-phone"><img src="assets/compare_month_screen.png" alt="Analytics" loading="lazy"></div>
             </div>
+        </div>
 
-            <!-- Feature 3 -->
-            <div class="grid lg:grid-cols-2 gap-16 items-center mb-32">
-                <div class="order-2 lg:order-1">
-                    <div class="inline-block bg-green-100 text-green-600 px-4 py-2 rounded-full text-sm font-semibold mb-6">Planning</div>
-                    <h2 class="text-4xl font-bold mb-6 text-slate-900">Budget Management</h2>
-                    <p class="text-xl text-slate-600 mb-8 leading-relaxed">Set monthly budgets for different categories and stay on track. Get intelligent alerts when you're approaching your limits.</p>
-                    <ul class="space-y-4">
-                        <li class="flex items-start">
-                            <i class="fas fa-check-circle text-green-500 text-xl mr-3 mt-1"></i>
-                            <span class="text-slate-700">Category-wise budget allocation</span>
-                        </li>
-                        <li class="flex items-start">
-                            <i class="fas fa-check-circle text-green-500 text-xl mr-3 mt-1"></i>
-                            <span class="text-slate-700">Smart alerts and notifications</span>
-                        </li>
-                        <li class="flex items-start">
-                            <i class="fas fa-check-circle text-green-500 text-xl mr-3 mt-1"></i>
-                            <span class="text-slate-700">Visual progress tracking</span>
-                        </li>
-                    </ul>
-                </div>
-                <div class="order-1 lg:order-2">
-                    <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-3xl p-12 shadow-2xl">
-                        <i class="fas fa-wallet text-8xl text-green-500"></i>
-                    </div>
-                </div>
+        <div class="story-item reveal">
+            <div class="story-text">
+                <p class="mono">Control</p>
+                <h2>Budgets that<br>fight for you.</h2>
+                <p>4-step guided creation. Category allocation, spending pace tracking, alerts at 80% and 100%.</p>
+                <ul>
+                    <li>Daily, weekly, monthly, yearly recurrence</li>
+                    <li>Category-wise, tag-wise, day-wise, festival, travel types</li>
+                    <li>Under-budget streaks earn achievements</li>
+                    <li>Smart feedback as you set amounts</li>
+                </ul>
             </div>
-
-            <!-- Feature 4 -->
-            <div class="grid lg:grid-cols-2 gap-16 items-center mb-32">
-                <div>
-                    <div class="bg-gradient-to-br from-amber-50 to-amber-100 rounded-3xl p-12 shadow-2xl">
-                        <i class="fas fa-bullseye text-8xl text-amber-500"></i>
-                    </div>
-                </div>
-                <div>
-                    <div class="inline-block bg-amber-100 text-amber-600 px-4 py-2 rounded-full text-sm font-semibold mb-6">Goals</div>
-                    <h2 class="text-4xl font-bold mb-6 text-slate-900">Financial Goals & Savings</h2>
-                    <p class="text-xl text-slate-600 mb-8 leading-relaxed">Set and track your financial goals. Whether it's saving for a vacation, emergency fund, or a new gadget - stay motivated with visual progress tracking.</p>
-                    <ul class="space-y-4">
-                        <li class="flex items-start">
-                            <i class="fas fa-check-circle text-amber-500 text-xl mr-3 mt-1"></i>
-                            <span class="text-slate-700">Multiple goal tracking</span>
-                        </li>
-                        <li class="flex items-start">
-                            <i class="fas fa-check-circle text-amber-500 text-xl mr-3 mt-1"></i>
-                            <span class="text-slate-700">Target date and amount setting</span>
-                        </li>
-                        <li class="flex items-start">
-                            <i class="fas fa-check-circle text-amber-500 text-xl mr-3 mt-1"></i>
-                            <span class="text-slate-700">Progress visualization</span>
-                        </li>
-                    </ul>
-                </div>
+            <div class="story-visual">
+                <div class="mini-phone"><img src="assets/budget_dashboard.png" alt="Budgets" loading="lazy"></div>
             </div>
+        </div>
 
-            <!-- More Features Grid -->
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mt-20">
-                <div class="bg-white p-8 rounded-3xl shadow-lg border border-slate-100">
-                    <div class="w-16 h-16 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-2xl flex items-center justify-center mb-6">
-                        <i class="fas fa-plane text-3xl text-white"></i>
-                    </div>
-                    <h3 class="text-2xl font-bold mb-4 text-slate-900">Travel Expenses</h3>
-                    <p class="text-slate-600">Track travel expenses separately with dedicated categories and trip-wise organization.</p>
-                </div>
+        <div class="story-item reveal">
+            <div class="story-text">
+                <p class="mono">Goals</p>
+                <h2>Save with<br>purpose.</h2>
+                <p>Set savings goals with target amounts and deadlines. Visual progress tracking with emotional milestones.</p>
+                <ul>
+                    <li>Progress rings and confetti celebrations</li>
+                    <li>Smart deposit suggestions</li>
+                    <li>Daily/monthly pace tracking</li>
+                    <li>Health indicator (on track / needs effort / ambitious)</li>
+                </ul>
+            </div>
+            <div class="story-visual">
+                <div class="mini-phone"><img src="assets/goal_dashboard.png" alt="Goals" loading="lazy"></div>
+            </div>
+        </div>
 
-                <div class="bg-white p-8 rounded-3xl shadow-lg border border-slate-100">
-                    <div class="w-16 h-16 bg-gradient-to-br from-rose-500 to-rose-600 rounded-2xl flex items-center justify-center mb-6">
-                        <i class="fas fa-users text-3xl text-white"></i>
-                    </div>
-                    <h3 class="text-2xl font-bold mb-4 text-slate-900">Split Bills</h3>
-                    <p class="text-slate-600">Split expenses with friends and family. Track who owes what with ease.</p>
-                </div>
+        <div class="story-item reveal">
+            <div class="story-text">
+                <p class="mono">Security</p>
+                <h2>Your data.<br>Only yours.</h2>
+                <p>AES-256 field-level encryption. Biometric lock, PIN protection, guest mode. Zero cloud, zero servers, zero data collection.</p>
+                <ul>
+                    <li>Encryption key stored in Android Keystore / iOS Keychain</li>
+                    <li>SMS body, merchant info, notes encrypted at rest</li>
+                    <li>Guest mode hides all amounts</li>
+                    <li>Graceful degradation — app works even if encryption fails</li>
+                </ul>
+            </div>
+            <div class="story-visual">
+                <div class="mini-phone"><img src="assets/dashboard.png" alt="Dashboard" loading="lazy"></div>
+            </div>
+        </div>
 
-                <div class="bg-white p-8 rounded-3xl shadow-lg border border-slate-100">
-                    <div class="w-16 h-16 bg-gradient-to-br from-violet-500 to-violet-600 rounded-2xl flex items-center justify-center mb-6">
-                        <i class="fas fa-redo text-3xl text-white"></i>
-                    </div>
-                    <h3 class="text-2xl font-bold mb-4 text-slate-900">Recurring Transactions</h3>
-                    <p class="text-slate-600">Automate recurring bills and subscriptions for hassle-free tracking.</p>
-                </div>
+    </div>
 
-                <div class="bg-white p-8 rounded-3xl shadow-lg border border-slate-100">
-                    <div class="w-16 h-16 bg-gradient-to-br from-pink-500 to-pink-600 rounded-2xl flex items-center justify-center mb-6">
-                        <i class="fas fa-chart-pie text-3xl text-white"></i>
-                    </div>
-                    <h3 class="text-2xl font-bold mb-4 text-slate-900">Analytics & Reports</h3>
-                    <p class="text-slate-600">Visualize spending patterns with interactive charts and detailed reports.</p>
-                </div>
-
-                <div class="bg-white p-8 rounded-3xl shadow-lg border border-slate-100">
-                    <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-2xl flex items-center justify-center mb-6">
-                        <i class="fas fa-shield-alt text-3xl text-white"></i>
-                    </div>
-                    <h3 class="text-2xl font-bold mb-4 text-slate-900">Bank-Level Security</h3>
-                    <p class="text-slate-600">Local-first storage with optional biometric authentication.</p>
-                </div>
-
-                <div class="bg-white p-8 rounded-3xl shadow-lg border border-slate-100">
-                    <div class="w-16 h-16 bg-gradient-to-br from-teal-500 to-teal-600 rounded-2xl flex items-center justify-center mb-6">
-                        <i class="fas fa-language text-3xl text-white"></i>
-                    </div>
-                    <h3 class="text-2xl font-bold mb-4 text-slate-900">Multi-Language</h3>
-                    <p class="text-slate-600">Full support for multiple languages across India.</p>
-                </div>
-
-                <div class="bg-white p-8 rounded-3xl shadow-lg border border-slate-100">
-                    <div class="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center mb-6">
-                        <i class="fas fa-file-export text-3xl text-white"></i>
-                    </div>
-                    <h3 class="text-2xl font-bold mb-4 text-slate-900">Export & Share</h3>
-                    <p class="text-slate-600">Export financial data to Excel or PDF formats.</p>
-                </div>
+    <section style="max-width:900px;margin:0 auto;padding:0 clamp(20px,4vw,64px) 80px">
+        <p class="mono">And more</p>
+        <h2 style="margin-bottom:40px">Everything else<br>you'd expect.</h2>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px">
+            <div class="fcard reveal">
+                <i class="fas fa-plane"></i>
+                <strong>Trips & Splits</strong>
+                <span>Dedicated trip budgets, group splitting, per-person balances, settlement tracking.</span>
+            </div>
+            <div class="fcard reveal">
+                <i class="fas fa-repeat"></i>
+                <strong>Recurring Bills</strong>
+                <span>Auto-creates transactions. SMS-matches payments. Reminders before due dates.</span>
+            </div>
+            <div class="fcard reveal">
+                <i class="fas fa-trophy"></i>
+                <strong>Gamification</strong>
+                <span>35+ achievements, daily streaks, XP & levels, under-budget challenges.</span>
+            </div>
+            <div class="fcard reveal">
+                <i class="fas fa-comment-dots"></i>
+                <strong>4 Tone Personalities</strong>
+                <span>Friendly, Professional, Motivational, or Calm. Every message adapts.</span>
+            </div>
+            <div class="fcard reveal">
+                <i class="fas fa-language"></i>
+                <strong>37 Languages</strong>
+                <span>English, Hindi, Bengali + 34 more. Real translations, not machine-generated.</span>
+            </div>
+            <div class="fcard reveal">
+                <i class="fas fa-coins"></i>
+                <strong>150+ Currencies</strong>
+                <span>Multi-currency accounts with exchange rates. Per-account currency with base conversion.</span>
+            </div>
+            <div class="fcard reveal">
+                <i class="fas fa-palette"></i>
+                <strong>Material You Themes</strong>
+                <span>Dynamic theming, 10+ color themes, AMOLED dark mode, customizable dashboard.</span>
+            </div>
+            <div class="fcard reveal">
+                <i class="fas fa-file-export"></i>
+                <strong>Export & Backup</strong>
+                <span>Excel and PDF reports. Encrypted backup and restore. No data lock-in.</span>
             </div>
         </div>
     </section>
 
-    <!-- CTA -->
-    <section class="py-24 bg-gradient-to-r from-primary to-secondary text-white">
-        <div class="max-w-4xl mx-auto px-4 text-center">
-            <h2 class="text-5xl font-bold mb-6">Ready to Get Started?</h2>
-            <p class="text-xl mb-8 opacity-90">Join our beta program and experience all these features today</p>
-            <a href="index.html#download" class="inline-block bg-white text-primary px-12 py-5 rounded-xl font-semibold hover:bg-slate-100 transition text-lg">
-                <i class="fas fa-rocket mr-2"></i>Join Beta Testing
-            </a>
-        </div>
+    <section class="final-cta reveal">
+        <h2>Ready to take control?</h2>
+        <p>Free on Google Play. No account needed.</p>
+        <a href="https://play.google.com/store/apps/details?id=com.mudramanager.app" target="_blank" class="hero-btn" style="font-size:17px;padding:16px 36px;border-radius:14px">
+            <i class="fab fa-google-play"></i> Download Free
+        </a>
     </section>
 
-    <footer class="bg-slate-900 text-white py-8">
-        <div class="max-w-7xl mx-auto px-4 text-center">
-            <p class="text-slate-400">&copy; 2025 Mudra Manager. All rights reserved.</p>
+    </main>
+
+    <footer>
+        <div class="foot">
+            <div class="foot-logo"><img src="assets/logo.png" alt="" width="20" height="20"> Mudra Manager: Budget Tracker</div>
+            <div class="foot-links">
+                <a href="privacy.html">Privacy</a>
+                <a href="terms.html">Terms</a>
+                <a href="support.html">Support</a>
+                <a href="whatsnew.html">Changelog</a>
+                <a href="features.html">Features</a>
+            </div>
+            <span style="display:flex;align-items:center;gap:8px">
+                Built by <a href="https://linkedin.com/in/aloketewary" target="_blank" style="color:var(--accent);font-weight:600">Aloke Tewary</a>
+                · Made with <span style="color:#ef4444">♥</span> in India · © 2026
+            </span>
         </div>
     </footer>
+
+    <script src="2026.js"></script>
 </body>
 </html>

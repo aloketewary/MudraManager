@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:flutter/material.dart';
@@ -5,7 +7,6 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_native_timezone_latest/flutter_native_timezone_latest.dart';
 import 'package:go_router/go_router.dart';
 import 'package:isar_community/isar.dart';
-import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/models/notification_record.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
@@ -22,11 +23,19 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
   static const _reminderTimeKey = 'daily_reminder_time_key';
   static const _streakReminderTimeKey = 'streak_reminder_time_key';
-  static BuildContext? _context;
+  static GlobalKey<NavigatorState>? _navigatorKey;
   static final _log = AppLog(getLogger(), 'NotificationService');
+  static SharedPreferences? _prefsCache;
 
+  /// Set the navigator key for notification tap routing.
+  /// Call this once from your root MaterialApp/GoRouter.
+  static void setNavigatorKey(GlobalKey<NavigatorState> key) {
+    _navigatorKey = key;
+  }
+
+  /// @deprecated Use setNavigatorKey instead.
   static void setContext(BuildContext context) {
-    _context = context;
+    // Kept for backward compatibility — callers should migrate to setNavigatorKey
   }
 
   static Future<void> initialize() async {
@@ -62,7 +71,7 @@ class NotificationService {
     );
 
     await _plugin.initialize(
-      initializationSettings,
+      settings: initializationSettings,
       onDidReceiveNotificationResponse: (details) {
         _handleNotificationTap(details.payload);
       },
@@ -79,18 +88,28 @@ class NotificationService {
   }
 
   static Future<void> scheduleDailyReminder(TimeOfDay time) async {
-    await _plugin.cancel(0);
+    await _plugin.cancel(id: 0);
     await _saveReminderTime(time);
 
     final scheduledDate = _nextInstanceOfTime(time);
     _log.i('Scheduling daily reminder at ${time.hour}:${time.minute}');
 
     await _plugin.zonedSchedule(
-      0,
-      '📊 Your day in numbers',
-      'Here\'s how yesterday went — take a quick look',
-      scheduledDate,
-      const NotificationDetails(
+
+
+      id: 0,
+
+
+      title: Tone.appL10n?.notif_dailyReminderTitle ?? '📊 Your day in numbers',
+
+
+      body: Tone.appL10n?.notif_dailyReminderBody ?? 'Here\'s how yesterday went — take a quick look',
+
+
+      scheduledDate: scheduledDate,
+
+
+      notificationDetails: const NotificationDetails(
         android: AndroidNotificationDetails(
           'daily_reminder_channel',
           'Daily Reminder',
@@ -130,6 +149,7 @@ class NotificationService {
         title: Tone.appL10n?.notif_quietDayTitle ?? '📊 Quiet day yesterday',
         body: BuddyMessages.dailySummaryEmpty,
         payload: 'statistics',
+        dedupKey: 'daily_summary',
         bypassThrottle: true,
       );
       return;
@@ -138,6 +158,11 @@ class NotificationService {
     double totalSpent = 0;
     double totalIncome = 0;
     final categorySpending = <String, double>{};
+
+    // Batch-load categories once before the loop
+    for (final tx in transactions) {
+      tx.category.loadSync();
+    }
 
     for (final tx in transactions) {
       if (tx.isTransfer) continue;
@@ -161,14 +186,6 @@ class NotificationService {
           .key;
     }
 
-    final accounts = await isar.collection<Account>().where().findAll();
-    for (final acc in accounts) {
-      await isar.transactions
-          .filter()
-          .account((q) => q.idEqualTo(acc.id))
-          .findAll();
-    }
-
     await showLocalNotification(
       id: 100,
       title: Tone.appL10n?.notif_heresYesterdayTitle ?? '📊 Here\'s yesterday',
@@ -178,6 +195,7 @@ class NotificationService {
         topCategory,
       ),
       payload: 'statistics',
+      dedupKey: 'daily_summary',
       bypassThrottle: true,
     );
   }
@@ -185,7 +203,7 @@ class NotificationService {
   static Future<void> scheduleWeeklySummary([
     int weekday = DateTime.sunday,
   ]) async {
-    await _plugin.cancel(2);
+    await _plugin.cancel(id: 2);
 
     final now = tz.TZDateTime.now(tz.local);
     var scheduledDate = tz.TZDateTime(
@@ -206,11 +224,21 @@ class NotificationService {
     }
 
     await _plugin.zonedSchedule(
-      2,
-      '📅 Your week wrapped up',
-      'Let\'s see how the week went — tap to check',
-      scheduledDate,
-      const NotificationDetails(
+
+
+      id: 2,
+
+
+      title: Tone.appL10n?.notif_weeklyReminderTitle ?? '📅 Your week wrapped up',
+
+
+      body: Tone.appL10n?.notif_weeklyReminderBody ?? 'Let\'s see how the week went — tap to check',
+
+
+      scheduledDate: scheduledDate,
+
+
+      notificationDetails: const NotificationDetails(
         android: AndroidNotificationDetails(
           'weekly_summary_channel',
           'Weekly Summary',
@@ -262,25 +290,29 @@ class NotificationService {
     final lastWeekTotal = lastWeekTxns.fold<double>(0, (s, t) => s + t.baseAmount);
 
     if (thisWeekTotal <= 0) {
+      final zeroBody = Tone.appL10n?.notif_weeklyZeroBody ?? 'Zero expenses this week — that\'s impressive 💪';
       await showLocalNotification(
         id: 101,
         title: Tone.appL10n?.notif_weekInReviewTitle ?? '📅 Week in review',
-        body: 'Zero expenses this week — that\'s impressive 💪',
+        body: zeroBody,
         payload: 'statistics',
+        dedupKey: 'weekly_summary',
         bypassThrottle: true,
       );
       await _logToDatabase(
-        '📅 Weekly Summary',
-        'No expenses this week — great discipline! 💪',
+        Tone.appL10n?.notif_weekInReviewTitle ?? '📅 Weekly Summary',
+        zeroBody,
         'weekly_summary',
       );
       return;
     }
 
-    // Top category
+    // Top category — batch-load once
+    for (final t in thisWeekTxns) {
+      t.category.loadSync();
+    }
     final catSpend = <String, double>{};
     for (final t in thisWeekTxns) {
-      await t.category.load();
       final name = t.category.value?.name ?? 'Other';
       catSpend[name] = (catSpend[name] ?? 0) + t.baseAmount;
     }
@@ -310,38 +342,47 @@ class NotificationService {
       title: Tone.appL10n?.notif_yourWeekInReviewTitle ?? '📅 Your week in review',
       body: body,
       payload: 'statistics',
+      dedupKey: 'weekly_summary',
       bypassThrottle: true,
     );
-    await _logToDatabase('📅 Your week in review', body, 'weekly_summary');
+    await _logToDatabase(Tone.appL10n?.notif_yourWeekInReviewTitle ?? '📅 Your week in review', body, 'weekly_summary');
   }
 
   static Future<void> _saveReminderTime(TimeOfDay time) async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = _prefsCache ??= await SharedPreferences.getInstance();
     prefs.setString(_reminderTimeKey, '${time.hour}:${time.minute}');
   }
 
   static Future<void> cancelReminder() async {
-    await _plugin.cancel(0);
+    await _plugin.cancel(id: 0);
   }
 
   static Future<TimeOfDay?> getSavedReminderTime() async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = _prefsCache ??= await SharedPreferences.getInstance();
     final saved = prefs.getString(_reminderTimeKey);
     if (saved == null) return null;
     final parts = saved.split(':');
-    return TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+    if (parts.length < 2) return null;
+    final hour = int.tryParse(parts[0]);
+    final minute = int.tryParse(parts[1]);
+    if (hour == null || minute == null) return null;
+    return TimeOfDay(hour: hour, minute: minute);
   }
 
   static Future<TimeOfDay?> getSavedStreakReminderTime() async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = _prefsCache ??= await SharedPreferences.getInstance();
     final saved = prefs.getString(_streakReminderTimeKey);
     if (saved == null) return null;
     final parts = saved.split(':');
-    return TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+    if (parts.length < 2) return null;
+    final hour = int.tryParse(parts[0]);
+    final minute = int.tryParse(parts[1]);
+    if (hour == null || minute == null) return null;
+    return TimeOfDay(hour: hour, minute: minute);
   }
 
   static Future<void> saveStreakReminderTime(TimeOfDay time) async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = _prefsCache ??= await SharedPreferences.getInstance();
     await prefs.setString(
       _streakReminderTimeKey,
       '${time.hour}:${time.minute}',
@@ -370,7 +411,14 @@ class NotificationService {
   static const _maxDailySmartPush = 12;
   static const _pushCountKey = 'notif_push_count';
   static const _pushDateKey = 'notif_push_date';
-  static final _sentToday = <String>{}; // in-memory dedup for current session
+  static const _contentHashKey = 'notif_content_hashes';
+  static const _contentHashDateKey = 'notif_content_hash_date';
+
+  /// Generate a short content hash from title+body for dedup.
+  static String _contentHash(String title, String body) {
+    final bytes = utf8.encode('$title|$body');
+    return sha256.convert(bytes).toString().substring(0, 16);
+  }
 
   /// Show an OS notification.
   /// [dedupKey] — if set, only one notification per key per day.
@@ -383,25 +431,57 @@ class NotificationService {
     String? dedupKey,
     bool bypassThrottle = false,
   }) async {
+    final prefs = _prefsCache ??= await SharedPreferences.getInstance();
+    final now = DateTime.now();
+    final today = '${now.year}-${now.month}-${now.day}';
+
+    // ── Clean up stale dedup keys from previous days ──
+    final allKeys = prefs.getKeys();
+    // Only run cleanup once per day
+    if (prefs.getString(_pushDateKey) != today) {
+      for (final key in allKeys) {
+        if (key.startsWith('dedup_')) {
+          final val = prefs.getString(key);
+          if (val != null && val != today) {
+            await prefs.remove(key);
+          }
+        }
+      }
+    }
+
+    // ── Content-hash dedup: same title+body never fires twice in a day ──
+    // Skip for bypassThrottle — SMS per-txn notifications are unique events
+    if (!bypassThrottle) {
+      if (prefs.getString(_contentHashDateKey) != today) {
+        await prefs.setStringList(_contentHashKey, []);
+        await prefs.setString(_contentHashDateKey, today);
+      }
+      final hash = _contentHash(title, body);
+      final seenHashes = prefs.getStringList(_contentHashKey) ?? [];
+      if (seenHashes.contains(hash)) {
+        _log.i('Content-hash dedup, skipping: $title');
+        return;
+      }
+      seenHashes.add(hash);
+      if (seenHashes.length > 500) seenHashes.removeRange(0, seenHashes.length - 500);
+      await prefs.setStringList(_contentHashKey, seenHashes);
+    }
+
     // Dedup: if a dedupKey is provided, skip if already sent today
     if (dedupKey != null) {
-      if (_sentToday.contains(dedupKey)) return;
-      final prefs = await SharedPreferences.getInstance();
-      final today = '${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}';
       final stored = prefs.getString('dedup_$dedupKey');
-      if (stored == today) return;
+      if (stored == today) {
+        _log.i('Dedup key already sent today, skipping: $dedupKey');
+        return;
+      }
       await prefs.setString('dedup_$dedupKey', today);
-      _sentToday.add(dedupKey);
     }
 
     // Throttle: cap smart-alert pushes per day (scheduled notifications bypass)
     if (!bypassThrottle) {
-      final prefs = await SharedPreferences.getInstance();
-      final today = '${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}';
       if (prefs.getString(_pushDateKey) != today) {
         await prefs.setInt(_pushCountKey, 0);
         await prefs.setString(_pushDateKey, today);
-        _sentToday.clear();
       }
       final count = prefs.getInt(_pushCountKey) ?? 0;
       if (count >= _maxDailySmartPush) {
@@ -412,39 +492,86 @@ class NotificationService {
     }
 
     _log.i('Showing notification: $title');
-    const androidDetails = AndroidNotificationDetails(
-      'mudra_channel_id',
-      'Mudra Manager Notifications',
-      channelDescription: 'Notifications for budget & account alerts',
+
+    // Route to appropriate Android channel based on dedupKey prefix
+    final channelId = _resolveChannel(dedupKey, payload);
+    final androidDetails = AndroidNotificationDetails(
+      channelId.$1,
+      channelId.$2,
+      channelDescription: channelId.$3,
       importance: Importance.max,
       priority: Priority.high,
     );
 
-    const notificationDetails = NotificationDetails(
+    final notificationDetails = NotificationDetails(
       android: androidDetails,
-      iOS: DarwinNotificationDetails(
+      iOS: const DarwinNotificationDetails(
         presentAlert: true,
         presentBadge: true,
         presentSound: true,
       ),
     );
 
-    await _plugin.show(id, title, body, notificationDetails, payload: payload);
+    await _plugin.show(id: id, title: title, body: body, notificationDetails: notificationDetails, payload: payload);
+  }
+
+  /// Resolve Android notification channel based on notification type.
+  static (String id, String name, String desc) _resolveChannel(
+    String? dedupKey,
+    String? payload,
+  ) {
+    if (dedupKey != null) {
+      if (dedupKey.startsWith('sms_')) {
+        return ('sms_transactions', 'SMS Transactions', 'Auto-imported SMS transaction alerts');
+      }
+      if (dedupKey.startsWith('budget_')) {
+        return ('budget_alerts', 'Budget Alerts', 'Budget limit warnings and exceeded alerts');
+      }
+      if (dedupKey.startsWith('bill_')) {
+        return ('bill_reminders', 'Bill Reminders', 'Upcoming bill payment reminders');
+      }
+      if (dedupKey == 'daily_summary' || dedupKey == 'weekly_summary') {
+        return ('summaries', 'Summaries', 'Daily and weekly spending summaries');
+      }
+    }
+    if (payload == 'achievements') {
+      return ('gamification', 'Achievements & Streaks', 'Achievement unlocks, level-ups, and streak milestones');
+    }
+    return ('mudra_channel_id', 'Mudra Manager', 'General notifications');
   }
 
   static void _handleNotificationTap(String? payload) {
-    if (payload == 'statistics' && _context != null) {
-      _context!.go(AppRoutes.statistics);
-    } else if (payload == 'home' && _context != null) {
-      _context!.go(AppRoutes.home);
-    } else if (payload == 'achievements' && _context != null) {
-      _context!.go(AppRoutes.achievements);
+    final context = _navigatorKey?.currentContext;
+    if (context == null) return;
+    switch (payload) {
+      case 'statistics':
+        GoRouter.of(context).go(AppRoutes.statistics);
+      case 'home':
+        GoRouter.of(context).go(AppRoutes.home);
+      case 'achievements':
+        GoRouter.of(context).go(AppRoutes.achievements);
+      case 'sms_activity':
+        GoRouter.of(context).go(AppRoutes.smsActivity);
+      case 'view_budget':
+        GoRouter.of(context).go(AppRoutes.budgetDashboard);
+      case 'view_bills':
+        GoRouter.of(context).go(AppRoutes.recurringTransactions);
+      case 'view_accounts':
+        GoRouter.of(context).go(AppRoutes.manageAccounts);
+      case 'view_sms':
+        GoRouter.of(context).go(AppRoutes.smsActivity);
+      case 'view_recap':
+        GoRouter.of(context).go(AppRoutes.monthlyRecap);
+      case 'view_statistics':
+        GoRouter.of(context).go(AppRoutes.statistics);
+      case 'open_home':
+        GoRouter.of(context).go(AppRoutes.home);
     }
   }
 
   static Future<void> scheduleMonthlyGoalReminder(String body) async {
     // ID 1 for monthly goal reminder
-    await _plugin.cancel(1);
+    await _plugin.cancel(id: 1);
 
     final now = tz.TZDateTime.now(tz.local);
     // Schedule for the 1st of next month at 9:00 AM
@@ -458,11 +585,21 @@ class NotificationService {
     );
 
     await _plugin.zonedSchedule(
-      1,
-      'Monthly Goal Status',
-      body,
-      scheduledDate,
-      const NotificationDetails(
+
+
+      id: 1,
+
+
+      title: Tone.appL10n?.notif_goalStatusTitle ?? 'Monthly Goal Status',
+
+
+      body: body,
+
+
+      scheduledDate: scheduledDate,
+
+
+      notificationDetails: const NotificationDetails(
         android: AndroidNotificationDetails(
           'goal_reminder_channel',
           'Goal Reminders',
@@ -482,12 +619,12 @@ class NotificationService {
   }
 
   static Future<void> scheduleStreakReminder(int currentStreak) async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = _prefsCache ??= await SharedPreferences.getInstance();
     final enabled = prefs.getBool('streak_reminder_enabled') ?? true;
 
     if (!enabled) return;
 
-    await _plugin.cancel(3);
+    await _plugin.cancel(id: 3);
 
     final savedTime = await getSavedStreakReminderTime();
     final time = savedTime ?? const TimeOfDay(hour: 20, minute: 0);
@@ -507,11 +644,21 @@ class NotificationService {
     }
 
     await _plugin.zonedSchedule(
-      3,
-      '🔥 $currentStreak days and counting!',
-      Tone.current.streakAtRisk(currentStreak),
-      scheduledDate,
-      const NotificationDetails(
+
+
+      id: 3,
+
+
+      title: Tone.appL10n?.notif_streakCountingTitle(currentStreak) ?? '🔥 $currentStreak days and counting!',
+
+
+      body: Tone.current.streakAtRisk(currentStreak),
+
+
+      scheduledDate: scheduledDate,
+
+
+      notificationDetails: const NotificationDetails(
         android: AndroidNotificationDetails(
           'streak_reminder_channel',
           'Streak Reminders',
@@ -532,52 +679,49 @@ class NotificationService {
   }
 
   static Future<void> cancelStreakReminder() async {
-    await _plugin.cancel(3);
+    await _plugin.cancel(id: 3);
   }
 
   static Future<void> showAchievementUnlocked(String title, int xp) async {
+    final body = Tone.appL10n?.notif_achievementBody(title, xp) ?? '$title — that\'s +$xp XP for you';
     await showLocalNotification(
-      id: 200,
+      id: DateTime.now().microsecondsSinceEpoch % 100000000,
       title: Tone.appL10n?.notif_niceOneTitle ?? '🏆 Nice one!',
-      body: '$title — that\'s +$xp XP for you',
+      body: body,
       payload: 'achievements',
       bypassThrottle: true,
     );
     await _logToDatabase(
-      '🏆 Nice one!',
-      '$title — that\'s +$xp XP for you',
+      Tone.appL10n?.notif_niceOneTitle ?? '🏆 Nice one!',
+      body,
       'achievement',
     );
   }
 
   static Future<void> showLevelUp(int newLevel) async {
+    final body = Tone.appL10n?.notif_levelUpBody ?? 'You just leveled up — keep going!';
+    final title = Tone.appL10n?.notif_levelUpTitle(newLevel) ?? '🎉 Level $newLevel!';
     await showLocalNotification(
-      id: 201,
-      title: Tone.appL10n?.notif_levelUpTitle(newLevel) ?? '🎉 Level $newLevel!',
-      body: 'You just leveled up — keep going!',
+      id: DateTime.now().microsecondsSinceEpoch % 100000000,
+      title: title,
+      body: body,
       payload: 'achievements',
       bypassThrottle: true,
     );
-    await _logToDatabase(
-      '🎉 Level Up!',
-      'Congratulations! You are now Level $newLevel',
-      'level_up',
-    );
+    await _logToDatabase(title, body, 'level_up');
   }
 
   static Future<void> showStreakMilestone(int days) async {
+    final body = Tone.appL10n?.notif_streakMilestoneBody ?? 'That\'s dedication — your streak is on fire';
+    final title = Tone.appL10n?.notif_streakDaysTitle(days) ?? '🔥 $days days straight!';
     await showLocalNotification(
-      id: 202,
-      title: Tone.appL10n?.notif_streakDaysTitle(days) ?? '🔥 $days days straight!',
-      body: 'That\'s dedication — your streak is on fire',
+      id: DateTime.now().microsecondsSinceEpoch % 100000000,
+      title: title,
+      body: body,
       payload: 'achievements',
       bypassThrottle: true,
     );
-    await _logToDatabase(
-      '🔥 Streak Milestone!',
-      'Amazing! You have a $days-day streak',
-      'streak',
-    );
+    await _logToDatabase(title, body, 'streak');
   }
 
   static Future<void> _logToDatabase(

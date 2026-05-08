@@ -10,7 +10,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get onboard_manageYourMoneyDescription =>
-      'টাকা-পয়সা smart ভাবে manage করুন, ঝামেলা ছাড়াই।';
+      '100% offline। Hindi, Bengali, English। India-র জন্য তৈরি।';
 
   @override
   String onboard_welcomeToApp(Object appName) {
@@ -18,17 +18,18 @@ class AppLocalizationsBn extends AppLocalizations {
   }
 
   @override
-  String get onboard_TrackYourTransactions => 'খরচ track করুন';
+  String get onboard_TrackYourTransactions => 'Bank SMS থেকে Auto-track';
 
   @override
-  String get onboard_SeeWhereYourMoneyGoes => 'টাকা কোথায় যাচ্ছে, রোজ দেখুন।';
+  String get onboard_SeeWhereYourMoneyGoes =>
+      '50+ Indian bank support। HDFC, SBI, ICICI, Paytm, GPay — auto-import।';
 
   @override
-  String get onboard_SetBudgetsAndGoals => 'Budget আর Goals সেট করুন';
+  String get onboard_SetBudgetsAndGoals => 'Budget, Goals ও Smart Alerts';
 
   @override
   String get onboard_stayOnTrackAndAchieveYourDream =>
-      'Track-এ থাকুন, স্বপ্ন পূরণ করুন।';
+      'Overspend-এর আগে warning। যা দরকার তার জন্য save করুন।';
 
   @override
   String get onboard_GetStarted => 'চলুন শুরু করি!';
@@ -855,6 +856,18 @@ class AppLocalizationsBn extends AppLocalizations {
   String get transaction_editTransactionTitle => 'লেনদেন সম্পাদনা করুন';
 
   @override
+  String get transaction_addExpenseTitle => 'খরচ যোগ করুন';
+
+  @override
+  String get transaction_addIncomeTitle => 'আয় যোগ করুন';
+
+  @override
+  String get transaction_accountRequired => 'Account বেছে নিন';
+
+  @override
+  String get transaction_categoryRequired => 'Category বেছে নিন';
+
+  @override
   String get transaction_dateLabel => 'তারিখ';
 
   @override
@@ -963,6 +976,9 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get common_reset => 'রিসেট';
+
+  @override
+  String get common_viewDetails => 'বিস্তারিত দেখুন';
 
   @override
   String get common_apply => 'প্রযোগ';
@@ -1328,6 +1344,18 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get utility_addUtilities => 'উপযোগিতা যোগ করুন';
+
+  @override
+  String get utility_analyticsSubtitle => 'Health score, trends ও forecasts';
+
+  @override
+  String get utility_cashFlowSubtitle => 'Income vs খরচ-এর projection';
+
+  @override
+  String get utility_spendingTrendsSubtitle => 'Category-wise খরচের patterns';
+
+  @override
+  String get utility_taxSubtitle => 'Income tax-এর আনুমানিক হিসাব';
 
   @override
   String get profile_accounts => 'অ্যাকাউন্ট';
@@ -2771,6 +2799,122 @@ class AppLocalizationsBn extends AppLocalizations {
   String get notif_fewDaysUntrackedTitle => '📊 কয়েকদিন untracked';
 
   @override
+  String notif_budgetExceededBody(String name) {
+    return '$name budget পার হয়ে গেছে — check করুন';
+  }
+
+  @override
+  String notif_budgetExceededBodyMulti(String names) {
+    return '$names budget পার হয়ে গেছে';
+  }
+
+  @override
+  String notif_budgetWarningBody(String name) {
+    return '$name limit-এর কাছাকাছি';
+  }
+
+  @override
+  String notif_budgetWarningBodyMulti(String names) {
+    return '$names limit-এর কাছাকাছি';
+  }
+
+  @override
+  String notif_budgetWarningPctBody(String name, String pct) {
+    return '$name: $pct% খরচ';
+  }
+
+  @override
+  String notif_billPaidAutoTitle(String name) {
+    return '✅ $name — auto-match হয়েছে';
+  }
+
+  @override
+  String notif_billPaidRecordedTitle(String name) {
+    return '✅ $name — record হয়েছে';
+  }
+
+  @override
+  String get notif_smsLoggedTitle => '✅ Transaction save হয়েছে';
+
+  @override
+  String get notif_smsNeedsReviewTitle => '👀 Review করুন';
+
+  @override
+  String notif_smsLoggedBody(String amount, String sender) {
+    return '$sender থেকে $amount — auto-save হয়েছে';
+  }
+
+  @override
+  String notif_smsLoggedBodyNoAmount(String sender) {
+    return '$sender থেকে — auto-save হয়েছে';
+  }
+
+  @override
+  String notif_smsNeedsReviewBody(String sender) {
+    return '$sender থেকে transaction — tap করে দেখুন';
+  }
+
+  @override
+  String get notif_smsGotItTitle => '✅ হয়ে গেছে!';
+
+  @override
+  String get notif_smsAllCaughtUpTitle => '✅ সব হয়ে গেছে!';
+
+  @override
+  String get notif_smsAlmostThereTitle => '📋 প্রায় হয়ে গেছে!';
+
+  @override
+  String get notif_smsNeedHelpTitle => '👋 একটু help চাই!';
+
+  @override
+  String notif_streakOnLineTitle(int days) {
+    return '🔥 $days দিনের streak দাঁড়ে!';
+  }
+
+  @override
+  String get notif_quickActionTitle => '⚡ মাত্র 5 second-এর কাজ';
+
+  @override
+  String get notif_dailyReminderTitle => '📊 আপনার দিন numbers-এ';
+
+  @override
+  String get notif_dailyReminderBody => 'গতকাল কেমন ছিল — একটু দেখুন';
+
+  @override
+  String get notif_weeklyReminderTitle => '📅 সপ্তাহ শেষ';
+
+  @override
+  String get notif_weeklyReminderBody => 'সপ্তাহের হাল দেখুন — tap করুন';
+
+  @override
+  String get notif_goalStatusTitle => '🎯 Goal Status';
+
+  @override
+  String notif_goalStatusBody(int count, String name, String pct) {
+    return 'আপনার $countটি goal active। $name $pct% complete!';
+  }
+
+  @override
+  String notif_streakCountingTitle(int days) {
+    return '🔥 $days দিন এবং counting!';
+  }
+
+  @override
+  String notif_achievementBody(String title, int xp) {
+    return '$title — +$xp XP পেলেন!';
+  }
+
+  @override
+  String get notif_levelUpBody => 'Level up হয়েছে — চালিয়ে যান!';
+
+  @override
+  String get notif_streakMilestoneBody =>
+      'দারুণ dedication — streak fire-এ আছে 🔥';
+
+  @override
+  String get notif_weeklyZeroBody => 'এই সপ্তাহে zero খরচ — impressive 💪';
+
+  @override
   String get insight_moneyLeakTitle => 'চুপচাপ টাকা বেরিয়ে যাচ্ছে 💧';
 
   @override
@@ -2909,7 +3053,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get goal_smartInsight => 'Smart তথ্য';
 
   @override
-  String get goal_onTrack => 'ঠিক চলছে ✅';
+  String get goal_onTrack => 'ঠিক চলছে';
 
   @override
   String get goal_onTrackDesc => 'এই goal সহজেই অর্জনযোগ্য 👍';
@@ -3173,6 +3317,11 @@ class AppLocalizationsBn extends AppLocalizations {
       'কিছু categories মুছে ফেলা হয়েছে। ঠিক করতে budget edit করুন।';
 
   @override
+  String budget_pastBudgets(int count) {
+    return '$countটি আগের budget';
+  }
+
+  @override
   String get category_categoryName => 'শ্রেণীর নাম';
 
   @override
@@ -3371,6 +3520,16 @@ class AppLocalizationsBn extends AppLocalizations {
   String get txnList_clearDateRange => 'তারিখ সীমা মুছুন';
 
   @override
+  String get txnList_convertToTransfer => 'Transfer-এ বদলান';
+
+  @override
+  String get txnList_convertToTransferDesc =>
+      'এটা আসলে আপনার accounts-এর মধ্যে transfer ছিল';
+
+  @override
+  String get txnList_convertedToTransfer => 'Transfer-এ বদলানো হয়েছে';
+
+  @override
   String get stats_today => 'আজ';
 
   @override
@@ -3390,12 +3549,6 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get stats_overview => 'সারসংক্ষেপ';
-
-  @override
-  String get stats_income => 'আয়';
-
-  @override
-  String get stats_expense => 'খরচ';
 
   @override
   String get stats_trends => 'প্রবণতা';
@@ -3461,6 +3614,12 @@ class AppLocalizationsBn extends AppLocalizations {
   String get stats_categoryImpact => 'CATEGORY প্রভাব';
 
   @override
+  String get stats_income => 'আয়';
+
+  @override
+  String get stats_expense => 'খরচ';
+
+  @override
   String get stats_net => 'নেট';
 
   @override
@@ -3496,15 +3655,6 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get stats_generating => 'তৈরি হচ্ছে...';
-
-  @override
-  String get recap_income => 'আয়';
-
-  @override
-  String get recap_expense => 'খরচ';
-
-  @override
-  String get recap_saved => 'সঞ্চিত';
 
   @override
   String get recap_belowAvg => 'গড়ের নিচে';
@@ -3749,6 +3899,15 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get day_sunday => 'রবিবার';
+
+  @override
+  String get recap_income => 'আয়';
+
+  @override
+  String get recap_expense => 'খরচ';
+
+  @override
+  String get recap_saved => 'সঞ্চিত';
 
   @override
   String get recap_dailySpending => 'দৈনিক খরচ';
@@ -4555,7 +4714,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String notifSettings_activeCount(int count) {
-    return '৩ এর মধ্যে $count সক্রিয়';
+    return '৫ এর মধ্যে $count সক্রিয়';
   }
 
   @override
@@ -4772,6 +4931,9 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get goal_finishGoal => 'এই goal শেষ করুন! 🚀';
+
+  @override
+  String get goal_onTrackStatus => 'ঠিক চলছে ✅';
 
   @override
   String get goal_behindPace => 'পিছিয়ে পড়ছে ⚠️';
@@ -5281,4 +5443,705 @@ class AppLocalizationsBn extends AppLocalizations {
   String dashboard_accountsTapExpand(int count) {
     return '$count accounts · Tap করুন';
   }
+
+  @override
+  String get notif_lowBalanceTitle => '⚠️ Balance কম';
+
+  @override
+  String notif_lowBalanceBody(String account, String amount) {
+    return '$account-এ মাত্র $amount বাকি আছে';
+  }
+
+  @override
+  String get achieve_unlocked => 'Unlock হয়েছে';
+
+  @override
+  String get achieve_inProgress => 'চলছে';
+
+  @override
+  String get achieve_trophyShelf => 'Trophy Shelf';
+
+  @override
+  String get achieve_streaks => 'Streaks';
+
+  @override
+  String get achieve_totalXP => 'Total XP';
+
+  @override
+  String get achieve_dailyCheckIn => 'Daily Check-in';
+
+  @override
+  String get achieve_budgetAdherence => 'Budget মেনে চলা';
+
+  @override
+  String achieve_bestDays(int count) {
+    return 'Best: $count দিন';
+  }
+
+  @override
+  String achieve_noBadgesYet(String category) {
+    return 'এখনও কোনো $category badge নেই';
+  }
+
+  @override
+  String achieve_levelUpSnack(int level) {
+    return '🎉 Level Up! আপনি Level $level-এ!';
+  }
+
+  @override
+  String achieve_levelLabel(int level) {
+    return 'Level $level';
+  }
+
+  @override
+  String get achieve_catBudgeting => 'Budgeting';
+
+  @override
+  String get achieve_catSavings => 'সঞ্চয়';
+
+  @override
+  String get achieve_catTracking => 'Tracking';
+
+  @override
+  String get achieve_catMilestones => 'Milestones';
+
+  @override
+  String get achieve_catEngagement => 'Engagement';
+
+  @override
+  String get achieve_catAll => 'সব';
+
+  @override
+  String get alert_actionNeeded => 'Action দরকার';
+
+  @override
+  String alert_billsDueTomorrow(int count) {
+    return 'আগামীকাল $countটি bill due';
+  }
+
+  @override
+  String get alert_upcomingBills => 'আসন্ন Bills';
+
+  @override
+  String alert_billsDueInDays(int count) {
+    return '2 দিনে $countটি bill due';
+  }
+
+  @override
+  String get alert_budgetAlert => 'Budget Alert';
+
+  @override
+  String alert_budgetsExceeded(int count) {
+    return '$countটি budget পার হয়েছে';
+  }
+
+  @override
+  String get alert_budgetWarning => 'Budget Warning';
+
+  @override
+  String alert_budgetsNearLimit(int count) {
+    return '$countটি budget limit-এর কাছে';
+  }
+
+  @override
+  String get alert_goalProgress => 'Goal Progress';
+
+  @override
+  String alert_goalsAlmostComplete(int count) {
+    return '$countটি goal প্রায় শেষ!';
+  }
+
+  @override
+  String get analytics_cashFlowForecast => 'Cash Flow পূর্বাভাস';
+
+  @override
+  String get analytics_thisMonthProjected => 'এই মাসে (অনুমানিত)';
+
+  @override
+  String get analytics_savingOnAverage => 'গড়ে সঞ্চয় হচ্ছে';
+
+  @override
+  String get analytics_spendingExceedsIncome => 'খরচ income-এর চেয়ে বেশি';
+
+  @override
+  String get health_scoreBreakdown => 'Score Breakdown';
+
+  @override
+  String get health_savings => 'Savings';
+
+  @override
+  String get health_spending => 'Spending';
+
+  @override
+  String get health_debt => 'ঋণ';
+
+  @override
+  String get health_emergency => 'Emergency Fund';
+
+  @override
+  String get health_liquidityRunway => 'Liquidity Runway';
+
+  @override
+  String health_balanceCoversMonths(String months) {
+    return 'আপনার balance $months মাসের খরচ cover করে';
+  }
+
+  @override
+  String get health_days => 'দিন';
+
+  @override
+  String health_nDays(String n) {
+    return '$n দিন';
+  }
+
+  @override
+  String get health_safe => 'Safe';
+
+  @override
+  String get health_moderate => 'মাঝামাঝি';
+
+  @override
+  String get health_risk => 'Risk';
+
+  @override
+  String get health_categoryHealth => 'Category Health';
+
+  @override
+  String get health_stable => 'Stable →';
+
+  @override
+  String get health_high => 'বেশি ↑';
+
+  @override
+  String get health_reduced => 'কম ↓';
+
+  @override
+  String get health_whatYouCanDo => 'কী করতে পারেন';
+
+  @override
+  String get health_verdictExcellent => 'অসাধারণ অবস্থায়';
+
+  @override
+  String get health_verdictGood => 'সঠিক track-এ আছেন';
+
+  @override
+  String get health_verdictFair => 'উন্নতির সুযোগ আছে';
+
+  @override
+  String get health_verdictPoor => 'মনোযোগ দরকার';
+
+  @override
+  String get health_of100 => 'এর মধ্যে 100';
+
+  @override
+  String get health_errorLoading => 'Health data load হয়নি';
+
+  @override
+  String get analytics_cashFlowTitle => 'Cash Flow পূর্বাভাস';
+
+  @override
+  String get analytics_currentMonth => 'এই মাসে';
+
+  @override
+  String get analytics_projected => 'Projected';
+
+  @override
+  String get analytics_forecast3Month => '3 মাসের Forecast';
+
+  @override
+  String get analytics_monthlyNet => 'Monthly Net';
+
+  @override
+  String get analytics_income => 'Income';
+
+  @override
+  String get analytics_expense => 'Expense';
+
+  @override
+  String get analytics_net => 'Net';
+
+  @override
+  String get analytics_avgMonthlyNet => 'Avg Monthly Net';
+
+  @override
+  String get analytics_noForecastData => 'Forecast-এর জন্য যথেষ্ট data নেই';
+
+  @override
+  String get analytics_spendingTrendsTitle => 'Spending Trends';
+
+  @override
+  String get analytics_predictedNextMonth => 'পরের মাসের অনুমান';
+
+  @override
+  String get analytics_anomaly => 'Anomaly';
+
+  @override
+  String get analytics_vsLastMonth => 'গত মাসের তুলনায়';
+
+  @override
+  String get analytics_risingCategories => 'বাড়তি Categories';
+
+  @override
+  String get analytics_anomalyCategories => 'Anomaly Detected';
+
+  @override
+  String get analytics_allCategories => 'সব Categories';
+
+  @override
+  String get analytics_noTrendData => 'Trends-এর জন্য যথেষ্ট data নেই';
+
+  @override
+  String get recap_vsLastYear => 'গত বছরের তুলনায়';
+
+  @override
+  String get common_income => 'আয়';
+
+  @override
+  String get common_expense => 'খরচ';
+
+  @override
+  String get common_transactions => 'Transactions';
+
+  @override
+  String get tax_title => 'Tax Estimation';
+
+  @override
+  String get tax_projected => 'Projected (বছর এখনও চলছে)';
+
+  @override
+  String get tax_estimatedTax => 'আনুমানিক Tax';
+
+  @override
+  String get tax_effectiveRate => 'Effective Rate';
+
+  @override
+  String get tax_monthlyTax => 'Monthly';
+
+  @override
+  String tax_fyProgress(int elapsed, int total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      elapsed,
+      locale: localeName,
+      other: 'দিন',
+      one: 'দিন',
+    );
+    return '$total-এর মধ্যে $elapsed $_temp0';
+  }
+
+  @override
+  String get tax_slabBreakdown => 'Slab Breakdown';
+
+  @override
+  String get tax_totalSlabTax => 'মোট Slab Tax';
+
+  @override
+  String get tax_computation => 'Tax Computation';
+
+  @override
+  String get tax_grossIncome => 'মোট আয়';
+
+  @override
+  String get tax_standardDeduction => 'Standard Deduction';
+
+  @override
+  String get tax_taxableIncome => 'Taxable Income';
+
+  @override
+  String get tax_baseTax => 'Income-এর উপর Tax';
+
+  @override
+  String get tax_rebate87A => 'Rebate u/s 87A';
+
+  @override
+  String get tax_cess => 'Health & Education Cess (4%)';
+
+  @override
+  String get tax_totalTax => 'মোট Tax দিতে হবে';
+
+  @override
+  String get tax_incomeBreakdown => 'Income Sources';
+
+  @override
+  String get tax_disclaimer =>
+      'এটি New Tax Regime (FY 2025-26) অনুযায়ী একটি আনুমানিক হিসাব। আসল tax আলাদা হতে পারে। সঠিক filing-এর জন্য tax professional-এর সাথে কথা বলুন।';
+
+  @override
+  String get tax_noData => 'Tax estimate-এর জন্য যথেষ্ট data নেই';
+
+  @override
+  String get tax_viewDetails => 'Tax Estimate দেখুন';
+
+  @override
+  String get tax_zeroTax => 'কোনো tax নেই 🎉';
+
+  @override
+  String get tax_newRegime => 'New Regime';
+
+  @override
+  String get tax_oldRegime => 'Old Regime';
+
+  @override
+  String get tax_regimeComparison => 'কোন Regime-এ বেশি সাশ্রয়?';
+
+  @override
+  String tax_regimeSavings(String regime) {
+    return '$regime-এ সাশ্রয়';
+  }
+
+  @override
+  String get tax_oldRegimeDisclaimer =>
+      'Old Regime estimate শুধু standard deduction-এর উপর। HRA, 80C, 80D deductions থাকলে সাশ্রয় আরও বেশি হতে পারে।';
+
+  @override
+  String get category_merge => 'Category merge করুন';
+
+  @override
+  String get category_mergeInto => 'এটাতে merge করুন';
+
+  @override
+  String get category_mergeConfirm => 'Merge';
+
+  @override
+  String category_mergePreview(int count, String target) {
+    return '$countটি item $target-এ move হবে';
+  }
+
+  @override
+  String get category_mergeSuccess => 'Categories merge হয়ে গেছে ✅';
+
+  @override
+  String get category_mergeSameError => 'একই category-তে merge করা যাবে না';
+
+  @override
+  String get category_mergeSelectTarget => 'Target category বেছে নিন';
+
+  @override
+  String get notif_morningInsightTitle => '☀️ সকালের টাকার update';
+
+  @override
+  String get notif_weeklyRecapNudgeTitle => '📊 সপ্তাহের recap তৈরি';
+
+  @override
+  String get notif_yesterdaySpendTitle => '💰 গতকালের খরচ';
+
+  @override
+  String get notif_weeklyRecapReadyTitle => '📊 Weekly recap অপেক্ষা করছে';
+
+  @override
+  String notif_underBudgetStreakTitle(int days) {
+    return '🔥 $days দিন budget-এর মধ্যে!';
+  }
+
+  @override
+  String get dashboard_bgSyncIssueTitle => 'Background sync-এ সমস্যা হতে পারে';
+
+  @override
+  String get dashboard_bgSyncIssueDesc =>
+      'Bills ও alerts-এ দেরি হতে পারে। App আবার খুলুন।';
+
+  @override
+  String get onboard_whatDidYouSpend => 'আজ কী খরচ করেছেন?';
+
+  @override
+  String get onboard_addFewToStart =>
+      'কিছু add করুন — dashboard সাথে সাথে live হয়ে যাবে';
+
+  @override
+  String get onboard_skipAddLater => 'Skip — পরে করব';
+
+  @override
+  String get onboard_starterCoffee => 'চা / Coffee';
+
+  @override
+  String get onboard_starterTransport => 'Transport';
+
+  @override
+  String get onboard_starterLunch => 'খাবার';
+
+  @override
+  String get onboard_starterGroceries => 'Groceries';
+
+  @override
+  String onboard_starterAdded(int count) {
+    return '$countটি expense add হয়েছে!';
+  }
+
+  @override
+  String get dashboard_listeningTitle => 'Transactions শুনছি...';
+
+  @override
+  String get dashboard_waitingForSms =>
+      'পরের bank notification এখানে আপনা আপনি চলে আসবে';
+
+  @override
+  String get dashboard_meanwhile => 'এতোমধ্যে, try করুন:';
+
+  @override
+  String get dashboard_addExpense => 'Expense Add করুন';
+
+  @override
+  String get dashboard_setBudget => 'Budget তৈরি করুন';
+
+  @override
+  String get dashboard_createGoal => 'Goal তৈরি করুন';
+
+  @override
+  String get dashboard_addAccount => 'Account যোগ করুন';
+
+  @override
+  String get dashboard_testTip =>
+      '💡 Tip: একটি ছোট UPI payment পাঠান — auto-import দেখুন!';
+
+  @override
+  String get dashboard_addFirstExpense => 'প্রথম খরচ add করুন';
+
+  @override
+  String get dashboard_addFirstExpenseDesc => 'আজ কী খরচ করেছেন? Tap করে বলুন';
+
+  @override
+  String get quickAdd_title => 'Quick Add';
+
+  @override
+  String get quickAdd_recentCategories => 'Recent categories';
+
+  @override
+  String get quickAdd_moreOptions => 'আরও options';
+
+  @override
+  String get mode_simple => 'Simple';
+
+  @override
+  String get mode_full => 'Full';
+
+  @override
+  String get mode_simpleDesc => 'Expenses, budgets ও SMS tracking';
+
+  @override
+  String get mode_fullDesc => 'সবকিছু — trips, goals, analytics, gamification';
+
+  @override
+  String get mode_switchToFull => 'Full Mode-এ যান';
+
+  @override
+  String get mode_switchToSimple => 'Simple Mode-এ যান';
+
+  @override
+  String get mode_pickTitle => 'Mudra কীভাবে use করতে চান?';
+
+  @override
+  String get mode_pickDesc => 'পরে settings থেকে বদলাতে পারবেন';
+
+  @override
+  String get backup_cloudBackup => 'Cloud Backup';
+
+  @override
+  String get backup_cloudRestore => 'Cloud থেকে Restore করুন';
+
+  @override
+  String get backup_signInGoogle => 'Google দিয়ে Sign in করুন';
+
+  @override
+  String backup_signedInAs(String email) {
+    return '$email দিয়ে signed in';
+  }
+
+  @override
+  String get backup_uploadingToDrive => 'Google Drive-এ upload হচ্ছে...';
+
+  @override
+  String get backup_uploadSuccess => 'Backup Google Drive-এ upload হয়েছে';
+
+  @override
+  String get backup_uploadFailed => 'Backup upload হয়নি';
+
+  @override
+  String get backup_cloudBackups => 'Cloud Backups';
+
+  @override
+  String get backup_noCloudBackups => 'কোনো cloud backup পাওয়া যায়নি';
+
+  @override
+  String get backup_downloading => 'Google Drive থেকে download হচ্ছে...';
+
+  @override
+  String get backup_signInRequired =>
+      'Cloud backup-এর জন্য Google দিয়ে sign in করুন';
+
+  @override
+  String get backup_signOut => 'Sign out';
+
+  @override
+  String get backup_cloudSubtitle => 'Google Drive-এ encrypted backup';
+
+  @override
+  String get backup_autoBackup => 'Auto Backup';
+
+  @override
+  String get backup_autoBackupDesc => 'Automatic local backup, শেষ 7 দিন রাখে';
+
+  @override
+  String get backup_autoFrequency => 'Backup frequency';
+
+  @override
+  String get backup_autoNever => 'Off';
+
+  @override
+  String get backup_autoDaily => 'Daily';
+
+  @override
+  String get backup_autoWeekly => 'Weekly';
+
+  @override
+  String get backup_autoSetPassword => 'Auto backup-এর জন্য password set করুন';
+
+  @override
+  String backup_autoEnabled(String frequency) {
+    return 'Auto backup on ($frequency)';
+  }
+
+  @override
+  String backup_autoLastRun(String date) {
+    return 'শেষ auto backup: $date';
+  }
+
+  @override
+  String get backup_passwordSet => 'Backup password set হয়েছে';
+
+  @override
+  String get backup_proRequired => 'Pro feature';
+
+  @override
+  String get onboard_skip => 'Skip করুন';
+
+  @override
+  String get onboard_languages => 'ভাষা';
+
+  @override
+  String get onboard_smartTrackingMergedDesc =>
+      'Bank SMS থেকে auto-import, budget তৈরি করুন, goals track করুন — সব এক জায়গায়।';
+
+  @override
+  String get sms_celebrationTitle => 'প্রথম SMS transaction! 🎉';
+
+  @override
+  String get sms_celebrationBody =>
+      'Mudra আপনার bank SMS থেকে নিজে থেকেই transaction save করেছে। এখন থেকে খরচ আপনা আপনি track হবে।';
+
+  @override
+  String get sms_celebrationCta => 'চলো, শুরু করি!';
+
+  @override
+  String get milestone_shareButton => 'Story-তে Share করুন';
+
+  @override
+  String get milestone_goalReachedTitle => 'Goal সম্পূর্ণ!';
+
+  @override
+  String milestone_goalReachedDesc(String amount) {
+    return '$amount সেভ করে target পূরণ করেছেন 🌟';
+  }
+
+  @override
+  String milestone_streakTitle(int days) {
+    return '$days দিনের Streak!';
+  }
+
+  @override
+  String milestone_streakDesc(int days) {
+    return 'লাগাতার $days দিন খরচ track করেছেন';
+  }
+
+  @override
+  String get milestone_underBudgetTitle => 'Budget-এর মধ্যে!';
+
+  @override
+  String get milestone_underBudgetDesc => 'পুরো মাস budget-এর মধ্যে ছিলেন 💪';
+
+  @override
+  String get account_creditLimit => 'Credit Limit';
+
+  @override
+  String get account_statementDay => 'Statement Day';
+
+  @override
+  String get account_dueDay => 'Due Day';
+
+  @override
+  String account_daysUntilDue(int days) {
+    return '$days দিন বাকি';
+  }
+
+  @override
+  String get account_dueToday => 'আজ due!';
+
+  @override
+  String account_overdue(int days) {
+    return '$days দিন overdue';
+  }
+
+  @override
+  String get subscription_title => 'Subscriptions ধরা পড়েছে';
+
+  @override
+  String subscription_monthlyTotal(String amount) {
+    return 'প্রতি মাসে $amount';
+  }
+
+  @override
+  String subscription_occurrences(int count) {
+    return '4 মাসে $count বার';
+  }
+
+  @override
+  String get subscription_none => 'এখনও কোনো subscription detect হয়নি';
+
+  @override
+  String subscription_dayOfMonth(int day) {
+    return 'প্রতি মাসে $day তারিখের আশেপাশে';
+  }
+
+  @override
+  String get subscription_trackAsRecurring =>
+      'Recurring bill হিসেবে track করুন';
+
+  @override
+  String get cc_title => 'Credit Card Bills';
+
+  @override
+  String get cc_totalOutstanding => 'মোট বকেয়া';
+
+  @override
+  String cc_acrossCards(int count) {
+    return '$count টি card-এ';
+  }
+
+  @override
+  String get cc_noCards => 'কোনো credit card নেই';
+
+  @override
+  String get cc_noCardsHint => 'Bills track করতে credit card account যোগ করুন';
+
+  @override
+  String get cc_minimumDue => 'Min. Due';
+
+  @override
+  String get cc_cycleSpend => 'Cycle খরচ';
+
+  @override
+  String get cc_utilization => 'Credit Utilization';
+
+  @override
+  String get cc_nextStatement => 'Statement';
+
+  @override
+  String get cc_nextDue => 'Due';
+
+  @override
+  String get cc_payMinimum => 'Minimum দিন';
+
+  @override
+  String get cc_payFull => 'পুরোটা দিন';
+
+  @override
+  String get cc_utilitySubtitle => 'Due dates, বকেয়া ও limits';
 }

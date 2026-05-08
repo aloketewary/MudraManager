@@ -109,6 +109,7 @@ class AchievementCard extends StatelessWidget {
                         ),
                       ),
                     Image.asset(
+                      semanticLabel: 'Decorative image',
                       'assets/icons/100/${achievement.icon}.png',
                       width: 34,
                       height: 34,
@@ -200,6 +201,7 @@ class AchievementCard extends StatelessWidget {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(3),
                       child: LinearProgressIndicator(
+                        semanticsLabel: 'Progress',
                         value: progress,
                         minHeight: 4,
                         backgroundColor:
@@ -364,6 +366,7 @@ class _AchievementShowcase extends StatelessWidget {
                         ),
                         child: Center(
                           child: Image.asset(
+                            semanticLabel: 'Decorative image',
                             'assets/icons/100/${achievement.icon}.png',
                             width: 64,
                             height: 64,
@@ -463,6 +466,7 @@ class _AchievementShowcase extends StatelessWidget {
                         ClipRRect(
                           borderRadius: BorderRadius.circular(4),
                           child: LinearProgressIndicator(
+                            semanticsLabel: 'Progress',
                             value: progress,
                             minHeight: 6,
                             backgroundColor:

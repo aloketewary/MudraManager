@@ -5,9 +5,43 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
+import 'app_localizations_ar.dart';
+import 'app_localizations_as.dart';
 import 'app_localizations_bn.dart';
+import 'app_localizations_bo.dart';
+import 'app_localizations_brx.dart';
+import 'app_localizations_de.dart';
+import 'app_localizations_doi.dart';
 import 'app_localizations_en.dart';
+import 'app_localizations_es.dart';
+import 'app_localizations_fr.dart';
+import 'app_localizations_gu.dart';
 import 'app_localizations_hi.dart';
+import 'app_localizations_id.dart';
+import 'app_localizations_ja.dart';
+import 'app_localizations_kn.dart';
+import 'app_localizations_ko.dart';
+import 'app_localizations_kok.dart';
+import 'app_localizations_mai.dart';
+import 'app_localizations_ml.dart';
+import 'app_localizations_mni.dart';
+import 'app_localizations_mr.dart';
+import 'app_localizations_ms.dart';
+import 'app_localizations_ne.dart';
+import 'app_localizations_or.dart';
+import 'app_localizations_pa.dart';
+import 'app_localizations_pt.dart';
+import 'app_localizations_sat.dart';
+import 'app_localizations_sd.dart';
+import 'app_localizations_si.dart';
+import 'app_localizations_sw.dart';
+import 'app_localizations_ta.dart';
+import 'app_localizations_te.dart';
+import 'app_localizations_th.dart';
+import 'app_localizations_tr.dart';
+import 'app_localizations_ur.dart';
+import 'app_localizations_vi.dart';
+import 'app_localizations_zh.dart';
 
 // ignore_for_file: type=lint
 
@@ -95,15 +129,49 @@ abstract class AppLocalizations {
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
+    Locale('ar'),
+    Locale('as'),
     Locale('bn'),
+    Locale('bo'),
+    Locale('brx'),
+    Locale('de'),
+    Locale('doi'),
     Locale('en'),
-    Locale('hi')
+    Locale('es'),
+    Locale('fr'),
+    Locale('gu'),
+    Locale('hi'),
+    Locale('id'),
+    Locale('ja'),
+    Locale('kn'),
+    Locale('ko'),
+    Locale('kok'),
+    Locale('mai'),
+    Locale('ml'),
+    Locale('mni'),
+    Locale('mr'),
+    Locale('ms'),
+    Locale('ne'),
+    Locale('or'),
+    Locale('pa'),
+    Locale('pt'),
+    Locale('sat'),
+    Locale('sd'),
+    Locale('si'),
+    Locale('sw'),
+    Locale('ta'),
+    Locale('te'),
+    Locale('th'),
+    Locale('tr'),
+    Locale('ur'),
+    Locale('vi'),
+    Locale('zh')
   ];
 
   /// Manage your money smartly & effortlessly.
   ///
   /// In en, this message translates to:
-  /// **'Manage your money smartly & effortlessly.'**
+  /// **'100% offline. Your data never leaves your device.'**
   String get onboard_manageYourMoneyDescription;
 
   /// Welcome to Application
@@ -115,25 +183,25 @@ abstract class AppLocalizations {
   /// Track your Transactions
   ///
   /// In en, this message translates to:
-  /// **'Track your Transactions'**
+  /// **'Auto-track from Bank SMS'**
   String get onboard_TrackYourTransactions;
 
   /// See where your money goes, every day.
   ///
   /// In en, this message translates to:
-  /// **'See where your money goes, every day.'**
+  /// **'Auto-import from bank SMS & notifications. Works with 50+ banks.'**
   String get onboard_SeeWhereYourMoneyGoes;
 
   /// Set Budgets and Goals
   ///
   /// In en, this message translates to:
-  /// **'Set Budgets and Goals'**
+  /// **'Budgets, Goals & Smart Alerts'**
   String get onboard_SetBudgetsAndGoals;
 
   /// Stay on track and achieve your dreams.
   ///
   /// In en, this message translates to:
-  /// **'Stay on track and achieve your dreams.'**
+  /// **'Get warnings before you overspend. Save for what matters.'**
   String get onboard_stayOnTrackAndAchieveYourDream;
 
   /// Get Started!
@@ -1673,6 +1741,30 @@ abstract class AppLocalizations {
   /// **'Edit Transaction'**
   String get transaction_editTransactionTitle;
 
+  /// No description provided for @transaction_addExpenseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Expense'**
+  String get transaction_addExpenseTitle;
+
+  /// No description provided for @transaction_addIncomeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Income'**
+  String get transaction_addIncomeTitle;
+
+  /// No description provided for @transaction_accountRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Account is required'**
+  String get transaction_accountRequired;
+
+  /// No description provided for @transaction_categoryRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Category is required'**
+  String get transaction_categoryRequired;
+
   /// Label for date field
   ///
   /// In en, this message translates to:
@@ -1882,6 +1974,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reset'**
   String get common_reset;
+
+  /// No description provided for @common_viewDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'View details'**
+  String get common_viewDetails;
 
   /// No description provided for @common_apply.
   ///
@@ -2596,6 +2694,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add Utilities'**
   String get utility_addUtilities;
+
+  /// No description provided for @utility_analyticsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Health score, trends & forecasts'**
+  String get utility_analyticsSubtitle;
+
+  /// No description provided for @utility_cashFlowSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Income vs expense projections'**
+  String get utility_cashFlowSubtitle;
+
+  /// No description provided for @utility_spendingTrendsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Category-wise spending patterns'**
+  String get utility_spendingTrendsSubtitle;
+
+  /// No description provided for @utility_taxSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimate your income tax'**
+  String get utility_taxSubtitle;
 
   /// No description provided for @profile_accounts.
   ///
@@ -5020,6 +5142,180 @@ abstract class AppLocalizations {
   /// **'📊 A few days untracked'**
   String get notif_fewDaysUntrackedTitle;
 
+  /// No description provided for @notif_budgetExceededBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is over budget — time to review'**
+  String notif_budgetExceededBody(String name);
+
+  /// No description provided for @notif_budgetExceededBodyMulti.
+  ///
+  /// In en, this message translates to:
+  /// **'{names} are over budget'**
+  String notif_budgetExceededBodyMulti(String names);
+
+  /// No description provided for @notif_budgetWarningBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is nearing the limit'**
+  String notif_budgetWarningBody(String name);
+
+  /// No description provided for @notif_budgetWarningBodyMulti.
+  ///
+  /// In en, this message translates to:
+  /// **'{names} are nearing their limits'**
+  String notif_budgetWarningBodyMulti(String names);
+
+  /// No description provided for @notif_budgetWarningPctBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}: {pct}% used'**
+  String notif_budgetWarningPctBody(String name, String pct);
+
+  /// No description provided for @notif_billPaidAutoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'✅ {name} — auto-matched'**
+  String notif_billPaidAutoTitle(String name);
+
+  /// No description provided for @notif_billPaidRecordedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'✅ {name} — recorded'**
+  String notif_billPaidRecordedTitle(String name);
+
+  /// No description provided for @notif_smsLoggedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'✅ Transaction logged'**
+  String get notif_smsLoggedTitle;
+
+  /// No description provided for @notif_smsNeedsReviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'👀 Needs your review'**
+  String get notif_smsNeedsReviewTitle;
+
+  /// No description provided for @notif_smsLoggedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} from {sender} — auto-saved'**
+  String notif_smsLoggedBody(String amount, String sender);
+
+  /// No description provided for @notif_smsLoggedBodyNoAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'From {sender} — auto-saved'**
+  String notif_smsLoggedBodyNoAmount(String sender);
+
+  /// No description provided for @notif_smsNeedsReviewBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction from {sender} — tap to review'**
+  String notif_smsNeedsReviewBody(String sender);
+
+  /// No description provided for @notif_smsGotItTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'✅ Got it!'**
+  String get notif_smsGotItTitle;
+
+  /// No description provided for @notif_smsAllCaughtUpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'✅ All caught up!'**
+  String get notif_smsAllCaughtUpTitle;
+
+  /// No description provided for @notif_smsAlmostThereTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'📋 Almost there!'**
+  String get notif_smsAlmostThereTitle;
+
+  /// No description provided for @notif_smsNeedHelpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'👋 Hey, need your help!'**
+  String get notif_smsNeedHelpTitle;
+
+  /// No description provided for @notif_streakOnLineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'🔥 {days}-day streak on the line!'**
+  String notif_streakOnLineTitle(int days);
+
+  /// No description provided for @notif_quickActionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'⚡ 5 seconds is all it takes'**
+  String get notif_quickActionTitle;
+
+  /// No description provided for @notif_dailyReminderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'📊 Your day in numbers'**
+  String get notif_dailyReminderTitle;
+
+  /// No description provided for @notif_dailyReminderBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Here\'s how yesterday went — take a quick look'**
+  String get notif_dailyReminderBody;
+
+  /// No description provided for @notif_weeklyReminderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'📅 Your week wrapped up'**
+  String get notif_weeklyReminderTitle;
+
+  /// No description provided for @notif_weeklyReminderBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Let\'s see how the week went — tap to check'**
+  String get notif_weeklyReminderBody;
+
+  /// No description provided for @notif_goalStatusTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'🎯 Monthly Goal Status'**
+  String get notif_goalStatusTitle;
+
+  /// No description provided for @notif_goalStatusBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You have {count} active goals. {name} is {pct}% complete!'**
+  String notif_goalStatusBody(int count, String name, String pct);
+
+  /// No description provided for @notif_streakCountingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'🔥 {days} days and counting!'**
+  String notif_streakCountingTitle(int days);
+
+  /// No description provided for @notif_achievementBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{title} — that\'s +{xp} XP for you'**
+  String notif_achievementBody(String title, int xp);
+
+  /// No description provided for @notif_levelUpBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You just leveled up — keep going!'**
+  String get notif_levelUpBody;
+
+  /// No description provided for @notif_streakMilestoneBody.
+  ///
+  /// In en, this message translates to:
+  /// **'That\'s dedication — your streak is on fire'**
+  String get notif_streakMilestoneBody;
+
+  /// No description provided for @notif_weeklyZeroBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Zero expenses this week — that\'s impressive 💪'**
+  String get notif_weeklyZeroBody;
+
   /// No description provided for @insight_moneyLeakTitle.
   ///
   /// In en, this message translates to:
@@ -5293,7 +5589,7 @@ abstract class AppLocalizations {
   /// No description provided for @goal_onTrack.
   ///
   /// In en, this message translates to:
-  /// **'On Track ✅'**
+  /// **'On Track'**
   String get goal_onTrack;
 
   /// No description provided for @goal_onTrackDesc.
@@ -5752,6 +6048,12 @@ abstract class AppLocalizations {
   /// **'Some categories were deleted. Edit this budget to fix.'**
   String get budget_invalidCategories;
 
+  /// No description provided for @budget_pastBudgets.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} past {count, plural, =1{budget} other{budgets}}'**
+  String budget_pastBudgets(int count);
+
   /// No description provided for @category_categoryName.
   ///
   /// In en, this message translates to:
@@ -6124,6 +6426,24 @@ abstract class AppLocalizations {
   /// **'Clear Date Range'**
   String get txnList_clearDateRange;
 
+  /// No description provided for @txnList_convertToTransfer.
+  ///
+  /// In en, this message translates to:
+  /// **'Convert to Transfer'**
+  String get txnList_convertToTransfer;
+
+  /// No description provided for @txnList_convertToTransferDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'This was actually a transfer between your accounts'**
+  String get txnList_convertToTransferDesc;
+
+  /// No description provided for @txnList_convertedToTransfer.
+  ///
+  /// In en, this message translates to:
+  /// **'Converted to transfer'**
+  String get txnList_convertedToTransfer;
+
   /// No description provided for @stats_today.
   ///
   /// In en, this message translates to:
@@ -6165,18 +6485,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Overview'**
   String get stats_overview;
-
-  /// No description provided for @stats_income.
-  ///
-  /// In en, this message translates to:
-  /// **'Income'**
-  String get stats_income;
-
-  /// No description provided for @stats_expense.
-  ///
-  /// In en, this message translates to:
-  /// **'Expense'**
-  String get stats_expense;
 
   /// No description provided for @stats_trends.
   ///
@@ -6280,6 +6588,18 @@ abstract class AppLocalizations {
   /// **'CATEGORY IMPACT'**
   String get stats_categoryImpact;
 
+  /// No description provided for @stats_income.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get stats_income;
+
+  /// No description provided for @stats_expense.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense'**
+  String get stats_expense;
+
   /// No description provided for @stats_net.
   ///
   /// In en, this message translates to:
@@ -6345,24 +6665,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Generating...'**
   String get stats_generating;
-
-  /// No description provided for @recap_income.
-  ///
-  /// In en, this message translates to:
-  /// **'Income'**
-  String get recap_income;
-
-  /// No description provided for @recap_expense.
-  ///
-  /// In en, this message translates to:
-  /// **'Expense'**
-  String get recap_expense;
-
-  /// No description provided for @recap_saved.
-  ///
-  /// In en, this message translates to:
-  /// **'Saved'**
-  String get recap_saved;
 
   /// No description provided for @recap_belowAvg.
   ///
@@ -6813,6 +7115,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sunday'**
   String get day_sunday;
+
+  /// No description provided for @recap_income.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get recap_income;
+
+  /// No description provided for @recap_expense.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense'**
+  String get recap_expense;
+
+  /// No description provided for @recap_saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get recap_saved;
 
   /// No description provided for @recap_dailySpending.
   ///
@@ -8365,7 +8685,7 @@ abstract class AppLocalizations {
   /// No description provided for @notifSettings_activeCount.
   ///
   /// In en, this message translates to:
-  /// **'{count} of 3 active'**
+  /// **'{count} of 5 active'**
   String notifSettings_activeCount(int count);
 
   /// No description provided for @notifSettings_summaryDesc.
@@ -8727,6 +9047,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Finish this goal! 🚀'**
   String get goal_finishGoal;
+
+  /// No description provided for @goal_onTrackStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'On Track ✅'**
+  String get goal_onTrackStatus;
 
   /// No description provided for @goal_behindPace.
   ///
@@ -9621,6 +9947,1260 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} accounts · Tap to expand'**
   String dashboard_accountsTapExpand(int count);
+
+  /// No description provided for @notif_lowBalanceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'⚠️ Low Balance Alert'**
+  String get notif_lowBalanceTitle;
+
+  /// No description provided for @notif_lowBalanceBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your balance in {account} is {amount}'**
+  String notif_lowBalanceBody(String account, String amount);
+
+  /// No description provided for @achieve_unlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlocked'**
+  String get achieve_unlocked;
+
+  /// No description provided for @achieve_inProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In Progress'**
+  String get achieve_inProgress;
+
+  /// No description provided for @achieve_trophyShelf.
+  ///
+  /// In en, this message translates to:
+  /// **'Trophy Shelf'**
+  String get achieve_trophyShelf;
+
+  /// No description provided for @achieve_streaks.
+  ///
+  /// In en, this message translates to:
+  /// **'Streaks'**
+  String get achieve_streaks;
+
+  /// No description provided for @achieve_totalXP.
+  ///
+  /// In en, this message translates to:
+  /// **'Total XP'**
+  String get achieve_totalXP;
+
+  /// No description provided for @achieve_dailyCheckIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Check-in'**
+  String get achieve_dailyCheckIn;
+
+  /// No description provided for @achieve_budgetAdherence.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget Adherence'**
+  String get achieve_budgetAdherence;
+
+  /// No description provided for @achieve_bestDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Best: {count} days'**
+  String achieve_bestDays(int count);
+
+  /// No description provided for @achieve_noBadgesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No {category} badges yet'**
+  String achieve_noBadgesYet(String category);
+
+  /// No description provided for @achieve_levelUpSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'🎉 Level Up! You are now Level {level}!'**
+  String achieve_levelUpSnack(int level);
+
+  /// No description provided for @achieve_levelLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Level {level}'**
+  String achieve_levelLabel(int level);
+
+  /// No description provided for @achieve_catBudgeting.
+  ///
+  /// In en, this message translates to:
+  /// **'Budgeting'**
+  String get achieve_catBudgeting;
+
+  /// No description provided for @achieve_catSavings.
+  ///
+  /// In en, this message translates to:
+  /// **'Savings'**
+  String get achieve_catSavings;
+
+  /// No description provided for @achieve_catTracking.
+  ///
+  /// In en, this message translates to:
+  /// **'Tracking'**
+  String get achieve_catTracking;
+
+  /// No description provided for @achieve_catMilestones.
+  ///
+  /// In en, this message translates to:
+  /// **'Milestones'**
+  String get achieve_catMilestones;
+
+  /// No description provided for @achieve_catEngagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Engagement'**
+  String get achieve_catEngagement;
+
+  /// No description provided for @achieve_catAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get achieve_catAll;
+
+  /// No description provided for @alert_actionNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Action Needed'**
+  String get alert_actionNeeded;
+
+  /// No description provided for @alert_billsDueTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} bill(s) due tomorrow'**
+  String alert_billsDueTomorrow(int count);
+
+  /// No description provided for @alert_upcomingBills.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming Bills'**
+  String get alert_upcomingBills;
+
+  /// No description provided for @alert_billsDueInDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} bill(s) due in 2 days'**
+  String alert_billsDueInDays(int count);
+
+  /// No description provided for @alert_budgetAlert.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget Alert'**
+  String get alert_budgetAlert;
+
+  /// No description provided for @alert_budgetsExceeded.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} budget(s) exceeded'**
+  String alert_budgetsExceeded(int count);
+
+  /// No description provided for @alert_budgetWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget Warning'**
+  String get alert_budgetWarning;
+
+  /// No description provided for @alert_budgetsNearLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} budget(s) near limit'**
+  String alert_budgetsNearLimit(int count);
+
+  /// No description provided for @alert_goalProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal Progress'**
+  String get alert_goalProgress;
+
+  /// No description provided for @alert_goalsAlmostComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} goal(s) almost complete!'**
+  String alert_goalsAlmostComplete(int count);
+
+  /// No description provided for @analytics_cashFlowForecast.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash Flow Forecast'**
+  String get analytics_cashFlowForecast;
+
+  /// No description provided for @analytics_thisMonthProjected.
+  ///
+  /// In en, this message translates to:
+  /// **'This month (projected)'**
+  String get analytics_thisMonthProjected;
+
+  /// No description provided for @analytics_savingOnAverage.
+  ///
+  /// In en, this message translates to:
+  /// **'You are saving on average'**
+  String get analytics_savingOnAverage;
+
+  /// No description provided for @analytics_spendingExceedsIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Spending exceeds income'**
+  String get analytics_spendingExceedsIncome;
+
+  /// No description provided for @health_scoreBreakdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Score Breakdown'**
+  String get health_scoreBreakdown;
+
+  /// No description provided for @health_savings.
+  ///
+  /// In en, this message translates to:
+  /// **'Savings'**
+  String get health_savings;
+
+  /// No description provided for @health_spending.
+  ///
+  /// In en, this message translates to:
+  /// **'Spending'**
+  String get health_spending;
+
+  /// No description provided for @health_debt.
+  ///
+  /// In en, this message translates to:
+  /// **'Debt'**
+  String get health_debt;
+
+  /// No description provided for @health_emergency.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency'**
+  String get health_emergency;
+
+  /// No description provided for @health_liquidityRunway.
+  ///
+  /// In en, this message translates to:
+  /// **'Liquidity Runway'**
+  String get health_liquidityRunway;
+
+  /// No description provided for @health_balanceCoversMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'Your balance covers {months} months of expenses'**
+  String health_balanceCoversMonths(String months);
+
+  /// No description provided for @health_days.
+  ///
+  /// In en, this message translates to:
+  /// **'days'**
+  String get health_days;
+
+  /// No description provided for @health_nDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} days'**
+  String health_nDays(String n);
+
+  /// No description provided for @health_safe.
+  ///
+  /// In en, this message translates to:
+  /// **'Safe'**
+  String get health_safe;
+
+  /// No description provided for @health_moderate.
+  ///
+  /// In en, this message translates to:
+  /// **'Moderate'**
+  String get health_moderate;
+
+  /// No description provided for @health_risk.
+  ///
+  /// In en, this message translates to:
+  /// **'Risk'**
+  String get health_risk;
+
+  /// No description provided for @health_categoryHealth.
+  ///
+  /// In en, this message translates to:
+  /// **'Category Health'**
+  String get health_categoryHealth;
+
+  /// No description provided for @health_stable.
+  ///
+  /// In en, this message translates to:
+  /// **'Stable →'**
+  String get health_stable;
+
+  /// No description provided for @health_high.
+  ///
+  /// In en, this message translates to:
+  /// **'High ↑'**
+  String get health_high;
+
+  /// No description provided for @health_reduced.
+  ///
+  /// In en, this message translates to:
+  /// **'Reduced ↓'**
+  String get health_reduced;
+
+  /// No description provided for @health_whatYouCanDo.
+  ///
+  /// In en, this message translates to:
+  /// **'What You Can Do'**
+  String get health_whatYouCanDo;
+
+  /// No description provided for @health_verdictExcellent.
+  ///
+  /// In en, this message translates to:
+  /// **'you\'re in great shape'**
+  String get health_verdictExcellent;
+
+  /// No description provided for @health_verdictGood.
+  ///
+  /// In en, this message translates to:
+  /// **'you\'re on track'**
+  String get health_verdictGood;
+
+  /// No description provided for @health_verdictFair.
+  ///
+  /// In en, this message translates to:
+  /// **'room for improvement'**
+  String get health_verdictFair;
+
+  /// No description provided for @health_verdictPoor.
+  ///
+  /// In en, this message translates to:
+  /// **'needs attention'**
+  String get health_verdictPoor;
+
+  /// No description provided for @health_of100.
+  ///
+  /// In en, this message translates to:
+  /// **'of 100'**
+  String get health_of100;
+
+  /// No description provided for @health_errorLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load health data'**
+  String get health_errorLoading;
+
+  /// No description provided for @analytics_cashFlowTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash Flow Forecast'**
+  String get analytics_cashFlowTitle;
+
+  /// No description provided for @analytics_currentMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Month'**
+  String get analytics_currentMonth;
+
+  /// No description provided for @analytics_projected.
+  ///
+  /// In en, this message translates to:
+  /// **'Projected'**
+  String get analytics_projected;
+
+  /// No description provided for @analytics_forecast3Month.
+  ///
+  /// In en, this message translates to:
+  /// **'3-Month Forecast'**
+  String get analytics_forecast3Month;
+
+  /// No description provided for @analytics_monthlyNet.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Net'**
+  String get analytics_monthlyNet;
+
+  /// No description provided for @analytics_income.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get analytics_income;
+
+  /// No description provided for @analytics_expense.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense'**
+  String get analytics_expense;
+
+  /// No description provided for @analytics_net.
+  ///
+  /// In en, this message translates to:
+  /// **'Net'**
+  String get analytics_net;
+
+  /// No description provided for @analytics_avgMonthlyNet.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg Monthly Net'**
+  String get analytics_avgMonthlyNet;
+
+  /// No description provided for @analytics_noForecastData.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough data to forecast'**
+  String get analytics_noForecastData;
+
+  /// No description provided for @analytics_spendingTrendsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Spending Trends'**
+  String get analytics_spendingTrendsTitle;
+
+  /// No description provided for @analytics_predictedNextMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Predicted next month'**
+  String get analytics_predictedNextMonth;
+
+  /// No description provided for @analytics_anomaly.
+  ///
+  /// In en, this message translates to:
+  /// **'Anomaly'**
+  String get analytics_anomaly;
+
+  /// No description provided for @analytics_vsLastMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'vs last month'**
+  String get analytics_vsLastMonth;
+
+  /// No description provided for @analytics_risingCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Rising Categories'**
+  String get analytics_risingCategories;
+
+  /// No description provided for @analytics_anomalyCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Anomaly Detected'**
+  String get analytics_anomalyCategories;
+
+  /// No description provided for @analytics_allCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'All Categories'**
+  String get analytics_allCategories;
+
+  /// No description provided for @analytics_noTrendData.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough data for trends'**
+  String get analytics_noTrendData;
+
+  /// No description provided for @recap_vsLastYear.
+  ///
+  /// In en, this message translates to:
+  /// **'vs Last Year'**
+  String get recap_vsLastYear;
+
+  /// No description provided for @common_income.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get common_income;
+
+  /// No description provided for @common_expense.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense'**
+  String get common_expense;
+
+  /// No description provided for @common_transactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions'**
+  String get common_transactions;
+
+  /// No description provided for @tax_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax Estimation'**
+  String get tax_title;
+
+  /// No description provided for @tax_projected.
+  ///
+  /// In en, this message translates to:
+  /// **'Projected (year in progress)'**
+  String get tax_projected;
+
+  /// No description provided for @tax_estimatedTax.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated Tax'**
+  String get tax_estimatedTax;
+
+  /// No description provided for @tax_effectiveRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Effective Rate'**
+  String get tax_effectiveRate;
+
+  /// No description provided for @tax_monthlyTax.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get tax_monthlyTax;
+
+  /// No description provided for @tax_fyProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{elapsed} of {total} {total, plural, =1{day} other{days}}'**
+  String tax_fyProgress(int elapsed, int total);
+
+  /// No description provided for @tax_slabBreakdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Slab Breakdown'**
+  String get tax_slabBreakdown;
+
+  /// No description provided for @tax_totalSlabTax.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Slab Tax'**
+  String get tax_totalSlabTax;
+
+  /// No description provided for @tax_computation.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax Computation'**
+  String get tax_computation;
+
+  /// No description provided for @tax_grossIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Gross Income'**
+  String get tax_grossIncome;
+
+  /// No description provided for @tax_standardDeduction.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard Deduction'**
+  String get tax_standardDeduction;
+
+  /// No description provided for @tax_taxableIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Taxable Income'**
+  String get tax_taxableIncome;
+
+  /// No description provided for @tax_baseTax.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax on Income'**
+  String get tax_baseTax;
+
+  /// No description provided for @tax_rebate87A.
+  ///
+  /// In en, this message translates to:
+  /// **'Rebate u/s 87A'**
+  String get tax_rebate87A;
+
+  /// No description provided for @tax_cess.
+  ///
+  /// In en, this message translates to:
+  /// **'Health & Education Cess (4%)'**
+  String get tax_cess;
+
+  /// No description provided for @tax_totalTax.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Tax Payable'**
+  String get tax_totalTax;
+
+  /// No description provided for @tax_incomeBreakdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Income Sources'**
+  String get tax_incomeBreakdown;
+
+  /// No description provided for @tax_disclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'This is an estimate based on New Tax Regime (FY 2025-26). Actual tax may vary. Consult a tax professional for accurate filing.'**
+  String get tax_disclaimer;
+
+  /// No description provided for @tax_noData.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough data to estimate tax'**
+  String get tax_noData;
+
+  /// No description provided for @tax_viewDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'View Tax Estimate'**
+  String get tax_viewDetails;
+
+  /// No description provided for @tax_zeroTax.
+  ///
+  /// In en, this message translates to:
+  /// **'No tax liability 🎉'**
+  String get tax_zeroTax;
+
+  /// No description provided for @tax_newRegime.
+  ///
+  /// In en, this message translates to:
+  /// **'New Regime'**
+  String get tax_newRegime;
+
+  /// No description provided for @tax_oldRegime.
+  ///
+  /// In en, this message translates to:
+  /// **'Old Regime'**
+  String get tax_oldRegime;
+
+  /// No description provided for @tax_regimeComparison.
+  ///
+  /// In en, this message translates to:
+  /// **'Which Regime Saves More?'**
+  String get tax_regimeComparison;
+
+  /// No description provided for @tax_regimeSavings.
+  ///
+  /// In en, this message translates to:
+  /// **'{regime} saves you'**
+  String tax_regimeSavings(String regime);
+
+  /// No description provided for @tax_oldRegimeDisclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Old Regime estimate uses standard deduction only. With HRA, 80C, 80D deductions, savings could be higher.'**
+  String get tax_oldRegimeDisclaimer;
+
+  /// No description provided for @category_merge.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge Category'**
+  String get category_merge;
+
+  /// No description provided for @category_mergeInto.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge into'**
+  String get category_mergeInto;
+
+  /// No description provided for @category_mergeConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge'**
+  String get category_mergeConfirm;
+
+  /// No description provided for @category_mergePreview.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} items will be moved to {target}'**
+  String category_mergePreview(int count, String target);
+
+  /// No description provided for @category_mergeSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories merged successfully'**
+  String get category_mergeSuccess;
+
+  /// No description provided for @category_mergeSameError.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot merge a category into itself'**
+  String get category_mergeSameError;
+
+  /// No description provided for @category_mergeSelectTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Select target category'**
+  String get category_mergeSelectTarget;
+
+  /// No description provided for @notif_morningInsightTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'☀️ Your morning money minute'**
+  String get notif_morningInsightTitle;
+
+  /// No description provided for @notif_weeklyRecapNudgeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'📊 Your weekly recap is ready'**
+  String get notif_weeklyRecapNudgeTitle;
+
+  /// No description provided for @notif_yesterdaySpendTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'💰 Yesterday\'s spending'**
+  String get notif_yesterdaySpendTitle;
+
+  /// No description provided for @notif_weeklyRecapReadyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'📊 Your weekly recap is waiting'**
+  String get notif_weeklyRecapReadyTitle;
+
+  /// No description provided for @notif_underBudgetStreakTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'🔥 {days} days under budget!'**
+  String notif_underBudgetStreakTitle(int days);
+
+  /// No description provided for @dashboard_bgSyncIssueTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Background sync may not be working'**
+  String get dashboard_bgSyncIssueTitle;
+
+  /// No description provided for @dashboard_bgSyncIssueDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Bills and alerts may be delayed. Try reopening the app.'**
+  String get dashboard_bgSyncIssueDesc;
+
+  /// No description provided for @onboard_whatDidYouSpend.
+  ///
+  /// In en, this message translates to:
+  /// **'What did you spend today?'**
+  String get onboard_whatDidYouSpend;
+
+  /// No description provided for @onboard_addFewToStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a few to see your dashboard come alive'**
+  String get onboard_addFewToStart;
+
+  /// No description provided for @onboard_skipAddLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip — I\'ll add later'**
+  String get onboard_skipAddLater;
+
+  /// No description provided for @onboard_starterCoffee.
+  ///
+  /// In en, this message translates to:
+  /// **'Coffee / Tea'**
+  String get onboard_starterCoffee;
+
+  /// No description provided for @onboard_starterTransport.
+  ///
+  /// In en, this message translates to:
+  /// **'Transport'**
+  String get onboard_starterTransport;
+
+  /// No description provided for @onboard_starterLunch.
+  ///
+  /// In en, this message translates to:
+  /// **'Lunch / Dinner'**
+  String get onboard_starterLunch;
+
+  /// No description provided for @onboard_starterGroceries.
+  ///
+  /// In en, this message translates to:
+  /// **'Groceries'**
+  String get onboard_starterGroceries;
+
+  /// No description provided for @onboard_starterAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} expenses added!'**
+  String onboard_starterAdded(int count);
+
+  /// No description provided for @dashboard_listeningTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Listening for transactions...'**
+  String get dashboard_listeningTitle;
+
+  /// No description provided for @dashboard_waitingForSms.
+  ///
+  /// In en, this message translates to:
+  /// **'Your next bank notification will appear here automatically'**
+  String get dashboard_waitingForSms;
+
+  /// No description provided for @dashboard_meanwhile.
+  ///
+  /// In en, this message translates to:
+  /// **'Meanwhile, try:'**
+  String get dashboard_meanwhile;
+
+  /// No description provided for @dashboard_addExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Expense'**
+  String get dashboard_addExpense;
+
+  /// No description provided for @dashboard_setBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Budget'**
+  String get dashboard_setBudget;
+
+  /// No description provided for @dashboard_createGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Goal'**
+  String get dashboard_createGoal;
+
+  /// No description provided for @dashboard_addAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Account'**
+  String get dashboard_addAccount;
+
+  /// No description provided for @dashboard_testTip.
+  ///
+  /// In en, this message translates to:
+  /// **'💡 Tip: Send a small UPI payment to see auto-import in action!'**
+  String get dashboard_testTip;
+
+  /// No description provided for @dashboard_addFirstExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first expense'**
+  String get dashboard_addFirstExpense;
+
+  /// No description provided for @dashboard_addFirstExpenseDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to quickly log what you spent today'**
+  String get dashboard_addFirstExpenseDesc;
+
+  /// No description provided for @quickAdd_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Add'**
+  String get quickAdd_title;
+
+  /// No description provided for @quickAdd_recentCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent categories'**
+  String get quickAdd_recentCategories;
+
+  /// No description provided for @quickAdd_moreOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'More options'**
+  String get quickAdd_moreOptions;
+
+  /// No description provided for @mode_simple.
+  ///
+  /// In en, this message translates to:
+  /// **'Simple'**
+  String get mode_simple;
+
+  /// No description provided for @mode_full.
+  ///
+  /// In en, this message translates to:
+  /// **'Full'**
+  String get mode_full;
+
+  /// No description provided for @mode_simpleDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses, budgets & SMS tracking'**
+  String get mode_simpleDesc;
+
+  /// No description provided for @mode_fullDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything — trips, goals, analytics, gamification'**
+  String get mode_fullDesc;
+
+  /// No description provided for @mode_switchToFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to Full Mode'**
+  String get mode_switchToFull;
+
+  /// No description provided for @mode_switchToSimple.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to Simple Mode'**
+  String get mode_switchToSimple;
+
+  /// No description provided for @mode_pickTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How do you want to use Mudra?'**
+  String get mode_pickTitle;
+
+  /// No description provided for @mode_pickDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'You can change this anytime in settings'**
+  String get mode_pickDesc;
+
+  /// No description provided for @backup_cloudBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud Backup'**
+  String get backup_cloudBackup;
+
+  /// No description provided for @backup_cloudRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore from Cloud'**
+  String get backup_cloudRestore;
+
+  /// No description provided for @backup_signInGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with Google'**
+  String get backup_signInGoogle;
+
+  /// No description provided for @backup_signedInAs.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in as {email}'**
+  String backup_signedInAs(String email);
+
+  /// No description provided for @backup_uploadingToDrive.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading to Google Drive...'**
+  String get backup_uploadingToDrive;
+
+  /// No description provided for @backup_uploadSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup uploaded to Google Drive'**
+  String get backup_uploadSuccess;
+
+  /// No description provided for @backup_uploadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to upload backup'**
+  String get backup_uploadFailed;
+
+  /// No description provided for @backup_cloudBackups.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud Backups'**
+  String get backup_cloudBackups;
+
+  /// No description provided for @backup_noCloudBackups.
+  ///
+  /// In en, this message translates to:
+  /// **'No cloud backups found'**
+  String get backup_noCloudBackups;
+
+  /// No description provided for @backup_downloading.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading from Google Drive...'**
+  String get backup_downloading;
+
+  /// No description provided for @backup_signInRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to Google to use cloud backup'**
+  String get backup_signInRequired;
+
+  /// No description provided for @backup_signOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get backup_signOut;
+
+  /// No description provided for @backup_cloudSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Encrypted backup to Google Drive'**
+  String get backup_cloudSubtitle;
+
+  /// No description provided for @backup_autoBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto Backup'**
+  String get backup_autoBackup;
+
+  /// No description provided for @backup_autoBackupDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic local backups, keeps last 7 days'**
+  String get backup_autoBackupDesc;
+
+  /// No description provided for @backup_autoFrequency.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup frequency'**
+  String get backup_autoFrequency;
+
+  /// No description provided for @backup_autoNever.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get backup_autoNever;
+
+  /// No description provided for @backup_autoDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily'**
+  String get backup_autoDaily;
+
+  /// No description provided for @backup_autoWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get backup_autoWeekly;
+
+  /// No description provided for @backup_autoSetPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a backup password to enable auto backup'**
+  String get backup_autoSetPassword;
+
+  /// No description provided for @backup_autoEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto backup enabled ({frequency})'**
+  String backup_autoEnabled(String frequency);
+
+  /// No description provided for @backup_autoLastRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Last auto backup: {date}'**
+  String backup_autoLastRun(String date);
+
+  /// No description provided for @backup_passwordSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup password set'**
+  String get backup_passwordSet;
+
+  /// No description provided for @backup_proRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro feature'**
+  String get backup_proRequired;
+
+  /// No description provided for @onboard_skip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get onboard_skip;
+
+  /// No description provided for @onboard_languages.
+  ///
+  /// In en, this message translates to:
+  /// **'Languages'**
+  String get onboard_languages;
+
+  /// No description provided for @onboard_smartTrackingMergedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-import from bank SMS, set budgets, track goals — all in one place.'**
+  String get onboard_smartTrackingMergedDesc;
+
+  /// No description provided for @sms_celebrationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your first SMS transaction! 🎉'**
+  String get sms_celebrationTitle;
+
+  /// No description provided for @sms_celebrationBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Mudra just auto-imported a transaction from your bank SMS. From now on, your expenses track themselves.'**
+  String get sms_celebrationBody;
+
+  /// No description provided for @sms_celebrationCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Awesome, let\'s go!'**
+  String get sms_celebrationCta;
+
+  /// No description provided for @milestone_shareButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Share to Story'**
+  String get milestone_shareButton;
+
+  /// No description provided for @milestone_goalReachedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal Reached!'**
+  String get milestone_goalReachedTitle;
+
+  /// No description provided for @milestone_goalReachedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved {amount} and hit the target 🌟'**
+  String milestone_goalReachedDesc(String amount);
+
+  /// No description provided for @milestone_streakTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{days}-Day Streak!'**
+  String milestone_streakTitle(int days);
+
+  /// No description provided for @milestone_streakDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Tracked expenses every day for {days} days straight'**
+  String milestone_streakDesc(int days);
+
+  /// No description provided for @milestone_underBudgetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Under Budget!'**
+  String get milestone_underBudgetTitle;
+
+  /// No description provided for @milestone_underBudgetDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Stayed within budget for the entire month 💪'**
+  String get milestone_underBudgetDesc;
+
+  /// No description provided for @account_creditLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit Limit'**
+  String get account_creditLimit;
+
+  /// No description provided for @account_statementDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Statement Day'**
+  String get account_statementDay;
+
+  /// No description provided for @account_dueDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Due Day'**
+  String get account_dueDay;
+
+  /// No description provided for @account_daysUntilDue.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days until due'**
+  String account_daysUntilDue(int days);
+
+  /// No description provided for @account_dueToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Due today!'**
+  String get account_dueToday;
+
+  /// No description provided for @account_overdue.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue by {days} days'**
+  String account_overdue(int days);
+
+  /// No description provided for @subscription_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Detected Subscriptions'**
+  String get subscription_title;
+
+  /// No description provided for @subscription_monthlyTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount}/month total'**
+  String subscription_monthlyTotal(String amount);
+
+  /// No description provided for @subscription_occurrences.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} charges in 4 months'**
+  String subscription_occurrences(int count);
+
+  /// No description provided for @subscription_none.
+  ///
+  /// In en, this message translates to:
+  /// **'No recurring subscriptions detected yet'**
+  String get subscription_none;
+
+  /// No description provided for @subscription_dayOfMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Around the {day}th of each month'**
+  String subscription_dayOfMonth(int day);
+
+  /// No description provided for @subscription_trackAsRecurring.
+  ///
+  /// In en, this message translates to:
+  /// **'Track as recurring bill'**
+  String get subscription_trackAsRecurring;
+
+  /// No description provided for @cc_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit Card Bills'**
+  String get cc_title;
+
+  /// No description provided for @cc_totalOutstanding.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Outstanding'**
+  String get cc_totalOutstanding;
+
+  /// No description provided for @cc_acrossCards.
+  ///
+  /// In en, this message translates to:
+  /// **'Across {count} cards'**
+  String cc_acrossCards(int count);
+
+  /// No description provided for @cc_noCards.
+  ///
+  /// In en, this message translates to:
+  /// **'No credit cards added'**
+  String get cc_noCards;
+
+  /// No description provided for @cc_noCardsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a credit card account to track bills here'**
+  String get cc_noCardsHint;
+
+  /// No description provided for @cc_minimumDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Min. Due'**
+  String get cc_minimumDue;
+
+  /// No description provided for @cc_cycleSpend.
+  ///
+  /// In en, this message translates to:
+  /// **'Cycle Spend'**
+  String get cc_cycleSpend;
+
+  /// No description provided for @cc_utilization.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit Utilization'**
+  String get cc_utilization;
+
+  /// No description provided for @cc_nextStatement.
+  ///
+  /// In en, this message translates to:
+  /// **'Statement'**
+  String get cc_nextStatement;
+
+  /// No description provided for @cc_nextDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Due'**
+  String get cc_nextDue;
+
+  /// No description provided for @cc_payMinimum.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay Minimum'**
+  String get cc_payMinimum;
+
+  /// No description provided for @cc_payFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay Full'**
+  String get cc_payFull;
+
+  /// No description provided for @cc_utilitySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Due dates, outstanding & limits'**
+  String get cc_utilitySubtitle;
 }
 
 class _AppLocalizationsDelegate
@@ -9633,8 +11213,45 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool isSupported(Locale locale) =>
-      <String>['bn', 'en', 'hi'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>[
+        'ar',
+        'as',
+        'bn',
+        'bo',
+        'brx',
+        'de',
+        'doi',
+        'en',
+        'es',
+        'fr',
+        'gu',
+        'hi',
+        'id',
+        'ja',
+        'kn',
+        'ko',
+        'kok',
+        'mai',
+        'ml',
+        'mni',
+        'mr',
+        'ms',
+        'ne',
+        'or',
+        'pa',
+        'pt',
+        'sat',
+        'sd',
+        'si',
+        'sw',
+        'ta',
+        'te',
+        'th',
+        'tr',
+        'ur',
+        'vi',
+        'zh'
+      ].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -9643,12 +11260,80 @@ class _AppLocalizationsDelegate
 AppLocalizations lookupAppLocalizations(Locale locale) {
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
+    case 'ar':
+      return AppLocalizationsAr();
+    case 'as':
+      return AppLocalizationsAs();
     case 'bn':
       return AppLocalizationsBn();
+    case 'bo':
+      return AppLocalizationsBo();
+    case 'brx':
+      return AppLocalizationsBrx();
+    case 'de':
+      return AppLocalizationsDe();
+    case 'doi':
+      return AppLocalizationsDoi();
     case 'en':
       return AppLocalizationsEn();
+    case 'es':
+      return AppLocalizationsEs();
+    case 'fr':
+      return AppLocalizationsFr();
+    case 'gu':
+      return AppLocalizationsGu();
     case 'hi':
       return AppLocalizationsHi();
+    case 'id':
+      return AppLocalizationsId();
+    case 'ja':
+      return AppLocalizationsJa();
+    case 'kn':
+      return AppLocalizationsKn();
+    case 'ko':
+      return AppLocalizationsKo();
+    case 'kok':
+      return AppLocalizationsKok();
+    case 'mai':
+      return AppLocalizationsMai();
+    case 'ml':
+      return AppLocalizationsMl();
+    case 'mni':
+      return AppLocalizationsMni();
+    case 'mr':
+      return AppLocalizationsMr();
+    case 'ms':
+      return AppLocalizationsMs();
+    case 'ne':
+      return AppLocalizationsNe();
+    case 'or':
+      return AppLocalizationsOr();
+    case 'pa':
+      return AppLocalizationsPa();
+    case 'pt':
+      return AppLocalizationsPt();
+    case 'sat':
+      return AppLocalizationsSat();
+    case 'sd':
+      return AppLocalizationsSd();
+    case 'si':
+      return AppLocalizationsSi();
+    case 'sw':
+      return AppLocalizationsSw();
+    case 'ta':
+      return AppLocalizationsTa();
+    case 'te':
+      return AppLocalizationsTe();
+    case 'th':
+      return AppLocalizationsTh();
+    case 'tr':
+      return AppLocalizationsTr();
+    case 'ur':
+      return AppLocalizationsUr();
+    case 'vi':
+      return AppLocalizationsVi();
+    case 'zh':
+      return AppLocalizationsZh();
   }
 
   throw FlutterError(

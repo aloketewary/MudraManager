@@ -83,6 +83,7 @@ class _CategorySelectorBottomSheetState
                   children: [
                     if (_selectedParent != null)
                       IconButton(
+                        tooltip: 'Back',
                         icon: const Icon(LucideIcons.arrowLeft),
                         onPressed: () => setState(() => _selectedParent = null),
                       ),

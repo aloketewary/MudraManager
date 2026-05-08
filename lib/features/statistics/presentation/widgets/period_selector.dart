@@ -55,6 +55,7 @@ class PeriodSelector extends StatelessWidget {
       child: Row(
         children: [
           IconButton(
+            tooltip: 'Previous',
             icon: const Icon(LucideIcons.chevronLeft),
             onPressed: () {
               HapticFeedback.lightImpact();
@@ -88,6 +89,7 @@ class PeriodSelector extends StatelessWidget {
             ),
           ),
           IconButton(
+            tooltip: 'Next',
             icon: const Icon(LucideIcons.chevronRight),
             onPressed: () {
               HapticFeedback.lightImpact();

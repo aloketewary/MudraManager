@@ -93,6 +93,7 @@ class _FloatingBadgeFieldState extends State<FloatingBadgeField>
                 child: Opacity(
                   opacity: 0.85,
                   child: Image.asset(
+                    semanticLabel: 'Decorative image',
                     'assets/icons/100/${p.icon}.png',
                     width: p.size,
                     height: p.size,

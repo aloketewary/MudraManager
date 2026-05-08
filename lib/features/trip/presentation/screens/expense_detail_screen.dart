@@ -853,7 +853,9 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
       icon: LucideIcons.trash2,
     );
     if (confirm != true) return;
+    if (!context.mounted) return;
 
+    final router = GoRouter.of(context);
     await ref.read(tripServiceProvider).removeTripTransaction(
           widget.tripId,
           widget.expenseId,
@@ -861,6 +863,6 @@ class _ExpenseDetailScreenState extends ConsumerState<ExpenseDetailScreen> {
     ref.invalidate(tripByIdProvider(widget.tripId));
 
     SnackbarService.success(BuddyMessages.txnDeleted);
-    if (mounted) context.pop();
+    router.pop();
   }
 }

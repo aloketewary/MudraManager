@@ -10,7 +10,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboard_manageYourMoneyDescription =>
-      'Manage your money smartly & effortlessly.';
+      '100% offline. Your data never leaves your device.';
 
   @override
   String onboard_welcomeToApp(Object appName) {
@@ -18,18 +18,18 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get onboard_TrackYourTransactions => 'Track your Transactions';
+  String get onboard_TrackYourTransactions => 'Auto-track from Bank SMS';
 
   @override
   String get onboard_SeeWhereYourMoneyGoes =>
-      'See where your money goes, every day.';
+      'Auto-import from bank SMS & notifications. Works with 50+ banks.';
 
   @override
-  String get onboard_SetBudgetsAndGoals => 'Set Budgets and Goals';
+  String get onboard_SetBudgetsAndGoals => 'Budgets, Goals & Smart Alerts';
 
   @override
   String get onboard_stayOnTrackAndAchieveYourDream =>
-      'Stay on track and achieve your dreams.';
+      'Get warnings before you overspend. Save for what matters.';
 
   @override
   String get onboard_GetStarted => 'Get Started!';
@@ -852,6 +852,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transaction_editTransactionTitle => 'Edit Transaction';
 
   @override
+  String get transaction_addExpenseTitle => 'Add Expense';
+
+  @override
+  String get transaction_addIncomeTitle => 'Add Income';
+
+  @override
+  String get transaction_accountRequired => 'Account is required';
+
+  @override
+  String get transaction_categoryRequired => 'Category is required';
+
+  @override
   String get transaction_dateLabel => 'Date';
 
   @override
@@ -960,6 +972,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get common_reset => 'Reset';
+
+  @override
+  String get common_viewDetails => 'View details';
 
   @override
   String get common_apply => 'Apply';
@@ -1325,6 +1340,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get utility_addUtilities => 'Add Utilities';
+
+  @override
+  String get utility_analyticsSubtitle => 'Health score, trends & forecasts';
+
+  @override
+  String get utility_cashFlowSubtitle => 'Income vs expense projections';
+
+  @override
+  String get utility_spendingTrendsSubtitle =>
+      'Category-wise spending patterns';
+
+  @override
+  String get utility_taxSubtitle => 'Estimate your income tax';
 
   @override
   String get profile_accounts => 'Accounts';
@@ -2779,6 +2807,125 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notif_fewDaysUntrackedTitle => '📊 A few days untracked';
 
   @override
+  String notif_budgetExceededBody(String name) {
+    return '$name is over budget — time to review';
+  }
+
+  @override
+  String notif_budgetExceededBodyMulti(String names) {
+    return '$names are over budget';
+  }
+
+  @override
+  String notif_budgetWarningBody(String name) {
+    return '$name is nearing the limit';
+  }
+
+  @override
+  String notif_budgetWarningBodyMulti(String names) {
+    return '$names are nearing their limits';
+  }
+
+  @override
+  String notif_budgetWarningPctBody(String name, String pct) {
+    return '$name: $pct% used';
+  }
+
+  @override
+  String notif_billPaidAutoTitle(String name) {
+    return '✅ $name — auto-matched';
+  }
+
+  @override
+  String notif_billPaidRecordedTitle(String name) {
+    return '✅ $name — recorded';
+  }
+
+  @override
+  String get notif_smsLoggedTitle => '✅ Transaction logged';
+
+  @override
+  String get notif_smsNeedsReviewTitle => '👀 Needs your review';
+
+  @override
+  String notif_smsLoggedBody(String amount, String sender) {
+    return '$amount from $sender — auto-saved';
+  }
+
+  @override
+  String notif_smsLoggedBodyNoAmount(String sender) {
+    return 'From $sender — auto-saved';
+  }
+
+  @override
+  String notif_smsNeedsReviewBody(String sender) {
+    return 'Transaction from $sender — tap to review';
+  }
+
+  @override
+  String get notif_smsGotItTitle => '✅ Got it!';
+
+  @override
+  String get notif_smsAllCaughtUpTitle => '✅ All caught up!';
+
+  @override
+  String get notif_smsAlmostThereTitle => '📋 Almost there!';
+
+  @override
+  String get notif_smsNeedHelpTitle => '👋 Hey, need your help!';
+
+  @override
+  String notif_streakOnLineTitle(int days) {
+    return '🔥 $days-day streak on the line!';
+  }
+
+  @override
+  String get notif_quickActionTitle => '⚡ 5 seconds is all it takes';
+
+  @override
+  String get notif_dailyReminderTitle => '📊 Your day in numbers';
+
+  @override
+  String get notif_dailyReminderBody =>
+      'Here\'s how yesterday went — take a quick look';
+
+  @override
+  String get notif_weeklyReminderTitle => '📅 Your week wrapped up';
+
+  @override
+  String get notif_weeklyReminderBody =>
+      'Let\'s see how the week went — tap to check';
+
+  @override
+  String get notif_goalStatusTitle => '🎯 Monthly Goal Status';
+
+  @override
+  String notif_goalStatusBody(int count, String name, String pct) {
+    return 'You have $count active goals. $name is $pct% complete!';
+  }
+
+  @override
+  String notif_streakCountingTitle(int days) {
+    return '🔥 $days days and counting!';
+  }
+
+  @override
+  String notif_achievementBody(String title, int xp) {
+    return '$title — that\'s +$xp XP for you';
+  }
+
+  @override
+  String get notif_levelUpBody => 'You just leveled up — keep going!';
+
+  @override
+  String get notif_streakMilestoneBody =>
+      'That\'s dedication — your streak is on fire';
+
+  @override
+  String get notif_weeklyZeroBody =>
+      'Zero expenses this week — that\'s impressive 💪';
+
+  @override
   String get insight_moneyLeakTitle => 'Quiet money leak 💧';
 
   @override
@@ -2918,7 +3065,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get goal_smartInsight => 'Smart Insight';
 
   @override
-  String get goal_onTrack => 'On Track ✅';
+  String get goal_onTrack => 'On Track';
 
   @override
   String get goal_onTrackDesc => 'This goal is very achievable 👍';
@@ -3184,6 +3331,17 @@ class AppLocalizationsEn extends AppLocalizations {
       'Some categories were deleted. Edit this budget to fix.';
 
   @override
+  String budget_pastBudgets(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'budgets',
+      one: 'budget',
+    );
+    return '$count past $_temp0';
+  }
+
+  @override
   String get category_categoryName => 'Category Name';
 
   @override
@@ -3380,6 +3538,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get txnList_clearDateRange => 'Clear Date Range';
 
   @override
+  String get txnList_convertToTransfer => 'Convert to Transfer';
+
+  @override
+  String get txnList_convertToTransferDesc =>
+      'This was actually a transfer between your accounts';
+
+  @override
+  String get txnList_convertedToTransfer => 'Converted to transfer';
+
+  @override
   String get stats_today => 'Today';
 
   @override
@@ -3399,12 +3567,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get stats_overview => 'Overview';
-
-  @override
-  String get stats_income => 'Income';
-
-  @override
-  String get stats_expense => 'Expense';
 
   @override
   String get stats_trends => 'Trends';
@@ -3470,6 +3632,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stats_categoryImpact => 'CATEGORY IMPACT';
 
   @override
+  String get stats_income => 'Income';
+
+  @override
+  String get stats_expense => 'Expense';
+
+  @override
   String get stats_net => 'Net';
 
   @override
@@ -3506,15 +3674,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get stats_generating => 'Generating...';
-
-  @override
-  String get recap_income => 'Income';
-
-  @override
-  String get recap_expense => 'Expense';
-
-  @override
-  String get recap_saved => 'Saved';
 
   @override
   String get recap_belowAvg => 'Below avg';
@@ -3755,6 +3914,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get day_sunday => 'Sunday';
+
+  @override
+  String get recap_income => 'Income';
+
+  @override
+  String get recap_expense => 'Expense';
+
+  @override
+  String get recap_saved => 'Saved';
 
   @override
   String get recap_dailySpending => 'Daily Spending';
@@ -4565,7 +4733,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String notifSettings_activeCount(int count) {
-    return '$count of 3 active';
+    return '$count of 5 active';
   }
 
   @override
@@ -4782,6 +4950,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get goal_finishGoal => 'Finish this goal! 🚀';
+
+  @override
+  String get goal_onTrackStatus => 'On Track ✅';
 
   @override
   String get goal_behindPace => 'Behind pace ⚠️';
@@ -5289,4 +5460,708 @@ class AppLocalizationsEn extends AppLocalizations {
   String dashboard_accountsTapExpand(int count) {
     return '$count accounts · Tap to expand';
   }
+
+  @override
+  String get notif_lowBalanceTitle => '⚠️ Low Balance Alert';
+
+  @override
+  String notif_lowBalanceBody(String account, String amount) {
+    return 'Your balance in $account is $amount';
+  }
+
+  @override
+  String get achieve_unlocked => 'Unlocked';
+
+  @override
+  String get achieve_inProgress => 'In Progress';
+
+  @override
+  String get achieve_trophyShelf => 'Trophy Shelf';
+
+  @override
+  String get achieve_streaks => 'Streaks';
+
+  @override
+  String get achieve_totalXP => 'Total XP';
+
+  @override
+  String get achieve_dailyCheckIn => 'Daily Check-in';
+
+  @override
+  String get achieve_budgetAdherence => 'Budget Adherence';
+
+  @override
+  String achieve_bestDays(int count) {
+    return 'Best: $count days';
+  }
+
+  @override
+  String achieve_noBadgesYet(String category) {
+    return 'No $category badges yet';
+  }
+
+  @override
+  String achieve_levelUpSnack(int level) {
+    return '🎉 Level Up! You are now Level $level!';
+  }
+
+  @override
+  String achieve_levelLabel(int level) {
+    return 'Level $level';
+  }
+
+  @override
+  String get achieve_catBudgeting => 'Budgeting';
+
+  @override
+  String get achieve_catSavings => 'Savings';
+
+  @override
+  String get achieve_catTracking => 'Tracking';
+
+  @override
+  String get achieve_catMilestones => 'Milestones';
+
+  @override
+  String get achieve_catEngagement => 'Engagement';
+
+  @override
+  String get achieve_catAll => 'All';
+
+  @override
+  String get alert_actionNeeded => 'Action Needed';
+
+  @override
+  String alert_billsDueTomorrow(int count) {
+    return '$count bill(s) due tomorrow';
+  }
+
+  @override
+  String get alert_upcomingBills => 'Upcoming Bills';
+
+  @override
+  String alert_billsDueInDays(int count) {
+    return '$count bill(s) due in 2 days';
+  }
+
+  @override
+  String get alert_budgetAlert => 'Budget Alert';
+
+  @override
+  String alert_budgetsExceeded(int count) {
+    return '$count budget(s) exceeded';
+  }
+
+  @override
+  String get alert_budgetWarning => 'Budget Warning';
+
+  @override
+  String alert_budgetsNearLimit(int count) {
+    return '$count budget(s) near limit';
+  }
+
+  @override
+  String get alert_goalProgress => 'Goal Progress';
+
+  @override
+  String alert_goalsAlmostComplete(int count) {
+    return '$count goal(s) almost complete!';
+  }
+
+  @override
+  String get analytics_cashFlowForecast => 'Cash Flow Forecast';
+
+  @override
+  String get analytics_thisMonthProjected => 'This month (projected)';
+
+  @override
+  String get analytics_savingOnAverage => 'You are saving on average';
+
+  @override
+  String get analytics_spendingExceedsIncome => 'Spending exceeds income';
+
+  @override
+  String get health_scoreBreakdown => 'Score Breakdown';
+
+  @override
+  String get health_savings => 'Savings';
+
+  @override
+  String get health_spending => 'Spending';
+
+  @override
+  String get health_debt => 'Debt';
+
+  @override
+  String get health_emergency => 'Emergency';
+
+  @override
+  String get health_liquidityRunway => 'Liquidity Runway';
+
+  @override
+  String health_balanceCoversMonths(String months) {
+    return 'Your balance covers $months months of expenses';
+  }
+
+  @override
+  String get health_days => 'days';
+
+  @override
+  String health_nDays(String n) {
+    return '$n days';
+  }
+
+  @override
+  String get health_safe => 'Safe';
+
+  @override
+  String get health_moderate => 'Moderate';
+
+  @override
+  String get health_risk => 'Risk';
+
+  @override
+  String get health_categoryHealth => 'Category Health';
+
+  @override
+  String get health_stable => 'Stable →';
+
+  @override
+  String get health_high => 'High ↑';
+
+  @override
+  String get health_reduced => 'Reduced ↓';
+
+  @override
+  String get health_whatYouCanDo => 'What You Can Do';
+
+  @override
+  String get health_verdictExcellent => 'you\'re in great shape';
+
+  @override
+  String get health_verdictGood => 'you\'re on track';
+
+  @override
+  String get health_verdictFair => 'room for improvement';
+
+  @override
+  String get health_verdictPoor => 'needs attention';
+
+  @override
+  String get health_of100 => 'of 100';
+
+  @override
+  String get health_errorLoading => 'Unable to load health data';
+
+  @override
+  String get analytics_cashFlowTitle => 'Cash Flow Forecast';
+
+  @override
+  String get analytics_currentMonth => 'Current Month';
+
+  @override
+  String get analytics_projected => 'Projected';
+
+  @override
+  String get analytics_forecast3Month => '3-Month Forecast';
+
+  @override
+  String get analytics_monthlyNet => 'Monthly Net';
+
+  @override
+  String get analytics_income => 'Income';
+
+  @override
+  String get analytics_expense => 'Expense';
+
+  @override
+  String get analytics_net => 'Net';
+
+  @override
+  String get analytics_avgMonthlyNet => 'Avg Monthly Net';
+
+  @override
+  String get analytics_noForecastData => 'Not enough data to forecast';
+
+  @override
+  String get analytics_spendingTrendsTitle => 'Spending Trends';
+
+  @override
+  String get analytics_predictedNextMonth => 'Predicted next month';
+
+  @override
+  String get analytics_anomaly => 'Anomaly';
+
+  @override
+  String get analytics_vsLastMonth => 'vs last month';
+
+  @override
+  String get analytics_risingCategories => 'Rising Categories';
+
+  @override
+  String get analytics_anomalyCategories => 'Anomaly Detected';
+
+  @override
+  String get analytics_allCategories => 'All Categories';
+
+  @override
+  String get analytics_noTrendData => 'Not enough data for trends';
+
+  @override
+  String get recap_vsLastYear => 'vs Last Year';
+
+  @override
+  String get common_income => 'Income';
+
+  @override
+  String get common_expense => 'Expense';
+
+  @override
+  String get common_transactions => 'Transactions';
+
+  @override
+  String get tax_title => 'Tax Estimation';
+
+  @override
+  String get tax_projected => 'Projected (year in progress)';
+
+  @override
+  String get tax_estimatedTax => 'Estimated Tax';
+
+  @override
+  String get tax_effectiveRate => 'Effective Rate';
+
+  @override
+  String get tax_monthlyTax => 'Monthly';
+
+  @override
+  String tax_fyProgress(int elapsed, int total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: 'days',
+      one: 'day',
+    );
+    return '$elapsed of $total $_temp0';
+  }
+
+  @override
+  String get tax_slabBreakdown => 'Slab Breakdown';
+
+  @override
+  String get tax_totalSlabTax => 'Total Slab Tax';
+
+  @override
+  String get tax_computation => 'Tax Computation';
+
+  @override
+  String get tax_grossIncome => 'Gross Income';
+
+  @override
+  String get tax_standardDeduction => 'Standard Deduction';
+
+  @override
+  String get tax_taxableIncome => 'Taxable Income';
+
+  @override
+  String get tax_baseTax => 'Tax on Income';
+
+  @override
+  String get tax_rebate87A => 'Rebate u/s 87A';
+
+  @override
+  String get tax_cess => 'Health & Education Cess (4%)';
+
+  @override
+  String get tax_totalTax => 'Total Tax Payable';
+
+  @override
+  String get tax_incomeBreakdown => 'Income Sources';
+
+  @override
+  String get tax_disclaimer =>
+      'This is an estimate based on New Tax Regime (FY 2025-26). Actual tax may vary. Consult a tax professional for accurate filing.';
+
+  @override
+  String get tax_noData => 'Not enough data to estimate tax';
+
+  @override
+  String get tax_viewDetails => 'View Tax Estimate';
+
+  @override
+  String get tax_zeroTax => 'No tax liability 🎉';
+
+  @override
+  String get tax_newRegime => 'New Regime';
+
+  @override
+  String get tax_oldRegime => 'Old Regime';
+
+  @override
+  String get tax_regimeComparison => 'Which Regime Saves More?';
+
+  @override
+  String tax_regimeSavings(String regime) {
+    return '$regime saves you';
+  }
+
+  @override
+  String get tax_oldRegimeDisclaimer =>
+      'Old Regime estimate uses standard deduction only. With HRA, 80C, 80D deductions, savings could be higher.';
+
+  @override
+  String get category_merge => 'Merge Category';
+
+  @override
+  String get category_mergeInto => 'Merge into';
+
+  @override
+  String get category_mergeConfirm => 'Merge';
+
+  @override
+  String category_mergePreview(int count, String target) {
+    return '$count items will be moved to $target';
+  }
+
+  @override
+  String get category_mergeSuccess => 'Categories merged successfully';
+
+  @override
+  String get category_mergeSameError => 'Cannot merge a category into itself';
+
+  @override
+  String get category_mergeSelectTarget => 'Select target category';
+
+  @override
+  String get notif_morningInsightTitle => '☀️ Your morning money minute';
+
+  @override
+  String get notif_weeklyRecapNudgeTitle => '📊 Your weekly recap is ready';
+
+  @override
+  String get notif_yesterdaySpendTitle => '💰 Yesterday\'s spending';
+
+  @override
+  String get notif_weeklyRecapReadyTitle => '📊 Your weekly recap is waiting';
+
+  @override
+  String notif_underBudgetStreakTitle(int days) {
+    return '🔥 $days days under budget!';
+  }
+
+  @override
+  String get dashboard_bgSyncIssueTitle => 'Background sync may not be working';
+
+  @override
+  String get dashboard_bgSyncIssueDesc =>
+      'Bills and alerts may be delayed. Try reopening the app.';
+
+  @override
+  String get onboard_whatDidYouSpend => 'What did you spend today?';
+
+  @override
+  String get onboard_addFewToStart =>
+      'Add a few to see your dashboard come alive';
+
+  @override
+  String get onboard_skipAddLater => 'Skip — I\'ll add later';
+
+  @override
+  String get onboard_starterCoffee => 'Coffee / Tea';
+
+  @override
+  String get onboard_starterTransport => 'Transport';
+
+  @override
+  String get onboard_starterLunch => 'Lunch / Dinner';
+
+  @override
+  String get onboard_starterGroceries => 'Groceries';
+
+  @override
+  String onboard_starterAdded(int count) {
+    return '$count expenses added!';
+  }
+
+  @override
+  String get dashboard_listeningTitle => 'Listening for transactions...';
+
+  @override
+  String get dashboard_waitingForSms =>
+      'Your next bank notification will appear here automatically';
+
+  @override
+  String get dashboard_meanwhile => 'Meanwhile, try:';
+
+  @override
+  String get dashboard_addExpense => 'Add Expense';
+
+  @override
+  String get dashboard_setBudget => 'Set Budget';
+
+  @override
+  String get dashboard_createGoal => 'Create Goal';
+
+  @override
+  String get dashboard_addAccount => 'Add Account';
+
+  @override
+  String get dashboard_testTip =>
+      '💡 Tip: Send a small UPI payment to see auto-import in action!';
+
+  @override
+  String get dashboard_addFirstExpense => 'Add your first expense';
+
+  @override
+  String get dashboard_addFirstExpenseDesc =>
+      'Tap to quickly log what you spent today';
+
+  @override
+  String get quickAdd_title => 'Quick Add';
+
+  @override
+  String get quickAdd_recentCategories => 'Recent categories';
+
+  @override
+  String get quickAdd_moreOptions => 'More options';
+
+  @override
+  String get mode_simple => 'Simple';
+
+  @override
+  String get mode_full => 'Full';
+
+  @override
+  String get mode_simpleDesc => 'Expenses, budgets & SMS tracking';
+
+  @override
+  String get mode_fullDesc =>
+      'Everything — trips, goals, analytics, gamification';
+
+  @override
+  String get mode_switchToFull => 'Switch to Full Mode';
+
+  @override
+  String get mode_switchToSimple => 'Switch to Simple Mode';
+
+  @override
+  String get mode_pickTitle => 'How do you want to use Mudra?';
+
+  @override
+  String get mode_pickDesc => 'You can change this anytime in settings';
+
+  @override
+  String get backup_cloudBackup => 'Cloud Backup';
+
+  @override
+  String get backup_cloudRestore => 'Restore from Cloud';
+
+  @override
+  String get backup_signInGoogle => 'Sign in with Google';
+
+  @override
+  String backup_signedInAs(String email) {
+    return 'Signed in as $email';
+  }
+
+  @override
+  String get backup_uploadingToDrive => 'Uploading to Google Drive...';
+
+  @override
+  String get backup_uploadSuccess => 'Backup uploaded to Google Drive';
+
+  @override
+  String get backup_uploadFailed => 'Failed to upload backup';
+
+  @override
+  String get backup_cloudBackups => 'Cloud Backups';
+
+  @override
+  String get backup_noCloudBackups => 'No cloud backups found';
+
+  @override
+  String get backup_downloading => 'Downloading from Google Drive...';
+
+  @override
+  String get backup_signInRequired => 'Sign in to Google to use cloud backup';
+
+  @override
+  String get backup_signOut => 'Sign out';
+
+  @override
+  String get backup_cloudSubtitle => 'Encrypted backup to Google Drive';
+
+  @override
+  String get backup_autoBackup => 'Auto Backup';
+
+  @override
+  String get backup_autoBackupDesc =>
+      'Automatic local backups, keeps last 7 days';
+
+  @override
+  String get backup_autoFrequency => 'Backup frequency';
+
+  @override
+  String get backup_autoNever => 'Off';
+
+  @override
+  String get backup_autoDaily => 'Daily';
+
+  @override
+  String get backup_autoWeekly => 'Weekly';
+
+  @override
+  String get backup_autoSetPassword =>
+      'Set a backup password to enable auto backup';
+
+  @override
+  String backup_autoEnabled(String frequency) {
+    return 'Auto backup enabled ($frequency)';
+  }
+
+  @override
+  String backup_autoLastRun(String date) {
+    return 'Last auto backup: $date';
+  }
+
+  @override
+  String get backup_passwordSet => 'Backup password set';
+
+  @override
+  String get backup_proRequired => 'Pro feature';
+
+  @override
+  String get onboard_skip => 'Skip';
+
+  @override
+  String get onboard_languages => 'Languages';
+
+  @override
+  String get onboard_smartTrackingMergedDesc =>
+      'Auto-import from bank SMS, set budgets, track goals — all in one place.';
+
+  @override
+  String get sms_celebrationTitle => 'Your first SMS transaction! 🎉';
+
+  @override
+  String get sms_celebrationBody =>
+      'Mudra just auto-imported a transaction from your bank SMS. From now on, your expenses track themselves.';
+
+  @override
+  String get sms_celebrationCta => 'Awesome, let\'s go!';
+
+  @override
+  String get milestone_shareButton => 'Share to Story';
+
+  @override
+  String get milestone_goalReachedTitle => 'Goal Reached!';
+
+  @override
+  String milestone_goalReachedDesc(String amount) {
+    return 'Saved $amount and hit the target 🌟';
+  }
+
+  @override
+  String milestone_streakTitle(int days) {
+    return '$days-Day Streak!';
+  }
+
+  @override
+  String milestone_streakDesc(int days) {
+    return 'Tracked expenses every day for $days days straight';
+  }
+
+  @override
+  String get milestone_underBudgetTitle => 'Under Budget!';
+
+  @override
+  String get milestone_underBudgetDesc =>
+      'Stayed within budget for the entire month 💪';
+
+  @override
+  String get account_creditLimit => 'Credit Limit';
+
+  @override
+  String get account_statementDay => 'Statement Day';
+
+  @override
+  String get account_dueDay => 'Due Day';
+
+  @override
+  String account_daysUntilDue(int days) {
+    return '$days days until due';
+  }
+
+  @override
+  String get account_dueToday => 'Due today!';
+
+  @override
+  String account_overdue(int days) {
+    return 'Overdue by $days days';
+  }
+
+  @override
+  String get subscription_title => 'Detected Subscriptions';
+
+  @override
+  String subscription_monthlyTotal(String amount) {
+    return '$amount/month total';
+  }
+
+  @override
+  String subscription_occurrences(int count) {
+    return '$count charges in 4 months';
+  }
+
+  @override
+  String get subscription_none => 'No recurring subscriptions detected yet';
+
+  @override
+  String subscription_dayOfMonth(int day) {
+    return 'Around the ${day}th of each month';
+  }
+
+  @override
+  String get subscription_trackAsRecurring => 'Track as recurring bill';
+
+  @override
+  String get cc_title => 'Credit Card Bills';
+
+  @override
+  String get cc_totalOutstanding => 'Total Outstanding';
+
+  @override
+  String cc_acrossCards(int count) {
+    return 'Across $count cards';
+  }
+
+  @override
+  String get cc_noCards => 'No credit cards added';
+
+  @override
+  String get cc_noCardsHint => 'Add a credit card account to track bills here';
+
+  @override
+  String get cc_minimumDue => 'Min. Due';
+
+  @override
+  String get cc_cycleSpend => 'Cycle Spend';
+
+  @override
+  String get cc_utilization => 'Credit Utilization';
+
+  @override
+  String get cc_nextStatement => 'Statement';
+
+  @override
+  String get cc_nextDue => 'Due';
+
+  @override
+  String get cc_payMinimum => 'Pay Minimum';
+
+  @override
+  String get cc_payFull => 'Pay Full';
+
+  @override
+  String get cc_utilitySubtitle => 'Due dates, outstanding & limits';
 }

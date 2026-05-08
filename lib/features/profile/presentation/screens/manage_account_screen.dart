@@ -32,39 +32,20 @@ class ManageAccountScreen extends ConsumerStatefulWidget {
 }
 
 class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
-  Map<int, double> _balanceMap = {};
-  Map<int, double> _baseBalanceMap = {};
-  bool _initialized = false;
-
   AppLocalizations get ctxt => AppLocalizations.of(context)!;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!_initialized) {
-      _initialized = true;
-      final service = ref.read(accountServiceProvider);
-      Future.wait([
-        service.getAccountBalanceMap(),
-        service.getAccountBalanceMapInBase(),
-      ]).then((results) {
-        if (mounted) {
-          setState(() {
-            _balanceMap = results[0];
-            _baseBalanceMap = results[1];
-          });
-        }
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     final spacing = ref.watch(spacingProvider);
     final color = Theme.of(context).colorScheme;
     final allAccountsAsync = ref.watch(allAccountsProvider);
+    final balanceMapAsync = ref.watch(accountBalanceMapProvider);
+    final baseBalanceMapAsync = ref.watch(accountBaseBalanceMapProvider);
     final textTheme = Theme.of(context).textTheme;
     final ctxt = AppLocalizations.of(context)!;
+
+    final balanceMap = balanceMapAsync.value ?? {};
+    final baseBalanceMap = baseBalanceMapAsync.value ?? {};
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
@@ -115,24 +96,19 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
             grouped.putIfAbsent(account.accountType, () => []).add(account);
           }
 
-          final totalBalance =
-              _baseBalanceMap.values.fold(0.0, (a, b) => a + b);
+          final totalBalance = activeAccounts.fold<double>(0.0, (sum, acc) {
+            final balance = baseBalanceMap[acc.id] ?? 0.0;
+            return acc.accountType == AccountType.creditCard
+                ? sum - balance
+                : sum + balance;
+          });
 
           return RefreshIndicator(
             onRefresh: () => RefreshHelper.withMinDuration(() async {
               ref.invalidate(allAccountsProvider);
               ref.invalidate(accountsProvider);
-              final service = ref.read(accountServiceProvider);
-              final results = await Future.wait([
-                service.getAccountBalanceMap(),
-                service.getAccountBalanceMapInBase(),
-              ]);
-              if (mounted) {
-                setState(() {
-                  _balanceMap = results[0];
-                  _baseBalanceMap = results[1];
-                });
-              }
+              ref.invalidate(accountBalanceMapProvider);
+              ref.invalidate(accountBaseBalanceMapProvider);
             }),
             child: ListView(
               physics: const AlwaysScrollableScrollPhysics(),
@@ -161,6 +137,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
                         entry.value,
                         false,
                         activeAccounts.length,
+                        balanceMap,
                         color,
                         textTheme,
                         ctxt,
@@ -180,6 +157,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
                     archivedAccounts,
                     true,
                     activeAccounts.length,
+                    balanceMap,
                     color,
                     textTheme,
                     ctxt,
@@ -319,6 +297,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
     List<Account> accounts,
     bool isArchived,
     int activeCount,
+    Map<int, double> balanceMap,
     ColorScheme color,
     TextTheme textTheme,
     AppLocalizations ctxt,
@@ -356,7 +335,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
             final isLast = entry.key == accounts.length - 1;
             final accountColor =
                 Color(account.colorValue ?? Colors.blue.toARGB32());
-            final balance = _balanceMap[account.id] ?? 0.0;
+            final balance = balanceMap[account.id] ?? 0.0;
 
             return Column(
               children: [
@@ -492,7 +471,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
                             builder: (context, ref, _) {
                               final unlockedIds =
                                   ref.watch(unlockedAccountIdsProvider);
-                              final isUnlocked = unlockedIds.valueOrNull
+                              final isUnlocked = unlockedIds.value
                                       ?.contains(account.id) ??
                                   true;
                               if (isUnlocked || isArchived) {
@@ -575,40 +554,48 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
                   ctx, LucideIcons.pen, ctxt.accounts_edit, null, color.primary,
                   () {
                 Navigator.pop(ctx);
-                context
-                    .push('/manage-accounts/add', extra: {'account': account});
+                if (mounted) {
+                  context
+                      .push('/manage-accounts/add', extra: {'account': account});
+                }
               }),
               _sheetOption(ctx, LucideIcons.history, ctxt.accounts_balanceHistory, null,
                   color.primary, () {
                 Navigator.pop(ctx);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => BalanceHistoryScreen(account: account),
-                  ),
-                );
+                if (mounted) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => BalanceHistoryScreen(account: account),
+                    ),
+                  );
+                }
               }),
               _sheetOption(ctx, LucideIcons.scale, ctxt.reconcile_title,
                   ctxt.accounts_matchBank, color.primary, () {
                 Navigator.pop(ctx);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => ReconciliationScreen(account: account),
-                  ),
-                );
+                if (mounted) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ReconciliationScreen(account: account),
+                    ),
+                  );
+                }
               }),
               if (account.accountType == AccountType.investment)
                 _sheetOption(ctx, LucideIcons.chartLine, ctxt.accounts_viewPortfolio, null,
                     color.primary, () {
                   Navigator.pop(ctx);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) =>
-                          InvestmentPortfolioScreen(account: account),
-                    ),
-                  );
+                  if (mounted) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            InvestmentPortfolioScreen(account: account),
+                      ),
+                    );
+                  }
                 }),
               if (!account.isPrimary)
                 _sheetOption(
@@ -623,9 +610,11 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
                       .setPrimaryAccount(account.id);
                   ref.invalidate(accountsProvider);
                   ref.invalidate(primaryAccountProvider);
-                  SnackbarService.success(
-                    '${account.name} is now your primary account',
-                  );
+                  if (mounted) {
+                    SnackbarService.success(
+                      '${account.name} is now your primary account',
+                    );
+                  }
                 }),
               const Divider(height: 1),
               _sheetOption(ctx, LucideIcons.archive, ctxt.accounts_archive,
@@ -823,7 +812,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
     ref.invalidate(allAccountsProvider);
     ref.invalidate(accountsProvider);
 
-    if (mounted) {
+    if (context.mounted) {
       SnackbarService.success('${account.name} restored');
     }
   }
@@ -870,7 +859,7 @@ class _ManageAccountScreenState extends ConsumerState<ManageAccountScreen> {
       ref.invalidate(allAccountsProvider);
       ref.invalidate(accountsProvider);
 
-      if (mounted) {
+      if (context.mounted) {
         SnackbarService.success(
           ctxt.accounts_accountArchivedMessage(account.name),
         );

@@ -79,6 +79,7 @@ class BudgetDetailsScreen extends ConsumerWidget {
         elevation: 0,
         actions: [
           IconButton(
+            tooltip: 'Edit',
             icon: const Icon(LucideIcons.pencil, size: 20),
             onPressed: () {
               HapticFeedback.lightImpact();
@@ -484,6 +485,7 @@ class BudgetDetailsScreen extends ConsumerWidget {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(spacing.radiusSmall),
                       child: LinearProgressIndicator(
+                        semanticsLabel: 'Progress',
                         value: allowedDaily > 0
                             ? (actualDaily / allowedDaily).clamp(0.0, 1.0)
                             : 0,
@@ -642,6 +644,7 @@ class BudgetDetailsScreen extends ConsumerWidget {
                 alignment: Alignment.center,
                 children: [
                   CircularProgressIndicator(
+                    semanticsLabel: 'Loading',
                     value: pct,
                     strokeWidth: 3,
                     strokeCap: StrokeCap.round,
@@ -673,6 +676,7 @@ class BudgetDetailsScreen extends ConsumerWidget {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(2),
                     child: LinearProgressIndicator(
+                      semanticsLabel: 'Progress',
                       value: pct,
                       minHeight: 3,
                       backgroundColor: accent.withValues(alpha: 0.1),
@@ -710,10 +714,11 @@ class BudgetDetailsScreen extends ConsumerWidget {
   }
 
   Future<void> _deleteBudget(BuildContext context, WidgetRef ref) async {
+    final router = GoRouter.of(context);
     try {
       await ref.read(budgetServiceProvider).deleteBudget(data.budget.id);
       SnackbarService.success(BuddyMessages.budgetDeleted);
-      if (context.mounted) context.pop();
+      router.pop();
     } catch (e) {
       if (context.mounted) SnackbarService.error(BuddyMessages.genericError);
     }

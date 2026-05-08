@@ -1,5 +1,8 @@
+import 'package:mudra_manager/core/extension/case_extention.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
+import 'package:mudra_manager/core/utils/dialog_utils.dart';
+import 'package:mudra_manager/features/sms/domain/detection_level.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'dart:io';
 
@@ -69,13 +72,16 @@ class _SmsImportSettingsScreenState
     final textTheme = Theme.of(context).textTheme;
     final spacing = ref.watch(spacingProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ctxt = AppLocalizations.of(context)!;
 
-    if (Platform.isIOS) return _buildIosPlaceholder(color, textTheme, spacing);
+    if (Platform.isIOS) return _buildIosPlaceholder(color, textTheme, spacing, ctxt);
 
     return Scaffold(
-      appBar: AppBar(title: Text(AppLocalizations.of(context)!.smsImport_autoImport)),
+      appBar: AppBar(
+          title: Text(ctxt.smsImport_autoImport),),
       body: !_loaded
-          ? ListView(children: List.generate(3, (_) => const DashboardCardSkeleton()))
+          ? ListView(
+              children: List.generate(3, (_) => const DashboardCardSkeleton()),)
           : ListView(
               padding: EdgeInsets.symmetric(
                 horizontal: spacing.cardHorizontal,
@@ -83,11 +89,14 @@ class _SmsImportSettingsScreenState
               ),
               children: [
                 // ── HERO STATUS ──
-                _buildHeroCard(color, textTheme, spacing, isDark),
+                _buildHeroCard(color, textTheme, spacing, isDark, ctxt,),
                 SizedBox(height: spacing.sectionGap),
 
                 // ── PERMISSIONS ──
-                _buildSectionHeader(AppLocalizations.of(context)!.smsImport_permissions, color, textTheme),
+                _buildSectionHeader(
+                    ctxt.smsImport_permissions,
+                    color,
+                    textTheme,),
                 SizedBox(height: spacing.sectionGap),
                 _buildGroupedCard(
                   spacing: spacing,
@@ -95,26 +104,63 @@ class _SmsImportSettingsScreenState
                   children: [
                     _buildToggleRow(
                       icon: LucideIcons.shieldCheck,
-                      title: AppLocalizations.of(context)!.smsImport_notifAccess,
+                      title:
+                          ctxt.smsImport_notifAccess,
                       subtitle: _permissionGranted
-                          ? AppLocalizations.of(context)!.smsImport_notifAccessEnabled
-                          : AppLocalizations.of(context)!.smsImport_allowReadingNotif,
+                          ? ctxt
+                              .smsImport_notifAccessEnabled
+                          : ctxt
+                              .smsImport_allowReadingNotif,
                       value: _permissionGranted,
                       onChanged: _handlePermissionToggle,
                       color: color,
                       textTheme: textTheme,
+                      ctxt: ctxt,
                     ),
                     _divider(color),
                     _buildToggleRow(
                       icon: LucideIcons.messageSquare,
-                      title: AppLocalizations.of(context)!.smsImport_autoImport,
-                      subtitle: AppLocalizations.of(context)!.smsImport_autoDetectTxn,
+                      title: ctxt.smsImport_autoImport,
+                      subtitle:
+                          ctxt.smsImport_autoDetectTxn,
                       value: _smsImportEnabled && _permissionGranted,
                       onChanged:
                           _permissionGranted ? _handleAutoImportToggle : null,
                       color: color,
                       textTheme: textTheme,
+                      ctxt: ctxt,
                       disabled: !_permissionGranted,
+                    ),
+                    _divider(color),
+                    _buildTapRow(
+                      icon: LucideIcons.settings,
+                      title: 'Smart Detection Settings',
+                      subtitle:
+                          'How automatic should transaction detection be?',
+                      onTap: () {
+                        HapticFeedback.mediumImpact();
+                        DialogUtils.showListItems(
+                          context: context,
+                          title: 'Select Detection Sensitivity',
+                          items: DetectionSensitivity.values.map((d) => d.name.toTitleCase()).toList(),
+                          selectedValue: SharedPrefsUtil.instance.getDetectionMode().name.toTitleCase(),
+                          onItemSelected: (val) {
+                            final level = switch (val) {
+                              'Strict' => DetectionSensitivity.strict,
+                              'Balanced' => DetectionSensitivity.balanced,
+                              'Aggressive' => DetectionSensitivity.aggressive,
+                              _ => DetectionSensitivity.balanced,
+                            };
+                            SharedPrefsUtil.instance
+                                .setString('detection_mode', level.name);
+                            SnackbarService.info(
+                              'Detection sensitivity set to ${level.name.toTitleCase()}',
+                            );
+                          },
+                        );
+                      },
+                      color: color,
+                      textTheme: textTheme,
                     ),
                   ],
                 ),
@@ -139,7 +185,7 @@ class _SmsImportSettingsScreenState
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          AppLocalizations.of(context)!.smsImport_privacyNote,
+                          ctxt.smsImport_privacyNote,
                           style: textTheme.bodySmall?.copyWith(
                             color: color.onSurfaceVariant,
                             height: 1.4,
@@ -150,7 +196,10 @@ class _SmsImportSettingsScreenState
                   ),
                 ),
                 // ── TOOLS ──
-                _buildSectionHeader(AppLocalizations.of(context)!.smsImport_tools, color, textTheme),
+                _buildSectionHeader(
+                    ctxt.smsImport_tools,
+                    color,
+                    textTheme,),
                 SizedBox(height: spacing.sectionGap),
                 _buildGroupedCard(
                   spacing: spacing,
@@ -158,14 +207,14 @@ class _SmsImportSettingsScreenState
                   children: [
                     _buildTapRow(
                       icon: LucideIcons.activity,
-                      title: AppLocalizations.of(context)!.smsImport_txnActivity,
-                      subtitle: AppLocalizations.of(context)!.smsImport_viewDetectedTxn,
+                      title:
+                          ctxt.smsImport_txnActivity,
+                      subtitle: ctxt
+                          .smsImport_viewDetectedTxn,
                       onTap: () => context.push(AppRoutes.smsActivity),
                       color: color,
                       textTheme: textTheme,
-                      badge: ref
-                          .watch(pendingCountProvider)
-                          .maybeWhen(
+                      badge: ref.watch(pendingCountProvider).maybeWhen(
                             data: (c) => c,
                             orElse: () => null,
                           ),
@@ -173,8 +222,10 @@ class _SmsImportSettingsScreenState
                     _divider(color),
                     _buildTapRow(
                       icon: LucideIcons.trash2,
-                      title: AppLocalizations.of(context)!.smsImport_clearHistory,
-                      subtitle: AppLocalizations.of(context)!.smsImport_resetDetection,
+                      title:
+                          ctxt.smsImport_clearHistory,
+                      subtitle: ctxt
+                          .smsImport_resetDetection,
                       onTap: _permissionGranted
                           ? () => _showClearHistoryConfirmation(context)
                           : null,
@@ -188,7 +239,10 @@ class _SmsImportSettingsScreenState
                 SizedBox(height: spacing.sectionGap),
 
                 // ── HOW IT WORKS ──
-                _buildSectionHeader(AppLocalizations.of(context)!.smsImport_howItWorks, color, textTheme),
+                _buildSectionHeader(
+                    ctxt.smsImport_howItWorks,
+                    color,
+                    textTheme,),
                 const SizedBox(height: 10),
                 Container(
                   padding: const EdgeInsets.all(16),
@@ -203,35 +257,36 @@ class _SmsImportSettingsScreenState
                     children: [
                       _buildInfoPoint(
                         LucideIcons.landmark,
-                        AppLocalizations.of(context)!.smsImport_readsBankNotif,
+                        ctxt.smsImport_readsBankNotif,
                         color,
                         textTheme,
                       ),
                       SizedBox(height: spacing.elementGap),
                       _buildInfoPoint(
                         LucideIcons.lock,
-                        AppLocalizations.of(context)!.smsImport_dataStaysOnDevice,
+                        ctxt
+                            .smsImport_dataStaysOnDevice,
                         color,
                         textTheme,
                       ),
                       SizedBox(height: spacing.elementGap),
                       _buildInfoPoint(
                         LucideIcons.sparkles,
-                        AppLocalizations.of(context)!.smsImport_autoCreatesTxn,
+                        ctxt.smsImport_autoCreatesTxn,
                         color,
                         textTheme,
                       ),
                       SizedBox(height: spacing.elementGap),
                       _buildInfoPoint(
                         LucideIcons.eyeOff,
-                        AppLocalizations.of(context)!.smsImport_personalIgnored,
+                        ctxt.smsImport_personalIgnored,
                         color,
                         textTheme,
                       ),
                       SizedBox(height: spacing.elementGap),
                       _buildInfoPoint(
                         LucideIcons.cloudOff,
-                        AppLocalizations.of(context)!.smsImport_noDataSent,
+                        ctxt.smsImport_noDataSent,
                         color,
                         textTheme,
                       ),
@@ -250,6 +305,7 @@ class _SmsImportSettingsScreenState
     TextTheme textTheme,
     AppSpacing spacing,
     bool isDark,
+    AppLocalizations ctxt,
   ) {
     final active = _permissionGranted && _smsImportEnabled;
     final heroColor = active ? color.primary : color.primary;
@@ -299,7 +355,9 @@ class _SmsImportSettingsScreenState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  active ? AppLocalizations.of(context)!.smsImport_active : AppLocalizations.of(context)!.smsImport_inactive,
+                  active
+                      ? ctxt.smsImport_active
+                      : ctxt.smsImport_inactive,
                   style: textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                     color: heroColor,
@@ -308,10 +366,11 @@ class _SmsImportSettingsScreenState
                 const SizedBox(height: 4),
                 Text(
                   active
-                      ? AppLocalizations.of(context)!.smsImport_autoImporting
+                      ? ctxt.smsImport_autoImporting
                       : _permissionGranted
-                          ? AppLocalizations.of(context)!.smsImport_enableToStart
-                          : AppLocalizations.of(context)!.smsImport_grantAccess,
+                          ? ctxt
+                              .smsImport_enableToStart
+                          : ctxt.smsImport_grantAccess,
                   style: textTheme.bodySmall?.copyWith(
                     color: color.onSurfaceVariant,
                   ),
@@ -330,9 +389,11 @@ class _SmsImportSettingsScreenState
     ColorScheme color,
     TextTheme textTheme,
     AppSpacing spacing,
+    AppLocalizations ctxt,
   ) {
     return Scaffold(
-      appBar: AppBar(title: Text(AppLocalizations.of(context)!.smsImport_autoImport)),
+      appBar: AppBar(
+          title: Text(ctxt.smsImport_autoImport),),
       body: Center(
         child: Padding(
           padding: EdgeInsets.all(spacing.cardHorizontalMax),
@@ -353,7 +414,7 @@ class _SmsImportSettingsScreenState
               ),
               const SizedBox(height: 20),
               Text(
-                AppLocalizations.of(context)!.smsImport_notAvailableIos,
+                ctxt.smsImport_notAvailableIos,
                 style: textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: color.primary,
@@ -361,7 +422,7 @@ class _SmsImportSettingsScreenState
               ),
               const SizedBox(height: 8),
               Text(
-                AppLocalizations.of(context)!.smsImport_iosRestriction,
+                ctxt.smsImport_iosRestriction,
                 textAlign: TextAlign.center,
                 style: textTheme.bodyMedium?.copyWith(
                   color: color.onSurfaceVariant,
@@ -430,6 +491,7 @@ class _SmsImportSettingsScreenState
     required ValueChanged<bool>? onChanged,
     required ColorScheme color,
     required TextTheme textTheme,
+    required AppLocalizations ctxt,
     bool disabled = false,
   }) {
     final alpha = disabled ? 0.4 : 1.0;
@@ -462,7 +524,10 @@ class _SmsImportSettingsScreenState
                   ),
                 ),
                 Text(
-                  disabled ? AppLocalizations.of(context)!.smsImport_enableAccessFirst : subtitle,
+                  disabled
+                      ? ctxt
+                          .smsImport_enableAccessFirst
+                      : subtitle,
                   style: textTheme.bodySmall?.copyWith(
                     color: color.onSurfaceVariant.withValues(alpha: alpha),
                   ),
@@ -586,6 +651,7 @@ class _SmsImportSettingsScreenState
   Future<bool?> _showSmsPermissionDisclosure(BuildContext context) {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final ctxt = AppLocalizations.of(context)!;
 
     return showModalBottomSheet<bool>(
       context: context,
@@ -618,14 +684,14 @@ class _SmsImportSettingsScreenState
             ),
             const SizedBox(height: 20),
             Text(
-              AppLocalizations.of(context)!.smsImport_notifAccessRequired,
+              ctxt.smsImport_notifAccessRequired,
               style:
                   textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
-              AppLocalizations.of(context)!.smsImport_notifAccessDesc,
+              ctxt.smsImport_notifAccessDesc,
               style:
                   textTheme.bodyMedium?.copyWith(color: color.onSurfaceVariant),
               textAlign: TextAlign.center,
@@ -644,28 +710,28 @@ class _SmsImportSettingsScreenState
                 children: [
                   _disclosurePoint(
                     LucideIcons.listFilter,
-                    AppLocalizations.of(context)!.smsImport_onlyBankRead,
+                    ctxt.smsImport_onlyBankRead,
                     color,
                     textTheme,
                   ),
                   const SizedBox(height: 12),
                   _disclosurePoint(
                     LucideIcons.smartphone,
-                    AppLocalizations.of(context)!.smsImport_dataStaysOnDevice,
+                    ctxt.smsImport_dataStaysOnDevice,
                     color,
                     textTheme,
                   ),
                   const SizedBox(height: 12),
                   _disclosurePoint(
                     LucideIcons.ban,
-                    AppLocalizations.of(context)!.smsImport_personalNeverRead,
+                    ctxt.smsImport_personalNeverRead,
                     color,
                     textTheme,
                   ),
                   const SizedBox(height: 12),
                   _disclosurePoint(
                     LucideIcons.cloudOff,
-                    AppLocalizations.of(context)!.smsImport_noDataSent,
+                    ctxt.smsImport_noDataSent,
                     color,
                     textTheme,
                   ),
@@ -684,7 +750,7 @@ class _SmsImportSettingsScreenState
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: Text(AppLocalizations.of(context)!.common_cancel),
+                    child: Text(ctxt.common_cancel),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -698,7 +764,8 @@ class _SmsImportSettingsScreenState
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: Text(AppLocalizations.of(context)!.smsImport_openSettings),
+                    child: Text(
+                        ctxt.smsImport_openSettings,),
                   ),
                 ),
               ],
@@ -732,6 +799,7 @@ class _SmsImportSettingsScreenState
   Future<void> _showClearHistoryConfirmation(BuildContext context) async {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final ctxt = AppLocalizations.of(context)!;
 
     final confirmed = await showModalBottomSheet<bool>(
       context: context,
@@ -763,7 +831,7 @@ class _SmsImportSettingsScreenState
             ),
             const SizedBox(height: 20),
             Text(
-              AppLocalizations.of(context)!.smsImport_clearHistoryConfirm,
+              ctxt.smsImport_clearHistoryConfirm,
               style:
                   textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
@@ -783,7 +851,8 @@ class _SmsImportSettingsScreenState
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      AppLocalizations.of(context)!.smsImport_clearHistoryWarning,
+                      ctxt
+                          .smsImport_clearHistoryWarning,
                       style: textTheme.bodySmall?.copyWith(
                         color: color.onSurfaceVariant,
                         height: 1.4,
@@ -806,7 +875,7 @@ class _SmsImportSettingsScreenState
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: Text(AppLocalizations.of(context)!.common_cancel),
+                    child: Text(ctxt.common_cancel),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -821,7 +890,7 @@ class _SmsImportSettingsScreenState
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: Text(AppLocalizations.of(context)!.txnList_clear),
+                    child: Text(ctxt.txnList_clear),
                   ),
                 ),
               ],
@@ -861,7 +930,8 @@ class _SmsImportSettingsScreenState
         await NotificationListenerBridge.openSettings();
         _permissionDisableTapCount = 0;
       } else {
-        SnackbarService.info(AppLocalizations.of(context)!.smsImport_tapAgainSettings);
+        SnackbarService.info(
+            AppLocalizations.of(context)!.smsImport_tapAgainSettings,);
       }
     }
   }
@@ -872,10 +942,11 @@ class _SmsImportSettingsScreenState
     SharedPrefsUtil.instance.setSmsImportEnabled(on);
     ref.invalidate(smsPermissionGrantedProvider);
     if (on) {
-      if (!mounted) return;
+      if (!context.mounted) return;
       SnackbarService.success(BuddyMessages.smsImportEnabled);
     } else {
-      SnackbarService.info(BuddyMessages.toggledOff(AppLocalizations.of(context)!.smsImport_autoImport));
+      SnackbarService.info(BuddyMessages.toggledOff(
+          AppLocalizations.of(context)!.smsImport_autoImport,),);
     }
   }
 }

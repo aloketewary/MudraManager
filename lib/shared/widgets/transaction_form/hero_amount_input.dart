@@ -72,6 +72,7 @@ class HeroAmountInput extends StatelessWidget {
               focusedBorder: InputBorder.none,
               suffixIcon: onCalculatorTap != null
                   ? IconButton(
+                    tooltip: 'Calculator',
                       onPressed: onCalculatorTap,
                       icon: Icon(
                         LucideIcons.calculator,

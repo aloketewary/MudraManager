@@ -1,4 +1,5 @@
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
+import 'package:mudra_manager/core/theme/app_theme.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -277,7 +278,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
                           child: Text(
                             'Build: ${info?.buildNumber ?? 'N/A'}\nPackage: ${info?.packageName ?? 'N/A'}',
                             style: textTheme.bodySmall?.copyWith(
-                              fontFamily: 'monospace',
+                              fontFamily: AppTheme.monoFontFamily,
                               color: color.onErrorContainer,
                             ),
                           ),

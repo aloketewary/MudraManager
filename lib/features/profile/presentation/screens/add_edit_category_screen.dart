@@ -417,7 +417,7 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
             c.parentCategory.loadSync();
             return c.parentCategory.value == null;
           }).toList();
-          if (!mounted) return;
+          if (!context.mounted) return;
           final selected = await showModalBottomSheet<Category?>(
             context: context,
             isScrollControlled: true,
@@ -635,7 +635,7 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
             ?.track(GamificationEvent.categoryCreated);
       }
 
-      if (mounted) context.pop(true);
+      if (context.mounted) context.pop(true);
     } finally {
       if (mounted) setState(() => _saving = false);
     }

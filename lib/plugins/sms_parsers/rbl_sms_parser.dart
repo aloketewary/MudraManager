@@ -11,7 +11,7 @@ class RblSmsParserPlugin extends SmsParserPlugin {
   String get bankName => 'RBL';
 
   @override
-  List<String> get senderNames => ['RBLBNK', 'RBLBK', 'RBL'];
+  List<String> get senderNames => ['RBL'];
 
   @override
   String get iconPath => 'assets/logo/banks/rbl.svg';
@@ -67,7 +67,7 @@ class RblSmsParserPlugin extends SmsParserPlugin {
     final merchant = vpa ?? merchantRegex.firstMatch(body)?.group(1)?.trim();
     final balance = _extractAmount(balanceRegex, body);
 
-    final isIncome = type == 'credited' || type == 'received';
+    final isIncome = type == 'credited' || (type == 'received' && ParsedSms.isReceivedCredit(body));
     final isLikelyTransfer = bodyLower.contains('neft') ||
         bodyLower.contains('imps') ||
         bodyLower.contains('rtgs') ||

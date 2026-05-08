@@ -9,6 +9,11 @@ class MainActivity: FlutterFragmentActivity() {
     private val CHANNEL = "com.mudramanager.app/widget"
     private var methodChannel: MethodChannel? = null
 
+    override fun onResume() {
+        super.onResume()
+        TransactionNotificationListener.ensureRunning(this)
+    }
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         

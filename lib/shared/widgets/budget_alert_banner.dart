@@ -91,6 +91,7 @@ class BudgetAlertBanner extends StatelessWidget {
                   ),
                 ),
                 IconButton(
+                  tooltip: 'Close',
                   icon: const Icon(LucideIcons.x),
                   onPressed: onDismiss,
                   color: color,
@@ -117,6 +118,7 @@ class BudgetAlertBanner extends StatelessWidget {
             Text('Percentage: ${alert.percentage.toStringAsFixed(1)}%'),
             const SizedBox(height: 16),
             LinearProgressIndicator(
+              semanticsLabel: 'Progress',
               value: alert.percentage / 100,
               backgroundColor: Colors.grey[300],
               color: alert.threshold == 100

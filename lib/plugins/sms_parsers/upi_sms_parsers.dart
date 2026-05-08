@@ -11,7 +11,7 @@ class PaytmSmsParserPlugin extends SmsParserPlugin {
   String get bankName => 'PAYTM';
 
   @override
-  List<String> get senderNames => ['PAYTM', 'PYTM', 'PPBL'];
+  List<String> get senderNames => ['PAYTM'];
 
   @override
   String get iconPath => 'assets/logo/banks/paytm.svg';
@@ -124,7 +124,8 @@ class PaytmSmsParserPlugin extends SmsParserPlugin {
             .firstMatch(body)
             ?.group(1)
             ?.toLowerCase();
-    final isIncome = typeMatch == 'received' || typeMatch == 'credited';
+    final isIncome = typeMatch == 'credited' ||
+        (typeMatch == 'received' && ParsedSms.isReceivedCredit(body));
     final account = _accountRegex.firstMatch(body)?.group(1);
 
     return ParsedSms(
@@ -168,7 +169,7 @@ class PhonePeSmsParserPlugin extends SmsParserPlugin {
   String get bankName => 'PHONEPE';
 
   @override
-  List<String> get senderNames => ['PHONEPE', 'PHPEPE'];
+  List<String> get senderNames => ['PHONEPE'];
 
   @override
   String get iconPath => 'assets/logo/banks/phonepe.svg';
@@ -237,7 +238,7 @@ class GpaySmsParserPlugin extends SmsParserPlugin {
   String get bankName => 'GPAY';
 
   @override
-  List<String> get senderNames => ['GPAY', 'GOOGLE'];
+  List<String> get senderNames => ['GPAY', 'GOOGLE PAY'];
 
   @override
   String get iconPath => 'assets/logo/banks/gpay.svg';

@@ -13,6 +13,7 @@ import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/category_rule.dart';
 import 'package:mudra_manager/core/db/models/goal.dart';
 import 'package:mudra_manager/core/db/models/notification_record.dart';
+import 'package:mudra_manager/core/db/models/pending_notifications.dart';
 import 'package:mudra_manager/core/db/models/reconciliation_status.dart';
 import 'package:mudra_manager/core/db/models/sms_activity.dart';
 import 'package:mudra_manager/core/db/models/recurring_bill.dart';
@@ -84,6 +85,7 @@ class IsarService {
           DashboardWidgetPreferenceSchema,
           ExchangeRateSchema,
           ArchivedTransactionSchema,
+          PendingNotificationsSchema,
         ],
         directory: dir.path,
       ).timeout(const Duration(seconds: 5));
@@ -91,6 +93,7 @@ class IsarService {
       _initCompleter!.complete(_instance!);
     } catch (e) {
       _log.w('Isar.open() failed or timed out: $e');
+      _initCompleter = null;
       // Fallback: try getInstance one more time
       final fallback = Isar.getInstance();
       if (fallback != null && fallback.isOpen) {
@@ -118,5 +121,14 @@ class IsarService {
     }
 
     return await initIsar();
+  }
+
+  Future<void> healthCheck() async {
+    try {
+      final isar = await getInstance();
+      await isar.smsActivitys.count();
+    } catch (e) {
+      _log.e('DB health check failed', e);
+    }
   }
 }

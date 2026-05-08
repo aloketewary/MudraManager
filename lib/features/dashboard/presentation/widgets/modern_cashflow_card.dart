@@ -65,8 +65,8 @@ class _ModernCashFlowCardState extends ConsumerState<ModernCashFlowCard> {
               final prevSummary = ref.watch(
                 previousPeriodTransactionsProvider('month'),
               );
-              final rawPrevIncome = prevSummary.valueOrNull?['income'] ?? 0.0;
-              final rawPrevExpense = prevSummary.valueOrNull?['expense'] ?? 0.0;
+              final rawPrevIncome = prevSummary.value?['income'] ?? 0.0;
+              final rawPrevExpense = prevSummary.value?['expense'] ?? 0.0;
 
               final prevIncome =
                   GuestModeUtil.applyGuestMode(rawPrevIncome, isGuestMode);
@@ -123,7 +123,7 @@ class _ModernCashFlowCardState extends ConsumerState<ModernCashFlowCard> {
               color: color.primary,
             ),
           ),
-          const SizedBox(width: 4),
+          SizedBox(width: spacing.elementGapMin),
           AdaptiveText(
             '(${DateFormat(
               'dd',

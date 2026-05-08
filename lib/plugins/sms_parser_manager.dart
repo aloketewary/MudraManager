@@ -1,4 +1,15 @@
 import 'package:mudra_manager/plugins/sms_parsers/rbl_sms_parser.dart';
+import 'package:mudra_manager/plugins/sms_parsers/federal_bank_sms_parser.dart';
+import 'package:mudra_manager/plugins/sms_parsers/pnb_sms_parser.dart';
+import 'package:mudra_manager/plugins/sms_parsers/bob_sms_parser.dart';
+import 'package:mudra_manager/plugins/sms_parsers/canara_sms_parser.dart';
+import 'package:mudra_manager/plugins/sms_parsers/union_sms_parser.dart';
+import 'package:mudra_manager/plugins/sms_parsers/brazil_sms_parser.dart';
+import 'package:mudra_manager/plugins/sms_parsers/indonesia_sms_parser.dart';
+import 'package:mudra_manager/plugins/sms_parsers/mea_region_sms_parser.dart';
+import 'package:mudra_manager/plugins/sms_parsers/latam_sms_parser.dart';
+import 'package:mudra_manager/plugins/sms_parsers/europe_sms_parser.dart';
+import 'package:mudra_manager/plugins/sms_parsers/generic_international_parser.dart';
 
 import 'sms_parser_plugin.dart';
 import 'sms_parsers/hdfc_sms_parser.dart';
@@ -36,6 +47,17 @@ class SmsParserManager {
       IdfcSmsParserPlugin(),
       AuBankSmsParserPlugin(),
       RblSmsParserPlugin(),
+      FederalBankSmsParserPlugin(),
+      PnbSmsParserPlugin(),
+      BobSmsParserPlugin(),
+      CanaraSmsParserPlugin(),
+      UnionBankSmsParserPlugin(),
+      BrazilSmsParser(),
+      IndonesiaSmsParser(),
+      MeaRegionSmsParser(),
+      LatamSmsParser(),
+      EuropeSmsParser(),
+      GenericInternationalSmsParser(),
     ];
 
     for (final parser in parsers) {

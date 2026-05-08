@@ -55,6 +55,17 @@ class MarketplaceService {
     'idfc_sms_parser',
     'aubank_sms_parser',
     'rbl_sms_parser',
+    'federal_bank_sms_parser',
+    'pnb_sms_parser',
+    'bob_sms_parser',
+    'canara_sms_parser',
+    'unionbank_sms_parser',
+    'brazil_sms_parser',
+    'indonesia_sms_parser',
+    'mea_region_sms_parser',
+    'latam_sms_parser',
+    'europe_sms_parser',
+    'generic_international_parser',
   };
 
   static const _defaultEnabledIds = {
@@ -119,13 +130,14 @@ class MarketplaceService {
     _enabledCache[pluginId] = enabled;
 
     if (CategoryPackRegistry.isPack(pluginId)) {
+      final catService = CategoryManagementService(IsarService());
       if (enabled) {
-        await CategoryManagementService.installPack(pluginId);
+        await catService.installPack(pluginId);
       } else {
         final enabledPacks = await _getEnabledPackIds();
-        await CategoryManagementService.removePack(pluginId, enabledPacks);
+        await catService.removePack(pluginId, enabledPacks);
         if (enabledPacks.isEmpty) {
-          await CategoryManagementService.clearAll();
+          await catService.clearAll();
         }
       }
     }
@@ -300,6 +312,128 @@ class MarketplaceService {
       description: 'Parse RBL Bank SMS messages',
       author: 'Mudra Team',
       iconUrl: 'assets/logo/banks/rbl.svg',
+      downloads: 0,
+      rating: 5.0,
+      packageUrl: 'bundled',
+      group: PluginGroup.smsParser,
+    ),
+    PluginMetadata(
+      id: 'pnb_sms_parser',
+      name: 'Punjab National Bank',
+      version: '1.0.0',
+      description: 'Parse PNB SMS messages',
+      author: 'Mudra Team',
+      iconUrl: 'assets/logo/banks/generic.svg',
+      downloads: 0,
+      rating: 5.0,
+      packageUrl: 'bundled',
+      group: PluginGroup.smsParser,
+    ),
+    PluginMetadata(
+      id: 'bob_sms_parser',
+      name: 'Bank of Baroda',
+      version: '1.0.0',
+      description: 'Parse Bank of Baroda SMS messages',
+      author: 'Mudra Team',
+      iconUrl: 'assets/logo/banks/generic.svg',
+      downloads: 0,
+      rating: 5.0,
+      packageUrl: 'bundled',
+      group: PluginGroup.smsParser,
+    ),
+    PluginMetadata(
+      id: 'canara_sms_parser',
+      name: 'Canara Bank',
+      version: '1.0.0',
+      description: 'Parse Canara Bank SMS messages',
+      author: 'Mudra Team',
+      iconUrl: 'assets/logo/banks/generic.svg',
+      downloads: 0,
+      rating: 5.0,
+      packageUrl: 'bundled',
+      group: PluginGroup.smsParser,
+    ),
+    PluginMetadata(
+      id: 'unionbank_sms_parser',
+      name: 'Union Bank of India',
+      version: '1.0.0',
+      description: 'Parse Union Bank SMS messages',
+      author: 'Mudra Team',
+      iconUrl: 'assets/logo/banks/generic.svg',
+      downloads: 0,
+      rating: 5.0,
+      packageUrl: 'bundled',
+      group: PluginGroup.smsParser,
+    ),
+
+    // ── International SMS Parsers ──
+    PluginMetadata(
+      id: 'brazil_sms_parser',
+      name: 'Brazil Banks',
+      version: '1.0.0',
+      description: 'Nubank, Itaú, Bradesco, BB, Caixa, C6, Inter, PicPay',
+      author: 'Mudra Team',
+      iconUrl: 'assets/logo/banks/generic.svg',
+      downloads: 0,
+      rating: 5.0,
+      packageUrl: 'bundled',
+      group: PluginGroup.smsParser,
+    ),
+    PluginMetadata(
+      id: 'indonesia_sms_parser',
+      name: 'Indonesia Banks',
+      version: '1.0.0',
+      description: 'BCA, Mandiri, BNI, BRI, GoPay, OVO, Dana, ShopeePay',
+      author: 'Mudra Team',
+      iconUrl: 'assets/logo/banks/generic.svg',
+      downloads: 0,
+      rating: 5.0,
+      packageUrl: 'bundled',
+      group: PluginGroup.smsParser,
+    ),
+    PluginMetadata(
+      id: 'mea_region_sms_parser',
+      name: 'Middle East & Africa',
+      version: '1.0.0',
+      description: 'UAE, Saudi, Egypt, Nigeria, Kenya, South Africa banks & M-Pesa',
+      author: 'Mudra Team',
+      iconUrl: 'assets/logo/banks/generic.svg',
+      downloads: 0,
+      rating: 5.0,
+      packageUrl: 'bundled',
+      group: PluginGroup.smsParser,
+    ),
+    PluginMetadata(
+      id: 'latam_sms_parser',
+      name: 'Latin America',
+      version: '1.0.0',
+      description: 'Mexico, Colombia, Argentina, Peru, Chile banks & wallets',
+      author: 'Mudra Team',
+      iconUrl: 'assets/logo/banks/generic.svg',
+      downloads: 0,
+      rating: 5.0,
+      packageUrl: 'bundled',
+      group: PluginGroup.smsParser,
+    ),
+    PluginMetadata(
+      id: 'europe_sms_parser',
+      name: 'Europe Banks',
+      version: '1.0.0',
+      description: 'France, Germany, Turkey, Revolut, N26, ING & more',
+      author: 'Mudra Team',
+      iconUrl: 'assets/logo/banks/generic.svg',
+      downloads: 0,
+      rating: 5.0,
+      packageUrl: 'bundled',
+      group: PluginGroup.smsParser,
+    ),
+    PluginMetadata(
+      id: 'generic_international_parser',
+      name: 'Generic International',
+      version: '1.0.0',
+      description: 'Fallback parser for any bank worldwide — 30+ currencies',
+      author: 'Mudra Team',
+      iconUrl: 'assets/logo/banks/generic.svg',
       downloads: 0,
       rating: 5.0,
       packageUrl: 'bundled',

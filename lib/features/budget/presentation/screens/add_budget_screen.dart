@@ -1,4 +1,6 @@
 import 'package:isar_community/isar.dart';
+import 'package:mudra_manager/shared/widgets/currency_text.dart';
+import 'package:mudra_manager/shared/widgets/inline_error.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
@@ -57,6 +59,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
   final Map<int, bool> _expandedParents = {};
 
   bool _allocationsLoaded = false;
+  bool _saving = false;
   int _step = 0;
   static const _totalSteps = 4;
   String _categoryQuery = '';
@@ -162,40 +165,53 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
   }
 
   Future<void> _save() async {
+    if (_saving) return;
+    setState(() => _saving = true);
     final ctxt = AppLocalizations.of(context)!;
     // ── Entitlement check (new budgets only) ──
     if (widget.existing == null) {
       final canCreate = await ref.read(canCreateBudgetProvider.future);
       if (!canCreate) {
+        setState(() => _saving = false);
         SnackbarService.warning(
           ctxt.budget_freePlanLimit,
         );
         return;
       }
     }
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) {
+      setState(() => _saving = false);
+      return;
+    }
 
     if (_startDate == null || _endDate == null) {
+      setState(() => _saving = false);
       SnackbarService.error(ctxt.budget_pickBothDatesErrorText);
       return;
     }
     if (_budgetType == BudgetType.categoryWise && _selectedCats.isEmpty) {
+      setState(() => _saving = false);
       SnackbarService.error(ctxt.budget_selectAtLeastOneCategoryErrorText);
       return;
     }
     if (_budgetType == BudgetType.tagWise && _selectedTagIds.isEmpty) {
+      setState(() => _saving = false);
       SnackbarService.error(ctxt.budget_selectAtLeastOneTag);
       return;
     }
 
     final service = ref.read(budgetServiceProvider);
     final isEditing = widget.existing != null;
-    final totalAmount = double.parse(_amountC.text.trim());
+    final totalAmount = double.tryParse(_amountC.text.trim().replaceAll(',', '')) ?? 0;
+    if (totalAmount <= 0) {
+      setState(() => _saving = false);
+      return;
+    }
 
     final bud = widget.existing ??
         Budget.create(
           name: _nameC.text.trim(),
-          amount: double.parse(_amountC.text),
+          amount: totalAmount,
           startDate: _startDate!,
           endDate: _endDate!,
         );
@@ -248,6 +264,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
       final remainingBudget = totalAmount - totalAllocated;
 
       if (remainingBudget < 0) {
+        setState(() => _saving = false);
         SnackbarService.error(
           ctxt.budget_allocatedAmountExceedsTotalBudgetText,
         );
@@ -276,7 +293,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
 
     await service.save(bud, newAllocations: newAllocations);
 
-    if (mounted) {
+    if (context.mounted) {
       HapticFeedback.mediumImpact();
       ref.invalidate(budgetServiceProvider);
       SnackbarService.success(
@@ -307,6 +324,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
       backgroundColor: color.surface,
       appBar: AppBar(
         leading: IconButton(
+          tooltip: 'Close',
           icon: Icon(LucideIcons.x, color: color.onSurfaceVariant),
           onPressed: () => context.pop(),
         ),
@@ -446,11 +464,12 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
                     ? ctxt.budget_saveButtonText
                     : ctxt.budget_updateButtonText)
                 : ctxt.common_next,
-            onTap: _nextStep,
+            onTap: (isLast && _saving) ? null : _nextStep,
             color: color,
             textTheme: textTheme,
             spacing: spacing,
             isPrimary: true,
+            isLoading: isLast && _saving,
           ),
         ],
       ),
@@ -500,15 +519,16 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
     required TextTheme textTheme,
     required AppSpacing spacing,
     bool isPrimary = false,
+    bool isLoading = false,
   }) {
-    final enabled = onTap != null;
+    final enabled = onTap != null && !isLoading;
     final fg = !enabled
         ? color.onSurfaceVariant.withValues(alpha: 0.3)
         : isPrimary
             ? color.primary
             : color.onSurfaceVariant;
     return InkWell(
-      onTap: onTap,
+      onTap: enabled ? onTap : null,
       borderRadius: BorderRadius.circular(spacing.radiusSmall),
       child: Padding(
         padding: EdgeInsets.symmetric(
@@ -520,15 +540,25 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
           children: [
             if (!isPrimary) Icon(icon, size: 16, color: fg),
             if (!isPrimary) SizedBox(width: spacing.elementGapMin),
-            Text(
-              label,
-              style: textTheme.labelLarge?.copyWith(
-                color: fg,
-                fontWeight: isPrimary ? FontWeight.w700 : FontWeight.w500,
+            if (isLoading)
+              SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: color.primary,
+                ),
+              )
+            else
+              Text(
+                label,
+                style: textTheme.labelLarge?.copyWith(
+                  color: fg,
+                  fontWeight: isPrimary ? FontWeight.w700 : FontWeight.w500,
+                ),
               ),
-            ),
-            if (isPrimary) SizedBox(width: spacing.elementGapMin),
-            if (isPrimary) Icon(icon, size: 16, color: fg),
+            if (isPrimary && !isLoading) SizedBox(width: spacing.elementGapMin),
+            if (isPrimary && !isLoading) Icon(icon, size: 16, color: fg),
           ],
         ),
       ),
@@ -563,8 +593,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
           iconData: currencyIcon(null),
           inputType: const TextInputType.numberWithOptions(decimal: true),
           validateField: (v) => v == null ||
-                  double.tryParse(v) == null ||
-                  double.parse(v) <= 0
+                  (double.tryParse(v.replaceAll(',', '')) ?? 0) <= 0
               ? ctxt.budget_amountRequiredHintText
               : null,
           onChanged: (v) => setState(() {}),
@@ -650,7 +679,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
             final isActive = _budgetType == type;
             final isTravel = type == BudgetType.travel;
             final activeTripAsync = isTravel ? ref.watch(activeTripProvider) : null;
-            final hasActiveTrip = activeTripAsync?.valueOrNull != null;
+            final hasActiveTrip = activeTripAsync?.value != null;
             final isDisabled = isTravel && !hasActiveTrip;
             return GestureDetector(
               onTap: isDisabled
@@ -1010,7 +1039,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
                   );
                 },
                 loading: () => const CircularProgressIndicator(),
-                error: (_, __) => const SizedBox(),
+                error: (_, __) => const InlineError(),
               );
             },
           ),
@@ -1108,8 +1137,8 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    Text(
-                      formatCurrency(displayAmount, code: BaseCurrency.code),
+                    CurrencyText(
+                      amount: displayAmount,
                       style: textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                         color: autoDistributed ? color.onSurfaceVariant : color.onSurface,
@@ -1236,7 +1265,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
                 children: [
                   Text(ctxt.budget_totalBudget, style: textTheme.bodySmall?.copyWith(color: color.onTertiaryContainer)),
                   SizedBox(height: spacing.elementGapUltraMin),
-                  Text(formatCurrency(totalAmount, code: BaseCurrency.code), style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: color.onTertiaryContainer)),
+                  CurrencyText(amount: totalAmount, style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: color.onTertiaryContainer)),
                 ],
               ),
               Column(
@@ -1244,7 +1273,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
                 children: [
                   Text(ctxt.budget_allocated, style: textTheme.bodySmall?.copyWith(color: color.onTertiaryContainer)),
                   SizedBox(height: spacing.elementGapUltraMin),
-                  Text(formatCurrency(totalAlloc, code: BaseCurrency.code), style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: color.onTertiaryContainer)),
+                  CurrencyText(amount: totalAlloc, style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: color.onTertiaryContainer)),
                 ],
               ),
             ],
@@ -1253,6 +1282,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
           ClipRRect(
             borderRadius: BorderRadius.circular(spacing.radiusSmall),
             child: LinearProgressIndicator(
+              semanticsLabel: 'Progress',
               value: totalAmount > 0 ? (totalAlloc / totalAmount).clamp(0.0, 1.0) : 0,
               minHeight: 6,
               backgroundColor: color.surface.withValues(alpha: 0.5),
@@ -1264,7 +1294,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(remaining >= 0 ? ctxt.budget_remaining : ctxt.budget_overBudget, style: textTheme.bodySmall?.copyWith(color: color.onTertiaryContainer)),
-              Text(formatCurrency(remaining.abs(), code: BaseCurrency.code), style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: remaining < 0 ? color.error : color.onTertiaryContainer)),
+              CurrencyText(amount: remaining.abs(), style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: remaining < 0 ? color.error : color.onTertiaryContainer)),
             ],
           ),
         ],
@@ -1399,6 +1429,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
               duration: const Duration(milliseconds: 400),
               curve: Curves.easeOutCubic,
               builder: (_, value, __) => LinearProgressIndicator(
+                semanticsLabel: 'Progress',
                 value: value,
                 minHeight: 6,
                 backgroundColor: accent.withValues(alpha: 0.1),
@@ -1529,7 +1560,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
 
   double _getSpent() {
     if (widget.existing == null) return 0;
-    return ref.read(budgetsWithProgressProvider).valueOrNull
+    return ref.read(budgetsWithProgressProvider).value
         ?.where((b) => b.budget.id == widget.existing!.id)
         .firstOrNull?.spent ?? 0.0;
   }

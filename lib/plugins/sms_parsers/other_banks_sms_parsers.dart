@@ -11,7 +11,7 @@ class YesBankSmsParserPlugin extends SmsParserPlugin {
   String get bankName => 'YES';
 
   @override
-  List<String> get senderNames => ['YESBNK', 'YESBANK'];
+  List<String> get senderNames => ['YES BANK', 'YESBNK'];
 
   @override
   String get iconPath => 'assets/logo/banks/yes.svg';
@@ -19,7 +19,8 @@ class YesBankSmsParserPlugin extends SmsParserPlugin {
   @override
   bool canParse(String sender) {
     final s = sender.toUpperCase();
-    return s.contains('YESBNK') || s.contains('YESBANK');
+    return s.contains('YESBANK') || s.contains('YESBNK') ||
+        s.contains('YES BANK') || s.contains('YES BNK');
   }
 
   @override
@@ -83,7 +84,7 @@ class IndusIndSmsParserPlugin extends SmsParserPlugin {
   String get bankName => 'INDUSIND';
 
   @override
-  List<String> get senderNames => ['INDUS', 'INDUSIND'];
+  List<String> get senderNames => ['INDUS'];
 
   @override
   String get iconPath => 'assets/logo/banks/indusind.svg';
@@ -173,7 +174,7 @@ class IdfcSmsParserPlugin extends SmsParserPlugin {
   String get bankName => 'IDFC';
 
   @override
-  List<String> get senderNames => ['IDFC', 'IDFCFB'];
+  List<String> get senderNames => ['IDFC'];
 
   @override
   String get iconPath => 'assets/logo/banks/idfc.svg';
@@ -242,13 +243,16 @@ class AuBankSmsParserPlugin extends SmsParserPlugin {
   String get bankName => 'AU';
 
   @override
-  List<String> get senderNames => ['AUBANK', 'AUSFB'];
+  List<String> get senderNames => ['AU BANK', 'AUBANK', 'AU SMALL'];
 
   @override
   String get iconPath => 'assets/logo/banks/au.svg';
 
   @override
-  bool canParse(String sender) => sender.toUpperCase().contains('AUBANK');
+  bool canParse(String sender) {
+    final s = sender.toUpperCase();
+    return s.contains('AUBANK') || s.contains('AUSFB') || s.contains('AU SMALL') || s.contains('AU BANK');
+  }
 
   @override
   ParsedSms? parseSms(String sender, String body) {

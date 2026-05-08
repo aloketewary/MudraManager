@@ -75,7 +75,7 @@ class BackupService {
         'timestamp': DateTime.now().toIso8601String(),
       });
 
-      final key = _deriveKey(password);
+      final key = deriveKey(password);
       final iv = encrypt.IV.fromSecureRandom(16);
       final encrypter = encrypt.Encrypter(encrypt.AES(key));
       final encrypted = encrypter.encrypt(content, iv: iv);
@@ -123,14 +123,14 @@ class BackupService {
     String password,
   ) async {
     try {
-      await FilePicker.platform.clearTemporaryFiles();
-      final result = await FilePicker.platform.pickFiles(
+      await FilePicker.clearTemporaryFiles();
+      final result = await FilePicker.pickFiles(
         allowMultiple: false,
         type: FileType.any,
         dialogTitle: 'Select Backup File',
       );
 
-      if (result == null || result.files.single.path == null) {
+      if (result == null || result.files.isEmpty || result.files.first.path == null) {
         _log.w('No file selected');
         return null;
       }
@@ -140,11 +140,11 @@ class BackupService {
         return null;
       }
 
-      final selectedFile = File(result.files.single.path!);
+      final selectedFile = File(result.files.first.path!);
       final fileContent = await selectedFile.readAsString();
       final backupData = jsonDecode(fileContent);
 
-      final key = _deriveKey(password);
+      final key = deriveKey(password);
       final iv = encrypt.IV.fromBase64(backupData['iv']);
       final encrypter = encrypt.Encrypter(encrypt.AES(key));
 
@@ -175,7 +175,7 @@ class BackupService {
     }
   }
 
-  static encrypt.Key _deriveKey(String password) {
+  static encrypt.Key deriveKey(String password) {
     final bytes = utf8.encode(password);
     final hash = sha256.convert(bytes);
     return encrypt.Key(Uint8List.fromList(hash.bytes));
@@ -614,7 +614,7 @@ class BackupService {
   }
 
   static Future<Directory?> pickBackupFolder() async {
-    final String? selectedDir = await FilePicker.platform.getDirectoryPath();
+    final String? selectedDir = await FilePicker.getDirectoryPath();
     if (selectedDir != null) {
       return Directory(selectedDir);
     }

@@ -34,7 +34,7 @@ android {
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
 //        minSdk = flutter.minSdkVersion
-        minSdk = 29
+        minSdk = 26
 //        targetSdk = flutter.targetSdkVersion
         targetSdk = 35
         versionCode = flutter.versionCode
@@ -98,6 +98,7 @@ flutter {
 }
 
 dependencies {
+    implementation(project(":integration_test"))
     implementation("androidx.core:core-ktx")
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
 

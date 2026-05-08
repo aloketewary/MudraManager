@@ -4,6 +4,7 @@ import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:mudra_manager/core/utils/safe_date_format.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/extension/localization_extenstion.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
@@ -195,12 +196,12 @@ class HeroChartCard extends StatelessWidget {
       case 'Month':
         return ctxt.formatCompactNumber().format(index + 1);
       case 'Year':
-        return DateFormat(
+        return safeDateFormat(
           'MMM',
           ctxt.localeName,
         ).format(DateTime(now.year, index + 1));
       default:
-        return DateFormat(
+        return safeDateFormat(
           'MMM',
           ctxt.localeName,
         ).format(DateTime(now.year, index + 1));

@@ -1,26 +1,28 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:in_app_update/in_app_update.dart';
 
 class AppUpdateService {
-  static Future<void> checkForUpdate(BuildContext context) async {
+  static bool _checked = false;
+
+  static Future<void> checkForUpdate() async {
+    if (_checked) return;
+    _checked = true;
+
     try {
       final info = await InAppUpdate.checkForUpdate();
-      
+
       if (info.updateAvailability == UpdateAvailability.updateAvailable) {
-        if (info.immediateUpdateAllowed) {
-          await InAppUpdate.performImmediateUpdate();
-        } else if (info.flexibleUpdateAllowed) {
+        if (info.flexibleUpdateAllowed) {
           await InAppUpdate.startFlexibleUpdate();
           await InAppUpdate.completeFlexibleUpdate();
+        } else if (info.immediateUpdateAllowed) {
+          await InAppUpdate.performImmediateUpdate();
         }
       }
     } on MissingPluginException {
       // Ignore during hot reload/development
-    } catch (e) {
-      if (!e.toString().contains('ERROR_APP_NOT_OWNED')) {
-        // Silently ignore update check failures in production
-      }
+    } catch (_) {
+      // Silently ignore update check failures
     }
   }
 }

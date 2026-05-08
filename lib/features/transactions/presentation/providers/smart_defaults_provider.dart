@@ -121,3 +121,73 @@ class _CatScore {
   int timeScore = 0;
   int dayScore = 0;
 }
+
+/// Returns top 8 most-used categories for the given type (expense/income).
+/// Used by compact quick-add mode.
+final frequentCategoriesProvider = FutureProvider.autoDispose
+    .family<List<Category>, bool>((ref, isExpense) async {
+  final isar = await ref.watch(isarServiceProvider).getInstance();
+  final cutoff = DateTime.now().subtract(const Duration(days: 90));
+  final transactions = await isar.transactions
+      .filter()
+      .isExpenseEqualTo(isExpense)
+      .isTransferEqualTo(false)
+      .dateGreaterThan(cutoff)
+      .findAll();
+
+  final counts = <int, int>{};
+  final catMap = <int, Category>{};
+  for (final tx in transactions) {
+    await tx.category.load();
+    final cat = tx.category.value;
+    if (cat == null) continue;
+    counts[cat.id] = (counts[cat.id] ?? 0) + 1;
+    catMap[cat.id] = cat;
+  }
+
+  if (counts.isEmpty) {
+    // Fallback: return first 8 categories of the type
+    final cats = await isar.categorys
+        .filter()
+        .categoryTypeEqualTo(
+          isExpense ? CategoryType.expense : CategoryType.income,
+        )
+        .limit(8)
+        .findAll();
+    return cats;
+  }
+
+  final sorted = counts.entries.toList()
+    ..sort((a, b) => b.value.compareTo(a.value));
+
+  return sorted.take(8).map((e) => catMap[e.key]!).toList();
+});
+
+/// Returns the primary or most-used account.
+final lastUsedAccountProvider = FutureProvider.autoDispose<Account?>((ref) async {
+  final isar = await ref.watch(isarServiceProvider).getInstance();
+
+  // Try primary account first
+  final primary = await isar.accounts
+      .filter()
+      .isPrimaryEqualTo(true)
+      .isActiveEqualTo(true)
+      .findFirst();
+  if (primary != null) return primary;
+
+  // Fallback: most recent transaction's account
+  final recent = await isar.transactions
+      .where()
+      .sortByDateDesc()
+      .findFirst();
+  if (recent != null) {
+    await recent.account.load();
+    if (recent.account.value?.isActive == true) return recent.account.value;
+  }
+
+  // Fallback: first active account
+  return await isar.accounts
+      .filter()
+      .isActiveEqualTo(true)
+      .findFirst();
+});

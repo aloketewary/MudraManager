@@ -13,6 +13,9 @@ import 'package:mudra_manager/features/analytics/presentation/screens/analytics_
 import 'package:mudra_manager/features/analytics/presentation/financial_health_screen.dart';
 import 'package:mudra_manager/features/analytics/presentation/spending_personality_screen.dart';
 import 'package:mudra_manager/features/analytics/presentation/net_worth_screen.dart';
+import 'package:mudra_manager/features/analytics/presentation/tax_estimation_screen.dart';
+import 'package:mudra_manager/features/analytics/presentation/cash_flow_forecast_screen.dart';
+import 'package:mudra_manager/features/analytics/presentation/spending_trends_screen.dart';
 import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
 import 'package:mudra_manager/features/budget/presentation/screens/add_budget_screen.dart';
 import 'package:mudra_manager/features/budget/presentation/screens/adaptive_budget_dashboard.dart';
@@ -59,17 +62,18 @@ import 'package:mudra_manager/features/trip/presentation/screens/trips_screen.da
 import 'package:mudra_manager/features/upgrade/presentation/screens/upgrade_screen.dart';
 import 'package:mudra_manager/features/import_export/presentation/screens/import_export_screen.dart';
 import 'package:mudra_manager/features/import_export/presentation/screens/import_preview_screen.dart';
+import 'package:mudra_manager/features/account/presentation/screens/credit_card_bills_screen.dart';
 import 'package:mudra_manager/plugins/credit_card_reminder_settings.dart';
 import 'package:mudra_manager/shared/screens/notification_page_screen.dart';
 import 'package:mudra_manager/features/gamification/screens/achievements_screen.dart';
 import 'package:mudra_manager/features/marketplace/screens/plugin_groups_screen.dart';
 import 'package:mudra_manager/shared/widgets/pro_gate.dart';
 
-final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
+final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 
 class AppRouter {
   static GoRouter router(bool showOnboarding) => GoRouter(
-        navigatorKey: _rootNavigatorKey,
+        navigatorKey: rootNavigatorKey,
         initialLocation: showOnboarding ? AppRoutes.onboarding : AppRoutes.home,
         debugLogDiagnostics: true,
         errorBuilder: (context, state) {
@@ -394,6 +398,27 @@ class AppRouter {
                 ),
               ),
               GoRoute(
+                path: AppRoutes.taxEstimation,
+                builder: (context, state) => const ProGate(
+                  feature: ProFeature.advancedAnalytics,
+                  child: TaxEstimationScreen(),
+                ),
+              ),
+              GoRoute(
+                path: AppRoutes.cashFlowForecast,
+                builder: (context, state) => const ProGate(
+                  feature: ProFeature.advancedAnalytics,
+                  child: CashFlowForecastScreen(),
+                ),
+              ),
+              GoRoute(
+                path: AppRoutes.spendingTrends,
+                builder: (context, state) => const ProGate(
+                  feature: ProFeature.advancedAnalytics,
+                  child: SpendingTrendsScreen(),
+                ),
+              ),
+              GoRoute(
                 path: AppRoutes.achievements,
                 builder: (context, state) => const AchievementsScreen(),
               ),
@@ -414,6 +439,10 @@ class AppRouter {
               GoRoute(
                 path: AppRoutes.creditCardReminders,
                 builder: (context, state) => const CreditCardReminderSettings(),
+              ),
+              GoRoute(
+                path: AppRoutes.creditCardBills,
+                builder: (context, state) => const CreditCardBillsScreen(),
               ),
               // Add route (inside the ShellRoute routes list, near the other settings routes)
               GoRoute(

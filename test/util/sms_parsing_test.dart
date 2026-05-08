@@ -72,8 +72,8 @@ void main() {
       const address = 'HDFCBK';
       const body = 'Test SMS';
 
-      final hash1 = SmsProcessorService.instance.generateSmsHash(address, body);
-      final hash2 = SmsProcessorService.instance.generateSmsHash(address, body);
+      final hash1 = SmsProcessorService.instance.generateSmsHash(address, 1234567890, body);
+      final hash2 = SmsProcessorService.instance.generateSmsHash(address, 1234567890, body);
 
       expect(hash1, equals(hash2));
     });
@@ -83,8 +83,8 @@ void main() {
       const body1 = 'Test SMS';
       const body2 = 'Different SMS';
 
-      final hash1 = SmsProcessorService.instance.generateSmsHash(address, body1);
-      final hash2 = SmsProcessorService.instance.generateSmsHash(address, body2);
+      final hash1 = SmsProcessorService.instance.generateSmsHash(address, 1234567890, body1);
+      final hash2 = SmsProcessorService.instance.generateSmsHash(address, 1234567890, body2);
 
       expect(hash1, isNot(equals(hash2)));
     });

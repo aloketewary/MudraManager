@@ -114,6 +114,7 @@ class _WeeklyCalendarState extends State<WeeklyCalendar> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               IconButton(
+                tooltip: 'Previous',
                 icon: const Icon(LucideIcons.chevronLeft),
                 onPressed: _previousWeek,
               ),
@@ -128,6 +129,7 @@ class _WeeklyCalendarState extends State<WeeklyCalendar> {
                 ),
               ),
               IconButton(
+                tooltip: 'Next',
                 icon: const Icon(LucideIcons.chevronRight),
                 onPressed: _nextWeek,
               ),

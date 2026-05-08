@@ -85,7 +85,7 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
             textTheme,
             spacing,
             highContrast,
-            guestPluginEnabled: guestPluginAsync.valueOrNull == true,
+            guestPluginEnabled: guestPluginAsync.value == true,
             isGuestMode: isGuestMode,
           ),
           const SizedBox(height: 24),

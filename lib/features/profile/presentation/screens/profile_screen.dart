@@ -13,6 +13,7 @@ import 'package:mudra_manager/core/entitlement/entitlement_products.dart';
 import 'package:mudra_manager/core/entitlement/entitlement_provider.dart';
 import 'package:mudra_manager/core/extension/localization_extenstion.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
+import 'package:mudra_manager/core/providers/app_mode_provider.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
@@ -22,6 +23,7 @@ import 'package:mudra_manager/features/budget/data/budget_service_provider.dart'
 import 'package:mudra_manager/features/category/data/category_provider.dart';
 import 'package:mudra_manager/features/profile/data/user_profile_provider.dart';
 import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
+import 'package:mudra_manager/features/sms/presentation/screens/sms_activity_screen.dart';
 import 'package:mudra_manager/shared/widgets/pro_gate.dart';
 import 'package:mudra_manager/shared/widgets/ambient_brand_section.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
@@ -35,10 +37,11 @@ class ProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  AppLocalizations get l10n => AppLocalizations.of(context)!;
+
   @override
   Widget build(BuildContext context) {
     final spacing = ref.watch(spacingProvider);
-    final l10n = AppLocalizations.of(context)!;
     final profileAsync = ref.watch(userProfileProvider);
     final accountsAsync = ref.watch(accountsProvider);
     final categoriesAsync = ref.watch(categoryListProvider);
@@ -73,7 +76,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ? Padding(
                           padding: const EdgeInsets.only(right: 16),
                           child: Text(
-                            profile?.name ?? AppLocalizations.of(context)!.profile_awesomeUser,
+                            profile?.name ?? l10n.profile_awesomeUser,
                             style: textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: color.onSurface,
@@ -112,8 +115,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 SizedBox(height: spacing.sectionGap),
 
                 // ── ACHIEVEMENTS ──
-                _buildAchievementsCard(color, textTheme, spacing),
-                const SizedBox(height: 24),
+                if (!ref.watch(isSimpleModeProvider))
+                  _buildAchievementsCard(color, textTheme, spacing),
+                if (!ref.watch(isSimpleModeProvider))
+                  const SizedBox(height: 24),
                 // ── SUBSCRIPTION STATUS ──
                 _buildSubscriptionCard(color, textTheme, spacing, isDark),
                 // ── CORE SETTINGS ──
@@ -126,14 +131,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   items: [
                     _SettingItem(
                       LucideIcons.wallet,
-                      AppLocalizations.of(context)!.profile_accounts,
-                      AppLocalizations.of(context)!.profile_manageAccounts,
+                      l10n.profile_accounts,
+                      l10n.profile_manageAccounts,
                       () => context.push(AppRoutes.manageAccounts),
                     ),
                     _SettingItem(
                       LucideIcons.layoutGrid,
-                      AppLocalizations.of(context)!.profile_categories,
-                      AppLocalizations.of(context)!.profile_manageCategories,
+                      l10n.profile_categories,
+                      l10n.profile_manageCategories,
                       () => context.push(AppRoutes.manageCategories),
                     ),
                     _SettingItem(
@@ -145,7 +150,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     _SettingItem(
                       LucideIcons.lock,
                       l10n.title_security,
-                      AppLocalizations.of(context)!.profile_pinFingerprint,
+                      l10n.profile_pinFingerprint,
                       () => context.push(AppRoutes.security),
                     ),
                   ],
@@ -174,15 +179,31 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     _SettingItem(
                       LucideIcons.palette,
                       l10n.title_appearance,
-                      AppLocalizations.of(context)!.profile_themeDisplay,
+                      l10n.profile_themeDisplay,
                       () => context.push(AppRoutes.appearance),
                     ),
                     _SettingItem(
                       LucideIcons.languages,
-                      AppLocalizations.of(context)!.profile_language,
+                      l10n.profile_language,
                       Locale(SharedPrefsUtil.instance.getLanguage())
                           .displayName(),
                       () => context.push(AppRoutes.chooseLanguage),
+                    ),
+                    _SettingItem(
+                      LucideIcons.layoutGrid,
+                      ref.watch(isSimpleModeProvider)
+                          ? l10n.mode_switchToFull
+                          : l10n.mode_switchToSimple,
+                      ref.watch(isSimpleModeProvider)
+                          ? l10n.mode_simpleDesc
+                          : l10n.mode_fullDesc,
+                      () async {
+                        final notifier = ref.read(appModeProvider.notifier);
+                        final current = ref.read(appModeProvider);
+                        await notifier.setMode(
+                          current == AppMode.simple ? AppMode.full : AppMode.simple,
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -190,35 +211,37 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 const SizedBox(height: 24),
 
                 // ── ADVANCED ──
-                _buildSectionHeader(l10n.section_advanced, color, textTheme),
-                const SizedBox(height: 10),
-                _buildGroupedCard(
-                  color,
-                  textTheme,
-                  spacing,
-                  items: [
-                    _SettingItem(
-                      LucideIcons.layoutDashboard,
-                      l10n.title_dashboardLayout,
-                      AppLocalizations.of(context)!.profile_customizeWidgets,
-                      () => context.push(AppRoutes.dashboardCustomize),
-                      trailing: const ProBadge(),
-                    ),
-                    _SettingItem(
-                      LucideIcons.arrowLeftRight,
-                      AppLocalizations.of(context)!.profile_importExport,
-                      AppLocalizations.of(context)!.profile_importExportDesc,
-                      () => context.push(AppRoutes.importExport),
-                    ),
-                    _SettingItem(
-                      LucideIcons.puzzle,
-                      l10n.title_plugins,
-                      AppLocalizations.of(context)!.profile_manageExtensions,
-                      () => context.push(AppRoutes.marketplace),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
+                if (!ref.watch(isSimpleModeProvider)) ...[
+                  _buildSectionHeader(l10n.section_advanced, color, textTheme),
+                  const SizedBox(height: 10),
+                  _buildGroupedCard(
+                    color,
+                    textTheme,
+                    spacing,
+                    items: [
+                      _SettingItem(
+                        LucideIcons.layoutDashboard,
+                        l10n.title_dashboardLayout,
+                        l10n.profile_customizeWidgets,
+                        () => context.push(AppRoutes.dashboardCustomize),
+                        trailing: const ProBadge(),
+                      ),
+                      _SettingItem(
+                        LucideIcons.arrowLeftRight,
+                        l10n.profile_importExport,
+                        l10n.profile_importExportDesc,
+                        () => context.push(AppRoutes.importExport),
+                      ),
+                      _SettingItem(
+                        LucideIcons.puzzle,
+                        l10n.title_plugins,
+                        l10n.profile_manageExtensions,
+                        () => context.push(AppRoutes.marketplace),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                ],
 
                 // ── SUPPORT & LEGAL ──
                 _buildSectionHeader(l10n.section_supportLegal, color, textTheme),
@@ -230,14 +253,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   items: [
                     _SettingItem(
                       LucideIcons.circleQuestionMark,
-                      AppLocalizations.of(context)!.profile_helpSupport,
-                      AppLocalizations.of(context)!.profile_faqs,
+                      l10n.profile_helpSupport,
+                      l10n.profile_faqs,
                       () => context.push(AppRoutes.help),
                     ),
                     _SettingItem(
                       LucideIcons.info,
-                      AppLocalizations.of(context)!.profile_aboutApp,
-                      AppLocalizations.of(context)!.profile_versionInfo,
+                      l10n.profile_aboutApp,
+                      l10n.profile_versionInfo,
                       () => context.push(AppRoutes.about),
                     ),
                   ],
@@ -257,7 +280,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         _showLogoutBottomSheet(context, ref, color, textTheme),
                     icon: Icon(LucideIcons.logOut, size: 18, color: color.error),
                     label: Text(
-                      AppLocalizations.of(context)!.profile_logout,
+                      l10n.profile_logout,
                       style: textTheme.bodyMedium?.copyWith(color: color.error),
                     ),
                     style: TextButton.styleFrom(
@@ -311,7 +334,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return Consumer(
       builder: (context, ref, _) {
         final isProAsync = ref.watch(isProProvider);
-        final isPro = isProAsync.valueOrNull ?? false;
+        final isPro = isProAsync.value ?? false;
 
         return Card(
           elevation: 0,
@@ -348,7 +371,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     const SizedBox(width: 14),
                     Expanded(
                       child: Text(
-                        isPro ? AppLocalizations.of(context)!.profile_proActiveLabel : AppLocalizations.of(context)!.profile_freeTierLabel,
+                        isPro ? l10n.profile_proActiveLabel : l10n.profile_freeTierLabel,
                         style: textTheme.bodyLarge?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
@@ -616,8 +639,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                   info.isPro
                                       ? info.label
                                       : info.isTrial
-                                          ? AppLocalizations.of(context)!.profile_fullAccessLabel
-                                          : AppLocalizations.of(context)!.profile_upgradeToProLabel,
+                                          ? l10n.profile_fullAccessLabel
+                                          : l10n.profile_upgradeToProLabel,
                                   style: textTheme.titleSmall?.copyWith(
                                     fontWeight: FontWeight.w700,
                                   ),
@@ -700,21 +723,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   String _subscriptionSubtitle(ProPlanInfo info) {
     if (info.isTrial) {
       final days = info.trialDaysRemaining ?? 0;
-      if (days > 30) return AppLocalizations.of(context)!.profile_fullAccessEnjoy;
-      if (days > 7) return AppLocalizations.of(context)!.profile_fullAccessDaysRemaining(days);
-      if (days > 0) return AppLocalizations.of(context)!.profile_fullAccessEndsIn(days);
-      return AppLocalizations.of(context)!.profile_trialEnded;
+      if (days > 30) return l10n.profile_fullAccessEnjoy;
+      if (days > 7) return l10n.profile_fullAccessDaysRemaining(days);
+      if (days > 0) return l10n.profile_fullAccessEndsIn(days);
+      return l10n.profile_trialEnded;
     }
-    if (!info.isPro) return AppLocalizations.of(context)!.profile_unlimitedDesc;
+    if (!info.isPro) return l10n.profile_unlimitedDesc;
 
     if (info.expiresAt != null) {
       final days = info.expiresAt!.difference(DateTime.now()).inDays;
-      if (days < 0) return AppLocalizations.of(context)!.profile_expiredRenew;
-      if (days == 0) return AppLocalizations.of(context)!.profile_expiresToday;
-      if (days == 1) return AppLocalizations.of(context)!.profile_renewsTomorrow;
-      return AppLocalizations.of(context)!.profile_renewsInDays(days);
+      if (days < 0) return l10n.profile_expiredRenew;
+      if (days == 0) return l10n.profile_expiresToday;
+      if (days == 1) return l10n.profile_renewsTomorrow;
+      return l10n.profile_renewsInDays(days);
     }
-    return AppLocalizations.of(context)!.profile_activeSubscription;
+    return l10n.profile_activeSubscription;
   }
 
   // ── HERO BACKGROUND ──
@@ -777,7 +800,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          profile?.name ?? AppLocalizations.of(context)!.profile_unknown,
+                          profile?.name ?? l10n.profile_unknown,
                           style: textTheme.headlineSmall?.copyWith(
                             fontWeight: FontWeight.w900,
                           ),
@@ -854,7 +877,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           height: 64,
           child: ClipOval(
             child: BoringAvatar(
-              name: profile?.name ?? AppLocalizations.of(context)!.profile_awesomeUser,
+              name: profile?.name ?? l10n.profile_awesomeUser,
               palette: BoringAvatarPalette([
                 color.primary,
                 color.tertiary,
@@ -967,7 +990,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   loading: () => '...',
                   error: (_, __) => '0',
                 ),
-                AppLocalizations.of(context)!.profile_accountsLabel,
+                l10n.profile_accountsLabel,
                 color,
                 textTheme,
               ),
@@ -981,7 +1004,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   loading: () => '...',
                   error: (_, __) => '0',
                 ),
-                AppLocalizations.of(context)!.profile_categoriesLabel,
+                l10n.profile_categoriesLabel,
                 color,
                 textTheme,
               ),
@@ -995,7 +1018,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   snapshot.hasData
                       ? (snapshot.data as List).length.toString()
                       : '...',
-                  AppLocalizations.of(context)!.profile_budgetsLabel,
+                  l10n.profile_budgetsLabel,
                   color,
                   textTheme,
                 ),
@@ -1007,7 +1030,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 child: _quickStat(
                   LucideIcons.flame,
                   '${streak.longestCount}',
-                  AppLocalizations.of(context)!.profile_bestStreakLabel,
+                  l10n.profile_bestStreakLabel,
                   color,
                   textTheme,
                   accentColor: color.tertiary,
@@ -1093,7 +1116,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        AppLocalizations.of(context)!.profile_yourAchievementsLabel,
+                        l10n.profile_yourAchievementsLabel,
                         style: textTheme.titleMedium
                             ?.copyWith(fontWeight: FontWeight.w600),
                       ),
@@ -1134,7 +1157,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   Icon(LucideIcons.trophy, color: color.primary, size: 24),
                   const SizedBox(width: 12),
                   Text(
-                    AppLocalizations.of(context)!.profile_yourAchievementsLabel,
+                    l10n.profile_yourAchievementsLabel,
                     style: textTheme.titleMedium
                         ?.copyWith(fontWeight: FontWeight.w600),
                   ),
@@ -1270,32 +1293,55 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     TextTheme textTheme,
     AppSpacing spacing,
   ) {
-    final l10n = AppLocalizations.of(context)!;
-    final items = <_SettingItem>[
-      _SettingItem(
-        LucideIcons.bell,
-        l10n.profile_notifications,
-        l10n.profile_dailyWeeklySummaries,
-        () => context.push(AppRoutes.notificationSettings),
-      ),
-      _SettingItem(
-        LucideIcons.bellRing,
-        l10n.profile_autoImport,
-        l10n.profile_autoImportDesc,
-        () => context.push(AppRoutes.smsImport),
-      ),
-      _SettingItem(
-        LucideIcons.cloudUpload,
-        l10n.profile_backupRestore,
-        l10n.profile_manageData,
-        () => context.push(AppRoutes.backupRestore),
-        trailing: const ProBadge(),
-      ),
-    ];
-
     return Consumer(
       builder: (context, ref, _) {
-        final extraItems = [...items];
+        final pendingCount = ref.watch(pendingCountProvider).value ?? 0;
+        final extraItems = <_SettingItem>[
+          _SettingItem(
+            LucideIcons.bell,
+            l10n.profile_notifications,
+            l10n.profile_dailyWeeklySummaries,
+            () => context.push(AppRoutes.notificationSettings),
+          ),
+          _SettingItem(
+            LucideIcons.bellRing,
+            l10n.profile_autoImport,
+            pendingCount > 0
+                ? '$pendingCount pending review'
+                : l10n.profile_autoImportDesc,
+            () => context.push(
+              pendingCount > 0 ? AppRoutes.smsActivity : AppRoutes.smsImport,
+            ),
+            trailing: pendingCount > 0
+                ? Container(
+                    margin: const EdgeInsets.only(left: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: color.error,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      '$pendingCount',
+                      style: TextStyle(
+                        color: color.onError,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  )
+                : null,
+          ),
+          _SettingItem(
+            LucideIcons.cloudUpload,
+            l10n.profile_backupRestore,
+            l10n.profile_manageData,
+            () => context.push(AppRoutes.backupRestore),
+            trailing: const ProBadge(),
+          ),
+        ];
 
         return _buildGroupedCard(color, textTheme, spacing, items: extraItems);
       },
@@ -1328,13 +1374,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             Icon(LucideIcons.user, size: 64, color: color.primary),
             const SizedBox(height: 16),
             Text(
-              AppLocalizations.of(context)!.profile_aboutMudra,
+              l10n.profile_aboutMudra,
               style:
                   textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             Text(
-              AppLocalizations.of(context)!.profile_aboutMudraDesc,
+              l10n.profile_aboutMudraDesc,
               style: textTheme.bodyMedium,
               textAlign: TextAlign.center,
             ),
@@ -1351,14 +1397,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     ColorScheme color,
     TextTheme textTheme,
   ) {
+    final spacing = ref.read(spacingProvider);
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(spacing.radiusLarge)),
       ),
       builder: (ctx) {
         return Padding(
-          padding: const EdgeInsets.all(24),
+          padding: EdgeInsets.all(spacing.sectionGap),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -1370,22 +1417,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: spacing.sectionGap),
               Icon(LucideIcons.logOut, size: 48, color: color.error),
-              const SizedBox(height: 16),
+              SizedBox(height: spacing.elementGap),
               Text(
                 BuddyMessages.logoutTitle,
                 style:
                     textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: spacing.elementGapMin),
               Text(
                 BuddyMessages.logoutMessage,
                 style: textTheme.bodyMedium
                     ?.copyWith(color: color.onSurfaceVariant),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: spacing.sectionGap),
               Row(
                 children: [
                   Expanded(
@@ -1395,15 +1442,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         context.pop();
                       },
                       style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        padding: EdgeInsets.symmetric(vertical: spacing.elementGap),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(spacing.radiusMedium),
                         ),
                       ),
                       child: Text(BuddyMessages.deleteCancel),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: spacing.elementGap),
                   Expanded(
                     child: FilledButton(
                       onPressed: () async {
@@ -1412,8 +1459,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         final isar =
                             await ref.read(isarServiceProvider).getInstance();
                         await isar.writeTxn(() async => await isar.clear());
-                        prefs.clear();
-                        prefs.setLanguage(lang);
+                        await prefs.clear();
+                        await prefs.setLanguage(lang);
                         BaseCurrency.sync('INR');
                         ref.invalidate(baseCurrencyProvider);
                         ref.invalidate(currencyServiceProvider);
@@ -1424,10 +1471,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         if (ctx.mounted) ctx.go(AppRoutes.onboarding);
                       },
                       style: FilledButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        padding: EdgeInsets.symmetric(vertical: spacing.elementGap),
                         backgroundColor: color.error,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(spacing.radiusMedium),
                         ),
                       ),
                       child: Text(BuddyMessages.logoutConfirm),
@@ -1435,7 +1482,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: spacing.elementGapMin),
             ],
           ),
         );
@@ -1445,7 +1492,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   String _baseCurrencySubtitle(WidgetRef ref) {
     final async = ref.watch(baseCurrencyProvider);
-    final code = async.valueOrNull ?? 'INR';
+    final code = async.value ?? 'INR';
     return '$code — ${currencyName(code)}';
   }
 }

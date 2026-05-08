@@ -1,3 +1,7 @@
+import 'dart:collection';
+
+import 'package:mudra_manager/core/services/auto_backup_service.dart';
+import 'package:mudra_manager/features/sms/domain/detection_level.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SharedPrefsUtil {
@@ -9,11 +13,30 @@ class SharedPrefsUtil {
   static const _setSmsImportEnabledKey = 'sms_import_enabled';
   static const _hasSeenHelpGuideKey = 'has_seen_help_guide';
   static const _lastDailyCheckInKey = 'last_daily_check_in';
+  final Queue<String> _hashQueue = Queue();
+  final Set<String> _hashSet = {};
+  bool _isUpdatingHashes = false;
+
+  static const _processedHashesKey = 'processed_sms_hashes';
+  static const _maxHashes = 500;
 
   final SharedPreferences _prefs;
 
   static void init(SharedPreferences prefs) {
     instance = SharedPrefsUtil._(prefs);
+    instance.initHashes();
+  }
+
+  Future<void> initHashes() async {
+    final stored = _prefs.getStringList(_processedHashesKey) ?? [];
+
+    _hashQueue.clear();
+    _hashSet.clear();
+
+    for (final h in stored) {
+      _hashQueue.addLast(h);
+      _hashSet.add(h);
+    }
   }
 
   static const _accountDisplayStyleKey = 'account_display_style';
@@ -24,9 +47,10 @@ class SharedPrefsUtil {
   Future<void> setAccountDisplayStyle(String style) =>
       _prefs.setString(_accountDisplayStyleKey, style);
 
-  // Save onboarding completion
+  // Save onboarding completion (also stamps timestamp)
   void setOnboardingComplete() {
     _prefs.setBool('onboarding_complete', true);
+    _prefs.setInt('onboarding_completed_at', DateTime.now().millisecondsSinceEpoch);
   }
 
   // Check if onboarding is complete
@@ -35,8 +59,8 @@ class SharedPrefsUtil {
   }
 
   // Save onboarding completion
-  void setLanguage(String locale) {
-    _prefs.setString('user_language', locale);
+  Future<void> setLanguage(String locale) async {
+    await _prefs.setString('user_language', locale);
   }
 
   // Check if onboarding is complete
@@ -44,29 +68,49 @@ class SharedPrefsUtil {
     return _prefs.getString('user_language') ?? 'en';
   }
 
-  void storeProcessedHash(String hash) {
-    final hashes = _prefs.getStringList('processed_sms_hashes') ?? [];
-    if (!hashes.contains(hash)) {
-      hashes.add(hash);
-      // FIFO eviction: keep only the last 500 hashes
-      if (hashes.length > 500) {
-        hashes.removeRange(0, hashes.length - 500);
+  Future<void> storeProcessedHash(String hash) async {
+    if (hash.isEmpty) return;
+
+    // Prevent async interleaving
+    while (_isUpdatingHashes) {
+      await Future.delayed(const Duration(milliseconds: 1));
+    }
+    _isUpdatingHashes = true;
+
+    try {
+      if (_hashSet.contains(hash)) return;
+
+      _hashSet.add(hash);
+      _hashQueue.addLast(hash);
+
+      if (_hashQueue.length > _maxHashes) {
+        final oldest = _hashQueue.removeFirst();
+        _hashSet.remove(oldest);
       }
-      _prefs.setStringList('processed_sms_hashes', hashes);
+
+      // Persist snapshot
+      await _prefs.setStringList(
+        _processedHashesKey,
+        _hashQueue.toList(),
+      );
+    } finally {
+      _isUpdatingHashes = false;
     }
   }
 
   bool isAlreadyProcessed(String hash) {
-    final hashes = _prefs.getStringList('processed_sms_hashes') ?? [];
-    return hashes.contains(hash);
+    if (hash.isEmpty) return false;
+    return _hashSet.contains(hash);
   }
 
   void clearProcessedHashes() {
-    _prefs.remove('processed_sms_hashes');
+    _hashQueue.clear();
+    _hashSet.clear();
+    _prefs.remove(_processedHashesKey);
   }
 
-  void clear() {
-    _prefs.clear();
+  Future<void> clear() async {
+    await _prefs.clear();
   }
 
   Future<void> saveBackupDate(DateTime date) async {
@@ -169,11 +213,60 @@ class SharedPrefsUtil {
     await _prefs.setBool('high_contrast_mode', enabled);
   }
 
-  Future<void> setSmsBannerDismiss() async{
+  Future<void> setSmsBannerDismiss() async {
     await _prefs.setBool('sms_banner_dismissed', true);
   }
 
   bool getSmsbannerDismiss() {
     return _prefs.getBool('sms_banner_dismissed') ?? false;
   }
+
+  DetectionSensitivity getDetectionMode() {
+    final value = _prefs.getString('detection_mode') ?? 'balanced';
+    return DetectionSensitivity.values.firstWhere(
+      (e) => e.name == value,
+      orElse: () => DetectionSensitivity.balanced,
+    );
+  }
+
+  Future<void> setDetectionMode(DetectionSensitivity mode) async {
+    await _prefs.setString('detection_mode', mode.name);
+  }
+
+  // App mode (simple / full)
+  String getAppMode() => _prefs.getString('app_mode') ?? 'simple';
+  Future<void> setAppMode(String mode) => _prefs.setString('app_mode', mode);
+
+  // First transaction nudge
+  bool getFirstTxnNudgeDismissed() => _prefs.getBool('first_txn_nudge_dismissed') ?? false;
+  Future<void> setFirstTxnNudgeDismissed() => _prefs.setBool('first_txn_nudge_dismissed', true);
+
+  // Starter transactions offered during onboarding
+  bool getStarterTxnsOffered() => _prefs.getBool('starter_txns_offered') ?? false;
+  Future<void> setStarterTxnsOffered() => _prefs.setBool('starter_txns_offered', true);
+
+  // SMS first import celebration
+  bool getSmsFirstImportReady() => _prefs.getBool('sms_first_import_ready') ?? false;
+  Future<void> setSmsFirstImportReady() => _prefs.setBool('sms_first_import_ready', true);
+  bool getSmsFirstImportCelebrated() => _prefs.getBool('sms_first_import_celebrated') ?? false;
+  Future<void> setSmsFirstImportCelebrated() => _prefs.setBool('sms_first_import_celebrated', true);
+
+  // Onboarding completion timestamp
+  DateTime? getOnboardingCompletedAt() {
+    final ms = _prefs.getInt('onboarding_completed_at');
+    return ms != null ? DateTime.fromMillisecondsSinceEpoch(ms) : null;
+  }
+  Future<void> setOnboardingCompletedAt(DateTime dt) =>
+      _prefs.setInt('onboarding_completed_at', dt.millisecondsSinceEpoch);
+
+  // Auto backup frequency
+  BackupFrequency getAutoBackupFrequency() {
+    final value = _prefs.getString('auto_backup_frequency') ?? 'never';
+    return BackupFrequency.values.firstWhere(
+      (e) => e.name == value,
+      orElse: () => BackupFrequency.never,
+    );
+  }
+  Future<void> setAutoBackupFrequency(String frequency) =>
+      _prefs.setString('auto_backup_frequency', frequency);
 }

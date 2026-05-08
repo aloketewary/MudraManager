@@ -149,11 +149,13 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
                       icon: LucideIcons.archive,
                     );
                     if (confirm == true) {
+                      
+                      final router = GoRouter.of(context);
                       await ref.read(tripServiceProvider).archiveTrip(widget.tripId);
                       ref.invalidate(allTripsProvider);
                       ref.invalidate(activeTripsProvider);
                       ref.invalidate(tripByIdProvider(widget.tripId));
-                      if (context.mounted) context.pop();
+                      router.pop();
                     }
                   }
                 },
@@ -1895,7 +1897,7 @@ class _TripDetailScreenState extends ConsumerState<TripDetailScreen>
 
     try {
       final fontData =
-          await rootBundle.load('assets/fonts/NotoSans-Regular.ttf');
+          await rootBundle.load('assets/fonts/Inter-Variable.ttf');
       final font = pw.Font.ttf(fontData);
       final now = DateTime.now();
       final pdf = pw.Document();

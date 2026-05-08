@@ -21,7 +21,7 @@ class HeroMoment {
 }
 
 final heroMomentProvider = Provider<HeroMoment?>((ref) {
-  final data = ref.watch(dashboardDataProvider).valueOrNull;
+  final data = ref.watch(dashboardDataProvider).value;
   if (data == null) return null;
 
   final now = DateTime.now();
@@ -266,7 +266,7 @@ class _HeroMomentCardState extends ConsumerState<HeroMomentCard>
                 borderRadius: BorderRadius.circular(spacing.radiusMedium),
               ),
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(spacing.cardInner),
                 child: Row(
                   children: [
                     Container(
@@ -280,7 +280,7 @@ class _HeroMomentCardState extends ConsumerState<HeroMomentCard>
                       alignment: Alignment.center,
                       child: Icon(hero.icon, color: accent, size: 24),
                     ),
-                    const SizedBox(width: 16),
+                    SizedBox(width: spacing.sectionGap),
                     Expanded(
                       child: Text(
                         hero.message,

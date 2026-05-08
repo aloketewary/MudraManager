@@ -1,4 +1,5 @@
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
@@ -70,6 +71,7 @@ class CommandCenterScreen extends ConsumerWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             IconButton(
+                              tooltip: 'Search',
                               icon: Icon(LucideIcons.search, color: color.onSurface),
                               onPressed: () {
                                 HapticFeedback.mediumImpact();
@@ -77,6 +79,7 @@ class CommandCenterScreen extends ConsumerWidget {
                               },
                             ),
                             IconButton(
+                              tooltip: 'Notifications',
                               icon: Icon(LucideIcons.bell,
                                   color: color.onSurface,),
                               onPressed: () {
@@ -101,8 +104,10 @@ class CommandCenterScreen extends ConsumerWidget {
                             ),
                           ),
                           const SizedBox(height: 16),
-                          Text(
-                            formatCurrency(totalBalance, code: BaseCurrency.code, decimals: 2),
+                          CurrencyText(
+                            amount: totalBalance,
+                            compact: false,
+                            fixedLength: 2,
                             style: textTheme.displayLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                               fontSize: 56,
@@ -230,8 +235,10 @@ class CommandCenterScreen extends ConsumerWidget {
                                           ),
                                         ),
                                         const SizedBox(height: 4),
-                                        Text(
-                                          formatCurrency((primaryAccount.initialBalance), decimals: 2),
+                                        CurrencyText(
+                                          amount: primaryAccount.initialBalance,
+                                          compact: false,
+                                          fixedLength: 2,
                                           style:
                                               textTheme.titleMedium?.copyWith(
                                             color: color.onPrimary,

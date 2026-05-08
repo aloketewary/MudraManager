@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
+import 'package:mudra_manager/core/db/models/tag.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
@@ -77,6 +78,11 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
   Timer? _searchDebounce;
   Timer? _pendingDeleteTimer;
   int? _pendingDeleteId;
+  final Map<int, Timer> _pendingDeletes = {};
+
+  // Multi-select for merge-as-transfer
+  bool _selectMode = false;
+  final Set<int> _selectedTxnIds = {};
 
   // Trip names caching
   List<int>? _lastTxIds;
@@ -102,6 +108,9 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
   void dispose() {
     _searchDebounce?.cancel();
     _pendingDeleteTimer?.cancel();
+    for (final timer in _pendingDeletes.values) {
+      timer.cancel();
+    }
     _scrollController.dispose();
     _fabController?.dispose();
     super.dispose();
@@ -187,7 +196,29 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
 
     return widget.showAppBar
         ? Scaffold(
-            appBar: AppBar(
+            appBar: _selectMode
+                ? AppBar(
+                    leading: IconButton(
+                      onPressed: () {
+                        HapticFeedback.mediumImpact();
+                        setState(() {
+                          _selectMode = false;
+                          _selectedTxnIds.clear();
+                        });
+                      },
+                      icon: const Icon(LucideIcons.x),
+                    ),
+                    title: Text('${_selectedTxnIds.length} selected'),
+                    actions: [
+                      if (_selectedTxnIds.length == 2)
+                        TextButton.icon(
+                          onPressed: () => _mergeAsTransfer(ctxt),
+                          icon: const Icon(LucideIcons.arrowLeftRight, size: 18),
+                          label: Text(ctxt.txnList_convertToTransfer),
+                        ),
+                    ],
+                  )
+                : AppBar(
               title: Text(ctxt.transaction_list_cash_flow_screen_title),
               actions: [
                 IconButton(
@@ -218,16 +249,34 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
                   },
                   icon: const Icon(LucideIcons.listFilter),
                 ),
+                IconButton(
+                  onPressed: () {
+                    HapticFeedback.mediumImpact();
+                    setState(() {
+                      _selectMode = true;
+                      _selectedTxnIds.clear();
+                    });
+                  },
+                  icon: const Icon(LucideIcons.combine),
+                  tooltip: ctxt.txnList_convertToTransfer,
+                ),
               ],
             ),
             body: Stack(
               children: [
                 _buildMainComponent(),
-                ExpandableFab(
-                  key: _speedDialKey,
-                  visibilityController: _fabController,
-                  padding: const EdgeInsets.only(bottom: 16),
-                ),
+                if (!_selectMode)
+                  ExpandableFab(
+                    key: _speedDialKey,
+                    visibilityController: _fabController,
+                    padding: const EdgeInsets.only(bottom: 16),
+                  ),
+                if (_selectMode && _selectedTxnIds.isNotEmpty)
+                  _buildSelectModeHint(
+                    Theme.of(context).colorScheme,
+                    Theme.of(context).textTheme,
+                    spacing,
+                  ),
               ],
             ),
           )
@@ -324,10 +373,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
 
   void _invalidateTransactionProviders() {
     _clearCache();
-    ref.invalidate(allSectionedTransactionsProvider(_filter));
-    ref.invalidate(sectionedTransactionsProvider);
-    ref.invalidate(sectionedTransactionsByDateRangeProvider);
-    ref.invalidate(transactionProvider);
+    // Service providers that don't have Isar watchers need manual invalidation
     ref.invalidate(accountServiceProvider);
   }
 
@@ -1016,8 +1062,12 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
     }
 
     // Hide pending delete from UI
-    final visible = _pendingDeleteId != null
-        ? filtered.where((e) => e is! TxItem || e.txn.id != _pendingDeleteId).toList()
+    final visible = _pendingDeleteId != null || _pendingDeletes.isNotEmpty
+        ? filtered.where((e) {
+            if (e is! TxItem) return true;
+            if (e.txn.id == _pendingDeleteId) return false;
+            return !_pendingDeletes.containsKey(e.txn.id);
+          }).toList()
         : filtered;
 
     final displayItems = visible.take(_displayLimit).toList();
@@ -1087,7 +1137,9 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
             final int firstTxIndex =
                 displayItems.indexWhere((e) => e is TxItem);
 
-            return TransactionCard(
+            return _selectMode
+                ? _buildSelectableCard(transaction, tags, isRecurring, tripName, ctxt, color, spacing)
+                : TransactionCard(
               category: transaction.category.value,
               description: transaction.description,
               account: transaction.account.value,
@@ -1114,6 +1166,193 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
     );
   }
 
+  // ── SELECT MODE HINT BAR ──
+  Widget _buildSelectModeHint(ColorScheme color, TextTheme textTheme, AppSpacing spacing) {
+    final hint = _selectedTxnIds.length == 1
+        ? 'Select the matching transaction'
+        : 'Tap merge in the app bar';
+
+    return Positioned(
+      bottom: MediaQuery.of(context).padding.bottom + kBottomNavigationBarHeight + 8,
+      left: spacing.cardHorizontal,
+      right: spacing.cardHorizontal,
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: spacing.cardHorizontal,
+          vertical: spacing.cardVertical + 2,
+        ),
+        decoration: BoxDecoration(
+          color: color.primaryContainer,
+          borderRadius: BorderRadius.circular(spacing.radiusMedium),
+          border: Border.all(color: color.primary.withValues(alpha: 0.3)),
+        ),
+        child: Row(
+          children: [
+            Icon(LucideIcons.arrowLeftRight, size: 18, color: color.primary),
+            SizedBox(width: spacing.elementGap),
+            Expanded(
+              child: Text(
+                hint,
+                style: textTheme.labelLarge?.copyWith(
+                  color: color.onPrimaryContainer,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            Text(
+              '${_selectedTxnIds.length}/2',
+              style: textTheme.labelLarge?.copyWith(
+                color: color.primary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── SELECTABLE CARD (merge-as-transfer mode) ──
+  Widget _buildSelectableCard(
+    Transaction transaction,
+    List<Tag> tags,
+    bool isRecurring,
+    String? tripName,
+    AppLocalizations ctxt,
+    ColorScheme color,
+    AppSpacing spacing,
+  ) {
+    final isSelected = _selectedTxnIds.contains(transaction.id);
+    final canSelect = !transaction.isTransfer &&
+        (_selectedTxnIds.length < 2 || isSelected);
+
+    return GestureDetector(
+      onTap: () {
+        if (!canSelect && !isSelected) return;
+        HapticFeedback.selectionClick();
+        setState(() {
+          if (isSelected) {
+            _selectedTxnIds.remove(transaction.id);
+          } else {
+            _selectedTxnIds.add(transaction.id);
+          }
+        });
+      },
+      child: Stack(
+        children: [
+          Opacity(
+            opacity: canSelect || isSelected ? 1.0 : 0.4,
+            child: TransactionCard(
+              category: transaction.category.value,
+              description: transaction.description,
+              account: transaction.account.value,
+              amount: transaction.amount.toStringAsFixed(2),
+              currencyCode: transaction.currencyCode,
+              convertedAmount: transaction.convertedAmount,
+              date: transaction.date,
+              isExpense: transaction.isExpense,
+              isTransfer: transaction.isTransfer,
+              tags: tags,
+              related: transaction.related.value,
+              tripName: tripName,
+              isRecurring: isRecurring,
+              onEdit: () {},
+              onRemove: () {},
+              enablePeek: false,
+            ),
+          ),
+          if (isSelected)
+            Positioned(
+              top: spacing.cardVertical + 4,
+              right: spacing.cardHorizontal + 4,
+              child: Container(
+                padding: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  color: color.primary,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(LucideIcons.check, size: 16, color: color.onPrimary),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  // ── MERGE AS TRANSFER ──
+  Future<void> _mergeAsTransfer(AppLocalizations ctxt) async {
+    if (_selectedTxnIds.length != 2) return;
+
+    final isar = await ref.read(isarServiceProvider).getInstance();
+    final txns = <Transaction>[];
+    for (final id in _selectedTxnIds) {
+      final t = await isar.transactions.get(id);
+      if (t != null) {
+        t.account.loadSync();
+        txns.add(t);
+      }
+    }
+
+    if (txns.length != 2) {
+      SnackbarService.error(BuddyMessages.genericError);
+      return;
+    }
+
+    // Validate: one expense, one income
+    final expense = txns.where((t) => t.isExpense).firstOrNull;
+    final income = txns.where((t) => !t.isExpense).firstOrNull;
+    if (expense == null || income == null) {
+      SnackbarService.error('Select one expense and one income transaction');
+      return;
+    }
+
+    // Validate: same amount (±1 tolerance)
+    if ((expense.amount - income.amount).abs() > 1) {
+      SnackbarService.error('Amounts must match (within ₹1)');
+      return;
+    }
+
+    // Validate: within 24 hours
+    if (expense.date.difference(income.date).inHours.abs() > 24) {
+      SnackbarService.error('Transactions must be within 24 hours');
+      return;
+    }
+
+    // Navigate to transfer screen pre-filled
+    final fromAccount = expense.account.value;
+    final toAccount = income.account.value;
+
+    if (!context.mounted) return;
+    final result = await context.push<bool>(
+      AppRoutes.transfer,
+      extra: {
+        'amount': expense.amount.toStringAsFixed(2),
+        'note': expense.description ?? income.description,
+        'date': expense.date,
+        'fromAccount': fromAccount,
+        'toAccount': toAccount,
+      },
+    );
+
+    if (result == true) {
+      // Delete both original transactions
+      final service = ref.read(transactionProvider);
+      await service.deleteTransaction(expense.id);
+      await service.deleteTransaction(income.id);
+      _invalidateTransactionProviders();
+
+      setState(() {
+        _selectMode = false;
+        _selectedTxnIds.clear();
+        _clearCache();
+      });
+
+      if (context.mounted) {
+        SnackbarService.success(ctxt.txnList_convertedToTransfer);
+      }
+    }
+  }
+
   // ── EDIT HANDLER ──
   Future<void> _onEditTransaction(transaction) async {
     final bool? result;
@@ -1125,7 +1364,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
       if (relatedTx != null) {
         await relatedTx.account.load();
       }
-      if (!mounted) return;
+      if (!context.mounted) return;
       result = await context.push(
         AppRoutes.transfer,
         extra: {
@@ -1160,7 +1399,8 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
     });
     _invalidateTransactionProviders();
     setState(() => _clearCache());
-    if (mounted) SnackbarService.success(AppLocalizations.of(context)!.txnList_subscriptionTagRemoved);
+    if (!context.mounted) return;
+    SnackbarService.success(AppLocalizations.of(context)!.txnList_subscriptionTagRemoved);
   }
 
   Future<void> _onRemoveTransaction(transaction, AppLocalizations ctxt) async {
@@ -1174,22 +1414,25 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
 
     if (confirm != true) return;
 
+    final txnId = transaction.id as int;
+
     // Hide from UI immediately
     setState(() {
-      _pendingDeleteId = transaction.id;
+      _pendingDeleteId = txnId;
       _clearCache();
     });
 
     // Schedule actual delete after undo window
     bool undone = false;
-    _pendingDeleteTimer?.cancel();
-    _pendingDeleteTimer = Timer(const Duration(seconds: 6), () async {
+    _pendingDeletes[txnId]?.cancel();
+    final timer = Timer(const Duration(seconds: 6), () async {
       if (undone) return;
-      _pendingDeleteId = null;
+      _pendingDeletes.remove(txnId);
+      if (_pendingDeleteId == txnId) _pendingDeleteId = null;
 
       await ref
           .read(tripServiceProvider)
-          .removeTransactionFromTrip(transaction.id);
+          .removeTransactionFromTrip(txnId);
 
       if (transaction.isTransfer) {
         await transaction.related.load();
@@ -1199,18 +1442,20 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
         }
       }
 
-      await ref.read(transactionProvider).deleteTransaction(transaction.id);
+      await ref.read(transactionProvider).deleteTransaction(txnId);
       _invalidateTransactionProviders();
       if (mounted) setState(() => _clearCache());
     });
+    _pendingDeletes[txnId] = timer;
 
-    if (mounted) {
+    if (context.mounted) {
       SnackbarService.success(
         BuddyMessages.txnDeleted,
         actionLabel: ctxt.common_undo,
         onAction: () {
           undone = true;
-          _pendingDeleteTimer?.cancel();
+          _pendingDeletes[txnId]?.cancel();
+          _pendingDeletes.remove(txnId);
           setState(() {
             _pendingDeleteId = null;
             _clearCache();

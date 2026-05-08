@@ -1,137 +1,116 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Support - Mudra Manager</title>
+    <meta name="theme-color" content="#08080c" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)">
+    <title>Support — Mudra Manager</title>
+    <meta name="description" content="Get help with Mudra Manager. FAQ, email support, bug reports, and feature requests.">
     <link rel="icon" href="assets/logo.png">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#6366f1',
-                        secondary: '#8b5cf6',
-                    }
-                }
-            }
-        }
-    </script>
+    <link rel="stylesheet" href="2026.css">
+    <style>
+        details { border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 24px; background: var(--tint); transition: border-color 0.2s; }
+        details + details { margin-top: 8px; }
+        details[open] { border-color: color-mix(in srgb, var(--accent) 15%, transparent); }
+        summary { font-size: 14px; font-weight: 600; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; min-height: 44px; }
+        summary::-webkit-details-marker { display: none; }
+        summary::after { content: '+'; font-size: 18px; color: var(--mute); transition: color 0.2s; }
+        details[open] summary { color: var(--accent); }
+        details[open] summary::after { content: '−'; color: var(--accent); }
+        details p { font-size: 13px; color: var(--dim); margin-top: 12px; line-height: 1.7; }
+        .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 48px; }
+        .contact-card { padding: 24px; border-radius: var(--radius); border: 1px solid var(--line); background: var(--tint); transition: border-color 0.2s; display: block; }
+        .contact-card:hover { border-color: color-mix(in srgb, var(--accent) 25%, transparent); }
+        .contact-card .ci { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
+        .contact-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+        .contact-card p { font-size: 13px; color: var(--mute); margin: 0; }
+        .feat-req { text-align: center; padding: 40px; border-radius: var(--radius-lg); background: color-mix(in srgb, var(--accent) 4%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 10%, transparent); margin-top: 48px; }
+        .feat-req h3 { font-size: 20px; margin-bottom: 8px; }
+        .feat-req p { font-size: 14px; color: var(--dim); margin-bottom: 20px; }
+        @media (max-width: 600px) { .contact-grid { grid-template-columns: 1fr; } }
+    </style>
 </head>
-<body class="bg-white">
-    <nav class="fixed w-full bg-white/95 backdrop-blur-sm z-50 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-20">
-                <a href="index.html" class="flex items-center space-x-3">
-                    <img src="assets/logo.png" alt="Mudra Manager" class="h-12 w-12">
-                    <span class="text-2xl font-bold text-slate-900">Mudra Manager</span>
-                </a>
-                <a href="index.html" class="text-slate-600 hover:text-primary transition">← Back to Home</a>
+<body>
+    <a href="#main" class="skip">Skip to content</a>
+
+    <nav class="nav" role="navigation" aria-label="Main">
+        <a href="index.html" class="nav-logo"><img src="assets/logo.png" alt="" width="24" height="24">Mudra Manager</a>
+        <div class="nav-r">
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="features.html">Features</a>
+                <a href="whatsnew.html">Changelog</a>
+                <a href="support.html">Support</a>
             </div>
+            <button class="nav-theme" id="theme-toggle" aria-label="Toggle theme"><i class="fas fa-sun theme-icon"></i></button>
+            <a href="https://play.google.com/store/apps/details?id=com.mudramanager.app" target="_blank" class="nav-dl">Download</a>
+            <button class="nav-burger" id="menu-btn" aria-label="Menu"><span></span><span></span></button>
         </div>
     </nav>
 
-    <main class="pt-32 pb-20 px-4">
-        <div class="max-w-4xl mx-auto">
-            <h1 class="text-5xl font-bold mb-6 text-slate-900">Support</h1>
-            <p class="text-xl text-slate-600 mb-12">We're here to help! Get answers to common questions or reach out to us.</p>
+    <div class="mob" id="mob">
+        <button class="mob-close" id="mob-close" aria-label="Close menu"><i class="fas fa-xmark"></i></button>
+        <a href="index.html" class="ml">Home</a>
+        <a href="features.html" class="ml">Features</a>
+        <a href="whatsnew.html" class="ml">Changelog</a>
+        <a href="support.html" class="ml">Support</a>
+        <button onclick="flip()" style="color:var(--mute);font-size:14px;text-align:left;margin-top:12px"><i class="fas fa-circle-half-stroke" style="margin-right:6px"></i>Toggle theme</button>
+    </div>
 
-            <!-- Contact Section -->
-            <section class="mb-16">
-                <h2 class="text-3xl font-bold text-slate-900 mb-6">Get in Touch</h2>
-                <div class="grid md:grid-cols-2 gap-6">
-                    <div class="bg-slate-50 p-8 rounded-2xl">
-                        <div class="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center mb-4">
-                            <i class="fas fa-envelope text-2xl text-white"></i>
-                        </div>
-                        <h3 class="text-xl font-bold text-slate-900 mb-2">Email Support</h3>
-                        <p class="text-slate-600 mb-4">Send us an email and we'll respond within 24 hours</p>
-                        <a href="mailto:support@mudramanager.com" class="text-primary font-semibold hover:underline">support@mudramanager.com</a>
-                    </div>
-                    <div class="bg-slate-50 p-8 rounded-2xl">
-                        <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center mb-4">
-                            <i class="fas fa-bug text-2xl text-white"></i>
-                        </div>
-                        <h3 class="text-xl font-bold text-slate-900 mb-2">Report a Bug</h3>
-                        <p class="text-slate-600 mb-4">Found an issue? Let us know so we can fix it</p>
-                        <a href="mailto:support@mudramanager.com?subject=Bug Report" class="text-primary font-semibold hover:underline">Report Bug</a>
-                    </div>
-                </div>
-            </section>
+    <main id="main">
+    <section class="page">
+        <span class="label">Help Center</span>
+        <h1 style="font-size:clamp(2.2rem,5vw,3.2rem);margin-bottom:8px">Support</h1>
+        <p style="font-size:17px;color:var(--dim);margin-bottom:48px">Get answers or reach out — we respond within 24 hours.</p>
 
-            <!-- FAQ Section -->
-            <section class="mb-16">
-                <h2 class="text-3xl font-bold text-slate-900 mb-6">Frequently Asked Questions</h2>
-                <div class="space-y-4">
-                    <details class="bg-slate-50 p-6 rounded-xl">
-                        <summary class="font-semibold text-lg text-slate-900 cursor-pointer">How do I backup my data?</summary>
-                        <p class="text-slate-600 mt-4">Go to Settings → Backup & Restore → Export Data. You can export your data to Excel or PDF format and save it to your device or cloud storage.</p>
-                    </details>
-
-                    <details class="bg-slate-50 p-6 rounded-xl">
-                        <summary class="font-semibold text-lg text-slate-900 cursor-pointer">Is my financial data secure?</summary>
-                        <p class="text-slate-600 mt-4">Yes! All your data is stored locally on your device using encrypted Isar database. We never transmit your financial data to any servers. You can also enable biometric authentication for extra security.</p>
-                    </details>
-
-                    <details class="bg-slate-50 p-6 rounded-xl">
-                        <summary class="font-semibold text-lg text-slate-900 cursor-pointer">How does SMS auto-import work?</summary>
-                        <p class="text-slate-600 mt-4">With your permission, the app reads SMS messages from banks and payment services to automatically detect transactions. All processing happens locally on your device. You can disable this feature anytime in Settings.</p>
-                    </details>
-
-                    <details class="bg-slate-50 p-6 rounded-xl">
-                        <summary class="font-semibold text-lg text-slate-900 cursor-pointer">Can I use the app offline?</summary>
-                        <p class="text-slate-600 mt-4">Yes! Mudra Manager works completely offline. All features are available without an internet connection since everything is stored locally on your device.</p>
-                    </details>
-
-                    <details class="bg-slate-50 p-6 rounded-xl">
-                        <summary class="font-semibold text-lg text-slate-900 cursor-pointer">How do I set up budgets?</summary>
-                        <p class="text-slate-600 mt-4">Go to Budgets tab → Add Budget → Select category, set amount, and choose time period (monthly/yearly). The app will track your spending and alert you when you're close to the limit.</p>
-                    </details>
-
-                    <details class="bg-slate-50 p-6 rounded-xl">
-                        <summary class="font-semibold text-lg text-slate-900 cursor-pointer">Can I split bills with friends?</summary>
-                        <p class="text-slate-600 mt-4">Yes! When adding a transaction, select "Split Bill" option, add participants, and choose how to split (equally or custom amounts). The app will track who owes what.</p>
-                    </details>
-
-                    <details class="bg-slate-50 p-6 rounded-xl">
-                        <summary class="font-semibold text-lg text-slate-900 cursor-pointer">Is the app free?</summary>
-                        <p class="text-slate-600 mt-4">Yes! Mudra Manager is free with all core features included. We may introduce optional premium features in the future, but essential functionality will always remain free.</p>
-                    </details>
-
-                    <details class="bg-slate-50 p-6 rounded-xl">
-                        <summary class="font-semibold text-lg text-slate-900 cursor-pointer">How do I change the app language?</summary>
-                        <p class="text-slate-600 mt-4">Go to Settings → Language → Select your preferred language. The app supports multiple Indian languages.</p>
-                    </details>
-
-                    <details class="bg-slate-50 p-6 rounded-xl">
-                        <summary class="font-semibold text-lg text-slate-900 cursor-pointer">What if I lose my phone?</summary>
-                        <p class="text-slate-600 mt-4">If you've exported your data regularly, you can restore it on a new device. We recommend setting up automatic backups to cloud storage for peace of mind.</p>
-                    </details>
-
-                    <details class="bg-slate-50 p-6 rounded-xl">
-                        <summary class="font-semibold text-lg text-slate-900 cursor-pointer">How do I delete my data?</summary>
-                        <p class="text-slate-600 mt-4">Go to Settings → Data Management → Clear All Data. Alternatively, uninstalling the app will remove all data from your device.</p>
-                    </details>
-                </div>
-            </section>
-
-            <!-- Feature Request -->
-            <section class="bg-gradient-to-r from-primary to-secondary text-white p-8 rounded-2xl text-center">
-                <h2 class="text-3xl font-bold mb-4">Have a Feature Request?</h2>
-                <p class="text-lg mb-6 opacity-90">We'd love to hear your ideas to make Mudra Manager even better!</p>
-                <a href="mailto:support@mudramanager.com?subject=Feature Request" class="inline-block bg-white text-primary px-8 py-3 rounded-xl font-semibold hover:bg-slate-100 transition">
-                    <i class="fas fa-lightbulb mr-2"></i>Share Your Ideas
-                </a>
-            </section>
+        <div class="contact-grid">
+            <a href="mailto:support@mudramanager.com" class="contact-card" aria-label="Email support at support@mudramanager.com">
+                <div class="ci" style="background:color-mix(in srgb, var(--accent) 12%, transparent)"><i class="fas fa-envelope" style="color:var(--accent)"></i></div>
+                <h3>Email Support</h3><p>support@mudramanager.com</p>
+            </a>
+            <a href="mailto:support@mudramanager.com?subject=Bug Report" class="contact-card" aria-label="Report a bug via email">
+                <div class="ci" style="background:color-mix(in srgb, #ec4899 12%, transparent)"><i class="fas fa-bug" style="color:#ec4899"></i></div>
+                <h3>Report a Bug</h3><p>Include steps to reproduce</p>
+            </a>
         </div>
+
+        <h2 style="font-size:1.5rem;margin-bottom:20px">FAQ</h2>
+        <details><summary>Is my financial data secure?</summary><p>All data stored locally with AES-256 field-level encryption. Keys in Android Keystore / iOS Keychain. Zero servers.</p></details>
+        <details><summary>How does SMS auto-import work?</summary><p>Reads bank SMS/RCS locally using 50+ bank-specific parsers. All on-device. Nothing sent anywhere.</p></details>
+        <details><summary>Can I use the app offline?</summary><p>100% offline. Isar local database, zero network dependency.</p></details>
+        <details><summary>How do I backup my data?</summary><p>Settings → Backup & Restore → Export to encrypted backup, Excel, or PDF.</p></details>
+        <details><summary>Is the app free?</summary><p>Core features free forever. Pro unlocks unlimited accounts and advanced analytics.</p></details>
+        <details><summary>What languages are supported?</summary><p>Full EN, HI, BN. Partial ES, PT, ID. Stubs for all 22 scheduled Indian languages.</p></details>
+        <details><summary>How do I delete all data?</summary><p>Settings → Clear All Data, or uninstall. No servers = nothing to delete on our end.</p></details>
+
+        <div class="feat-req">
+            <h3>Have a feature request?</h3>
+            <p>We build what users ask for.</p>
+            <a href="mailto:support@mudramanager.com?subject=Feature Request" class="btn-primary"><i class="fas fa-lightbulb"></i> Share Your Idea</a>
+        </div>
+    </section>
     </main>
 
-    <footer class="bg-slate-900 text-white py-8">
-        <div class="max-w-7xl mx-auto px-4 text-center">
-            <p class="text-slate-400">&copy; 2026 Mudra Manager. All rights reserved.</p>
+    <footer>
+        <div class="foot">
+            <div class="foot-logo"><img src="assets/logo.png" alt="" width="20" height="20"> Mudra Manager: Budget Tracker</div>
+            <div class="foot-links">
+                <a href="privacy.html">Privacy</a>
+                <a href="terms.html">Terms</a>
+                <a href="support.html">Support</a>
+                <a href="whatsnew.html">Changelog</a>
+                <a href="features.html">Features</a>
+            </div>
+            <span style="display:flex;align-items:center;gap:8px">
+                Built by <a href="https://linkedin.com/in/aloketewary" target="_blank" style="color:var(--accent);font-weight:600">Aloke Tewary</a>
+                · Made with <span style="color:#ef4444">♥</span> in India · © 2026
+            </span>
         </div>
     </footer>
+    <script src="2026.js"></script>
 </body>
 </html>

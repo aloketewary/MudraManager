@@ -1,8 +1,8 @@
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/services/background_task_manager.dart';
+import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
-import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/theme/app_color_theme_enum.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
@@ -25,6 +25,7 @@ import 'package:mudra_manager/shared/widgets/ambient_brand_section.dart';
 import 'package:mudra_manager/shared/widgets/widgets.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mudra_manager/features/transactions/presentation/widgets/subscription_list_card.dart';
 
 class BillControlCenterScreen extends ConsumerStatefulWidget {
   const BillControlCenterScreen({super.key});
@@ -116,6 +117,7 @@ class _BillControlCenterScreenState
         elevation: 0,
         actions: [
           IconButton(
+            tooltip: 'Add',
             icon: const Icon(LucideIcons.plus),
             onPressed: () {
               HapticFeedback.mediumImpact();
@@ -189,6 +191,9 @@ class _BillControlCenterScreenState
                     spacing,
                   ),
                   SizedBox(height: spacing.sectionGap),
+
+                  // 3b. Detected subscriptions
+                  const SubscriptionListCard(),
 
                   // 4. Grouped lists
                   if (overdue.isNotEmpty)
@@ -340,13 +345,10 @@ class _BillControlCenterScreenState
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        Text(
-                          formatCurrency(
-                            b.amount,
-                            code: b.account.value?.currencyCode ??
-                                BaseCurrency.code,
-                            decimals: 0,
-                          ),
+                        CurrencyText(
+                          amount: b.amount,
+                          currencyCode: b.account.value?.currencyCode,
+                          compact: false,
                           style: textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w600,
                             color: color.onPrimaryContainer,
@@ -390,8 +392,9 @@ class _BillControlCenterScreenState
                     color: color.onPrimaryContainer.withValues(alpha: 0.7),
                   ),
                 ),
-                Text(
-                  formatCurrency(total, decimals: 0),
+                CurrencyText(
+                  amount: total,
+                  compact: false,
                   style: textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: color.onPrimaryContainer,
@@ -608,8 +611,9 @@ class _BillControlCenterScreenState
                 ),
               ),
               const Spacer(),
-              Text(
-                formatCurrency(groupTotal, decimals: 0),
+              CurrencyText(
+                amount: groupTotal,
+                compact: false,
                 style: textTheme.bodySmall?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: color.onSurfaceVariant,
@@ -750,13 +754,10 @@ class _BillControlCenterScreenState
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Text(
-                        formatCurrency(
-                          bill.amount,
-                          code: bill.account.value?.currencyCode ??
-                              BaseCurrency.code,
-                          decimals: 0,
-                        ),
+                      CurrencyText(
+                        amount: bill.amount,
+                        currencyCode: bill.account.value?.currencyCode,
+                        compact: false,
                         style: textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: isPaid
@@ -923,7 +924,7 @@ class _BillControlCenterScreenState
     await _advanceDueDate(isar, bill);
     ref.invalidate(transactionProvider);
     ref.invalidate(recurringTransactionsProvider);
-    if (mounted) {
+    if (context.mounted) {
       HapticFeedback.mediumImpact();
       SnackbarService.success('${bill.category.value?.name} marked as paid');
     }
@@ -991,10 +992,10 @@ class _BillControlCenterScreenState
                           ],
                         ),
                       ),
-                      Text(
-                        formatCurrency(existing.amount,
-                            code: existing.account.value?.currencyCode ??
-                                BaseCurrency.code,),
+                      CurrencyText(
+                        amount: existing.amount,
+                        currencyCode: existing.account.value?.currencyCode,
+                        compact: false,
                         style: tt.titleMedium
                             ?.copyWith(fontWeight: FontWeight.bold),
                       ),

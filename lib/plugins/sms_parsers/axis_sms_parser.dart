@@ -14,7 +14,7 @@ class AxisSmsParserPlugin extends SmsParserPlugin {
   String get bankName => 'AXIS';
 
   @override
-  List<String> get senderNames => ['AXIS', 'AXISBK'];
+  List<String> get senderNames => ['AXIS'];
 
   @override
   String get iconPath => 'assets/logo/banks/axis.svg';
@@ -49,7 +49,7 @@ class AxisSmsParserPlugin extends SmsParserPlugin {
 
     return ParsedSms(
       amount: amount,
-      isIncome: type == 'credited' || type == 'received',
+      isIncome: type == 'credited' || (type == 'received' && ParsedSms.isReceivedCredit(body)),
       account: account,
       transactionType: 'Card',
       merchant: merchant,

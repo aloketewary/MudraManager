@@ -193,6 +193,64 @@ class DialogUtils {
       builder: (context) => _PasswordDialogContent(isRestore: isRestore, color: color, textTheme: textTheme),
     );
   }
+
+  static Future<String?> showListItems({
+    required BuildContext context,
+    required String title,
+    required List<String> items,
+    IconData? icon,
+    required void Function(String item) onItemSelected,
+    required String selectedValue,
+  }) {
+    final color = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: color.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 24),
+                decoration: BoxDecoration(
+                  color: color.onSurfaceVariant.withValues(alpha: 0.4),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              if (icon != null) ...[
+                Icon(icon, size: 48, color: color.primary),
+                const SizedBox(height: 16),
+              ],
+              Text(
+                title,
+                style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              ...items.map((item) => ListTile(
+                    title: Text(item),
+                    onTap: () {
+                      Navigator.pop(context, item);
+                      onItemSelected(item);
+                    },
+                    selected: item == selectedValue,
+                    trailing: item == selectedValue ? Icon(LucideIcons.check, color: color.primary) : null,
+                  ),),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _PasswordDialogContent extends StatefulWidget {

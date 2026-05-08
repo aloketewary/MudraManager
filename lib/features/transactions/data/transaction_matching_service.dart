@@ -3,21 +3,25 @@ import 'package:mudra_manager/core/db/models/category.dart' as db_category;
 import 'package:mudra_manager/core/utils/category_matcher.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
+import 'package:mudra_manager/core/utils/robust_category_matcher.dart';
+import 'package:mudra_manager/features/transactions/data/models/pending_transaction_data.dart';
 
 class TransactionMatchingService {
   static final _log = AppLog(getLogger(), 'TxnMatching');
 
   /// Matches a pending transaction to an account and category using various strategies.
+  /// If [preMatchedCategory] is provided, skips category matching and uses it directly.
   static MatchingResult? matchTransaction({
-    required dynamic pending,
+    required PendingTransactionData pending,
     required List<Account> accounts,
     required List<db_category.Category> categories,
+    db_category.Category? preMatchedCategory,
   }) {
-    final account = pending.account as String?;
-    final isIncome = pending.isIncome as bool?;
-    final body = pending.body as String;
-    final amount = pending.amount as double?;
-    final fromBank = pending.fromBank as String?;
+    final account = pending.account;
+    final isIncome = pending.isIncome;
+    final body = pending.body;
+    final amount = pending.amount;
+    final fromBank = pending.fromBank;
     
     if (account == null || account.isEmpty) {
       _log.d('No account number in pending transaction');
@@ -55,7 +59,13 @@ class TransactionMatchingService {
       return null;
     }
 
-    // 2. Filter categories by type (income/expense)
+    // 2. Use pre-matched category or find one
+    if (preMatchedCategory != null) {
+      _log.i('Using pre-matched category: ${preMatchedCategory.name}');
+      return MatchingResult(account: matchedAccount, category: preMatchedCategory);
+    }
+
+    // 3. Filter categories by type (income/expense)
     final relevantCategories =
         categories
             .where(
@@ -72,13 +82,23 @@ class TransactionMatchingService {
       return null;
     }
 
-    // 3. Try keyword-based matching
-    db_category.Category? matchedCategory = CategoryMatcher.matchByKeywords(
-      body,
-      relevantCategories,
+    // 4. Try robust category matching with confidence scoring
+    final matchResult = RobustCategoryMatcher.match(
+      text: body,
+      allCategories: categories,
+      relevantCategories: relevantCategories,
+      amount: amount,
+      isIncome: isIncome,
     );
 
-    // 4. Fallback with smart logic based on amount
+    db_category.Category? matchedCategory = matchResult.category;
+
+    // Log the matching strategy and confidence
+    if (matchedCategory != null) {
+      _log.i('Category matched: ${matchedCategory.name} (${matchResult.confidenceScore}% confidence via ${matchResult.matchStrategy})');
+    }
+
+    // 5. Fallback with smart logic based on amount
     matchedCategory ??= CategoryMatcher.getFallbackCategory(
       relevantCategories,
       amount,

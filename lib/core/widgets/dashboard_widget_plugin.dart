@@ -30,8 +30,8 @@ abstract class DashboardWidgetPlugin {
   /// Is this widget visible by default?
   bool get defaultVisible => true;
 
-  /// Is this a premium widget?
-  bool get isPremium => false;
+  /// Should this widget be hidden in simple mode?
+  bool get fullModeOnly => false;
 
   /// Widget description
   String get description => '';

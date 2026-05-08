@@ -52,7 +52,7 @@ class RecurringExpensesCard extends ConsumerWidget {
                   ),
                   child: Icon(LucideIcons.repeat, color: color.error, size: 28),
                 ),
-                const SizedBox(width: 16),
+                SizedBox(width: spacing.sectionGap),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -64,7 +64,7 @@ class RecurringExpensesCard extends ConsumerWidget {
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: spacing.elementGapMin),
                       Text(
                         '${formatCurrency(monthlyTotal, decimals: 0)}/month • ${expenses.length} bills',
                         style: textTheme.bodySmall?.copyWith(

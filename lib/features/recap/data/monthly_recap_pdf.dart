@@ -1,5 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:mudra_manager/core/utils/safe_date_format.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'monthly_recap_service.dart';
@@ -8,15 +9,18 @@ class MonthlyRecapPdf {
   static Future<Uint8List> generate(MonthlyRecapData data) async {
     final pdf = pw.Document();
     final font =
-        pw.Font.ttf(await rootBundle.load('assets/fonts/NotoSans-Regular.ttf'));
+        pw.Font.ttf(await rootBundle.load('assets/fonts/Inter-Variable.ttf'));
     final fallbackFont = pw.Font.ttf(
       await rootBundle
-          .load('assets/fonts/NotoSansDevanagari-VariableFont_wdth,wght.ttf'),
+          .load('assets/fonts/NotoSansDevanagari-Variable.ttf'),
+    );
+    final bengaliFallback = pw.Font.ttf(
+      await rootBundle.load('assets/fonts/NotoSansBengali-Variable.ttf'),
     );
     final theme =
-        pw.ThemeData.withFont(base: font, fontFallback: [fallbackFont]);
+        pw.ThemeData.withFont(base: font, fontFallback: [fallbackFont, bengaliFallback]);
 
-    final monthName = DateFormat('MMMM yyyy').format(data.month);
+    final monthName = safeDateFormat('MMMM yyyy').format(data.month);
     final now = DateTime.now();
     final c = data.currency;
 
@@ -121,7 +125,7 @@ class MonthlyRecapPdf {
           alignment: pw.Alignment.centerRight,
           margin: const pw.EdgeInsets.only(top: 8),
           child: pw.Text(
-            'Mudra Manager • Generated ${DateFormat('dd MMM yyyy').format(now)} • Page ${ctx.pageNumber}/${ctx.pagesCount}',
+            'Mudra Manager • Generated ${safeDateFormat('dd MMM yyyy').format(now)} • Page ${ctx.pageNumber}/${ctx.pagesCount}',
             style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey500),
           ),
         ),
@@ -773,7 +777,7 @@ class MonthlyRecapPdf {
       data: transactions
           .map(
             (t) => [
-              DateFormat('dd MMM').format(t.date),
+              safeDateFormat('dd MMM').format(t.date),
               t.category,
               t.description.isEmpty ? '-' : t.description,
               _fmt(t.amount, c),

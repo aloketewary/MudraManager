@@ -1,6 +1,5 @@
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:mudra_manager/core/currency/currency_meta.dart';
-import 'package:mudra_manager/core/currency/currency_service.dart';
+import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -31,6 +30,7 @@ class BudgetCategoryAllocation extends StatelessWidget {
       child: ListTile(
         title: Text(categoryName, style: textTheme.titleSmall),
         subtitle: LinearProgressIndicator(
+          semanticsLabel: 'Progress',
           value: percentage / 100,
           backgroundColor: color.surfaceContainerHighest,
           valueColor: AlwaysStoppedAnimation(color.primary),
@@ -38,11 +38,13 @@ class BudgetCategoryAllocation extends StatelessWidget {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              formatCurrency(allocatedAmount, code: BaseCurrency.code),
+            CurrencyText(
+              amount: allocatedAmount,
+              compact: false,
               style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             IconButton(
+              tooltip: 'Edit',
               icon: const Icon(LucideIcons.pencil, size: 20),
               onPressed: () {
                 HapticFeedback.lightImpact();
@@ -50,6 +52,7 @@ class BudgetCategoryAllocation extends StatelessWidget {
               },
             ),
             IconButton(
+              tooltip: 'Delete',
               icon: const Icon(LucideIcons.trash2, size: 20),
               onPressed: () {
                 HapticFeedback.mediumImpact();

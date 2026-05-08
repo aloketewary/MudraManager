@@ -31,99 +31,48 @@ class PaginatedTransactionState {
   }
 }
 
-class PaginatedTransactionNotifier
-    extends StateNotifier<PaginatedTransactionState> {
-  final Ref ref;
-  final int? categoryId;
-  final int? accountId;
-  final DateTime? startDate;
-  final DateTime? endDate;
+/// Paginated transaction provider using family for filter params.
+///
+/// Usage:
+/// ```dart
+/// final state = ref.watch(paginatedTransactionsProvider({'categoryId': 5}));
+/// ref.read(paginatedTransactionsProvider({'categoryId': 5}).notifier).loadMore();
+/// ```
+final paginatedTransactionsProvider = FutureProvider.autoDispose
+    .family<PaginatedTransactionState, Map<String, dynamic>>((ref, params) async {
+  final categoryId = params['categoryId'] as int?;
+  final accountId = params['accountId'] as int?;
+  final startDate = params['startDate'] as DateTime?;
+  final endDate = params['endDate'] as DateTime?;
+  final page = params['page'] as int? ?? 0;
 
-  PaginatedTransactionNotifier(
-    this.ref, {
-    this.categoryId,
-    this.accountId,
-    this.startDate,
-    this.endDate,
-  }) : super(
-         PaginatedTransactionState(
-           transactions: [],
-           hasMore: true,
-           isLoading: false,
-           currentPage: 0,
-         ),
-       ) {
-    loadMore();
+  final isar = await IsarService().getInstance();
+
+  dynamic query = isar.transactions.filter();
+
+  if (categoryId != null) {
+    query = query.category((q) => q.idEqualTo(categoryId));
+  }
+  if (accountId != null) {
+    query = query.account((q) => q.idEqualTo(accountId));
+  }
+  if (startDate != null) {
+    query = query.dateGreaterThan(startDate);
+  }
+  if (endDate != null) {
+    query = query.dateLessThan(endDate);
   }
 
-  Future<void> loadMore() async {
-    if (state.isLoading || !state.hasMore) return;
+  final transactions = await query
+      .sortByDateDesc()
+      .offset(page * AppConstants.transactionPageSize)
+      .limit(AppConstants.transactionPageSize)
+      .findAll();
 
-    state = state.copyWith(isLoading: true);
-
-    try {
-      final isar = await IsarService().getInstance();
-
-      // Start with base query - use dynamic to avoid type issues
-      dynamic query = isar.transactions.filter();
-
-      if (categoryId != null) {
-        query = query.category((q) => q.idEqualTo(categoryId!));
-      }
-      if (accountId != null) {
-        query = query.account((q) => q.idEqualTo(accountId!));
-      }
-      if (startDate != null) {
-        query = query.dateGreaterThan(startDate!);
-      }
-      if (endDate != null) {
-        query = query.dateLessThan(endDate!);
-      }
-
-      // Execute query with sorting
-      final newTransactions = await query
-          .sortByDateDesc()
-          .offset(state.currentPage * AppConstants.transactionPageSize)
-          .limit(AppConstants.transactionPageSize)
-          .findAll();
-
-      final hasMore =
-          newTransactions.length == AppConstants.transactionPageSize;
-
-      state = state.copyWith(
-        transactions: [...state.transactions, ...newTransactions],
-        hasMore: hasMore,
-        isLoading: false,
-        currentPage: state.currentPage + 1,
-      );
-    } catch (e) {
-      state = state.copyWith(isLoading: false);
-      rethrow;
-    }
-  }
-
-  void reset() {
-    state = PaginatedTransactionState(
-      transactions: [],
-      hasMore: true,
-      isLoading: false,
-      currentPage: 0,
-    );
-    loadMore();
-  }
-}
-
-final paginatedTransactionsProvider = StateNotifierProvider.autoDispose
-    .family<
-      PaginatedTransactionNotifier,
-      PaginatedTransactionState,
-      Map<String, dynamic>
-    >((ref, params) {
-      return PaginatedTransactionNotifier(
-        ref,
-        categoryId: params['categoryId'] as int?,
-        accountId: params['accountId'] as int?,
-        startDate: params['startDate'] as DateTime?,
-        endDate: params['endDate'] as DateTime?,
-      );
-    });
+  return PaginatedTransactionState(
+    transactions: transactions,
+    hasMore: transactions.length == AppConstants.transactionPageSize,
+    isLoading: false,
+    currentPage: page,
+  );
+});

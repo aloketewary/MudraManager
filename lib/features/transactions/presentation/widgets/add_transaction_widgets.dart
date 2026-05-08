@@ -9,6 +9,7 @@ import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/tag.dart';
 import 'package:mudra_manager/core/extension/account_type_extenstion.dart';
+import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/icon_helper.dart';
 import 'package:mudra_manager/features/account/data/account_access_provider.dart';
@@ -117,6 +118,7 @@ class AccountSelector extends ConsumerWidget {
   final ValueChanged<Account> onSelected;
   final VoidCallback onAddResult;
   final ValueChanged<int> onShowUnlockPrompt;
+  final bool showError;
 
   const AccountSelector({
     super.key,
@@ -130,6 +132,7 @@ class AccountSelector extends ConsumerWidget {
     required this.onSelected,
     required this.onAddResult,
     required this.onShowUnlockPrompt,
+    this.showError = false,
   });
 
   @override
@@ -142,7 +145,7 @@ class AccountSelector extends ConsumerWidget {
     return accountsAsync.when(
       data: (accounts) {
         final unlockedIds =
-            ref.watch(unlockedAccountIdsProvider).valueOrNull ?? {};
+            ref.watch(unlockedAccountIdsProvider).value ?? {};
 
         if (selectedAccount != null && !alreadyScrolled) {
           final idx = accounts.indexWhere((a) => a.id == selectedAccount!.id);
@@ -193,6 +196,23 @@ class AccountSelector extends ConsumerWidget {
                         color: color.onSurfaceVariant,
                       ),
                       maxLines: 1,
+                    ),
+                  ],
+                ),
+              )
+            else if (showError)
+              Padding(
+                padding: EdgeInsets.only(bottom: spacing.elementGapMin),
+                child: Row(
+                  children: [
+                    Icon(LucideIcons.circleAlert, size: 16, color: color.error),
+                    SizedBox(width: spacing.elementGapMin),
+                    Text(
+                      AppLocalizations.of(context)!.transaction_accountRequired,
+                      style: textTheme.labelSmall?.copyWith(
+                        color: color.error,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ],
                 ),
@@ -404,6 +424,7 @@ class CategorySelector extends ConsumerWidget {
   final String addLabel;
   final ValueChanged<Category> onSelected;
   final List<Category> Function(List<Category>) expandedParentFinder;
+  final bool showError;
 
   const CategorySelector({
     super.key,
@@ -415,6 +436,7 @@ class CategorySelector extends ConsumerWidget {
     required this.addLabel,
     required this.onSelected,
     required this.expandedParentFinder,
+    this.showError = false,
   });
 
   Category? _expandedParent(List<Category> parents) {
@@ -494,12 +516,29 @@ class CategorySelector extends ConsumerWidget {
                     if (selectedCategory!.parentCategory.value != null) ...[
                       SizedBox(width: spacing.elementGap),
                       Text(
-                        '· ${selectedCategory!.parentCategory.value!.name}',
+                        '· ${selectedCategory!.parentCategory.value?.name ?? ""}',
                         style: textTheme.labelMedium?.copyWith(
                           color: color.onSurfaceVariant,
                         ),
                       ),
                     ],
+                  ],
+                ),
+              )
+            else if (showError)
+              Padding(
+                padding: EdgeInsets.only(bottom: spacing.elementGapMin),
+                child: Row(
+                  children: [
+                    Icon(LucideIcons.circleAlert, size: 16, color: color.error),
+                    SizedBox(width: spacing.elementGapMin),
+                    Text(
+                      AppLocalizations.of(context)!.transaction_categoryRequired,
+                      style: textTheme.labelSmall?.copyWith(
+                        color: color.error,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -831,7 +870,7 @@ class QuickAmounts extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final amounts = ref.watch(quickAmountsProvider);
     final textTheme = Theme.of(context).textTheme;
-    final chips = amounts.valueOrNull ?? [100, 500, 1000, 2000, 5000];
+    final chips = amounts.value ?? [100, 500, 1000, 2000, 5000];
 
     return Wrap(
       alignment: WrapAlignment.center,

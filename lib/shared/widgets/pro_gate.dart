@@ -63,6 +63,7 @@ class _BlurUpgradeOverlay extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.only(left: 4, top: 4),
                       child: IconButton(
+                        tooltip: 'Back',
                         icon: const Icon(LucideIcons.arrowLeft),
                         onPressed: () => Navigator.of(context).pop(),
                       ),

@@ -1,16 +1,22 @@
 import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
+import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
 import 'package:mudra_manager/core/db/models/sms_activity.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
+import 'package:mudra_manager/core/db/models/category_rule.dart';
 import 'package:mudra_manager/core/db/models/exchange_rate.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
+import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
+import 'package:mudra_manager/core/utils/robust_category_matcher.dart';
 import 'package:mudra_manager/features/sms/data/bank_sms_parser.dart';
 import 'package:mudra_manager/features/sms/data/category_matcher_service.dart';
+import 'package:mudra_manager/features/sms/domain/detection_level.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_matching_service.dart';
+import 'package:mudra_manager/features/transactions/data/models/pending_transaction_data.dart';
 import 'package:mudra_manager/features/sms/data/recurring_detector_service.dart';
 
 class SmsActivityService {
@@ -20,23 +26,39 @@ class SmsActivityService {
   SmsActivityService._();
 
   Future<Isar> _getIsar() async {
-    if (Isar.instanceNames.isEmpty) {
-      return await IsarService.initIsar();
-    }
-    return Isar.getInstance()!;
+    final existing = Isar.getInstance();
+    if (existing != null && existing.isOpen) return existing;
+    return await IsarService.initIsar();
   }
 
-  // Calculate parsing confidence based on available data
-  int _calculateConfidence(SmsActivity activity) {
+  double? _normalizeAmount(double? amount) {
+    if (amount == null || amount <= 0) return null;
+    return amount;
+  }
+
+  /// Calculate parsing confidence based on available data.
+  /// Visible for testing.
+  static int calculateConfidence(SmsActivity activity) {
     int score = 0;
 
-    if (activity.amount != null && activity.amount! > 0) score += 40;
+    if (activity.amount != null && activity.amount! > 0) {
+      score += 35; // Increased
+    }
+    if (activity.isIncome != null) score += 25; // Increased
     if (activity.account != null && activity.account!.isNotEmpty) score += 20;
-    if (activity.isIncome != null) score += 20;
     if (activity.fromBank != null && activity.fromBank!.isNotEmpty) score += 10;
     if (activity.transactionRef != null) score += 10;
+    if (activity.category != null && activity.category!.isNotEmpty) score += 15;
 
-    return score;
+    // Bonus for merchant detection
+    if (activity.merchant != null && activity.merchant!.isNotEmpty) score += 15;
+
+    // Bonus for payment type detection
+    if (activity.paymentType != null && activity.paymentType!.isNotEmpty) {
+      score += 10;
+    }
+
+    return score.clamp(0, 100);
   }
 
   // Detect potential duplicates within time window (check both SMS and manual transactions)
@@ -46,13 +68,13 @@ class SmsActivityService {
   ) async {
     final isar = await _getIsar();
 
-    if (activity.amount == null) return [];
+    if (activity.amount == null || activity.amount == 0) return [];
 
     final startTime = activity.date.subtract(timeWindow);
     final endTime = activity.date.add(timeWindow);
 
-    // Check SMS activities (exclude self by hash, skip already-approved ones)
-    final smsDuplicates = await isar.smsActivitys
+    // Check SMS activities (exclude self by hash, skip already-approved/rejected ones)
+    final rawSmsDuplicates = await isar.smsActivitys
         .filter()
         .dateBetween(startTime, endTime)
         .and()
@@ -60,10 +82,27 @@ class SmsActivityService {
         .and()
         .not()
         .smsHashEqualTo(activity.smsHash)
+        .and()
+        .not()
+        .statusEqualTo(ActivityStatus.approved)
+        .and()
+        .not()
+        .statusEqualTo(ActivityStatus.rejected)
         .findAll();
 
+    // Content-aware: only keep SMS dupes from same sender or same account
+    final smsDuplicates = rawSmsDuplicates.where((d) {
+      if (activity.sender == d.sender) return true;
+      if (activity.account != null &&
+          activity.account!.isNotEmpty &&
+          activity.account == d.account) {
+        return true;
+      }
+      return false;
+    }).toList();
+
     // Check manual/SMS-created transactions
-    final manualDuplicates = await isar.transactions
+    final rawManualDuplicates = await isar.transactions
         .filter()
         .dateBetween(startTime, endTime)
         .and()
@@ -72,14 +111,31 @@ class SmsActivityService {
         .isExpenseEqualTo(!(activity.isIncome == true))
         .findAll();
 
+    // Content-aware: only keep manual dupes linked to same account
+    // If we don't know the SMS account, skip manual dupe check entirely
+    // to avoid false positives
+    final manualDuplicates =
+        (activity.account == null || activity.account!.isEmpty)
+            ? <Transaction>[]
+            : rawManualDuplicates.where((txn) {
+                final txnAccount = txn.account.value;
+                if (txnAccount == null) return false;
+                final acNum = txnAccount.accountNumber ?? '';
+                if (acNum.isEmpty) return false;
+                return acNum.endsWith(activity.account!);
+              }).toList();
+
     // Also check if any existing transaction was already created from this SMS
     // (handles the case where user edited the transaction's amount/date)
-    final linkedTxn = await isar.transactions
-        .filter()
-        .smsActivityIdEqualTo(activity.id)
-        .findFirst();
-    if (linkedTxn != null && !manualDuplicates.contains(linkedTxn)) {
-      return [...smsDuplicates, ...manualDuplicates, linkedTxn];
+    // Only check if activity has been saved (id > 0)
+    if (activity.id > 0) {
+      final linkedTxn = await isar.transactions
+          .filter()
+          .smsActivityIdEqualTo(activity.id)
+          .findFirst();
+      if (linkedTxn != null && !manualDuplicates.contains(linkedTxn)) {
+        return [...smsDuplicates, ...manualDuplicates, linkedTxn];
+      }
     }
 
     return [...smsDuplicates, ...manualDuplicates];
@@ -97,12 +153,22 @@ class SmsActivityService {
     String? toAccount,
     String? transactionRef,
     String? category,
+    String corrId = '',
+    bool isRcs = false,
+    String? currencyCode,
   }) async {
     final isar = await _getIsar();
     final categories = await isar.categorys.where().findAll();
 
     // Use bank parser for better extraction
     final parsed = await BankSmsParser.parse(sender, body);
+    final existing =
+        await isar.smsActivitys.filter().smsHashEqualTo(smsHash).findFirst();
+
+    if (existing != null) {
+      _log.w('[$corrId] Duplicate SMS at DB level: $smsHash');
+      return existing;
+    }
 
     // Clamp date to now if it's in the future (SMS parsing error)
     final now = DateTime.now();
@@ -114,7 +180,7 @@ class SmsActivityService {
       ..date = safeDate
       ..createdAt = DateTime.now()
       ..smsHash = smsHash
-      ..amount = parsed?.amount ?? amount
+      ..amount = _normalizeAmount(parsed?.amount ?? amount)
       ..isIncome = parsed?.isIncome ?? isIncome
       ..account = parsed?.account ?? account
       ..fromBank = fromBank
@@ -126,64 +192,93 @@ class SmsActivityService {
       ..merchant = parsed?.merchant ??
           CategoryMatcherService.detectMerchant(body, categories)
       ..isLikelyTransfer = parsed?.isLikelyTransfer ?? false
-      ..paymentType = CategoryMatcherService.detectPaymentType(body);
+      ..paymentType = CategoryMatcherService.detectPaymentType(body)
+      ..currencyCode = currencyCode;
 
-    // Calculate confidence
-    activity.confidence = _calculateConfidence(activity);
+    // If parser did not provide a category, try learned rules first, then robust matching
+    bool categoryHighConfidence = false;
+    if (activity.category == null) {
+      // Strategy 0: Check learned merchant→category rules
+      final learnedCategory = await _matchByLearnedRule(
+        body,
+        categories,
+        isar,
+        merchant: activity.merchant,
+        recipient: activity.toAccount,
+      );
+      if (learnedCategory != null) {
+        activity.category = learnedCategory.name;
+        categoryHighConfidence = true;
+        _log.d('[$corrId] Category from learned rule: ${activity.category}');
+      } else {
+        // Strategy 1-5: Robust category matching fallback
+        final relevantCategories = categories
+            .where(
+              (c) =>
+                  activity.isIncome == null ||
+                  (activity.isIncome == true &&
+                      c.categoryType == CategoryType.income) ||
+                  (activity.isIncome == false &&
+                      c.categoryType == CategoryType.expense),
+            )
+            .toList();
+
+        final matchResult = RobustCategoryMatcher.match(
+          text: body,
+          allCategories: categories,
+          relevantCategories: relevantCategories,
+          amount: activity.amount,
+          isIncome: activity.isIncome,
+        );
+
+        activity.category = matchResult.category?.name;
+        categoryHighConfidence = matchResult.isHighConfidence;
+
+        _log.d(
+          '[$corrId] Category matched: ${activity.category} (${matchResult.confidenceScore}% via ${matchResult.matchStrategy})',
+        );
+      }
+    }
+
+    // Calculate base confidence, then apply category match boost
+    activity.confidence = calculateConfidence(activity);
+    if (categoryHighConfidence) {
+      activity.confidence = (activity.confidence! + 10).clamp(0, 100);
+    }
+
+    // RCS penalty: notification text may be truncated, lower confidence
+    // so it's more likely to go to needsReview instead of auto-approve
+    if (isRcs) {
+      activity.confidence = (activity.confidence! - 15).clamp(0, 100);
+      _log.d('[$corrId] RCS confidence penalty applied: ${activity.confidence}%');
+    }
+
+    // ── Encrypt sensitive fields before any Isar write
+    activity.encryptFields();
 
     // ── 1. Check for transfer pair (opposite direction, same amount, different account, within 15 min)
-    final transferPair = await _findTransferPair(activity);
+    final transferPair = await _claimTransferPair(activity);
+
     if (transferPair != null) {
-      // Link both activities as a transfer pair
       activity.isLikelyTransfer = true;
-      activity.pairedActivityId = transferPair.id;
       activity.transactionType = 'Transfer';
-
-      // If the paired activity was already auto-approved as a regular transaction,
-      // we need to convert it: delete the expense and let user create a proper transfer
-      if (transferPair.status == ActivityStatus.approved && transferPair.transactionId != null) {
-        // Delete the incorrectly created expense transaction
-        await isar.writeTxn(() async {
-          await isar.transactions.delete(transferPair.transactionId!);
-
-          // Reset the paired activity to pending transfer
-          transferPair.isLikelyTransfer = true;
-          transferPair.pairedActivityId = activity.id;
-          transferPair.transactionType = 'Transfer';
-          transferPair.status = ActivityStatus.pending;
-          transferPair.transactionId = null;
-          await isar.smsActivitys.put(transferPair);
-
-          activity.status = ActivityStatus.pending;
-          await isar.smsActivitys.put(activity);
-        });
-
-        _log.i(
-          'Transfer pair detected (converted existing txn ${transferPair.transactionId}): '
-          '${activity.id} <-> ${transferPair.id} (${BaseCurrency.symbol}${activity.amount})',
-        );
-        return activity;
-      }
-
-      // Normal case: neither was auto-approved yet
       activity.status = ActivityStatus.pending;
 
       await isar.writeTxn(() async {
-        await isar.smsActivitys.put(activity);
-        transferPair.isLikelyTransfer = true;
-        transferPair.pairedActivityId = activity.id;
-        transferPair.transactionType = 'Transfer';
-        // If the pair was marked as duplicate, upgrade it to pending
-        if (transferPair.status == ActivityStatus.duplicate) {
-          transferPair.status = ActivityStatus.pending;
-          transferPair.isPotentialDuplicate = false;
-        }
+        // Save activity first to get ID
+        final activityId = await isar.smsActivitys.put(activity);
+
+        // Finalize pairing
+        transferPair.pairedActivityId = activityId;
+        activity.pairedActivityId = transferPair.id;
         await isar.smsActivitys.put(transferPair);
+        await isar.smsActivitys.put(activity);
       });
 
       _log.i(
-        'Transfer pair detected: ${activity.id} <-> ${transferPair.id} (${BaseCurrency.symbol}${activity.amount})',
+        '[$corrId] Transfer pair: ${activity.id} <-> ${transferPair.id}',
       );
+
       return activity;
     }
 
@@ -192,29 +287,43 @@ class SmsActivityService {
       activity,
       const Duration(minutes: 5),
     );
+    final mode = SharedPrefsUtil.instance.getDetectionMode();
+    final threshold = getThreshold(mode);
 
     if (duplicates.isNotEmpty) {
       activity.isPotentialDuplicate = true;
       activity.similarActivityIds =
           duplicates.whereType<SmsActivity>().map((d) => d.id).toList();
-      activity.status = ActivityStatus.duplicate;
+      activity.status = ActivityStatus.pending;
       final manualCount = duplicates.whereType<Transaction>().length;
       final smsCount = duplicates.whereType<SmsActivity>().length;
       _log.w(
-        'Potential duplicate detected: $smsCount SMS + $manualCount manual transactions',
+        '[$corrId] Potential duplicate: $smsCount SMS + $manualCount manual',
       );
-    } else if (activity.confidence! < 60) {
+    } else if (activity.confidence! < threshold) {
       activity.status = ActivityStatus.needsReview;
-      _log.i('Low confidence (${activity.confidence}%), needs review');
+      _log.i(
+        '[$corrId] Low confidence (${activity.confidence}%), needs review',
+      );
     } else {
-      // Try auto-approval
+      // Try auto-approval — pass pre-matched category to avoid re-running matcher
       final accounts = await isar.accounts.where().findAll();
-      final categories = await isar.categorys.where().findAll();
+
+      // Resolve the pre-matched category by name if available
+      Category? preMatchedCat;
+      if (activity.category != null) {
+        preMatchedCat = categories
+            .where(
+              (c) => c.name == activity.category,
+            )
+            .firstOrNull;
+      }
 
       final matchResult = TransactionMatchingService.matchTransaction(
         pending: _activityToPending(activity),
         accounts: accounts,
         categories: categories,
+        preMatchedCategory: preMatchedCat,
       );
 
       if (matchResult != null) {
@@ -248,12 +357,15 @@ class SmsActivityService {
         transaction.category.value = matchResult.category;
 
         await isar.writeTxn(() async {
+          // Save activity FIRST (with pending status to satisfy late field)
+          activity.status = ActivityStatus.pending;
+          final activityId = await isar.smsActivitys.put(activity);
+
           await isar.transactions.put(transaction);
           await transaction.account.save();
           await transaction.category.save();
 
-          // Set smsActivityId after transaction has an ID
-          transaction.smsActivityId = activity.id;
+          transaction.smsActivityId = activityId;
           await isar.transactions.put(transaction);
 
           activity.status = ActivityStatus.approved;
@@ -262,12 +374,22 @@ class SmsActivityService {
         });
 
         _log.i(
-          'Auto-approved with confidence ${activity.confidence}% -> Transaction ${transaction.id}',
+          '[$corrId] Auto-approved ${activity.confidence}% -> Txn ${transaction.id}',
         );
+
+        // Learn merchant → category rule from auto-approved SMS
+        await _learnFromApproval(
+          body,
+          matchResult.category,
+          isar,
+          merchant: activity.merchant,
+          recipient: activity.toAccount,
+        );
+
         return activity;
       } else {
         activity.status = ActivityStatus.pending;
-        _log.i('Pending review (no match found)');
+        _log.i('[$corrId] Pending (no account match)');
       }
     }
 
@@ -275,7 +397,9 @@ class SmsActivityService {
       await isar.smsActivitys.put(activity);
     });
 
-    _log.i('Activity added: ${activity.status.name} - ${BaseCurrency.symbol}${activity.amount}');
+    _log.i(
+      '[$corrId] ${activity.status.name} ${BaseCurrency.symbol}${activity.amount}',
+    );
     return activity;
   }
 
@@ -306,8 +430,7 @@ class SmsActivityService {
           .currencyCodeEqualTo(accountCurrency)
           .findFirst();
       if (rate != null) {
-        transaction.convertedAmount =
-            (activity.amount ?? 0) * rate.rateToBase;
+        transaction.convertedAmount = (activity.amount ?? 0) * rate.rateToBase;
         transaction.rateUsed = rate.rateToBase;
       }
     }
@@ -327,43 +450,174 @@ class SmsActivityService {
       await isar.smsActivitys.put(activity);
     });
 
-    // Learn new keywords from SMS
-    await _learnKeywordsFromSms(activity.body, category, isar);
+    // Learn merchant → category rule
+    await _learnFromApproval(
+      activity.body,
+      category,
+      isar,
+      merchant: activity.merchant,
+      recipient: activity.toAccount,
+    );
 
     // Detect recurring patterns
-    await RecurringDetectorService.detectAndTagRecurring(transaction);
+    await RecurringDetectorService(IsarService()).detectAndTagRecurring(transaction);
 
     _log.i(
       'Activity approved: ID ${activity.id} -> Transaction ${transaction.id}',
     );
   }
 
-  Future<void> _learnKeywordsFromSms(
+  /// Learn merchant→category mapping when user manually approves.
+  Future<void> learnKeywordsFromApproval(
+    String smsBody,
+    Category category, {
+    String? merchant,
+    String? recipient,
+  }) async {
+    final isar = await _getIsar();
+    await _learnFromApproval(
+      smsBody,
+      category,
+      isar,
+      merchant: merchant,
+      recipient: recipient,
+    );
+  }
+
+  Future<void> _learnFromApproval(
     String smsBody,
     Category category,
-    Isar isar,
-  ) async {
+    Isar isar, {
+    String? merchant,
+    String? recipient,
+  }) async {
     final categories = await isar.categorys.where().findAll();
-    final merchant = CategoryMatcherService.detectMerchant(smsBody, categories);
-    if (merchant == null) return;
+    final keys = <String>{};
 
-    final keyword = merchant.toLowerCase().trim();
-    if (keyword.length < 3 || _smsNoiseWords.contains(keyword)) return;
+    // 1. Merchant from regex extraction
+    final detected = CategoryMatcherService.detectMerchant(smsBody, categories);
+    if (detected != null) keys.add(detected.toLowerCase().trim());
 
-    final existingKeywords = category.keywords ?? [];
-    if (existingKeywords.contains(keyword)) return;
+    // 2. Pre-extracted merchant from parser (e.g., "Swiggy" from HDFC plugin)
+    if (merchant != null && merchant.isNotEmpty) {
+      keys.add(merchant.toLowerCase().trim());
+    }
 
-    category.keywords = [...existingKeywords, keyword];
+    // 3. UPI VPA recipient (e.g., "suraj@okaxis" → learn "suraj")
+    if (recipient != null && recipient.contains('@')) {
+      final vpaName = recipient.split('@').first.toLowerCase().trim();
+      if (vpaName.length >= 3) keys.add(vpaName);
+    }
+
+    // Filter noise and upsert rules
+    final validKeys = keys.where(
+      (k) => k.length >= 3 && !_smsNoiseWords.contains(k),
+    );
+
+    for (final key in validKeys) {
+      await _upsertRule(key, category, isar);
+    }
+  }
+
+  Future<void> _upsertRule(String key, Category category, Isar isar) async {
+    final existing = await isar.categoryRules
+        .filter()
+        .merchantNameEqualTo(key, caseSensitive: false)
+        .findFirst();
+
     await isar.writeTxn(() async {
-      await isar.categorys.put(category);
+      if (existing != null) {
+        existing.categoryId = category.id.toString();
+        existing.matchCount++;
+        existing.confidence = (existing.confidence + 10).clamp(0, 100);
+        existing.lastUsed = DateTime.now();
+        await isar.categoryRules.put(existing);
+        _log.i(
+          'Rule updated: $key → ${category.name} (confidence: ${existing.confidence}, matches: ${existing.matchCount})',
+        );
+      } else {
+        final rule = CategoryRule(
+          merchantName: key,
+          categoryId: category.id.toString(),
+          confidence: 60,
+          matchCount: 1,
+        );
+        await isar.categoryRules.put(rule);
+        _log.i('Rule created: $key → ${category.name}');
+      }
     });
-    _log.i('Learned merchant keyword for ${category.name}: $keyword');
+  }
+
+  /// Look up a learned merchant→category rule.
+  /// Checks merchant name, then UPI VPA recipient as fallback.
+  Future<Category?> _matchByLearnedRule(
+    String smsBody,
+    List<Category> categories,
+    Isar isar, {
+    String? merchant,
+    String? recipient,
+  }) async {
+    // Collect all possible lookup keys
+    final keys = <String>[];
+
+    final detected = CategoryMatcherService.detectMerchant(smsBody, categories);
+    if (detected != null) keys.add(detected.toLowerCase().trim());
+    if (merchant != null && merchant.isNotEmpty) {
+      keys.add(merchant.toLowerCase().trim());
+    }
+    if (recipient != null && recipient.contains('@')) {
+      keys.add(recipient.split('@').first.toLowerCase().trim());
+    }
+
+    for (final key in keys) {
+      if (key.length < 3) continue;
+      final rule = await isar.categoryRules
+          .filter()
+          .merchantNameEqualTo(key, caseSensitive: false)
+          .and()
+          .confidenceGreaterThan(40)
+          .findFirst();
+
+      if (rule == null) continue;
+
+      final categoryId = int.tryParse(rule.categoryId);
+      if (categoryId == null) continue;
+
+      final matched = categories.where((c) => c.id == categoryId).firstOrNull;
+      if (matched != null) {
+        _log.i(
+          'Learned rule matched: $key → ${matched.name} (confidence: ${rule.confidence})',
+        );
+        return matched;
+      }
+    }
+    return null;
   }
 
   static const _smsNoiseWords = {
-    'debited', 'credited', 'account', 'balance', 'available',
-    'transaction', 'transfer', 'payment', 'received', 'sent',
-    'bank', 'upi', 'neft', 'imps', 'rtgs', 'ref', 'inr',
+    'debited',
+    'credited',
+    'account',
+    'balance',
+    'available',
+    'transaction',
+    'transfer',
+    'payment',
+    'received',
+    'sent',
+    'bank',
+    'upi',
+    'neft',
+    'imps',
+    'rtgs',
+    'ref',
+    'inr',
+    'your',
+    'from',
+    'the',
+    'for',
+    'with',
+    'info',
   };
 
   Future<void> rejectActivity(SmsActivity activity, String? reason) async {
@@ -375,7 +629,44 @@ class SmsActivityService {
       await isar.smsActivitys.put(activity);
     });
 
+    // Negative learning: penalize the rule that led to wrong categorization
+    if (activity.merchant != null || activity.toAccount != null) {
+      await _penalizeRules(activity, isar);
+    }
+
     _log.i('Activity rejected: ID ${activity.id}');
+  }
+
+  /// Penalize rules when user rejects or corrects a categorization.
+  Future<void> _penalizeRules(SmsActivity activity, Isar isar) async {
+    final keys = <String>[];
+    if (activity.merchant != null) {
+      keys.add(activity.merchant!.toLowerCase().trim());
+    }
+    if (activity.toAccount != null && activity.toAccount!.contains('@')) {
+      keys.add(activity.toAccount!.split('@').first.toLowerCase().trim());
+    }
+
+    for (final key in keys) {
+      if (key.length < 3) continue;
+      final rule = await isar.categoryRules
+          .filter()
+          .merchantNameEqualTo(key, caseSensitive: false)
+          .findFirst();
+      if (rule == null) continue;
+
+      await isar.writeTxn(() async {
+        rule.confidence = (rule.confidence - 20).clamp(0, 100);
+        rule.lastUsed = DateTime.now();
+        if (rule.confidence <= 0 && rule.matchCount <= 1) {
+          await isar.categoryRules.delete(rule.id);
+          _log.i('Rule deleted (zero confidence): $key');
+        } else {
+          await isar.categoryRules.put(rule);
+          _log.i('Rule penalized: $key (confidence: ${rule.confidence})');
+        }
+      });
+    }
   }
 
   /// Marks a transfer activity (and its paired activity) as approved.
@@ -396,7 +687,9 @@ class SmsActivityService {
       }
     });
 
-    _log.i('Transfer activity approved: ID ${activity.id} (pair: ${activity.pairedActivityId})');
+    _log.i(
+      'Transfer activity approved: ID ${activity.id} (pair: ${activity.pairedActivityId})',
+    );
   }
 
   Future<void> markAsNotDuplicate(SmsActivity activity) async {
@@ -411,7 +704,11 @@ class SmsActivityService {
 
   Future<List<SmsActivity>> getAllActivities() async {
     final isar = await _getIsar();
-    return await isar.smsActivitys.where().sortByCreatedAtDesc().findAll();
+    return await isar.smsActivitys
+        .where()
+        .sortByCreatedAtDesc()
+        .findAll()
+        .withDecryption();
   }
 
   Future<List<SmsActivity>> getActivitiesByStatus(ActivityStatus status) async {
@@ -420,7 +717,8 @@ class SmsActivityService {
         .filter()
         .statusEqualTo(status)
         .sortByCreatedAtDesc()
-        .findAll();
+        .findAll()
+        .withDecryption();
   }
 
   Future<int> getPendingCount() async {
@@ -436,7 +734,7 @@ class SmsActivityService {
     return pending;
   }
 
-  dynamic _activityToPending(SmsActivity activity) {
+  PendingTransactionData _activityToPending(SmsActivity activity) {
     return _PendingTransactionAdapter(
       account: activity.account,
       amount: activity.amount,
@@ -453,41 +751,43 @@ class SmsActivityService {
 
   /// Finds a matching opposite-direction SMS that forms a transfer pair.
   /// e.g. A/c X9684 debited Rs.5000 + Card X1234 credited Rs.5000 within 15 min
-  Future<SmsActivity?> _findTransferPair(SmsActivity activity) async {
+  Future<SmsActivity?> _claimTransferPair(SmsActivity activity) async {
     if (activity.amount == null || activity.isIncome == null) return null;
     if (activity.account == null || activity.account!.isEmpty) return null;
 
     final isar = await _getIsar();
-    final window = const Duration(days: 1);
-    final startTime = activity.date.subtract(window);
-    final endTime = activity.date.add(window);
 
-    // Look for opposite direction, same amount, different account
-    final candidates = await isar.smsActivitys
-        .filter()
-        .dateBetween(startTime, endTime)
-        .and()
-        .amountEqualTo(activity.amount)
-        .and()
-        .isIncomeEqualTo(!activity.isIncome!) // opposite direction
-        .and()
-        .not()
-        .smsHashEqualTo(activity.smsHash)
-        .and()
-        .not()
-        .accountEqualTo(activity.account) // different account
-        .and()
-        .pairedActivityIdIsNull() // not already paired
-        .findAll();
+    return await isar.writeTxn(() async {
+      final window = const Duration(minutes: 30);
+      final startTime = activity.date.subtract(window);
+      final endTime = activity.date.add(window);
 
-    if (candidates.isEmpty) return null;
+      final candidate = await isar.smsActivitys
+          .filter()
+          .dateBetween(startTime, endTime)
+          .and()
+          .amountEqualTo(activity.amount)
+          .and()
+          .isIncomeEqualTo(!activity.isIncome!)
+          .and()
+          .not()
+          .smsHashEqualTo(activity.smsHash)
+          .and()
+          .not()
+          .accountEqualTo(activity.account)
+          .and()
+          .pairedActivityIdIsNull()
+          .and()
+          .statusEqualTo(ActivityStatus.pending)
+          .findFirst();
 
-    // Prefer candidates that are also flagged as transfer
-    final transferCandidates =
-        candidates.where((c) => c.isLikelyTransfer == true).toList();
-    return transferCandidates.isNotEmpty
-        ? transferCandidates.first
-        : candidates.first;
+      if (candidate == null) return null;
+
+      candidate.pairedActivityId = -1;
+      await isar.smsActivitys.put(candidate);
+
+      return candidate;
+    });
   }
 
   Future<void> approveTransferPair(
@@ -514,16 +814,21 @@ class SmsActivityService {
 }
 
 // Adapter class to match transaction matching interface
-class _PendingTransactionAdapter {
+class _PendingTransactionAdapter implements PendingTransactionData {
+  @override
   final String? account;
+  @override
   final double? amount;
+  @override
   final bool? isIncome;
+  @override
   final String body;
   final String sender;
   final String? transactionRef;
   final String? category;
   final String smsHash;
   final String? toAccount;
+  @override
   final String? fromBank;
 
   _PendingTransactionAdapter({

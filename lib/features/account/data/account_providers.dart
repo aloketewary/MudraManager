@@ -1,6 +1,8 @@
+import 'package:mudra_manager/core/providers/state_value.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
+import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/exchange_rate.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
@@ -22,13 +24,31 @@ final accountServiceProvider = Provider((ref) {
 });
 
 final allAccountsProvider = FutureProvider.autoDispose((ref) async {
+  ref.watch(accountChangeProvider);
+  ref.watch(transactionChangeProvider);
   final isarService = ref.watch(isarServiceProvider);
   final isar = await isarService.getInstance();
   return await isar.accounts.where().findAll();
 });
 
+final accountBalanceMapProvider = FutureProvider.autoDispose<Map<int, double>>((ref) async {
+  ref.watch(accountChangeProvider);
+  ref.watch(transactionChangeProvider);
+  final service = ref.watch(accountServiceProvider);
+  return service.getAccountBalanceMap();
+});
+
+final accountBaseBalanceMapProvider = FutureProvider.autoDispose<Map<int, double>>((ref) async {
+  ref.watch(accountChangeProvider);
+  ref.watch(transactionChangeProvider);
+  final service = ref.watch(accountServiceProvider);
+  return service.getAccountBalanceMapInBase();
+});
+
 final balanceVisibilityProvider =
-    StateProvider.autoDispose<bool>((ref) => true);
+    NotifierProvider.autoDispose<StateValue<bool>, bool>(
+  () => StateValue(true),
+);
 
 /// The user's primary/default account.
 final primaryAccountProvider = FutureProvider.autoDispose<Account?>((ref) async {
@@ -52,16 +72,25 @@ final primaryAccountProvider = FutureProvider.autoDispose<Account?>((ref) async 
 final frequencySortedAccountsProvider =
     FutureProvider.autoDispose<List<Account>>((ref) async {
   final accounts = await ref.watch(accountsProvider.future);
-  final isar = await ref.watch(isarServiceProvider).getInstance();
+  if (accounts.isEmpty) return accounts;
 
+  ref.watch(transactionChangeProvider);
+  final isar = await ref.watch(isarServiceProvider).getInstance();
   final cutoff = DateTime.now().subtract(const Duration(days: 30));
+
+  // Single query: all recent transactions, group by account in memory
+  final recentTxns = await isar.transactions
+      .filter()
+      .dateGreaterThan(cutoff)
+      .findAll();
+
   final counts = <int, int>{};
-  for (final acc in accounts) {
-    counts[acc.id] = await isar.transactions
-        .filter()
-        .account((q) => q.idEqualTo(acc.id))
-        .dateGreaterThan(cutoff)
-        .count();
+  for (final txn in recentTxns) {
+    txn.account.loadSync();
+    final accId = txn.account.value?.id;
+    if (accId != null) {
+      counts[accId] = (counts[accId] ?? 0) + 1;
+    }
   }
 
   return accounts.toList()
@@ -172,6 +201,8 @@ class AccountsService {
 
     final rates = await isar.exchangeRates.where().findAll();
     final rateMap = {for (final r in rates) r.currencyCode: r.rateToBase};
+    // Populate the shared cache so other code benefits
+    CurrencyService.cachedRates.addAll(rateMap);
 
     final futures = accounts.map((acc) async {
       final results = await Future.wait([

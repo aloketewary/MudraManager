@@ -102,7 +102,7 @@ class _SecuritySettingsScreenState
       return;
     }
 
-    if (!mounted) return;
+    if (!context.mounted) return;
 
     // Enter new PIN
     final newPin = await showDialog<String>(

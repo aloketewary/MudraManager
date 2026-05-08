@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -8,53 +10,118 @@ class AppTheme {
 
   final Iterable<ThemeExtension<dynamic>>? extensions;
 
-  // Build the TextTheme with Onest for both light and dark themes
+  // ── Font Strategy ──
+  // Headings (display/headline/title) → Geist Sans (premium, tight)
+  // Body (body/label)                 → Inter (clarity, tabular nums)
+  // Hindi fallback                    → NotoSansDevanagari
+  // Bengali fallback                  → NotoSansBengali
+  // Monospace                         → GeistMono (account numbers, SMS)
+  static const _headingFont = 'Geist';
+  static const _bodyFont = 'Inter';
+  static const _monoFont = 'GeistMono';
+  static const _indicFallback = ['NotoSansDevanagari', 'NotoSansBengali'];
+
+  /// Monospace font for account numbers, SMS body, build info.
+  static const String monoFontFamily = _monoFont;
+
+  // Tabular figures for number alignment in tables/lists
+  static const _tabularFigures = [FontFeature.tabularFigures()];
+
   TextTheme _buildTextTheme(TextTheme base) {
     return base.copyWith(
+      // ── Headings: Geist (tight tracking, premium) ──
       displayLarge: base.displayLarge!.copyWith(
-        fontWeight: FontWeight.w900, // Black
+        fontFamily: _headingFont,
+        fontFamilyFallback: _indicFallback,
+        fontWeight: FontWeight.w700,
+        letterSpacing: -0.25,
       ),
       displayMedium: base.displayMedium!.copyWith(
-        fontWeight: FontWeight.w800, // ExtraBold
+        fontFamily: _headingFont,
+        fontFamilyFallback: _indicFallback,
+        fontWeight: FontWeight.w700,
+        letterSpacing: -0.25,
       ),
       displaySmall: base.displaySmall!.copyWith(
-        fontWeight: FontWeight.w700, // Bold
+        fontFamily: _headingFont,
+        fontFamilyFallback: _indicFallback,
+        fontWeight: FontWeight.w600,
       ),
       headlineLarge: base.headlineLarge!.copyWith(
-        fontWeight: FontWeight.w700, // Bold
+        fontFamily: _headingFont,
+        fontFamilyFallback: _indicFallback,
+        fontWeight: FontWeight.w600,
       ),
       headlineMedium: base.headlineMedium!.copyWith(
-        fontWeight: FontWeight.w600, // SemiBold
+        fontFamily: _headingFont,
+        fontFamilyFallback: _indicFallback,
+        fontWeight: FontWeight.w600,
       ),
       headlineSmall: base.headlineSmall!.copyWith(
-        fontWeight: FontWeight.w600, // SemiBold
+        fontFamily: _headingFont,
+        fontFamilyFallback: _indicFallback,
+        fontWeight: FontWeight.w500,
       ),
       titleLarge: base.titleLarge!.copyWith(
-        fontWeight: FontWeight.w500, // Medium
+        fontFamily: _headingFont,
+        fontFamilyFallback: _indicFallback,
+        fontWeight: FontWeight.w600,
       ),
       titleMedium: base.titleMedium!.copyWith(
-        fontWeight: FontWeight.w500, // Medium
+        fontFamily: _headingFont,
+        fontFamilyFallback: _indicFallback,
+        fontWeight: FontWeight.w500,
+        letterSpacing: 0.15,
       ),
       titleSmall: base.titleSmall!.copyWith(
-        fontWeight: FontWeight.w400, // Regular
+        fontFamily: _headingFont,
+        fontFamilyFallback: _indicFallback,
+        fontWeight: FontWeight.w500,
+        letterSpacing: 0.1,
       ),
+      // ── Body: Inter (readable, tabular figures) ──
       bodyLarge: base.bodyLarge!.copyWith(
-        fontWeight: FontWeight.w400, // Regular
+        fontFamily: _bodyFont,
+        fontFamilyFallback: _indicFallback,
+        fontWeight: FontWeight.w400,
+        letterSpacing: 0.5,
+        fontFeatures: _tabularFigures,
       ),
       bodyMedium: base.bodyMedium!.copyWith(
-        fontWeight: FontWeight.w400, // Regular
+        fontFamily: _bodyFont,
+        fontFamilyFallback: _indicFallback,
+        fontWeight: FontWeight.w400,
+        letterSpacing: 0.25,
+        fontFeatures: _tabularFigures,
       ),
       bodySmall: base.bodySmall!.copyWith(
-        fontWeight: FontWeight.w300, // Light
+        fontFamily: _bodyFont,
+        fontFamilyFallback: _indicFallback,
+        fontWeight: FontWeight.w400,
+        letterSpacing: 0.4,
+        fontFeatures: _tabularFigures,
       ),
+      // ── Labels: Inter (buttons, nav, badges) ──
       labelLarge: base.labelLarge!.copyWith(
-        fontWeight: FontWeight.w500, // Medium
+        fontFamily: _bodyFont,
+        fontFamilyFallback: _indicFallback,
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0.1,
+        fontFeatures: _tabularFigures,
       ),
       labelMedium: base.labelMedium!.copyWith(
-        fontWeight: FontWeight.w400, // Regular
+        fontFamily: _bodyFont,
+        fontFamilyFallback: _indicFallback,
+        fontWeight: FontWeight.w500,
+        letterSpacing: 0.5,
+        fontFeatures: _tabularFigures,
       ),
       labelSmall: base.labelSmall!.copyWith(
-        fontWeight: FontWeight.w300, // Light
+        fontFamily: _bodyFont,
+        fontFamilyFallback: _indicFallback,
+        fontWeight: FontWeight.w500,
+        letterSpacing: 0.5,
+        fontFeatures: _tabularFigures,
       ),
     );
   }
@@ -66,13 +133,14 @@ class AppTheme {
 
     final textTheme = _buildTextTheme(
       isDark ? ThemeData.dark().textTheme : ThemeData.light().textTheme,
-    ).apply(fontFamily: 'Onest');
+    );
 
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
       textTheme: textTheme,
-      fontFamily: 'Onest',
+      fontFamily: _bodyFont,
+      fontFamilyFallback: _indicFallback,
       appBarTheme: _appBarTheme(colorScheme, textTheme, colorScheme.brightness),
       elevatedButtonTheme: _elevatedButtonTheme(colorScheme, textTheme),
       outlinedButtonTheme: _outlinedButtonTheme(colorScheme, textTheme),

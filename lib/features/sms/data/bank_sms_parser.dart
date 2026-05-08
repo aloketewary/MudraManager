@@ -132,7 +132,7 @@ class BankSmsParser {
 
     // Check for transfer patterns (money going OUT)
     final transferOutRegex = RegExp(
-      r'(?:received|transferred|sent).*from\s+(?:your\s+)?(?:A/c|a/c)',
+      r'(?:rec(?:ei|ie)ved|transferred|sent).*from\s+(?:your\s+)?(?:A/c|a/c)',
       caseSensitive: false,
     );
     final transferInRegex = RegExp(

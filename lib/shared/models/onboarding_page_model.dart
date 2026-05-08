@@ -20,25 +20,13 @@ const onboardingData = [
     description: 'manageYourMoneyDescription',
     icon: LucideIcons.indianRupee,
   ),
-  // 2. SMS auto-import — key differentiator
+  // 2. Smart tracking — merged SMS + budgets + insights
   OnboardingPage(
     title: 'onboard_SmartAutoTracking',
-    description: 'onboard_SmartAutoTrackingDesc',
+    description: 'onboard_smartTrackingMergedDesc',
     icon: LucideIcons.bellRing,
   ),
-  // 3. Budgets & Goals
-  OnboardingPage(
-    title: 'onboard_SetBudgetsAndGoals',
-    description: 'onboard_stayOnTrackAndAchieveYourDream',
-    icon: LucideIcons.target,
-  ),
-  // 4. Analytics & Insights
-  OnboardingPage(
-    title: 'onboard_InsightsAndAnalytics',
-    description: 'onboard_InsightsAndAnalyticsDesc',
-    icon: LucideIcons.chartBar,
-  ),
-  // 5. Privacy-first — trust builder, final CTA
+  // 3. Privacy-first — trust builder, final CTA
   OnboardingPage(
     title: 'onboard_SecureAndPrivate',
     description: 'onboard_SecureAndPrivateDesc',

@@ -1,8 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/providers/collection_watchers.dart';
 import 'package:mudra_manager/features/analytics/data/advanced_analytics_service.dart';
+import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/features/dashboard/data/status_data_provider.dart';
 import 'package:mudra_manager/features/transactions/data/transaction_provider.dart';
+import 'package:mudra_manager/features/analytics/data/tax_estimation_service.dart';
 
 final analyticsServiceProvider =
     Provider.autoDispose<AdvancedAnalyticsService>((ref) {
@@ -22,6 +24,7 @@ final financialHealthProvider =
   ref,
 ) async {
   ref.watch(transactionChangeProvider);
+  ref.watch(accountChangeProvider);
   final service = ref.watch(analyticsServiceProvider);
   final totalBalance = await ref.watch(totalAccountBalanceProvider.future);
   return await service.calculateHealthScore(totalBalance);
@@ -34,6 +37,24 @@ final categoryTrendsProvider =
   ref.watch(transactionChangeProvider);
   final service = ref.watch(analyticsServiceProvider);
   return await service.getCategoryTrends();
+});
+
+/// Categories with rising spending trend — sorted by change percentage.
+final risingCategoriesProvider =
+    FutureProvider.autoDispose<List<CategoryTrend>>((ref) async {
+  final trends = await ref.watch(categoryTrendsProvider.future);
+  return trends.values
+      .where((t) => t.direction == TrendDirection.rising && t.thisMonth > 0)
+      .toList()
+    ..sort((a, b) => b.changePercent.compareTo(a.changePercent));
+});
+
+/// Categories with anomalous spending this month.
+final anomalyCategoriesProvider =
+    FutureProvider.autoDispose<List<CategoryTrend>>((ref) async {
+  final trends = await ref.watch(categoryTrendsProvider.future);
+  return trends.values.where((t) => t.isAnomaly).toList()
+    ..sort((a, b) => b.thisMonth.compareTo(a.thisMonth));
 });
 
 final spendingByDayProvider =
@@ -74,4 +95,25 @@ final monthlyExpenseTrendsProvider =
   }
 
   return categoryMonthlyData;
+});
+
+
+final cashFlowForecastProvider =
+    FutureProvider.autoDispose<CashFlowForecast>((ref) async {
+  ref.watch(transactionChangeProvider);
+  final service = ref.watch(analyticsServiceProvider);
+  return await service.forecastCashFlow();
+});
+
+final taxEstimationServiceProvider =
+    Provider.autoDispose<TaxEstimationService>((ref) {
+  final isarService = ref.watch(isarServiceProvider);
+  return TaxEstimationService(isarService);
+});
+
+final taxEstimationProvider =
+    FutureProvider.autoDispose<TaxEstimate>((ref) async {
+  ref.watch(transactionChangeProvider);
+  final service = ref.watch(taxEstimationServiceProvider);
+  return await service.estimateForFY(TaxEstimationService.currentFYStartYear());
 });

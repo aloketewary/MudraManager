@@ -43,6 +43,7 @@ class TripParticipantCard extends StatelessWidget {
         ),
         trailing: onDelete != null
             ? IconButton(
+              tooltip: 'Delete',
                 icon: const Icon(LucideIcons.trash2),
                 onPressed: onDelete,
               )

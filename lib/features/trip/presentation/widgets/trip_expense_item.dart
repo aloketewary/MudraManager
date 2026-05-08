@@ -1,7 +1,7 @@
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:mudra_manager/core/currency/currency_meta.dart';
 
 class TripExpenseItem extends StatelessWidget {
   final String description;
@@ -44,8 +44,11 @@ class TripExpenseItem extends StatelessWidget {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              formatCurrency(amount, code: currencyCode, decimals: 2),
+            CurrencyText(
+              amount: amount,
+              currencyCode: currencyCode,
+              compact: false,
+              fixedLength: 2,
               style: textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: color.primary,
@@ -53,6 +56,7 @@ class TripExpenseItem extends StatelessWidget {
             ),
             if (onDelete != null)
               IconButton(
+                tooltip: 'Delete',
                 icon: const Icon(LucideIcons.trash2, size: 20),
                 onPressed: onDelete,
               ),

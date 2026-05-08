@@ -10,6 +10,7 @@ import 'package:mudra_manager/core/currency/currency_provider.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/extension/account_type_extenstion.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
+import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/core/utils/simple_color_picker.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
@@ -88,6 +89,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
       backgroundColor: color.surface,
       appBar: AppBar(
         leading: IconButton(
+          tooltip: 'Close',
           icon: const Icon(LucideIcons.x),
           onPressed: () {
             HapticFeedback.mediumImpact();
@@ -608,7 +610,9 @@ class _AccountFormState extends ConsumerState<AccountForm> {
       }
 
       if (mounted) {
-        invalidateAll(ref);
+        ref.invalidate(accountsProvider);
+        ref.invalidate(allAccountsProvider);
+        ref.invalidate(frequencySortedAccountsProvider);
         context.pop(true);
       }
     } finally {

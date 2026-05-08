@@ -182,7 +182,8 @@ class _ExchangeRateScreenState extends ConsumerState<ExchangeRateScreen> {
     final service = await ref.read(currencyServiceProvider.future);
     await service.updateRates({code: newRate});
     ref.invalidate(_ratesProvider);
-    if (mounted) SnackbarService.success(ctxt.exchange_rateUpdated(code));
+    if (!context.mounted) return;
+    SnackbarService.success(ctxt.exchange_rateUpdated(code));
   }
 }
 
@@ -210,6 +211,7 @@ class _RateTile extends StatelessWidget {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final spacing = SpacingProvider.of(context);
+    final ctxt = AppLocalizations.of(context)!;
 
     return InkWell(
       onTap: () => _showEditSheet(context, color, textTheme, spacing),
@@ -265,7 +267,7 @@ class _RateTile extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  safeDateFormat('dd MMM yy').format(updatedAt),
+                  safeDateFormat('dd MMM yy', ctxt.localeName).format(updatedAt),
                   style: textTheme.labelSmall?.copyWith(
                     color: color.onSurfaceVariant.withValues(alpha: 0.6),
                     fontSize: 10,

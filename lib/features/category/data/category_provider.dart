@@ -11,6 +11,7 @@ import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
 import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
 import 'package:mudra_manager/features/gamification/services/gamification_service.dart';
+import 'package:mudra_manager/features/category/data/category_merge_service.dart';
 import 'package:mudra_manager/features/marketplace/services/marketplace_service.dart';
 
 final categoryListProvider =
@@ -66,6 +67,12 @@ final expenseCategoriesProvider =
     await category.parentCategory.load();
   }
   return categories;
+});
+
+final categoryMergeServiceProvider = Provider.autoDispose<CategoryMergeService>((ref) {
+  final isarService = ref.watch(isarServiceProvider);
+  final log = ref.getLogger('CategoryMerge');
+  return CategoryMergeService(isarService, log);
 });
 
 final categoryServiceProvider = Provider((ref) {

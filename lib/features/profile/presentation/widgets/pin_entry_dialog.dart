@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class PinEntryDialog extends StatefulWidget {
   /// Length of the PIN to collect
@@ -30,7 +31,7 @@ class _PinEntryDialogState extends State<PinEntryDialog> {
     setState(() => _input.add(digit.toString()));
     if (_input.length == widget.length) {
       Future.delayed(const Duration(milliseconds: 200), () {
-        if (mounted) Navigator.of(context).pop(_input.join());
+        if (context.mounted) Navigator.of(context).pop(_input.join());
       });
     }
   }
@@ -95,7 +96,7 @@ class _PinEntryDialogState extends State<PinEntryDialog> {
                 } else if (idx == 10) {
                   return const SizedBox.shrink();
                 } else {
-                  return _buildKey(const Icon(Icons.backspace), _onBackspace);
+                  return _buildKey(const Icon(LucideIcons.delete), _onBackspace);
                 }
               },
             ),

@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/providers/state_value.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/features/gamification/models/achievement.dart';
 import 'package:mudra_manager/features/gamification/services/gamification_service.dart';
@@ -5,7 +6,7 @@ import 'package:mudra_manager/core/providers/isar_provider.dart';
 
 final gamificationServiceProvider = Provider<GamificationService?>((ref) {
   final asyncValue = ref.watch(gamificationServiceInitProvider);
-  return asyncValue.valueOrNull;
+  return asyncValue.value;
 });
 
 final achievementsProvider = StreamProvider.autoDispose<List<Achievement>>((ref) async* {
@@ -36,4 +37,6 @@ final dailyCheckInProvider = FutureProvider.autoDispose<String?>((ref) async {
   return await service.updateDailyCheckIn();
 });
 
-final lastSeenLevelProvider = StateProvider.autoDispose<int?>((ref) => null);
+final lastSeenLevelProvider = NotifierProvider.autoDispose<StateValue<int?>, int?>(
+  () => StateValue(null),
+);

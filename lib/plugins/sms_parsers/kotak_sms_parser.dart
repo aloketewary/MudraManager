@@ -14,7 +14,7 @@ class KotakSmsParserPlugin extends SmsParserPlugin {
   String get bankName => 'KOTAK';
 
   @override
-  List<String> get senderNames => ['KOTAK', 'KOTAKB'];
+  List<String> get senderNames => ['KOTAK'];
 
   @override
   String get iconPath => 'assets/logo/banks/kotak.svg';

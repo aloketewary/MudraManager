@@ -160,13 +160,14 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
                       icon: LucideIcons.archive,
                     );
                     if (confirm == true) {
+                      final router = GoRouter.of(context);
                       await ref
                           .read(tripServiceProvider)
                           .archiveTrip(widget.tripId);
                       ref.invalidate(allTripsProvider);
                       ref.invalidate(activeTripsProvider);
                       ref.invalidate(tripByIdProvider(widget.tripId));
-                      if (context.mounted) context.pop();
+                      router.pop();
                     }
                   }
                 },
@@ -1987,7 +1988,7 @@ class _SplitDetailScreenState extends ConsumerState<SplitDetailScreen>
 
     try {
       final fontData =
-          await rootBundle.load('assets/fonts/NotoSans-Regular.ttf');
+          await rootBundle.load('assets/fonts/Inter-Variable.ttf');
       final font = pw.Font.ttf(fontData);
       final now = DateTime.now();
       final pdf = pw.Document();

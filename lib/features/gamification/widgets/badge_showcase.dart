@@ -59,6 +59,7 @@ class BadgeShowcase extends ConsumerWidget {
                   return Container(
                     padding: const EdgeInsets.all(8),
                     child: Image.asset(
+                      semanticLabel: 'Decorative image',
                       'assets/icons/20/${achievement.icon}.png',
                       width: 35,
                     ),
@@ -79,6 +80,7 @@ class BadgeShowcase extends ConsumerWidget {
               children: [
                 Expanded(
                   child: LinearProgressIndicator(
+                    semanticsLabel: 'Progress',
                     value: total > 0 ? unlocked.length / total : 0,
                     backgroundColor: color.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(4),

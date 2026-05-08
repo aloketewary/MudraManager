@@ -7,16 +7,14 @@ import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
 
 class InvestmentPortfolioService {
-  static final InvestmentPortfolioService instance =
-      InvestmentPortfolioService._();
-  static final AppLog _log =
-      AppLog(getLogger(), 'InvestmentPortfolioService');
+  final IsarService isarService;
+  final AppLog _log = AppLog(getLogger(), 'InvestmentPortfolioService');
 
-  InvestmentPortfolioService._();
+  InvestmentPortfolioService(this.isarService);
 
   Future<void> addHolding(InvestmentHolding holding, int accountId) async {
     try {
-      final isar = await IsarService.initIsar();
+      final isar = await isarService.getInstance();
       final account = await isar.accounts.get(accountId);
       if (account == null) {
         _log.e('Account not found: $accountId');
@@ -35,7 +33,7 @@ class InvestmentPortfolioService {
   }
 
   Future<void> updatePrice(int holdingId, double newPrice) async {
-    final isar = await IsarService.initIsar();
+    final isar = await isarService.getInstance();
     final holding = await isar.investmentHoldings.get(holdingId);
     if (holding != null) {
       holding.currentPrice = newPrice;
@@ -45,7 +43,7 @@ class InvestmentPortfolioService {
   }
 
   Future<List<InvestmentHolding>> getPortfolio(int accountId) async {
-    final isar = await IsarService.initIsar();
+    final isar = await isarService.getInstance();
     final holdings = await isar.investmentHoldings.where().findAll();
     for (var h in holdings) {
       await h.account.load();
@@ -82,7 +80,7 @@ class InvestmentPortfolioService {
   }
 
   Future<void> deleteHolding(int holdingId) async {
-    final isar = await IsarService.initIsar();
+    final isar = await isarService.getInstance();
     await isar.writeTxn(() => isar.investmentHoldings.delete(holdingId));
     _log.i('Holding deleted: $holdingId');
   }

@@ -9,4 +9,7 @@ abstract class Env {
 
   @EnviedField(varName: 'ENCRYPT_IV', obfuscate: true)
   static String encryptIv = _Env.encryptIv;
+
+  @EnviedField(varName: 'GOOGLE_SERVER_CLIENT_ID', obfuscate: true, defaultValue: '')
+  static String googleServerClientId = _Env.googleServerClientId;
 }

@@ -43,6 +43,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
   String? _tripCurrency;
   bool _isActive = true;
   bool _isInitialized = false;
+  bool _saving = false;
 
   bool get isEditMode => widget.tripId != null;
   late bool _isTrip;
@@ -188,6 +189,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
   }
 
   Future<void> _saveTrip(Trip? originalTrip) async {
+    if (_saving) return;
     if (_nameController.text.trim().isEmpty) {
       SnackbarService.error(BuddyMessages.tripNameRequired(_isTrip));
       return;
@@ -197,6 +199,8 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
       SnackbarService.error(BuddyMessages.addParticipant);
       return;
     }
+
+    final router = GoRouter.of(context);
     if (!isEditMode) {
       final canCreate = await ref.read(canCreateTripProvider.future);
       if (!canCreate) {
@@ -204,6 +208,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
         return;
       }
     }
+    setState(() => _saving = true);
     HapticFeedback.mediumImpact();
 
     final budget = _isTrip && _budgetController.text.trim().isNotEmpty
@@ -257,7 +262,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
       SnackbarService.success(BuddyMessages.tripCreated(_isTrip));
     }
 
-    if (mounted) context.pop();
+    router.pop();
   }
 
   Future<void> _finalizeTrip(Trip trip) async {
@@ -271,7 +276,8 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
       icon: LucideIcons.circleCheck,
     );
     if (confirm != true) return;
-
+    if (!context.mounted) return;
+    final router = GoRouter.of(context);
     trip.isActive = false;
     await ref.read(tripServiceProvider).updateTrip(
           trip,
@@ -280,9 +286,8 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
         );
     ref.invalidate(allTripsProvider);
     SnackbarService.success(BuddyMessages.tripFinalized(_isTrip));
-    if (mounted) context.pop();
+    router.pop();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -298,7 +303,9 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
             if (mounted && _participants.isEmpty) {
               setState(() {
                 _ownerName = profile.name;
-                _participants.add(TripParticipant.create(name: _ownerName!, isOwner: true));
+                _participants.add(
+                  TripParticipant.create(name: _ownerName!, isOwner: true),
+                );
               });
             }
           });
@@ -313,8 +320,12 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
         data: (trip) {
           if (trip == null) {
             return Scaffold(
-              appBar: AppBar(title: Text(_isTrip ? 'Trip Not Found' : 'Group Not Found')),
-              body: Center(child: Text(_isTrip ? 'Trip not found' : 'Group not found')),
+              appBar: AppBar(
+                title: Text(_isTrip ? 'Trip Not Found' : 'Group Not Found'),
+              ),
+              body: Center(
+                child: Text(_isTrip ? 'Trip not found' : 'Group not found'),
+              ),
             );
           }
 
@@ -329,7 +340,9 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
         },
         loading: () => Scaffold(
           appBar: AppBar(title: Text(_isTrip ? 'Edit Trip' : 'Edit Group')),
-          body: ListView(children: List.generate(3, (_) => const DashboardCardSkeleton())),
+          body: ListView(
+            children: List.generate(3, (_) => const DashboardCardSkeleton()),
+          ),
         ),
         error: (e, _) => Scaffold(
           appBar: AppBar(title: Text(BuddyMessages.genericError)),
@@ -393,8 +406,7 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
                   color: _isTrip
                       ? color.primaryContainer
                       : color.tertiaryContainer,
-                  borderRadius:
-                      BorderRadius.circular(spacing.radiusMedium),
+                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
                 ),
                 child: Row(
                   children: [
@@ -437,7 +449,9 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
                     Icon(LucideIcons.info, color: color.primary, size: 20),
                     const SizedBox(width: 8),
                     Text(
-                      _isTrip ? AppLocalizations.of(context)!.editTrip_tripDetails : AppLocalizations.of(context)!.editTrip_groupDetails,
+                      _isTrip
+                          ? AppLocalizations.of(context)!.editTrip_tripDetails
+                          : AppLocalizations.of(context)!.editTrip_groupDetails,
                       style: textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -464,7 +478,8 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
                 TextField(
                   controller: _descController,
                   decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.editTrip_descriptionOptional,
+                    labelText: AppLocalizations.of(context)!
+                        .editTrip_descriptionOptional,
                     hintText: _isTrip
                         ? 'Beach vacation with friends'
                         : 'Split expenses with friends',
@@ -480,10 +495,12 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
                   TextField(
                     controller: _budgetController,
                     decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context)!.editTrip_budgetOptional,
+                      labelText:
+                          AppLocalizations.of(context)!.editTrip_budgetOptional,
                       hintText: 'e.g., 50000',
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                        borderRadius:
+                            BorderRadius.circular(spacing.radiusMedium),
                       ),
                       prefixIcon: Icon(currencyIcon(_tripCurrency)),
                     ),
@@ -514,7 +531,8 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
                     decoration: InputDecoration(
                       labelText: 'Currency',
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                        borderRadius:
+                            BorderRadius.circular(spacing.radiusMedium),
                       ),
                       prefixIcon: const Icon(LucideIcons.coins),
                     ),
@@ -557,167 +575,174 @@ class _ManageTripScreenState extends ConsumerState<ManageTripScreen> {
             ),
           ),
           if (_isTrip) ...[
-          SizedBox(height: spacing.sectionGap),
-          Padding(
-            padding: EdgeInsets.all(spacing.cardInner),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(LucideIcons.calendar, color: color.primary, size: 20),
-                    const SizedBox(width: 8),
-                    Text(
-                      AppLocalizations.of(context)!.editTrip_duration,
-                      style: textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+            SizedBox(height: spacing.sectionGap),
+            Padding(
+              padding: EdgeInsets.all(spacing.cardInner),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        LucideIcons.calendar,
+                        color: color.primary,
+                        size: 20,
                       ),
-                    ),
-                    const Spacer(),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: color.primaryContainer,
-                        borderRadius:
-                            BorderRadius.circular(spacing.radiusSmall),
-                      ),
-                      child: Text(
-                        '$duration ${duration == 1 ? 'day' : 'days'}',
-                        style: textTheme.labelSmall?.copyWith(
-                          color: color.onPrimaryContainer,
+                      const SizedBox(width: 8),
+                      Text(
+                        AppLocalizations.of(context)!.editTrip_duration,
+                        style: textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                InkWell(
-                  onTap: () async {
-                    HapticFeedback.mediumImpact();
+                      const Spacer(),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: color.primaryContainer,
+                          borderRadius:
+                              BorderRadius.circular(spacing.radiusSmall),
+                        ),
+                        child: Text(
+                          '$duration ${duration == 1 ? 'day' : 'days'}',
+                          style: textTheme.labelSmall?.copyWith(
+                            color: color.onPrimaryContainer,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  InkWell(
+                    onTap: () async {
+                      HapticFeedback.mediumImpact();
 
-                    if (isEditMode && trip != null) {
-                      final range = await showDateRangePicker(
-                        context: context,
-                        firstDate: DateTime(2020),
-                        lastDate: DateTime(2030),
-                        initialDateRange: DateTimeRange(
-                          start: _startDate,
-                          end: _endDate,
-                        ),
-                      );
-                      if (range != null) {
-                        final datesChanged =
-                            !DateUtils.isSameDay(range.start, trip.startDate) ||
-                                !DateUtils.isSameDay(range.end, trip.endDate);
-                        if (datesChanged) {
-                          if (!mounted) return;
-                          final confirm = await DialogUtils.showConfirmation(
-                            context,
-                            title: 'Warning: Date Change',
-                            message:
-                                'Changing dates will remove all linked transactions. Continue?',
-                            confirmText: 'Proceed',
-                            icon: LucideIcons.triangleAlert,
-                          );
-                          if (confirm != true) return;
+                      if (isEditMode && trip != null) {
+                        final range = await showDateRangePicker(
+                          context: context,
+                          firstDate: DateTime(2020),
+                          lastDate: DateTime(2030),
+                          initialDateRange: DateTimeRange(
+                            start: _startDate,
+                            end: _endDate,
+                          ),
+                        );
+                        if (range != null) {
+                          final datesChanged = !DateUtils.isSameDay(
+                                range.start,
+                                trip.startDate,
+                              ) ||
+                              !DateUtils.isSameDay(range.end, trip.endDate);
+                          if (datesChanged) {
+                            if (!context.mounted) return;
+                            final confirm = await DialogUtils.showConfirmation(
+                              context,
+                              title: 'Warning: Date Change',
+                              message:
+                                  'Changing dates will remove all linked transactions. Continue?',
+                              confirmText: 'Proceed',
+                              icon: LucideIcons.triangleAlert,
+                            );
+                            if (confirm != true) return;
+                          }
+                          setState(() {
+                            _startDate = range.start;
+                            _endDate = range.end;
+                          });
                         }
-                        setState(() {
-                          _startDate = range.start;
-                          _endDate = range.end;
-                        });
+                      } else {
+                        final range = await showDateRangePicker(
+                          context: context,
+                          firstDate: DateTime(2020),
+                          lastDate: DateTime(2030),
+                          initialDateRange: DateTimeRange(
+                            start: _startDate,
+                            end: _endDate,
+                          ),
+                        );
+                        if (range != null) {
+                          setState(() {
+                            _startDate = range.start;
+                            _endDate = range.end;
+                          });
+                        }
                       }
-                    } else {
-                      final range = await showDateRangePicker(
-                        context: context,
-                        firstDate: DateTime(2020),
-                        lastDate: DateTime(2030),
-                        initialDateRange: DateTimeRange(
-                          start: _startDate,
-                          end: _endDate,
+                    },
+                    borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: color.surfaceContainerHighest,
+                        borderRadius:
+                            BorderRadius.circular(spacing.radiusMedium),
+                        border: Border.all(
+                          color: color.outlineVariant.withValues(alpha: 0.5),
                         ),
-                      );
-                      if (range != null) {
-                        setState(() {
-                          _startDate = range.start;
-                          _endDate = range.end;
-                        });
-                      }
-                    }
-                  },
-                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: color.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                      border: Border.all(
-                        color: color.outlineVariant.withValues(alpha: 0.5),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Start Date',
+                                  style: textTheme.labelSmall?.copyWith(
+                                    color: color.onSurfaceVariant,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  DateFormat('MMM d, yyyy').format(_startDate),
+                                  style: textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(
+                            LucideIcons.arrowRight,
+                            color: color.onSurfaceVariant,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'End Date',
+                                  style: textTheme.labelSmall?.copyWith(
+                                    color: color.onSurfaceVariant,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  DateFormat('MMM d, yyyy').format(_endDate),
+                                  style: textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(
+                            LucideIcons.calendarDays,
+                            color: color.primary,
+                            size: 20,
+                          ),
+                        ],
                       ),
                     ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Start Date',
-                                style: textTheme.labelSmall?.copyWith(
-                                  color: color.onSurfaceVariant,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                DateFormat('MMM d, yyyy').format(_startDate),
-                                style: textTheme.titleSmall?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Icon(
-                          LucideIcons.arrowRight,
-                          color: color.onSurfaceVariant,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'End Date',
-                                style: textTheme.labelSmall?.copyWith(
-                                  color: color.onSurfaceVariant,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                DateFormat('MMM d, yyyy').format(_endDate),
-                                style: textTheme.titleSmall?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Icon(
-                          LucideIcons.calendarDays,
-                          color: color.primary,
-                          size: 20,
-                        ),
-                      ],
-                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
           ],
           SizedBox(height: spacing.sectionGap),
           if (isEditMode)
@@ -1006,9 +1031,11 @@ class _TripCurrencyPickerState extends State<_TripCurrencyPicker> {
     if (_query.isEmpty) return all;
     final q = _query.toLowerCase();
     return all
-        .where((c) =>
-            c.code.toLowerCase().contains(q) ||
-            c.name.toLowerCase().contains(q),)
+        .where(
+          (c) =>
+              c.code.toLowerCase().contains(q) ||
+              c.name.toLowerCase().contains(q),
+        )
         .toList();
   }
 

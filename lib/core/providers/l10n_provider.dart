@@ -6,19 +6,23 @@ import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/shared_preference_provider.dart';
 
 
-final localeProvider = StateProvider<Locale>((ref) {
-  try {
-    final language = SharedPrefsUtil.instance.getLanguage();
-    return Locale(language);
-  } catch(exception) {
-    return const Locale('en');
+final localeProvider = NotifierProvider<_LocaleNotifier, Locale>(_LocaleNotifier.new);
+
+class _LocaleNotifier extends Notifier<Locale> {
+  @override
+  Locale build() {
+    try {
+      final language = SharedPrefsUtil.instance.getLanguage();
+      return Locale(language);
+    } catch (_) {
+      return const Locale('en');
+    }
   }
 
-});
+  void set(Locale value) => state = value;
+}
 
-final languageService = StateProvider<LanguageService>((ref) {
-  return LanguageService();
-});
+final languageService = Provider<LanguageService>((ref) => LanguageService());
 
 class LanguageService {
   static void changeLanguage(
@@ -27,7 +31,7 @@ class LanguageService {
     Locale newLocale,
   ) {
     SharedPrefsUtil.instance.setLanguage(newLocale.languageCode);
-    ref.read(localeProvider.notifier).state = newLocale;
+    ref.read(localeProvider.notifier).set(newLocale);
   }
 
   static void showLanguagePicker(BuildContext context, WidgetRef ref) {

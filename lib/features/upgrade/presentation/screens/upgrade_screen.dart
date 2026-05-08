@@ -365,9 +365,9 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
       _buildPlanCard(
         id: EntitlementProducts.yearlyPlan,
         label: AppLocalizations.of(context)!.upgrade_yearly,
-        fallbackPrice: '₹199/year',
+        fallbackPrice: '\u20b9199/year',
         savings: AppLocalizations.of(context)!.upgrade_save43,
-        perMonth: '₹16.6/mo',
+        perMonth: '\u20b916.6/mo',
         billing: billing,
         color: color,
         textTheme: textTheme,
@@ -377,7 +377,7 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
       _buildPlanCard(
         id: EntitlementProducts.monthlyPlan,
         label: AppLocalizations.of(context)!.upgrade_monthly,
-        fallbackPrice: '₹29/month',
+        fallbackPrice: '\u20b929/month',
         billing: billing,
         color: color,
         textTheme: textTheme,
@@ -663,10 +663,8 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
   }) {
     final isSelected = _selectedPlan == id;
     // Use Google Play price if loaded, otherwise fallback
-    final displayPrice = (id == EntitlementProducts.monthlyPlan ||
-            id == EntitlementProducts.yearlyPlan)
-        ? fallbackPrice
-        : (billing.getPrice(id) ?? fallbackPrice);
+    final playPrice = billing.getPrice(id);
+    final displayPrice = playPrice ?? fallbackPrice;
 
     return GestureDetector(
       onTap: () {

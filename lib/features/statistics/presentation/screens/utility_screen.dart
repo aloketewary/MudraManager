@@ -48,6 +48,14 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
       route: AppRoutes.trips,
       section: _Section.active,
     ),
+    _UtilityDef(
+      id: 'credit_cards',
+      titleKey: 'cc_title',
+      subtitleKey: 'cc_utilitySubtitle',
+      icon: LucideIcons.creditCard,
+      route: AppRoutes.creditCardBills,
+      section: _Section.active,
+    ),
   ];
 
   static const _planning = [
@@ -84,6 +92,14 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
       subtitleKey: 'recap_trackProgressOverTime',
       icon: LucideIcons.arrowLeftRight,
       route: AppRoutes.monthlyComparison,
+      section: _Section.insights,
+    ),
+    _UtilityDef(
+      id: 'tax_estimation',
+      titleKey: 'tax_title',
+      subtitleKey: 'utility_taxSubtitle',
+      icon: LucideIcons.landmark,
+      route: AppRoutes.taxEstimation,
       section: _Section.insights,
     ),
   ];
@@ -314,32 +330,29 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
               staggerIndex: 0,
             ),
             SizedBox(height: spacing.elementGap),
-            Row(
+            GridView.count(
+              crossAxisCount: 2,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              mainAxisSpacing: spacing.elementGap,
+              crossAxisSpacing: spacing.elementGap,
+              childAspectRatio: 1.5,
               children: activeVisible
                   .asMap()
                   .entries
                   .map(
-                    (e) => Expanded(
-                      child: Padding(
-                        padding: EdgeInsets.only(
-                          right: e.key != activeVisible.length - 1
-                              ? spacing.elementGap
-                              : 0,
-                        ),
-                        child: _buildCard(
-                          e.value,
-                          color,
-                          textTheme,
-                          spacing,
-                          e.key,
-                          l10n,
-                        ),
-                      ),
+                    (e) => _buildCard(
+                      e.value,
+                      color,
+                      textTheme,
+                      spacing,
+                      e.key,
+                      l10n,
                     ),
                   )
                   .toList(),
             ),
-            SizedBox(height: spacing.sectionGap * 1.5),
+            SizedBox(height: spacing.sectionGap),
           ],
 
           // 2. Planning
@@ -378,7 +391,7 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
                   )
                   .toList(),
             ),
-            SizedBox(height: spacing.sectionGap * 1.5),
+            SizedBox(height: spacing.sectionGap),
           ],
 
           // 3. Insights
@@ -455,78 +468,85 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
       builder: (context, ref, _) {
         final alertAsync = ref.watch(priorityAlertProvider);
         return alertAsync.maybeWhen(
-          data: (alert) {
-            if (alert == null) return const SizedBox.shrink();
-
-            final alertColor = alert.type == AlertType.urgent
-                ? color.error
-                : alert.type == AlertType.warning
-                    ? color.tertiary
-                    : color.primary;
+          data: (alerts) {
+            if (alerts.isEmpty) return const SizedBox.shrink();
 
             return Padding(
               padding: EdgeInsets.only(bottom: spacing.sectionGap),
-              child: InkWell(
-                onTap: () {
-                  HapticFeedback.mediumImpact();
-                  context.push(alert.route);
-                },
-                borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                child: Container(
-                  padding: EdgeInsets.all(spacing.cardInner),
-                  decoration: BoxDecoration(
-                    color: alertColor.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                    border: Border.all(
-                      color: alertColor.withValues(alpha: 0.25),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: EdgeInsets.all(spacing.elementGap),
+              child: Column(
+                children: alerts.map((alert) {
+                  final alertColor = alert.type == AlertType.urgent
+                      ? color.error
+                      : alert.type == AlertType.warning
+                          ? color.tertiary
+                          : color.primary;
+
+                  return Padding(
+                    padding: EdgeInsets.only(bottom: spacing.elementGap),
+                    child: InkWell(
+                      onTap: () {
+                        HapticFeedback.mediumImpact();
+                        context.push(alert.route);
+                      },
+                      borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                      child: Container(
+                        padding: EdgeInsets.all(spacing.cardInner),
                         decoration: BoxDecoration(
-                          color: alertColor.withValues(alpha: 0.15),
-                          shape: BoxShape.circle,
+                          color: alertColor.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(spacing.radiusMedium),
+                          border: Border.all(
+                            color: alertColor.withValues(alpha: 0.25),
+                          ),
                         ),
-                        child: Icon(
-                          alert.type == AlertType.urgent
-                              ? LucideIcons.circleAlert
-                              : LucideIcons.triangleAlert,
-                          color: alertColor,
-                          size: 18,
-                        ),
-                      ),
-                      SizedBox(width: spacing.elementGap * 1.5),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        child: Row(
                           children: [
-                            Text(
-                              alert.title,
-                              style: textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
+                            Container(
+                              padding: EdgeInsets.all(spacing.elementGap),
+                              decoration: BoxDecoration(
+                                color: alertColor.withValues(alpha: 0.15),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                alert.type == AlertType.urgent
+                                    ? LucideIcons.circleAlert
+                                    : LucideIcons.triangleAlert,
+                                color: alertColor,
+                                size: 18,
                               ),
                             ),
-                            Text(
-                              alert.message,
-                              style: textTheme.bodySmall?.copyWith(
-                                color: color.onSurfaceVariant,
+                            SizedBox(width: spacing.elementGap * 1.5),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    alert.title,
+                                    style: textTheme.titleSmall?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    alert.message,
+                                    style: textTheme.bodySmall?.copyWith(
+                                      color: color.onSurfaceVariant,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
                               ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Icon(
+                              LucideIcons.chevronRight,
+                              size: 16,
+                              color: color.onSurfaceVariant.withValues(alpha: 0.5),
                             ),
                           ],
                         ),
                       ),
-                      Icon(
-                        LucideIcons.chevronRight,
-                        size: 16,
-                        color: color.onSurfaceVariant.withValues(alpha: 0.5),
-                      ),
-                    ],
-                  ),
-                ),
+                    ),
+                  );
+                }).toList(),
               ),
             );
           },
@@ -563,7 +583,6 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
         },
         borderRadius: BorderRadius.circular(spacing.radiusMedium),
         child: SizedBox(
-          height: 120,
           child: Stack(
             children: [
               // Large background icon — slow float
@@ -596,7 +615,7 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(8),
+                      padding: EdgeInsets.all(spacing.elementGap),
                       decoration: BoxDecoration(
                         color: color.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(10),
@@ -685,7 +704,7 @@ class UtilityScreenState extends ConsumerState<UtilityScreen>
               child: Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(8),
+                    padding: EdgeInsets.all(spacing.elementGap),
                     decoration: BoxDecoration(
                       color: color.secondary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),

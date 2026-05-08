@@ -6,7 +6,7 @@ import 'package:mudra_manager/features/dashboard/presentation/providers/dashboar
 /// Computes a smart relevance score for each widget.
 /// Higher score = should appear higher on dashboard.
 final smartWidgetScoresProvider = Provider<Map<String, double>>((ref) {
-  final data = ref.watch(dashboardDataProvider).valueOrNull;
+  final data = ref.watch(dashboardDataProvider).value;
   if (data == null) return {};
 
   final tapCounts = CardInteractionTracker.getAllTapCounts();

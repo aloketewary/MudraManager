@@ -142,7 +142,11 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
 
     try {
       HapticFeedback.heavyImpact();
-      final amount = double.parse(_amountController.text);
+      final amount = double.tryParse(_amountController.text.replaceAll(',', '')) ?? 0;
+      if (amount <= 0) {
+        setState(() => _saving = false);
+        return;
+      }
       final fromCur = _fromAccount!.currencyCode;
       final toCur = _toAccount!.currencyCode;
 
@@ -178,7 +182,7 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
         );
       }
 
-      if (mounted) {
+      if (context.mounted) {
         ref.invalidate(transactionProvider);
         ref.invalidate(accountServiceProvider);
         ref.invalidate(allSectionedTransactionsProvider);
@@ -206,6 +210,7 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
       backgroundColor: color.surface,
       appBar: AppBar(
         leading: IconButton(
+          tooltip: 'Close',
           icon: const Icon(LucideIcons.x),
           onPressed: () {
             HapticFeedback.mediumImpact();
@@ -299,7 +304,7 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
                                   builder: (context, ref, _) {
                                     final amounts =
                                         ref.watch(quickAmountsProvider);
-                                    final chips = amounts.valueOrNull ??
+                                    final chips = amounts.value ??
                                         [100, 500, 1000, 2000, 5000];
                                     return Wrap(
                                       alignment: WrapAlignment.center,
@@ -497,7 +502,7 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
                               size: 18,
                               color: color.onSurfaceVariant,
                             ),
-                            const SizedBox(width: 12),
+                            SizedBox(width: spacing.radiusMedium),
                             Text(
                               DateFormat('MMM dd, yyyy').format(_date),
                               style: textTheme.bodyLarge,
@@ -524,7 +529,7 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
             ],
           );
         },
-        loading: () => const Padding(padding: EdgeInsets.all(16), child: AccountCardSkeleton()),
+        loading: () =>  Padding(padding: EdgeInsets.all(spacing.cardInner), child: AccountCardSkeleton()),
         error: (e, _) => Center(child: Text(BuddyMessages.errorWith('$e'))),
       ),
     );
@@ -562,7 +567,7 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
           child: Row(
             children: [
               Icon(LucideIcons.arrowLeftRight, size: 18, color: color.tertiary),
-              const SizedBox(width: 12),
+              SizedBox(width: spacing.radiusMedium),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -614,7 +619,7 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
       onTap: () => _showAccountPicker(context, accounts, onSelect),
       borderRadius: BorderRadius.circular(spacing.radiusMedium),
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(spacing.cardInner),
         decoration: BoxDecoration(
           color: account != null
               ? accountColor.withValues(alpha: 0.06)
@@ -631,7 +636,7 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
                 children: [
                   // Direction icon
                   Container(
-                    padding: const EdgeInsets.all(8),
+                    padding: EdgeInsets.all(spacing.elementGap),
                     decoration: BoxDecoration(
                       color: iconColor.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
@@ -651,7 +656,7 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
                             letterSpacing: 1,
                           ),
                         ),
-                        const SizedBox(height: 2),
+                        SizedBox(height: spacing.elementGapUltraMin),
                         Text(
                           account.name,
                           style: textTheme.titleMedium?.copyWith(
@@ -669,7 +674,7 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
                         size: 18,
                         color: accountColor,
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: spacing.elementGapMin),
                       CurrencyText(
                         amount: displayBalance,
                         currencyCode: account.currencyCode,
@@ -686,7 +691,7 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
             : Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(8),
+                    padding: EdgeInsets.all(spacing.elementGap),
                     decoration: BoxDecoration(
                       color: color.onSurfaceVariant.withValues(alpha: 0.08),
                       shape: BoxShape.circle,
@@ -738,7 +743,7 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(height: 8),
+            SizedBox(height: spacing.elementGap),
             Container(
               width: 40,
               height: 4,
@@ -747,13 +752,13 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: spacing.sectionGap),
             Text(
               'Select Account',
               style:
                   textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: spacing.elementGap),
             ...accounts.map((account) {
               final acColor =
                   Color(account.colorValue ?? color.primary.toARGB32());
@@ -762,7 +767,7 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
 
               return ListTile(
                 leading: Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: EdgeInsets.all(spacing.elementGap),
                   decoration: BoxDecoration(
                     color: acColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
@@ -793,7 +798,7 @@ class _TransferScreenNewState extends ConsumerState<TransferScreenNew>
                 },
               );
             }),
-            const SizedBox(height: 16),
+            SizedBox(height: spacing.sectionGap),
           ],
         ),
       ),

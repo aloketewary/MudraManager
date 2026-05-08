@@ -23,6 +23,7 @@ class FinancialHealthScreen extends ConsumerWidget {
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ctxt = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: color.surface,
@@ -41,7 +42,7 @@ class FinancialHealthScreen extends ConsumerWidget {
             ),
             children: [
               // 1. Hero — Score + Verdict
-              _buildHero(health, scoreColor, color, textTheme, spacing, isDark),
+              _buildHero(health, scoreColor, color, textTheme, spacing, isDark, ctxt),
               SizedBox(height: spacing.sectionGap),
 
               // 2. Key Insight (top 1)
@@ -57,7 +58,7 @@ class FinancialHealthScreen extends ConsumerWidget {
                 SizedBox(height: spacing.sectionGap),
 
               // 3. Score Breakdown
-              _buildScoreBreakdown(health, color, textTheme, spacing),
+              _buildScoreBreakdown(health, color, textTheme, spacing, ctxt),
               SizedBox(height: spacing.sectionGap),
 
               // 4. Liquidity Runway
@@ -68,6 +69,7 @@ class FinancialHealthScreen extends ConsumerWidget {
                   color,
                   textTheme,
                   spacing,
+                  ctxt,
                 ),
                 orElse: () => const SizedBox.shrink(),
               ),
@@ -76,7 +78,7 @@ class FinancialHealthScreen extends ConsumerWidget {
               // 5. Category Health
               categoryTrendsAsync.maybeWhen(
                 data: (trends) =>
-                    _buildCategoryHealth(trends, color, textTheme, spacing),
+                    _buildCategoryHealth(trends, color, textTheme, spacing, ctxt),
                 orElse: () => const SizedBox.shrink(),
               ),
               SizedBox(height: spacing.sectionGap),
@@ -88,6 +90,7 @@ class FinancialHealthScreen extends ConsumerWidget {
                   color,
                   textTheme,
                   spacing,
+                  ctxt,
                 ),
               SizedBox(height: spacing.sectionGap * 3),
             ],
@@ -97,7 +100,7 @@ class FinancialHealthScreen extends ConsumerWidget {
           children: List.generate(3, (_) => const DashboardCardSkeleton()),
         ),
         error: (_, __) =>
-            const Center(child: Text('Unable to load health data')),
+            Center(child: Text(ctxt.health_errorLoading)),
       ),
     );
   }
@@ -110,8 +113,9 @@ class FinancialHealthScreen extends ConsumerWidget {
     TextTheme textTheme,
     AppSpacing spacing,
     bool isDark,
+    AppLocalizations ctxt,
   ) {
-    final verdict = _verdict(health.score);
+    final verdict = _verdict(health.score, ctxt);
 
     return Column(
       children: [
@@ -145,11 +149,11 @@ class FinancialHealthScreen extends ConsumerWidget {
     );
   }
 
-  String _verdict(int score) {
-    if (score >= 80) return "you're in great shape";
-    if (score >= 60) return "you're on track";
-    if (score >= 40) return 'room for improvement';
-    return 'needs attention';
+  String _verdict(int score, AppLocalizations ctxt) {
+    if (score >= 80) return ctxt.health_verdictExcellent;
+    if (score >= 60) return ctxt.health_verdictGood;
+    if (score >= 40) return ctxt.health_verdictFair;
+    return ctxt.health_verdictPoor;
   }
 
   // ── 2. KEY INSIGHT ──
@@ -191,6 +195,7 @@ class FinancialHealthScreen extends ConsumerWidget {
     ColorScheme color,
     TextTheme textTheme,
     AppSpacing spacing,
+    AppLocalizations ctxt,
   ) {
     final savingsRate = health.savingsRate;
     final expenseRatio = health.expenseRatio;
@@ -215,10 +220,10 @@ class FinancialHealthScreen extends ConsumerWidget {
     final emergencyPoints = (remainingPoints - debtPoints).clamp(0, 20);
 
     final components = [
-      _Component('Savings', savingsPoints, 30, LucideIcons.piggyBank),
-      _Component('Spending', budgetPoints, 30, LucideIcons.shieldCheck),
-      _Component('Debt', debtPoints, 20, LucideIcons.landmark),
-      _Component('Emergency', emergencyPoints, 20, LucideIcons.heartPulse),
+      _Component(ctxt.health_savings, savingsPoints, 30, LucideIcons.piggyBank),
+      _Component(ctxt.health_spending, budgetPoints, 30, LucideIcons.shieldCheck),
+      _Component(ctxt.health_debt, debtPoints, 20, LucideIcons.landmark),
+      _Component(ctxt.health_emergency, emergencyPoints, 20, LucideIcons.heartPulse),
     ];
 
     return Card(
@@ -237,7 +242,7 @@ class FinancialHealthScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _sectionHeader(
-              'Score Breakdown',
+              ctxt.health_scoreBreakdown,
               LucideIcons.chartBar,
               color,
               textTheme,
@@ -308,6 +313,7 @@ class FinancialHealthScreen extends ConsumerWidget {
     ColorScheme color,
     TextTheme textTheme,
     AppSpacing spacing,
+    AppLocalizations ctxt,
   ) {
     final daysOfCover =
         predicted > 0 ? (30 * (100 - health.expenseRatio) / 100).round() : 0;
@@ -318,13 +324,13 @@ class FinancialHealthScreen extends ConsumerWidget {
     final String statusLabel;
     if (daysOfCover >= 60) {
       runwayColor = FinanceColors.statusGood;
-      statusLabel = 'Safe';
+      statusLabel = ctxt.health_safe;
     } else if (daysOfCover >= 30) {
       runwayColor = FinanceColors.statusWarning;
-      statusLabel = 'Moderate';
+      statusLabel = ctxt.health_moderate;
     } else {
       runwayColor = FinanceColors.statusDanger;
-      statusLabel = 'Risk';
+      statusLabel = ctxt.health_risk;
     }
 
     return Card(
@@ -362,12 +368,12 @@ class FinancialHealthScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Liquidity Runway',
+                        ctxt.health_liquidityRunway,
                         style: textTheme.titleSmall
                             ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       Text(
-                        'Your balance covers $months months of expenses',
+                        ctxt.health_balanceCoversMonths(months),
                         style: textTheme.bodySmall
                             ?.copyWith(color: color.onSurfaceVariant),
                       ),
@@ -407,7 +413,7 @@ class FinancialHealthScreen extends ConsumerWidget {
                 ),
                 SizedBox(width: spacing.elementGapMin),
                 Text(
-                  'days',
+                  ctxt.health_days,
                   style: textTheme.bodyMedium?.copyWith(
                     color: runwayColor,
                     fontWeight: FontWeight.w500,
@@ -432,7 +438,7 @@ class FinancialHealthScreen extends ConsumerWidget {
                       ?.copyWith(color: color.onSurfaceVariant),
                 ),
                 Text(
-                  '90 days',
+                  ctxt.health_nDays('90'),
                   style: textTheme.labelSmall
                       ?.copyWith(color: color.onSurfaceVariant),
                 ),
@@ -450,6 +456,7 @@ class FinancialHealthScreen extends ConsumerWidget {
     ColorScheme color,
     TextTheme textTheme,
     AppSpacing spacing,
+    AppLocalizations ctxt,
   ) {
     if (trends.isEmpty) return const SizedBox.shrink();
 
@@ -473,7 +480,7 @@ class FinancialHealthScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _sectionHeader(
-              'Category Health',
+              ctxt.health_categoryHealth,
               LucideIcons.layers,
               color,
               textTheme,
@@ -496,7 +503,7 @@ class FinancialHealthScreen extends ConsumerWidget {
                     ),
                     SizedBox(width: spacing.elementGap),
                     // Trend label
-                    _trendLabel(trend.changePercent, textTheme, color),
+                    _trendLabel(trend.changePercent, textTheme, color, ctxt),
                     SizedBox(width: spacing.elementGap),
                     SizedBox(
                       width: 64,
@@ -521,6 +528,7 @@ class FinancialHealthScreen extends ConsumerWidget {
     double changePercent,
     TextTheme textTheme,
     ColorScheme color,
+    AppLocalizations ctxt,
   ) {
     if (changePercent.abs() < 5) {
       return Container(
@@ -530,7 +538,7 @@ class FinancialHealthScreen extends ConsumerWidget {
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
-          'Stable →',
+          ctxt.health_stable,
           style: textTheme.labelSmall?.copyWith(
             color: color.onSurfaceVariant,
             fontWeight: FontWeight.w600,
@@ -542,7 +550,7 @@ class FinancialHealthScreen extends ConsumerWidget {
     final isUp = changePercent > 0;
     final trendColor =
         isUp ? FinanceColors.statusDanger : FinanceColors.statusGood;
-    final label = isUp ? 'High ↑' : 'Reduced ↓';
+    final label = isUp ? ctxt.health_high : ctxt.health_reduced;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -566,6 +574,7 @@ class FinancialHealthScreen extends ConsumerWidget {
     ColorScheme color,
     TextTheme textTheme,
     AppSpacing spacing,
+    AppLocalizations ctxt,
   ) {
     return Card(
       elevation: 0,
@@ -583,7 +592,7 @@ class FinancialHealthScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _sectionHeader(
-              'What You Can Do',
+              ctxt.health_whatYouCanDo,
               LucideIcons.rocket,
               color,
               textTheme,
@@ -745,7 +754,7 @@ class _AnimatedScoreRingState extends State<_AnimatedScoreRing>
                       ),
                     ),
                     Text(
-                      'of 100',
+                      AppLocalizations.of(context)!.health_of100,
                       style: widget.textTheme.bodyMedium?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),

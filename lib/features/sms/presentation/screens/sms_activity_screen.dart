@@ -1,7 +1,10 @@
+import 'package:mudra_manager/core/providers/state_value.dart';
+import 'package:mudra_manager/core/theme/app_theme.dart';
 import 'package:mudra_manager/core/utils/safe_date_format.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
+import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,6 +19,7 @@ import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/refresh_helper.dart';
 import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/sms/data/sms_activity_service.dart';
+import 'package:mudra_manager/core/providers/singleton_providers.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
@@ -23,15 +27,17 @@ import 'package:mudra_manager/core/router/app_routes.dart';
 final smsActivityProvider =
     FutureProvider.autoDispose<List<SmsActivity>>((ref) async {
   ref.watch(smsRefreshProvider);
-  return await SmsActivityService.instance.getAllActivities();
+  return await ref.read(smsActivityServiceProvider).getAllActivities();
 });
 
 final pendingCountProvider = FutureProvider.autoDispose<int>((ref) async {
   ref.watch(smsRefreshProvider);
-  return await SmsActivityService.instance.getPendingCount();
+  return await ref.read(smsActivityServiceProvider).getPendingCount();
 });
 
-final smsRefreshProvider = StateProvider<int>((ref) => 0);
+final smsRefreshProvider = NotifierProvider<StateValue<int>, int>(
+  () => StateValue(0),
+);
 
 class SmsActivityScreen extends ConsumerStatefulWidget {
   const SmsActivityScreen({super.key});
@@ -60,7 +66,7 @@ class _SmsActivityScreenState extends ConsumerState<SmsActivityScreen>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      ref.read(smsRefreshProvider.notifier).state++;
+      ref.read(smsRefreshProvider.notifier).update((v) => v + 1);
     }
   }
 
@@ -113,7 +119,7 @@ class _SmsActivityScreenState extends ConsumerState<SmsActivityScreen>
                     ),
                     child: _buildHeroCard(
                       activities,
-                      pendingCount.valueOrNull ?? 0,
+                      pendingCount.value ?? 0,
                       color,
                       textTheme,
                       spacing,
@@ -578,7 +584,7 @@ class _ActivityCard extends ConsumerWidget {
                     Row(
                       children: [
                         Text(
-                          safeDateFormat('dd MMM, hh:mm a').format(activity.date),
+                          safeDateFormat('dd MMM, hh:mm a', ctxt.localeName).format(activity.date),
                           style: textTheme.bodySmall?.copyWith(
                             color: color.onSurfaceVariant,
                           ),
@@ -600,7 +606,7 @@ class _ActivityCard extends ConsumerWidget {
                       runSpacing: 4,
                       children: [
                         _StatusChip(
-                          label: _getStatusLabel(),
+                          label: _getStatusLabel(context),
                           color: statusColor,
                         ),
                         if (activity.isPotentialDuplicate == true)
@@ -670,18 +676,19 @@ class _ActivityCard extends ConsumerWidget {
     }
   }
 
-  String _getStatusLabel() {
+  String _getStatusLabel(BuildContext context) {
+    final ctxt = AppLocalizations.of(context)!;
     switch (activity.status) {
       case ActivityStatus.pending:
-        return 'PENDING';
+        return ctxt.smsActivity_pending;
       case ActivityStatus.approved:
-        return 'APPROVED';
+        return ctxt.smsActivity_approved;
       case ActivityStatus.duplicate:
-        return 'DUPLICATE';
+        return ctxt.smsActivity_duplicates;
       case ActivityStatus.rejected:
-        return 'REJECTED';
+        return ctxt.smsActivity_rejected;
       case ActivityStatus.needsReview:
-        return 'REVIEW';
+        return ctxt.smsActivity_needsReview;
     }
   }
 
@@ -792,11 +799,14 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
     final acc = widget.activity.account;
     if (acc == null || acc.isEmpty) return;
     final isar = await ref.read(isarServiceProvider).getInstance();
-    final match = await isar.accounts
+    final accounts = await isar.accounts
         .filter()
-        .accountNumberEqualTo(acc)
         .isActiveEqualTo(true)
-        .findFirst();
+        .findAll();
+    final match = accounts.where((a) {
+      final dbAccNo = a.accountNumber?.trim();
+      return dbAccNo != null && dbAccNo.endsWith(acc.trim());
+    }).firstOrNull;
     if (mounted) setState(() => _hasMatchingAccount = match != null);
   }
 
@@ -852,7 +862,7 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          safeDateFormat('dd MMM yyyy, hh:mm a')
+                          safeDateFormat('dd MMM yyyy, hh:mm a', ctxt.localeName)
                               .format(widget.activity.date),
                           style: textTheme.bodySmall?.copyWith(
                             color: color.onSurfaceVariant,
@@ -891,7 +901,7 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                   widget.activity.body,
                   style: textTheme.bodySmall?.copyWith(
                     height: 1.5,
-                    fontFamily: 'monospace',
+                    fontFamily: AppTheme.monoFontFamily,
                   ),
                 ),
               ),
@@ -1100,12 +1110,31 @@ class _ActivityDetailsSheetState extends ConsumerState<_ActivityDetailsSheet> {
                       child: OutlinedButton.icon(
                         onPressed: () async {
                           HapticFeedback.mediumImpact();
+                          final activity = widget.activity;
+                          final previousStatus = activity.status;
                           Navigator.pop(context);
+
                           await SmsActivityService.instance
-                              .rejectActivity(widget.activity, null);
+                              .rejectActivity(activity, null);
                           ref.invalidate(smsActivityProvider);
                           ref.invalidate(pendingCountProvider);
-                          ref.read(smsRefreshProvider.notifier).state++;
+                          ref.read(smsRefreshProvider.notifier).update((v) => v + 1);
+
+                          SnackbarService.success(
+                            ctxt.smsActivity_rejected,
+                            actionLabel: ctxt.common_undo,
+                            onAction: () async {
+                              final isar = await ref.read(isarServiceProvider).getInstance();
+                              await isar.writeTxn(() async {
+                                activity.status = previousStatus;
+                                activity.reviewNotes = null;
+                                await isar.smsActivitys.put(activity);
+                              });
+                              ref.invalidate(smsActivityProvider);
+                              ref.invalidate(pendingCountProvider);
+                              ref.read(smsRefreshProvider.notifier).update((v) => v + 1);
+                            },
+                          );
                         },
                         icon: const Icon(LucideIcons.x, size: 16),
                         label: Text(ctxt.smsActivity_reject),

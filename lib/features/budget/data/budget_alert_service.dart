@@ -1,15 +1,14 @@
 import 'package:isar_community/isar.dart';
-import 'package:mudra_manager/core/currency/currency_meta.dart';
-import 'package:mudra_manager/core/currency/currency_service.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/budget.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
-import 'package:mudra_manager/core/services/notification_service.dart';
+import 'package:mudra_manager/features/notifications/data/smart_notification_service.dart';
 
 class BudgetAlertService {
   final IsarService isarService;
+  final SmartNotificationService _notificationService;
 
-  BudgetAlertService(this.isarService);
+  BudgetAlertService(this.isarService, this._notificationService);
 
   Future<List<BudgetAlert>> checkBudgetsAfterTransaction(
     Transaction transaction,
@@ -80,6 +79,10 @@ class BudgetAlertService {
         .dateBetween(start, end)
         .findAll();
 
+    for (final t in transactions) {
+      await t.category.load();
+    }
+
     return transactions
         .where((t) =>
             t.category.value != null &&
@@ -87,34 +90,23 @@ class BudgetAlertService {
         .fold<double>(0.0, (sum, t) => sum + t.baseAmount);
   }
 
-  /// Routes through NotificationService gateway — single grouped notification.
+  /// Routes through SmartNotificationService for in-app record + OS notification.
   Future<void> _sendNotification(List<BudgetAlert> alerts) async {
     final exceeded = alerts.where((a) => a.threshold == 100).toList();
     final warnings = alerts.where((a) => a.threshold != 100).toList();
 
     if (exceeded.isNotEmpty) {
-      final n = exceeded.length;
-      final names = exceeded.map((a) => a.budget.name).join(', ');
-      await NotificationService.showLocalNotification(
-        id: 9000,
-        title: '🚨 $n budget${n > 1 ? 's' : ''} exceeded!',
-        body: n == 1
-            ? '${exceeded.first.budget.name}: ${formatCurrency(exceeded.first.spent, code: BaseCurrency.code)} / ${formatCurrency(exceeded.first.budget.amount, code: BaseCurrency.code)}'
-            : '$names are over budget',
-        dedupKey: 'budget_exceeded_txn',
+      await _notificationService.notifyBudgetExceeded(
+        names: exceeded.map((a) => a.budget.name).toList(),
+        spent: exceeded.first.spent,
+        limit: exceeded.first.budget.amount,
       );
     }
 
     if (warnings.isNotEmpty) {
-      final n = warnings.length;
-      final names = warnings.map((a) => a.budget.name).join(', ');
-      await NotificationService.showLocalNotification(
-        id: 9001,
-        title: '⚠️ $n budget${n > 1 ? 's' : ''} near limit',
-        body: n == 1
-            ? '${warnings.first.budget.name}: ${warnings.first.percentage.toStringAsFixed(0)}% used'
-            : '$names are nearing their limits',
-        dedupKey: 'budget_warning_txn',
+      await _notificationService.notifyBudgetWarning(
+        names: warnings.map((a) => a.budget.name).toList(),
+        percentage: warnings.first.percentage,
       );
     }
   }

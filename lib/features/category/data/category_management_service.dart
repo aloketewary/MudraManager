@@ -1,17 +1,22 @@
 import 'package:isar_community/isar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
+import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/plugins/category_packs/category_pack.dart';
 
 class CategoryManagementService {
+  final IsarService _isarService;
+
+  CategoryManagementService(this._isarService);
+
   /// Install a single pack by ID.
-  static Future<void> installPack(String packId) async {
+  Future<void> installPack(String packId) async {
     final pack = CategoryPackRegistry.get(packId);
     if (pack == null) return;
 
-    final isar = Isar.getInstance();
-    if (isar == null) return;
+    final isar = await _isarService.getInstance();
 
     // Install dependencies first
     for (final depId in pack.extendsPackIds) {
@@ -57,15 +62,14 @@ class CategoryManagementService {
 
   /// Remove categories owned by a pack.
   /// Only removes categories that are NOT shared with other enabled packs.
-    static Future<void> removePack(
+  Future<void> removePack(
     String packId,
     Set<String> enabledPackIds,
   ) async {
     final pack = CategoryPackRegistry.get(packId);
     if (pack == null) return;
 
-    final isar = Isar.getInstance();
-    if (isar == null) return;
+    final isar = await _isarService.getInstance();
 
     final protectedNames = <String>{};
     for (final otherId in enabledPackIds) {
@@ -109,16 +113,15 @@ class CategoryManagementService {
   }
 
   /// Install multiple packs at once (used during onboarding).
-  static Future<void> installPacks(List<String> packIds) async {
+  Future<void> installPacks(List<String> packIds) async {
     for (final id in packIds) {
       await installPack(id);
     }
   }
 
   /// Remove all categories when no packs are enabled.
-    static Future<void> clearAll() async {
-    final isar = Isar.getInstance();
-    if (isar == null) return;
+  Future<void> clearAll() async {
+    final isar = await _isarService.getInstance();
 
     await isar.writeTxn(() async {
       final allCats = await isar.categorys.where().findAll();
@@ -140,10 +143,10 @@ class CategoryManagementService {
       }
     });
   }
-
 }
 
 final categoryManagementServiceProvider =
     Provider.autoDispose<CategoryManagementService>((ref) {
-  return CategoryManagementService();
+  final isarService = ref.watch(isarServiceProvider);
+  return CategoryManagementService(isarService);
 });

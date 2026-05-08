@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
@@ -120,7 +119,7 @@ class _ImportExportScreenState extends ConsumerState<ImportExportScreen> {
     TextTheme textTheme,
     AppSpacing spacing,
   ) {
-    final dateFmt = safeDateFormat('MMM dd, yyyy');
+    final dateFmt = safeDateFormat('MMM dd, yyyy', ctxt.localeName);
 
     return Card(
       elevation: 0,
@@ -368,7 +367,7 @@ class _ImportExportScreenState extends ConsumerState<ImportExportScreen> {
             _exportEnd.year, _exportEnd.month, _exportEnd.day, 23, 59, 59,),
       );
       final fileName =
-          'Mudra_${safeDateFormat('yyyyMMdd').format(_exportStart)}_${DateFormat('yyyyMMdd').format(_exportEnd)}.xlsx';
+          'Mudra_${safeDateFormat('yyyyMMdd').format(_exportStart)}_${safeDateFormat('yyyyMMdd').format(_exportEnd)}.xlsx';
       await saveExportedFile(bytes, fileName, askUser: true);
       SnackbarService.success(BuddyMessages.exportSuccess);
     } catch (e) {
@@ -381,7 +380,7 @@ class _ImportExportScreenState extends ConsumerState<ImportExportScreen> {
   Future<void> _pickAndImport() async {
     HapticFeedback.mediumImpact();
     try {
-      final result = await FilePicker.platform.pickFiles(
+      final result = await FilePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['xlsx', 'xls'],
         withData: true,
@@ -404,7 +403,7 @@ class _ImportExportScreenState extends ConsumerState<ImportExportScreen> {
         return;
       }
 
-      if (mounted) {
+      if (context.mounted) {
         context.push(
           AppRoutes.importPreview,
           extra: bytes,

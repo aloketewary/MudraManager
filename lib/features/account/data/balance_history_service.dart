@@ -8,13 +8,13 @@ import 'package:mudra_manager/core/logging/app_log.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
 
 class BalanceHistoryService {
-  static final BalanceHistoryService instance = BalanceHistoryService._();
-  static final AppLog _log = AppLog(getLogger(), 'BalanceHistoryService');
+  final IsarService _isarService;
+  final AppLog _log = AppLog(getLogger(), 'BalanceHistoryService');
 
-  BalanceHistoryService._();
+  BalanceHistoryService(this._isarService);
 
   Future<void> recordDailySnapshots() async {
-    final isar = await IsarService().getInstance();
+    final isar = await _isarService.getInstance();
 
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);

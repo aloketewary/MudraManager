@@ -24,6 +24,7 @@ import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 import 'package:confetti/confetti.dart';
 import 'dart:math' as math;
 import 'package:mudra_manager/core/router/app_routes.dart';
+import 'package:mudra_manager/shared/widgets/milestone_share_sheet.dart';
 
 class GoalDetailsScreen extends ConsumerStatefulWidget {
   final Goal goal;
@@ -56,20 +57,20 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
   }
 
   Future<void> _deleteGoal() async {
+    final ctxt = AppLocalizations.of(context)!;
     final confirmed = await DialogUtils.showDeleteConfirmation(
       context,
-      title: AppLocalizations.of(context)!.goal_deleteGoalTitle,
+      title: ctxt.goal_deleteGoalTitle,
     );
     if (confirmed == true && mounted) {
       bool undone = false;
-      context.pop();
-      final ctxt = AppLocalizations.of(context)!;
 
       // Schedule actual delete after undo window
       Future.delayed(const Duration(seconds: 6), () async {
-        if (undone) return;
+        if (undone || !mounted) return;
         await ref.read(goalServiceProvider).deleteGoal(widget.goal.id);
         ref.invalidate(goalsProvider);
+        context.pop();
       });
 
       SnackbarService.success(
@@ -84,7 +85,11 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
   }
 
   // ── Emotional headline ──
-  String _emotionLine(double progress, GoalHealth health, AppLocalizations ctxt) {
+  String _emotionLine(
+    double progress,
+    GoalHealth health,
+    AppLocalizations ctxt,
+  ) {
     if (progress >= 1.0) return ctxt.goal_emotionDidIt;
     if (progress >= 0.9) return ctxt.goal_emotionAlmost;
     if (progress >= 0.75) return ctxt.goal_emotionSoClose;
@@ -280,7 +285,7 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
                             if (daysLeft > 0) ...[
                               SizedBox(height: spacing.elementGapUltraMin),
                               Text(
-                                _formatDaysLeft(daysLeft),
+                                _formatDaysLeft(daysLeft, ctxt),
                                 style: textTheme.bodySmall?.copyWith(
                                   color: color.onSurfaceVariant,
                                 ),
@@ -300,14 +305,26 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
                       ),
                       SizedBox(width: spacing.elementGap),
                       // Right — progress ring
-                      _buildProgressRing(progress, goalColor, color, textTheme, ctxt,),
+                      _buildProgressRing(
+                        progress,
+                        goalColor,
+                        color,
+                        textTheme,
+                        ctxt,
+                      ),
                     ],
                   ),
                 ),
               ),
 
               // ── Smart Insight (promoted — right after hero) ──
-              _buildSmartInsight(goalColor, color, textTheme, spacing, ctxt,),
+              _buildSmartInsight(
+                goalColor,
+                color,
+                textTheme,
+                spacing,
+                ctxt,
+              ),
 
               // ── Quick Deposit ──
               Padding(
@@ -318,7 +335,7 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
                 child: FilledButton.icon(
                   onPressed: () {
                     HapticFeedback.mediumImpact();
-                    _showQuickDepositSheet(context, goalColor, spacing);
+                    _showQuickDepositSheet(context, goalColor, spacing, ctxt);
                   },
                   icon: const Icon(LucideIcons.plus, size: 20),
                   label: Text(
@@ -593,7 +610,7 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
   ) {
     final label = switch (health.status) {
       GoalStatus.ahead => ctxt.goal_aheadOfSchedule,
-      GoalStatus.onTrack => ctxt.goal_onTrack,
+      GoalStatus.onTrack => ctxt.goal_onTrackStatus,
       GoalStatus.behind => ctxt.goal_behindPace,
       GoalStatus.completed => ctxt.goal_completedSection,
       GoalStatus.noDeadline => ctxt.goal_flexibleTimeline,
@@ -877,7 +894,7 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
             ? ctxt.common_yesterday
             : diff.inDays < 7
                 ? ctxt.goal_daysAgo(diff.inDays)
-                : safeDateFormat('dd MMM').format(c.date);
+                : safeDateFormat('dd MMM', ctxt.localeName).format(c.date);
 
     return Padding(
       padding: EdgeInsets.symmetric(
@@ -919,9 +936,9 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
     BuildContext context,
     Color goalColor,
     AppSpacing spacing,
+    AppLocalizations ctxt,
   ) {
     final textTheme = Theme.of(context).textTheme;
-    final ctxt = AppLocalizations.of(context)!;
     final amountController = TextEditingController();
 
     showModalBottomSheet(
@@ -979,14 +996,15 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
                   HapticFeedback.mediumImpact();
                   final wasComplete = widget.goal.progressPercent >= 1.0;
                   widget.goal.currentAmount += amount;
-                  widget.goal.contributions
-                      .add(GoalContribution.create(amount));
+                  widget.goal.contributions = [
+                    ...widget.goal.contributions,
+                    GoalContribution.create(amount),
+                  ];
                   final isNowComplete = widget.goal.progressPercent >= 1.0;
                   await ref.read(goalServiceProvider).updateGoal(widget.goal);
                   ref.invalidate(goalsProvider);
                   if (context.mounted) {
                     Navigator.pop(context);
-                    setState(() {});
                     SnackbarService.success(
                       '${formatCurrency(amount, code: widget.goal.currencyCode, decimals: 0)} added to ${widget.goal.name}',
                     );
@@ -995,6 +1013,32 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
                       SnackbarService.success(
                         Tone.current.goalMilestone100(widget.goal.name),
                       );
+                      if (context.mounted) {
+                        final ctxt = AppLocalizations.of(context)!;
+                        Future.delayed(
+                          const Duration(milliseconds: 1500),
+                          () {
+                            if (!context.mounted) return;
+                            showMilestoneShareSheet(
+                              context,
+                              MilestoneData(
+                                emoji: '🎯',
+                                title: ctxt.milestone_goalReachedTitle,
+                                stat: widget.goal.name,
+                                description: ctxt.milestone_goalReachedDesc(
+                                  formatCurrency(
+                                    widget.goal.targetAmount,
+                                    code: widget.goal.currencyCode,
+                                    decimals: 0,
+                                  ),
+                                ),
+                                icon: LucideIcons.goal,
+                                accent: const Color(0xFF4CAF50),
+                              ),
+                            );
+                          },
+                        );
+                      }
                     }
                   }
                 }
@@ -1012,8 +1056,7 @@ class _GoalDetailsScreenState extends ConsumerState<GoalDetailsScreen> {
     );
   }
 
-  String _formatDaysLeft(int days) {
-    final ctxt = AppLocalizations.of(context)!;
+  String _formatDaysLeft(int days, AppLocalizations ctxt) {
     if (days > 60) return ctxt.goal_monthsLeft((days / 30).round());
     return ctxt.goal_daysLeft(days);
   }

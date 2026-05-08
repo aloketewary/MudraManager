@@ -1,95 +1,140 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#6200EE"
-    android:padding="16dp">
+    android:background="@drawable/widget_bg_quick"
+    android:orientation="vertical"
+    android:padding="20dp">
 
-    <TextView
-        android:id="@+id/widget_title"
-        android:layout_width="wrap_content"
+    <!-- Header: App name + rupee icon -->
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Mudra Manager"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:textColor="#FFFFFF" />
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
+        <ImageView
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/ic_widget_rupee"
+            android:contentDescription="Mudra"
+            android:layout_marginEnd="6dp" />
+
+        <TextView
+            android:id="@+id/widget_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="sans-serif-medium"
+            android:letterSpacing="0.03"
+            android:text="Mudra Manager"
+            android:textColor="#B0FFFFFF"
+            android:textSize="13sp" />
+    </LinearLayout>
+
+    <!-- Balance -->
     <TextView
         android:id="@+id/widget_balance"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/widget_title"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="6dp"
+        android:fontFamily="sans-serif-medium"
         android:text="₹0"
-        android:textSize="32sp"
-        android:textStyle="bold"
-        android:textColor="#FFFFFF" />
+        android:textColor="#FFFFFF"
+        android:textSize="30sp" />
 
+    <!-- Stat chips row -->
     <LinearLayout
         android:id="@+id/stats_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/widget_balance"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="14dp"
         android:orientation="horizontal">
 
+        <!-- Expense chip -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:orientation="vertical">
+            android:layout_marginEnd="6dp"
+            android:background="@drawable/widget_stat_chip_bg"
+            android:gravity="center_vertical"
+            android:orientation="vertical"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:fontFamily="sans-serif"
                 android:text="Expense"
-                android:textSize="12sp"
-                android:textColor="#CCFFFFFF" />
+                android:textColor="#80FFFFFF"
+                android:textSize="11sp" />
 
             <TextView
                 android:id="@+id/widget_expense"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:fontFamily="sans-serif-medium"
                 android:text="₹0"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="#FF5252" />
+                android:textColor="#FF6B6B"
+                android:textSize="15sp" />
         </LinearLayout>
 
+        <!-- Income chip -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:orientation="vertical">
+            android:layout_marginStart="6dp"
+            android:background="@drawable/widget_stat_chip_bg"
+            android:gravity="center_vertical"
+            android:orientation="vertical"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:fontFamily="sans-serif"
                 android:text="Income"
-                android:textSize="12sp"
-                android:textColor="#CCFFFFFF" />
+                android:textColor="#80FFFFFF"
+                android:textSize="11sp" />
 
             <TextView
                 android:id="@+id/widget_income"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:fontFamily="sans-serif-medium"
                 android:text="₹0"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="#4CAF50" />
+                android:textColor="#51CF66"
+                android:textSize="15sp" />
         </LinearLayout>
     </LinearLayout>
 
-    <Button
+    <!-- Spacer -->
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:visibility="invisible" />
+
+    <!-- Add Transaction button -->
+    <TextView
         android:id="@+id/widget_add_button"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_below="@id/stats_container"
-        android:layout_marginTop="16dp"
-        android:text="+ Add Transaction"
+        android:layout_height="44dp"
+        android:background="@drawable/widget_btn_add"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="center"
+        android:text="＋  Add Transaction"
         android:textColor="#FFFFFF"
-        android:background="#3700B3"
-        android:textAllCaps="false"
-        android:textStyle="bold" />
+        android:textSize="14sp" />
 
-</RelativeLayout>
+</LinearLayout>

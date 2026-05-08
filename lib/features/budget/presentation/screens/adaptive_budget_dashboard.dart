@@ -11,6 +11,7 @@ import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/refresh_helper.dart';
 import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
+import 'package:mudra_manager/core/utils/safe_date_format.dart';
 import 'package:mudra_manager/shared/widgets/animated_balance.dart';
 import 'package:mudra_manager/shared/widgets/currency_text.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
@@ -236,6 +237,9 @@ class _AdaptiveBudgetDashboardState
                     ),
                   ),
                 ],
+
+                // ── 6. PAST BUDGETS ──
+                ..._buildArchivedSection(color, textTheme, spacing, ctxt),
 
                 SliverToBoxAdapter(
                   child: Padding(
@@ -739,6 +743,152 @@ class _AdaptiveBudgetDashboardState
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  // ── ARCHIVED BUDGETS SECTION ──
+
+  List<Widget> _buildArchivedSection(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+    AppLocalizations ctxt,
+  ) {
+    final archivedAsync = ref.watch(archivedBudgetsProvider);
+
+    return archivedAsync.when(
+      data: (archived) {
+        if (archived.isEmpty) return [];
+        return [
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                spacing.cardHorizontal,
+                spacing.sectionGap,
+                spacing.cardHorizontal,
+                spacing.elementGap,
+              ),
+              child: Row(
+                children: [
+                  Icon(LucideIcons.archive, size: 16, color: color.primary),
+                  SizedBox(width: spacing.elementGap),
+                  Text(
+                    ctxt.budget_pastBudgets(archived.length),
+                    style: textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: color.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SliverPadding(
+            padding: EdgeInsets.symmetric(
+              horizontal: spacing.cardHorizontal,
+            ),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) => Padding(
+                  padding: EdgeInsets.only(bottom: spacing.elementGap),
+                  child: _archivedCard(
+                    archived[index], color, textTheme, spacing,
+                  ),
+                ),
+                childCount: archived.length,
+              ),
+            ),
+          ),
+        ];
+      },
+      loading: () => [],
+      error: (_, __) => [],
+    );
+  }
+
+  Widget _archivedCard(
+    ArchivedBudgetSummary item,
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
+    final pct = (item.spent / item.budget.amount * 100).clamp(0, 999);
+    final accent = item.wasUnderBudget ? color.primary : color.error;
+
+    return Card(
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      color: color.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        side: BorderSide(
+          color: color.outlineVariant.withValues(alpha: 0.5),
+        ),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(spacing.cardInner),
+        child: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(spacing.elementGap + 2),
+              decoration: BoxDecoration(
+                color: accent.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(spacing.radiusSmall),
+              ),
+              child: Icon(
+                item.wasUnderBudget
+                    ? LucideIcons.circleCheck
+                    : LucideIcons.circleAlert,
+                color: accent,
+                size: 20,
+              ),
+            ),
+            SizedBox(width: spacing.cardInner),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.budget.name,
+                    style: textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: 2),
+                  Text(
+                    '${safeDateFormat('dd MMM', AppLocalizations.of(context)!.localeName).format(item.budget.startDate)}'
+                    ' \u2013 '
+                    '${safeDateFormat('dd MMM yy', AppLocalizations.of(context)!.localeName).format(item.budget.endDate)}',
+                    style: textTheme.bodySmall?.copyWith(
+                      color: color.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                CurrencyText(
+                  amount: item.spent,
+                  style: textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: accent,
+                  ),
+                ),
+                Text(
+                  '${pct.toStringAsFixed(0)}%',
+                  style: textTheme.labelSmall?.copyWith(
+                    color: color.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

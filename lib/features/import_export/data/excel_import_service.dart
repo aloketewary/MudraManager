@@ -50,7 +50,7 @@ class ExcelImportService {
       final sheet = excel.tables[name]!;
       final allRows = sheet.rows;
       _log.i(
-        'Sheet "$name": ${allRows.length} rows (maxRows=${sheet.maxRows}, maxCols=${sheet.maxCols})',
+        'Sheet "$name": ${allRows.length} rows (maxRows=${sheet.maxRows}, cols=${allRows.isNotEmpty ? allRows.first.length : 0})',
       );
       if (allRows.isEmpty) continue;
 

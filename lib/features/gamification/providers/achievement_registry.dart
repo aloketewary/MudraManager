@@ -691,5 +691,48 @@ class AchievementRegistry {
       ..rewardCoins = 0
       ..series = 'budget_completion'
       ..seriesOrder = 2,
+
+    // ==================== UNDER-BUDGET SPENDING STREAK ====================
+    'under_budget_3': Achievement()
+      ..key = 'under_budget_3'
+      ..title = 'Budget Keeper'
+      ..description = 'Stay under daily budget for 3 days straight'
+      ..icon = 'shield'
+      ..category = AchievementCategory.budgeting
+      ..type = AchievementType.streak
+      ..progress = 0
+      ..target = 3
+      ..rewardXP = 20
+      ..rewardCoins = 0
+      ..series = 'under_budget'
+      ..seriesOrder = 1,
+
+    'under_budget_7': Achievement()
+      ..key = 'under_budget_7'
+      ..title = 'Budget Warrior'
+      ..description = 'A full week under budget — real discipline'
+      ..icon = 'shield'
+      ..category = AchievementCategory.budgeting
+      ..type = AchievementType.streak
+      ..progress = 0
+      ..target = 7
+      ..rewardXP = 50
+      ..rewardCoins = 0
+      ..series = 'under_budget'
+      ..seriesOrder = 2,
+
+    'under_budget_30': Achievement()
+      ..key = 'under_budget_30'
+      ..title = 'Budget Legend'
+      ..description = '30 days under budget — legendary control'
+      ..icon = 'crown'
+      ..category = AchievementCategory.budgeting
+      ..type = AchievementType.streak
+      ..progress = 0
+      ..target = 30
+      ..rewardXP = 200
+      ..rewardCoins = 0
+      ..series = 'under_budget'
+      ..seriesOrder = 3,
   };
 }

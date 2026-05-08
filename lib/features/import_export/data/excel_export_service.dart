@@ -32,7 +32,7 @@ class ExcelExportService {
       'Category', 'Account', 'Description', 'Tags',
     ];
     for (int i = 0; i < headers.length; i++) {
-      sheet.cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: 0)).value = headers[i];
+      sheet.cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: 0)).value = TextCellValue(headers[i]);
       sheet.cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: 0)).cellStyle = CellStyle(bold: true);
     }
 
@@ -61,7 +61,7 @@ class ExcelExportService {
       ];
 
       for (int i = 0; i < values.length; i++) {
-        sheet.cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: row)).value = values[i];
+        sheet.cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: row)).value = TextCellValue(values[i]);
       }
     }
 

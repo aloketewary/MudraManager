@@ -46,6 +46,7 @@ void main() {
     test('analytics routes are gated', () {
       expect(gatedRoutes['/analytics'], ProFeature.advancedAnalytics);
       expect(gatedRoutes['/financial-health'], ProFeature.advancedAnalytics);
+      expect(gatedRoutes['/tax-estimation'], ProFeature.advancedAnalytics);
       expect(gatedRoutes['/spending-personality'], ProFeature.spendingPersonality);
     });
 
@@ -62,8 +63,8 @@ void main() {
       }
     });
 
-    test('backup route is gated', () {
-      expect(gatedRoutes['/backup-restore'], ProFeature.cloudBackup);
+    test('backup route is free (cloud/auto gated at widget level)', () {
+      expect(gatedRoutes['/backup-restore'], isNull);
     });
   });
 

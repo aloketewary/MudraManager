@@ -2,7 +2,8 @@ import 'package:isar_community/isar.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'category.dart'; // Import for linking
 import 'account.dart';  // Import for linking
-import 'frequency.dart';   // Import Frequency enum
+import 'package:mudra_manager/core/utils/date_arithmetic.dart';
+import 'frequency.dart';
 
 part 'recurring_transaction.g.dart';
 
@@ -70,7 +71,7 @@ class RecurringTransaction {
 // This should ideally live in a service/logic class, not directly in the model file.
 DateTime calculateNextDueDate(DateTime currentDueDate, Frequency frequency, DateTime startDate) {
   if (currentDueDate.isBefore(startDate)) {
-    return startDate; // Ensure first due date isn't before start date
+    return startDate;
   }
   switch (frequency) {
     case Frequency.daily:
@@ -78,9 +79,8 @@ DateTime calculateNextDueDate(DateTime currentDueDate, Frequency frequency, Date
     case Frequency.weekly:
       return currentDueDate.add(const Duration(days: 7));
     case Frequency.monthly:
-    // Basic calculation - careful with month lengths! Libraries like `intl` or `jiffy` can help.
-      return DateTime(currentDueDate.year, currentDueDate.month + 1, currentDueDate.day);
+      return DateArithmetic.addMonths(currentDueDate, 1, preferDay: startDate.day);
     case Frequency.yearly:
-      return DateTime(currentDueDate.year + 1, currentDueDate.month, currentDueDate.day);
+      return DateArithmetic.addYears(currentDueDate, 1, preferDay: startDate.day);
   }
 }

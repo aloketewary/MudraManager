@@ -1,5 +1,7 @@
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
+import 'package:mudra_manager/core/db/isar_service.dart';
+import 'package:mudra_manager/core/db/extensions/transaction_links.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/models/budget.dart';
 import 'package:mudra_manager/core/db/models/user_profile.dart';
@@ -39,6 +41,11 @@ class MonthlyRecapData {
   final List<AccountSpend> accountBreakdown;
   final List<CategoryFrequency> categoryByFrequency;
 
+  // Year-over-year comparison
+  final double? yoyIncome;
+  final double? yoyExpense;
+  final int? yoyTransactionCount;
+
   MonthlyRecapData({
     String? currency,
     required this.month,
@@ -70,6 +77,9 @@ class MonthlyRecapData {
     required this.oneTimeExpense,
     required this.accountBreakdown,
     required this.categoryByFrequency,
+    this.yoyIncome,
+    this.yoyExpense,
+    this.yoyTransactionCount,
   }) : currency = currency ?? BaseCurrency.symbol;
 
   double get prevMonthSavings => prevMonthIncome - prevMonthExpense;
@@ -78,6 +88,13 @@ class MonthlyRecapData {
       : 0;
   double get expenseChange => prevMonthExpense > 0
       ? (totalExpense - prevMonthExpense) / prevMonthExpense * 100
+      : 0;
+  bool get hasYoyData => yoyIncome != null || yoyExpense != null;
+  double get yoyIncomeChange => (yoyIncome != null && yoyIncome! > 0)
+      ? (totalIncome - yoyIncome!) / yoyIncome! * 100
+      : 0;
+  double get yoyExpenseChange => (yoyExpense != null && yoyExpense! > 0)
+      ? (totalExpense - yoyExpense!) / yoyExpense! * 100
       : 0;
 }
 
@@ -120,8 +137,8 @@ class CategoryFrequency {
 }
 
 class MonthlyRecapService {
-  final Isar _isar;
-  MonthlyRecapService(this._isar);
+  final IsarService _isarService;
+  MonthlyRecapService(this._isarService);
 
   Future<MonthlyRecapData> generate(
     DateTime month, {
@@ -133,9 +150,11 @@ class MonthlyRecapService {
     final daysInMonth = end.day;
     final midDay = (daysInMonth / 2).ceil();
 
+    final _isar = await _isarService.getInstance();
+
     // ── Current month transactions ──
     final txns =
-        await _isar.transactions.where().dateBetween(start, end).findAll();
+        await _isar.transactions.where().dateBetween(start, end).findAll().withLinks();
     double income = 0, expense = 0;
     final Map<String, double> catTotals = {};
     final Map<String, int> catCounts = {};
@@ -153,8 +172,6 @@ class MonthlyRecapService {
 
     for (final txn in txns) {
       if (txn.isTransfer) continue;
-      await txn.category.load();
-      await txn.account.load();
 
       if (txn.isExpense) {
         expense += txn.baseAmount;
@@ -332,6 +349,32 @@ class MonthlyRecapService {
     final streaks = await _isar.streaks.where().findAll();
     final daily = streaks.where((s) => s.type == 'daily_checkin').firstOrNull;
 
+    // ── Year-over-year comparison ──
+    final yoyStart = DateTime(month.year - 1, month.month, 1);
+    final yoyEnd = DateTime(month.year - 1, month.month + 1, 0, 23, 59, 59);
+    final yoyTxns = await _isar.transactions
+        .where()
+        .dateBetween(yoyStart, yoyEnd)
+        .findAll();
+    double? yoyIncome, yoyExpense;
+    int? yoyTxnCount;
+    if (yoyTxns.isNotEmpty) {
+      double yi = 0, ye = 0;
+      int count = 0;
+      for (final txn in yoyTxns) {
+        if (txn.isTransfer) continue;
+        count++;
+        if (txn.isExpense) {
+          ye += txn.baseAmount;
+        } else {
+          yi += txn.baseAmount;
+        }
+      }
+      yoyIncome = yi;
+      yoyExpense = ye;
+      yoyTxnCount = count;
+    }
+
     // ── User ──
     final profile = await _isar.userProfiles.where().findFirst();
 
@@ -374,6 +417,9 @@ class MonthlyRecapService {
       oneTimeExpense: oneTimeExp,
       accountBreakdown: accountBreakdown,
       categoryByFrequency: categoryByFrequency,
+      yoyIncome: yoyIncome,
+      yoyExpense: yoyExpense,
+      yoyTransactionCount: yoyTxnCount,
     );
   }
 }

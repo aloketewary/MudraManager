@@ -36,6 +36,7 @@ class _AddRecurringTransactionScreenState
   final _descController = TextEditingController();
 
   bool _isExpense = true;
+  bool _saving = false;
   DateTime _startDate = DateTime.now();
   Frequency _frequency = Frequency.monthly;
   Account? _selectedAccount;
@@ -547,7 +548,7 @@ class _AddRecurringTransactionScreenState
                     if (_selectedCategory!.parentCategory.value != null) ...[
                       const SizedBox(width: 6),
                       Text(
-                        '\u00b7 ${_selectedCategory!.parentCategory.value!.name}',
+                        '\u00b7 ${_selectedCategory!.parentCategory.value?.name ?? ""}',
                         style: textTheme.labelMedium
                             ?.copyWith(color: color.onSurfaceVariant),
                       ),
@@ -749,6 +750,7 @@ class _AddRecurringTransactionScreenState
   }
 
   Future<void> _save() async {
+    if (_saving) return;
     if (_amountController.text.isEmpty ||
         double.tryParse(_amountController.text) == null) {
       SnackbarService.error(BuddyMessages.invalidAmount);
@@ -759,11 +761,13 @@ class _AddRecurringTransactionScreenState
       return;
     }
 
+    setState(() => _saving = true);
     HapticFeedback.mediumImpact();
 
     try {
       final recurring = widget.recurring ?? RecurringTransaction();
-      recurring.amount = double.parse(_amountController.text);
+      recurring.amount = double.tryParse(_amountController.text.replaceAll(',', '')) ?? 0;
+      if (recurring.amount <= 0) return;
       recurring.description = _descController.text;
       recurring.isExpense = _isExpense;
       recurring.frequency = _frequency;
@@ -785,7 +789,7 @@ class _AddRecurringTransactionScreenState
             ?.track(GamificationEvent.recurringTransactionCreated);
       }
 
-      if (mounted) {
+      if (context.mounted) {
         SnackbarService.success(
           _isEditing ? BuddyMessages.txnUpdated : BuddyMessages.txnAdded,
         );
@@ -801,7 +805,7 @@ class _AddRecurringTransactionScreenState
     await ref
         .read(recurringTransactionServiceProvider)
         .delete(widget.recurring!.id);
-    if (mounted) {
+    if (context.mounted) {
       SnackbarService.success(BuddyMessages.txnDeleted);
       context.pop();
     }

@@ -930,12 +930,11 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
         isarService: isarService,
       );
 
-      if (mounted) {
-        Navigator.of(context).pop(); // dismiss loader
-        _showResultDialog(result);
-      }
+      if (!context.mounted) return;
+      GoRouter.of(context).pop(); // dismiss loader
+      _showResultDialog(result);
     } catch (e) {
-      if (mounted) Navigator.of(context).pop(); // dismiss loader
+      if (context.mounted) GoRouter.of(context).pop(); // dismiss loader
       SnackbarService.error(BuddyMessages.errorWith('$e'));
     } finally {
       if (mounted) setState(() => _importing = false);
@@ -957,7 +956,9 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
           size: 48,
         ),
         title: Text(
-          result.imported > 0 ? AppLocalizations.of(context)!.import_complete : AppLocalizations.of(context)!.import_failed,
+          result.imported > 0
+              ? AppLocalizations.of(context)!.import_complete
+              : AppLocalizations.of(context)!.import_failed,
           style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         content: Column(
@@ -996,7 +997,7 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
           FilledButton(
             onPressed: () {
               ctx.pop();
-              if (mounted) context.pop();
+              if (context.mounted) context.pop();
             },
             child: Text(AppLocalizations.of(context)!.common_done),
           ),

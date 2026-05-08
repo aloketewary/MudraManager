@@ -221,6 +221,15 @@ class TransactionUtil {
       'kotak': 'Kotak Bank',
       'pnbbank': 'PNB',
       'pnb': 'PNB',
+      'punbnk': 'PNB',
+      'bobbank': 'Bank of Baroda',
+      'bobank': 'Bank of Baroda',
+      'baroda': 'Bank of Baroda',
+      'canara': 'Canara Bank',
+      'canbnk': 'Canara Bank',
+      'unionbank': 'Union Bank',
+      'unibnk': 'Union Bank',
+      'uboi': 'Union Bank',
       'paytm': 'Paytm',
       'phonepe': 'PhonePe',
       'googlepay': 'Google Pay',
@@ -491,14 +500,12 @@ bool checkForTransactionalMessage(String? body) {
 
   // Must have transaction keywords
   // Check for confirmed (past tense) transaction keywords
-  // Exclude future tense: "will be debited" / "to be debited"
-  final hasFutureTense = lower.contains('will be') || lower.contains('to be');
-  final hasConfirmedTrn = !hasFutureTense &&
-      (lower.contains('debited') ||
-          lower.contains('credited') ||
-          lower.contains('spent') ||
-          lower.contains('paid') ||
-          lower.contains('withdrawn'));
+  // Only exclude when "will be" / "to be" directly precedes the keyword
+  final hasConfirmedTrn = _hasConfirmedKeyword(lower, 'debited') ||
+      _hasConfirmedKeyword(lower, 'credited') ||
+      _hasConfirmedKeyword(lower, 'spent') ||
+      _hasConfirmedKeyword(lower, 'paid') ||
+      _hasConfirmedKeyword(lower, 'withdrawn');
 
   final hasTrn = hasConfirmedTrn ||
       (lower.contains('added') && RegExp(r'rs\.?|inr').hasMatch(lower)) ||
@@ -510,6 +517,8 @@ bool checkForTransactionalMessage(String? body) {
       (lower.contains('contribution') &&
           RegExp(r'rs\.?\s*\d|inr\s*\d').hasMatch(lower)) ||
       (lower.contains('successful') &&
+          RegExp(r'rs\.?\s*\d|inr\s*\d').hasMatch(lower)) ||
+      (lower.contains('txn') &&
           RegExp(r'rs\.?\s*\d|inr\s*\d').hasMatch(lower));
 
   if (!hasTrn) return false;
@@ -599,4 +608,22 @@ bool checkForTransactionalMessage(String? body) {
       !isBillReminder &&
       !isReceipt &&
       !isOTP;
+}
+
+/// Returns true if [keyword] appears in [text] without being preceded by
+/// "will be" or "to be" (which indicate future/pending transactions).
+bool _hasConfirmedKeyword(String text, String keyword) {
+  if (!text.contains(keyword)) return false;
+  // Check if any occurrence is NOT preceded by future-tense markers
+  final futurePatterns = ['will be $keyword', 'to be $keyword'];
+  for (final fp in futurePatterns) {
+    if (text.contains(fp)) {
+      // The keyword exists in future context — but it might ALSO exist
+      // in confirmed context elsewhere in the message. Remove the future
+      // occurrence and check if the keyword still exists.
+      final stripped = text.replaceAll(fp, '');
+      if (!stripped.contains(keyword)) return false;
+    }
+  }
+  return true;
 }

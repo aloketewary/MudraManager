@@ -347,9 +347,9 @@ class CurrencySettingsScreen extends ConsumerWidget {
             ],
           );
         },
-        loading: () => const Padding(
-          padding: EdgeInsets.all(16),
-          child: DashboardCardSkeleton(),
+        loading: () => Padding(
+          padding: EdgeInsets.all(spacing.cardInner),
+          child: const DashboardCardSkeleton(),
         ),
         error: (e, _) => Center(child: Text(ctxt.common_errorLoading)),
       ),
@@ -562,7 +562,7 @@ class CurrencySettingsScreen extends ConsumerWidget {
       final archivedCount = await currencyService.changeBaseCurrency(newCurrency);
 
       BaseCurrency.sync(newCurrency);
-      invalidateAll(ref);
+      invalidateAfterCurrencyChange(ref);
 
       if (context.mounted) {
         Navigator.of(context).pop(); // dismiss loading

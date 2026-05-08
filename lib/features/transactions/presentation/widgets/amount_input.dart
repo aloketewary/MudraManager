@@ -44,6 +44,7 @@ class AmountInput extends StatelessWidget {
         errorText: errorText,
         suffixIcon: onCalculatorTap != null
             ? IconButton(
+              tooltip: 'Calculator',
                 icon: const Icon(LucideIcons.calculator),
                 onPressed: onCalculatorTap,
               )

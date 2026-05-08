@@ -28,10 +28,13 @@ import 'package:mudra_manager/features/account/data/account_access_provider.dart
 import 'package:mudra_manager/features/account/data/account_providers.dart';
 import 'package:mudra_manager/features/budget/data/budget_alert_provider.dart';
 import 'package:mudra_manager/features/budget/data/budget_alert_service.dart';
+import 'package:mudra_manager/features/notifications/data/smart_notification_service.dart';
 import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
 import 'package:mudra_manager/features/gamification/models/gamification_enum.dart';
 import 'package:mudra_manager/features/gamification/providers/gamification_providers.dart';
-import 'package:mudra_manager/features/sms/data/recurring_detector_service.dart';
+import 'package:mudra_manager/features/sms/data/sms_activity_service.dart';
+import 'package:mudra_manager/core/providers/singleton_providers.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mudra_manager/features/sms/data/tag_matcher_service.dart';
 import 'package:mudra_manager/features/sms/presentation/screens/sms_activity_screen.dart';
 import 'package:mudra_manager/features/transactions/data/tag_provider.dart';
@@ -77,6 +80,10 @@ class _AddEditTransactionScreenState
   bool _initialized = false;
   bool _saving = false;
   bool _tripManuallyCleared = false;
+  bool _showAccountError = false;
+  bool _showCategoryError = false;
+  final _accountKey = GlobalKey();
+  final _categoryKey = GlobalKey();
 
   Trip? _selectedTrip;
   List<TripParticipant> _selectedParticipants = [];
@@ -209,11 +216,14 @@ class _AddEditTransactionScreenState
     final smsAccountNumber = widget.smsActivity?.account;
     if (smsAccountNumber == null || smsAccountNumber.isEmpty) return;
     final isar = await ref.read(isarServiceProvider).getInstance();
-    final match = await isar.accounts
+    final accounts = await isar.accounts
         .filter()
-        .accountNumberEqualTo(smsAccountNumber)
         .isActiveEqualTo(true)
-        .findFirst();
+        .findAll();
+    final match = accounts.where((a) {
+      final dbAccNo = a.accountNumber?.trim();
+      return dbAccNo != null && dbAccNo.endsWith(smsAccountNumber.trim());
+    }).firstOrNull;
     if (match != null && mounted) {
       setState(() => _selectedAccount = match);
     }
@@ -241,6 +251,20 @@ class _AddEditTransactionScreenState
     _categoryScrollController.dispose();
     _subcategoryScrollController.dispose();
     super.dispose();
+  }
+
+  void _scrollToKey(GlobalKey key) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final ctx = key.currentContext;
+      if (ctx != null) {
+        Scrollable.ensureVisible(
+          ctx,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+          alignment: 0.3,
+        );
+      }
+    });
   }
 
   void _showCalculator(BuildContext context, Function(double) onResult) {
@@ -291,10 +315,33 @@ class _AddEditTransactionScreenState
         ),
         title: Text(
           _isEditing
-              ? 'Edit Transaction'
-              : (_isExpense ? 'Add Expense' : 'Add Income'),
+              ? ctxt.transaction_editTransactionTitle
+              : (_isExpense ? ctxt.transaction_addExpenseTitle : ctxt.transaction_addIncomeTitle),
           style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
+        actions: [
+          TextButton(
+            onPressed: _saving ? null : _saveTransaction,
+            child: _saving
+                ? SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: color.primary,
+                    ),
+                  )
+                : Text(
+                    _isEditing
+                        ? ctxt.common_update
+                        : ctxt.common_save,
+                    style: textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+          ),
+          SizedBox(width: spacing.cardHorizontal),
+        ],
       ),
       body: Form(
         key: _formKey,
@@ -597,7 +644,7 @@ class _AddEditTransactionScreenState
                           SmartDefaultsBanner(
                             isExpense: _isExpense,
                             onApply: () {
-                              final d = ref.read(smartDefaultsProvider(_isExpense)).valueOrNull;
+                              final d = ref.read(smartDefaultsProvider(_isExpense)).value;
                               if (d == null) return;
                               setState(() {
                                 _selectedCategory = d.suggestedCategory;
@@ -616,48 +663,58 @@ class _AddEditTransactionScreenState
                   ),
                   SizedBox(height: spacing.sectionGap),
                   // ── Account selector ──
-                  AccountSelector(
-                    selectedAccount: _selectedAccount,
-                    balanceMap: _balanceMap,
-                    scrollController: _accountScrollController,
-                    alreadyScrolled: _accountScrolled,
-                    smsAccountNumber: widget.smsActivity?.account,
-                    smsBankName: widget.smsActivity?.fromBank,
-                    addLabel: ctxt.common_addLabel,
-                    onSelected: (account) {
-                      setState(() {
-                        _selectedAccount = account;
-                        _accountScrolled = true;
-                      });
-                    },
-                    onAddResult: () {
-                      ref
-                          .read(accountServiceProvider)
-                          .getAccountBalanceMap()
-                          .then((val) {
-                        if (mounted) setState(() => _balanceMap = val);
-                      });
-                    },
-                    onShowUnlockPrompt: _showUnlockPrompt,
+                  KeyedSubtree(
+                    key: _accountKey,
+                    child: AccountSelector(
+                      selectedAccount: _selectedAccount,
+                      balanceMap: _balanceMap,
+                      scrollController: _accountScrollController,
+                      alreadyScrolled: _accountScrolled,
+                      smsAccountNumber: widget.smsActivity?.account,
+                      smsBankName: widget.smsActivity?.fromBank,
+                      addLabel: ctxt.common_addLabel,
+                      showError: _showAccountError,
+                      onSelected: (account) {
+                        setState(() {
+                          _selectedAccount = account;
+                          _accountScrolled = true;
+                          _showAccountError = false;
+                        });
+                      },
+                      onAddResult: () {
+                        ref
+                            .read(accountServiceProvider)
+                            .getAccountBalanceMap()
+                            .then((val) {
+                          if (mounted) setState(() => _balanceMap = val);
+                        });
+                      },
+                      onShowUnlockPrompt: _showUnlockPrompt,
+                    ),
                   ),
 
                   SizedBox(height: spacing.sectionGap),
 
                   // ── Category selector ──
-                  CategorySelector(
-                    isExpense: _isExpense,
-                    selectedCategory: _selectedCategory,
-                    categoryScrollController: _categoryScrollController,
-                    subcategoryScrollController: _subcategoryScrollController,
-                    alreadyScrolled: _categoryScrolled,
-                    addLabel: ctxt.common_addLabel,
-                    onSelected: (cat) {
-                      setState(() {
-                        _selectedCategory = cat;
-                        _categoryScrolled = true;
-                      });
-                    },
-                    expandedParentFinder: (parents) => parents,
+                  KeyedSubtree(
+                    key: _categoryKey,
+                    child: CategorySelector(
+                      isExpense: _isExpense,
+                      selectedCategory: _selectedCategory,
+                      categoryScrollController: _categoryScrollController,
+                      subcategoryScrollController: _subcategoryScrollController,
+                      alreadyScrolled: _categoryScrolled,
+                      addLabel: ctxt.common_addLabel,
+                      showError: _showCategoryError,
+                      onSelected: (cat) {
+                        setState(() {
+                          _selectedCategory = cat;
+                          _categoryScrolled = true;
+                          _showCategoryError = false;
+                        });
+                      },
+                      expandedParentFinder: (parents) => parents,
+                    ),
                   ),
                   SizedBox(height: spacing.sectionGap),
 
@@ -848,41 +905,7 @@ class _AddEditTransactionScreenState
                 ],
               ),
             ),
-            // ── Pinned save button ──
-            Padding(
-              padding: EdgeInsets.fromLTRB(
-                spacing.cardHorizontal,
-                spacing.elementGap,
-                spacing.cardHorizontal,
-                spacing.cardHorizontalMax +
-                    MediaQuery.of(context).padding.bottom,
-              ),
-              child: FilledButton(
-                onPressed: _saving ? null : _saveTransaction,
-                style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(spacing.radiusMedium),
-                  ),
-                  minimumSize: const Size(double.infinity, 52),
-                ),
-                child: _saving
-                    ? SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: color.onPrimary,
-                        ),
-                      )
-                    : Text(
-                        _isEditing
-                            ? 'Update Transaction'
-                            : ctxt.transaction_saveTransactionButtonLabel,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-              ),
-            ),
+
           ],
         ),
       ),
@@ -898,6 +921,8 @@ class _AddEditTransactionScreenState
       return;
     }
     if (_selectedAccount == null) {
+      setState(() => _showAccountError = true);
+      _scrollToKey(_accountKey);
       SnackbarService.error(BuddyMessages.pickAccount);
       return;
     }
@@ -911,6 +936,8 @@ class _AddEditTransactionScreenState
     }
 
     if (_selectedCategory == null) {
+      setState(() => _showCategoryError = true);
+      _scrollToKey(_categoryKey);
       SnackbarService.error(BuddyMessages.pickCategory);
       return;
     }
@@ -918,7 +945,11 @@ class _AddEditTransactionScreenState
     setState(() => _saving = true);
 
     try {
-      final amount = double.parse(_amountController.text);
+      final amount = double.tryParse(_amountController.text.replaceAll(',', '')) ?? 0;
+      if (amount <= 0) {
+        SnackbarService.error(BuddyMessages.invalidAmount);
+        return;
+      }
 
       final String? saveCurrency = _effectiveCurrency;
       double? convertedAmount;
@@ -934,18 +965,36 @@ class _AddEditTransactionScreenState
         }
       }
 
-      final txn = Transaction.create(
-        date: _selectedDate,
-        amount: amount,
-        isExpense: _isExpense,
-        description: _descController.text,
-        currencyCode: saveCurrency,
-        convertedAmount: convertedAmount,
-        rateUsed: rateUsed,
-      );
-
-      if (_isEditing && widget.transaction!.id != Isar.autoIncrement) {
-        txn.id = widget.transaction!.id;
+      final Transaction txn;
+      if (_isEditing) {
+        // Preserve existing transaction fields during update
+        final existing = widget.transaction!;
+        txn = Transaction.create(
+          date: _selectedDate,
+          amount: amount,
+          isExpense: _isExpense,
+          description: _descController.text,
+          currencyCode: saveCurrency,
+          convertedAmount: convertedAmount,
+          rateUsed: rateUsed,
+        );
+        txn.id = existing.id;
+        // Carry over fields that the edit screen doesn't modify
+        txn.isFromSms = existing.isFromSms;
+        txn.smsActivityId = existing.smsActivityId;
+        txn.isSharedExpense = existing.isSharedExpense;
+        txn.isSettlement = existing.isSettlement;
+        txn.myShare = existing.myShare;
+      } else {
+        txn = Transaction.create(
+          date: _selectedDate,
+          amount: amount,
+          isExpense: _isExpense,
+          description: _descController.text,
+          currencyCode: saveCurrency,
+          convertedAmount: convertedAmount,
+          rateUsed: rateUsed,
+        );
       }
 
       txn.account.value = _selectedAccount;
@@ -985,31 +1034,37 @@ class _AddEditTransactionScreenState
             ?.track(GamificationEvent.expenseSplit);
       }
 
-      // If from SMS activity, approve it
+      // If from SMS activity, mark as approved and learn keywords
       if (widget.smsActivity != null) {
         final isar = await ref.read(isarServiceProvider).getInstance();
         await isar.writeTxn(() async {
           widget.smsActivity!.status = ActivityStatus.approved;
           widget.smsActivity!.transactionId = txn.id;
           await isar.smsActivitys.put(widget.smsActivity!);
+
+          txn.smsActivityId = widget.smsActivity!.id;
+          txn.isFromSms = true;
+          await isar.transactions.put(txn);
         });
 
-        // Detect and link to recurring bills (SMS imports only)
-        await RecurringDetectorService.detectAndTagRecurring(txn);
+        // Learn keywords + detect recurring (same as approveActivity but without creating a second txn)
+        await SmsActivityService.instance.learnKeywordsFromApproval(
+          widget.smsActivity!.body,
+          _selectedCategory!,
+          merchant: widget.smsActivity!.merchant,
+          recipient: widget.smsActivity!.toAccount,
+        );
+        await ref.read(recurringDetectorServiceProvider).detectAndTagRecurring(txn);
       }
 
-      await _checkLowBalance(txn.account.value);
-      await _checkBudgetAlerts(txn);
-      await WidgetService.updateWidget(ref);
-
-      if (mounted) {
-        ref.invalidate(transactionProvider);
+      // Pop first so the user sees immediate feedback, then run side effects
+      if (context.mounted) {
         ref.invalidate(accountServiceProvider);
         ref.invalidate(budgetServiceProvider);
         if (widget.smsActivity != null) {
           ref.invalidate(smsActivityProvider);
           ref.invalidate(pendingCountProvider);
-          ref.read(smsRefreshProvider.notifier).state++;
+          ref.read(smsRefreshProvider.notifier).update((v) => v + 1);
           ref
               .read(gamificationServiceProvider)
               ?.track(GamificationEvent.smsTransactionApproved);
@@ -1017,11 +1072,19 @@ class _AddEditTransactionScreenState
 
         context.pop(true);
         SnackbarService.success(
-          widget.transaction == null
-              ? BuddyMessages.txnAdded
-              : BuddyMessages.txnUpdated,
+          _isEditing
+              ? BuddyMessages.txnUpdated
+              : BuddyMessages.txnAdded,
         );
       }
+
+      // Fire-and-forget side effects after pop
+      _checkLowBalance(txn.account.value);
+      _checkBudgetAlerts(txn);
+      WidgetService.updateWidget(ref);
+    } catch (e) {
+      SnackbarService.error(BuddyMessages.txnAdded); // fallback error
+      debugPrint('Save transaction error: $e');
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -1078,7 +1141,7 @@ class _AddEditTransactionScreenState
                     await isar.writeTxn(() async {
                       await isar.tags.put(tag);
                     });
-                    if (mounted) {
+                    if (context.mounted) {
                       setState(() => selectedTags.add(tag));
                       ref.invalidate(tagListProvider);
                       navigator.pop();
@@ -1455,7 +1518,7 @@ class _AddEditTransactionScreenState
     final tripsAsync = ref.read(allTripsProvider);
 
     if (tripsAsync case AsyncData(:final value)) {
-      if (!mounted) return;
+      if (!context.mounted) return;
       final trips = value.where((t) => t.isTrip).toList();
 
       showModalBottomSheet(
@@ -1519,24 +1582,26 @@ class _AddEditTransactionScreenState
 
   Future<void> _checkLowBalance(Account? account) async {
     if (account == null) return;
+    final prefs = await SharedPreferences.getInstance();
+    if (!(prefs.getBool('smart_alerts_enabled') ?? true)) return;
+
     final accountsService = ref.read(accountServiceProvider);
     final currentBalance = await accountsService.getAccountBalance(account.id);
     final lowBalanceThreshold =
         SharedPrefsUtil.instance.getLowBalanceThreshold();
 
     if (currentBalance < lowBalanceThreshold) {
+      final ctxt = AppLocalizations.of(context)!;
       final notificationService = ref.read(notificationRecordServiceProvider);
       await notificationService.logNotification(
-        title: 'Low Balance Alert',
-        body:
-            'Your account "${account.name}" has ${formatCurrency(currentBalance, decimals: 2)} remaining.',
+        title: ctxt.notif_lowBalanceTitle,
+        body: ctxt.notif_lowBalanceBody(account.name, formatCurrency(currentBalance, decimals: 2)),
         type: 'low_balance',
       );
       await NotificationService.showLocalNotification(
         id: 1000 + account.id,
-        title: 'Low Balance Alert',
-        body:
-            'Your balance in ${account.name} is ${formatCurrency(currentBalance, decimals: 2)}.',
+        title: ctxt.notif_lowBalanceTitle,
+        body: ctxt.notif_lowBalanceBody(account.name, formatCurrency(currentBalance, decimals: 2)),
         dedupKey: 'low_balance_${account.id}',
       );
     }
@@ -1546,6 +1611,7 @@ class _AddEditTransactionScreenState
     if (!txn.isExpense || txn.isTransfer) return;
     final alertService = BudgetAlertService(
       ref.read(isarServiceProvider),
+      SmartNotificationService.instance,
     );
 
     final alerts = await alertService.checkBudgetsAfterTransaction(txn);

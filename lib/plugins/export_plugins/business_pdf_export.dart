@@ -52,12 +52,15 @@ class BusinessPdfExportPlugin extends ExportPlugin {
 
   Future<pw.ThemeData> _loadFont() async {
     final font =
-        pw.Font.ttf(await rootBundle.load('assets/fonts/NotoSans-Regular.ttf'));
+        pw.Font.ttf(await rootBundle.load('assets/fonts/Inter-Variable.ttf'));
     final fallback = pw.Font.ttf(
       await rootBundle
-          .load('assets/fonts/NotoSansDevanagari-VariableFont_wdth,wght.ttf'),
+          .load('assets/fonts/NotoSansDevanagari-Variable.ttf'),
     );
-    return pw.ThemeData.withFont(base: font, fontFallback: [fallback]);
+    final bengaliFallback = pw.Font.ttf(
+      await rootBundle.load('assets/fonts/NotoSansBengali-Variable.ttf'),
+    );
+    return pw.ThemeData.withFont(base: font, fontFallback: [fallback, bengaliFallback]);
   }
 
   pw.Widget _buildHeader(ExportData data) {
@@ -110,11 +113,19 @@ class BusinessPdfExportPlugin extends ExportPlugin {
 
   pw.Widget _buildFooter(pw.Context context) {
     return pw.Container(
-      alignment: pw.Alignment.centerRight,
       margin: const pw.EdgeInsets.only(top: 20),
-      child: pw.Text(
-        'Page ${context.pageNumber} of ${context.pagesCount}',
-        style: const pw.TextStyle(color: PdfColors.grey600, fontSize: 10),
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+        children: [
+          pw.Text(
+            'Made with Mudra Manager • mudramanager.com',
+            style: const pw.TextStyle(color: PdfColors.grey600, fontSize: 10),
+          ),
+          pw.Text(
+            'Page ${context.pageNumber} of ${context.pagesCount}',
+            style: const pw.TextStyle(color: PdfColors.grey600, fontSize: 10),
+          ),
+        ],
       ),
     );
   }

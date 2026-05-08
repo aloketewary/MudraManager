@@ -23,9 +23,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   static const _pageColors = [
     Color(0xFF2196F3), // rupee — blue
-    Color(0xFFFF9800), // sms — orange
-    Color(0xFF4CAF50), // budget — green
-    Color(0xFF9C27B0), // insights — purple
+    Color(0xFFFF9800), // smart tracking — orange
     Color(0xFF009688), // secure — teal
   ];
 
@@ -77,6 +75,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
+                    tooltip: ctxt.onboard_languages,
                     icon: Icon(
                       LucideIcons.languages,
                       color: color.onSurfaceVariant,
@@ -88,7 +87,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     TextButton(
                       onPressed: () => context.go(AppRoutes.accountSetup),
                       child: Text(
-                        'Skip',
+                        ctxt.onboard_skip,
                         style: textTheme.labelLarge?.copyWith(
                           color: color.onSurfaceVariant,
                         ),
@@ -166,6 +165,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                               ),
                               child: index == 0
                                   ? Image.asset(
+                                    semanticLabel: 'Decorative image',
                                       'assets/logo/logo.png',
                                       width: 64,
                                       height: 64,
@@ -291,7 +291,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        SizedBox(width: spacing.radiusMedium),
                       ],
                       Expanded(
                         child: SizedBox(
@@ -312,14 +312,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  isLast ? 'Get Started' : 'Continue',
+                                  isLast
+                                      ? ctxt.translate('onboard_GetStarted')
+                                      : ctxt.onboard_continue,
                                   style: const TextStyle(
                                     fontWeight: FontWeight.w600,
                                     fontSize: 16,
                                   ),
                                 ),
                                 if (isLast) ...[
-                                  const SizedBox(width: 8),
+                                  SizedBox(width: spacing.elementGap),
                                   const Icon(LucideIcons.arrowRight, size: 18),
                                 ],
                               ],

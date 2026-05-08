@@ -90,6 +90,94 @@ extension AppLocalizationsHelper on AppLocalizations {
         return onboard_SmartAutoTracking;
       case 'onboard_SmartAutoTrackingDesc':
         return onboard_SmartAutoTrackingDesc;
+      case 'onboard_smartTrackingMergedDesc':
+        return onboard_smartTrackingMergedDesc;
+
+      // Starter transactions (onboarding step 5)
+      case 'onboard_whatDidYouSpend':
+        return onboard_whatDidYouSpend;
+      case 'onboard_addFewToStart':
+        return onboard_addFewToStart;
+      case 'onboard_skipAddLater':
+        return onboard_skipAddLater;
+      case 'onboard_starterCoffee':
+        return onboard_starterCoffee;
+      case 'onboard_starterTransport':
+        return onboard_starterTransport;
+      case 'onboard_starterLunch':
+        return onboard_starterLunch;
+      case 'onboard_starterGroceries':
+        return onboard_starterGroceries;
+
+      // Dashboard zero-state
+      case 'dashboard_listeningTitle':
+        return dashboard_listeningTitle;
+      case 'dashboard_waitingForSms':
+        return dashboard_waitingForSms;
+      case 'dashboard_meanwhile':
+        return dashboard_meanwhile;
+      case 'dashboard_addExpense':
+        return dashboard_addExpense;
+      case 'dashboard_setBudget':
+        return dashboard_setBudget;
+      case 'dashboard_createGoal':
+        return dashboard_createGoal;
+      case 'dashboard_addAccount':
+        return dashboard_addAccount;
+      case 'dashboard_testTip':
+        return dashboard_testTip;
+      case 'dashboard_addFirstExpense':
+        return dashboard_addFirstExpense;
+      case 'dashboard_addFirstExpenseDesc':
+        return dashboard_addFirstExpenseDesc;
+
+      // Quick-add compact
+      case 'quickAdd_title':
+        return quickAdd_title;
+      case 'quickAdd_recentCategories':
+        return quickAdd_recentCategories;
+      case 'quickAdd_moreOptions':
+        return quickAdd_moreOptions;
+
+      // App mode
+      case 'mode_simple':
+        return mode_simple;
+      case 'mode_full':
+        return mode_full;
+      case 'mode_simpleDesc':
+        return mode_simpleDesc;
+      case 'mode_fullDesc':
+        return mode_fullDesc;
+      case 'mode_switchToFull':
+        return mode_switchToFull;
+      case 'mode_switchToSimple':
+        return mode_switchToSimple;
+      case 'mode_pickTitle':
+        return mode_pickTitle;
+      case 'mode_pickDesc':
+        return mode_pickDesc;
+
+      // Cloud backup
+      case 'backup_cloudBackup':
+        return backup_cloudBackup;
+      case 'backup_cloudRestore':
+        return backup_cloudRestore;
+      case 'backup_signInGoogle':
+        return backup_signInGoogle;
+      case 'backup_uploadSuccess':
+        return backup_uploadSuccess;
+      case 'backup_uploadFailed':
+        return backup_uploadFailed;
+      case 'backup_cloudBackups':
+        return backup_cloudBackups;
+      case 'backup_noCloudBackups':
+        return backup_noCloudBackups;
+      case 'backup_signInRequired':
+        return backup_signInRequired;
+      case 'backup_signOut':
+        return backup_signOut;
+      case 'backup_cloudSubtitle':
+        return backup_cloudSubtitle;
 
       // Navigation
       case 'nav_activity':
@@ -192,6 +280,8 @@ extension AppLocalizationsHelper on AppLocalizations {
         return title_backupShare;
       case 'title_exchangeRates':
         return title_exchangeRates;
+      case 'tax_title':
+        return tax_title;
       case 'title_recurringTransactions':
         return title_recurringTransactions;
       case 'title_billControlCenter':
@@ -368,6 +458,14 @@ extension AppLocalizationsHelper on AppLocalizations {
         return utility_customizeUtilities;
       case 'utility_addUtilities':
         return utility_addUtilities;
+      case 'utility_taxSubtitle':
+        return utility_taxSubtitle;
+      case 'utility_analyticsSubtitle':
+        return utility_analyticsSubtitle;
+      case 'cc_title':
+        return cc_title;
+      case 'cc_utilitySubtitle':
+        return cc_utilitySubtitle;
 
       // Profile
       case 'profile_accounts':
@@ -525,8 +623,76 @@ extension LocalizationExtension on Locale {
         return 'हिंदी';
       case 'BN':
         return 'বাংলা';
+      case 'ES':
+        return 'Español';
+      case 'PT':
+        return 'Português';
+      case 'ID':
+        return 'Bahasa Indonesia';
+      case 'FR':
+        return 'Français';
+      case 'DE':
+        return 'Deutsch';
+      case 'AR':
+        return 'العربية';
+      case 'TR':
+        return 'Türkçe';
+      case 'TH':
+        return 'ไทย';
+      case 'VI':
+        return 'Tiếng Việt';
+      case 'SW':
+        return 'Kiswahili';
+      case 'KO':
+        return '한국어';
+      case 'JA':
+        return '日本語';
+      case 'ZH':
+        return '中文';
+      case 'MS':
+        return 'Bahasa Melayu';
+      case 'TA':
+        return 'தமிழ்';
+      case 'TE':
+        return 'తెలుగు';
+      case 'MR':
+        return 'मराठी';
+      case 'GU':
+        return 'ગુજરાતી';
+      case 'KN':
+        return 'ಕನ್ನಡ';
+      case 'ML':
+        return 'മലയാളം';
+      case 'PA':
+        return 'ਪੰਜਾਬੀ';
+      case 'OR':
+        return 'ଓଡ଼ିଆ';
+      case 'AS':
+        return 'অসমীয়া';
+      case 'UR':
+        return 'اردو';
+      case 'SD':
+        return 'सिन्धी';
+      case 'NE':
+        return 'नेपाली';
+      case 'SI':
+        return 'සිංහල';
+      case 'BO':
+        return 'བོད་སྐད་';
+      case 'DOI':
+        return 'डोगरी';
+      case 'KOK':
+        return 'कोंकणी';
+      case 'MAI':
+        return 'मैथिली';
+      case 'MNI':
+        return 'মৈতৈলোন';
+      case 'SAT':
+        return 'ᱥᱟᱱᱛᱟᱣᱤ';
+      case 'BRX':
+        return 'बोडो';
       default:
-        return 'English';
+        return languageCode.toUpperCase();
     }
   }
 }

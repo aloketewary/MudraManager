@@ -316,6 +316,7 @@ class _EditUserProfileScreenState extends ConsumerState<EditUserProfileScreen> {
       onPressed: () async {
         HapticFeedback.mediumImpact();
         if (_formKey.currentState?.validate() ?? false) {
+          final router = GoRouter.of(context);
           final updatedProfile = _profile
             ..name = _nameController.text.trim()
             ..email = _emailController.text.trim()
@@ -326,7 +327,7 @@ class _EditUserProfileScreenState extends ConsumerState<EditUserProfileScreen> {
               .saveProfile(updatedProfile);
           ref.invalidate(userProfileProvider);
           SnackbarService.success(BuddyMessages.settingsSaved);
-          if (mounted) context.pop();
+          router.pop();
         }
       },
       icon: const Icon(LucideIcons.check),

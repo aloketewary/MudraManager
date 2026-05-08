@@ -12,6 +12,7 @@ import 'package:mudra_manager/core/entitlement/entitlement_provider.dart';
 import 'package:mudra_manager/core/extension/localization_extenstion.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/logging/logger_provider.dart';
+import 'package:mudra_manager/core/providers/app_mode_provider.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:mudra_manager/core/providers/notification_record_service.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
@@ -70,7 +71,7 @@ class HomePageState extends ConsumerState<HomePage>
 
     // Deferred — not needed for first frame
     Future.delayed(const Duration(seconds: 2), () {
-      if (!mounted) return;
+      if (!context.mounted) return;
       initNotification();
       ref.read(achievementUnlockListenerProvider).initialize(context);
     });
@@ -90,7 +91,7 @@ class HomePageState extends ConsumerState<HomePage>
         log.i('Widget action received: $action');
         if (action == 'add_transaction' || action == 'ADD_TRANSACTION') {
           await Future.delayed(const Duration(milliseconds: 300));
-          if (mounted) {
+          if (context.mounted) {
             showModalBottomSheet(
               context: context,
               isScrollControlled: true,
@@ -143,19 +144,30 @@ class HomePageState extends ConsumerState<HomePage>
     final profileAsync = ref.watch(userProfileProvider);
     final ctxt = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isSimple = ref.watch(isSimpleModeProvider);
+
+    // In simple mode: Home(0), Activity(1), Profile(2)
+    // In full mode:   Home(0), Activity(1), Manage(2), Insights(3), Profile(4)
+    // Clamp selected index immediately so NavigationBar never gets an out-of-range value
+    final maxIndex = isSimple ? 2 : 4;
+    final effectiveIndex = _selectedIndex > maxIndex ? 0 : _selectedIndex;
+
+    // In simple mode, nav indices 0,1,2 map to stack indices 0,1,4
+    // In full mode, nav indices map 1:1 to stack indices
+    final stackIndex = isSimple && effectiveIndex == 2 ? 4 : effectiveIndex;
 
     return PopScope(
-      canPop: _selectedIndex == 0,
+      canPop: effectiveIndex == 0,
       onPopInvokedWithResult: (didPop, result) async {
-        if (!didPop && _selectedIndex != 0) {
+        if (!didPop && effectiveIndex != 0) {
           _onTabSelected(0);
         }
       },
       child: Scaffold(
-        appBar: buildTopBar(profileAsync, _selectedIndex),
+        appBar: buildTopBar(profileAsync, stackIndex),
         extendBody: true,
         bottomNavigationBar: NavigationBar(
-          selectedIndex: _selectedIndex,
+          selectedIndex: effectiveIndex,
           onDestinationSelected: _onTabSelected,
           elevation: 0,
           animationDuration: const Duration(milliseconds: 300),
@@ -174,7 +186,7 @@ class HomePageState extends ConsumerState<HomePage>
                   isDark ? Colors.white : Colors.black,
                   BlendMode.srcIn,
                 ),
-              ).animate(target: _selectedIndex == 0 ? 1 : 0).scale(
+              ).animate(target: effectiveIndex == 0 ? 1 : 0).scale(
                     begin: const Offset(0.9, 0.9),
                     end: const Offset(1, 1),
                     curve: Curves.easeOutCubic,
@@ -196,7 +208,7 @@ class HomePageState extends ConsumerState<HomePage>
                   isDark ? Colors.white : Colors.black,
                   BlendMode.srcIn,
                 ),
-              ).animate(target: _selectedIndex == 1 ? 1 : 0).scale(
+              ).animate(target: effectiveIndex == 1 ? 1 : 0).scale(
                     begin: const Offset(0.9, 0.9),
                     end: const Offset(1, 1),
                     curve: Curves.easeOutCubic,
@@ -204,6 +216,7 @@ class HomePageState extends ConsumerState<HomePage>
                   ),
               label: ctxt.nav_activity,
             ),
+            if (!isSimple)
             NavigationDestination(
               icon: Consumer(
                 builder: (context, ref, _) {
@@ -258,7 +271,7 @@ class HomePageState extends ConsumerState<HomePage>
                           : (isDark ? Colors.white : Colors.black),
                       BlendMode.srcIn,
                     ),
-                  ).animate(target: _selectedIndex == 2 ? 1 : 0).scale(
+                  ).animate(target: effectiveIndex == 2 ? 1 : 0).scale(
                         begin: const Offset(0.9, 0.9),
                         end: const Offset(1, 1),
                         curve: Curves.easeOutCubic,
@@ -268,6 +281,7 @@ class HomePageState extends ConsumerState<HomePage>
               ),
               label: ctxt.nav_manage,
             ),
+            if (!isSimple)
             NavigationDestination(
               icon: SvgPicture.asset(
                 'assets/logo/nav/outline/statistics.svg',
@@ -282,7 +296,7 @@ class HomePageState extends ConsumerState<HomePage>
                   isDark ? Colors.white : Colors.black,
                   BlendMode.srcIn,
                 ),
-              ).animate(target: _selectedIndex == 3 ? 1 : 0).scale(
+              ).animate(target: effectiveIndex == 3 ? 1 : 0).scale(
                     begin: const Offset(0.9, 0.9),
                     end: const Offset(1, 1),
                     curve: Curves.easeOutCubic,
@@ -293,7 +307,7 @@ class HomePageState extends ConsumerState<HomePage>
             NavigationDestination(
               icon: Consumer(
                 builder: (context, ref, _) {
-                  final isPro = ref.watch(isProProvider).valueOrNull ?? false;
+                  final isPro = ref.watch(isProProvider).value ?? false;
                   return SvgPicture.asset(
                     isPro
                         ? 'assets/logo/nav/outline/pro_profile.svg'
@@ -309,7 +323,7 @@ class HomePageState extends ConsumerState<HomePage>
               ),
               selectedIcon: Consumer(
                 builder: (context, ref, _) {
-                  final isPro = ref.watch(isProProvider).valueOrNull ?? false;
+                  final isPro = ref.watch(isProProvider).value ?? false;
                   return SvgPicture.asset(
                     isPro
                         ? 'assets/logo/nav/solid/pro_profile.svg'
@@ -320,7 +334,7 @@ class HomePageState extends ConsumerState<HomePage>
                           : (isDark ? Colors.white : Colors.black),
                       BlendMode.srcIn,
                     ),
-                  ).animate(target: _selectedIndex == 4 ? 1 : 0).scale(
+                  ).animate(target: (isSimple ? effectiveIndex == 2 : effectiveIndex == 4) ? 1 : 0).scale(
                         begin: const Offset(0.9, 0.9),
                         end: const Offset(1, 1),
                         curve: Curves.easeOutCubic,
@@ -335,12 +349,12 @@ class HomePageState extends ConsumerState<HomePage>
         body: Stack(
           children: [
             IndexedStack(
-              index: _selectedIndex,
+              index: stackIndex,
               children: [
                 const DashboardHome(),
                 TransactionListScreen(
                   key: transactionListKey,
-                  isTabActive: _selectedIndex == 1,
+                  isTabActive: stackIndex == 1,
                   onScrollChanged: (isScrollingDown) {
                     if (isScrollingDown) {
                       _fabController.reverse();
@@ -349,12 +363,12 @@ class HomePageState extends ConsumerState<HomePage>
                     }
                   },
                 ),
-                UtilityScreen(key: utilityKey, isTabActive: _selectedIndex == 2),
+                UtilityScreen(key: utilityKey, isTabActive: stackIndex == 2),
                 const StatisticsScreen(),
                 const ProfileScreen(),
               ],
             ),
-            if (_selectedIndex == 1)
+            if (stackIndex == 1)
               ExpandableFab(
                 key: _speedDialKey,
                 visibilityController: _fabController,
@@ -382,7 +396,7 @@ class HomePageState extends ConsumerState<HomePage>
         return AppBar(
           automaticallyImplyLeading: false,
           title: GestureDetector(
-            onTap: () => _onTabSelected(4),
+            onTap: () => _onTabSelected(ref.read(isSimpleModeProvider) ? 2 : 4),
             child: Row(
               children: [
                 profileAsync.when(
@@ -419,7 +433,7 @@ class HomePageState extends ConsumerState<HomePage>
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: spacing.radiusMedium),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -560,6 +574,7 @@ class HomePageState extends ConsumerState<HomePage>
                   alignment: Alignment.center,
                   children: [
                     IconButton(
+                      tooltip: 'Notifications',
                       icon: const Icon(LucideIcons.bell, size: 28),
                       onPressed: () => context.push(AppRoutes.notifications),
                     ),
@@ -611,6 +626,7 @@ class HomePageState extends ConsumerState<HomePage>
           ),
           actions: [
             IconButton(
+              tooltip: 'Search',
               onPressed: () {
                 HapticFeedback.mediumImpact();
                 transactionListKey.currentState?.toggleSearch();
@@ -618,6 +634,7 @@ class HomePageState extends ConsumerState<HomePage>
               icon: const Icon(LucideIcons.search),
             ),
             IconButton(
+              tooltip: 'Filter',
               onPressed: () => transactionListKey.currentState
                   ?.showFilterBottomSheet(context, spacing),
               icon: const Icon(LucideIcons.listFilter),
@@ -627,7 +644,7 @@ class HomePageState extends ConsumerState<HomePage>
       case 2:
         return AppBar(
           automaticallyImplyLeading: false,
-          title: Text('Manage', style: textTheme.titleLarge),
+          title: Text(ctxt.nav_manage, style: textTheme.titleLarge),
           actions: [
             IconButton(
               onPressed: () {
@@ -642,11 +659,12 @@ class HomePageState extends ConsumerState<HomePage>
         return AppBar(
           automaticallyImplyLeading: false,
           title: Text(
-            'Insights',
+            ctxt.nav_insights,
             style: textTheme.titleLarge,
           ),
           actions: [
             IconButton(
+              tooltip: 'Download',
               icon: const Icon(LucideIcons.download),
               onPressed: () => _showExportDialog(context),
             ),
@@ -660,7 +678,7 @@ class HomePageState extends ConsumerState<HomePage>
 
   void initNotification() async {
     final savedTime = await NotificationService.getSavedReminderTime();
-    ref.read(reminderTimeProvider.notifier).state = savedTime;
+    ref.read(reminderTimeProvider.notifier).set(savedTime);
   }
 
   void _showExportDialog(BuildContext context) {

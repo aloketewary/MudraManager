@@ -69,7 +69,11 @@ class ReconciliationService {
     if (diff.abs() < 0.01) return 0;
 
     final isar = await _isarService.getInstance();
-    final isExpense = diff < 0;
+    // For credit cards, balance = debt. A negative diff means debt decreased,
+    // which requires an income (payment) transaction, not an expense.
+    // For regular accounts, negative diff means money is missing → expense.
+    final isCreditCard = account.accountType == AccountType.creditCard;
+    final isExpense = isCreditCard ? diff > 0 : diff < 0;
     final category = await _findFallbackCategory(isar, isExpense);
     final txn = Transaction.create(
       date: DateTime.now(),
@@ -121,7 +125,7 @@ class ReconciliationService {
       return patched;
     } catch (e, stack) {
       _log.e('Failed to patch uncategorized transactions', e, stack);
-      return 0;
+      rethrow;
     }
   }
 

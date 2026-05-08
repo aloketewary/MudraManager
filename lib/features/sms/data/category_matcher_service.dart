@@ -39,10 +39,10 @@ class CategoryMatcherService {
       if (!_isNoiseName(name)) return name;
     }
 
-    // "at MERCHANT" pattern for card/POS
+    // "at MERCHANT" pattern for card/POS (cap at 5 words to avoid garbage)
     // e.g. "debited at Amazon" or "spent at Swiggy"
     final atMatch = RegExp(
-      r'(?:at|At)\s+([A-Za-z][A-Za-z0-9\s&\-]{2,30})(?:\s+on|\s+Ref|\.|\s*$)',
+      r'(?:at|At)\s+([A-Za-z][A-Za-z0-9]+(?:\s+[A-Za-z0-9&\-]+){0,4})(?:\s+on|\s+Ref|\.|\s*$)',
     ).firstMatch(smsBody);
     if (atMatch != null) {
       final name = atMatch.group(1)!.trim();
@@ -71,9 +71,12 @@ class CategoryMatcherService {
   };
 
   static bool _isNoiseName(String name) {
+    final lower = name.toLowerCase();
     return name.length < 2 ||
-        _noiseNames.contains(name.toLowerCase()) ||
-        RegExp(r'^\d+$').hasMatch(name);
+        _noiseNames.contains(lower) ||
+        RegExp(r'^\d').hasMatch(name) ||
+        RegExp(r'^(INR|RS|USD|EUR|GBP|AED)\b', caseSensitive: false)
+            .hasMatch(name);
   }
 
   static String _humanizeName(String vpaId) {
@@ -116,14 +119,15 @@ class CategoryMatcherService {
   static Category? matchCategory(
     String smsBody,
     List<Category> categories,
-    bool isIncome,
+    bool? isIncome,
   ) {
     final bodyLower = smsBody.toLowerCase();
-    final type = isIncome ? CategoryType.income : CategoryType.expense;
 
-    // Filter by type
-    final validCategories =
-        categories.where((c) => c.categoryType == type).toList();
+    // Filter by type when known; otherwise consider both income and expense categories.
+    final validCategories = isIncome == null
+        ? categories.toList()
+        : categories.where((c) => c.categoryType ==
+            (isIncome ? CategoryType.income : CategoryType.expense),).toList();
 
     // Keyword matching with scoring (prioritize longer, more specific keywords)
     Category? bestMatch;
@@ -133,6 +137,9 @@ class CategoryMatcherService {
       if (category.keywords == null || category.keywords!.isEmpty) continue;
 
       int score = 0;
+      int exactMatches = 0;
+      int wordMatches = 0;
+
       for (final keyword in category.keywords!) {
         final keywordLower = keyword.toLowerCase();
         if (bodyLower.contains(keywordLower)) {
@@ -142,12 +149,25 @@ class CategoryMatcherService {
           // Bonus for exact word match (not just substring)
           if (RegExp(r'\b' + RegExp.escape(keywordLower) + r'\b')
               .hasMatch(bodyLower)) {
-            score += 10;
+            score += 15; // Increased from 10
+            exactMatches++;
+            wordMatches++;
+          } else {
+            wordMatches++;
           }
         }
       }
 
-      if (score > maxScore) {
+      // Require at least 1 exact match for consideration
+      if (exactMatches < 1 && wordMatches < 1) continue;
+
+      // Additional penalty for common false positive categories like "subscription"
+      if (category.name.toLowerCase().contains('subscription') ||
+          category.name.toLowerCase().contains('service')) {
+        score = (score * 0.7).round(); // 30% penalty
+      }
+
+      if (score > maxScore && score >= 20) { // Minimum threshold
         maxScore = score;
         bestMatch = category;
       }

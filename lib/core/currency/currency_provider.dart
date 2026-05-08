@@ -9,6 +9,7 @@ final currencyServiceProvider = FutureProvider<CurrencyService>((ref) async {
   final config = AppConfigService(isar);
   final service = CurrencyService(isar, config);
   await service.seedIfEmpty();
+  await service.loadRateCache();
   // Sync static accessor
   final base = await service.getBaseCurrency();
   BaseCurrency.sync(base);
@@ -22,6 +23,6 @@ final baseCurrencyProvider = FutureProvider<String>((ref) async {
 
 /// Returns the icon for the current base currency.
 final baseCurrencyIconProvider = Provider<IconData>((ref) {
-  final code = ref.watch(baseCurrencyProvider).valueOrNull;
+  final code = ref.watch(baseCurrencyProvider).value;
   return currencyIcon(code);
 });

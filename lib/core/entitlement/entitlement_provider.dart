@@ -68,7 +68,7 @@ final canCreateTripProvider = FutureProvider.autoDispose<bool>((ref) {
 
 /// Watches Pro/trial status and reverts to free theme if access expires.
 final themeEntitlementGuardProvider = Provider.autoDispose<void>((ref) {
-  final hasAccess = ref.watch(hasFullAccessProvider).valueOrNull ?? true;
+  final hasAccess = ref.watch(hasFullAccessProvider).value ?? true;
   if (!hasAccess) {
     final currentTheme = ref.read(themeNotifierProvider);
     if (currentTheme.isPro) {

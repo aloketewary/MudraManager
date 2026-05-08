@@ -1,7 +1,9 @@
-import 'package:intl/intl.dart';
+import 'package:mudra_manager/core/utils/safe_date_format.dart';
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
+import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/features/dashboard/presentation/widgets/financial_health_card.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mudra_manager/shared/widgets/ambient_brand_section.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 import 'package:mudra_manager/core/currency/currency_service.dart';
@@ -25,6 +27,7 @@ import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import 'package:mudra_manager/shared/widgets/skeleton_loader.dart';
+import 'package:mudra_manager/shared/widgets/inline_error.dart';
 
 class StatisticsScreen extends ConsumerStatefulWidget {
   const StatisticsScreen({super.key});
@@ -132,6 +135,10 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                       _buildNarrativeZone(d, color, textTheme, spacing),
                       SizedBox(height: spacing.sectionGap),
 
+                      // SPENDING TRENDS
+                      _buildSpendingTrendsLink(color, textTheme, spacing),
+                      SizedBox(height: spacing.sectionGap),
+
                       // ZONE 3: THE INTELLIGENCE (Insights & Actions)
                       _buildIntelligenceZone(
                         d,
@@ -146,13 +153,17 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                       _buildTagSpendingZone(color, textTheme, spacing),
                       SizedBox(height: spacing.elementGap),
 
-                      // ZONE 4: FINANCIAL HEALTH
+                      // CASH FLOW FORECAST
+                      _buildCashFlowLink(color, textTheme, spacing),
+                      SizedBox(height: spacing.elementGap),
+
+                      // FINANCIAL HEALTH
                       const FinancialHealthCard(
                         globalPadding: 0,
                       ),
                       SizedBox(height: spacing.elementGap),
 
-                      // ZONE 5: SPENDING PERSONALITY
+                      // SPENDING PERSONALITY
                       const SpendingPersonalityCard(
                         globalPadding: 0,
                       ),
@@ -226,6 +237,104 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSpendingTrendsLink(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
+    final ctxt = AppLocalizations.of(context)!;
+    return Card(
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      color: color.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        side: BorderSide(color: color.outlineVariant.withValues(alpha: 0.5)),
+      ),
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.mediumImpact();
+          context.push(AppRoutes.spendingTrends);
+        },
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        child: Padding(
+          padding: EdgeInsets.all(spacing.cardInner),
+          child: Row(
+            children: [
+              Icon(LucideIcons.chartSpline, color: color.primary, size: 22),
+              SizedBox(width: spacing.elementGap),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      ctxt.analytics_spendingTrendsTitle,
+                      style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      ctxt.utility_spendingTrendsSubtitle,
+                      style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(LucideIcons.chevronRight, size: 16, color: color.onSurfaceVariant.withValues(alpha: 0.5)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCashFlowLink(
+    ColorScheme color,
+    TextTheme textTheme,
+    AppSpacing spacing,
+  ) {
+    final ctxt = AppLocalizations.of(context)!;
+    return Card(
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      color: color.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        side: BorderSide(color: color.outlineVariant.withValues(alpha: 0.5)),
+      ),
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.mediumImpact();
+          context.push(AppRoutes.cashFlowForecast);
+        },
+        borderRadius: BorderRadius.circular(spacing.radiusMedium),
+        child: Padding(
+          padding: EdgeInsets.all(spacing.cardInner),
+          child: Row(
+            children: [
+              Icon(LucideIcons.trendingUp, color: color.primary, size: 22),
+              SizedBox(width: spacing.elementGap),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      ctxt.analytics_cashFlowForecast,
+                      style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      ctxt.utility_cashFlowSubtitle,
+                      style: textTheme.bodySmall?.copyWith(color: color.onSurfaceVariant),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(LucideIcons.chevronRight, size: 16, color: color.onSurfaceVariant.withValues(alpha: 0.5)),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -967,7 +1076,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                 );
               },
               loading: () => const SizedBox.shrink(),
-              error: (_, __) => const SizedBox.shrink(),
+              error: (_, __) => const InlineError(),
             );
           },
         ),
@@ -1066,7 +1175,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                                               ),
                                             ),
                                             if (trend.changePercent != 0) ...[
-                                              const SizedBox(width: 8),
+                                              SizedBox(width: spacing.elementGap),
                                               Container(
                                                 padding:
                                                     const EdgeInsets.symmetric(
@@ -1119,7 +1228,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                                         ),
                                       ],
                                     ),
-                                    const SizedBox(height: 8),
+                                    SizedBox(height: spacing.elementGap),
                                     _AnimatedMetricBar(
                                       progress: (trend.thisMonth /
                                               sortedTrends.first.thisMonth)
@@ -1137,7 +1246,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                 );
               },
               loading: () => const SizedBox.shrink(),
-              error: (_, __) => const SizedBox.shrink(),
+              error: (_, __) => const InlineError(),
             );
           },
         ),
@@ -1198,7 +1307,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                                         size: 16,
                                         color: color.tertiary,
                                       ),
-                                      const SizedBox(width: 8),
+                                      SizedBox(width: spacing.elementGap),
                                       Text(
                                         ts.tag.name,
                                         style: textTheme.bodyLarge?.copyWith(
@@ -1215,7 +1324,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
-                                      const SizedBox(width: 8),
+                                      SizedBox(width: spacing.elementGap),
                                       Text(
                                         '${ts.count} txn',
                                         style: textTheme.bodySmall?.copyWith(
@@ -1226,10 +1335,11 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 8),
+                              SizedBox(height: spacing.elementGap),
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(4),
                                 child: LinearProgressIndicator(
+                                  semanticsLabel: 'Progress',
                                   value:
                                       (ts.amount / maxAmount).clamp(0.0, 1.0),
                                   backgroundColor:
@@ -1249,7 +1359,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
             );
           },
           loading: () => const SizedBox.shrink(),
-          error: (_, __) => const SizedBox.shrink(),
+          error: (_, __) => const InlineError(),
         );
       },
     );
@@ -1504,7 +1614,7 @@ class _NetWorthCard extends ConsumerWidget {
         );
       },
       loading: () => const SizedBox.shrink(),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (_, __) => const InlineError(),
     );
   }
 }
@@ -1593,13 +1703,13 @@ class _PulseCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Icon(icon, color: cardColor, size: 20),
-                const SizedBox(height: 8),
+                SizedBox(height: spacing.elementGap),
                 Text(
                   label,
                   style: textTheme.bodySmall
                       ?.copyWith(color: color.onSurfaceVariant),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: spacing.elementGapMin),
                 isPercentage
                     ? Text(
                         '${value.toStringAsFixed(1)}%',
@@ -1681,6 +1791,7 @@ class _AnimatedScoreRingState extends State<_AnimatedScoreRing>
                 width: 72,
                 height: 72,
                 child: CircularProgressIndicator(
+                  semanticsLabel: 'Loading',
                   value: value,
                   strokeWidth: 6,
                   strokeCap: StrokeCap.round,
@@ -1754,6 +1865,7 @@ class _AnimatedMetricBarState extends State<_AnimatedMetricBar>
       child: AnimatedBuilder(
         animation: _anim,
         builder: (_, __) => LinearProgressIndicator(
+          semanticsLabel: 'Progress',
           value: _anim.value * widget.progress,
           minHeight: 8,
           backgroundColor: widget.bgColor,
@@ -1833,6 +1945,7 @@ class _FullScreenTrendChartState extends ConsumerState<_FullScreenTrendChart> {
       backgroundColor: color.surface,
       appBar: AppBar(
         leading: IconButton(
+          tooltip: 'Close',
           icon: const Icon(LucideIcons.x),
           onPressed: widget.onClose,
         ),
@@ -1847,6 +1960,7 @@ class _FullScreenTrendChartState extends ConsumerState<_FullScreenTrendChart> {
         actions: [
           if (_selectedMonthIndex != null)
             IconButton(
+              tooltip: 'Back',
               icon: const Icon(LucideIcons.arrowLeft),
               onPressed: () => setState(() => _selectedMonthIndex = null),
             ),
@@ -1959,7 +2073,7 @@ class _FullScreenTrendChartState extends ConsumerState<_FullScreenTrendChart> {
                 final month =
                     DateTime(now.year, now.month - (11 - value.toInt()));
                 return Text(
-                  DateFormat('MMM').format(month),
+                  safeDateFormat('MMM', AppLocalizations.of(context)!.localeName).format(month),
                   style: textTheme.labelSmall?.copyWith(
                     color: color.onSurfaceVariant.withValues(alpha: 0.6),
                     fontSize: 10,
@@ -2191,6 +2305,6 @@ class _FullScreenTrendChartState extends ConsumerState<_FullScreenTrendChart> {
 
   String _monthLabel(DateTime now, int index) {
     final month = DateTime(now.year, now.month - (11 - index));
-    return DateFormat('MMMM yyyy').format(month);
+    return safeDateFormat('MMMM yyyy', AppLocalizations.of(context)!.localeName).format(month);
   }
 }

@@ -16,12 +16,13 @@ final allTonePacks = <TonePack>[
 ];
 
 /// Currently selected tone pack provider.
-final tonePackProvider = StateNotifierProvider<TonePackNotifier, TonePack>(
-  (ref) => TonePackNotifier(),
+final tonePackProvider = NotifierProvider<TonePackNotifier, TonePack>(
+  TonePackNotifier.new,
 );
 
-class TonePackNotifier extends StateNotifier<TonePack> {
-  TonePackNotifier() : super(_loadFromPrefs());
+class TonePackNotifier extends Notifier<TonePack> {
+  @override
+  TonePack build() => _loadFromPrefs();
 
   static TonePack _loadFromPrefs() {
     var id = SharedPrefsUtil.instance.getString(_prefKey) ?? 'friendly';

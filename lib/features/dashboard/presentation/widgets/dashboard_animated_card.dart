@@ -1,4 +1,5 @@
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/extension/account_type_extenstion.dart';
@@ -270,7 +271,7 @@ class _AnimatedAccountCard extends State<AnimatedAccountCard> {
                               color: textColor,
                               fontWeight: FontWeight.w600,
                               letterSpacing: 2.0,
-                              fontFamily: 'monospace',
+                              fontFamily: AppTheme.monoFontFamily,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),

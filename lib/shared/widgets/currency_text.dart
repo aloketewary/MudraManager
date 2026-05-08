@@ -88,39 +88,49 @@ class CurrencyText extends StatelessWidget {
 
     return Tooltip(
       message: _buildTooltip(ctxt, effectiveCode, meta, sign),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.baseline,
-        textBaseline: TextBaseline.alphabetic,
-        children: [
-          if (sign.isNotEmpty)
-            Text(sign, style: effectiveStyle),
-          Text(symbolText, style: symbolStyle),
-          if (showCode && (meta?.cleanSymbol ?? false))
-            Text(
-              ' ',
-              style: symbolStyle.copyWith(fontSize: (effectiveStyle.fontSize ?? 14) * 0.3),
-            ),
-          if (showCode && (meta?.cleanSymbol ?? false))
-            Text(
-              effectiveCode,
-              style: symbolStyle.copyWith(
-                fontSize: (effectiveStyle.fontSize ?? 14) * 0.6,
-                letterSpacing: 0.3,
+      child: Semantics(
+        label: _buildSemanticLabel(meta, effectiveCode, sign),
+        excludeSemantics: true,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            if (sign.isNotEmpty)
+              Text(sign, style: effectiveStyle),
+            Text(symbolText, style: symbolStyle),
+            if (showCode && (meta?.cleanSymbol ?? false))
+              Text(
+                ' ',
+                style: symbolStyle.copyWith(fontSize: (effectiveStyle.fontSize ?? 14) * 0.3),
+              ),
+            if (showCode && (meta?.cleanSymbol ?? false))
+              Text(
+                effectiveCode,
+                style: symbolStyle.copyWith(
+                  fontSize: (effectiveStyle.fontSize ?? 14) * 0.6,
+                  letterSpacing: 0.3,
+                ),
+              ),
+            Flexible(
+              child: AdaptiveText(
+                displayText,
+                style: effectiveStyle,
+                maxLines: maxLines,
+                textAlign: textAlign,
+                isNumeric: true,
               ),
             ),
-          Flexible(
-            child: AdaptiveText(
-              displayText,
-              style: effectiveStyle,
-              maxLines: maxLines,
-              textAlign: textAlign,
-              isNumeric: true,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
+  }
+
+  String _buildSemanticLabel(CurrencyMeta? meta, String code, String sign) {
+    final name = meta?.name ?? code;
+    final signLabel = sign == '-' ? 'minus ' : '';
+    return '$signLabel${amount.abs().toStringAsFixed(0)} $name';
   }
 
   /// Returns the symbol prefix string.

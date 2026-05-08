@@ -32,6 +32,7 @@ class TransactionSearchBar extends StatelessWidget {
             prefixIcon: Icon(LucideIcons.search, color: color.primary, size: 22),
             suffixIcon: searchQuery.isNotEmpty
                 ? IconButton(
+                  tooltip: 'Close',
                     icon: const Icon(LucideIcons.x, size: 20),
                     onPressed: () {
                       HapticFeedback.mediumImpact();

@@ -241,7 +241,7 @@ class _DashboardCustomizeScreenState
                 SizedBox(height: spacing.elementGap),
                 Consumer(
                   builder: (context, ref, _) {
-                    final isPro = ref.watch(hasFullAccessProvider).valueOrNull ?? false;
+                    final isPro = ref.watch(hasFullAccessProvider).value ?? false;
                     return Row(
                       children: [
                         Icon(LucideIcons.sparkles, size: 14, color: accent),

@@ -6,12 +6,15 @@ import 'package:mudra_manager/core/db/isar_service.dart';
 
 class RecurringDetectorService {
   static const _minOccurrences = 2;
+  final IsarService _isarService;
+
+  RecurringDetectorService(this._isarService);
 
   /// Called after every transaction save (manual or SMS).
   /// First tries to link to an existing recurring bill by exact amount + account + date window.
   /// If no match, falls back to pattern detection from history.
-  static Future<void> detectAndTagRecurring(Transaction newTransaction) async {
-    final isar = await IsarService().getInstance();
+  Future<void> detectAndTagRecurring(Transaction newTransaction) async {
+    final isar = await _isarService.getInstance();
 
     if (newTransaction.recurringTransactionSource.value != null) return;
 
@@ -24,7 +27,7 @@ class RecurringDetectorService {
   }
 
   /// Match by exact amount, same account, within the recurring bill's date window.
-  static Future<bool> _tryLinkToExistingRecurring(
+  Future<bool> _tryLinkToExistingRecurring(
     Isar isar,
     Transaction newTransaction,
   ) async {
@@ -77,7 +80,7 @@ class RecurringDetectorService {
   }
 
   /// Fallback: detect recurring pattern from similar past transactions.
-  static Future<void> _detectPatternFromHistory(
+  Future<void> _detectPatternFromHistory(
     Isar isar,
     Transaction newTransaction,
   ) async {

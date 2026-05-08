@@ -97,6 +97,7 @@ class _ApproveTransactionSheetState extends State<ApproveTransactionSheet> {
                 ),
                 const Spacer(),
                 IconButton(
+                  tooltip: 'Close',
                   icon: const Icon(LucideIcons.x),
                   onPressed: () => Navigator.pop(context),
                 ),

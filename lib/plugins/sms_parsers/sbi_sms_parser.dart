@@ -11,7 +11,7 @@ class SbiSmsParserPlugin extends SmsParserPlugin {
   String get bankName => 'SBI';
 
   @override
-  List<String> get senderNames => ['SBI', 'SBIINB', 'SBIPSG'];
+  List<String> get senderNames => ['SBI', 'STATE BANK'];
 
   @override
   String get iconPath => 'assets/logo/banks/sbi.svg';
@@ -19,7 +19,7 @@ class SbiSmsParserPlugin extends SmsParserPlugin {
   @override
   bool canParse(String sender) {
     final s = sender.toUpperCase();
-    return s.contains('SBI');
+    return s.contains('SBI') || s.contains('STATE BANK');
   }
 
   // Matches: Rs.1234.56, Rs 1234.56, Rs1234.5, INR 1234.56, INR1234.56

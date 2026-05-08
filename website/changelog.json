@@ -1,12 +1,123 @@
 [
   {
+    "version": "3.5.3",
+    "build": 45,
+    "date": "2026-06-15",
+    "title": "Growth & Retention",
+    "summary": "Smart notifications that bring you back, streaks that keep you going.",
+    "icon": "chart-line",
+    "tag": "LATEST",
+    "features": [
+      {
+        "type": "new",
+        "title": "Morning Money Minute",
+        "description": "Personalized spending insight every morning — yesterday's spend vs your average, top category breakdown."
+      },
+      {
+        "type": "new",
+        "title": "Under-Budget Spending Streak",
+        "description": "Track consecutive days under your daily budget allowance. 3 new achievements: Budget Keeper, Budget Warrior, Budget Legend."
+      },
+      {
+        "type": "new",
+        "title": "Weekly Recap Nudge",
+        "description": "Sunday evening push with your top spending category — drives you to the full weekly recap."
+      },
+      {
+        "type": "improved",
+        "title": "Smart Re-engagement",
+        "description": "Day 1-7 notifications now show real data — yesterday's spend, pending SMS count, budget status, weekly totals."
+      },
+      {
+        "type": "improved",
+        "title": "Architecture Overhaul",
+        "description": "SmartCheck interface, BudgetSpentCalculator, cached exchange rates, background task health monitoring."
+      }
+    ],
+    "fixes": [
+      "Fixed subcategory delete deleting parent category instead",
+      "Fixed manage accounts total balance not accounting for credit card debt",
+      "Moved Add Transaction save button to AppBar",
+      "Added inline validation with scroll-to-field for missing account/category",
+      "Added undo support for SMS activity rejection",
+      "Fixed budget save button showing no loading state",
+      "Fixed dashboard stagger animation replaying on every tab switch"
+    ]
+  },
+  {
+    "version": "3.5.2",
+    "build": 43,
+    "date": "2026-06-08",
+    "title": "Field-Level Encryption",
+    "summary": "Your sensitive data is now encrypted at rest with AES-256.",
+    "icon": "lock",
+    "features": [
+      {
+        "type": "new",
+        "title": "AES-256 Encryption",
+        "description": "SMS body, merchant info, and transaction descriptions encrypted before storage. Key in Android Keystore / iOS Keychain."
+      },
+      {
+        "type": "improved",
+        "title": "One-Time Migration",
+        "description": "Existing plaintext data automatically encrypted on first launch after update."
+      }
+    ],
+    "fixes": []
+  },
+  {
+    "version": "3.5.1",
+    "build": 41,
+    "date": "2026-05-25",
+    "title": "International SMS & Architecture Fixes",
+    "summary": "50+ countries supported. 25+ critical bugs fixed.",
+    "icon": "globe",
+    "features": [
+      {
+        "type": "new",
+        "title": "International SMS Parsers",
+        "description": "Auto-import from banks in Brazil, Indonesia, UAE, Saudi, Nigeria, Kenya, Mexico, France, Germany, Turkey, and 40+ more."
+      },
+      {
+        "type": "new",
+        "title": "RCS Support",
+        "description": "Google Messages and Samsung Messages RCS notifications now parsed alongside traditional SMS."
+      },
+      {
+        "type": "new",
+        "title": "37 Languages",
+        "description": "Full EN, HI, BN + partial ES, PT, ID + stubs for all 22 scheduled Indian languages."
+      },
+      {
+        "type": "new",
+        "title": "Bill Paid Notifications",
+        "description": "Get notified when recurring bills are auto-created or SMS-matched."
+      },
+      {
+        "type": "improved",
+        "title": "1246 Tests",
+        "description": "148 E2E tests, 37 pipeline simulations, 31 international parser tests."
+      }
+    ],
+    "fixes": [
+      "Fixed SMS sender detection on dual-SIM phones",
+      "Fixed budget alerts never firing",
+      "Fixed analytics showing all 'Uncategorized'",
+      "Fixed month-end date drift in recurring transactions",
+      "Fixed budget spending for tag-wise, day-wise, festival, travel types",
+      "Fixed YES Bank parser not matching",
+      "Fixed notification settings toggles swapped",
+      "Fixed daily summary firing without opt-in",
+      "Fixed division by zero in budget alerts"
+    ]
+  },
+  {
     "version": "3.4.17",
     "build": 38,
     "date": "2026-04-03",
     "title": "Tone & Voice System",
     "summary": "Your app, your personality. Mudra now talks the way you want.",
     "icon": "comment-dots",
-    "tag": "LATEST",
     "features": [
       {
         "type": "new",

@@ -8,8 +8,7 @@ import 'package:path_provider/path_provider.dart';
 Future<Directory> getSaveDirectory({bool askUser = false}) async {
   if (askUser) {
     // SAF: Let user pick location
-    final String? selectedDirectory = await FilePicker.platform
-        .getDirectoryPath();
+    final String? selectedDirectory = await FilePicker.getDirectoryPath();
     if (selectedDirectory != null) {
       return Directory(selectedDirectory);
     }

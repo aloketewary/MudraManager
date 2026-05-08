@@ -1,7 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 import 'package:mudra_manager/core/db/models/recurring_transaction.dart';
+import 'package:mudra_manager/core/providers/collection_watchers.dart';
+import 'package:mudra_manager/core/providers/date_change_provider.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/features/goal/data/goal_provider.dart';
@@ -26,12 +29,16 @@ enum AlertType {
   info, // Blue - informational
 }
 
+/// Returns up to 3 priority alerts, ordered by severity (urgent first).
 final priorityAlertProvider =
-    FutureProvider.autoDispose<PriorityAlert?>((ref) async {
+    FutureProvider.autoDispose<List<PriorityAlert>>((ref) async {
+  ref.watch(transactionChangeProvider);
+  ref.watch(dateChangeProvider);
   final isar = ref.watch(isarServiceProvider);
   final db = await isar.getInstance();
+  final alerts = <PriorityAlert>[];
 
-  // Check for bills due in next 2 days
+  // ── Bills due in next 2 days ──
   final now = DateTime.now();
   final twoDaysLater = now.add(const Duration(days: 2));
 
@@ -55,56 +62,56 @@ final priorityAlertProvider =
         .length;
 
     if (billsDueTomorrow > 0) {
-      return PriorityAlert(
-        title: 'Action Needed',
-        message:
+      alerts.add(PriorityAlert(
+        title: Tone.appL10n?.alert_actionNeeded ?? 'Action Needed',
+        message: Tone.appL10n?.alert_billsDueTomorrow(billsDueTomorrow) ??
             '$billsDueTomorrow bill${billsDueTomorrow > 1 ? 's' : ''} due tomorrow',
         route: AppRoutes.recurringTransactions,
         type: AlertType.urgent,
-      );
+      ),);
+    } else {
+      alerts.add(PriorityAlert(
+        title: Tone.appL10n?.alert_upcomingBills ?? 'Upcoming Bills',
+        message: Tone.appL10n?.alert_billsDueInDays(upcomingBills.length) ??
+            '${upcomingBills.length} bill${upcomingBills.length > 1 ? 's' : ''} due in 2 days',
+        route: AppRoutes.recurringTransactions,
+        type: AlertType.warning,
+      ),);
     }
-
-    return PriorityAlert(
-      title: 'Upcoming Bills',
-      message:
-          '${upcomingBills.length} bill${upcomingBills.length > 1 ? 's' : ''} due in 2 days',
-      route: AppRoutes.recurringTransactions,
-      type: AlertType.warning,
-    );
   }
 
-  // Check for budget overruns
+  // ── Budget overruns ──
   final budgetsAsync = await ref.watch(budgetsWithProgressProvider.future);
   final overBudget =
       budgetsAsync.where((b) => b.spent > b.budget.amount).toList();
 
   if (overBudget.isNotEmpty) {
-    return PriorityAlert(
-      title: 'Budget Alert',
-      message:
+    alerts.add(PriorityAlert(
+      title: Tone.appL10n?.alert_budgetAlert ?? 'Budget Alert',
+      message: Tone.appL10n?.alert_budgetsExceeded(overBudget.length) ??
           '${overBudget.length} budget${overBudget.length > 1 ? 's' : ''} exceeded',
       route: AppRoutes.budgetDashboard,
       type: AlertType.urgent,
-    );
+    ),);
   }
 
-  // Check for budgets near limit (>90%)
+  // ── Budgets near limit (>90%) ──
   final nearLimit = budgetsAsync.where((b) {
     final percent = (b.spent / b.budget.amount * 100);
     return percent >= 90 && percent < 100;
   }).toList();
 
   if (nearLimit.isNotEmpty) {
-    return PriorityAlert(
-      title: 'Budget Warning',
-      message:
+    alerts.add(PriorityAlert(
+      title: Tone.appL10n?.alert_budgetWarning ?? 'Budget Warning',
+      message: Tone.appL10n?.alert_budgetsNearLimit(nearLimit.length) ??
           '${nearLimit.length} budget${nearLimit.length > 1 ? 's' : ''} near limit',
       route: AppRoutes.budgetDashboard,
       type: AlertType.warning,
-    );
+    ),);
   }
 
-  // Check for goals near completion (>80%)
+  // ── Goals near completion (>80%) ──
   final goalsAsync = await ref.watch(goalsProvider.future);
   final nearCompletion = goalsAsync
       .where(
@@ -113,14 +120,16 @@ final priorityAlertProvider =
       .toList();
 
   if (nearCompletion.isNotEmpty) {
-    return PriorityAlert(
-      title: 'Goal Progress',
-      message:
+    alerts.add(PriorityAlert(
+      title: Tone.appL10n?.alert_goalProgress ?? 'Goal Progress',
+      message: Tone.appL10n?.alert_goalsAlmostComplete(nearCompletion.length) ??
           '${nearCompletion.length} goal${nearCompletion.length > 1 ? 's' : ''} almost complete!',
       route: AppRoutes.goalScreen,
       type: AlertType.info,
-    );
+    ),);
   }
 
-  return null;
+  // Sort by severity: urgent > warning > info, cap at 3
+  alerts.sort((a, b) => a.type.index.compareTo(b.type.index));
+  return alerts.take(3).toList();
 });

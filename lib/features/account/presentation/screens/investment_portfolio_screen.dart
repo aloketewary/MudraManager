@@ -9,9 +9,14 @@ import 'package:mudra_manager/core/db/models/account.dart';
 import 'package:mudra_manager/core/db/models/investment_holding.dart';
 import 'package:mudra_manager/core/utils/snackbar_service.dart';
 import 'package:mudra_manager/features/account/data/investment_portfolio_service.dart';
+import 'package:mudra_manager/core/providers/isar_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/features/profile/data/guest_mode_provider.dart';
 import 'package:mudra_manager/core/utils/guest_mode_util.dart';
+
+final investmentPortfolioServiceProvider = Provider<InvestmentPortfolioService>((ref) {
+  return InvestmentPortfolioService(ref.watch(isarServiceProvider));
+});
 
 class InvestmentPortfolioScreen extends ConsumerStatefulWidget {
   final Account account;
@@ -40,8 +45,8 @@ class _InvestmentPortfolioScreenState
   void _loadData() {
     setState(() {
       _holdingsFuture =
-          InvestmentPortfolioService.instance.getPortfolio(widget.account.id);
-      _metricsFuture = InvestmentPortfolioService.instance
+          ref.read(investmentPortfolioServiceProvider).getPortfolio(widget.account.id);
+      _metricsFuture = ref.read(investmentPortfolioServiceProvider)
           .getPortfolioMetrics(widget.account.id);
     });
   }
@@ -419,11 +424,11 @@ class _InvestmentPortfolioScreenState
                                     0,
                                 purchaseDate: DateTime.now(),
                               );
-                              await InvestmentPortfolioService.instance
+                              await ref.read(investmentPortfolioServiceProvider)
                                   .addHolding(holding, widget.account.id);
                               _loadData();
                               SnackbarService.info(BuddyMessages.txnAdded);
-                              if (mounted) {
+                              if (context.mounted) {
                                 formContext.pop();
                               }
                             } catch (e) {

@@ -211,6 +211,7 @@ class _SwipeableWeeklyCalendarState extends State<SwipeableWeeklyCalendar> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 IconButton(
+                  tooltip: 'Previous',
                   icon: Icon(LucideIcons.chevronLeft, color: color.primary),
                   onPressed: _goToPreviousWeek,
                 ),
@@ -225,6 +226,7 @@ class _SwipeableWeeklyCalendarState extends State<SwipeableWeeklyCalendar> {
                   ),
                 ),
                 IconButton(
+                  tooltip: 'Next',
                   icon: Icon(LucideIcons.chevronRight, color: color.primary),
                   onPressed: _goToNextWeek,
                 ),

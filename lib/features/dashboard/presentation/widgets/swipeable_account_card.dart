@@ -1,4 +1,5 @@
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mudra_manager/core/theme/app_theme.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'package:mudra_manager/shared/widgets/no_data_found.dart';
 import 'dart:math' as math;
@@ -84,7 +85,7 @@ class _AnimatedSwipeableAccountCardsState
     final isGuestMode = ref.watch(guestModeProvider);
     final displayStyle = ref.watch(accountDisplayStyleProvider);
 
-    final data = dashboardAsync.valueOrNull;
+    final data = dashboardAsync.value;
     if (data == null) {
       return const Column(children: [AccountCardSkeleton()]);
     }
@@ -548,7 +549,7 @@ class _AnimatedSwipeableAccountCardsState
                                                     ?.copyWith(
                                                   color: Colors.white,
                                                   fontWeight: FontWeight.w700,
-                                                  fontFamily: 'monospace',
+                                                  fontFamily: AppTheme.monoFontFamily,
                                                 ),
                                               ),
                                             ],
@@ -865,7 +866,7 @@ class _AnimatedSwipeableAccountCardsState
                     style: textTheme.titleLarge?.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
-                      fontFamily: 'monospace',
+                      fontFamily: AppTheme.monoFontFamily,
                     ),
                   ),
                 ],
@@ -903,7 +904,7 @@ class _AnimatedSwipeableAccountCardsState
                     style: textTheme.titleMedium?.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
-                      fontFamily: 'monospace',
+                      fontFamily: AppTheme.monoFontFamily,
                     ),
                   ),
                 ],
@@ -995,7 +996,7 @@ class _AnimatedSwipeableAccountCardsState
                           color: Colors.white,
                           letterSpacing: 2,
                           fontWeight: FontWeight.w700,
-                          fontFamily: 'monospace',
+                          fontFamily: AppTheme.monoFontFamily,
                         ),
                       ),
                     ],

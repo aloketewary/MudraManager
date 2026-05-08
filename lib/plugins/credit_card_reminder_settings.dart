@@ -111,6 +111,7 @@ class _CreditCardReminderSettingsState extends State<CreditCardReminderSettings>
             children: [
               Text('Credit Cards', style: Theme.of(context).textTheme.titleLarge),
               IconButton(
+                tooltip: 'Add',
                 icon: const Icon(LucideIcons.circlePlus),
                 onPressed: _addCard,
               ),
@@ -137,10 +138,12 @@ class _CreditCardReminderSettingsState extends State<CreditCardReminderSettings>
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
+                        tooltip: 'Edit',
                         icon: const Icon(LucideIcons.pencil),
                         onPressed: () => _editCard(index),
                       ),
                       IconButton(
+                        tooltip: 'Delete',
                         icon: const Icon(LucideIcons.trash2),
                         onPressed: () => _deleteCard(index),
                       ),

@@ -5,16 +5,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/plugins/export_plugin_manager.dart';
+import 'package:mudra_manager/core/providers/singleton_providers.dart';
 import 'package:mudra_manager/plugins/export_plugin.dart';
 import 'package:mudra_manager/core/utils/file_utils.dart';
 import 'package:intl/intl.dart';
 
 final exportFormatsProvider = FutureProvider.autoDispose<List<String>>((ref) async {
-  return ExportPluginManager.instance.getSupportedFormats();
+  return ref.read(exportPluginManagerProvider).getSupportedFormats();
 });
 
 final exportTemplatesProvider = FutureProvider.autoDispose.family<List<String>, String>((ref, format) async {
-  return ExportPluginManager.instance.getTemplatesForFormat(format);
+  return ref.read(exportPluginManagerProvider).getTemplatesForFormat(format);
 });
 
 class ExportOptionsScreen extends ConsumerWidget {

@@ -75,7 +75,7 @@ class _ReconciliationScreenState extends ConsumerState<ReconciliationScreen> {
       ref.invalidate(transactionProvider);
       ref.invalidate(accountsProvider);
 
-      if (mounted) {
+      if (context.mounted) {
         if (adj.abs() < 0.01) {
           SnackbarService.success(BuddyMessages.txnAdded);
         } else {
