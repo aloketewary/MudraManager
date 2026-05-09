@@ -92,10 +92,12 @@ class _AnimatedSwipeableAccountCardsState
 
     final accounts = data.accounts;
     if (accounts.isEmpty) {
-      return Center(child: NoDataFound(
-        message: BuddyMessages.noAccounts,
-        iconData: LucideIcons.wallet,
-      ),);
+      return Center(
+        child: NoDataFound(
+          message: BuddyMessages.noAccounts,
+          iconData: LucideIcons.wallet,
+        ),
+      );
     }
 
     final balanceMap = data.accountBalances;
@@ -194,7 +196,7 @@ class _AnimatedSwipeableAccountCardsState
                 HapticFeedback.lightImpact();
                 context.push(AppRoutes.netWorth);
               },
-              borderRadius: BorderRadius.circular(spacing.radiusSmall),
+              borderRadius: spacing.borderRadiusSmall,
               child: Padding(
                 padding: EdgeInsets.symmetric(
                   horizontal: spacing.elementGap,
@@ -276,7 +278,7 @@ class _AnimatedSwipeableAccountCardsState
                   color: netCashFlow >= 0
                       ? color.primaryContainer
                       : color.errorContainer,
-                  borderRadius: BorderRadius.circular(spacing.radiusLarge),
+                  borderRadius: spacing.borderRadiusLarge,
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -320,7 +322,7 @@ class _AnimatedSwipeableAccountCardsState
                 ),
                 decoration: BoxDecoration(
                   color: color.surfaceContainerHighest.withValues(alpha: 0.6),
-                  borderRadius: BorderRadius.circular(spacing.radiusSmall),
+                  borderRadius: spacing.borderRadiusSmall,
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -946,9 +948,8 @@ class _AnimatedSwipeableAccountCardsState
             child: Container(
               decoration: BoxDecoration(
                 color: Color(account.colorValue ?? 0xFF6B4CE6),
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(spacing.radiusLarge),
-                  topRight: Radius.circular(spacing.radiusLarge),
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(spacing.radiusLarge),
                 ),
               ),
               padding: EdgeInsets.symmetric(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -112,7 +113,6 @@ class RecentTransactionsCard extends ConsumerWidget {
                 return InkWell(
                   onTap: () {
                     HapticFeedback.lightImpact();
-                    // Navigate to transaction detail or edit
                   },
                   child: Padding(
                     padding: EdgeInsets.symmetric(
@@ -204,7 +204,10 @@ class RecentTransactionsCard extends ConsumerWidget {
                       ],
                     ),
                   ),
-                );
+                )
+                    .animate()
+                    .fadeIn(delay: (index * 50).ms, duration: 300.ms)
+                    .slideX(begin: 0.05, end: 0, curve: Curves.easeOutCubic);
               },
             ),
           ],

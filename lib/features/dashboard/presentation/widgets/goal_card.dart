@@ -42,7 +42,7 @@ class GoalCard extends ConsumerWidget {
             HapticFeedback.mediumImpact();
             context.push(AppRoutes.goalScreen);
           },
-          borderRadius: BorderRadius.circular(spacing.radiusLarge),
+          borderRadius: BorderRadius.circular(spacing.radiusMedium),
           child: Padding(
             padding: EdgeInsets.all(spacing.cardInner),
             child: Row(

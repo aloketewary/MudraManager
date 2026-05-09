@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mudra_manager/core/db/models/category.dart';
@@ -175,11 +176,35 @@ class AppRouter {
 
               GoRoute(
                 path: AppRoutes.smsActivity,
-                builder: (context, state) => const SmsActivityScreen(),
+                pageBuilder: (context, state) => CustomTransitionPage(
+                  key: state.pageKey,
+                  child: const SmsActivityScreen(),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                    return SharedAxisTransition(
+                      animation: animation,
+                      secondaryAnimation: secondaryAnimation,
+                      transitionType: SharedAxisTransitionType.horizontal,
+                      child: child,
+                    );
+                  },
+                ),
               ),
               GoRoute(
                 path: AppRoutes.notifications,
-                builder: (context, state) => const NotificationPage(),
+                pageBuilder: (context, state) => CustomTransitionPage(
+                  key: state.pageKey,
+                  child: const NotificationPage(),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                    return SharedAxisTransition(
+                      animation: animation,
+                      secondaryAnimation: secondaryAnimation,
+                      transitionType: SharedAxisTransitionType.horizontal,
+                      child: child,
+                    );
+                  },
+                ),
               ),
               GoRoute(
                 path: AppRoutes.editProfile,
@@ -187,7 +212,19 @@ class AppRouter {
               ),
               GoRoute(
                 path: AppRoutes.appSettings,
-                builder: (context, state) => const AppSettingsPage(),
+                pageBuilder: (context, state) => CustomTransitionPage(
+                  key: state.pageKey,
+                  child: const AppSettingsPage(),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                    return SharedAxisTransition(
+                      animation: animation,
+                      secondaryAnimation: secondaryAnimation,
+                      transitionType: SharedAxisTransitionType.horizontal,
+                      child: child,
+                    );
+                  },
+                ),
               ),
               GoRoute(
                 path: AppRoutes.dashboardCustomize,
@@ -242,11 +279,35 @@ class AppRouter {
               ),
               GoRoute(
                 path: AppRoutes.manageAccounts,
-                builder: (context, state) => const ManageAccountScreen(),
+                pageBuilder: (context, state) => CustomTransitionPage(
+                  key: state.pageKey,
+                  child: const ManageAccountScreen(),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                    return SharedAxisTransition(
+                      animation: animation,
+                      secondaryAnimation: secondaryAnimation,
+                      transitionType: SharedAxisTransitionType.horizontal,
+                      child: child,
+                    );
+                  },
+                ),
               ),
               GoRoute(
                 path: AppRoutes.manageCategories,
-                builder: (context, state) => const ManageCategoriesScreen(),
+                pageBuilder: (context, state) => CustomTransitionPage(
+                  key: state.pageKey,
+                  child: const ManageCategoriesScreen(),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                    return SharedAxisTransition(
+                      animation: animation,
+                      secondaryAnimation: secondaryAnimation,
+                      transitionType: SharedAxisTransitionType.horizontal,
+                      child: child,
+                    );
+                  },
+                ),
               ),
               GoRoute(
                 path: AppRoutes.addBudget,
@@ -275,24 +336,70 @@ class AppRouter {
               ),
               GoRoute(
                 path: AppRoutes.budgetDashboard,
-                builder: (context, state) => const AdaptiveBudgetDashboard(),
+                pageBuilder: (context, state) => CustomTransitionPage(
+                  key: state.pageKey,
+                  child: const AdaptiveBudgetDashboard(),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                    return SharedAxisTransition(
+                      animation: animation,
+                      secondaryAnimation: secondaryAnimation,
+                      transitionType: SharedAxisTransitionType.horizontal,
+                      child: child,
+                    );
+                  },
+                ),
               ),
               GoRoute(
                 path: AppRoutes.budgetDetails,
-                builder: (context, state) {
+                pageBuilder: (context, state) {
                   final data = state.extra as BudgetWithProgress;
-                  return BudgetDetailsScreen(data: data);
+                  return CustomTransitionPage(
+                    key: state.pageKey,
+                    child: BudgetDetailsScreen(data: data),
+                    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                      return SharedAxisTransition(
+                        animation: animation,
+                        secondaryAnimation: secondaryAnimation,
+                        transitionType: SharedAxisTransitionType.horizontal,
+                        child: child,
+                      );
+                    },
+                  );
                 },
               ),
               GoRoute(
                 path: AppRoutes.goalScreen,
-                builder: (context, state) => const GoalScreen(),
+                pageBuilder: (context, state) => CustomTransitionPage(
+                  key: state.pageKey,
+                  child: const GoalScreen(),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                    return SharedAxisTransition(
+                      animation: animation,
+                      secondaryAnimation: secondaryAnimation,
+                      transitionType: SharedAxisTransitionType.horizontal,
+                      child: child,
+                    );
+                  },
+                ),
               ),
               GoRoute(
                 path: AppRoutes.goalDetails,
-                builder: (context, state) {
+                pageBuilder: (context, state) {
                   final extra = state.extra as Map<String, dynamic>?;
-                  return GoalDetailsScreen(goal: extra?['goal']);
+                  return CustomTransitionPage(
+                    key: state.pageKey,
+                    child: GoalDetailsScreen(goal: extra?['goal']),
+                    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                      return SharedAxisTransition(
+                        animation: animation,
+                        secondaryAnimation: secondaryAnimation,
+                        transitionType: SharedAxisTransitionType.horizontal,
+                        child: child,
+                      );
+                    },
+                  );
                 },
               ),
               GoRoute(
@@ -325,14 +432,38 @@ class AppRouter {
               ),
               GoRoute(
                 path: AppRoutes.trips,
-                builder: (context, state) => const TripsScreen(),
+                pageBuilder: (context, state) => CustomTransitionPage(
+                  key: state.pageKey,
+                  child: const TripsScreen(),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                    return SharedAxisTransition(
+                      animation: animation,
+                      secondaryAnimation: secondaryAnimation,
+                      transitionType: SharedAxisTransitionType.horizontal,
+                      child: child,
+                    );
+                  },
+                ),
               ),
 
               GoRoute(
                 path: AppRoutes.tripDetail,
-                builder: (context, state) {
+                pageBuilder: (context, state) {
                   final tripId = state.extra as int;
-                  return GroupDetailDispatcher(tripId: tripId);
+                  return CustomTransitionPage(
+                    key: state.pageKey,
+                    child: GroupDetailDispatcher(tripId: tripId),
+                    transitionsBuilder:
+                        (context, animation, secondaryAnimation, child) {
+                      return SharedAxisTransition(
+                        animation: animation,
+                        secondaryAnimation: secondaryAnimation,
+                        transitionType: SharedAxisTransitionType.horizontal,
+                        child: child,
+                      );
+                    },
+                  );
                 },
               ),
               GoRoute(
@@ -371,9 +502,21 @@ class AppRouter {
               ),
               GoRoute(
                 path: AppRoutes.analytics,
-                builder: (context, state) => const ProGate(
-                  feature: ProFeature.advancedAnalytics,
-                  child: AnalyticsScreen(),
+                pageBuilder: (context, state) => CustomTransitionPage(
+                  key: state.pageKey,
+                  child: const ProGate(
+                    feature: ProFeature.advancedAnalytics,
+                    child: AnalyticsScreen(),
+                  ),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                    return SharedAxisTransition(
+                      animation: animation,
+                      secondaryAnimation: secondaryAnimation,
+                      transitionType: SharedAxisTransitionType.horizontal,
+                      child: child,
+                    );
+                  },
                 ),
               ),
               GoRoute(

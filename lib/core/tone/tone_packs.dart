@@ -510,6 +510,15 @@ class FriendlyTonePack extends TonePack {
   @override
   String weeklyRecapHookStat(String pct, String category) =>
       '$pct% of your spending went to $category';
+
+  @override
+  double get borderRadius => 20.0;
+  @override
+  double get cardElevation => 0.0;
+  @override
+  double get buttonRadius => 20.0;
+  @override
+  double get inputRadius => 12.0;
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1014,6 +1023,15 @@ class ProfessionalTonePack extends TonePack {
   @override
   String weeklyRecapHookStat(String pct, String category) =>
       '$pct% of expenditure allocated to $category.';
+
+  @override
+  double get borderRadius => 8.0;
+  @override
+  double get cardElevation => 1.0;
+  @override
+  double get buttonRadius => 4.0;
+  @override
+  double get inputRadius => 4.0;
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1546,6 +1564,15 @@ class MotivationalTonePack extends TonePack {
   @override
   String weeklyRecapHookStat(String pct, String category) =>
       '$pct% of your spending went to $category — interesting!';
+
+  @override
+  double get borderRadius => 28.0;
+  @override
+  double get cardElevation => 2.0;
+  @override
+  double get buttonRadius => 30.0;
+  @override
+  double get inputRadius => 16.0;
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -2042,4 +2069,13 @@ class CalmTonePack extends TonePack {
   @override
   String weeklyRecapHookStat(String pct, String category) =>
       '$pct% flowed to $category.';
+
+  @override
+  double get borderRadius => 16.0;
+  @override
+  double get cardElevation => 0.0;
+  @override
+  double get buttonRadius => 12.0;
+  @override
+  double get inputRadius => 12.0;
 }

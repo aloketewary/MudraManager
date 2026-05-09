@@ -317,10 +317,10 @@ class _MudraManagerAppState extends ConsumerState<MudraManagerApp> {
 
         return MaterialApp.router(
           title: 'Mudra Manager',
-          theme: appTheme.buildTheme(lightScheme),
+          theme: appTheme.buildTheme(lightScheme, activeTone),
           darkTheme: appThemeMode == AppThemeMode.amoled
-              ? appTheme.buildTheme(amoledScheme)
-              : appTheme.buildTheme(darkScheme),
+              ? appTheme.buildTheme(amoledScheme, activeTone)
+              : appTheme.buildTheme(darkScheme, activeTone),
           themeMode: switch (appThemeMode) {
             AppThemeMode.light => ThemeMode.light,
             AppThemeMode.dark => ThemeMode.dark,

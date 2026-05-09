@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 
 class PageTransitions {
   static const Duration _duration = Duration(milliseconds: 300);
@@ -53,30 +55,35 @@ class PageTransitions {
   }
 }
 
-class OpenContainerWrapper extends StatelessWidget {
+class OpenContainerWrapper extends ConsumerWidget {
   final Widget closedBuilder;
   final Widget Function(BuildContext) openBuilder;
   final Color? closedColor;
+  final double? borderRadius;
 
   const OpenContainerWrapper({
     super.key,
     required this.closedBuilder,
     required this.openBuilder,
     this.closedColor,
+    this.borderRadius,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+    final spacing = ref.watch(spacingProvider);
+
     return OpenContainer(
       closedElevation: 0,
       openElevation: 0,
       closedColor: closedColor ?? colorScheme.surfaceContainerHighest,
       openColor: colorScheme.surface,
       middleColor: colorScheme.surface,
-      closedShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      transitionDuration: const Duration(milliseconds: 300),
+      closedShape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(borderRadius ?? spacing.radiusMedium),
+      ),
+      transitionDuration: const Duration(milliseconds: 450),
       closedBuilder: (context, action) => closedBuilder,
       openBuilder: (context, action) => openBuilder(context),
     );

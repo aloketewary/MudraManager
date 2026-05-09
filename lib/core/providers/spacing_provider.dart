@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mudra_manager/core/theme/theme_provider.dart';
+import 'package:mudra_manager/core/tone/tone_provider.dart';
 
 class AppSpacing {
   // ── Layout Spacing ──
@@ -102,8 +103,11 @@ class AppSpacing {
 
   /// Comfortable spacing for accessibility / high contrast / elderly users.
   /// Larger touch targets, more breathing room, bolder strokes.
-  const AppSpacing.comfortable()
-      : // Layout — ~40% larger
+  const AppSpacing.comfortable({
+    double? rSmall,
+    double? rMedium,
+    double? rLarge,
+  })  : // Layout — ~40% larger
         cardHorizontalMin = 8.0,
         cardHorizontal = 14.0,
         cardHorizontalMax = 22.0,
@@ -116,9 +120,9 @@ class AppSpacing {
         elementGapMin = 8.0,
         elementGapUltraMin = 4.0,
         // Radius — slightly larger
-        radiusSmall = 10.0,
-        radiusMedium = 16.0,
-        radiusLarge = 20.0,
+        radiusSmall = rSmall ?? 10.0,
+        radiusMedium = rMedium ?? 16.0,
+        radiusLarge = rLarge ?? 20.0,
         // Icons — 2px larger
         iconXS = 16.0,
         iconSM = 18.0,
@@ -156,5 +160,24 @@ class AppSpacing {
 
 final spacingProvider = Provider<AppSpacing>((ref) {
   final highContrast = ref.watch(highContrastModeProvider);
-  return highContrast ? const AppSpacing.comfortable() : const AppSpacing();
+  final tone = ref.watch(tonePackProvider);
+
+  // Derived radii from TonePack
+  final rMed = tone.borderRadius;
+  final rSmall = (rMed * 0.6).clamp(4.0, 12.0);
+  final rLarge = (rMed * 1.4).clamp(16.0, 32.0);
+
+  if (highContrast) {
+    return AppSpacing.comfortable(
+      rSmall: rSmall + 2,
+      rMedium: rMed + 4,
+      rLarge: rLarge + 4,
+    );
+  }
+
+  return AppSpacing(
+    radiusSmall: rSmall,
+    radiusMedium: rMed,
+    radiusLarge: rLarge,
+  );
 });

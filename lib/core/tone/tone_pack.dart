@@ -234,4 +234,10 @@ abstract class TonePack {
   String reEngageDay3Budgets(int count);
   String reEngageDay7Spend(String amount);
   String weeklyRecapHookStat(String pct, String category);
+
+  // ── Styling ──
+  double get borderRadius;
+  double get cardElevation;
+  double get buttonRadius;
+  double get inputRadius;
 }

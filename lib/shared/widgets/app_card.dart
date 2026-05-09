@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 
-class AppCard extends StatelessWidget {
+class AppCard extends ConsumerWidget {
   final Widget child;
   final EdgeInsetsGeometry? padding;
   final Color? color;
@@ -17,10 +19,12 @@ class AppCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
+    final spacing = ref.watch(spacingProvider);
     final effectiveColor = color ?? colorScheme.surfaceContainer;
-    final effectiveBorderRadius = borderRadius ?? BorderRadius.circular(20);
+    final effectiveBorderRadius =
+        borderRadius ?? BorderRadius.circular(spacing.radiusMedium);
 
     return Card(
       elevation: 0,

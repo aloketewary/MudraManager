@@ -158,6 +158,7 @@ class _ModernCashFlowCardState extends ConsumerState<ModernCashFlowCard> {
     double amount,
     double previousValue,
   ) {
+    final spacing = ref.read(spacingProvider);
     final ctxt = AppLocalizations.of(context)!;
     final textTheme = Theme.of(context).textTheme;
     final brightness = Theme.of(context).brightness;
@@ -180,8 +181,8 @@ class _ModernCashFlowCardState extends ConsumerState<ModernCashFlowCard> {
             color: accent.withValues(alpha: 0.12),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.horizontal(
-                left: isExpense ? Radius.zero : const Radius.circular(12),
-                right: isExpense ? const Radius.circular(12) : Radius.zero,
+                left: isExpense ? Radius.zero : Radius.circular(spacing.radiusMedium),
+                right: isExpense ? Radius.circular(spacing.radiusMedium) : Radius.zero,
               ),
             ),
             child: Padding(

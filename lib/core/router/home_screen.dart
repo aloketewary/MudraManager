@@ -1,3 +1,4 @@
+import 'package:animations/animations.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
@@ -348,25 +349,36 @@ class HomePageState extends ConsumerState<HomePage>
         ),
         body: Stack(
           children: [
-            IndexedStack(
-              index: stackIndex,
-              children: [
-                const DashboardHome(),
-                TransactionListScreen(
-                  key: transactionListKey,
-                  isTabActive: stackIndex == 1,
-                  onScrollChanged: (isScrollingDown) {
-                    if (isScrollingDown) {
-                      _fabController.reverse();
-                    } else {
-                      _fabController.forward();
-                    }
-                  },
-                ),
-                UtilityScreen(key: utilityKey, isTabActive: stackIndex == 2),
-                const StatisticsScreen(),
-                const ProfileScreen(),
-              ],
+            PageTransitionSwitcher(
+              duration: const Duration(milliseconds: 400),
+              transitionBuilder: (child, primaryAnimation, secondaryAnimation) {
+                return FadeThroughTransition(
+                  animation: primaryAnimation,
+                  secondaryAnimation: secondaryAnimation,
+                  child: child,
+                );
+              },
+              child: IndexedStack(
+                key: ValueKey<int>(stackIndex),
+                index: stackIndex,
+                children: [
+                  const DashboardHome(),
+                  TransactionListScreen(
+                    key: transactionListKey,
+                    isTabActive: stackIndex == 1,
+                    onScrollChanged: (isScrollingDown) {
+                      if (isScrollingDown) {
+                        _fabController.reverse();
+                      } else {
+                        _fabController.forward();
+                      }
+                    },
+                  ),
+                  UtilityScreen(key: utilityKey, isTabActive: stackIndex == 2),
+                  const StatisticsScreen(),
+                  const ProfileScreen(),
+                ],
+              ),
             ),
             if (stackIndex == 1)
               ExpandableFab(
