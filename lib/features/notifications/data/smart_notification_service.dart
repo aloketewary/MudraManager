@@ -1,4 +1,5 @@
 import 'package:isar_community/isar.dart';
+import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/notification_record.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
@@ -57,6 +58,7 @@ class SmartNotificationService {
       ..actionData = actionData
       ..budgetId = budgetId;
 
+    record.encryptFields(); // Sentinel: Encrypt smart alert content (contains budget/spending info)
     await isar.writeTxn(() => isar.notificationRecords.put(record));
 
     String? payload;
