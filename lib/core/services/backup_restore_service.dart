@@ -250,7 +250,7 @@ class BackupService {
 
     // Backup Notification Records
     final notificationRecords =
-        await isar.notificationRecords.where().findAll();
+        await isar.notificationRecords.where().findAll().withDecryption();
     backupData['NotificationRecord'] = notificationRecords
         .map(
           (nr) => NotificationRecordBackup.fromNotificationRecord(
@@ -491,6 +491,7 @@ class BackupService {
                   Map<String, dynamic>.from(itemJson),
                   restoredObjects,
                 );
+                fullyLinkedModel.encryptFields();
                 await isar.notificationRecords.put(fullyLinkedModel);
                 break;
 

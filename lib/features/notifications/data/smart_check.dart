@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:isar_community/isar.dart';
+import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/notification_record.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
@@ -59,6 +60,7 @@ class SmartNotificationEmitter {
       ..primaryAction = primaryAction
       ..actionData = actionData;
 
+    record.encryptFields(); // Sentinel: Encrypt smart check result before persisting
     await isar.writeTxn(() => isar.notificationRecords.put(record));
 
     // Extract route from actionData JSON for tap navigation

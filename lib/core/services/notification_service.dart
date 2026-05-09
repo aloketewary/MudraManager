@@ -7,6 +7,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_native_timezone_latest/flutter_native_timezone_latest.dart';
 import 'package:go_router/go_router.dart';
 import 'package:isar_community/isar.dart';
+import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
 import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/models/notification_record.dart';
 import 'package:mudra_manager/core/logging/app_log.dart';
@@ -724,6 +725,8 @@ class NotificationService {
     await _logToDatabase(title, body, 'streak');
   }
 
+  /// Internal helper to log a notification record to the database.
+  /// Fields are encrypted to prevent exposure of financial summaries.
   static Future<void> _logToDatabase(
     String title,
     String body,
@@ -739,6 +742,7 @@ class NotificationService {
       ..type = type
       ..priority = NotificationPriority.normal
       ..category = NotificationCategory.system;
+    record.encryptFields(); // Sentinel: Encrypt summaries which may contain spending data
     await isar.writeTxn(() => isar.notificationRecords.put(record));
   }
 }
