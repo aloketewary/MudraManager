@@ -457,16 +457,17 @@ class TripService {
         .anyOf(transactionIds, (q, id) => q.transaction((tq) => tq.idEqualTo(id)))
         .findAll();
 
-    final tripTxnMap = <int, int>{};
+    // Map: TripTransaction ID -> Transaction ID
+    final tripTxnToTxnIdMap = <int, int>{};
     for (var tripTxn in tripTxns) {
       await tripTxn.transaction.load();
       final txnId = tripTxn.transaction.value?.id;
       if (txnId != null) {
-        tripTxnMap[txnId] = tripTxn.id;
+        tripTxnToTxnIdMap[tripTxn.id] = txnId;
       }
     }
 
-    final tripTxnIds = tripTxnMap.values.toSet().toList();
+    final tripTxnIds = tripTxnToTxnIdMap.keys.toList();
     final trips = await isar.trips
         .filter()
         .anyOf(tripTxnIds, (q, id) => q.transactions((tq) => tq.idEqualTo(id)))
@@ -475,9 +476,10 @@ class TripService {
     final tripMap = <int, String>{};
     for (var trip in trips) {
       await trip.transactions.load();
+      // OPTIMIZATION: Avoid loading 'transaction' link for every tripTxn in the trip.
+      // We already have the mapping for the transactions we care about.
       for (var tripTxn in trip.transactions) {
-        await tripTxn.transaction.load();
-        final txnId = tripTxn.transaction.value?.id;
+        final txnId = tripTxnToTxnIdMap[tripTxn.id];
         if (txnId != null) {
           tripMap[txnId] = trip.name;
         }
