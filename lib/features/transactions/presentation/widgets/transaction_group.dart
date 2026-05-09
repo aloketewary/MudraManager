@@ -26,8 +26,8 @@ class SmsActivityItem implements TxListEntry {
 List<TxListEntry> buildSectionedList(List<Transaction> allTxns) {
   final List<TxListEntry> sectioned = [];
 
-  // Sort by date descending
-  allTxns.sort((a, b) => b.date.compareTo(a.date));
+  // OPTIMIZATION: Removed redundant in-memory sort.
+  // TransactionService already returns transactions sorted by date descending from the database.
 
   DateTime? currentDate;
 
