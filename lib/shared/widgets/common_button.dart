@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 
-class CommonButton extends StatelessWidget {
+class CommonButton extends ConsumerWidget {
   final String text;
   final VoidCallback onPressed;
   final Color? backGroundColor;
@@ -23,9 +25,10 @@ class CommonButton extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final textTheme = Theme.of(context).textTheme;
     final color = Theme.of(context).colorScheme;
+    final spacing = ref.watch(spacingProvider);
 
     final buttonColor = backGroundColor ?? color.primary;
     final contentColor =
@@ -40,7 +43,7 @@ class CommonButton extends StatelessWidget {
             foregroundColor: contentColor,
             side: BorderSide(color: buttonColor, width: 2),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(spacing.radiusSmall),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           ),
@@ -74,7 +77,7 @@ class CommonButton extends StatelessWidget {
           backgroundColor: buttonColor,
           foregroundColor: contentColor,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(spacing.radiusSmall),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           elevation: 2,

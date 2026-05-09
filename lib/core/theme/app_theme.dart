@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mudra_manager/core/tone/tone_pack.dart';
 
 class AppTheme {
   AppTheme._(this.extensions);
@@ -127,7 +128,7 @@ class AppTheme {
   }
 
   // Build the Theme based on ColorScheme
-  ThemeData buildTheme(ColorScheme colorScheme) {
+  ThemeData buildTheme(ColorScheme colorScheme, TonePack tone) {
     final isDark = colorScheme.brightness == Brightness.dark;
     final isAmoled = isDark && colorScheme.surface == Colors.black;
 
@@ -142,12 +143,12 @@ class AppTheme {
       fontFamily: _bodyFont,
       fontFamilyFallback: _indicFallback,
       appBarTheme: _appBarTheme(colorScheme, textTheme, colorScheme.brightness),
-      elevatedButtonTheme: _elevatedButtonTheme(colorScheme, textTheme),
-      outlinedButtonTheme: _outlinedButtonTheme(colorScheme, textTheme),
-      filledButtonTheme: _filledButtonTheme(colorScheme, textTheme),
-      textButtonTheme: _textButtonTheme(colorScheme, textTheme),
-      inputDecorationTheme: _inputDecorationTheme(colorScheme, textTheme),
-      cardTheme: _cardTheme(colorScheme),
+      elevatedButtonTheme: _elevatedButtonTheme(colorScheme, textTheme, tone),
+      outlinedButtonTheme: _outlinedButtonTheme(colorScheme, textTheme, tone),
+      filledButtonTheme: _filledButtonTheme(colorScheme, textTheme, tone),
+      textButtonTheme: _textButtonTheme(colorScheme, textTheme, tone),
+      inputDecorationTheme: _inputDecorationTheme(colorScheme, textTheme, tone),
+      cardTheme: _cardTheme(colorScheme, tone),
       dialogTheme: _dialogTheme(colorScheme, textTheme),
       chipTheme: _chipTheme(colorScheme, textTheme),
       tabBarTheme: _tabBarTheme(colorScheme),
@@ -209,11 +210,13 @@ class AppTheme {
   FilledButtonThemeData _filledButtonTheme(
     ColorScheme colorScheme,
     TextTheme textTheme,
+    TonePack tone,
   ) {
     return FilledButtonThemeData(
       style: FilledButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(tone.buttonRadius)),
         backgroundColor: colorScheme.primary,
         foregroundColor: colorScheme.onPrimary,
         textStyle: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
@@ -224,11 +227,13 @@ class AppTheme {
   TextButtonThemeData _textButtonTheme(
     ColorScheme colorScheme,
     TextTheme textTheme,
+    TonePack tone,
   ) {
     return TextButtonThemeData(
       style: TextButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(tone.buttonRadius)),
         foregroundColor: colorScheme.primary,
         textStyle: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
       ),
@@ -283,11 +288,13 @@ class AppTheme {
   ElevatedButtonThemeData _elevatedButtonTheme(
     ColorScheme colorScheme,
     TextTheme textTheme,
+    TonePack tone,
   ) {
     return ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(tone.buttonRadius)),
         backgroundColor: colorScheme.primary,
         foregroundColor: colorScheme.onPrimary,
         elevation: 1,
@@ -299,11 +306,13 @@ class AppTheme {
   OutlinedButtonThemeData _outlinedButtonTheme(
     ColorScheme colorScheme,
     TextTheme textTheme,
+    TonePack tone,
   ) {
     return OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(tone.buttonRadius)),
         foregroundColor: colorScheme.primary,
         side: BorderSide(color: colorScheme.outline),
         textStyle: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
@@ -314,6 +323,7 @@ class AppTheme {
   InputDecorationTheme _inputDecorationTheme(
     ColorScheme colorScheme,
     TextTheme textTheme,
+    TonePack tone,
   ) {
     return InputDecorationTheme(
       labelStyle: textTheme.bodyLarge?.copyWith(
@@ -323,21 +333,22 @@ class AppTheme {
         color: colorScheme.onSurfaceVariant,
       ),
       errorStyle: textTheme.bodySmall?.copyWith(color: colorScheme.error),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(tone.inputRadius)),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(tone.inputRadius),
         borderSide: BorderSide(color: colorScheme.primary, width: 2),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(tone.inputRadius),
         borderSide: BorderSide(color: colorScheme.outline),
       ),
       errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(tone.inputRadius),
         borderSide: BorderSide(color: colorScheme.error, width: 2),
       ),
       focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(tone.inputRadius),
         borderSide: BorderSide(color: colorScheme.error, width: 2),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -346,11 +357,11 @@ class AppTheme {
     );
   }
 
-  CardThemeData _cardTheme(ColorScheme colorScheme) {
+  CardThemeData _cardTheme(ColorScheme colorScheme, TonePack tone) {
     return CardThemeData(
-      elevation: 0,
+      elevation: tone.cardElevation,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(tone.borderRadius),
         side: BorderSide(
           color: colorScheme.outline.withValues(alpha: 0.12),
           width: 1,

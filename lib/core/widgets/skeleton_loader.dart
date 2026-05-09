@@ -106,8 +106,7 @@ class AccountCardSkeleton extends ConsumerWidget {
                       ),
                       decoration: BoxDecoration(
                         color: color.surfaceContainerLow,
-                        borderRadius:
-                            BorderRadius.circular(spacing.radiusMedium),
+                        borderRadius: spacing.borderRadiusMedium,
                         border: Border.all(
                           color: color.outlineVariant.withValues(alpha: 0.3),
                         ),
@@ -194,7 +193,7 @@ class CashFlowSkeleton extends ConsumerWidget {
           padding: EdgeInsets.all(spacing.cardInner),
           decoration: BoxDecoration(
             color: color.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(spacing.radiusMedium),
+            borderRadius: spacing.borderRadiusMedium,
             border: Border.all(
               color: color.outlineVariant.withValues(alpha: 0.3),
             ),
@@ -253,7 +252,7 @@ class BudgetCardSkeleton extends ConsumerWidget {
           padding: EdgeInsets.all(spacing.cardInner),
           decoration: BoxDecoration(
             color: color.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(spacing.radiusMedium),
+            borderRadius: spacing.borderRadiusMedium,
             border: Border.all(
               color: color.outlineVariant.withValues(alpha: 0.3),
             ),
@@ -310,7 +309,7 @@ class DashboardCardSkeleton extends ConsumerWidget {
           padding: EdgeInsets.all(spacing.cardInner),
           decoration: BoxDecoration(
             color: color.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(spacing.radiusMedium),
+            borderRadius: spacing.borderRadiusMedium,
             border: Border.all(
               color: color.outlineVariant.withValues(alpha: 0.3),
             ),
@@ -361,7 +360,7 @@ class TransactionCardSkeleton extends ConsumerWidget {
         elevation: 0,
         color: color.surfaceContainerLow,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(spacing.radiusMedium),
+          borderRadius: spacing.borderRadiusMedium,
           side: BorderSide(
             color: color.outlineVariant.withValues(alpha: 0.3),
           ),
@@ -422,7 +421,7 @@ class PersonalityCardSkeleton extends ConsumerWidget {
           padding: EdgeInsets.all(spacing.cardInner),
           decoration: BoxDecoration(
             color: color.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(spacing.radiusMedium),
+            borderRadius: spacing.borderRadiusMedium,
             border: Border.all(
               color: color.outlineVariant.withValues(alpha: 0.3),
             ),

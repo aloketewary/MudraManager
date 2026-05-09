@@ -1,5 +1,6 @@
 import 'package:mudra_manager/core/currency/currency_meta.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
@@ -278,7 +279,15 @@ class _HeroMomentCardState extends ConsumerState<HeroMomentCard>
                             BorderRadius.circular(spacing.radiusMedium),
                       ),
                       alignment: Alignment.center,
-                      child: Icon(hero.icon, color: accent, size: 24),
+                      child: Icon(hero.icon, color: accent, size: 24)
+                          .animate(onComplete: (c) => c.repeat(reverse: true))
+                          .scale(
+                            delay: 2.seconds,
+                            duration: 1.seconds,
+                            begin: const Offset(1, 1),
+                            end: const Offset(1.1, 1.1),
+                            curve: Curves.easeInOut,
+                          ),
                     ),
                     SizedBox(width: spacing.sectionGap),
                     Expanded(
@@ -300,7 +309,9 @@ class _HeroMomentCardState extends ConsumerState<HeroMomentCard>
                 ),
               ),
             ),
-          ),
+          )
+              .animate()
+              .shimmer(delay: 3.seconds, duration: 2.seconds, color: accent.withValues(alpha: 0.1)),
         ),
       ),
     );

@@ -33,6 +33,7 @@ import 'package:mudra_manager/shared/widgets/ambient_brand_section.dart';
 import 'package:mudra_manager/shared/widgets/budget_alert_banner.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
 import 'package:mudra_manager/features/dashboard/presentation/widgets/sms_success_celebration_sheet.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 class DashboardHome extends ConsumerStatefulWidget {
   const DashboardHome({super.key});
@@ -109,7 +110,7 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
 
   void _revealNext(int total) {
     if (_allRevealed || !mounted) return;
-    Future.delayed(const Duration(milliseconds: 80), () {
+    Future.delayed(const Duration(milliseconds: 60), () {
       if (!mounted) return;
       setState(() {
         _revealedCount++;
@@ -191,7 +192,8 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
 
     // Data is ready — check for zero-state (new user, no transactions)
     final data = dashboardAsync.value;
-    final hasTransactions = data != null && data.transactions.isNotEmpty;
+    final txns = data?.transactions.where((t) => !t.isTransfer).toList() ?? [];
+    final hasTransactions = txns.isNotEmpty;
     final nudgeDismissed = SharedPrefsUtil.instance.getFirstTxnNudgeDismissed();
     final onboardedAt = SharedPrefsUtil.instance.getOnboardingCompletedAt();
     final isNewUser = onboardedAt != null &&
@@ -268,10 +270,15 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
                     );
                     // Skip fade-in animation after first launch
                     if (_hasAnimatedOnce) return child;
-                    return _StaggeredEntry(
-                      key: ValueKey(widget.id),
-                      child: child,
-                    );
+                    return child
+                        .animate()
+                        .fadeIn(duration: 300.ms, curve: Curves.easeOut)
+                        .slideY(
+                          begin: 0.1,
+                          end: 0,
+                          duration: 400.ms,
+                          curve: Curves.easeOutBack,
+                        );
                   }
                   return const SizedBox.shrink();
                 },
@@ -346,46 +353,6 @@ class _DashboardHomeState extends ConsumerState<DashboardHome> {
           ],
         ),
       ),
-    );
-  }
-}
-
-/// Fade-in entry for each staggered widget
-class _StaggeredEntry extends StatefulWidget {
-  final Widget child;
-  const _StaggeredEntry({super.key, required this.child});
-
-  @override
-  State<_StaggeredEntry> createState() => _StaggeredEntryState();
-}
-
-class _StaggeredEntryState extends State<_StaggeredEntry>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-  late final Animation<double> _opacity;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 250),
-      vsync: this,
-    );
-    _opacity = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
-    _controller.forward();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: _opacity,
-      child: widget.child,
     );
   }
 }

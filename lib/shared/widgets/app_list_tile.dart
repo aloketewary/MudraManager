@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 
-class AppListTile extends StatelessWidget {
+class AppListTile extends ConsumerWidget {
   final Widget? leading;
   final Widget title;
   final Widget? subtitle;
@@ -19,14 +21,19 @@ class AppListTile extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final spacing = ref.watch(spacingProvider);
     return ListTile(
       leading: leading,
       title: title,
       subtitle: subtitle,
       trailing: trailing,
       onTap: onTap,
-      contentPadding: contentPadding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      contentPadding: contentPadding ??
+          EdgeInsets.symmetric(
+            horizontal: spacing.cardInner,
+            vertical: spacing.elementGap,
+          ),
     );
   }
 }

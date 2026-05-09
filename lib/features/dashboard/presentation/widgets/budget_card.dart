@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mudra_manager/core/router/app_routes.dart';
+import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/features/budget/data/budget_service_provider.dart';
 import 'dart:math' as math;
 
@@ -20,6 +21,7 @@ class BudgetCard extends ConsumerWidget {
     final budgetAsync = ref.watch(budgetsWithProgressProvider);
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final spacing = ref.watch(spacingProvider);
 
     return budgetAsync.when(
       data: (budgets) {
@@ -57,7 +59,7 @@ class BudgetCard extends ConsumerWidget {
                     HapticFeedback.mediumImpact();
                     context.push(AppRoutes.budgetDashboard);
                   },
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(spacing.radiusMedium),
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Row(
