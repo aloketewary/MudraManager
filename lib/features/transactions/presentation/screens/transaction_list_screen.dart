@@ -13,6 +13,7 @@ import 'package:mudra_manager/core/db/models/transaction.dart';
 import 'package:mudra_manager/core/db/models/tag.dart';
 import 'package:mudra_manager/core/l10n/app_localizations.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
+import 'package:mudra_manager/core/providers/collection_watchers.dart';
 import 'package:mudra_manager/core/providers/spacing_provider.dart';
 import 'package:mudra_manager/core/utils/dialog_utils.dart';
 import 'package:mudra_manager/core/utils/icon_helper.dart';
@@ -76,8 +77,6 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
   String _lastFilterKey = '';
   double _lastScrollOffset = 0;
   Timer? _searchDebounce;
-  Timer? _pendingDeleteTimer;
-  int? _pendingDeleteId;
   final Map<int, Timer> _pendingDeletes = {};
 
   // Multi-select for merge-as-transfer
@@ -102,12 +101,19 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
         value: 1.0,
       );
     }
+    // Clear in-memory cache whenever transactions collection changes
+    // (covers FAB add, SMS auto-import, background writes)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref.listenManual(transactionChangeProvider, (_, __) {
+        _clearCache();
+      });
+    });
   }
 
   @override
   void dispose() {
     _searchDebounce?.cancel();
-    _pendingDeleteTimer?.cancel();
     for (final timer in _pendingDeletes.values) {
       timer.cancel();
     }
@@ -373,8 +379,10 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
 
   void _invalidateTransactionProviders() {
     _clearCache();
-    // Service providers that don't have Isar watchers need manual invalidation
     ref.invalidate(accountServiceProvider);
+    ref.invalidate(allSectionedTransactionsProvider);
+    ref.invalidate(sectionedTransactionsProvider);
+    ref.invalidate(sectionedTransactionsByDateRangeProvider);
   }
 
   // ── SEARCH BAR ──
@@ -1062,10 +1070,9 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
     }
 
     // Hide pending delete from UI
-    final visible = _pendingDeleteId != null || _pendingDeletes.isNotEmpty
+    final visible = _pendingDeletes.isNotEmpty
         ? filtered.where((e) {
             if (e is! TxItem) return true;
-            if (e.txn.id == _pendingDeleteId) return false;
             return !_pendingDeletes.containsKey(e.txn.id);
           }).toList()
         : filtered;
@@ -1306,9 +1313,9 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
       return;
     }
 
-    // Validate: same amount (±1 tolerance)
-    if ((expense.amount - income.amount).abs() > 1) {
-      SnackbarService.error('Amounts must match (within ₹1)');
+    // Validate: same amount (±1% tolerance)
+    if ((expense.amount - income.amount).abs() > expense.amount * 0.01) {
+      SnackbarService.error('Amounts must match (within 1%)');
       return;
     }
 
@@ -1318,9 +1325,14 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
       return;
     }
 
-    // Navigate to transfer screen pre-filled
     final fromAccount = expense.account.value;
     final toAccount = income.account.value;
+
+    // Validate: different accounts
+    if (fromAccount?.id == toAccount?.id) {
+      SnackbarService.error('Cannot transfer between the same account');
+      return;
+    }
 
     if (!context.mounted) return;
     final result = await context.push<bool>(
@@ -1335,10 +1347,8 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
     );
 
     if (result == true) {
-      // Delete both original transactions
-      final service = ref.read(transactionProvider);
-      await service.deleteTransaction(expense.id);
-      await service.deleteTransaction(income.id);
+      // Delete both original transactions atomically
+      await ref.read(transactionProvider).deleteTransactionPair(expense.id, income.id);
       _invalidateTransactionProviders();
 
       setState(() {
@@ -1357,13 +1367,16 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
   Future<void> _onEditTransaction(transaction) async {
     final bool? result;
     if (transaction.isTransfer) {
-      // Await all nested Isar link loads before navigating
       await transaction.related.load();
       await transaction.account.load();
       final relatedTx = transaction.related.value;
-      if (relatedTx != null) {
-        await relatedTx.account.load();
+      if (relatedTx == null) {
+        if (context.mounted) {
+          SnackbarService.error(BuddyMessages.genericError);
+        }
+        return;
       }
+      await relatedTx.account.load();
       if (!context.mounted) return;
       result = await context.push(
         AppRoutes.transfer,
@@ -1371,9 +1384,9 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
           'amount': transaction.amount.toStringAsFixed(2),
           'note': transaction.description,
           'date': transaction.date,
-          'fromAccount': relatedTx?.account.value,
+          'fromAccount': relatedTx.account.value,
           'toAccount': transaction.account.value,
-          'fromId': relatedTx?.id,
+          'fromId': relatedTx.id,
           'toId': transaction.id,
         },
       );
@@ -1417,10 +1430,7 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
     final txnId = transaction.id as int;
 
     // Hide from UI immediately
-    setState(() {
-      _pendingDeleteId = txnId;
-      _clearCache();
-    });
+    setState(() => _clearCache());
 
     // Schedule actual delete after undo window
     bool undone = false;
@@ -1428,21 +1438,19 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
     final timer = Timer(const Duration(seconds: 6), () async {
       if (undone) return;
       _pendingDeletes.remove(txnId);
-      if (_pendingDeleteId == txnId) _pendingDeleteId = null;
+      if (!mounted) return;
 
       await ref
           .read(tripServiceProvider)
           .removeTransactionFromTrip(txnId);
 
+      final service = ref.read(transactionProvider);
       if (transaction.isTransfer) {
-        await transaction.related.load();
-        final relatedId = transaction.related.value?.id;
-        if (relatedId != null) {
-          await ref.read(transactionProvider).deleteTransaction(relatedId);
-        }
+        await service.deleteTransferAtomic(txnId);
+      } else {
+        await service.deleteTransaction(txnId);
       }
 
-      await ref.read(transactionProvider).deleteTransaction(txnId);
       _invalidateTransactionProviders();
       if (mounted) setState(() => _clearCache());
     });
@@ -1456,10 +1464,9 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
           undone = true;
           _pendingDeletes[txnId]?.cancel();
           _pendingDeletes.remove(txnId);
-          setState(() {
-            _pendingDeleteId = null;
-            _clearCache();
-          });
+          if (mounted) {
+            setState(() => _clearCache());
+          }
         },
       );
     }
@@ -1535,7 +1542,6 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
 
   // ── FILTER BOTTOM SHEET ──
   void _showTagFilterSheet(BuildContext context) {
-    final tagsAsync = ref.read(tagListProvider);
     final color = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
@@ -1545,7 +1551,10 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (ctx) {
-        return switch (tagsAsync) {
+        return Consumer(
+          builder: (context, ref, _) {
+            final tagsAsync = ref.watch(tagListProvider);
+            return switch (tagsAsync) {
           AsyncData(:final value) => Padding(
               padding: const EdgeInsets.all(24),
               child: Column(
@@ -1616,6 +1625,8 @@ class TransactionListScreenState extends ConsumerState<TransactionListScreen>
               child: Column(children: List.generate(5, (_) => const TransactionCardSkeleton())),
             ),
         };
+          },
+        );
       },
     );
   }
