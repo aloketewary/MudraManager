@@ -1,3 +1,4 @@
+import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
 import 'package:mudra_manager/core/utils/buddy_messages.dart';
 import 'dart:convert';
 import 'dart:typed_data';
