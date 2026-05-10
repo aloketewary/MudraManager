@@ -47,16 +47,28 @@ final tagSpendingProvider = FutureProvider.autoDispose
       .dateBetween(start, now)
       .findAll();
 
+  if (expenses.isEmpty) return [];
+
+  // BOLT OPTIMIZATION: Use a single pass aggregation (O(N+M)) instead of nested loops (O(N*M))
+  // This drastically reduces redundant loadSync() calls on Isar links.
+  final aggregation = <int, ({double amount, int count})>{};
+
+  for (final tx in expenses) {
+    tx.tags.loadSync();
+    for (final tag in tx.tags) {
+      final current = aggregation[tag.id] ?? (amount: 0.0, count: 0);
+      aggregation[tag.id] = (
+        amount: current.amount + tx.amount,
+        count: current.count + 1,
+      );
+    }
+  }
+
   final result = <TagSpending>[];
   for (final tag in tags) {
-    final tagged = expenses.where((tx) {
-      tx.tags.loadSync();
-      return tx.tags.any((t) => t.id == tag.id);
-    }).toList();
-
-    if (tagged.isNotEmpty) {
-      final total = tagged.fold<double>(0, (sum, tx) => sum + tx.amount);
-      result.add(TagSpending(tag: tag, amount: total, count: tagged.length));
+    final data = aggregation[tag.id];
+    if (data != null) {
+      result.add(TagSpending(tag: tag, amount: data.amount, count: data.count));
     }
   }
 
