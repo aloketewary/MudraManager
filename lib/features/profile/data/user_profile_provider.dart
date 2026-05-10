@@ -2,6 +2,7 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
+import 'package:mudra_manager/core/db/extensions/field_encryption_ext.dart';
 import 'package:mudra_manager/core/db/isar_service.dart';
 import 'package:mudra_manager/core/db/models/user_profile.dart';
 import 'package:mudra_manager/core/providers/isar_provider.dart';
@@ -23,6 +24,7 @@ class UserProfileService {
 
   Future<void> saveProfile(UserProfile profile) async {
     final isar = await isarService.getInstance();
+    profile.encryptFields();
     await isar.writeTxn(() async {
       await isar.userProfiles.put(profile);
     });
@@ -30,6 +32,6 @@ class UserProfileService {
 
   Future<UserProfile?> getProfile() async {
     final isar = await isarService.getInstance();
-    return await isar.userProfiles.where().findFirst();
+    return await isar.userProfiles.where().findFirst().withDecryption();
   }
 }
