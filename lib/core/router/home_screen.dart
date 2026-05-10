@@ -586,7 +586,7 @@ class HomePageState extends ConsumerState<HomePage>
                   alignment: Alignment.center,
                   children: [
                     IconButton(
-                      tooltip: 'Notifications',
+                      tooltip: ctxt.common_notifications,
                       icon: const Icon(LucideIcons.bell, size: 28),
                       onPressed: () => context.push(AppRoutes.notifications),
                     ),
@@ -638,7 +638,7 @@ class HomePageState extends ConsumerState<HomePage>
           ),
           actions: [
             IconButton(
-              tooltip: 'Search',
+              tooltip: ctxt.common_search,
               onPressed: () {
                 HapticFeedback.mediumImpact();
                 transactionListKey.currentState?.toggleSearch();
@@ -646,7 +646,7 @@ class HomePageState extends ConsumerState<HomePage>
               icon: const Icon(LucideIcons.search),
             ),
             IconButton(
-              tooltip: 'Filter',
+              tooltip: ctxt.common_filter,
               onPressed: () => transactionListKey.currentState
                   ?.showFilterBottomSheet(context, spacing),
               icon: const Icon(LucideIcons.listFilter),
@@ -663,7 +663,7 @@ class HomePageState extends ConsumerState<HomePage>
                 utilityKey.currentState?.showCustomizeSheet();
               },
               icon: const Icon(LucideIcons.settings2),
-              tooltip: 'Customize',
+              tooltip: ctxt.common_customize,
             ),
           ],
         );
@@ -676,7 +676,7 @@ class HomePageState extends ConsumerState<HomePage>
           ),
           actions: [
             IconButton(
-              tooltip: 'Download',
+              tooltip: ctxt.common_download,
               icon: const Icon(LucideIcons.download),
               onPressed: () => _showExportDialog(context),
             ),

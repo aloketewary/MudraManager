@@ -218,6 +218,16 @@ extension AppLocalizationsHelper on AppLocalizations {
         return common_filter;
       case 'common_reset':
         return common_reset;
+      case 'common_calculator':
+        return common_calculator;
+      case 'common_customize':
+        return common_customize;
+      case 'common_download':
+        return common_download;
+      case 'common_notifications':
+        return common_notifications;
+      case 'common_clear':
+        return common_clear;
       case 'common_apply':
         return common_apply;
       case 'common_yes':
